@@ -1,166 +1,314 @@
-Received: from dggsgout11.his.huawei.com (dggsgout11.his.huawei.com [45.249.212.51])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58BEE27707;
-	Wed, 27 Aug 2025 02:23:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01B4D6F06A
+	for <linux-efi@vger.kernel.org>; Wed, 27 Aug 2025 07:48:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756261432; cv=none; b=GkeXB2AphecP+3xUTomZk3uQtec0neNQ+viDdj43RbN6II5jg6Y24moGGu4SU+R9ClmrUXww76X7ZyvTDbzsbPWlnDZDfhlnUSTaoP7DNYv/0IxxDKwQEMqwTgu/Z0q6FOsuPl+VZ4sovLUNzkrM+ZAzUHyW5Xnc1Ou5nJ6aaso=
+	t=1756280906; cv=none; b=I9WXLA3wL5vfTsQIChbF5WcIaqEepvnrWwjy4E+dtuntmSGTVebKRLUim+vH6fdXK0Okkv48egJjFeawicHcYIVdF/54C/FMVQ+higL2VMIU1CP+GUbaSDrvnwvcVcs/0e3gCq+KhZNnw/i29K2q7vT8VBXR5grZNY5lbvrAFmY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756261432; c=relaxed/simple;
-	bh=AKi9/OHy1tHN9Xiukj7H9Mq4C66I06orms63TzLZEnw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=IWsBth+owypdPUXgv0t/BPAQZot1GAHlM/0teR3wOYs4VxG/7I3H2c5yQdfoglFr7LKRIKj73LuzUeHJHZIgur/UIeMe4eUvshN9757XUn0OdV2tTpHiV5m0cYoclTFht0bCAwuBt1HCKmK2KwK71OpSF5gRwJKsq+JpXCDZxQI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com; spf=pass smtp.mailfrom=huaweicloud.com; arc=none smtp.client-ip=45.249.212.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huaweicloud.com
-Received: from mail.maildlp.com (unknown [172.19.93.142])
-	by dggsgout11.his.huawei.com (SkyGuard) with ESMTPS id 4cBSyD0LSRzYQtM6;
-	Wed, 27 Aug 2025 10:23:48 +0800 (CST)
-Received: from mail02.huawei.com (unknown [10.116.40.128])
-	by mail.maildlp.com (Postfix) with ESMTP id 8FD1A1A0F22;
-	Wed, 27 Aug 2025 10:23:46 +0800 (CST)
-Received: from [10.174.179.247] (unknown [10.174.179.247])
-	by APP4 (Coremail) with SMTP id gCh0CgAncY0wbK5ougC0AQ--.46889S3;
-	Wed, 27 Aug 2025 10:23:46 +0800 (CST)
-Message-ID: <e1212545-2013-775d-e3a8-07b3be2cfc00@huaweicloud.com>
-Date: Wed, 27 Aug 2025 10:23:44 +0800
+	s=arc-20240116; t=1756280906; c=relaxed/simple;
+	bh=cvQ7sXzFSN44VjqsvIf+pGy2n7NQy0rRmqvBBLsd2qY=;
+	h=Date:From:To:Cc:Subject:Message-ID; b=VYpeOYICVumzM9QMW4wa2abSnK49W90kzgITRxvaZY6NNDN3SOtB2yb+bwTdibscTu3sTuKYI4FwIhUkVV7Nd+bGQNWR0NfZw1SzWwv+rTa1aj1fNOK2Hjjmn4H9a6eVjR8Oj/VJnkfz+fgKCF3ZGXJlEpnyeV/L4suTcJseqW8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=OEVNCGyH; arc=none smtp.client-ip=198.175.65.10
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="OEVNCGyH"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1756280904; x=1787816904;
+  h=date:from:to:cc:subject:message-id;
+  bh=cvQ7sXzFSN44VjqsvIf+pGy2n7NQy0rRmqvBBLsd2qY=;
+  b=OEVNCGyHZH0ANIxndZ2FODtZTrLr/d4hfSvp7UcPkNHiGMwA7LFNflYI
+   lMPDYNRuEN2FEB8Sk/E4LakeytGlsQVtq2bPeLOLOhHYef3k1mfbhp/CV
+   zoKNx0VAAnXLggbf2/l7qhJfv47y2qDwb4umE9cQJr0SESO5EVH7hx12l
+   Gjj0dZHoU+XBVx0Y4nurZSoLA642CtF0TTs4QcMFgKEOTwnVSP5ubstS+
+   QuSd1yyA/D35qywibuqz9ozvfeIE9BRZW6CqLDLmD9t9JP02PsB0Ufz25
+   SHIuweOXCNhPigX6aQnKO0WmyVuPmXuoLya/wK4o8+xFrHtXCBW2E0jaX
+   w==;
+X-CSE-ConnectionGUID: SniajbViSqWNXWgJvAho9A==
+X-CSE-MsgGUID: 2Eaz16s6RMKxfGmMUS2b8w==
+X-IronPort-AV: E=McAfee;i="6800,10657,11534"; a="75981298"
+X-IronPort-AV: E=Sophos;i="6.18,214,1751266800"; 
+   d="scan'208";a="75981298"
+Received: from orviesa008.jf.intel.com ([10.64.159.148])
+  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Aug 2025 00:48:24 -0700
+X-CSE-ConnectionGUID: jVo3NijRQwuT33sC51zV7g==
+X-CSE-MsgGUID: NPQ6tKJsSViEH3CLSuYMcg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.18,214,1751266800"; 
+   d="scan'208";a="169958706"
+Received: from lkp-server02.sh.intel.com (HELO 4ea60e6ab079) ([10.239.97.151])
+  by orviesa008.jf.intel.com with ESMTP; 27 Aug 2025 00:48:22 -0700
+Received: from kbuild by 4ea60e6ab079 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1urAtH-000SmZ-2u;
+	Wed, 27 Aug 2025 07:48:19 +0000
+Date: Wed, 27 Aug 2025 15:47:39 +0800
+From: kernel test robot <lkp@intel.com>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: linux-efi@vger.kernel.org
+Subject: [efi:urgent] BUILD SUCCESS
+ 134ed1093907a79e5d98087513f13fd7652c4df9
+Message-ID: <202508271533.B0QHfivA-lkp@intel.com>
+User-Agent: s-nail v14.9.24
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.10.0
-Subject: Re: [PATCH v2] efivarfs: Fix slab-out-of-bounds in efivarfs_d_compare
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: jk@ozlabs.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
- yangerkun@huawei.com, yi.zhang@huawei.com
-References: <20250819090802.2258766-1-linan666@huaweicloud.com>
- <CAMj1kXHvEOTHHshS9uoL4RSZgJZgd9OR9qzPHYJ5xW2Vgeefcg@mail.gmail.com>
-From: Li Nan <linan666@huaweicloud.com>
-In-Reply-To: <CAMj1kXHvEOTHHshS9uoL4RSZgJZgd9OR9qzPHYJ5xW2Vgeefcg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:gCh0CgAncY0wbK5ougC0AQ--.46889S3
-X-Coremail-Antispam: 1UD129KBjvJXoW7tw1DXrykAryrGw1UZw1kKrg_yoW5JF1Dpr
-	WrG3WxKFZ5Xw1jy3yFvFn7Ja4jgan2qr43XFsFqr12gF97Wr1fWrZFgw1Y9Fyqvr18Xayk
-	Wayqg3Waka13Aa7anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUU90b4IE77IF4wAFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k2
-	6cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4
-	vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7Cj
-	xVAFwI0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x
-	0267AKxVW0oVCq3wAac4AC62xK8xCEY4vEwIxC4wAS0I0E0xvYzxvE52x082IY62kv0487
-	Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aV
-	AFwI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcVAKI48JMxk0xIA0c2IEe2xF
-	o4CEbIxvr21lc7CjxVAaw2AFwI0_JF0_Jw1l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x
-	0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2
-	zVAF1VAY17CE14v26r126r1DMIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF
-	4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r1j6r4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWU
-	CwCI42IY6I8E87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r1j6r4UYxBIda
-	VFxhVjvjDU0xZFpf9x07UMnQUUUUUU=
-X-CM-SenderInfo: polqt0awwwqx5xdzvxpfor3voofrz/
 
+tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git urgent
+branch HEAD: 134ed1093907a79e5d98087513f13fd7652c4df9  efi: stmm: Drop unneeded null pointer check
 
+elapsed time: 1130m
 
-在 2025/8/26 21:32, Ard Biesheuvel 写道:
-> On Tue, 19 Aug 2025 at 11:16, <linan666@huaweicloud.com> wrote:
->>
->> From: Li Nan <linan122@huawei.com>
->>
->> Observed on kernel 6.6 (present on master as well):
->>
->>    BUG: KASAN: slab-out-of-bounds in memcmp+0x98/0xd0
->>    Call trace:
->>     kasan_check_range+0xe8/0x190
->>     __asan_loadN+0x1c/0x28
->>     memcmp+0x98/0xd0
->>     efivarfs_d_compare+0x68/0xd8
->>     __d_lookup_rcu_op_compare+0x178/0x218
->>     __d_lookup_rcu+0x1f8/0x228
->>     d_alloc_parallel+0x150/0x648
->>     lookup_open.isra.0+0x5f0/0x8d0
->>     open_last_lookups+0x264/0x828
->>     path_openat+0x130/0x3f8
->>     do_filp_open+0x114/0x248
->>     do_sys_openat2+0x340/0x3c0
->>     __arm64_sys_openat+0x120/0x1a0
->>
->> If dentry->d_name.len < EFI_VARIABLE_GUID_LEN , 'guid' can become
->> negative, leadings to oob. The issue can be triggered as below:
->>
->>    T1                    T2
->>    lookup_open
->>     ->lookup
->>      simple_lookup
->>       d_add
->>       // invalid dentry is added to hash list
->>
->>                          lookup_open
->>                           d_alloc_parallel
->>                            __d_lookup_rcu
->>                             __d_lookup_rcu_op_compare
->>                              hlist_bl_for_each_entry_rcu
->>                              // invalid dentry can be retrieved
->>                               ->d_compare
->>                                efivarfs_d_compare
->>
->> Fix it by checking len before cmp.
->>
->> Fixes: da27a24383b2 ("efivarfs: guid part of filenames are case-insensitive")
->> Signed-off-by: Li Nan <linan122@huawei.com>
->> Signed-off-by: Wu Guanghao <wuguanghao3@huawei.com>
->> ---
->> v2: optimize commit message
->>
-> 
-> Thanks for the fix, and for the elaborate description.
-> 
-> IIUC, two parallel lookups using an invalid filename can reproduce this?
-> 
+configs tested: 237
+configs skipped: 3
 
-Thansk for your review.
+The following configs have been built successfully.
+More configs may be tested in the coming days.
 
-Yes, the filename is invalid. I'll add that to the commit message in the 
-next version.
+tested configs:
+alpha                             allnoconfig    clang-22
+alpha                             allnoconfig    gcc-15.1.0
+alpha                            allyesconfig    gcc-15.1.0
+alpha                               defconfig    clang-19
+arc                              allmodconfig    clang-19
+arc                              allmodconfig    gcc-15.1.0
+arc                               allnoconfig    clang-22
+arc                               allnoconfig    gcc-15.1.0
+arc                              allyesconfig    clang-19
+arc                              allyesconfig    gcc-15.1.0
+arc                                 defconfig    clang-19
+arc                   randconfig-001-20250826    gcc-11.5.0
+arc                   randconfig-001-20250827    gcc-8.5.0
+arc                   randconfig-002-20250826    gcc-8.5.0
+arc                   randconfig-002-20250827    gcc-8.5.0
+arm                              allmodconfig    clang-19
+arm                              allmodconfig    gcc-15.1.0
+arm                               allnoconfig    clang-22
+arm                              allyesconfig    clang-19
+arm                              allyesconfig    gcc-15.1.0
+arm                                 defconfig    clang-19
+arm                   randconfig-001-20250826    gcc-12.5.0
+arm                   randconfig-001-20250827    gcc-8.5.0
+arm                   randconfig-002-20250826    gcc-13.4.0
+arm                   randconfig-002-20250827    gcc-8.5.0
+arm                   randconfig-003-20250826    gcc-8.5.0
+arm                   randconfig-003-20250827    gcc-8.5.0
+arm                   randconfig-004-20250826    gcc-10.5.0
+arm                   randconfig-004-20250827    gcc-8.5.0
+arm64                            allmodconfig    clang-19
+arm64                             allnoconfig    clang-22
+arm64                             allnoconfig    gcc-15.1.0
+arm64                               defconfig    clang-19
+arm64                 randconfig-001-20250826    clang-22
+arm64                 randconfig-001-20250827    gcc-8.5.0
+arm64                 randconfig-002-20250826    gcc-8.5.0
+arm64                 randconfig-002-20250827    gcc-8.5.0
+arm64                 randconfig-003-20250826    clang-22
+arm64                 randconfig-003-20250827    gcc-8.5.0
+arm64                 randconfig-004-20250826    gcc-8.5.0
+arm64                 randconfig-004-20250827    gcc-8.5.0
+csky                              allnoconfig    clang-22
+csky                              allnoconfig    gcc-15.1.0
+csky                                defconfig    clang-19
+csky                  randconfig-001-20250826    gcc-15.1.0
+csky                  randconfig-001-20250827    gcc-15.1.0
+csky                  randconfig-002-20250826    gcc-11.5.0
+csky                  randconfig-002-20250827    gcc-15.1.0
+hexagon                          allmodconfig    clang-17
+hexagon                           allnoconfig    clang-22
+hexagon                          allyesconfig    clang-22
+hexagon                             defconfig    clang-19
+hexagon               randconfig-001-20250826    clang-19
+hexagon               randconfig-001-20250827    gcc-15.1.0
+hexagon               randconfig-002-20250826    clang-22
+hexagon               randconfig-002-20250827    gcc-15.1.0
+i386                             allmodconfig    clang-20
+i386                             allmodconfig    gcc-12
+i386                              allnoconfig    clang-20
+i386                              allnoconfig    gcc-12
+i386                             allyesconfig    clang-20
+i386                             allyesconfig    gcc-12
+i386        buildonly-randconfig-001-20250826    gcc-12
+i386        buildonly-randconfig-002-20250826    gcc-12
+i386        buildonly-randconfig-003-20250826    clang-20
+i386        buildonly-randconfig-004-20250826    gcc-12
+i386        buildonly-randconfig-005-20250826    clang-20
+i386        buildonly-randconfig-006-20250826    gcc-12
+i386                                defconfig    clang-20
+i386                  randconfig-001-20250827    clang-20
+i386                  randconfig-002-20250827    clang-20
+i386                  randconfig-003-20250827    clang-20
+i386                  randconfig-004-20250827    clang-20
+i386                  randconfig-005-20250827    clang-20
+i386                  randconfig-006-20250827    clang-20
+i386                  randconfig-007-20250827    clang-20
+i386                  randconfig-011-20250827    clang-20
+i386                  randconfig-012-20250827    clang-20
+i386                  randconfig-013-20250827    clang-20
+i386                  randconfig-014-20250827    clang-20
+i386                  randconfig-015-20250827    clang-20
+i386                  randconfig-016-20250827    clang-20
+i386                  randconfig-017-20250827    clang-20
+loongarch                        allmodconfig    clang-19
+loongarch                         allnoconfig    clang-22
+loongarch                           defconfig    clang-19
+loongarch             randconfig-001-20250826    gcc-14.3.0
+loongarch             randconfig-001-20250827    gcc-15.1.0
+loongarch             randconfig-002-20250826    gcc-14.3.0
+loongarch             randconfig-002-20250827    gcc-15.1.0
+m68k                             allmodconfig    gcc-15.1.0
+m68k                              allnoconfig    gcc-15.1.0
+m68k                             allyesconfig    gcc-15.1.0
+m68k                                defconfig    clang-19
+microblaze                       allmodconfig    gcc-15.1.0
+microblaze                        allnoconfig    gcc-15.1.0
+microblaze                       allyesconfig    gcc-15.1.0
+microblaze                          defconfig    gcc-15.1.0
+mips                              allnoconfig    gcc-15.1.0
+mips                           ip22_defconfig    clang-22
+mips                           ip27_defconfig    clang-22
+nios2                             allnoconfig    gcc-11.5.0
+nios2                             allnoconfig    gcc-15.1.0
+nios2                               defconfig    gcc-11.5.0
+nios2                               defconfig    gcc-15.1.0
+nios2                 randconfig-001-20250826    gcc-8.5.0
+nios2                 randconfig-001-20250827    gcc-15.1.0
+nios2                 randconfig-002-20250826    gcc-10.5.0
+nios2                 randconfig-002-20250827    gcc-15.1.0
+openrisc                          allnoconfig    clang-22
+openrisc                          allnoconfig    gcc-15.1.0
+openrisc                         allyesconfig    gcc-15.1.0
+openrisc                            defconfig    gcc-12
+parisc                           allmodconfig    gcc-15.1.0
+parisc                            allnoconfig    clang-22
+parisc                            allnoconfig    gcc-15.1.0
+parisc                           allyesconfig    gcc-15.1.0
+parisc                              defconfig    gcc-15.1.0
+parisc                randconfig-001-20250826    gcc-8.5.0
+parisc                randconfig-001-20250827    gcc-15.1.0
+parisc                randconfig-002-20250826    gcc-15.1.0
+parisc                randconfig-002-20250827    gcc-15.1.0
+parisc64                            defconfig    gcc-15.1.0
+powerpc                          allmodconfig    gcc-15.1.0
+powerpc                           allnoconfig    clang-22
+powerpc                           allnoconfig    gcc-15.1.0
+powerpc                          allyesconfig    clang-22
+powerpc                 canyonlands_defconfig    clang-22
+powerpc                    ge_imp3a_defconfig    clang-22
+powerpc                   lite5200b_defconfig    clang-22
+powerpc                      pasemi_defconfig    clang-22
+powerpc               randconfig-001-20250826    gcc-8.5.0
+powerpc               randconfig-001-20250827    gcc-15.1.0
+powerpc               randconfig-002-20250826    clang-22
+powerpc               randconfig-002-20250827    gcc-15.1.0
+powerpc               randconfig-003-20250826    gcc-13.4.0
+powerpc               randconfig-003-20250827    gcc-15.1.0
+powerpc64             randconfig-001-20250826    gcc-10.5.0
+powerpc64             randconfig-001-20250827    gcc-15.1.0
+powerpc64             randconfig-002-20250826    gcc-11.5.0
+powerpc64             randconfig-002-20250827    gcc-15.1.0
+powerpc64             randconfig-003-20250826    gcc-14.3.0
+powerpc64             randconfig-003-20250827    gcc-15.1.0
+riscv                            allmodconfig    clang-22
+riscv                             allnoconfig    clang-22
+riscv                             allnoconfig    gcc-15.1.0
+riscv                            allyesconfig    clang-16
+riscv                               defconfig    gcc-12
+riscv                 randconfig-001-20250826    gcc-8.5.0
+riscv                 randconfig-001-20250827    gcc-11.5.0
+riscv                 randconfig-002-20250826    gcc-11.5.0
+riscv                 randconfig-002-20250827    gcc-11.5.0
+s390                             allmodconfig    clang-18
+s390                              allnoconfig    clang-22
+s390                             allyesconfig    gcc-15.1.0
+s390                                defconfig    gcc-12
+s390                  randconfig-001-20250826    clang-22
+s390                  randconfig-001-20250827    gcc-11.5.0
+s390                  randconfig-002-20250826    clang-18
+s390                  randconfig-002-20250827    gcc-11.5.0
+sh                               allmodconfig    gcc-15.1.0
+sh                                allnoconfig    gcc-15.1.0
+sh                               allyesconfig    gcc-15.1.0
+sh                                  defconfig    gcc-12
+sh                    randconfig-001-20250826    gcc-11.5.0
+sh                    randconfig-001-20250827    gcc-11.5.0
+sh                    randconfig-002-20250826    gcc-9.5.0
+sh                    randconfig-002-20250827    gcc-11.5.0
+sparc                            allmodconfig    gcc-15.1.0
+sparc                             allnoconfig    gcc-15.1.0
+sparc                               defconfig    gcc-15.1.0
+sparc                 randconfig-001-20250826    gcc-13.4.0
+sparc                 randconfig-001-20250827    gcc-11.5.0
+sparc                 randconfig-002-20250826    gcc-8.5.0
+sparc                 randconfig-002-20250827    gcc-11.5.0
+sparc64                             defconfig    gcc-12
+sparc64               randconfig-001-20250826    gcc-8.5.0
+sparc64               randconfig-001-20250827    gcc-11.5.0
+sparc64               randconfig-002-20250826    clang-22
+sparc64               randconfig-002-20250827    gcc-11.5.0
+um                               alldefconfig    clang-22
+um                               allmodconfig    clang-19
+um                                allnoconfig    clang-22
+um                               allyesconfig    gcc-12
+um                                  defconfig    gcc-12
+um                             i386_defconfig    clang-22
+um                             i386_defconfig    gcc-12
+um                    randconfig-001-20250826    gcc-12
+um                    randconfig-001-20250827    gcc-11.5.0
+um                    randconfig-002-20250826    clang-17
+um                    randconfig-002-20250827    gcc-11.5.0
+um                           x86_64_defconfig    gcc-12
+x86_64                            allnoconfig    clang-20
+x86_64                           allyesconfig    clang-20
+x86_64      buildonly-randconfig-001-20250826    clang-20
+x86_64      buildonly-randconfig-001-20250827    clang-20
+x86_64      buildonly-randconfig-002-20250826    clang-20
+x86_64      buildonly-randconfig-002-20250827    clang-20
+x86_64      buildonly-randconfig-003-20250826    gcc-12
+x86_64      buildonly-randconfig-003-20250827    clang-20
+x86_64      buildonly-randconfig-004-20250826    clang-20
+x86_64      buildonly-randconfig-004-20250827    clang-20
+x86_64      buildonly-randconfig-005-20250826    gcc-12
+x86_64      buildonly-randconfig-005-20250827    clang-20
+x86_64      buildonly-randconfig-006-20250826    gcc-12
+x86_64      buildonly-randconfig-006-20250827    clang-20
+x86_64                              defconfig    clang-20
+x86_64                              defconfig    gcc-11
+x86_64                                  kexec    clang-20
+x86_64                randconfig-001-20250827    clang-20
+x86_64                randconfig-002-20250827    clang-20
+x86_64                randconfig-003-20250827    clang-20
+x86_64                randconfig-004-20250827    clang-20
+x86_64                randconfig-005-20250827    clang-20
+x86_64                randconfig-006-20250827    clang-20
+x86_64                randconfig-007-20250827    clang-20
+x86_64                randconfig-008-20250827    clang-20
+x86_64                randconfig-071-20250827    clang-20
+x86_64                randconfig-072-20250827    clang-20
+x86_64                randconfig-073-20250827    clang-20
+x86_64                randconfig-074-20250827    clang-20
+x86_64                randconfig-075-20250827    clang-20
+x86_64                randconfig-076-20250827    clang-20
+x86_64                randconfig-077-20250827    clang-20
+x86_64                randconfig-078-20250827    clang-20
+x86_64                               rhel-9.4    clang-20
+x86_64                           rhel-9.4-bpf    gcc-12
+x86_64                          rhel-9.4-func    clang-20
+x86_64                    rhel-9.4-kselftests    clang-20
+x86_64                         rhel-9.4-kunit    gcc-12
+x86_64                           rhel-9.4-ltp    gcc-12
+x86_64                          rhel-9.4-rust    clang-20
+xtensa                            allnoconfig    gcc-15.1.0
+xtensa                randconfig-001-20250826    gcc-11.5.0
+xtensa                randconfig-001-20250827    gcc-11.5.0
+xtensa                randconfig-002-20250826    gcc-8.5.0
+xtensa                randconfig-002-20250827    gcc-11.5.0
 
->>   fs/efivarfs/super.c | 2 +-
->>   1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
->> index 23ff4e873651..c30d758e303a 100644
->> --- a/fs/efivarfs/super.c
->> +++ b/fs/efivarfs/super.c
->> @@ -152,7 +152,7 @@ static int efivarfs_d_compare(const struct dentry *dentry,
->>   {
->>          int guid = len - EFI_VARIABLE_GUID_LEN;
->>
-> 
-> Could we do a separate
-> 
-> if (guid <= 0)
->    return 1;
-> 
-> here, with a comment describing how that condition might become true?
-> 
-
-Okay, I will update it in v3.
-
->> -       if (name->len != len)
->> +       if (name->len != len || len <= EFI_VARIABLE_GUID_LEN)
-> 
-> ... and drop this change.
-> 
->>                  return 1;
->>
->>          /* Case-sensitive compare for the variable name */
->> --
->> 2.39.2
->>
->>
-
--- 
-Thanks,
-Nan
-
+--
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
