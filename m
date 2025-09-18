@@ -1,138 +1,151 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5325F2F25E9
-	for <linux-efi@vger.kernel.org>; Thu, 18 Sep 2025 11:48:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 17B94306B13
+	for <linux-efi@vger.kernel.org>; Thu, 18 Sep 2025 11:57:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758196103; cv=none; b=qjnyybuGuo/nPHvAkqhLyaZgGaB+uw0OvI5jYkNuiUDbxus7+8roYoX6hMrtrjKtZZa+LshK04bXHAhaogzGFP5XgIbQ73f9dOqe7ZFuJjY0+fdAtG+D8cQ6yg7HcrCOOrfYHSg7J3MoqtbwIR/i4lJWEISTiCtH3/Y1HF0YXUo=
+	t=1758196656; cv=none; b=Kw8N9WGP2ssI5NGgqPnxaixTFhdvyK94gb2WgbSRpiHxJuCCo3JKVSujkkMyjZViYcXUrgyuOxzWsXVinWSRtnza9G3NSGeKYHqaCkoJ5oXDNdP5bKfmbFC3zKzcojtVZ6KoC7PkaFLz8Kab37q5khGSkySNtup2Fqh08vwLh9E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758196103; c=relaxed/simple;
-	bh=RTUNOwYnHz3bm7fXFE054iF4e70EGE1OcyC40tA5Vwg=;
+	s=arc-20240116; t=1758196656; c=relaxed/simple;
+	bh=QnCGG1F/hqyhQaGreicIO5t9aXuxNFzDWO6EGQXut+Y=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Vy36RwjNwEn0vpeBAAmYKWaplwWTeAU979mJ9chzYtrV0Ap4A8m2K2dZwP+SKNzlHMBRze7HAPJAw8/Bsq36KfuFWM7eDSWucspTmkbeLpqlIThTgrfIQ7xKa2/Cxv3gipEBao8876Qyc549p1Qb+IIIpj3pt9DuYdWi8BSy0sQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pyWGX9ek; arc=none smtp.client-ip=10.30.226.201
+	 To:Cc:Content-Type; b=R0LmXTVMNffoxAoYjbbteGDspszFs7Xtiy83WktqQfrE44LKB+lkilKbUHXeJ8LbKVzuCYyXR5mG3JIATvrxQhaepr/BFn/XJHmiFpaaPp3ICzaRn33sFpsh4CbrevqTjhYrgKIYr9476F0/aJp15ZyA/3NcCZHOjbCmQDa69K4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=L5hKn77i; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pyWGX9ek"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EEDB9C4CEE7
-	for <linux-efi@vger.kernel.org>; Thu, 18 Sep 2025 11:48:22 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="L5hKn77i"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8259C4AF0B
+	for <linux-efi@vger.kernel.org>; Thu, 18 Sep 2025 11:57:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1758196103;
-	bh=RTUNOwYnHz3bm7fXFE054iF4e70EGE1OcyC40tA5Vwg=;
+	s=k20201202; t=1758196655;
+	bh=QnCGG1F/hqyhQaGreicIO5t9aXuxNFzDWO6EGQXut+Y=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=pyWGX9ekGA9wIniFXQFYd36XcgJrRczjKNwyyMmfLI/zXQSn8AXuByyOulFWaWWa2
-	 LKmbRBlz9rxzv8mhwGUh0Mqe44q4Ha6FbcXwkorZ3ncub5G7hydpe4seTfEwTCRR5t
-	 Sj7d58ma4J+FK1bCM1gyZqhuO3DapMdAf2R6NJr18ZEOnqzlQZLF3OHE9TeqmjCbT5
-	 qHZZiSuWt2HlAytQp4BUyj4myxGi8iOiJAK+JZyOMTUTxBcruVVG8/4dnalThfVYTU
-	 sxWpsK5jv0mdpbL8CcOxTCA/2g39qD5dUaTvIeML6yHlLkGWLElq32qlyWnFfRELjK
-	 mNzxy0PWmhiyg==
-Received: by mail-lf1-f47.google.com with SMTP id 2adb3069b0e04-579363a4602so513759e87.0
-        for <linux-efi@vger.kernel.org>; Thu, 18 Sep 2025 04:48:22 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCUlVmOBVwOqLWsuTxTLN64mWkHywoK8rNXYU8d/vDU2PZW4//cQP/pwGkauKFf9UiUnbtIVEJGSstY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxFNjRVzDv7iS3vwKxj76Ere+v4zfapt39uJgpM0HWiuKcskBJQ
-	vIQK8gMAmClBrhiNCqsgv/yJZ+mrbCDPjGtZous0DUhE8fja3oQVxHiQsBbJ4zSO49vybRXJPx2
-	h/YNUka7sLx6pRgaJViRTRLPf3YCiWxA=
-X-Google-Smtp-Source: AGHT+IGF0M6CdiMEFapSpsuAEcu8LEGsyj1+Ha6uD9bZ+JbV0vSO/y4+K4BYQUjIeTJU4lG+5fWipTeDfHAPo6wMBJM=
-X-Received: by 2002:a05:6512:32c6:b0:55f:601d:a819 with SMTP id
- 2adb3069b0e04-5779a6604d4mr1758174e87.33.1758196101313; Thu, 18 Sep 2025
- 04:48:21 -0700 (PDT)
+	b=L5hKn77iLZnqH2V8qLIMIipq7e2jhxcKM2rUX/sebVosDrQZLHFeBCjxk/cfX2H5y
+	 /QWfVKJ1ilXILb+r95fj6GmtOaICVSj39OQOORutfLLdSMudLcJWp+M/yy17UJE73s
+	 l9fB5hXNQguBHpNXprZNNrusoXaO8tbTr1LJdP+Wde0Pd5kEofQNq5Exrr5QHq7iGn
+	 c9Qi4ERaTz79nzOaSPtEHKWq6zCkpJp67bMiXwi3+pxosnrqdOeaIs4CcLyAon9ot5
+	 B+cv1w9BHDMYpdQEW1uaxPiQNkES+oVZZAZ5IMbqEX1f8VYQDNa0RT+7HcLPSeE750
+	 bdguiUEvr/odg==
+Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-570d0c280e4so1055906e87.0
+        for <linux-efi@vger.kernel.org>; Thu, 18 Sep 2025 04:57:35 -0700 (PDT)
+X-Gm-Message-State: AOJu0Yw1kEXT8KdD9OX/9LqJ3J8yP77FjA7yzw2Kobs3H42M5lfoxt2r
+	9Xx30xrdBQ6nKh2XwBgq3NtAzqGi7h6zM0kwW/YXbM7EgIsxVaKJrP/X/Pd5/q2huc5BSxnlMb1
+	epX01nRqJ8SAmUkB70gCrg0ziRc4Ffbs=
+X-Google-Smtp-Source: AGHT+IHYPtDHABOS+XktnkbTA9g5LgHepKlyYBaYIJE5P4XpCc/WpYv7sbOdTy9UHPafSUFpUFHKJcQW3E4vVmbVLVU=
+X-Received: by 2002:a05:6512:3b8e:b0:577:9ee:7d55 with SMTP id
+ 2adb3069b0e04-577999d49c0mr2000638e87.28.1758196654077; Thu, 18 Sep 2025
+ 04:57:34 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250918103010.2973462-10-ardb+git@google.com>
- <CAMj1kXGndZxxe+u3st6FCebrdutUibspA7tJUpqGMgpj9UTFnA@mail.gmail.com> <aMvwstR28CDphk4J@willie-the-truck>
-In-Reply-To: <aMvwstR28CDphk4J@willie-the-truck>
+References: <20250918103010.2973462-10-ardb+git@google.com> <20250918103010.2973462-15-ardb+git@google.com>
+In-Reply-To: <20250918103010.2973462-15-ardb+git@google.com>
 From: Ard Biesheuvel <ardb@kernel.org>
-Date: Thu, 18 Sep 2025 13:48:10 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXF1AAE9sLvDR0YwjZ0pDcnGG4cwqcy6VadUF-jOa7GkJw@mail.gmail.com>
-X-Gm-Features: AS18NWCkpq6FAgVrtvz42UXpOw-zfg2xngxs2fJpZJ76gvKhtfUyxwhkKEjs2jU
-Message-ID: <CAMj1kXF1AAE9sLvDR0YwjZ0pDcnGG4cwqcy6VadUF-jOa7GkJw@mail.gmail.com>
-Subject: Re: [PATCH v3 0/8] arm64: Make EFI calls preemptible
-To: Will Deacon <will@kernel.org>
-Cc: Ard Biesheuvel <ardb+git@google.com>, linux-efi@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+Date: Thu, 18 Sep 2025 13:57:22 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXE+hvMQLU6UF3QvTyo9Y1eUjCnPcPnMU9bOe4FDZ-N+EQ@mail.gmail.com>
+X-Gm-Features: AS18NWArWnMLbH2kRQX7johssD9UyrnwA4cP-veatvN2_G57llXGRNMEAsjOnCY
+Message-ID: <CAMj1kXE+hvMQLU6UF3QvTyo9Y1eUjCnPcPnMU9bOe4FDZ-N+EQ@mail.gmail.com>
+Subject: Re: [PATCH v3 5/8] arm64/fpsimd: Drop special handling for EFI
+ runtime services
+To: Ard Biesheuvel <ardb+git@google.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, Will Deacon <will@kernel.org>, 
 	Mark Rutland <mark.rutland@arm.com>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, 
 	Peter Zijlstra <peterz@infradead.org>, Catalin Marinas <catalin.marinas@arm.com>, 
 	Mark Brown <broonie@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 18 Sept 2025 at 13:44, Will Deacon <will@kernel.org> wrote:
+On Thu, 18 Sept 2025 at 12:30, Ard Biesheuvel <ardb+git@google.com> wrote:
 >
-> On Thu, Sep 18, 2025 at 01:33:48PM +0200, Ard Biesheuvel wrote:
-> > On Thu, 18 Sept 2025 at 12:30, Ard Biesheuvel <ardb+git@google.com> wrote:
-> > >
-> > > From: Ard Biesheuvel <ardb@kernel.org>
-> > >
-> > > The arm64 port permits the use of the baseline FP/SIMD register file in
-> > > kernel mode, and no longer requires preemption to be disabled. Now that
-> > > the EFI spec is being clarified to state that EFI runtime services may
-> > > only use baseline FP/SIMD, the fact that EFI may code may use FP/SIMD
-> > > registers (while executing at the same privilege level as the kernel) is
-> > > no longer a reason to disable preemption when invoking them.
-> > >
-> > > This means that the only remaining reason for disabling preemption is
-> > > the fact that the active mm is swapped out and replaced with efi_mm in a
-> > > way that is hidden from the scheduler, and so scheduling is not
-> > > supported currently. However, given that virtually all (*) EFI runtime
-> > > calls are made from the efi_rts_wq workqueue, the efi_mm can simply be
-> > > loaded into the workqueue worker kthread while the call is in progress,
-> > > and this does not require preemption to be disabled.
-> > >
-> > > Note that this is only a partial solution in terms of RT guarantees,
-> > > given that the runtime services execute at the same privilege level as
-> > > the kernel, and can therefore disable interrupts (and therefore
-> > > preemption) directly. But it should prevent scheduling latency spikes
-> > > for EFI calls that simply take a long time to run to completion.
-> > >
-> > > Changes since v2:
-> > > - Permit ordinary kernel mode FP/SIMD with IRQs disabled, so that the
-> > >   special EFI case only deals with invocations in hardirq or NMI context
-> > > - Disallow EFI runtime calls in hardirq or NMI context, so that the
-> > >   special FP/SIMD handling for EFI can be dropped entirely
-> > > - Use a mutex rather than a semaphore for the arm64 EFI runtime lock,
-> > >   now that it is never trylock()ed in IRQ or NMI context.
-> > >
-> > > Changes since v1/RFC:
-> > > - Disable uaccess for SWPAN before updating the preserved TTBR0 value
-> > > - Document why disabling migration is needed
-> > > - Rebase onto v6.17-rc1
-> > >
-> > > (*) only efi_reset_system() and EFI pstore invoke EFI runtime services
-> > >     without going through the workqueue, and the latter only when saving
-> > >     a kernel oops log to the EFI varstore
-> > >
-> > > Cc: Will Deacon <will@kernel.org>
-> > > Cc: Mark Rutland <mark.rutland@arm.com>
-> > > Cc: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-> > > Cc: Peter Zijlstra <peterz@infradead.org>
-> > > Cc: Catalin Marinas <catalin.marinas@arm.com>
-> > > Cc: Mark Brown <broonie@kernel.org>
-> > >
-> > > Ard Biesheuvel (8):
-> > >   efi: Add missing static initializer for efi_mm::cpus_allowed_lock
-> > >   efi/runtime: Return success/failure from arch_efi_call_virt_setup()
-> > >   efi/runtime: Deal with arch_efi_call_virt_setup() returning failure
-> >
-> > Unless anyone objects, I am going to queue up these 3 patches ^^^ via
-> > the EFI tree.
-> >
-> > >   arm64/fpsimd: Permit kernel mode NEON with IRQs off
-> > >   arm64/fpsimd: Drop special handling for EFI runtime services
-> > >   arm64/efi: Use a mutex to protect the EFI stack and FP/SIMD state
-> > >   arm64/efi: Move uaccess en/disable out of efi_set_pgd()
-> > >   arm64/efi: Call EFI runtime services without disabling preemption
-> > >
-> >
-> > ... so the rest can go in via the arm64 tree in the next cycle.
+> From: Ard Biesheuvel <ardb@kernel.org>
 >
-> I'm also happy to take the whole lot via arm64 this cycle, if you like?
-> I reviewed it a while ago and was happy with it then.
+> Now that the use of kernel mode FP/SIMD is generally permitted when IRQs
+> are disabled, the only purpose served by the EFI-specific fallback code
+> in fpsimd.c is the case where an EFI call occurs from hardirq or NMI
+> context. No such cases are known to occur in practice, and it is
+> doubtful whether calling into the EFI firmware for any reason under such
+> conditions would be a good idea to begin with.
+>
+> So disallow EFI runtime services in such cases. This means all the
+> fallback code can be dropped.
+>
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> ---
+>  arch/arm64/include/asm/fpsimd.h |   4 -
+>  arch/arm64/kernel/efi.c         |   8 +-
+>  arch/arm64/kernel/fpsimd.c      | 121 --------------------
+>  3 files changed, 6 insertions(+), 127 deletions(-)
 >
 
-I've made some major changes this time, so please double check that
-you're still ok with it.
+This patch is incomplete, the following needs to be folded in as well:
 
-In particular, I've ripped out all of the special EFI handling in fpsimd.c
+ arch/arm64/kernel/fpsimd.c | 39 ---------------------------------------
+ 1 file changed, 39 deletions(-)
+
+diff --git a/arch/arm64/kernel/fpsimd.c b/arch/arm64/kernel/fpsimd.c
+index e543dd569bd7..c846161a002b 100644
+--- a/arch/arm64/kernel/fpsimd.c
++++ b/arch/arm64/kernel/fpsimd.c
+@@ -180,13 +180,6 @@
+        set_default_vl(ARM64_VEC_SVE, val);
+ }
+
+-static u8 *efi_sve_state;
+-
+-#else /* ! CONFIG_ARM64_SVE */
+-
+-/* Dummy declaration for code that will be optimised out: */
+-extern u8 *efi_sve_state;
+-
+ #endif /* ! CONFIG_ARM64_SVE */
+
+ #ifdef CONFIG_ARM64_SME
+@@ -1086,36 +1079,6 @@
+        return 0;
+ }
+
+-static void __init sve_efi_setup(void)
+-{
+-       int max_vl = 0;
+-       int i;
+-
+-       if (!IS_ENABLED(CONFIG_EFI))
+-               return;
+-
+-       for (i = 0; i < ARRAY_SIZE(vl_info); i++)
+-               max_vl = max(vl_info[i].max_vl, max_vl);
+-
+-       /*
+-        * alloc_percpu() warns and prints a backtrace if this goes wrong.
+-        * This is evidence of a crippled system and we are returning void,
+-        * so no attempt is made to handle this situation here.
+-        */
+-       if (!sve_vl_valid(max_vl))
+-               goto fail;
+-
+-       efi_sve_state = kmalloc(SVE_SIG_REGS_SIZE(sve_vq_from_vl(max_vl)),
+-                               GFP_KERNEL);
+-       if (!efi_sve_state)
+-               goto fail;
+-
+-       return;
+-
+-fail:
+-       panic("Cannot allocate memory for EFI SVE save/restore");
+-}
+-
+ void cpu_enable_sve(const struct arm64_cpu_capabilities *__always_unused p)
+ {
+        write_sysreg(read_sysreg(CPACR_EL1) | CPACR_EL1_ZEN_EL1EN, CPACR_EL1);
+@@ -1176,8 +1139,6 @@
+        if (sve_max_virtualisable_vl() < sve_max_vl())
+                pr_warn("%s: unvirtualisable vector lengths present\n",
+                        info->name);
+-
+-       sve_efi_setup();
+ }
+
+ /*
