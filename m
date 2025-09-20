@@ -1,33 +1,33 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 222AB2773CC;
-	Sat, 20 Sep 2025 07:48:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C98E276041;
+	Sat, 20 Sep 2025 07:48:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758354487; cv=none; b=uyAYirqhobIA/hvUN+M9rPus6rh5Q6H1cuGqiY5crDbVT8bpdXro98iqL27887TglPrJwhOgE7G5SoN9joBR7irP5FxjUD2nzcrkqA6FzRbkGcXbaa2JPEtZB9aUmpJNw6PgrdY2i1I3Y2qguySG0PgtDzs+qX2yQ2sVscnxkNQ=
+	t=1758354487; cv=none; b=ROopup/3VYrdYgozfGcZPd87ms2NmmjXxgXEPTJq1OkHjbNgJkmxEATqLwFs5/TVyEP8eYGVdjH3PQlq/D5AstMiHGgj7ag+hGPz9CYl14rKtzHMO6VuhOsZiaSlaRees/Z8j3Yk8P2q8hozBRjS5nU1kNXWZsVW4G1g0ODl+vQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1758354487; c=relaxed/simple;
-	bh=Ie71DIWCi0Ah3EGLybzoifplxs3Ww8PvHoojot63j6I=;
+	bh=3/7wTnp+BUluB0yOKxyyf9McG0O9FqLVmSTXxagaJjY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=GZsdxZmFF+9RK6eGx2PerQwvO27dTzuqNdvYEPd661c+7ftKyTu3/MGYPeeiklBGzMuohz2mZN68458x6DM6SS19tn9KdztODjrB6If4S3QUOskVpMYojoPOYFfS7fPCsX4iiuluU/Y8ljPAn6VgTVt+aaIg9nHdAq2ZTQuJ91k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=nE9xTD2O; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=hnFxQZisp3sRTXBQ2p0hqLRniX1OsNVsZ7TAc4Dbb91hDSLhqXbXRFijL0FKV/9p0tlu+F+z6gjBWgijITot1VdDEKgplaHjDjQF+3LCbd9Jj1DngqauWks2izQ/GiqgPdWsEVQCGSgkKdrusuWkDCF8GK6Ei6An+F5eLHs7Owo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=h1PYM7wF; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="nE9xTD2O"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="h1PYM7wF"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=cZQ+/o3tr5dpemhKGUjYS6VsiGOwzb8RklREPcRpDvg=; b=nE9xTD2O4CN6wpP4Ngft7mDdEL
-	TuZcXGmk/7d3wdqCXaaVxrTXc2OSHAbf15SV7sa5HU6UiK2gZpavjRj9N/aM6/PamsDBqcxAg4fXm
-	OL7LPJpsFT9Jl7xe0XrmWdWBiFpFHZhhH/JfesOcQStv2NO2kG0XrRzVAr5lhdazpsjPHAOuItv2C
-	S+yo4rTy7pFfdpmUCBoKURVolp6v7OcIvRfTEnu/FPhKU0okt9N0AcAnFJKVTrkky6Vb87jl6b6wj
-	aBs7nHDF0M7wtjRq/0toFn10gpnC2nogDPVajqxejcGgVd/KFjsC9q6b5xdmDwzw3ajlyOkSCo2U2
-	SQIPPJtw==;
+	bh=wxn4MG/UuDcxk84tNsHI6sa3Q9kQYypoP2eBG9UjNw0=; b=h1PYM7wF8GAZQmFHnTVD3Eal5G
+	3sfQyHpwrCnfb8nq8dYDmp7db1lsQsiW0zGzVQqf1H2/iK9U857ZYv0k6fJaskP3ZAh/lIXWQAQRm
+	0Eqw7E+Y1UY+lxLUe8EHmLK3j1RaYCGVO4yoX4JPLStirWyDq8N85LAX/8T5rTBj5an57+vcyFlg0
+	jhPbS9IcCglfgZAOoJAftuvBRe1W2kHTcTm36SQ6aSvBSUTow/nSc5uRWjdqUDbEvGwWlobmtwXN3
+	YXuF5pGdUjk0SF4X9GcEAKh9hwMi1J0h77z7/c5seKNFmRikgDkUnShQND1x2e3QtbH6HF1a4IAhh
+	UlLYEIwA==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1uzsKB-0000000ExF6-022R;
+	id 1uzsKB-0000000ExFi-2BZc;
 	Sat, 20 Sep 2025 07:48:03 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
@@ -48,9 +48,9 @@ Cc: torvalds@linux-foundation.org,
 	casey@schaufler-ca.com,
 	linuxppc-dev@lists.ozlabs.org,
 	borntraeger@linux.ibm.com
-Subject: [PATCH 19/39] debugfs: remove duplicate checks in callers of start_creating()
-Date: Sat, 20 Sep 2025 08:47:38 +0100
-Message-ID: <20250920074759.3564072-19-viro@zeniv.linux.org.uk>
+Subject: [PATCH 21/39] convert spufs
+Date: Sat, 20 Sep 2025 08:47:40 +0100
+Message-ID: <20250920074759.3564072-21-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20250920074759.3564072-1-viro@zeniv.linux.org.uk>
 References: <20250920074156.GK39973@ZenIV>
@@ -64,54 +64,75 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-we'd already verified that DEBUGFS_ALLOW_API was there in
-start_creating() - it would've failed otherwise
+have spufs_new_file() use d_make_persistent() instead of d_add() and
+do an uncondition dput() in the caller; the rest is completely
+straightforward.
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- fs/debugfs/inode.c | 15 ---------------
- 1 file changed, 15 deletions(-)
+ arch/powerpc/platforms/cell/spufs/inode.c | 15 ++++++---------
+ 1 file changed, 6 insertions(+), 9 deletions(-)
 
-diff --git a/fs/debugfs/inode.c b/fs/debugfs/inode.c
-index 1302995d6816..95eb57566d26 100644
---- a/fs/debugfs/inode.c
-+++ b/fs/debugfs/inode.c
-@@ -432,11 +432,6 @@ static struct dentry *__debugfs_create_file(const char *name, umode_t mode,
- 	if (IS_ERR(dentry))
- 		return dentry;
+diff --git a/arch/powerpc/platforms/cell/spufs/inode.c b/arch/powerpc/platforms/cell/spufs/inode.c
+index 7ec60290abe6..f21f7a76ef0b 100644
+--- a/arch/powerpc/platforms/cell/spufs/inode.c
++++ b/arch/powerpc/platforms/cell/spufs/inode.c
+@@ -127,7 +127,7 @@ spufs_new_file(struct super_block *sb, struct dentry *dentry,
+ 	inode->i_fop = fops;
+ 	inode->i_size = size;
+ 	inode->i_private = SPUFS_I(inode)->i_ctx = get_spu_context(ctx);
+-	d_add(dentry, inode);
++	d_make_persistent(dentry, inode);
+ out:
+ 	return ret;
+ }
+@@ -163,10 +163,9 @@ static int spufs_fill_dir(struct dentry *dir,
+ 			return -ENOMEM;
+ 		ret = spufs_new_file(dir->d_sb, dentry, files->ops,
+ 					files->mode & mode, files->size, ctx);
+-		if (ret) {
+-			dput(dentry);
++		dput(dentry);
++		if (ret)
+ 			return ret;
+-		}
+ 		files++;
+ 	}
+ 	return 0;
+@@ -241,11 +240,10 @@ spufs_mkdir(struct inode *dir, struct dentry *dentry, unsigned int flags,
  
--	if (!(debugfs_allow & DEBUGFS_ALLOW_API)) {
--		failed_creating(dentry);
--		return ERR_PTR(-EPERM);
--	}
--
- 	inode = debugfs_get_inode(dentry->d_sb);
- 	if (unlikely(!inode)) {
- 		pr_err("out of free dentries, can not create file '%s'\n",
-@@ -582,11 +577,6 @@ struct dentry *debugfs_create_dir(const char *name, struct dentry *parent)
- 	if (IS_ERR(dentry))
- 		return dentry;
+ 	inode_lock(inode);
  
--	if (!(debugfs_allow & DEBUGFS_ALLOW_API)) {
--		failed_creating(dentry);
--		return ERR_PTR(-EPERM);
--	}
--
- 	inode = debugfs_get_inode(dentry->d_sb);
- 	if (unlikely(!inode)) {
- 		pr_err("out of free dentries, can not create directory '%s'\n",
-@@ -629,11 +619,6 @@ struct dentry *debugfs_create_automount(const char *name,
- 	if (IS_ERR(dentry))
- 		return dentry;
+-	dget(dentry);
+ 	inc_nlink(dir);
+ 	inc_nlink(inode);
  
--	if (!(debugfs_allow & DEBUGFS_ALLOW_API)) {
--		failed_creating(dentry);
--		return ERR_PTR(-EPERM);
--	}
--
- 	inode = debugfs_get_inode(dentry->d_sb);
- 	if (unlikely(!inode)) {
- 		pr_err("out of free dentries, can not create automount '%s'\n",
+-	d_instantiate(dentry, inode);
++	d_make_persistent(dentry, inode);
+ 
+ 	if (flags & SPU_CREATE_NOSCHED)
+ 		ret = spufs_fill_dir(dentry, spufs_dir_nosched_contents,
+@@ -479,10 +477,9 @@ spufs_mkgang(struct inode *dir, struct dentry *dentry, umode_t mode)
+ 	inode->i_op = &simple_dir_inode_operations;
+ 	inode->i_fop = &simple_dir_operations;
+ 
+-	d_instantiate(dentry, inode);
+-	dget(dentry);
+ 	inc_nlink(dir);
+ 	inc_nlink(d_inode(dentry));
++	d_make_persistent(dentry, inode);
+ 	return ret;
+ 
+ out_iput:
+@@ -780,7 +777,7 @@ static struct file_system_type spufs_type = {
+ 	.name = "spufs",
+ 	.init_fs_context = spufs_init_fs_context,
+ 	.parameters	= spufs_fs_parameters,
+-	.kill_sb = kill_litter_super,
++	.kill_sb = kill_anon_super,
+ };
+ MODULE_ALIAS_FS("spufs");
+ 
 -- 
 2.47.3
 
