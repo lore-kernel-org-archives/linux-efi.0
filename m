@@ -1,55 +1,55 @@
-Received: from mail-ed1-f73.google.com (mail-ed1-f73.google.com [209.85.208.73])
+Received: from mail-wr1-f73.google.com (mail-wr1-f73.google.com [209.85.221.73])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7DCE026FA56
-	for <linux-efi@vger.kernel.org>; Wed, 15 Oct 2025 21:01:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7CE452E2DFE
+	for <linux-efi@vger.kernel.org>; Wed, 15 Oct 2025 21:01:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760562068; cv=none; b=ur3s+LHRDo3pGeqtQuDvpVwPqmBZ76FB1U4R9Q1/6zm7x86Fhq5Vafxb7MXHNKCtAg2J2lh2svsXCVHyQAUomJjF8DfxT+e+xScNRUdwxdPEN1MldIUcLKd0PcJkaVTQImjFdGIQn4DagVgG5qwPkngaMJ8sH7x4lgZZE4MExoM=
+	t=1760562069; cv=none; b=AAd5Rp8v7QLitzxyN4RJxEY1hRHsugTNet5y4D9WweoCh9IQeuso4D0oe6dwcBXW6HOzVqt94GVqwEODsrs5+UP1QNwLIeDz7lhBI6Vu+mSw6T9U53pvQ/yza0IgiRf3S8xq9N3ObQuvJQcqBTwFMFm3+MMnO6KOPyj7EjmSHgA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760562068; c=relaxed/simple;
-	bh=pgc/OWqzPdhZ+ZByHmG0zKs5YUD6w7p8tgTZ4qv9RYY=;
+	s=arc-20240116; t=1760562069; c=relaxed/simple;
+	bh=plTDTpax7UhabJ3R97rpcaBJybZ/LXy6TKvHDYaOW40=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=Bu0A+f6SZLIqyvxbPtr92I5bg2n0k98uzgbc+pMajIDXLnVQRtl/eh37T7MZ/yQBbBLh3H4OsgeiTsTah76EpV18alTaSzibCWVAkGbpv7c9SvfNXqwRk2wJdZSjIllY1J0XX5PRSkuAhk+smDw7RZq8Ta8kNWfZCpkQAXHRndQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=Alh6XGsl; arc=none smtp.client-ip=209.85.208.73
+	 To:Cc:Content-Type; b=ciXhrv1RJSnLtrs58rY2H/RRu0gHtOCrG5KRIYCDA8SOgnQH9nn2xk5VT0XIg+gXYWmbxwVcd4DuVntHAG9oMqtCbKM3Ak5vx+q7V2m3Qf5h3vXAkXS5ZAiRwxyE4oYTjqp1C7GAxdg1fiEefdRvfavnDpIEniArjQjOzlX7AP8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=TvReFQcv; arc=none smtp.client-ip=209.85.221.73
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Alh6XGsl"
-Received: by mail-ed1-f73.google.com with SMTP id 4fb4d7f45d1cf-63bf373ede2so1280649a12.0
-        for <linux-efi@vger.kernel.org>; Wed, 15 Oct 2025 14:01:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="TvReFQcv"
+Received: by mail-wr1-f73.google.com with SMTP id ffacd0b85a97d-3f384f10762so20245f8f.3
+        for <linux-efi@vger.kernel.org>; Wed, 15 Oct 2025 14:01:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1760562064; x=1761166864; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1760562066; x=1761166866; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=TD0cTRsfkQ0iON4YZtzctxecoLUwl3UhcnKx4hSqyjw=;
-        b=Alh6XGslOoaDHLgHMozKhflIJuySiD2Ps3HMUrycl+vPsV7kKs0wodskKQWhpT7thW
-         yH6K4ZRHtApemQfJh25HV4lCCQmco/foXE6pq8lYD2KBkl/VbEg8MpOdIafO1jiVuC+u
-         BKpCJ+aA9oMVT+8Vwsllw++SkN00Pe29AioPq2zn69rNzXhEfG0oLGJwRWwUsXWan++q
-         bvcbHX3CrJNYl0+w3LrFkxY0bpQJXrEDuNNhrZL8XVta/vYpmRd/kY5vFt1ihm1wfJ+n
-         zyjpmAOo1VbTdoOwp5Qm7SiDYmMwoXHHwwl2mbJzgFKbl0UPRtELhdHgTMNVOiv/UKfb
-         HiEw==
+        bh=19SuM8BkFU86AdrsVL9he5wmDJI8XYP735e24p7BzJE=;
+        b=TvReFQcv9UcVKJ/bi0wglPCLAysT/jYaBlHwhTAsOzCC5Eq24laULjnH1nnhzfHmEi
+         3/xyMBNmBnwWaC7p7zqb//0iUaYBZvIhT6bNHCPhDNIzvN131dHx8lLEirnZ8/mFn/AW
+         V0wJzCex3YdTCMtcMNY4bm+2ZVrMLV5iwyAMkAjPalCDEwOqrZanJP+/MexLEFF8Khf9
+         jr53L8a9bheX7/LOMMP7M4ua7I7mxP9w45xyi9BVJXITfxXrxplwem+Oy8MKKJBVm0ph
+         w6/Yu4gSopLjGxJ9DWUJ4FR5OMOcWCutmERTw/Yri+MEPuCR/LQBEc8koN+d1mxfcv2G
+         S2Sg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760562064; x=1761166864;
+        d=1e100.net; s=20230601; t=1760562066; x=1761166866;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=TD0cTRsfkQ0iON4YZtzctxecoLUwl3UhcnKx4hSqyjw=;
-        b=jDQg4uUX27ofvv64J3gOIu1Ll2oWjrZBgrwa6UjmI0cXZTvFmQFfF9+LXliSCHS+oL
-         bO74q6CQZXYJm9BdgCRZlf4N1igUNep4tbn5Dc4dJ8OoOoeKtFPtzupBOtqhwfwT5fjV
-         BFp2FGrxDLQvLHwO3mQJABP9slsP5A4hO66DpLGP+3zQl+0YkQjIIlXjRxXA7PuAXrSR
-         KjV9bi7NmqcIGwLNCRP+kN5QzcHuPOQqPavDJFLkei72NeLC0JkdfAzSFsPr24WpOTMm
-         VWNeRSyHc/8rF98Kge8R8o7g+AvmDHXA25JYx2oGBE35d5xNLzJ1VN4+j4TVfulXo5mH
-         ye9w==
-X-Gm-Message-State: AOJu0YzMLE/cIoFGwx26pAEHWma4wTUDsjHoWykpoQWlEoy6aMPe5wZ2
-	E/0PrtWHoQh5+6r38JyYIDUICDvf19+KapcsUTU5wyiDFeWYwT2QL7lPMwostBnABTeAOnYqrjx
-	exXTE2k+TRDQPR8qASxM5Qm9URb2GTJf3Dpb8o/jD+MW1O+8q4W72iIUIB+UWSrXfr5pj5fmtVN
-	KLMgfjznQficDcwhXh+3dOsAmYfiI/WA==
-X-Google-Smtp-Source: AGHT+IHxb8mJwoK5rKnOiIInhvJ4q4VZQJ2QCiVbFL8msAiqQJ16/urDJrNLJku05vTcxZXu/6n/DgR7
-X-Received: from edcy14.prod.google.com ([2002:a05:6402:358e:b0:63b:dac2:1b06])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6402:518b:b0:62f:4915:bc47
- with SMTP id 4fb4d7f45d1cf-639d5b41857mr27245561a12.1.1760562063741; Wed, 15
- Oct 2025 14:01:03 -0700 (PDT)
-Date: Wed, 15 Oct 2025 22:56:37 +0200
+        bh=19SuM8BkFU86AdrsVL9he5wmDJI8XYP735e24p7BzJE=;
+        b=DV0i1G9td7FSkKGboKbU9MAzml8yffzdnEYGfKdK2kCfJ6RkJhTLBFKFG7vEDEzN/z
+         ygFGxYimUnmDQiRuc2I6FQ6O6k+6CZ1iiovzyl2XizLrHwfMTXyCAsAJJw0J4dZ1Xf30
+         cjZ6XMd+3ve8Q3M3u4dY09jGRY0ELpo+jRN5rnajhrs4anzFTpsPVu6aq88U/IX7WRgO
+         e3hfJ0fuyUuFqsjG6BSsC+cpDrbeUkCk2PnXg/7RW9DbM3ca6xNiHexHV3Drp+ij5GCL
+         VW6fM9w+eCwvDITEJwRBzJIK8SNo6l4Ji/mAu8o1El4lhyhAKiTKYbZP3CvZDUeGy3ah
+         cKvg==
+X-Gm-Message-State: AOJu0Yw4h4ypaCW3OtqkjCXrq/dsy8yc3BijjSVAea+Do5ZDBS/eeQ4l
+	L58YmVBb8E88lPt/QUxlFNOyt6fQGZqoK4QPJ2GOZyMNv15Wcp6FPJaGKM6mFcmONgLAx+mOjJU
+	eGRv5VvkTqYaPxs2vtJLkQNZ/KiMxvchbIxLo3rQ44viRgbRrDn1O66TCZmMkqVv2Dscg09Rpt1
+	SfZU7Kp6iTAQMga8RZlXuptSgxONcAhg==
+X-Google-Smtp-Source: AGHT+IFQpVg2U3+T4NvaCVGg+3jjnpHjurMn96RVhjpcDm7JJIbQd5n2ckQZklYZZG14FZbDn1HXPBda
+X-Received: from wmbjn22.prod.google.com ([2002:a05:600c:6b16:b0:46f:aa50:d718])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:1a8b:b0:425:8bd1:fbb4
+ with SMTP id ffacd0b85a97d-4266e7df95cmr20229304f8f.50.1760562065972; Wed, 15
+ Oct 2025 14:01:05 -0700 (PDT)
+Date: Wed, 15 Oct 2025 22:56:39 +0200
 In-Reply-To: <20251015205634.3820870-9-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -59,15 +59,14 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20251015205634.3820870-9-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3615; i=ardb@kernel.org;
- h=from:subject; bh=gYpYJdboczLvZzwBAFCsuy/KXaHSzTBHbFoWrECa7Dw=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIeMDV1t9cQbj1TMnuX+/1C4+c5tFuobh62Xpm2btO7vfz
- Zmmm+DdUcrCIMbFICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACbCv4aR4aJToYvt8st5Th+S
- nGolgoNnim0RWpP6ZF5fzOmdUoJ1ZowMixcI9ekxzvwTNP3mXMnfTRcy2o4za+5b3DPl4V3pA5f D2AE=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3253; i=ardb@kernel.org;
+ h=from:subject; bh=FjAcGhb6VYi+vJfe2JpmxvHhAqT8SyzVHt/xzyd0TNw=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIeMDV8ejrsz6he2dwTNnrNr5LD+tP1yqof/ebabW69esX
+ 2+PX2/SUcrCIMbFICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACaSYsHw369KU8vDXsfq9TfP
+ xX7nJbPk247V5Kkv/vbC8eOWHEUvJUaGa8++1bypTZXk3J6btGcxy4fcT2o31pZyl61w259wpsW RBwA=
 X-Mailer: git-send-email 2.51.0.869.ge66316f041-goog
-Message-ID: <20251015205634.3820870-11-ardb+git@google.com>
-Subject: [PATCH v4 resend 2/7] efi/runtime-wrappers: Keep track of the
- efi_runtime_lock owner
+Message-ID: <20251015205634.3820870-13-ardb+git@google.com>
+Subject: [PATCH v4 resend 4/7] arm64/fpsimd: Permit kernel mode NEON with IRQs off
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
@@ -79,110 +78,92 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-The EFI runtime wrappers use a file local semaphore to serialize access
-to the EFI runtime services. This means that any calls to the arch
-wrappers around the runtime services will also be serialized, removing
-the need for redundant locking.
+Currently, may_use_simd() will return false when called from a context
+where IRQs are disabled. One notable case where this happens is when
+calling the ResetSystem() EFI runtime service from the reboot/poweroff
+code path. For this case alone, there is a substantial amount of FP/SIMD
+support code to handle the corner case where a EFI runtime service is
+invoked with IRQs disabled.
 
-For robustness, add a facility that allows those arch wrappers to assert
-that the semaphore was taken by the current task.
+The only reason kernel mode SIMD is not allowed when IRQs are disabled
+is that re-enabling softirqs in this case produces a noisy diagnostic
+when lockdep is enabled. The warning is valid, in the sense that
+delivering pending softirqs over the back of the call to
+local_bh_enable() is problematic when IRQs are disabled.
 
+While the API lacks a facility to simply mask and unmask softirqs
+without triggering their delivery, disabling softirqs is not needed to
+begin with when IRQs are disabled, given that softirqs are only every
+taken asynchronously over the back of a hard IRQ.
+
+So dis/enable softirq processing conditionally, based on whether IRQs
+are enabled, and relax the check in may_use_simd().
+
+Acked-by: Will Deacon <will@kernel.org>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/runtime-wrappers.c | 17 ++++++++++++++++-
- include/linux/efi.h                     |  2 ++
- 2 files changed, 18 insertions(+), 1 deletion(-)
+ arch/arm64/include/asm/simd.h |  2 +-
+ arch/arm64/kernel/fpsimd.c    | 25 +++++++++++++++-----
+ 2 files changed, 20 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 708b777857d3..da8d29621644 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -202,6 +202,8 @@ void efi_call_virt_check_flags(unsigned long flags, const void *caller)
-  */
- static DEFINE_SEMAPHORE(efi_runtime_lock, 1);
+diff --git a/arch/arm64/include/asm/simd.h b/arch/arm64/include/asm/simd.h
+index 8e86c9e70e48..abd642c92f86 100644
+--- a/arch/arm64/include/asm/simd.h
++++ b/arch/arm64/include/asm/simd.h
+@@ -29,7 +29,7 @@ static __must_check inline bool may_use_simd(void)
+ 	 */
+ 	return !WARN_ON(!system_capabilities_finalized()) &&
+ 	       system_supports_fpsimd() &&
+-	       !in_hardirq() && !irqs_disabled() && !in_nmi();
++	       !in_hardirq() && !in_nmi();
+ }
  
-+static struct task_struct *efi_runtime_lock_owner;
-+
+ #else /* ! CONFIG_KERNEL_MODE_NEON */
+diff --git a/arch/arm64/kernel/fpsimd.c b/arch/arm64/kernel/fpsimd.c
+index 3d848c89604e..6d956ed23bd2 100644
+--- a/arch/arm64/kernel/fpsimd.c
++++ b/arch/arm64/kernel/fpsimd.c
+@@ -225,10 +225,21 @@ static void fpsimd_bind_task_to_cpu(void);
+  */
+ static void get_cpu_fpsimd_context(void)
+ {
+-	if (!IS_ENABLED(CONFIG_PREEMPT_RT))
+-		local_bh_disable();
+-	else
++	if (!IS_ENABLED(CONFIG_PREEMPT_RT)) {
++		/*
++		 * The softirq subsystem lacks a true unmask/mask API, and
++		 * re-enabling softirq processing using local_bh_enable() will
++		 * not only unmask softirqs, it will also result in immediate
++		 * delivery of any pending softirqs.
++		 * This is undesirable when running with IRQs disabled, but in
++		 * that case, there is no need to mask softirqs in the first
++		 * place, so only bother doing so when IRQs are enabled.
++		 */
++		if (!irqs_disabled())
++			local_bh_disable();
++	} else {
+ 		preempt_disable();
++	}
+ }
+ 
  /*
-  * Expose the EFI runtime lock to the UV platform
+@@ -240,10 +251,12 @@ static void get_cpu_fpsimd_context(void)
   */
-@@ -219,6 +221,8 @@ static void __nocfi efi_call_rts(struct work_struct *work)
- 	efi_status_t status = EFI_NOT_FOUND;
- 	unsigned long flags;
- 
-+	efi_runtime_lock_owner = current;
-+
- 	arch_efi_call_virt_setup();
- 	flags = efi_call_virt_save_flags();
- 
-@@ -310,6 +314,7 @@ static void __nocfi efi_call_rts(struct work_struct *work)
- 
- 	efi_rts_work.status = status;
- 	complete(&efi_rts_work.efi_rts_comp);
-+	efi_runtime_lock_owner = NULL;
+ static void put_cpu_fpsimd_context(void)
+ {
+-	if (!IS_ENABLED(CONFIG_PREEMPT_RT))
+-		local_bh_enable();
+-	else
++	if (!IS_ENABLED(CONFIG_PREEMPT_RT)) {
++		if (!irqs_disabled())
++			local_bh_enable();
++	} else {
+ 		preempt_enable();
++	}
  }
  
- static efi_status_t __efi_queue_work(enum efi_rts_ids id,
-@@ -444,8 +449,10 @@ virt_efi_set_variable_nb(efi_char16_t *name, efi_guid_t *vendor, u32 attr,
- 	if (down_trylock(&efi_runtime_lock))
- 		return EFI_NOT_READY;
- 
-+	efi_runtime_lock_owner = current;
- 	status = efi_call_virt_pointer(efi.runtime, set_variable, name, vendor,
- 				       attr, data_size, data);
-+	efi_runtime_lock_owner = NULL;
- 	up(&efi_runtime_lock);
- 	return status;
- }
-@@ -481,9 +488,11 @@ virt_efi_query_variable_info_nb(u32 attr, u64 *storage_space,
- 	if (down_trylock(&efi_runtime_lock))
- 		return EFI_NOT_READY;
- 
-+	efi_runtime_lock_owner = current;
- 	status = efi_call_virt_pointer(efi.runtime, query_variable_info, attr,
- 				       storage_space, remaining_space,
- 				       max_variable_size);
-+	efi_runtime_lock_owner = NULL;
- 	up(&efi_runtime_lock);
- 	return status;
- }
-@@ -509,12 +518,13 @@ virt_efi_reset_system(int reset_type, efi_status_t status,
- 		return;
- 	}
- 
-+	efi_runtime_lock_owner = current;
- 	arch_efi_call_virt_setup();
- 	efi_rts_work.efi_rts_id = EFI_RESET_SYSTEM;
- 	arch_efi_call_virt(efi.runtime, reset_system, reset_type, status,
- 			   data_size, data);
- 	arch_efi_call_virt_teardown();
--
-+	efi_runtime_lock_owner = NULL;
- 	up(&efi_runtime_lock);
- }
- 
-@@ -587,3 +597,8 @@ efi_call_acpi_prm_handler(efi_status_t (__efiapi *handler_addr)(u64, void *),
- }
- 
- #endif
-+
-+void efi_runtime_assert_lock_held(void)
-+{
-+	WARN_ON(efi_runtime_lock_owner != current);
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a98cc39e7aaa..b23ff8b83219 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1126,6 +1126,8 @@ static inline bool efi_runtime_disabled(void) { return true; }
- extern void efi_call_virt_check_flags(unsigned long flags, const void *caller);
- extern unsigned long efi_call_virt_save_flags(void);
- 
-+void efi_runtime_assert_lock_held(void);
-+
- enum efi_secureboot_mode {
- 	efi_secureboot_mode_unset,
- 	efi_secureboot_mode_unknown,
+ unsigned int task_get_vl(const struct task_struct *task, enum vec_type type)
 -- 
 2.51.0.869.ge66316f041-goog
 
