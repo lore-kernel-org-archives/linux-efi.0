@@ -1,105 +1,108 @@
-Received: from smtpbguseast1.qq.com (smtpbguseast1.qq.com [54.204.34.129])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9B3F3002BB;
-	Thu, 23 Oct 2025 08:23:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=54.204.34.129
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 404922F25E5
+	for <linux-efi@vger.kernel.org>; Thu, 23 Oct 2025 08:31:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761207810; cv=none; b=r3jLUnhzeKSnpkiXWBWw8HyOUc/y4m9e06sV1nGEC7wG0t8Q2wZZEWUMoup8htxA8AqjX4U+S2RSmk5LCjB3Sqyk/Sbjj6++XTNGvO+47JvRn8UtUW4wQwcgj1UB+pNiVhiwlEwAE4APhvslx2Csf6tBdKd9vC7FhxXkEFnSf5E=
+	t=1761208268; cv=none; b=kede8EoMNT+y9ZyOYv2ui3dWVDwOsBkjR6ywf1SaLWuWzMM5vudv4CwIO2aUa4TqV9VM3AL1wnE14h/YbozrU0HoKypKGbqJlOJc2dtgSpR0VMNITyzfL0W/whSSnEI62aGhUnEHhvcTu6jEumbfR+dSRJbLujZ2WDLAr9ms4mY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761207810; c=relaxed/simple;
-	bh=v0M+YSnxkgvRtoMvqCVVkzehsdPEfV4jIca8cUpLxn0=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=midCmvm6ujUHytiFmlruqxXQhn/QPYHYItPcFmfV0sinmGXAnMuuNdWncRZbGWAVINmlEq4SpUL6yDvS6GMrpMkpnk5b2k7Q6pGLQ5MRXtDItZQk7XH5RqxkS3WOze0YUt8OAM1AZB4JAwVmAfA30OZWI9q1U2e/8svcw218llQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=uniontech.com; spf=pass smtp.mailfrom=uniontech.com; dkim=pass (1024-bit key) header.d=uniontech.com header.i=@uniontech.com header.b=l2TUuhMm; arc=none smtp.client-ip=54.204.34.129
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=uniontech.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=uniontech.com
+	s=arc-20240116; t=1761208268; c=relaxed/simple;
+	bh=bFoOFvqHEoQk620s/iyc0FwUv0/+PYvVS9nDEBN1DGc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=iosty1k1wV4frkXDaT57IB3Yqvq0YNatt34BYWexVoWtILD2eieHHjsTJHQlj//ASeoUo5MdTe4WWXzBuY7RCABV0x8q1X15rRBtvPWq+iBrzMrOd3NdVoDpppbnE8yRAjMBwkM5Es7VXQQH7guaQBZXeh5DI20RswD34pGq8cw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rczCHipR; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=uniontech.com header.i=@uniontech.com header.b="l2TUuhMm"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=uniontech.com;
-	s=onoh2408; t=1761207725;
-	bh=/ryGCoaa5Mw0tnHL+6AJfKDs1HN3Csc9peumNiIny3k=;
-	h=From:To:Subject:Date:Message-Id:MIME-Version;
-	b=l2TUuhMmJbcJDZfe+YXV3qhuj3YMlFIm9wf1gkEkNm+MXN+ItPw137za40aRFoDoP
-	 5vG8sQD6fk4DGFhYOOsuA0WefhSY3EkvKLqcJKaHYjTdl9GwgQsBw2kPID/FcbV1Lr
-	 R8d4qA6zoND/p4l83O66Pf2Pqiom4lvPM5/VuIqQ=
-X-QQ-mid: esmtpsz17t1761207709t44688b9d
-X-QQ-Originating-IP: x+i7FOkwA4c7J7VYbfCrjqnVkzs0wKgBvPuewy/Lez0=
-Received: from localhost.localdomain ( [123.114.60.34])
-	by bizesmtp.qq.com (ESMTP) with 
-	id ; Thu, 23 Oct 2025 16:21:39 +0800 (CST)
-X-QQ-SSF: 0000000000000000000000000000000
-X-QQ-GoodBg: 1
-X-BIZMAIL-ID: 7804790617074854445
-EX-QQ-RecipientCnt: 6
-From: Qiang Ma <maqianga@uniontech.com>
-To: ardb@kernel.org,
-	linux@armlinux.org.uk
-Cc: linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	Qiang Ma <maqianga@uniontech.com>
-Subject: [PATCH 2/2] efi/arm*: Remove the useless failure return message print
-Date: Thu, 23 Oct 2025 16:21:29 +0800
-Message-Id: <20251023082129.75612-2-maqianga@uniontech.com>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20251023082129.75612-1-maqianga@uniontech.com>
-References: <20251023082129.75612-1-maqianga@uniontech.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rczCHipR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CB913C4CEE7
+	for <linux-efi@vger.kernel.org>; Thu, 23 Oct 2025 08:31:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1761208267;
+	bh=bFoOFvqHEoQk620s/iyc0FwUv0/+PYvVS9nDEBN1DGc=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=rczCHipRMct75wabc6EWWhjvu2ktMfl9mYmKrMiqQIIQlubasW4cUoHtKHTz7/wve
+	 pG9nEUVX6fmRC/G8TENPbCjQQkqrso7RdP4KASV+x2sn/jlzc+2uZXBoRvuniMzO/l
+	 j9le2fQ7PRa2o4/zt2EgB//1wGufYLWomuKJXy9KNbeLZkHtQ4pcH1VXjHzMbgz/ny
+	 fmMIfq/jT1FlwFQBSp+EcvLpMneHn0Jq7RNyN8hGD+l/Xikng6wyhVBEgVgw87vdQX
+	 CJIMXT8NZGSVqSp9cRhmPNGlQYUNn3egzh+0FdLZKkIecRmn+L1ftNYJ9bv+rbN29q
+	 5QaBPbov6LzdA==
+Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-591ebf841ddso700652e87.0
+        for <linux-efi@vger.kernel.org>; Thu, 23 Oct 2025 01:31:07 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCV0xDqodiO9YPKZZMuXetps/Zx6wQI6NudUlE9PicDA+kiq/xXzwk7OKuOIG+qdFgnEQ8+T0FfTnBI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwpOBYrHA+8CuMtELh1mS1Dn5dRN0iiEJeOKwtLZflCwNdJr0yV
+	aHwIKz3UKUJyVx7ujgRk/voYco2Td9pTia12wT2RpI5aQzlE9lr3giexYFBN9HLXhCEtTcpKlZT
+	HfDDO8Zz1XWwxuFy/3kVIb58K/NAmByk=
+X-Google-Smtp-Source: AGHT+IEhcLf5FIRwByJaSQnfDpZsBKep/9aXOLRRWcORJP4c6v5Nn9uvZ0mdqWItpwlkTlQdKxUgwjjzv9WgOvAqi9Q=
+X-Received: by 2002:a05:6512:3e18:b0:592:f315:843 with SMTP id
+ 2adb3069b0e04-592f3150ac3mr1217650e87.50.1761208266234; Thu, 23 Oct 2025
+ 01:31:06 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-QQ-SENDSIZE: 520
-Feedback-ID: esmtpsz:uniontech.com:qybglogicsvrgz:qybglogicsvrgz3a-1
-X-QQ-XMAILINFO: MgRpQMLhR5LwNsRitc7y1SqH4bnZ3sJ504yZfnKpqJam2871zjeOMTrD
-	7Br6iWKlNcaEraKyvyY8uYPq6KW605LVT72hrSTb2CgeuwFiW3mI6OaCeacx3fDLfBY5uzg
-	qWzVynzPFdRt2zQorAmjMR4p8mZiK1lXZrkhDtI/TxCyq6KvqKrGAKvFXmQjMDc0Q77gMap
-	pLQtwkppYGrn9xvnw6Fcpim+93vhTTML4Fb1WUSpQLu3EiaSgIVtBvq3opHejg+8WbPjHlr
-	FYUgc1e86MFcKVjDsCRDlI97az6K8AcTmGPX5mIwmOlyMKtihDPgZUq377SePYoAvF0YHrF
-	uCMWspyG4r5USmvfMSVot4UUGhca9bihFLffHNFFXpLT0lhWnMCCYs+INhWj8MY4Eq1W4aN
-	PjMMzkqQ8KJZ67LGHkMPkN8X8ASPqUTNgWGCtNWKEI+2AfKcI/7TiGUYxfbOGCr5K8q4ORr
-	j5bcWLb/Ca+yU91G0XRFkXjA22gKSxroem3gOTkJ3wxD35ZcH4SpZrXuJ31si50smWhjSTZ
-	ppUZVign68nnNf9R8Np3XRX9tKtHMUSAXgIWSJTMr5n0/daG2IvtV2jGwM44EVRY+xa2zpy
-	rNvC/CxKp8zvSjIY6L2+c0C3QV1ZQtjBVp5j86PUqXPJhOsABNh0Stbd8QgbJSQwRS5+ZDx
-	QCCvYM53ZRINVtXhoFFo3xdVGMGt5dwjaFtD5hNf0dOU1K2A/c9rBbF8hSaNUSj5OgTUyp8
-	KNKkfveap58uhZrApCNc0KxRP1fv34x6evKVuiZNBCHbcuWIQTTpTmg1hm+VJgk4MxK93vK
-	vLQf7QWKFs7vdaTzJm7q0XJZPNqYdWXLZIx3KHSYm5nNrO1ZdhtC7s3QENAOVVnB2jkrZU8
-	cfOtvyQII6FEl4l2cu6IuYYo9icT/aJXUP6HwoOGfUzzl/AfhsOtRPDA3Zpv6xPFuCafWMl
-	Wuu9ls9FUXtdhUWCeWorqiJYzLl0pLvL72sgg/+0Mw1dszAKpgf9VkI4fl22aauxwdDMT1a
-	QE40UH96RKD0BmjS5oMl7Eji72doK8x1M1pzRPVp2GPEW3wIPhjE80YOJ19DY=
-X-QQ-XMRINFO: NI4Ajvh11aEj8Xl/2s1/T8w=
-X-QQ-RECHKSPAM: 0
+References: <20251023082129.75612-1-maqianga@uniontech.com>
+In-Reply-To: <20251023082129.75612-1-maqianga@uniontech.com>
+From: Ard Biesheuvel <ardb@kernel.org>
+Date: Thu, 23 Oct 2025 10:30:55 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXHs3vC4TEWg1ogG=N8Dd5L0rkQ=qAFLWKiAA5yi_He3GA@mail.gmail.com>
+X-Gm-Features: AS18NWAqPnAyqoEewao8d7Q2_zh3PAnOF7TqO_cE-DS3GzEfQDx2JtSNzXOLUjg
+Message-ID: <CAMj1kXHs3vC4TEWg1ogG=N8Dd5L0rkQ=qAFLWKiAA5yi_He3GA@mail.gmail.com>
+Subject: Re: [PATCH 1/2] ARM/efi: Remove duplicate permission settings
+To: Qiang Ma <maqianga@uniontech.com>
+Cc: linux@armlinux.org.uk, linux-efi@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
 
-In the efi_create_mapping() in arch/arm*/kernel/efi.c,
-the return value is always 0, and this debug message
-is unnecessary. So, remove it.
+On Thu, 23 Oct 2025 at 10:22, Qiang Ma <maqianga@uniontech.com> wrote:
+>
+> In the efi_virtmap_init(), permission settings have been applied:
+>
+> static bool __init efi_virtmap_init(void)
+> {
+>         ...
+>         for_each_efi_memory_desc(md)
+>                 ...
+>                 efi_create_mapping(&efi_mm, md);
+>         ...
+>         efi_memattr_apply_permissions(&efi_mm, efi_set_mapping_permissions);
+>         ...
+> }
+>
+> Therefore, there is no need to apply it again in the efi_create_mapping().
+>
+> Fixes: 9fc68b717c24 ("ARM/efi: Apply strict permissions for UEFI Runtime Services regions")
+>
+> Signed-off-by: Qiang Ma <maqianga@uniontech.com>
 
-Signed-off-by: Qiang Ma <maqianga@uniontech.com>
----
- drivers/firmware/efi/arm-runtime.c | 7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
+No, efi_memattr_apply_permissions() uses the /optional/ memory
+attributes table, whereas efi_create_mapping() uses the permission
+attributes in the EFI memory map. The memory attributes table is
+optional, in which case any RO/XP attributes from the memory map
+should be used.
 
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 83092d93f36a..ca27fbfaff5c 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -66,12 +66,7 @@ static bool __init efi_virtmap_init(void)
- 		if (md->virt_addr == U64_MAX)
- 			return false;
- 
--		ret = efi_create_mapping(&efi_mm, md);
--		if (ret) {
--			pr_warn("  EFI remap %pa: failed to create mapping (%d)\n",
--				&phys, ret);
--			return false;
--		}
-+		efi_create_mapping(&efi_mm, md);
- 	}
- 
- 	if (efi_memattr_apply_permissions(&efi_mm, efi_set_mapping_permissions))
--- 
-2.20.1
 
+> ---
+>  arch/arm/kernel/efi.c | 5 -----
+>  1 file changed, 5 deletions(-)
+>
+> diff --git a/arch/arm/kernel/efi.c b/arch/arm/kernel/efi.c
+> index 6f9ec7d28a71..d2fca20d912e 100644
+> --- a/arch/arm/kernel/efi.c
+> +++ b/arch/arm/kernel/efi.c
+> @@ -70,11 +70,6 @@ int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
+>
+>         create_mapping_late(mm, &desc, true);
+>
+> -       /*
+> -        * If stricter permissions were specified, apply them now.
+> -        */
+> -       if (md->attribute & (EFI_MEMORY_RO | EFI_MEMORY_XP))
+> -               return efi_set_mapping_permissions(mm, md, false);
+>         return 0;
+>  }
+>
+> --
+> 2.20.1
+>
