@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.15])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 164672F0671;
-	Fri, 31 Oct 2025 16:55:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C4D721D58B;
+	Fri, 31 Oct 2025 17:03:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761929705; cv=none; b=Oyg+bDokTAr/RxlNdsYlPTBRGEoj/iiBS1YXEqTenSHf8eRdvW80vYxbQSSsqi2YNKUyh3bort8GgVM9kcvl2arV5ug3tvIvQlenrVjwuNAqurMm+dhFh0DgQycMlz1EoAzP0nIe4L6GfoUhLh5tbIF9lF6rhbCmvxM386g1RPA=
+	t=1761930229; cv=none; b=rlaJP5628cHo+7rJdUE+aW1DcXX/GrPI5gqRfIjeOgOJ3ZbD/+Sxq4rLnYznqY5HTCLblwy3VNDa9ZCE0EsENYPiTnR05jc9vNiIs/hy8FdUSCemPM4NPv3xlV3cHEQI1+Hp76DXx9qqR/sGjfyty/dmJRl9T9vcgaJ6HyheScM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761929705; c=relaxed/simple;
-	bh=mE1Nacho2z2E7aj19mlpYVozO+U1hfyyMLxt4xW3lTs=;
+	s=arc-20240116; t=1761930229; c=relaxed/simple;
+	bh=q/1t/GTeM/padKHu5uVfrST8/hkYVgiaKT+yOP3UX/A=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=S9jHlQiAWSbF2SG1XdzbbVceQUWbX2pfhMvEGaSRNiajTY17Dn6dKSXM1cNFc/cR8SUXTHdxbh+jZMZkJtcfEXCoZ7WnKkhLf+Ue1DWtyIx7kleZKt/4Hylrmc3v7zXPAHd2tTlD79NNWsPab2Hv3L4bPw+xJNwtcQxmHVXLJQU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WVOJjmI5; arc=none smtp.client-ip=198.175.65.15
+	 In-Reply-To:Content-Type; b=n/GgdTAzZCtmwmYruLA41JPulPIFKtl0IMSnZQPFvlP6pksTqz8bLAfak4btzuJrCnid2qbTHWsR9IVRGkMwMid0Te1Vtc40rpQoBsJWjirFjJihee/BqCpiXriKsWhE+6XO8bmEXZe4YbNpzGu+W2IBzGGeEO6yxTIDhNMqbnM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=RSsUBmLY; arc=none smtp.client-ip=192.198.163.7
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WVOJjmI5"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="RSsUBmLY"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1761929704; x=1793465704;
+  t=1761930227; x=1793466227;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=mE1Nacho2z2E7aj19mlpYVozO+U1hfyyMLxt4xW3lTs=;
-  b=WVOJjmI54Oy4zOJsAF6W5J54zKw8CXFhZgIAVA6TYSt1q3UOsZP31Axp
-   O8LI5QxPIPGWHaiJ7TXpxgGWaKhKRgt+B7oVkm6ZDOqgEsWlASYN5u/jW
-   TUNF5uAvfcnQkaDTaB3kExpZaDhGqploN9WehpoDFDTHsBeA10bgwdFrK
-   qXI3M0F3XKusd6j/cKeLjY8jxrvtLydJppGCw10YkrGJ0iIVkV0KOHSAN
-   iKbQ2Z1li2O7gZq2PHaYpjDnAmypxURyA42rtvYuQQ+4biR4ZyMDNpwmG
-   wLkoL0To7IILulLOxQhSe2B+wI4DPo27dRovY/GiWwUgoDSHHwp7Jnlie
-   Q==;
-X-CSE-ConnectionGUID: hyqCD9IJQ5yTZBdRIXvQHQ==
-X-CSE-MsgGUID: UqdhOagySpmQ5V1b2nFyXw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11599"; a="67750424"
+  bh=q/1t/GTeM/padKHu5uVfrST8/hkYVgiaKT+yOP3UX/A=;
+  b=RSsUBmLYGN+Xl0HHe69GloY4/CljRYbPONKiOVF+ajWA9i+k8CrYkA05
+   NZfSr5K3E6boaHuVuT2RtQ3VlUOlEy2IUcPLZsFEK6iFjuKC3rwgS4QVi
+   /+G5P/bvNUgyFt5tx2460Rex77U0/8uPHdQXWpNKKjppRwQRQ1nqMPYEh
+   63bH4+ch4bgKHK+X24uLacQMgF0VQx6dSFNdoXzIgkaFj2eY2qWn98md8
+   YLEyIXJIsEc9uhJcFlW2lWPFiYlpK6ue80rm2k8yImIgsGxLiRxCDcy33
+   edZv96f1EyoorW4u5WpnpR9lUIlnqX1Lja/akfvXnZ7jObAjpcZvRvOls
+   g==;
+X-CSE-ConnectionGUID: I4l2CCf/RkOr+kRnTSpB2g==
+X-CSE-MsgGUID: IpbSDNGxTS2pQgEF1+MHbA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11599"; a="89559072"
 X-IronPort-AV: E=Sophos;i="6.19,269,1754982000"; 
-   d="scan'208";a="67750424"
+   d="scan'208";a="89559072"
 Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by orvoesa107.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 Oct 2025 09:55:03 -0700
-X-CSE-ConnectionGUID: MIQ+2tf3QFiBgB8VYnsr8w==
-X-CSE-MsgGUID: jX0/fKWfROCUL4AocpFS5w==
+  by fmvoesa101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 Oct 2025 10:03:47 -0700
+X-CSE-ConnectionGUID: yZC6yF93SuO8p8Gt1E9ErA==
+X-CSE-MsgGUID: px8T+EvTQd+VZD6+nfwEZQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.19,269,1754982000"; 
-   d="scan'208";a="217119772"
+   d="scan'208";a="217121727"
 Received: from cmdeoliv-mobl4.amr.corp.intel.com (HELO [10.125.110.52]) ([10.125.110.52])
-  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 Oct 2025 09:55:02 -0700
-Message-ID: <f559e1fa-dfc6-435f-9337-30315891a394@intel.com>
-Date: Fri, 31 Oct 2025 09:55:01 -0700
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 Oct 2025 10:03:45 -0700
+Message-ID: <751ac81e-7545-47b7-ae3c-c4479aa3aa6d@intel.com>
+Date: Fri, 31 Oct 2025 10:03:45 -0700
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -52,36 +52,27 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v11 9/9] x86/cpu: Enable LASS by default during CPU
- initialization
-To: David Laight <david.laight.linux@gmail.com>,
- Sohil Mehta <sohil.mehta@intel.com>
-Cc: Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>,
- the arch/x86 maintainers <x86@kernel.org>,
+Subject: Re: [PATCH v11 1/9] x86/cpufeatures: Enumerate the LASS feature bits
+To: Sohil Mehta <sohil.mehta@intel.com>, x86@kernel.org,
  Dave Hansen <dave.hansen@linux.intel.com>,
  Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>,
- Borislav Petkov <bp@alien8.de>, Jonathan Corbet <corbet@lwn.net>,
- Josh Poimboeuf <jpoimboe@kernel.org>,
- "Peter Zijlstra (Intel)" <peterz@infradead.org>,
- Ard Biesheuvel <ardb@kernel.org>, "Kirill A . Shutemov" <kas@kernel.org>,
- Xin Li <xin@zytor.com>, David Woodhouse <dwmw@amazon.co.uk>,
- Sean Christopherson <seanjc@google.com>,
- Rick P Edgecombe <rick.p.edgecombe@intel.com>,
+ Borislav Petkov <bp@alien8.de>
+Cc: Jonathan Corbet <corbet@lwn.net>, "H . Peter Anvin" <hpa@zytor.com>,
+ Andy Lutomirski <luto@kernel.org>, Josh Poimboeuf <jpoimboe@kernel.org>,
+ Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ardb@kernel.org>,
+ "Kirill A . Shutemov" <kas@kernel.org>, Xin Li <xin@zytor.com>,
+ David Woodhouse <dwmw@amazon.co.uk>, Sean Christopherson
+ <seanjc@google.com>, Rick Edgecombe <rick.p.edgecombe@intel.com>,
  Vegard Nossum <vegard.nossum@oracle.com>,
  Andrew Cooper <andrew.cooper3@citrix.com>,
  Randy Dunlap <rdunlap@infradead.org>,
  Geert Uytterhoeven <geert@linux-m68k.org>, Kees Cook <kees@kernel.org>,
  Tony Luck <tony.luck@intel.com>,
  Alexander Shishkin <alexander.shishkin@linux.intel.com>,
- linux-doc@vger.kernel.org,
- Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+ linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-efi@vger.kernel.org
 References: <20251029210310.1155449-1-sohil.mehta@intel.com>
- <20251029210310.1155449-10-sohil.mehta@intel.com>
- <789ADBB5-F7AC-4B08-B343-F23260FB8FBC@zytor.com>
- <13681100-ddc3-4ef0-bd13-744282324ff1@app.fastmail.com>
- <d1b5698e-94ab-45a2-a472-4488895d55bb@intel.com>
- <20251030211318.74d90c3f@pumpkin>
+ <20251029210310.1155449-2-sohil.mehta@intel.com>
 From: Dave Hansen <dave.hansen@intel.com>
 Content-Language: en-US
 Autocrypt: addr=dave.hansen@intel.com; keydata=
@@ -127,23 +118,13 @@ Autocrypt: addr=dave.hansen@intel.com; keydata=
  MTsCeQDdjpgHsj+P2ZDeEKCbma4m6Ez/YWs4+zDm1X8uZDkZcfQlD9NldbKDJEXLIjYWo1PH
  hYepSffIWPyvBMBTW2W5FRjJ4vLRrJSUoEfJuPQ3vW9Y73foyo/qFoURHO48AinGPZ7PC7TF
  vUaNOTjKedrqHkaOcqB185ahG2had0xnFsDPlx5y
-In-Reply-To: <20251030211318.74d90c3f@pumpkin>
+In-Reply-To: <20251029210310.1155449-2-sohil.mehta@intel.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 10/30/25 14:13, David Laight wrote:
->> Unfortunately, CONFIG_X86_VSYSCALL_EMULATION defaults to y. Also, the
->> default Vsyscall mode is XONLY. So even if vsyscalls are deprecated,
->> there is a non-zero possibility someone would complain about it.
-> Presumably a command line parameter could be used to disable LASS
-> in order to enable vsyscall emulation?
-> 
-> That might let LASS be enabled by default.
+On 10/29/25 14:03, Sohil Mehta wrote:
+> Linear Address Space Separation (LASS) is a security feature that
+> mitigates a class of side-channel attacks relying on speculative access
+> across the user/kernel boundary.
 
-Sure... There are a million ways to skin this cat. That's the problem.
-
-The compile switch is the smallest amount of code with the fewest
-implications to ABI or documentation that we can muster. All I'm saying
-is we should _start_ here, not _end_ here.
-
-If anyone agrees with that approach, acks would be appreciated.
+Reviewed-by: Dave Hansen <dave.hansen@linux.intel.com>
