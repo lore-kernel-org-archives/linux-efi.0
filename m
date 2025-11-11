@@ -1,33 +1,33 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8CC9534AB01;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 909BC34AB04;
 	Tue, 11 Nov 2025 06:55:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762844134; cv=none; b=ui5LeMlDfVB4DSjYMZB0/y59nBHmha92pPX9Ii1v54bdDlue7pRZcf2mILy4JtG0w4iOYmWcT68+6pFoJWoHBPZtAT8uBFAkoikQeOd44HTxoi6FOck1Ia3LRJwYzGO6rCsSeYPLjbo6XMZgx/LkZT2FjNPnETpu4+oP/scg14I=
+	t=1762844134; cv=none; b=efBaJAMuCRoUrgwzAzD+JeATa51ciwVh7UBPXzJtnhbQP7zIqZ2dCPYLlRJY5ySE70CfSi2+qfwmtWDZtcnfpNJeFByFgYHrkPRAKGseMdL1h+Hvkg5KlVGGl2Y4lwiBGOgXJeURfHixai+v+J7y+P6msAO+Ex9dJ3cuO6btvTg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1762844134; c=relaxed/simple;
-	bh=wuHRVTuXFJmdyMHFXddGjPkbh9aAfDS2a7pk9RHCUqg=;
+	bh=cYeL+5cA9x0NwfB4diEl1DuF4hqIkdO6EuC/cakMsiI=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=LVCCRwUHTPM15YUbnABOrnFQy2ZQOh5eBHzP1RWNq7FtHkbmbhKwMBIjeh+RmcIbpV/7+23KxzM9edzULBSgAT0tFBjr3FbjQ+vsgFN+ak0u1vyGArv7kErho2ppKIm88aLJqRy2z4g9zR5sh+IbGc8QpyZNtJp0xutbbsihA7g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=pRTnXVSg; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=koFcnIuRB1xiTLJXzv3GMDoI+kfDEHg5Ne0Y9CssLX1Lwr8VivekauvKxViCgq9Ev85Bivah3TvEA/A00RsH9P3wguaWRXNzhDVIewN8MrUWLSUxZmS648TQLM5slbyCN1reJQmolDE7DO8QEeWqPrhLK5/1XkT5zzp8avMzmfI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=m9R6mf51; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="pRTnXVSg"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="m9R6mf51"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=wF5oceMSXViySxysMkUNPeCJ07Zgu8R8pwpIbBxZfJs=; b=pRTnXVSgUjFI8ImpwcWRs2NMh9
-	PFUB/rFfJMse8H1zKY/AzzCdA2oV8bZDris1DAFKFZqtO3YHL4tRpSYLEYxnh8E9jlpw2sGe9HC1T
-	tLsOi/41iwWjSplOT1bV6lFUVLYPqtr2QXrPbX5pBOLL+qv/IRTp0oZmfLRSBmaC93y4gH31y0wjO
-	FZeqysA7uYYi6Nw2xD3brd7wX8oQhacLslti2lTkswwKq3GVQNeumXjHnvqiUHP6rSYbvdjo7CmJu
-	WmA/vNvp44re4mPKX0YQqMZGPWh+E6TUY33USiEi56cRQZg76TMvhpYfwtVaAkb6VxamSf2qnX6xe
-	jciupEjQ==;
+	bh=jitbeNxbeSwoLaO1GW63OWcQzV6dbGiBbZYgEsubm2E=; b=m9R6mf51Go0SgMCw1YQi0QXZgW
+	EyEDA3mrdd+Xjdc8EP55fxHY3ZVHvcC31RtBHNSQgCsfzeNqTK9w+olpHpy/tnKKOSCqeAmKuScoa
+	pUKqXnr7u4y83LLprUDaV/ArG4DF68auUhiUB4wwLmO2QrN5KiiHTdH9fQqTA1suUH2Rif7WKh3eW
+	PTW4fB/8QQOLO7z3HjLqgHRpHJv1XOVsG3tWfys3RiZBnG8IDExyWgpw1jBjmd793ymisdgf4ev0H
+	NHdpI95KjyuLQ84zGf8WP4io9nLiO0zNh8dHhtL5teHCf/5MSvrN/1a2rmWvfeTCk0AkwnKIHf6hu
+	iv0AyxUg==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vIiHo-0000000Bx8B-2Ydn;
+	id 1vIiHo-0000000Bx6h-0ucI;
 	Tue, 11 Nov 2025 06:55:28 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
@@ -52,9 +52,9 @@ Cc: torvalds@linux-foundation.org,
 	selinux@vger.kernel.org,
 	borntraeger@linux.ibm.com,
 	bpf@vger.kernel.org
-Subject: [PATCH v3 39/50] convert gadgetfs
-Date: Tue, 11 Nov 2025 06:55:08 +0000
-Message-ID: <20251111065520.2847791-40-viro@zeniv.linux.org.uk>
+Subject: [PATCH v3 37/50] convert functionfs
+Date: Tue, 11 Nov 2025 06:55:06 +0000
+Message-ID: <20251111065520.2847791-38-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20251111065520.2847791-1-viro@zeniv.linux.org.uk>
 References: <20251111065520.2847791-1-viro@zeniv.linux.org.uk>
@@ -67,18 +67,27 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-same as functionfs
+All files are regular; ep0 is there all along, other ep* may appear
+and go away during the filesystem lifetime; all of those are guaranteed
+to be gone by the time we umount it.
+
+Object creation is in ffs_sb_create_file(), removals - at ->kill_sb()
+time (for ep0) or by simple_remove_by_name() from ffs_epfiles_destroy()
+(for the rest of them).
+
+Switch ffs_sb_create_file() to simple_start_creating()/d_make_persistent()/
+simple_done_creating() and that's it.
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- drivers/usb/gadget/legacy/inode.c | 19 +++++++++++--------
- 1 file changed, 11 insertions(+), 8 deletions(-)
+ drivers/usb/gadget/function/f_fs.c | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/usb/gadget/legacy/inode.c b/drivers/usb/gadget/legacy/inode.c
-index bcc25f13483f..62566a8e7451 100644
---- a/drivers/usb/gadget/legacy/inode.c
-+++ b/drivers/usb/gadget/legacy/inode.c
-@@ -1989,17 +1989,20 @@ static int gadgetfs_create_file (struct super_block *sb, char const *name,
+diff --git a/drivers/usb/gadget/function/f_fs.c b/drivers/usb/gadget/function/f_fs.c
+index 43dcd39b76c5..8b27414a424e 100644
+--- a/drivers/usb/gadget/function/f_fs.c
++++ b/drivers/usb/gadget/function/f_fs.c
+@@ -1870,17 +1870,18 @@ static int ffs_sb_create_file(struct super_block *sb, const char *name,
  	struct dentry	*dentry;
  	struct inode	*inode;
  
@@ -86,35 +95,33 @@ index bcc25f13483f..62566a8e7451 100644
 -	if (!dentry)
 -		return -ENOMEM;
 -
- 	inode = gadgetfs_make_inode (sb, data, fops,
- 			S_IFREG | (default_perm & S_IRWXUGO));
+ 	inode = ffs_sb_make_inode(sb, data, fops, NULL, &ffs->file_perms);
 -	if (!inode) {
 -		dput(dentry);
 +	if (!inode)
  		return -ENOMEM;
-+
 +	dentry = simple_start_creating(sb->s_root, name);
 +	if (IS_ERR(dentry)) {
 +		iput(inode);
 +		return PTR_ERR(dentry);
  	}
--	d_add (dentry, inode);
-+
+ 
+-	d_add(dentry, inode);
 +	d_make_persistent(dentry, inode);
 +
 +	simple_done_creating(dentry);
  	return 0;
  }
  
-@@ -2096,7 +2099,7 @@ static void
- gadgetfs_kill_sb (struct super_block *sb)
+@@ -2067,7 +2068,7 @@ static int ffs_fs_init_fs_context(struct fs_context *fc)
+ static void
+ ffs_fs_kill_sb(struct super_block *sb)
  {
- 	mutex_lock(&sb_mutex);
--	kill_litter_super (sb);
-+	kill_anon_super (sb);
- 	if (the_device) {
- 		put_dev (the_device);
- 		the_device = NULL;
+-	kill_litter_super(sb);
++	kill_anon_super(sb);
+ 	if (sb->s_fs_info)
+ 		ffs_data_closed(sb->s_fs_info);
+ }
 -- 
 2.47.3
 
