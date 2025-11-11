@@ -1,34 +1,34 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F5FF330B17;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7D973446C9;
 	Tue, 11 Nov 2025 06:55:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762844130; cv=none; b=lftdVszRxElBmGTaIOjAVJE86fYYx5geAmNxq1V/cV0ualgcg6kyM0w97iw889AJ/9fRJoOERuVX7tz5Pf1xSi3/vqUQlvGiczrAr7YKzubmnDRqwUzzkhNVSYmuJMmIvwBJTwiyTEIhyrjeCGEgu9RII8ATvco/FhvpdAcdxEE=
+	t=1762844131; cv=none; b=Z1TPl/2ujCOajYlAWDDC1z4fgNo6iqkaJKt6+vcUgUO0QzIYKy3L14agOEnyEi3QctL1zPxw/Ps6IwNJAfZAk4fXNBHe3pSnmWgHFTJu/5gi2wXYyRf2i024tsqFk1AGQ5OSElQGfVrUHX7ZPrbEMOmEIGzmYqAc4U7wYG2yqbQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762844130; c=relaxed/simple;
-	bh=CyVivJufSb4sh4+oM9l7NXmE+V2B9EmDQGjIticKJ8E=;
+	s=arc-20240116; t=1762844131; c=relaxed/simple;
+	bh=aQb2qy2J1pCZ1132PoicrKjRnzTEBFPwnGLeE5EsJfc=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=MFJwjVQTKVzkEM8VW+MoWT2Dnnpa0WUfoA4RUT0Kzsgc3bampJrOVjjaTvJACyNF8Apnu16BMAO9zc4hL4U0qel82i3ROxPGAHX+Q6Uah4AFpolMdAUQyHsbR7dazeqW4Ix5xb/bK9nxRsQGfuvj7M6KrJGH/RDkc6LBztoxHeA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=bfOYqpnw; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=mzoh4o4RBqx172UmT6ni+8YMZxFSdPRMgP+vBcoFzO5+WzLfsW97OB7Y5HoHa0vAnLjrIkcTdpvATSLlrG8qEAIdvebhMqhuTARxV17IR2b1tR4OxgneGw5VXKUcZ0LDoqHfCu9ukiW07Kz2kXGdA5xYV80mRtvhsClC/lrEAco=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=KJyJxRMc; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="bfOYqpnw"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="KJyJxRMc"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=TcFcmzxfGV+3rJDGgJ/eg0JcSdO3AKCKkQ7NxQ/vrvI=; b=bfOYqpnwRITYWirzu325V+Vjft
-	4P70PiidxpZzvKaDpbtGKJZ7Z7kz6ULfRHNrRj/WhL+Opb09PfOAkeMHjytlfhR5QIfbTxRuY/lkk
-	/SP/qvo6ubJuLtRmW3riFd9ATus8rT+PHyY9X1HWRv2hv7DJJ2L7Ccaz4SET8eWwIQLJ+goThnlDi
-	vkXMMPnDq1aZDyW1sUWNd7e6NenMqgpjtXspP5i7WkLuyOipur7dG97xmgp/Mmhh9IBeuSaH76i9V
-	Rv8y20iWmbTDwzQuWzvArRCwYZiu969sFh4ctU9PLoErZxvGh/parpyMzgOk9czyg9AZyT20F80Sa
-	ixjYrEeA==;
+	bh=JiG9nHcsxcwZpHb/L0Tx41DaV7imD29tLb/ai1sU578=; b=KJyJxRMc0dvbQcOITZBVA+WBk6
+	ifKPkydBj5RdVYpkYeX6lt/kJ7ld5xb0t53muvLxLstYnB5Kj+ibW1kF1JoNVPQmbi/Msmgp6IIua
+	rxkVOKwaX09nya1yIHsO/LXlke4OexR2bBkWG9LhOwtpTOY2ugBYceF0WF/wnns6qgtdqeY6EhATx
+	NaphnnRAzZNypERmbf3t7xl0oXOouhXWk5Ks9Gq+2D+L1HLZ20izPqJ7SWklcqVqWcK8WfltyTXu1
+	JWzC4NyfbA4dtQ5vb8jg0/lTWmXs+f02YOh/csRHhSEvARsXS9htgina50+ZEPcUaq8myz/AFR1Nu
+	i5DDMhaA==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vIiHl-0000000BwzW-1uyd;
-	Tue, 11 Nov 2025 06:55:25 +0000
+	id 1vIiHj-0000000BwyK-2Gux;
+	Tue, 11 Nov 2025 06:55:23 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
 Cc: torvalds@linux-foundation.org,
@@ -52,9 +52,9 @@ Cc: torvalds@linux-foundation.org,
 	selinux@vger.kernel.org,
 	borntraeger@linux.ibm.com,
 	bpf@vger.kernel.org
-Subject: [PATCH v3 24/50] convert ibmasmfs
-Date: Tue, 11 Nov 2025 06:54:53 +0000
-Message-ID: <20251111065520.2847791-25-viro@zeniv.linux.org.uk>
+Subject: [PATCH v3 14/50] convert mqueue
+Date: Tue, 11 Nov 2025 06:54:43 +0000
+Message-ID: <20251111065520.2847791-15-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20251111065520.2847791-1-viro@zeniv.linux.org.uk>
 References: <20251111065520.2847791-1-viro@zeniv.linux.org.uk>
@@ -67,86 +67,56 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-static contents for each "service processor", whatever the fuck it is.
-Congruent subdirectories of root, created at mount time, taken out
-by kill_litter_super().  All dentries created with d_alloc_name() and are
-left pinned.  The odd part is that the list of service providers is
-assumed to be unchanging - no locking, nothing to handle removals or
-extra elements added later on.
+All modifications via normal VFS codepaths; just take care of making
+persistent in in mqueue_create_attr() and discardable in mqueue_unlink()
+and it doesn't need kill_litter_super() at all.
 
-... and it's a PCI device.  If you ever tell it to remove an instance,
-you are fucked - it doesn't bother with removing its directory from filesystem,
-it has a strange check that presumably wanted to be a check for removed
-devices, but it had never been fleshed out.
-
-Anyway, d_add() -> d_make_persistent()+dput() in ibmasmfs_create_dir() and
-ibmasmfs_create_file(), and make the latter return int - no need to even
-borrow that dentry, callers completely ignore it.
+mqueue_unlink() side is best handled by having it call simple_unlink()
+rather than duplicating its guts...
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- drivers/misc/ibmasm/ibmasmfs.c | 18 ++++++++++--------
- 1 file changed, 10 insertions(+), 8 deletions(-)
+ ipc/mqueue.c | 12 +++---------
+ 1 file changed, 3 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/misc/ibmasm/ibmasmfs.c b/drivers/misc/ibmasm/ibmasmfs.c
-index b26c930e3edb..a6cde74efb68 100644
---- a/drivers/misc/ibmasm/ibmasmfs.c
-+++ b/drivers/misc/ibmasm/ibmasmfs.c
-@@ -103,7 +103,7 @@ static struct file_system_type ibmasmfs_type = {
- 	.owner          = THIS_MODULE,
- 	.name           = "ibmasmfs",
- 	.init_fs_context = ibmasmfs_init_fs_context,
--	.kill_sb        = kill_litter_super,
-+	.kill_sb        = kill_anon_super,
+diff --git a/ipc/mqueue.c b/ipc/mqueue.c
+index 093551fe66a7..5737130137bf 100644
+--- a/ipc/mqueue.c
++++ b/ipc/mqueue.c
+@@ -599,8 +599,7 @@ static int mqueue_create_attr(struct dentry *dentry, umode_t mode, void *arg)
+ 	dir->i_size += DIRENT_SIZE;
+ 	simple_inode_init_ts(dir);
+ 
+-	d_instantiate(dentry, inode);
+-	dget(dentry);
++	d_make_persistent(dentry, inode);
+ 	return 0;
+ out_unlock:
+ 	spin_unlock(&mq_lock);
+@@ -617,13 +616,8 @@ static int mqueue_create(struct mnt_idmap *idmap, struct inode *dir,
+ 
+ static int mqueue_unlink(struct inode *dir, struct dentry *dentry)
+ {
+-	struct inode *inode = d_inode(dentry);
+-
+-	simple_inode_init_ts(dir);
+ 	dir->i_size -= DIRENT_SIZE;
+-	drop_nlink(inode);
+-	dput(dentry);
+-	return 0;
++	return simple_unlink(dir, dentry);
+ }
+ 
+ /*
+@@ -1638,7 +1632,7 @@ static const struct fs_context_operations mqueue_fs_context_ops = {
+ static struct file_system_type mqueue_fs_type = {
+ 	.name			= "mqueue",
+ 	.init_fs_context	= mqueue_init_fs_context,
+-	.kill_sb		= kill_litter_super,
++	.kill_sb		= kill_anon_super,
+ 	.fs_flags		= FS_USERNS_MOUNT,
  };
- MODULE_ALIAS_FS("ibmasmfs");
  
-@@ -144,7 +144,7 @@ static struct inode *ibmasmfs_make_inode(struct super_block *sb, int mode)
- 	return ret;
- }
- 
--static struct dentry *ibmasmfs_create_file(struct dentry *parent,
-+static int ibmasmfs_create_file(struct dentry *parent,
- 			const char *name,
- 			const struct file_operations *fops,
- 			void *data,
-@@ -155,19 +155,20 @@ static struct dentry *ibmasmfs_create_file(struct dentry *parent,
- 
- 	dentry = d_alloc_name(parent, name);
- 	if (!dentry)
--		return NULL;
-+		return -ENOMEM;
- 
- 	inode = ibmasmfs_make_inode(parent->d_sb, S_IFREG | mode);
- 	if (!inode) {
- 		dput(dentry);
--		return NULL;
-+		return -ENOMEM;
- 	}
- 
- 	inode->i_fop = fops;
- 	inode->i_private = data;
- 
--	d_add(dentry, inode);
--	return dentry;
-+	d_make_persistent(dentry, inode);
-+	dput(dentry);
-+	return 0;
- }
- 
- static struct dentry *ibmasmfs_create_dir(struct dentry *parent,
-@@ -189,8 +190,9 @@ static struct dentry *ibmasmfs_create_dir(struct dentry *parent,
- 	inode->i_op = &simple_dir_inode_operations;
- 	inode->i_fop = ibmasmfs_dir_ops;
- 
--	d_add(dentry, inode);
--	return dentry;
-+	d_make_persistent(dentry, inode);
-+	dput(dentry);
-+	return dentry; // borrowed
- }
- 
- int ibmasmfs_register(void)
 -- 
 2.47.3
 
