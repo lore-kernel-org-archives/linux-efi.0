@@ -1,34 +1,34 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F57332AAB9;
-	Tue, 11 Nov 2025 06:55:27 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 618A234B1B7;
+	Tue, 11 Nov 2025 06:55:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762844134; cv=none; b=OnRKAi5+xqWJGcGqtg3+9ifSfT4shJ5uhpsHu7AzZHSwu3o5fbA3QoQDFTmSYmB0DV1ytFKoqDUi8qyEuBu9u46CxIJ+lUShRri9yr7G9IGDQqx3FyAFCWKhI9JMwTCXImJ8ADJhcTxkl9uW+MkJ4EExRLv6gHkM2Qq2k8OruhM=
+	t=1762844135; cv=none; b=iP/pMBS6ZOWlQDnxVQiLeyEzMdMBXo1/iTI8jlHMKg56mmQs1PI/UhRGta4Ce5SPMg7WI6fE0zKSmazi9Aa6j6ANG60wH7b2dF6gRsas4V/JGw9AiJDgyzPbwK1MRfYTeMy8lM8loh4TlU+Lmbr+OupkWAfb6keiWgiW762NS5g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762844134; c=relaxed/simple;
-	bh=EqYlDwL28zt1FMBzJNKg9kXWjfUikMGKlrA5yQ6cSlc=;
+	s=arc-20240116; t=1762844135; c=relaxed/simple;
+	bh=McNIUAqXu4qUUnpy/u9z9Zap5mXt5Gi3Tmjpjgu3QB8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=W8VIBXW5gZngHqF4jB2OseLdAMm/KjB6G8qmO9URoZO+gc1uqjeU3FQX+AWajevMaaj7zrZJj/Ivk+FV+q/gPC6s6Bf0fkE6TozmqyOrxLCg7u2DdAIRuiP7J7jbeFVJib+LXLbFnTMdtUD9ygSQGZc3moFIAZeCB9dsE1mVN4U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=NvA4L2Zw; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=NDjI4eP2rWk73EiopAyto0RZHdrl8h0Y/ARp5HJI65C8mn4wUSv7qEyN5CSs8nWKO3pX15DOa3OsJWvhKb8DJMfszEfEbxr12Pp7V3IdeCMSCnY9sL4wxsGmvVdokHeK/08guGjfRIjhDprn50VY+VgJDe/Cm2GzS3UErg8SFHs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=wtKH4oxQ; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="NvA4L2Zw"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="wtKH4oxQ"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=KjlhtDhBu18/9JmgPyyx9lDuBAywfgEoPZuaBcmvHHc=; b=NvA4L2ZwRtUeHW7QuJvY2SyLmK
-	RV8qnqzYay1FuvT3UE6H/54cBzg4DqPMeUKeJSdgeNeO9GmXF94fsND+sL+kHe2P/SEz/SzruMejC
-	KC+vAFArMaR4Ab2WBlEhCiNphiaWVR/RSO1HFienvay3iqhf5PaLC0KcKeuFjdEvwYxidZN7ylSeZ
-	lHhRmrqaTzX2ctZFOtAQ1ASzsxi923LvOSaksum1niBBc/aXEOfT7i9Xr+cAzQAQKVr+JuHbRn34K
-	18XCZshuF9YyNevfgXnWMq6+t6aQK9xTZjd7wkgoorB+bOwQIMSp4onK30UsLV5x8ND5Wb5eqKLft
-	Y3mHOsnQ==;
+	bh=AxXF+ZX7o2qevQIhaj7GgHO9nhvHZfJFLXJ69dxgaxo=; b=wtKH4oxQY/2cA79HkCgcoKJBMF
+	YOrX8xLQGNijM4ZeIrn5wgh8EBLeXIRaCgznbJWJLF4sMCXG88No2yz/1N4QDf4Ybv2gyxTP0MuEY
+	HkPV42ETmPsvVN2SBm+bxIDlulzSLOfEmEy6wdi0zvIgWAJwDEbSoixVhKxYYLF4BnOcAsljsLcW7
+	3Bt6WXPUByXgorENsvHsomVIe3iq9nlXOBMLEUsu5/duQEnIXHaL+5Itk/JH6XH6Q/JfUB6ZlnzVj
+	7OaCgWawr8yfCA28JGyWJ2pL3w9/EGC2wTPtLqttDRbvBiPwZB5KGEGoXvL1Z/3IFEh1JEsOTDgsR
+	JeBZReMA==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vIiHh-0000000Bwv2-34MT;
-	Tue, 11 Nov 2025 06:55:21 +0000
+	id 1vIiHo-0000000Bx8x-3l9j;
+	Tue, 11 Nov 2025 06:55:29 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
 Cc: torvalds@linux-foundation.org,
@@ -52,9 +52,9 @@ Cc: torvalds@linux-foundation.org,
 	selinux@vger.kernel.org,
 	borntraeger@linux.ibm.com,
 	bpf@vger.kernel.org
-Subject: [PATCH v3 03/50] new helper: simple_remove_by_name()
-Date: Tue, 11 Nov 2025 06:54:32 +0000
-Message-ID: <20251111065520.2847791-4-viro@zeniv.linux.org.uk>
+Subject: [PATCH v3 40/50] hypfs: don't pin dentries twice
+Date: Tue, 11 Nov 2025 06:55:09 +0000
+Message-ID: <20251111065520.2847791-41-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20251111065520.2847791-1-viro@zeniv.linux.org.uk>
 References: <20251111065520.2847791-1-viro@zeniv.linux.org.uk>
@@ -67,81 +67,108 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-simple_recursive_removal(), but instead of victim dentry it takes
-parent + name.
-
-Used to be open-coded in fs/fuse/control.c, but there's no need to expose
-the guts of that thing there and there are other potential users, so
-let's lift it into libfs...
+hypfs dentries end up with refcount 2 when they are not busy.
+Refcount 1 is enough to keep them pinned, and going that way
+allows to simplify things nicely:
+	* don't need to drop an extra reference before the
+call of kill_litter_super() in ->kill_sb(); all we need
+there is to reset the cleanup list - everything on it will
+be taken out automatically.
+	* we can make use of simple_recursive_removal() on
+tree rebuilds; just make sure that only children of root
+end up in the cleanup list and hypfs_delete_tree() becomes
+much simpler
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- fs/fuse/control.c  |  7 +------
- fs/libfs.c         | 13 +++++++++++++
- include/linux/fs.h |  2 ++
- 3 files changed, 16 insertions(+), 6 deletions(-)
+ arch/s390/hypfs/inode.c | 41 ++++++++++-------------------------------
+ 1 file changed, 10 insertions(+), 31 deletions(-)
 
-diff --git a/fs/fuse/control.c b/fs/fuse/control.c
-index 5247df896c5d..3dca752127ff 100644
---- a/fs/fuse/control.c
-+++ b/fs/fuse/control.c
-@@ -290,18 +290,13 @@ static void remove_one(struct dentry *dentry)
-  */
- void fuse_ctl_remove_conn(struct fuse_conn *fc)
+diff --git a/arch/s390/hypfs/inode.c b/arch/s390/hypfs/inode.c
+index 96409573c75d..a4dc8e13d999 100644
+--- a/arch/s390/hypfs/inode.c
++++ b/arch/s390/hypfs/inode.c
+@@ -61,33 +61,17 @@ static void hypfs_update_update(struct super_block *sb)
+ 
+ static void hypfs_add_dentry(struct dentry *dentry)
  {
--	struct dentry *dentry;
- 	char name[32];
- 
- 	if (!fuse_control_sb || fc->no_control)
- 		return;
- 
- 	sprintf(name, "%u", fc->dev);
--	dentry = lookup_noperm_positive_unlocked(&QSTR(name), fuse_control_sb->s_root);
--	if (!IS_ERR(dentry)) {
--		simple_recursive_removal(dentry, remove_one);
--		dput(dentry);	// paired with lookup_noperm_positive_unlocked()
--	}
-+	simple_remove_by_name(fuse_control_sb->s_root, name, remove_one);
+-	dentry->d_fsdata = hypfs_last_dentry;
+-	hypfs_last_dentry = dentry;
+-}
+-
+-static void hypfs_remove(struct dentry *dentry)
+-{
+-	struct dentry *parent;
+-
+-	parent = dentry->d_parent;
+-	inode_lock(d_inode(parent));
+-	if (simple_positive(dentry)) {
+-		if (d_is_dir(dentry))
+-			simple_rmdir(d_inode(parent), dentry);
+-		else
+-			simple_unlink(d_inode(parent), dentry);
++	if (IS_ROOT(dentry->d_parent)) {
++		dentry->d_fsdata = hypfs_last_dentry;
++		hypfs_last_dentry = dentry;
+ 	}
+-	d_drop(dentry);
+-	dput(dentry);
+-	inode_unlock(d_inode(parent));
  }
  
- static int fuse_ctl_fill_super(struct super_block *sb, struct fs_context *fsc)
-diff --git a/fs/libfs.c b/fs/libfs.c
-index ce8c496a6940..d029aff41f66 100644
---- a/fs/libfs.c
-+++ b/fs/libfs.c
-@@ -655,6 +655,19 @@ void simple_recursive_removal(struct dentry *dentry,
+-static void hypfs_delete_tree(struct dentry *root)
++static void hypfs_delete_tree(void)
+ {
+ 	while (hypfs_last_dentry) {
+-		struct dentry *next_dentry;
+-		next_dentry = hypfs_last_dentry->d_fsdata;
+-		hypfs_remove(hypfs_last_dentry);
++		struct dentry *next_dentry = hypfs_last_dentry->d_fsdata;
++		simple_recursive_removal(hypfs_last_dentry, NULL);
+ 		hypfs_last_dentry = next_dentry;
+ 	}
  }
- EXPORT_SYMBOL(simple_recursive_removal);
+@@ -184,14 +168,14 @@ static ssize_t hypfs_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 		rc = -EBUSY;
+ 		goto out;
+ 	}
+-	hypfs_delete_tree(sb->s_root);
++	hypfs_delete_tree();
+ 	if (machine_is_vm())
+ 		rc = hypfs_vm_create_files(sb->s_root);
+ 	else
+ 		rc = hypfs_diag_create_files(sb->s_root);
+ 	if (rc) {
+ 		pr_err("Updating the hypfs tree failed\n");
+-		hypfs_delete_tree(sb->s_root);
++		hypfs_delete_tree();
+ 		goto out;
+ 	}
+ 	hypfs_update_update(sb);
+@@ -326,13 +310,9 @@ static void hypfs_kill_super(struct super_block *sb)
+ {
+ 	struct hypfs_sb_info *sb_info = sb->s_fs_info;
  
-+void simple_remove_by_name(struct dentry *parent, const char *name,
-+                           void (*callback)(struct dentry *))
-+{
-+	struct dentry *dentry;
-+
-+	dentry = lookup_noperm_positive_unlocked(&QSTR(name), parent);
-+	if (!IS_ERR(dentry)) {
-+		simple_recursive_removal(dentry, callback);
-+		dput(dentry);	// paired with lookup_noperm_positive_unlocked()
-+	}
-+}
-+EXPORT_SYMBOL(simple_remove_by_name);
-+
- /* caller holds parent directory with I_MUTEX_PARENT */
- void locked_recursive_removal(struct dentry *dentry,
-                               void (*callback)(struct dentry *))
-diff --git a/include/linux/fs.h b/include/linux/fs.h
-index c895146c1444..28bd4e8d3892 100644
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -3631,6 +3631,8 @@ extern int simple_rename(struct mnt_idmap *, struct inode *,
- 			 unsigned int);
- extern void simple_recursive_removal(struct dentry *,
-                               void (*callback)(struct dentry *));
-+extern void simple_remove_by_name(struct dentry *, const char *,
-+                              void (*callback)(struct dentry *));
- extern void locked_recursive_removal(struct dentry *,
-                               void (*callback)(struct dentry *));
- extern int noop_fsync(struct file *, loff_t, loff_t, int);
+-	if (sb->s_root)
+-		hypfs_delete_tree(sb->s_root);
+-	if (sb_info && sb_info->update_file)
+-		hypfs_remove(sb_info->update_file);
+-	kfree(sb->s_fs_info);
+-	sb->s_fs_info = NULL;
++	hypfs_last_dentry = NULL;
+ 	kill_litter_super(sb);
++	kfree(sb_info);
+ }
+ 
+ static struct dentry *hypfs_create_file(struct dentry *parent, const char *name,
+@@ -367,7 +347,6 @@ static struct dentry *hypfs_create_file(struct dentry *parent, const char *name,
+ 		BUG();
+ 	inode->i_private = data;
+ 	d_instantiate(dentry, inode);
+-	dget(dentry);
+ fail:
+ 	inode_unlock(d_inode(parent));
+ 	return dentry;
 -- 
 2.47.3
 
