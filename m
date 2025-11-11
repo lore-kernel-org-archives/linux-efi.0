@@ -1,34 +1,34 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 909BC34AB04;
-	Tue, 11 Nov 2025 06:55:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F7223431F5;
+	Tue, 11 Nov 2025 06:55:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762844134; cv=none; b=efBaJAMuCRoUrgwzAzD+JeATa51ciwVh7UBPXzJtnhbQP7zIqZ2dCPYLlRJY5ySE70CfSi2+qfwmtWDZtcnfpNJeFByFgYHrkPRAKGseMdL1h+Hvkg5KlVGGl2Y4lwiBGOgXJeURfHixai+v+J7y+P6msAO+Ex9dJ3cuO6btvTg=
+	t=1762844134; cv=none; b=IGiie/ae5JnKU7IEqiccDTi46tN7bZQoov1RalwTsve5kg+RoMoPojdi4BPqAmiLm+GXPIW7QRpUEQrJBaTP3Dc1ar85TPCm4gAG+Hgf0w7LrT0A9kM6SyiexDG+JOVv1DYWIDmXA4vo/pvOWI8AGBt2FEPaIo4NP9m9uv0ej2U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1762844134; c=relaxed/simple;
-	bh=cYeL+5cA9x0NwfB4diEl1DuF4hqIkdO6EuC/cakMsiI=;
+	bh=uIkWhT5lBZMbGKboTZYEGGJGOnQwh5txmBIVng9mTCc=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=koFcnIuRB1xiTLJXzv3GMDoI+kfDEHg5Ne0Y9CssLX1Lwr8VivekauvKxViCgq9Ev85Bivah3TvEA/A00RsH9P3wguaWRXNzhDVIewN8MrUWLSUxZmS648TQLM5slbyCN1reJQmolDE7DO8QEeWqPrhLK5/1XkT5zzp8avMzmfI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=m9R6mf51; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=CXkATwkGobeVxwxJ1/9ofx2k5Y6kXzPx0a0yTgZYE8DJolka/apb35QjpxsxTUMpHldb0HG1EXZ/T5Y8Vfdgn8qPWikoDAqvm+nWQfLoby7Ybx8UEdEhXLXlgEYQagYiatsshF0wMUWzTCX8JL8P+/HNV8DRlAZNvqwazY1K2Ps=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=LN6CRJ2n; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="m9R6mf51"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="LN6CRJ2n"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=jitbeNxbeSwoLaO1GW63OWcQzV6dbGiBbZYgEsubm2E=; b=m9R6mf51Go0SgMCw1YQi0QXZgW
-	EyEDA3mrdd+Xjdc8EP55fxHY3ZVHvcC31RtBHNSQgCsfzeNqTK9w+olpHpy/tnKKOSCqeAmKuScoa
-	pUKqXnr7u4y83LLprUDaV/ArG4DF68auUhiUB4wwLmO2QrN5KiiHTdH9fQqTA1suUH2Rif7WKh3eW
-	PTW4fB/8QQOLO7z3HjLqgHRpHJv1XOVsG3tWfys3RiZBnG8IDExyWgpw1jBjmd793ymisdgf4ev0H
-	NHdpI95KjyuLQ84zGf8WP4io9nLiO0zNh8dHhtL5teHCf/5MSvrN/1a2rmWvfeTCk0AkwnKIHf6hu
-	iv0AyxUg==;
+	bh=nXGw1nJCnekakkZR178NLSh8+iviODtKUClSm5rridQ=; b=LN6CRJ2njLT76zNgYlaloendZP
+	sUs3p5zjumc8j/z2khvoDt6+pnpIkisW6gygxsWR+ifalIz1V4Yg5DAQ9FtJs7tAbkVTOk4sQFzEE
+	Akpdo+3J8ogkCfh5OvJpyvM3sqOb+5OBZAHsB5nEDbL/doLrK3VQ3BXxoVw3mc0cvWpZeEKGJpK3+
+	3I01Dow3QlFmu3TPpN6GW7C0p4u0V6qh6lc5uZmhE3vSZBXAHA4H6KxaKJeeh+6b8Bn7Psl1wdOyZ
+	REPNGf5fPVNcffpJNQamrqIiuww6WrjvNELA6e68M74n8WF3URvWF9NFN47LeYZylNTGsroeVQ2D0
+	f1oMDRWw==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vIiHo-0000000Bx6h-0ucI;
-	Tue, 11 Nov 2025 06:55:28 +0000
+	id 1vIiHj-0000000Bwy1-0ZAJ;
+	Tue, 11 Nov 2025 06:55:23 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
 Cc: torvalds@linux-foundation.org,
@@ -52,9 +52,9 @@ Cc: torvalds@linux-foundation.org,
 	selinux@vger.kernel.org,
 	borntraeger@linux.ibm.com,
 	bpf@vger.kernel.org
-Subject: [PATCH v3 37/50] convert functionfs
-Date: Tue, 11 Nov 2025 06:55:06 +0000
-Message-ID: <20251111065520.2847791-38-viro@zeniv.linux.org.uk>
+Subject: [PATCH v3 11/50] convert xenfs
+Date: Tue, 11 Nov 2025 06:54:40 +0000
+Message-ID: <20251111065520.2847791-12-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20251111065520.2847791-1-viro@zeniv.linux.org.uk>
 References: <20251111065520.2847791-1-viro@zeniv.linux.org.uk>
@@ -67,61 +67,27 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-All files are regular; ep0 is there all along, other ep* may appear
-and go away during the filesystem lifetime; all of those are guaranteed
-to be gone by the time we umount it.
-
-Object creation is in ffs_sb_create_file(), removals - at ->kill_sb()
-time (for ep0) or by simple_remove_by_name() from ffs_epfiles_destroy()
-(for the rest of them).
-
-Switch ffs_sb_create_file() to simple_start_creating()/d_make_persistent()/
-simple_done_creating() and that's it.
+entirely static tree, populated by simple_fill_super().  Can switch
+to kill_anon_super() without any other changes.
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- drivers/usb/gadget/function/f_fs.c | 17 +++++++++--------
- 1 file changed, 9 insertions(+), 8 deletions(-)
+ drivers/xen/xenfs/super.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/usb/gadget/function/f_fs.c b/drivers/usb/gadget/function/f_fs.c
-index 43dcd39b76c5..8b27414a424e 100644
---- a/drivers/usb/gadget/function/f_fs.c
-+++ b/drivers/usb/gadget/function/f_fs.c
-@@ -1870,17 +1870,18 @@ static int ffs_sb_create_file(struct super_block *sb, const char *name,
- 	struct dentry	*dentry;
- 	struct inode	*inode;
+diff --git a/drivers/xen/xenfs/super.c b/drivers/xen/xenfs/super.c
+index d7d64235010d..37ea7c5c0346 100644
+--- a/drivers/xen/xenfs/super.c
++++ b/drivers/xen/xenfs/super.c
+@@ -88,7 +88,7 @@ static struct file_system_type xenfs_type = {
+ 	.owner =	THIS_MODULE,
+ 	.name =		"xenfs",
+ 	.init_fs_context = xenfs_init_fs_context,
+-	.kill_sb =	kill_litter_super,
++	.kill_sb =	kill_anon_super,
+ };
+ MODULE_ALIAS_FS("xenfs");
  
--	dentry = d_alloc_name(sb->s_root, name);
--	if (!dentry)
--		return -ENOMEM;
--
- 	inode = ffs_sb_make_inode(sb, data, fops, NULL, &ffs->file_perms);
--	if (!inode) {
--		dput(dentry);
-+	if (!inode)
- 		return -ENOMEM;
-+	dentry = simple_start_creating(sb->s_root, name);
-+	if (IS_ERR(dentry)) {
-+		iput(inode);
-+		return PTR_ERR(dentry);
- 	}
- 
--	d_add(dentry, inode);
-+	d_make_persistent(dentry, inode);
-+
-+	simple_done_creating(dentry);
- 	return 0;
- }
- 
-@@ -2067,7 +2068,7 @@ static int ffs_fs_init_fs_context(struct fs_context *fc)
- static void
- ffs_fs_kill_sb(struct super_block *sb)
- {
--	kill_litter_super(sb);
-+	kill_anon_super(sb);
- 	if (sb->s_fs_info)
- 		ffs_data_closed(sb->s_fs_info);
- }
 -- 
 2.47.3
 
