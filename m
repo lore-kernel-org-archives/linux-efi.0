@@ -1,46 +1,63 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BC9316EB42;
-	Tue, 11 Nov 2025 06:02:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F5FF330B17;
+	Tue, 11 Nov 2025 06:55:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762840936; cv=none; b=f8i03s6k2wIEHHaPjh9tv3bSyDfVoL9seAgMlj+RQOdIiXbzwHWlaVpMxA+JHlogWWtnhc7XoGitRsNe4/W1Ey2ApoigQA1S97heuuTLueD/DTi/1w9fnBKpclsxNCkvBKZufMOr3rMj4ie6SefUeeuTm3YkqhloDFfUBMbnvq8=
+	t=1762844130; cv=none; b=lftdVszRxElBmGTaIOjAVJE86fYYx5geAmNxq1V/cV0ualgcg6kyM0w97iw889AJ/9fRJoOERuVX7tz5Pf1xSi3/vqUQlvGiczrAr7YKzubmnDRqwUzzkhNVSYmuJMmIvwBJTwiyTEIhyrjeCGEgu9RII8ATvco/FhvpdAcdxEE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762840936; c=relaxed/simple;
-	bh=FdJwL9JSzwV4UQQXRcpSy17j+YswctMS26lIS9FG4jA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FahNCDmIcwkGAg2dT6fEjuiT5iFDgakdPbZ9w6W2EXtlTaXvjH7MgK4EXMlmcfcqmswObQmbOwQSh4rr674OWhElM9xIyyjKlTReWHM5mx/y5dOzRbJRE0J+gNUb5DmGkQnxM8PGzr9fDcJxW5M20b2JqZaDnx5z+8cIc7y3elo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=Xprq7x27; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
+	s=arc-20240116; t=1762844130; c=relaxed/simple;
+	bh=CyVivJufSb4sh4+oM9l7NXmE+V2B9EmDQGjIticKJ8E=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=MFJwjVQTKVzkEM8VW+MoWT2Dnnpa0WUfoA4RUT0Kzsgc3bampJrOVjjaTvJACyNF8Apnu16BMAO9zc4hL4U0qel82i3ROxPGAHX+Q6Uah4AFpolMdAUQyHsbR7dazeqW4Ix5xb/bK9nxRsQGfuvj7M6KrJGH/RDkc6LBztoxHeA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=bfOYqpnw; arc=none smtp.client-ip=62.89.141.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Xprq7x27"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="bfOYqpnw"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=9FvSxcETb6qmgterhtVgRWeeCLevVfNPooXzwD8lXTQ=; b=Xprq7x270sJOgieEKEkVQ+sgKa
-	FQr+nKFZvlGxFGbquPIjpeQQiQxu7kHBsK7svtF4ZZKH+JtRcDmF6XoupbilVC0trVcAfjyxMZAIM
-	f+l6oeoKlDQWqryeDDvUbaRYtd/fWkPtvcM07RT6VTA/jsFDHz/zNzoMx+Xp1bWphPv33maFW4Kii
-	IEOw826/4An5UPNkaaxFcdgTRKURamT5gUvdlbDIGKY6+QfQsC+to1NyL5Dy0wn4hYrIMpFPx/gt6
-	FD8q8/G72zCSA8+17iTlqyop8/HCv7IPJKWHfWh0QgqNs5I9rECTP4Z1a3RT2HSuGos8CklizTsd4
-	PjFUD9Ng==;
-Received: from [50.53.43.113] (helo=bombadil.infradead.org)
-	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vIhSH-00000006aaj-0cs8;
-	Tue, 11 Nov 2025 06:02:13 +0000
-From: Randy Dunlap <rdunlap@infradead.org>
-To: linux-kernel@vger.kernel.org
-Cc: Randy Dunlap <rdunlap@infradead.org>,
-	Ard Biesheuvel <ardb@kernel.org>,
+	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
+	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
+	Reply-To:Content-Type:Content-ID:Content-Description;
+	bh=TcFcmzxfGV+3rJDGgJ/eg0JcSdO3AKCKkQ7NxQ/vrvI=; b=bfOYqpnwRITYWirzu325V+Vjft
+	4P70PiidxpZzvKaDpbtGKJZ7Z7kz6ULfRHNrRj/WhL+Opb09PfOAkeMHjytlfhR5QIfbTxRuY/lkk
+	/SP/qvo6ubJuLtRmW3riFd9ATus8rT+PHyY9X1HWRv2hv7DJJ2L7Ccaz4SET8eWwIQLJ+goThnlDi
+	vkXMMPnDq1aZDyW1sUWNd7e6NenMqgpjtXspP5i7WkLuyOipur7dG97xmgp/Mmhh9IBeuSaH76i9V
+	Rv8y20iWmbTDwzQuWzvArRCwYZiu969sFh4ctU9PLoErZxvGh/parpyMzgOk9czyg9AZyT20F80Sa
+	ixjYrEeA==;
+Received: from viro by zeniv.linux.org.uk with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1vIiHl-0000000BwzW-1uyd;
+	Tue, 11 Nov 2025 06:55:25 +0000
+From: Al Viro <viro@zeniv.linux.org.uk>
+To: linux-fsdevel@vger.kernel.org
+Cc: torvalds@linux-foundation.org,
+	brauner@kernel.org,
+	jack@suse.cz,
+	raven@themaw.net,
+	miklos@szeredi.hu,
+	neil@brown.name,
+	a.hindborg@kernel.org,
+	linux-mm@kvack.org,
 	linux-efi@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-	Alexandre Torgue <alexandre.torgue@foss.st.com>
-Subject: [PATCH] efi: stmm: fix kernel-doc "bad line" warnings
-Date: Mon, 10 Nov 2025 22:02:12 -0800
-Message-ID: <20251111060212.1963608-1-rdunlap@infradead.org>
-X-Mailer: git-send-email 2.51.1
+	ocfs2-devel@lists.linux.dev,
+	kees@kernel.org,
+	rostedt@goodmis.org,
+	gregkh@linuxfoundation.org,
+	linux-usb@vger.kernel.org,
+	paul@paul-moore.com,
+	casey@schaufler-ca.com,
+	linuxppc-dev@lists.ozlabs.org,
+	john.johansen@canonical.com,
+	selinux@vger.kernel.org,
+	borntraeger@linux.ibm.com,
+	bpf@vger.kernel.org
+Subject: [PATCH v3 24/50] convert ibmasmfs
+Date: Tue, 11 Nov 2025 06:54:53 +0000
+Message-ID: <20251111065520.2847791-25-viro@zeniv.linux.org.uk>
+X-Mailer: git-send-email 2.49.0
+In-Reply-To: <20251111065520.2847791-1-viro@zeniv.linux.org.uk>
+References: <20251111065520.2847791-1-viro@zeniv.linux.org.uk>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -48,51 +65,88 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Sender: Al Viro <viro@ftp.linux.org.uk>
 
-Add a beginning " *" to each line to avoid kernel-doc warnings:
+static contents for each "service processor", whatever the fuck it is.
+Congruent subdirectories of root, created at mount time, taken out
+by kill_litter_super().  All dentries created with d_alloc_name() and are
+left pinned.  The odd part is that the list of service providers is
+assumed to be unchanging - no locking, nothing to handle removals or
+extra elements added later on.
 
-Warning: drivers/firmware/efi/stmm/mm_communication.h:34 bad line: 
-Warning: drivers/firmware/efi/stmm/mm_communication.h:113 bad line: 
-Warning: drivers/firmware/efi/stmm/mm_communication.h:130 bad line: 
+... and it's a PCI device.  If you ever tell it to remove an instance,
+you are fucked - it doesn't bother with removing its directory from filesystem,
+it has a strange check that presumably wanted to be a check for removed
+devices, but it had never been fleshed out.
 
-Fixes: c44b6be62e8d ("efi: Add tee-based EFI variable driver")
-Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+Anyway, d_add() -> d_make_persistent()+dput() in ibmasmfs_create_dir() and
+ibmasmfs_create_file(), and make the latter return int - no need to even
+borrow that dentry, callers completely ignore it.
+
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
-Cc: Ard Biesheuvel <ardb@kernel.org>
-Cc: linux-efi@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: Maxime Coquelin <mcoquelin.stm32@gmail.com>
-Cc: Alexandre Torgue <alexandre.torgue@foss.st.com>
----
- drivers/firmware/efi/stmm/mm_communication.h |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/misc/ibmasm/ibmasmfs.c | 18 ++++++++++--------
+ 1 file changed, 10 insertions(+), 8 deletions(-)
 
---- linux-next-20251107.orig/drivers/firmware/efi/stmm/mm_communication.h
-+++ linux-next-20251107/drivers/firmware/efi/stmm/mm_communication.h
-@@ -32,7 +32,7 @@
+diff --git a/drivers/misc/ibmasm/ibmasmfs.c b/drivers/misc/ibmasm/ibmasmfs.c
+index b26c930e3edb..a6cde74efb68 100644
+--- a/drivers/misc/ibmasm/ibmasmfs.c
++++ b/drivers/misc/ibmasm/ibmasmfs.c
+@@ -103,7 +103,7 @@ static struct file_system_type ibmasmfs_type = {
+ 	.owner          = THIS_MODULE,
+ 	.name           = "ibmasmfs",
+ 	.init_fs_context = ibmasmfs_init_fs_context,
+-	.kill_sb        = kill_litter_super,
++	.kill_sb        = kill_anon_super,
+ };
+ MODULE_ALIAS_FS("ibmasmfs");
  
- /**
-  * struct efi_mm_communicate_header - Header used for SMM variable communication
--
-+ *
-  * @header_guid:  header use for disambiguation of content
-  * @message_len:  length of the message. Does not include the size of the
-  *                header
-@@ -111,7 +111,7 @@ struct efi_mm_communicate_header {
+@@ -144,7 +144,7 @@ static struct inode *ibmasmfs_make_inode(struct super_block *sb, int mode)
+ 	return ret;
+ }
  
- /**
-  * struct smm_variable_communicate_header - Used for SMM variable communication
--
-+ *
-  * @function:     function to call in Smm.
-  * @ret_status:   return status
-  * @data:         payload
-@@ -128,7 +128,7 @@ struct smm_variable_communicate_header {
- /**
-  * struct smm_variable_access - Used to communicate with StMM by
-  *                              SetVariable and GetVariable.
--
-+ *
-  * @guid:         vendor GUID
-  * @data_size:    size of EFI variable data
-  * @name_size:    size of EFI name
+-static struct dentry *ibmasmfs_create_file(struct dentry *parent,
++static int ibmasmfs_create_file(struct dentry *parent,
+ 			const char *name,
+ 			const struct file_operations *fops,
+ 			void *data,
+@@ -155,19 +155,20 @@ static struct dentry *ibmasmfs_create_file(struct dentry *parent,
+ 
+ 	dentry = d_alloc_name(parent, name);
+ 	if (!dentry)
+-		return NULL;
++		return -ENOMEM;
+ 
+ 	inode = ibmasmfs_make_inode(parent->d_sb, S_IFREG | mode);
+ 	if (!inode) {
+ 		dput(dentry);
+-		return NULL;
++		return -ENOMEM;
+ 	}
+ 
+ 	inode->i_fop = fops;
+ 	inode->i_private = data;
+ 
+-	d_add(dentry, inode);
+-	return dentry;
++	d_make_persistent(dentry, inode);
++	dput(dentry);
++	return 0;
+ }
+ 
+ static struct dentry *ibmasmfs_create_dir(struct dentry *parent,
+@@ -189,8 +190,9 @@ static struct dentry *ibmasmfs_create_dir(struct dentry *parent,
+ 	inode->i_op = &simple_dir_inode_operations;
+ 	inode->i_fop = ibmasmfs_dir_ops;
+ 
+-	d_add(dentry, inode);
+-	return dentry;
++	d_make_persistent(dentry, inode);
++	dput(dentry);
++	return dentry; // borrowed
+ }
+ 
+ int ibmasmfs_register(void)
+-- 
+2.47.3
+
