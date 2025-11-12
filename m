@@ -1,123 +1,96 @@
-Received: from mail.zytor.com (terminus.zytor.com [198.137.202.136])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f73.google.com (mail-wm1-f73.google.com [209.85.128.73])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7654C33F8A4;
-	Wed, 12 Nov 2025 16:29:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.136
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1313241695
+	for <linux-efi@vger.kernel.org>; Wed, 12 Nov 2025 17:53:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762964988; cv=none; b=OF+27crK6HiBHwwu6svUang67QWwsnX1icYIeoHyBXmA4AKK/D3B+RcF/87dplOBSy4vXZqvkp+eQHegqFL3RiEk+4txhRFSaqTXAhLlOaZqClZFlm3c3JMHY4c907cFdQ4yEkwYSGCptiTDAd8BrcLfA1YX0ikKGjVSYanZhUI=
+	t=1762970011; cv=none; b=m0OtCDjQB8r82xx4+IKS6b8YvGtcPcKzvVl7KtoXyDj0JcdClDhBbmbuB7+nyOlpx35FUCcq0RER/J/Wog1wmSzA8q3mWVEMaFlz8Iy8eN2IJv29K/SrEZ1An+irIZf6GW0O3/pkg9AKE8j8ElFWl8GC5divT0jebvMDPHiKPy4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762964988; c=relaxed/simple;
-	bh=CE16kltFzFqjrddLzR7/Ik/75YYEnP3wOW2uBkiaABM=;
-	h=Date:From:To:CC:Subject:In-Reply-To:References:Message-ID:
-	 MIME-Version:Content-Type; b=nGn/jF2Qw8IUIkPDwVjwmVkXhcJdOaVj+XXTULhzYbkbFoIsMisx7SjcZgCf5eOhBwNaooKzD1AqGBn4s8iNGXC5zVQ2gs+r0nIMlEf4ZVLLftZHZPPluKNiFNAkemVCmhiIkj9OqdTv5XQZ2UuGxFojbyHRmhID/QtDH/hiTdg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=Lex7gHuB; arc=none smtp.client-ip=198.137.202.136
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=zytor.com
+	s=arc-20240116; t=1762970011; c=relaxed/simple;
+	bh=7I4LzMofdKoP1sTTMWy7AWAOrp4droN6xfs+9bF0ADc=;
+	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=dEu5UAGf9iVuLfcxoaSjkIWXbDTh9xp3XpeiqC7Vi2k3xYNJzcbGjAuy0SAj78J1WW01RA/5SF4YQm3G/0l6dtu2z6x6oP5UF3BqUrISlbWKW+FA2TV0zrdKTjjaqofHekKMeQz+Fb6Iwbnuun4jN0YYNpKQzrskufZizt8h954=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=e7XS0Zyw; arc=none smtp.client-ip=209.85.128.73
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="Lex7gHuB"
-Received: from ehlo.thunderbird.net (c-76-133-66-138.hsd1.ca.comcast.net [76.133.66.138])
-	(authenticated bits=0)
-	by mail.zytor.com (8.18.1/8.17.1) with ESMTPSA id 5ACGT53V870373
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NO);
-	Wed, 12 Nov 2025 08:29:06 -0800
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 5ACGT53V870373
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zytor.com;
-	s=2025102301; t=1762964947;
-	bh=CE16kltFzFqjrddLzR7/Ik/75YYEnP3wOW2uBkiaABM=;
-	h=Date:From:To:CC:Subject:In-Reply-To:References:From;
-	b=Lex7gHuBbvK5cqsPYm7W/VXfOJuAR1NRyMhcQaqPG9PemQgiXgrJYsOmznbsnt3W5
-	 i0YkCz88MeUXYPLmbMaSsOQbG3OJzxfcbEoL+xc1O7IzrvAed+gqC0CDixOS4qlO+c
-	 zUDwJEyxDElDMrBAbF/c4Q8tCp5/u5hANGJqkgQcZoZj+DXQxs/AdnQviySwjSMXOK
-	 KMGoQVXgHDERu+0sinl9ZSqFy0NkpGkG9NVzzcCx+npfx+ilkKyghDSUxT5ugkgqfO
-	 ap8JFS6hXAGK+ALMLR+LkFgJPyx3pZlzFQSCHYobhQqMG+6cdsFyriNEDSO6cV69uX
-	 F/HgSnHyA17GA==
-Date: Wed, 12 Nov 2025 08:29:05 -0800
-From: "H. Peter Anvin" <hpa@zytor.com>
-To: Sohil Mehta <sohil.mehta@intel.com>, Ard Biesheuvel <ardb@kernel.org>
-CC: Dave Hansen <dave.hansen@intel.com>, x86@kernel.org,
-        Borislav Petkov <bp@alien8.de>, Jonathan Corbet <corbet@lwn.net>,
-        Andy Lutomirski <luto@kernel.org>,
-        Josh Poimboeuf <jpoimboe@kernel.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        "Kirill A . Shutemov" <kas@kernel.org>, Xin Li <xin@zytor.com>,
-        David Woodhouse <dwmw@amazon.co.uk>,
-        Sean Christopherson <seanjc@google.com>,
-        Rick Edgecombe <rick.p.edgecombe@intel.com>,
-        Vegard Nossum <vegard.nossum@oracle.com>,
-        Andrew Cooper <andrew.cooper3@citrix.com>,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>, Kees Cook <kees@kernel.org>,
-        Tony Luck <tony.luck@intel.com>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-efi@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>,
-        Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>
-Subject: =?US-ASCII?Q?Re=3A_=5BPATCH_v11_4/9=5D_x86/alternatives=3A_?=
- =?US-ASCII?Q?Disable_LASS_when_patching_kernel_code?=
-User-Agent: K-9 Mail for Android
-In-Reply-To: <6ab6e4d3-0caa-41e6-8231-2f3f45949876@intel.com>
-References: <20251029210310.1155449-1-sohil.mehta@intel.com> <20251029210310.1155449-5-sohil.mehta@intel.com> <29f2d16f-361f-475c-957e-0ebcefcd1a8c@intel.com> <CAMj1kXHvfgMqFncvP5A6ed=2qEPkNkS8ecoM6iXMect51Tpz4w@mail.gmail.com> <7c26ae81-3495-457b-9f64-f5b2e169a63b@intel.com> <DDEF6164-D1E6-4003-A251-804738CB59E0@zytor.com> <CAMj1kXGyTo=4Va1PevMQyCauEKSutfSPo6je0Ps09TabhTe4zQ@mail.gmail.com> <E9396874-5D2D-413D-A5D1-A28E4D429C51@zytor.com> <CAMj1kXECkKeDUDdjmrQjcYk=2Y5ydTV2L1Pg73X7uCC-=DC9Ww@mail.gmail.com> <6ab6e4d3-0caa-41e6-8231-2f3f45949876@intel.com>
-Message-ID: <FF519694-C4F5-4843-8E68-FE9C06FDC357@zytor.com>
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="e7XS0Zyw"
+Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-475c422fd70so8010235e9.2
+        for <linux-efi@vger.kernel.org>; Wed, 12 Nov 2025 09:53:29 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20230601; t=1762970008; x=1763574808; darn=vger.kernel.org;
+        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=M1eCAhXmDr9+kBNATXdCTz8d5iMFSVRFKM18smgzemg=;
+        b=e7XS0Zyw1/IySRTJuNukfpTR12oq2RbfmxORhwDjskTkWBh/NUIGy1FE9YB9h03U5S
+         xajgKCC3Mc0YzLnuOZ00lW2vADspL/BGbdELT5J89KFTQBNRyG34lhHBqDpBLtfsO7aH
+         7mhhHf0lPtbEi9oOp7IRyJ0wR0evr3AhXqDZiSt7wgffQqp+8VhcJAxt2C1xXulgqzmu
+         F7BzOWAWwwWsjH7cg0/+b5JjSplMIHARvdmPGdmPLRUYE+x8d4qKHt6SPc3nUdAA3uBy
+         bzbIAXGQ0nIO+z0hOfa/ESMn/ea5I12JGwGHeeVaEG1vf/5JkG1dlP3Kl9GGZ0qMZZIn
+         0bsA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1762970008; x=1763574808;
+        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=M1eCAhXmDr9+kBNATXdCTz8d5iMFSVRFKM18smgzemg=;
+        b=BDHNRe+O+qDh4rnHjGGLhC1yzRV0KDm/1d266NW7G8Zpe6Qjeth55qTxK2eZxAZRZL
+         v4nBwYium9WtJIhOM4gqSdzOLE7Jcg9amDP57VLhflSVuSwGeyXoq/p/ok5tqOzdr01C
+         eQcjAy3eIEebB06hKmiFyLvW5HtRo5sjWInwXRaMmzvykfBn8Bv5Rd6ii4FgtJ4DcBx5
+         BTM4x1PL/8SQIa285tcVYp240bNCYHLuC4Cs6ijpgw1aWzTpgTqrCP4zcd6ACau9/o1b
+         KF5+vXiJtddKzUtzJvMWLszKtEZvyGZDV9yx79Pw9T33o17j9yNWOiTBhwxCeR5srYxu
+         BBIg==
+X-Gm-Message-State: AOJu0Yza3Xp2L1BuK5jG0QIw2FbIzEiE4KmzclrDan+rXxCSolzG3WKF
+	nSw5Bb6VYXfwEEvHdnqaEu2dwa1IwagonNe9tEWjjFEXBHJcV+EdSO+KJyetvavDJbpS7LqKVg=
+	=
+X-Google-Smtp-Source: AGHT+IEebGJGBdHFsjiiDR5eFS/gIcIUAP221Wu8xdiSKNctgoPGWLYMxUjGOPTCDoUPoQqvagm6QWkP
+X-Received: from wmg22.prod.google.com ([2002:a05:600c:22d6:b0:474:979d:a20d])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:3b13:b0:477:28c1:26ce
+ with SMTP id 5b1f17b1804b1-477870413femr35612675e9.7.1762970008205; Wed, 12
+ Nov 2025 09:53:28 -0800 (PST)
+Date: Wed, 12 Nov 2025 18:53:17 +0100
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+X-Developer-Signature: v=1; a=openpgp-sha256; l=753; i=ardb@kernel.org;
+ h=from:subject; bh=OcA6f2ob9JexwbEKAOgfU9lLkm1nmoT5BKN+Rc8QMNs=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIVPkZO8+rxsTspMZEmK/NDTOd/rLNdEg64pOAff0YyzyZ
+ Q0rMqo6SlkYxLgYZMUUWQRm/3238/REqVrnWbIwc1iZQIYwcHEKwESM/Rn+Cngdzch9I/d1ntma
+ Pw6L/JTj9JSFeebsEvS6cDrC7E1fLyPDt0cOs58aB3/KDpey+/IguqF2yRfvPPmWnzXP98/wMs7 kAAA=
+X-Mailer: git-send-email 2.52.0.rc1.455.g30608eb744-goog
+Message-ID: <20251112175316.2841017-4-ardb+git@google.com>
+Subject: [PATCH 0/2] efi/arm64: Simplify SVE/SME state preserve/restore
+From: Ard Biesheuvel <ardb+git@google.com>
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, 
+	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>, 
+	Catalin Marinas <catalin.marinas@arm.com>, Mark Brown <broonie@kernel.org>, 
+	Kees Cook <keescook@chromium.org>
+Content-Type: text/plain; charset="UTF-8"
 
-On November 12, 2025 8:18:20 AM PST, Sohil Mehta <sohil=2Emehta@intel=2Ecom=
-> wrote:
->On 11/12/2025 7:28 AM, Ard Biesheuvel wrote:
->
->>>> d) calling SetVirtualAddressMap() does not result in all 1:1
->>>> references being converted to the new mapping=2E
->>>>
->>>>
->>>> To address d), the x86_64 implementation of efi_map_region() indeed
->>>> maps an 1:1 alias of each remapped runtime regions, so that stray
->>>> accesses don't fault=2E But the code addresses are all remapped, and =
-so
->>>> the firmware routines are always invoked via their remapped aliases i=
-n
->>>> the kernel VA space=2E Not calling SetVirtualAddressMap() at all, or
->>>> calling it with a 1:1 mapping is not feasible, essentially because
->>>> Windows doesn't do that, and that is the only thing that is tested on
->>>> all x86 PCs by the respective OEMs=2E
->>>>
->>>> Given that remapping the code is dealt with by the firmware's PE/COFF
->>>> loader, whereas remapping [dynamically allocated] data requires effor=
-t
->>>> on the part of the programmer, I'd hazard a guess that 99=2E9% of tho=
-se
->>>> bugs do not involve attempts to execute via the lower mapping, but
->>>> stray references to data objects that were not remapped properly=2E
->>>>
->>>> So we might consider
->>>> a) remapping those 1:1 aliases NX, so we don't have those patches of
->>>> RWX memory around
->>>> b) keeping LASS enabled during ordinary EFI runtime calls, as you sug=
-gest=2E
->>>
->>> Unless someone has a code pointer in their code=2E
->>=20
->> That is a good point, especially because the EFI universe is
->> constructed out of GUIDs and so-called protocols, which are just
->> structs with function pointers=2E
->>=20
->> However, EFI protocols are only supported at boot time, and the
->> runtime execution context is much more restricted=2E So I'd still expec=
-t
->> the code pointer case to be much less likely=2E
->
->But, that still leaves the stray data accesses=2E We would still need to
->disable the LASS data access enforcement by toggling RFLAGS=2EAC during
->the runtime calls=2E
->
->Can we rely on EFI to not mess up RFLAGS and keep the AC bit intact?
+From: Ard Biesheuvel <ardb@kernel.org>
 
-Let's not muck with this now; it is lately pointless and as you can see it=
-'s a rathole=2E
+The EFI specific SVE/SME state preserve/restore logic is unneeded, and
+can be removed. Patch #1 adds some lkdtm test cases to emulate the
+condition under which this code might be called.
+
+Cc: Will Deacon <will@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Mark Brown <broonie@kernel.org>
+Cc: Kees Cook <keescook@chromium.org>
+
+Ard Biesheuvel (2):
+  lkdtm/bugs: Add cases for BUG and PANIC occurring in hardirq context
+  arm64/efi: Remove unneeded SVE/SME fallback preserve/store handling
+
+ arch/arm64/kernel/fpsimd.c | 130 +++-----------------
+ drivers/misc/lkdtm/bugs.c  |  53 ++++++++
+ 2 files changed, 73 insertions(+), 110 deletions(-)
+
+-- 
+2.52.0.rc1.455.g30608eb744-goog
+
