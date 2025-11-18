@@ -1,34 +1,34 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 152EC28D8DF;
-	Tue, 18 Nov 2025 05:16:10 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A1742C0266;
+	Tue, 18 Nov 2025 05:16:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763442979; cv=none; b=chkXzMLVoG5Mae49w9HRHwSzV5+pUxsd3jQnmDkN6mDGdFlu/5pF+skNB2t7xirLmZ6ksmtkdOzt3BrINGXcCOVfEqA0LH2WV2NKfDa05f96wHt2jpnrf8lhA02AKIgGQ1SxtgacaN9KVMiweuS95D7xhFAUurLbPz14SPdJJ4E=
+	t=1763442982; cv=none; b=PPW1nUjgQX/b+4YIQTaFrdppWZQ1Qw4kneDiirfxf/WmM/P5A0w4R8zyF5Hgs1Sqnv1afpvhUsyBwAJHNrZlAMZSzIb58093UewgbLCds5gpZOnwrbHdpvD7zQtYQNo6KabEcY4JIULQZHBo4roE7MHPfFbzexJttQPZYsLcqbc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763442979; c=relaxed/simple;
-	bh=cPOxFMBLc13aTQ6kNNeMr1nHH9VwsrN2XN8U+K2FM4A=;
+	s=arc-20240116; t=1763442982; c=relaxed/simple;
+	bh=wuHRVTuXFJmdyMHFXddGjPkbh9aAfDS2a7pk9RHCUqg=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=dhvGj7eVq/lqnyeejyvKpVc2VEihmVNIVvKfq8F2fmFIVZNjk7jG1WeO68N9EcYfYol9cCJkOehrZly0GElGf4kGtoBbO5oB93H187hpl3uqHh9cJLebwHMlPLeiQU+M2GSbeFkF3MpnkFbBGWPHl8TfhS4Zx3cCC+x1BvLDL0M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=FE7OJf/U; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=FUihCVM+N48QZOVYyhALInr2zKDKyV84pgIwTrUC8osv9TKTruznkZdft0BtPvEjUhSS+UVO3721ODiUNzNu2pW1YG+zlCsaaIdD1mvmYaU0mOlUA5eAa6ppUFpnOlEL0Tqahzf+c2+3hXL1Ac1AWnpHBrORWJE/3ZUlJU5yiZs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=p1iwR+hn; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="FE7OJf/U"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="p1iwR+hn"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=IpNAvIvaquRQO1Ji53mf5vyLMZJ4O2UIIE/EO15yw64=; b=FE7OJf/UU+lFlMVRVRToGhRAzP
-	N8qGXHCOjkSsJDHwHKHBs4K6aMWob5Nbszex9l+s6ZK7OfCYvZ+9TG8qyL4a56MGLrMSV9WS+QFaH
-	s1N/VE1lLOH2Yk6U5H6G2Poh2PqGUWSQ3NEN0RCixCbVN/RP60yPNMYvhHIPBExVfx/5/OZTzs1EE
-	bhLcn7ls1cB8YCrarexnMvFo0q+gbwMu1mw9xNZu/jFbTij+eRpShRImoLn13GuhwUkVAFtVXI+yz
-	d1EdjG7xvDxR5x71JxFMIMLgaP4kB7U4RmZn17NAJrLLzst9bGtt1ub4xZUECV8by7OLH3v8P7leP
-	M9vSGWsg==;
+	bh=wF5oceMSXViySxysMkUNPeCJ07Zgu8R8pwpIbBxZfJs=; b=p1iwR+hn8eQdKdM3Wg/ANXtfCj
+	TipRsYDiAz2VNqxV7sNr0hMSJsc660aN9n7ij5Md6J4McBUo7fexK3H3p3/I+eMEq9mXFldv/xLhh
+	yFTHIg5AxvmHJZvHAtqPxKicTGvtSDquxhI3/v9jeXl/uDIypJzi7bUBv2fB6Col4wqstkXB5rqoM
+	+2aKg9moxFSQBNSXzhhr7ueXB11I4MUKMRxfO7RJikPBt8tjzwCZk1cAsjwUgQwsbzwolD2ctiqZC
+	+IlN8GRfsekf4G77YdQzs9zGULzK3qD62xQUFOgfQTg0VNQXTHCb2leQ2qo4cSh41LB5CQNL8iW3d
+	y2L9SriA==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vLE4U-0000000GEQo-1hsg;
-	Tue, 18 Nov 2025 05:16:06 +0000
+	id 1vLE4X-0000000GEWd-2fos;
+	Tue, 18 Nov 2025 05:16:09 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
 Cc: torvalds@linux-foundation.org,
@@ -53,9 +53,9 @@ Cc: torvalds@linux-foundation.org,
 	borntraeger@linux.ibm.com,
 	bpf@vger.kernel.org,
 	clm@meta.com
-Subject: [PATCH v4 12/54] convert smackfs
-Date: Tue, 18 Nov 2025 05:15:21 +0000
-Message-ID: <20251118051604.3868588-13-viro@zeniv.linux.org.uk>
+Subject: [PATCH v4 43/54] convert gadgetfs
+Date: Tue, 18 Nov 2025 05:15:52 +0000
+Message-ID: <20251118051604.3868588-44-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20251118051604.3868588-1-viro@zeniv.linux.org.uk>
 References: <20251118051604.3868588-1-viro@zeniv.linux.org.uk>
@@ -68,28 +68,54 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-Entirely static tree populated by simple_fill_super().  Can use
-kill_anon_super() as-is.
+same as functionfs
 
-Acked-by: Casey Schaufler <casey@schaufler-ca.com>
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- security/smack/smackfs.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/usb/gadget/legacy/inode.c | 19 +++++++++++--------
+ 1 file changed, 11 insertions(+), 8 deletions(-)
 
-diff --git a/security/smack/smackfs.c b/security/smack/smackfs.c
-index b1e5e62f5cbd..e989ae3890c7 100644
---- a/security/smack/smackfs.c
-+++ b/security/smack/smackfs.c
-@@ -2960,7 +2960,7 @@ static int smk_init_fs_context(struct fs_context *fc)
- static struct file_system_type smk_fs_type = {
- 	.name		= "smackfs",
- 	.init_fs_context = smk_init_fs_context,
--	.kill_sb	= kill_litter_super,
-+	.kill_sb	= kill_anon_super,
- };
+diff --git a/drivers/usb/gadget/legacy/inode.c b/drivers/usb/gadget/legacy/inode.c
+index bcc25f13483f..62566a8e7451 100644
+--- a/drivers/usb/gadget/legacy/inode.c
++++ b/drivers/usb/gadget/legacy/inode.c
+@@ -1989,17 +1989,20 @@ static int gadgetfs_create_file (struct super_block *sb, char const *name,
+ 	struct dentry	*dentry;
+ 	struct inode	*inode;
  
- static struct vfsmount *smackfs_mount;
+-	dentry = d_alloc_name(sb->s_root, name);
+-	if (!dentry)
+-		return -ENOMEM;
+-
+ 	inode = gadgetfs_make_inode (sb, data, fops,
+ 			S_IFREG | (default_perm & S_IRWXUGO));
+-	if (!inode) {
+-		dput(dentry);
++	if (!inode)
+ 		return -ENOMEM;
++
++	dentry = simple_start_creating(sb->s_root, name);
++	if (IS_ERR(dentry)) {
++		iput(inode);
++		return PTR_ERR(dentry);
+ 	}
+-	d_add (dentry, inode);
++
++	d_make_persistent(dentry, inode);
++
++	simple_done_creating(dentry);
+ 	return 0;
+ }
+ 
+@@ -2096,7 +2099,7 @@ static void
+ gadgetfs_kill_sb (struct super_block *sb)
+ {
+ 	mutex_lock(&sb_mutex);
+-	kill_litter_super (sb);
++	kill_anon_super (sb);
+ 	if (the_device) {
+ 		put_dev (the_device);
+ 		the_device = NULL;
 -- 
 2.47.3
 
