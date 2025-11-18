@@ -1,34 +1,34 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D41C2C08A1;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 826A52BEC20;
 	Tue, 18 Nov 2025 05:16:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763442979; cv=none; b=Pe37agO8lzRchTj+FzSg7wesIxBk1sTZ+oYUl9lNIXf9Weq4ojuqQcvRqxZJ/U3FWzWozwbQ+ZGXQsy78i5IWHIgrWKiI4AQguY2OlnvnkDaRSkIexnDOrcNfLr8rdFPlwv26aPhEAiaYOOklsf6M1rWnqthBw8AKLERxTPKM+8=
+	t=1763442980; cv=none; b=gI8TQDDdu6+Cjt6O4huT3uOUqawnBDSnfpSpYw0x/0wiuBZUnDVzuzmkFsK4nSkxNeliYM3++HhqRILmkUndCAPd20Ak5F7zzzGXHuWm47xl7YLQi3L+k1/vLOTHqCjGHXoWBO5iLwQhlLrViOb+LJ+2FjqwlQW5P7Gv8Us369s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763442979; c=relaxed/simple;
-	bh=McNIUAqXu4qUUnpy/u9z9Zap5mXt5Gi3Tmjpjgu3QB8=;
+	s=arc-20240116; t=1763442980; c=relaxed/simple;
+	bh=byBMgHbR87T18XBWxBXLSo3SukdEydOq3tHxIUqMMIY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=TnqEs6pfekgeGMc/10PEbQ8dRQ3gzyUak2KXGVYM09oSzzKVlHjLuF0gGbsZOVECz+35XUGtERyKU2a2pmQhViHKExALxZa8Nxnq2SRFyAHYjxexxZtLvOT7KwCamDwGkm91SET2//4AGUGvFzMV/5ydqQqbaOA7bar91Npfzhg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=UXYzzuo8; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=A0KJcdqwM0Bqr7MIX46C8EFght5nm/qwN/2nRhris6i4eXueZajGRpVW6M+3ToQPfMoqOQjMUF03OTEWNazuTsByEjOd8MQUQ1JAag2hjwvzMMn9G/qIaAScXW3cbGems2cqitDEQAh4yOSLdkUSc02vS3ipgcdoDEK4SGCTov4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=rzQCg5lh; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="UXYzzuo8"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="rzQCg5lh"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=AxXF+ZX7o2qevQIhaj7GgHO9nhvHZfJFLXJ69dxgaxo=; b=UXYzzuo8ARgZIVQ9rqDTjS+9Zu
-	ZEkiGMbJe0UgoAUO6lLrWus+HkKP+ieyHiSPgU0hywf9IVvXoPfvupLVj0g4KkiOxFF12TyERIVK9
-	g2AjuLnHf1N7gO5BI1TQwaEdmgw5AawNtvW41CyzucQfEnD0qkDwx9CRezrcc+VRkEh27ynExd5p9
-	Jf2RkbOPN+pD5DZ6A1uiauFYey2/0hhhOaAZUH1+mP20R5tlGm7I3oOUACVQlZVsKXQCcKz15eyPH
-	NjC/pYKRtsdv1ydnsmCfK/gRSitvMMiuHLa/25onUbAOzpO6aDdyaCtq6/kw3NpEN4UrM1RBJv860
-	+9DceorA==;
+	bh=h9ER29fbTJgjBa1gGf0LtXabL8srR/KWhHIa5FKJzwk=; b=rzQCg5lhFgfrMZlOVGl6dExZ/a
+	d0AgChO0Od/vBClGgnOu5Fjd5tl4dza+2pw+6RbcoI/f4TzFLHPjRU5qnY9douyr6yZfFvzXeiNCc
+	eOk1A/AfCZ2Fq9xW+wz6Iqe+G9K+8nuPPSVS6n3g9BfJxSh5M7HlQ7wGAr5JQXKfUHF8uLZ9hy5G+
+	xDwykHVpmx3evybIAKrC1sf5vcsJi02w5hG99QhujDNzHfiDW0+GKIhRq2eSwYG8ZwA8dbSKiOQnk
+	GnJYztrt9p6X2SHG0V2njXC+vTfxmOCaE3Nz/WzhcwmKIAz1BWSlmOecW8XBg5ia5hN5eImMb/kkB
+	7GelKqYg==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vLE4Y-0000000GEWz-0KHP;
-	Tue, 18 Nov 2025 05:16:10 +0000
+	id 1vLE4X-0000000GETr-25uP;
+	Tue, 18 Nov 2025 05:16:09 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
 Cc: torvalds@linux-foundation.org,
@@ -53,9 +53,9 @@ Cc: torvalds@linux-foundation.org,
 	borntraeger@linux.ibm.com,
 	bpf@vger.kernel.org,
 	clm@meta.com
-Subject: [PATCH v4 44/54] hypfs: don't pin dentries twice
-Date: Tue, 18 Nov 2025 05:15:53 +0000
-Message-ID: <20251118051604.3868588-45-viro@zeniv.linux.org.uk>
+Subject: [PATCH v4 42/54] gadgetfs: switch to simple_remove_by_name()
+Date: Tue, 18 Nov 2025 05:15:51 +0000
+Message-ID: <20251118051604.3868588-43-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20251118051604.3868588-1-viro@zeniv.linux.org.uk>
 References: <20251118051604.3868588-1-viro@zeniv.linux.org.uk>
@@ -68,108 +68,135 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-hypfs dentries end up with refcount 2 when they are not busy.
-Refcount 1 is enough to keep them pinned, and going that way
-allows to simplify things nicely:
-	* don't need to drop an extra reference before the
-call of kill_litter_super() in ->kill_sb(); all we need
-there is to reset the cleanup list - everything on it will
-be taken out automatically.
-	* we can make use of simple_recursive_removal() on
-tree rebuilds; just make sure that only children of root
-end up in the cleanup list and hypfs_delete_tree() becomes
-much simpler
+No need to return dentry from gadgetfs_create_file() or keep it around
+afterwards.
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- arch/s390/hypfs/inode.c | 41 ++++++++++-------------------------------
- 1 file changed, 10 insertions(+), 31 deletions(-)
+ drivers/usb/gadget/legacy/inode.c | 32 +++++++++++++------------------
+ 1 file changed, 13 insertions(+), 19 deletions(-)
 
-diff --git a/arch/s390/hypfs/inode.c b/arch/s390/hypfs/inode.c
-index 96409573c75d..a4dc8e13d999 100644
---- a/arch/s390/hypfs/inode.c
-+++ b/arch/s390/hypfs/inode.c
-@@ -61,33 +61,17 @@ static void hypfs_update_update(struct super_block *sb)
+diff --git a/drivers/usb/gadget/legacy/inode.c b/drivers/usb/gadget/legacy/inode.c
+index 13c3da49348c..bcc25f13483f 100644
+--- a/drivers/usb/gadget/legacy/inode.c
++++ b/drivers/usb/gadget/legacy/inode.c
+@@ -150,7 +150,6 @@ struct dev_data {
+ 	void				*buf;
+ 	wait_queue_head_t		wait;
+ 	struct super_block		*sb;
+-	struct dentry			*dentry;
  
- static void hypfs_add_dentry(struct dentry *dentry)
- {
--	dentry->d_fsdata = hypfs_last_dentry;
--	hypfs_last_dentry = dentry;
--}
+ 	/* except this scratch i/o buffer for ep0 */
+ 	u8				rbuf[RBUF_SIZE];
+@@ -208,7 +207,6 @@ struct ep_data {
+ 	struct usb_endpoint_descriptor	desc, hs_desc;
+ 	struct list_head		epfiles;
+ 	wait_queue_head_t		wait;
+-	struct dentry			*dentry;
+ };
+ 
+ static inline void get_ep (struct ep_data *data)
+@@ -1561,16 +1559,12 @@ static void destroy_ep_files (struct dev_data *dev)
+ 	spin_lock_irq (&dev->lock);
+ 	while (!list_empty(&dev->epfiles)) {
+ 		struct ep_data	*ep;
+-		struct dentry	*dentry;
+ 
+ 		/* break link to FS */
+ 		ep = list_first_entry (&dev->epfiles, struct ep_data, epfiles);
+ 		list_del_init (&ep->epfiles);
+ 		spin_unlock_irq (&dev->lock);
+ 
+-		dentry = ep->dentry;
+-		ep->dentry = NULL;
 -
--static void hypfs_remove(struct dentry *dentry)
--{
--	struct dentry *parent;
--
--	parent = dentry->d_parent;
--	inode_lock(d_inode(parent));
--	if (simple_positive(dentry)) {
--		if (d_is_dir(dentry))
--			simple_rmdir(d_inode(parent), dentry);
--		else
--			simple_unlink(d_inode(parent), dentry);
-+	if (IS_ROOT(dentry->d_parent)) {
-+		dentry->d_fsdata = hypfs_last_dentry;
-+		hypfs_last_dentry = dentry;
+ 		/* break link to controller */
+ 		mutex_lock(&ep->lock);
+ 		if (ep->state == STATE_EP_ENABLED)
+@@ -1581,10 +1575,11 @@ static void destroy_ep_files (struct dev_data *dev)
+ 		mutex_unlock(&ep->lock);
+ 
+ 		wake_up (&ep->wait);
+-		put_ep (ep);
+ 
+ 		/* break link to dcache */
+-		simple_recursive_removal(dentry, NULL);
++		simple_remove_by_name(dev->sb->s_root, ep->name, NULL);
++
++		put_ep (ep);
+ 
+ 		spin_lock_irq (&dev->lock);
  	}
--	d_drop(dentry);
--	dput(dentry);
--	inode_unlock(d_inode(parent));
+@@ -1592,14 +1587,14 @@ static void destroy_ep_files (struct dev_data *dev)
  }
  
--static void hypfs_delete_tree(struct dentry *root)
-+static void hypfs_delete_tree(void)
+ 
+-static struct dentry *
+-gadgetfs_create_file (struct super_block *sb, char const *name,
++static int gadgetfs_create_file (struct super_block *sb, char const *name,
+ 		void *data, const struct file_operations *fops);
+ 
+ static int activate_ep_files (struct dev_data *dev)
  {
- 	while (hypfs_last_dentry) {
--		struct dentry *next_dentry;
--		next_dentry = hypfs_last_dentry->d_fsdata;
--		hypfs_remove(hypfs_last_dentry);
-+		struct dentry *next_dentry = hypfs_last_dentry->d_fsdata;
-+		simple_recursive_removal(hypfs_last_dentry, NULL);
- 		hypfs_last_dentry = next_dentry;
+ 	struct usb_ep	*ep;
+ 	struct ep_data	*data;
++	int err;
+ 
+ 	gadget_for_each_ep (ep, dev->gadget) {
+ 
+@@ -1622,9 +1617,9 @@ static int activate_ep_files (struct dev_data *dev)
+ 		if (!data->req)
+ 			goto enomem1;
+ 
+-		data->dentry = gadgetfs_create_file (dev->sb, data->name,
++		err = gadgetfs_create_file (dev->sb, data->name,
+ 				data, &ep_io_operations);
+-		if (!data->dentry)
++		if (err)
+ 			goto enomem2;
+ 		list_add_tail (&data->epfiles, &dev->epfiles);
  	}
- }
-@@ -184,14 +168,14 @@ static ssize_t hypfs_write_iter(struct kiocb *iocb, struct iov_iter *from)
- 		rc = -EBUSY;
- 		goto out;
- 	}
--	hypfs_delete_tree(sb->s_root);
-+	hypfs_delete_tree();
- 	if (machine_is_vm())
- 		rc = hypfs_vm_create_files(sb->s_root);
- 	else
- 		rc = hypfs_diag_create_files(sb->s_root);
- 	if (rc) {
- 		pr_err("Updating the hypfs tree failed\n");
--		hypfs_delete_tree(sb->s_root);
-+		hypfs_delete_tree();
- 		goto out;
- 	}
- 	hypfs_update_update(sb);
-@@ -326,13 +310,9 @@ static void hypfs_kill_super(struct super_block *sb)
+@@ -1988,8 +1983,7 @@ gadgetfs_make_inode (struct super_block *sb,
+ /* creates in fs root directory, so non-renamable and non-linkable.
+  * so inode and dentry are paired, until device reconfig.
+  */
+-static struct dentry *
+-gadgetfs_create_file (struct super_block *sb, char const *name,
++static int gadgetfs_create_file (struct super_block *sb, char const *name,
+ 		void *data, const struct file_operations *fops)
  {
- 	struct hypfs_sb_info *sb_info = sb->s_fs_info;
+ 	struct dentry	*dentry;
+@@ -1997,16 +1991,16 @@ gadgetfs_create_file (struct super_block *sb, char const *name,
  
--	if (sb->s_root)
--		hypfs_delete_tree(sb->s_root);
--	if (sb_info && sb_info->update_file)
--		hypfs_remove(sb_info->update_file);
--	kfree(sb->s_fs_info);
--	sb->s_fs_info = NULL;
-+	hypfs_last_dentry = NULL;
- 	kill_litter_super(sb);
-+	kfree(sb_info);
+ 	dentry = d_alloc_name(sb->s_root, name);
+ 	if (!dentry)
+-		return NULL;
++		return -ENOMEM;
+ 
+ 	inode = gadgetfs_make_inode (sb, data, fops,
+ 			S_IFREG | (default_perm & S_IRWXUGO));
+ 	if (!inode) {
+ 		dput(dentry);
+-		return NULL;
++		return -ENOMEM;
+ 	}
+ 	d_add (dentry, inode);
+-	return dentry;
++	return 0;
  }
  
- static struct dentry *hypfs_create_file(struct dentry *parent, const char *name,
-@@ -367,7 +347,6 @@ static struct dentry *hypfs_create_file(struct dentry *parent, const char *name,
- 		BUG();
- 	inode->i_private = data;
- 	d_instantiate(dentry, inode);
--	dget(dentry);
- fail:
- 	inode_unlock(d_inode(parent));
- 	return dentry;
+ static const struct super_operations gadget_fs_operations = {
+@@ -2059,8 +2053,8 @@ gadgetfs_fill_super (struct super_block *sb, struct fs_context *fc)
+ 		goto Enomem;
+ 
+ 	dev->sb = sb;
+-	dev->dentry = gadgetfs_create_file(sb, CHIP, dev, &ep0_operations);
+-	if (!dev->dentry) {
++	rc = gadgetfs_create_file(sb, CHIP, dev, &ep0_operations);
++	if (rc) {
+ 		put_dev(dev);
+ 		goto Enomem;
+ 	}
 -- 
 2.47.3
 
