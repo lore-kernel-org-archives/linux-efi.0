@@ -1,34 +1,34 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39F662BE65F;
-	Tue, 18 Nov 2025 05:16:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11D7528A704;
+	Tue, 18 Nov 2025 05:16:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763442974; cv=none; b=cPRkUV2c4jw/L0JTQDSBObwqU0eV9R9eU5MXjLD/fIGlsAnOMfh4ZlZDRHxIyTDGrifKBmu8UnUMXqaA/9U0ETWffE1de8dalaiMjQXTy8xBLBcjIyeafyzlm2ejQ7Tz/oEmTg5c4kUq9n7vTduWm3qonoeKjyPYOXQ2gVHZDlw=
+	t=1763442975; cv=none; b=qH5OoL8QH/3Wv/x9xysvHT80Qga4AHYhSf+vm6x09Ytv174hwPcFlP4X/NnfNhnLvMApeDw0CCp818iDM2e8PzcLBbdXo2MfQWWivCVxkR7f4FlU8MpUj8TRtq3fUYUms8DWl7gIuaXO6GP9IHQQ6NVeAgkEjJUGRjwxDvQLuxc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763442974; c=relaxed/simple;
-	bh=WxSgeuo0ahJRBpa5cCoszsU7LKgd5x5Hzdw5+x6gsRk=;
+	s=arc-20240116; t=1763442975; c=relaxed/simple;
+	bh=uIkWhT5lBZMbGKboTZYEGGJGOnQwh5txmBIVng9mTCc=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=SQ9aOgi6xTI5LyZ1ar8bhktKg/bSg2IOF6peD00EL1QIWqlBhlOZxsGeQfRU7DlD/qsW6dZ/reYRMHlZnul8a6rnrcasjNYh/lO/GaWU690/7c46+dD5HiTe4s3Lww5G/v53imIEkDNkKiRcC+jVdSOizoCJbSro6Bwlp+0iG/E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=f82OFm7F; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=OuPvc6HF4GkY/3ExnnODNBPg35tVf253YXXWzxJFnlRYY5zLOTD3E0ForG8QV20XX32QK8f6lLHBAcMJ5USWf5DHcDKW+Hn6pKiCF1BF1yMrpzk7zPzQXh/aXiLLXjEj8iYl3+jDVaBG6Y60WCvs2lRhIQ8+R7dqFG9KyhkTP2w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=Vl/3NOTL; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="f82OFm7F"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="Vl/3NOTL"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=eoHAGF5loUqH0LAFPRC8F4kXyPuIEz0vDtopK5rWb5o=; b=f82OFm7FvazKYJYDPR56+WvVrq
-	Dj+gC8HySiz+YAUbtJL3dko4sirA2yyl3o0FsOZ9C5gPoeBshzb4xWNGR7mx5ndW+pcT0XXW0PTVA
-	1TdD3rRO4XfqYu4IR0qNpSgFvWmn69s6hBWs8H1HSLAVur0wqfCUAb/l9kFK9MJQPvsAVZ/QRPuI/
-	owlmwWB4SXiXlhgGLf8wVKr1cD1r6MfuwfesIPeZVcu2CllkQ7zErPM1f/l2l/YQojOTgvgL4PbRY
-	K6Eo7MWrGR49DBEjSc4+hMfJ2JYiCa+ZoPNrcs4NBhyUR/9rNJc7ltq2YHT8otRnbYDs9xo7mRhmC
-	/Whn4W5A==;
+	bh=nXGw1nJCnekakkZR178NLSh8+iviODtKUClSm5rridQ=; b=Vl/3NOTLarYBwB87GqxphHKkQI
+	7nr+xrUdOHGzbQvNgPwTh/+ZuDIklH3LjYUAJTNerzga8Stv121nDnS3dDUlEWMDcLUPP0vdvR7CY
+	bwy1nf84MahGcCd/mXVTinqlKGe/gh3FEFU4G0XTQY2caZj4q/ktudPogUMWC6fe4UAt6FUnBzwDI
+	wlEBeCbvC+oK7xQDjQ7Gp/b5U1/DIQzgr2komhocDqrOpYndVRm6Prd84cwdTe/IF2ZycbvfTJfwh
+	/cdvCBu8/rsMTkT9oC8Hh15d+60epPGvbHco9HjSlcLntpJEtmjdXQst25vMXn5ZTu5l4vga99Rih
+	xpFUYzEg==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vLE4W-0000000GEST-0Krw;
-	Tue, 18 Nov 2025 05:16:08 +0000
+	id 1vLE4U-0000000GEQg-1EYJ;
+	Tue, 18 Nov 2025 05:16:06 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
 Cc: torvalds@linux-foundation.org,
@@ -53,9 +53,9 @@ Cc: torvalds@linux-foundation.org,
 	borntraeger@linux.ibm.com,
 	bpf@vger.kernel.org,
 	clm@meta.com
-Subject: [PATCH v4 28/54] binderfs_binder_ctl_create(): kill a bogus check
-Date: Tue, 18 Nov 2025 05:15:37 +0000
-Message-ID: <20251118051604.3868588-29-viro@zeniv.linux.org.uk>
+Subject: [PATCH v4 11/54] convert xenfs
+Date: Tue, 18 Nov 2025 05:15:20 +0000
+Message-ID: <20251118051604.3868588-12-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20251118051604.3868588-1-viro@zeniv.linux.org.uk>
 References: <20251118051604.3868588-1-viro@zeniv.linux.org.uk>
@@ -68,34 +68,27 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-It's called once, during binderfs mount, right after allocating
-root dentry.  Checking that it hadn't been already called is
-only obfuscating things.
-
-Looks like that bogosity had been copied from devpts...
+entirely static tree, populated by simple_fill_super().  Can switch
+to kill_anon_super() without any other changes.
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- drivers/android/binderfs.c | 6 ------
- 1 file changed, 6 deletions(-)
+ drivers/xen/xenfs/super.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/android/binderfs.c b/drivers/android/binderfs.c
-index a7b0a773d47f..8253e517ab6c 100644
---- a/drivers/android/binderfs.c
-+++ b/drivers/android/binderfs.c
-@@ -397,12 +397,6 @@ static int binderfs_binder_ctl_create(struct super_block *sb)
- 	if (!device)
- 		return -ENOMEM;
+diff --git a/drivers/xen/xenfs/super.c b/drivers/xen/xenfs/super.c
+index d7d64235010d..37ea7c5c0346 100644
+--- a/drivers/xen/xenfs/super.c
++++ b/drivers/xen/xenfs/super.c
+@@ -88,7 +88,7 @@ static struct file_system_type xenfs_type = {
+ 	.owner =	THIS_MODULE,
+ 	.name =		"xenfs",
+ 	.init_fs_context = xenfs_init_fs_context,
+-	.kill_sb =	kill_litter_super,
++	.kill_sb =	kill_anon_super,
+ };
+ MODULE_ALIAS_FS("xenfs");
  
--	/* If we have already created a binder-control node, return. */
--	if (info->control_dentry) {
--		ret = 0;
--		goto out;
--	}
--
- 	ret = -ENOMEM;
- 	inode = new_inode(sb);
- 	if (!inode)
 -- 
 2.47.3
 
