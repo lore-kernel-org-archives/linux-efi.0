@@ -1,34 +1,34 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D1E71F8BD6;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19A182989B4;
 	Tue, 18 Nov 2025 05:16:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763442977; cv=none; b=gyL69q8SgUgKjA6h/vn/9znG8H8HpR8AXY0pTC1Hrw7M/+WeoGIAsnVR39GFn1ZatFZCO4MXNTAi+Kge9d9Hq3bASuk2TKJT8rlkd6El3OgcpC5+pxw+z4p9gyI7/u9k65xXh3ZPSKEgNiiM+0/ISTwGbwb14YS8fOu5vmJwsFw=
+	t=1763442975; cv=none; b=IVdnl6kxDwA9uKro9HP8/zBt8UewICNChu7RQ81XHyo3c69df1TUC8FL+ZWOvrg+0zBTPCGKNXwgoPVyj0mitkQ3X5GpycKGoB8zOzIhl1Pv8MGQKrrV8TVH/5j1ODCNTq+zM819IPqypChGpOfPNeCjFclsqtw1avNQh6rOG78=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763442977; c=relaxed/simple;
-	bh=drdrUYlNf0PCOpfWhx6O/F9lOTCkn1Mjer9awXrbASA=;
+	s=arc-20240116; t=1763442975; c=relaxed/simple;
+	bh=hKWw//UHdNOEXYtTeSMvdJHHjlwjZ1X78l74U5NCXO8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=M05GwMkGmGG44zUJkEwu+eXoGGrtexJu3Vk1LKVlNAiDFmSB6EDEoOMS01Xoyrn4cgP+XhEq4lFG9qGznewZKwRDye0LjWksvL4B8WidtW4MuWsTeCK3RLRtKgkjdoQiXwLFtBDJaxZ4XCnCs4hxFEoGTALyM6g+K4sAMbGnFP8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=U4N6FHfz; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=VxfVqywzdAUi/gRAJDaJyk3c6FBO3iSPWDXLd5Uuq+2oEKwdKXwps19jAZ6uRSOvVfkkKdjXgPdID2nFlNuyPwo0Ja85GGlQ4gEULoGoVvP8XPkZaRW3RtLUAchfCl17eA5A5V04sTag14AGxTQfiGYDCkdlzySTvmI9+wq2vu4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=gGHivrs5; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="U4N6FHfz"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="gGHivrs5"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=LZ6yrPf10XyjUbpb0uoz9zDvZV76d0sxqTJxoq2o+VY=; b=U4N6FHfzCrbb4azFmBn86hOncH
-	so26EVVboKgDcIHc4NlNjYEgmAeLAcFqHHn/t/vo56xyfRQsxhg1YHRnMAAWaVNY2xD35h5jYh8k5
-	yCfUGsKDh/bPgSRBJXsOPWFNagA+bppgRLXsGQ/yTJUOkhKA9V2WvyOxQRt+60nOdr3l//WnP1r3k
-	6JXxdBHmyFKBis+FJb/2i7FGpynpeU4Gb/PvvgXdXoPlGD37K66yHbbJ8CLTqK63mNFUqFZZh24mm
-	M+JqNVYMtGvdE7EL+ByCK96+52rNllm1LMZUcqbTbJMLt12x0is3C4q7BhBXF4em/I4Ucp3/jxwyy
-	Pl/2JT3g==;
+	bh=BK+HD9eFsxlpB9DT0f/M/+bf/xKzOtOP84IbBFRjnBU=; b=gGHivrs5VQYbp4P2WHM7xvl1vI
+	ax4AH360oXnMEt1pRtc4JNx9Mxj27G7Ntlw1mm2vR1YKwsbAJ7BIDIj7eFRTT5DnvK8JCUY03Da8N
+	fSZOXX/fBbd9LVbSGFm1KbrbLVwJmrOCLc3+6IQCZPiNgcegz18/qFCXOQsbpNt3DjC7U07vYtsPs
+	9Rhmie54jINi8XG2EuV19IWK3Ct6nuMbf1bu4GhYd7sCTgGxsorbv2ahk2JRFthbRoeXfeiF8W2c5
+	DoQk1Kfd0U8wa560MOaJXOVqC5lEJpoM0utWOPXCu1ozCSlbpkmyZddLcoFla63XBFJB319IxTbwC
+	cWQnABmg==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vLE4V-0000000GERh-1RuG;
-	Tue, 18 Nov 2025 05:16:07 +0000
+	id 1vLE4T-0000000GEPd-0X8R;
+	Tue, 18 Nov 2025 05:16:05 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-fsdevel@vger.kernel.org
 Cc: torvalds@linux-foundation.org,
@@ -53,9 +53,9 @@ Cc: torvalds@linux-foundation.org,
 	borntraeger@linux.ibm.com,
 	bpf@vger.kernel.org,
 	clm@meta.com
-Subject: [PATCH v4 21/54] debugfs: remove duplicate checks in callers of start_creating()
-Date: Tue, 18 Nov 2025 05:15:30 +0000
-Message-ID: <20251118051604.3868588-22-viro@zeniv.linux.org.uk>
+Subject: [PATCH v4 01/54] fuse_ctl_add_conn(): fix nlink breakage in case of early failure
+Date: Tue, 18 Nov 2025 05:15:10 +0000
+Message-ID: <20251118051604.3868588-2-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20251118051604.3868588-1-viro@zeniv.linux.org.uk>
 References: <20251118051604.3868588-1-viro@zeniv.linux.org.uk>
@@ -68,55 +68,76 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-we'd already verified that DEBUGFS_ALLOW_API was there in
-start_creating() - it would've failed otherwise
+fuse_ctl_remove_conn() used to decrement the link count of root
+manually; that got subsumed by simple_recursive_removal(), but
+in case when subdirectory creation has failed the latter won't
+get called.
 
-Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Just move the modification of parent's link count into
+fuse_ctl_add_dentry() to keep the things simple.  Allows to
+get rid of the nlink argument as well...
+
+Fixes: fcaac5b42768 "fuse_ctl: use simple_recursive_removal()"
+Acked-by: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- fs/debugfs/inode.c | 15 ---------------
- 1 file changed, 15 deletions(-)
+ fs/fuse/control.c | 19 ++++++++++---------
+ 1 file changed, 10 insertions(+), 9 deletions(-)
 
-diff --git a/fs/debugfs/inode.c b/fs/debugfs/inode.c
-index 682120fdbb17..25a554331ac4 100644
---- a/fs/debugfs/inode.c
-+++ b/fs/debugfs/inode.c
-@@ -433,11 +433,6 @@ static struct dentry *__debugfs_create_file(const char *name, umode_t mode,
- 	if (IS_ERR(dentry))
- 		return dentry;
+diff --git a/fs/fuse/control.c b/fs/fuse/control.c
+index bb407705603c..5247df896c5d 100644
+--- a/fs/fuse/control.c
++++ b/fs/fuse/control.c
+@@ -205,8 +205,7 @@ static const struct file_operations fuse_conn_congestion_threshold_ops = {
  
--	if (!(debugfs_allow & DEBUGFS_ALLOW_API)) {
--		failed_creating(dentry);
--		return ERR_PTR(-EPERM);
--	}
--
- 	inode = debugfs_get_inode(dentry->d_sb);
- 	if (unlikely(!inode)) {
- 		pr_err("out of free dentries, can not create file '%s'\n",
-@@ -583,11 +578,6 @@ struct dentry *debugfs_create_dir(const char *name, struct dentry *parent)
- 	if (IS_ERR(dentry))
- 		return dentry;
+ static struct dentry *fuse_ctl_add_dentry(struct dentry *parent,
+ 					  struct fuse_conn *fc,
+-					  const char *name,
+-					  int mode, int nlink,
++					  const char *name, int mode,
+ 					  const struct inode_operations *iop,
+ 					  const struct file_operations *fop)
+ {
+@@ -232,7 +231,10 @@ static struct dentry *fuse_ctl_add_dentry(struct dentry *parent,
+ 	if (iop)
+ 		inode->i_op = iop;
+ 	inode->i_fop = fop;
+-	set_nlink(inode, nlink);
++	if (S_ISDIR(mode)) {
++		inc_nlink(d_inode(parent));
++		inc_nlink(inode);
++	}
+ 	inode->i_private = fc;
+ 	d_add(dentry, inode);
  
--	if (!(debugfs_allow & DEBUGFS_ALLOW_API)) {
--		failed_creating(dentry);
--		return ERR_PTR(-EPERM);
--	}
--
- 	inode = debugfs_get_inode(dentry->d_sb);
- 	if (unlikely(!inode)) {
- 		pr_err("out of free dentries, can not create directory '%s'\n",
-@@ -630,11 +620,6 @@ struct dentry *debugfs_create_automount(const char *name,
- 	if (IS_ERR(dentry))
- 		return dentry;
+@@ -252,22 +254,21 @@ int fuse_ctl_add_conn(struct fuse_conn *fc)
+ 		return 0;
  
--	if (!(debugfs_allow & DEBUGFS_ALLOW_API)) {
--		failed_creating(dentry);
--		return ERR_PTR(-EPERM);
--	}
--
- 	inode = debugfs_get_inode(dentry->d_sb);
- 	if (unlikely(!inode)) {
- 		pr_err("out of free dentries, can not create automount '%s'\n",
+ 	parent = fuse_control_sb->s_root;
+-	inc_nlink(d_inode(parent));
+ 	sprintf(name, "%u", fc->dev);
+-	parent = fuse_ctl_add_dentry(parent, fc, name, S_IFDIR | 0500, 2,
++	parent = fuse_ctl_add_dentry(parent, fc, name, S_IFDIR | 0500,
+ 				     &simple_dir_inode_operations,
+ 				     &simple_dir_operations);
+ 	if (!parent)
+ 		goto err;
+ 
+-	if (!fuse_ctl_add_dentry(parent, fc, "waiting", S_IFREG | 0400, 1,
++	if (!fuse_ctl_add_dentry(parent, fc, "waiting", S_IFREG | 0400,
+ 				 NULL, &fuse_ctl_waiting_ops) ||
+-	    !fuse_ctl_add_dentry(parent, fc, "abort", S_IFREG | 0200, 1,
++	    !fuse_ctl_add_dentry(parent, fc, "abort", S_IFREG | 0200,
+ 				 NULL, &fuse_ctl_abort_ops) ||
+ 	    !fuse_ctl_add_dentry(parent, fc, "max_background", S_IFREG | 0600,
+-				 1, NULL, &fuse_conn_max_background_ops) ||
++				 NULL, &fuse_conn_max_background_ops) ||
+ 	    !fuse_ctl_add_dentry(parent, fc, "congestion_threshold",
+-				 S_IFREG | 0600, 1, NULL,
++				 S_IFREG | 0600, NULL,
+ 				 &fuse_conn_congestion_threshold_ops))
+ 		goto err;
+ 
 -- 
 2.47.3
 
