@@ -1,78 +1,78 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E97AF3195EC
-	for <linux-efi@vger.kernel.org>; Mon, 24 Nov 2025 16:51:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A01E31691D
+	for <linux-efi@vger.kernel.org>; Mon, 24 Nov 2025 16:51:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764003103; cv=none; b=V9zv8jx9/AzwpsFIhDsdrrUq1HAGK6aeHyaPC8hYE+GWcqyXfRX3qAuoeWNM9//WtLT9lzkar0tMVaGr1uQ9a2Q9O7INuonKaaiQguF24EBZ43EP9nQos6u2q9EhW/zoYjV7q6/8eEHqAhZL+fZ/tOXhhmRPOyPjFj9NvXpVCE0=
+	t=1764003105; cv=none; b=YlL5IxnE9DYWQ+t3v05Rh7fWqUuHsxsTsIPxFlj5JPsGN/88JjsMweggw5OtABtZewJ+vwcXNgjYmW5vWSLNhGGEvBXoBh6C2UBrty0rGG3EXwpEheQC3qYUCmG9Xz63H7DNDic1opdwSZwGyw22k//F3fOl5T8EymMI1qX0x7s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764003103; c=relaxed/simple;
-	bh=q1YapmmysoLNNV0hWk47DnHWk1R3kcAszF2Pnr1xUzM=;
+	s=arc-20240116; t=1764003105; c=relaxed/simple;
+	bh=JKuM/jaTl2iJydGB54YUBnDXSDJbNr7IJEQil41i7Ms=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Pf8WSXg91vgT80IzYwXNP1ldGU0wstFwMaA5sKWhX2Vgo+R+tE3/HCa/d0KzqSZErffuf21nb02teA1XgQDcAJyIDqluAH6NDfYeX5TnJ5omx4qdidhIJ6Rru/59mgA2mc+1q2dVjahxymGZZHV19g9bc3MHv/eW109/b/pCrd4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=P3YFh9Ad; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Ik7ItF7I; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=P3YFh9Ad; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Ik7ItF7I; arc=none smtp.client-ip=195.135.223.131
+	 MIME-Version; b=rhefQ7ygitxaxVmytq2t0/Kj2KDyeOIf8k0qmyqCIzCbQZdGrZeTD18MVjF4MOaA5iWJ/ix+Cf9cawW7LxNeeMljMLlZkXqw0K/BsrmOxO9OafSF7UReBjUSh5AfqoygJFB6Sh0pLLckO7w0GmezDA3bL/sSPw5b52uIKmz91p4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=ECE2zVww; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=dpeudZJQ; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=ECE2zVww; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=dpeudZJQ; arc=none smtp.client-ip=195.135.223.130
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="P3YFh9Ad";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Ik7ItF7I";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="P3YFh9Ad";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Ik7ItF7I"
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="ECE2zVww";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="dpeudZJQ";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="ECE2zVww";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="dpeudZJQ"
 Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 299935BCFE;
-	Mon, 24 Nov 2025 16:51:29 +0000 (UTC)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id D0C252217F;
+	Mon, 24 Nov 2025 16:51:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1764003089; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	t=1764003086; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=T4bUu16XS9Hy1d0288nImvDqun1w20DCWZYkIdGnquA=;
-	b=P3YFh9AdISWEG2+szuqjs1YSg5vXN7b7bgRKidCMLjQsLwlFa9lDAnLz/qy5DJbcPqh4IT
-	lul63lg+Nle7b17Dc9flzk9/kYDkQ/tR7D/FX7elZZSgIe0ZWV7hOe0aLkoC14925trkm7
-	apyFxRkJ42xYjbn1/YLAsrXsiSDOOn4=
+	bh=uE8DpDTFBiEBguFbOC/VX+Ch76R22UuZ+hSFRvY2rk8=;
+	b=ECE2zVwwPxQGXZgNCCPOINPR+FiEUGfm3LpoJPtKhIxAl6JkHEDPmO1U8rRD+cgHDUQfhw
+	bF5VueNTHOfOaeDxHWuHU3UYMdrW/rozVFzPlkRUge4ysafQbtembcOGEyG4YFXbGaAVTk
+	bFSFgl5vw1CV1eB74fnnnOAuo+vS10k=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1764003089;
+	s=susede2_ed25519; t=1764003086;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=T4bUu16XS9Hy1d0288nImvDqun1w20DCWZYkIdGnquA=;
-	b=Ik7ItF7Io3QAebcBgZot27HX7fmTDMBL1yJpqJlaB5cF/XUyr4AqggtdFX3k875ev10DD3
-	DaaHiHyLKHw2kTAA==
-Authentication-Results: smtp-out2.suse.de;
+	bh=uE8DpDTFBiEBguFbOC/VX+Ch76R22UuZ+hSFRvY2rk8=;
+	b=dpeudZJQgKmEvs6o33RV8c2t1SUEAcuXrtKw9Di1UmcKaotFrIMvgUoTV70IY7MUK9alUK
+	J9jy7QNWyW54H1Dg==
+Authentication-Results: smtp-out1.suse.de;
 	none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1764003089; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	t=1764003086; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=T4bUu16XS9Hy1d0288nImvDqun1w20DCWZYkIdGnquA=;
-	b=P3YFh9AdISWEG2+szuqjs1YSg5vXN7b7bgRKidCMLjQsLwlFa9lDAnLz/qy5DJbcPqh4IT
-	lul63lg+Nle7b17Dc9flzk9/kYDkQ/tR7D/FX7elZZSgIe0ZWV7hOe0aLkoC14925trkm7
-	apyFxRkJ42xYjbn1/YLAsrXsiSDOOn4=
+	bh=uE8DpDTFBiEBguFbOC/VX+Ch76R22UuZ+hSFRvY2rk8=;
+	b=ECE2zVwwPxQGXZgNCCPOINPR+FiEUGfm3LpoJPtKhIxAl6JkHEDPmO1U8rRD+cgHDUQfhw
+	bF5VueNTHOfOaeDxHWuHU3UYMdrW/rozVFzPlkRUge4ysafQbtembcOGEyG4YFXbGaAVTk
+	bFSFgl5vw1CV1eB74fnnnOAuo+vS10k=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1764003089;
+	s=susede2_ed25519; t=1764003086;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=T4bUu16XS9Hy1d0288nImvDqun1w20DCWZYkIdGnquA=;
-	b=Ik7ItF7Io3QAebcBgZot27HX7fmTDMBL1yJpqJlaB5cF/XUyr4AqggtdFX3k875ev10DD3
-	DaaHiHyLKHw2kTAA==
+	bh=uE8DpDTFBiEBguFbOC/VX+Ch76R22UuZ+hSFRvY2rk8=;
+	b=dpeudZJQgKmEvs6o33RV8c2t1SUEAcuXrtKw9Di1UmcKaotFrIMvgUoTV70IY7MUK9alUK
+	J9jy7QNWyW54H1Dg==
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id B57C03EA65;
-	Mon, 24 Nov 2025 16:51:28 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 664873EA63;
+	Mon, 24 Nov 2025 16:51:26 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id gD/jKhCNJGm3GgAAD6G6ig
-	(envelope-from <tzimmermann@suse.de>); Mon, 24 Nov 2025 16:51:28 +0000
+	id AOeIFw6NJGm3GgAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Mon, 24 Nov 2025 16:51:26 +0000
 From: Thomas Zimmermann <tzimmermann@suse.de>
 To: ardb@kernel.org,
 	javierm@redhat.com,
@@ -89,9 +89,9 @@ Cc: x86@kernel.org,
 	linux-pci@vger.kernel.org,
 	linux-fbdev@vger.kernel.org,
 	Thomas Zimmermann <tzimmermann@suse.de>
-Subject: [PATCH v2 09/10] efi: libstub: Transfer EDID to kernel
-Date: Mon, 24 Nov 2025 17:40:21 +0100
-Message-ID: <20251124165116.502813-10-tzimmermann@suse.de>
+Subject: [PATCH v2 04/10] sysfb: Replace screen_info with sysfb_primary_display
+Date: Mon, 24 Nov 2025 17:40:16 +0100
+Message-ID: <20251124165116.502813-5-tzimmermann@suse.de>
 X-Mailer: git-send-email 2.51.1
 In-Reply-To: <20251124165116.502813-1-tzimmermann@suse.de>
 References: <20251124165116.502813-1-tzimmermann@suse.de>
@@ -127,317 +127,538 @@ X-Spamd-Result: default: False [-2.80 / 50.00];
 X-Spam-Flag: NO
 X-Spam-Score: -2.80
 
-Replace struct screen_info with struct sysfb_display_info from the
-kernel's sysfb_primary_display and rename functions accordingly.
-Transfer the it to the runtime kernel using the kernel's global state
-or the config-table entry LINUX_EFI_PRIMARY_DISPLAY_TABLE_GUID.
+Replace the global screen_info with sysfb_primary_display of type
+struct sysfb_display_info. Adapt all users of screen_info.
 
-Also rename screen_info.c to primary_display.c and adapt the contained
-comment according to the changes.
+Instances of screen_info are defined for x86, loongarch and EFI,
+with only one instance compiled into a specific build. Replace all
+of them with sysfb_primary_display.
 
-With CONFIG_FIRMWARE_EDID=y, libstub now transfers the GOP device's
-EDID information to the kernel.
+All existing users of screen_info are updated by pointing them to
+sysfb_primary_display.screen instead. This introduces some churn to
+the code, but has no impact on functionality.
+
+Boot parameters and EFI config tables are unchanged. They transfer
+screen_info as before. The logic in EFI's alloc_screen_info() changes
+slightly, as it now returns the screen field of sysfb_primary_display.
+
+v2:
+- update comment
+- rename init_screen_info() to init_primary_display()
 
 Signed-off-by: Thomas Zimmermann <tzimmermann@suse.de>
+Acked-by: Arnd Bergmann <arnd@arndb.de>
+Acked-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/Makefile         |  2 +-
- drivers/firmware/efi/libstub/efi-stub-entry.c | 11 ++--
- drivers/firmware/efi/libstub/efi-stub.c       | 41 +++++++++-----
- drivers/firmware/efi/libstub/efistub.h        |  7 ++-
- .../firmware/efi/libstub/primary_display.c    | 56 +++++++++++++++++++
- drivers/firmware/efi/libstub/screen_info.c    | 53 ------------------
- drivers/firmware/efi/libstub/zboot.c          |  4 +-
- 7 files changed, 93 insertions(+), 81 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/primary_display.c
- delete mode 100644 drivers/firmware/efi/libstub/screen_info.c
+ arch/arm64/kernel/image-vars.h                |  2 +-
+ arch/loongarch/kernel/efi.c                   | 15 +++++++------
+ arch/loongarch/kernel/image-vars.h            |  2 +-
+ arch/riscv/kernel/image-vars.h                |  2 +-
+ arch/x86/kernel/kexec-bzimage64.c             |  4 +++-
+ arch/x86/kernel/setup.c                       | 10 +++++----
+ arch/x86/video/video-common.c                 |  4 ++--
+ drivers/firmware/efi/earlycon.c               |  8 +++----
+ drivers/firmware/efi/efi-init.c               | 22 +++++++++----------
+ drivers/firmware/efi/libstub/efi-stub-entry.c | 18 ++++++++++-----
+ drivers/firmware/efi/sysfb_efi.c              |  4 ++--
+ drivers/firmware/sysfb.c                      |  6 ++---
+ drivers/hv/vmbus_drv.c                        |  6 ++---
+ drivers/pci/vgaarb.c                          |  4 ++--
+ drivers/video/screen_info_pci.c               |  5 +++--
+ include/linux/screen_info.h                   |  2 --
+ include/linux/sysfb.h                         |  5 +++--
+ 17 files changed, 66 insertions(+), 53 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 7d15a85d579f..e386ffd009b7 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -80,7 +80,7 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
- 	$(call if_changed_rule,cc_o_c)
+diff --git a/arch/arm64/kernel/image-vars.h b/arch/arm64/kernel/image-vars.h
+index 85bc629270bd..d7b0d12b1015 100644
+--- a/arch/arm64/kernel/image-vars.h
++++ b/arch/arm64/kernel/image-vars.h
+@@ -38,7 +38,7 @@ PROVIDE(__efistub__end			= _end);
+ PROVIDE(__efistub___inittext_end       	= __inittext_end);
+ PROVIDE(__efistub__edata		= _edata);
+ #if defined(CONFIG_EFI_EARLYCON) || defined(CONFIG_SYSFB)
+-PROVIDE(__efistub_screen_info		= screen_info);
++PROVIDE(__efistub_sysfb_primary_display	= sysfb_primary_display);
+ #endif
+ PROVIDE(__efistub__ctype		= _ctype);
  
- lib-$(CONFIG_EFI_GENERIC_STUB)	+= efi-stub.o string.o intrinsics.o systable.o \
--				   screen_info.o efi-stub-entry.o
-+				   primary_display.o efi-stub-entry.o
+diff --git a/arch/loongarch/kernel/efi.c b/arch/loongarch/kernel/efi.c
+index 860a3bc030e0..638a392d2cd2 100644
+--- a/arch/loongarch/kernel/efi.c
++++ b/arch/loongarch/kernel/efi.c
+@@ -18,7 +18,7 @@
+ #include <linux/kobject.h>
+ #include <linux/memblock.h>
+ #include <linux/reboot.h>
+-#include <linux/screen_info.h>
++#include <linux/sysfb.h>
+ #include <linux/uaccess.h>
  
- lib-$(CONFIG_ARM)		+= arm32-stub.o
- lib-$(CONFIG_ARM64)		+= kaslr.o arm64.o arm64-stub.o smbios.o
+ #include <asm/early_ioremap.h>
+@@ -75,11 +75,11 @@ bool efi_poweroff_required(void)
+ unsigned long __initdata screen_info_table = EFI_INVALID_TABLE_ADDR;
+ 
+ #if defined(CONFIG_SYSFB) || defined(CONFIG_EFI_EARLYCON)
+-struct screen_info screen_info __section(".data");
+-EXPORT_SYMBOL_GPL(screen_info);
++struct sysfb_display_info sysfb_primary_display __section(".data");
++EXPORT_SYMBOL_GPL(sysfb_primary_display);
+ #endif
+ 
+-static void __init init_screen_info(void)
++static void __init init_primary_display(void)
+ {
+ 	struct screen_info *si;
+ 
+@@ -91,11 +91,12 @@ static void __init init_screen_info(void)
+ 		pr_err("Could not map screen_info config table\n");
+ 		return;
+ 	}
+-	screen_info = *si;
++	sysfb_primary_display.screen = *si;
+ 	memset(si, 0, sizeof(*si));
+ 	early_memunmap(si, sizeof(*si));
+ 
+-	memblock_reserve(__screen_info_lfb_base(&screen_info), screen_info.lfb_size);
++	memblock_reserve(__screen_info_lfb_base(&sysfb_primary_display.screen),
++			 sysfb_primary_display.screen.lfb_size);
+ }
+ 
+ void __init efi_init(void)
+@@ -127,7 +128,7 @@ void __init efi_init(void)
+ 	set_bit(EFI_CONFIG_TABLES, &efi.flags);
+ 
+ 	if (IS_ENABLED(CONFIG_EFI_EARLYCON) || IS_ENABLED(CONFIG_SYSFB))
+-		init_screen_info();
++		init_primary_display();
+ 
+ 	if (boot_memmap == EFI_INVALID_TABLE_ADDR)
+ 		return;
+diff --git a/arch/loongarch/kernel/image-vars.h b/arch/loongarch/kernel/image-vars.h
+index 41ddcf56d21c..e557ebd46c2b 100644
+--- a/arch/loongarch/kernel/image-vars.h
++++ b/arch/loongarch/kernel/image-vars.h
+@@ -12,7 +12,7 @@ __efistub_kernel_entry		= kernel_entry;
+ __efistub_kernel_asize		= kernel_asize;
+ __efistub_kernel_fsize		= kernel_fsize;
+ #if defined(CONFIG_EFI_EARLYCON) || defined(CONFIG_SYSFB)
+-__efistub_screen_info		= screen_info;
++__efistub_sysfb_primary_display	= sysfb_primary_display;
+ #endif
+ 
+ #endif
+diff --git a/arch/riscv/kernel/image-vars.h b/arch/riscv/kernel/image-vars.h
+index 3df30dd1c458..3bd9d06a8b8f 100644
+--- a/arch/riscv/kernel/image-vars.h
++++ b/arch/riscv/kernel/image-vars.h
+@@ -29,7 +29,7 @@ __efistub__end			= _end;
+ __efistub__edata		= _edata;
+ __efistub___init_text_end	= __init_text_end;
+ #if defined(CONFIG_EFI_EARLYCON) || defined(CONFIG_SYSFB)
+-__efistub_screen_info		= screen_info;
++__efistub_sysfb_primary_display	= sysfb_primary_display;
+ #endif
+ 
+ #endif
+diff --git a/arch/x86/kernel/kexec-bzimage64.c b/arch/x86/kernel/kexec-bzimage64.c
+index c3244ac680d1..7508d0ccc740 100644
+--- a/arch/x86/kernel/kexec-bzimage64.c
++++ b/arch/x86/kernel/kexec-bzimage64.c
+@@ -20,6 +20,7 @@
+ #include <linux/of_fdt.h>
+ #include <linux/efi.h>
+ #include <linux/random.h>
++#include <linux/sysfb.h>
+ 
+ #include <asm/bootparam.h>
+ #include <asm/setup.h>
+@@ -303,7 +304,8 @@ setup_boot_parameters(struct kimage *image, struct boot_params *params,
+ 	params->hdr.hardware_subarch = boot_params.hdr.hardware_subarch;
+ 
+ 	/* Copying screen_info will do? */
+-	memcpy(&params->screen_info, &screen_info, sizeof(struct screen_info));
++	memcpy(&params->screen_info, &sysfb_primary_display.screen,
++	       sizeof(sysfb_primary_display.screen));
+ 
+ 	/* Fill in memsize later */
+ 	params->screen_info.ext_mem_k = 0;
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 1b2edd07a3e1..675e4b9deb1f 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -22,6 +22,7 @@
+ #include <linux/random.h>
+ #include <linux/root_dev.h>
+ #include <linux/static_call.h>
++#include <linux/sysfb.h>
+ #include <linux/swiotlb.h>
+ #include <linux/tboot.h>
+ #include <linux/usb/xhci-dbgp.h>
+@@ -211,8 +212,9 @@ arch_initcall(init_x86_sysctl);
+ /*
+  * Setup options
+  */
+-struct screen_info screen_info;
+-EXPORT_SYMBOL(screen_info);
++
++struct sysfb_display_info sysfb_primary_display;
++EXPORT_SYMBOL(sysfb_primary_display);
+ #if defined(CONFIG_FIRMWARE_EDID)
+ struct edid_info edid_info;
+ EXPORT_SYMBOL_GPL(edid_info);
+@@ -526,7 +528,7 @@ static void __init parse_setup_data(void)
+ static void __init parse_boot_params(void)
+ {
+ 	ROOT_DEV = old_decode_dev(boot_params.hdr.root_dev);
+-	screen_info = boot_params.screen_info;
++	sysfb_primary_display.screen = boot_params.screen_info;
+ #if defined(CONFIG_FIRMWARE_EDID)
+ 	edid_info = boot_params.edid_info;
+ #endif
+@@ -1254,7 +1256,7 @@ void __init setup_arch(char **cmdline_p)
+ #ifdef CONFIG_VT
+ #if defined(CONFIG_VGA_CONSOLE)
+ 	if (!efi_enabled(EFI_BOOT) || (efi_mem_type(0xa0000) != EFI_CONVENTIONAL_MEMORY))
+-		vgacon_register_screen(&screen_info);
++		vgacon_register_screen(&sysfb_primary_display.screen);
+ #endif
+ #endif
+ 	x86_init.oem.banner();
+diff --git a/arch/x86/video/video-common.c b/arch/x86/video/video-common.c
+index e0aeee99bc99..152789f00fcd 100644
+--- a/arch/x86/video/video-common.c
++++ b/arch/x86/video/video-common.c
+@@ -9,7 +9,7 @@
+ 
+ #include <linux/module.h>
+ #include <linux/pci.h>
+-#include <linux/screen_info.h>
++#include <linux/sysfb.h>
+ #include <linux/vgaarb.h>
+ 
+ #include <asm/video.h>
+@@ -29,7 +29,7 @@ EXPORT_SYMBOL(pgprot_framebuffer);
+ bool video_is_primary_device(struct device *dev)
+ {
+ #ifdef CONFIG_SCREEN_INFO
+-	struct screen_info *si = &screen_info;
++	struct screen_info *si = &sysfb_primary_display.screen;
+ 	struct resource res[SCREEN_INFO_MAX_RESOURCES];
+ 	ssize_t i, numres;
+ #endif
+diff --git a/drivers/firmware/efi/earlycon.c b/drivers/firmware/efi/earlycon.c
+index 42e3a173dac1..3d060d59968c 100644
+--- a/drivers/firmware/efi/earlycon.c
++++ b/drivers/firmware/efi/earlycon.c
+@@ -9,7 +9,7 @@
+ #include <linux/io.h>
+ #include <linux/kernel.h>
+ #include <linux/serial_core.h>
+-#include <linux/screen_info.h>
++#include <linux/sysfb.h>
+ #include <linux/string.h>
+ 
+ #include <asm/early_ioremap.h>
+@@ -32,7 +32,7 @@ static void *efi_fb;
+  */
+ static int __init efi_earlycon_remap_fb(void)
+ {
+-	const struct screen_info *si = &screen_info;
++	const struct screen_info *si = &sysfb_primary_display.screen;
+ 
+ 	/* bail if there is no bootconsole or it was unregistered already */
+ 	if (!earlycon_console || !console_is_registered(earlycon_console))
+@@ -147,7 +147,7 @@ static void efi_earlycon_write_char(u32 *dst, unsigned char c, unsigned int h,
+ static void
+ efi_earlycon_write(struct console *con, const char *str, unsigned int num)
+ {
+-	const struct screen_info *si = &screen_info;
++	const struct screen_info *si = &sysfb_primary_display.screen;
+ 	u32 cur_efi_x = efi_x;
+ 	unsigned int len;
+ 	const char *s;
+@@ -227,7 +227,7 @@ void __init efi_earlycon_reprobe(void)
+ static int __init efi_earlycon_setup(struct earlycon_device *device,
+ 				     const char *opt)
+ {
+-	const struct screen_info *si = &screen_info;
++	const struct screen_info *si = &sysfb_primary_display.screen;
+ 	u16 xres, yres;
+ 	u32 i;
+ 
+diff --git a/drivers/firmware/efi/efi-init.c b/drivers/firmware/efi/efi-init.c
+index a65c2d5b9e7b..d1d418a34407 100644
+--- a/drivers/firmware/efi/efi-init.c
++++ b/drivers/firmware/efi/efi-init.c
+@@ -19,7 +19,7 @@
+ #include <linux/of_address.h>
+ #include <linux/of_fdt.h>
+ #include <linux/platform_device.h>
+-#include <linux/screen_info.h>
++#include <linux/sysfb.h>
+ 
+ #include <asm/efi.h>
+ 
+@@ -57,15 +57,15 @@ static phys_addr_t __init efi_to_phys(unsigned long addr)
+ extern __weak const efi_config_table_type_t efi_arch_tables[];
+ 
+ /*
+- * x86 defines its own screen_info and uses it even without EFI,
+- * everything else can get it from here.
++ * x86 defines its own instance of sysfb_primary_display and uses
++ * it even without EFI, everything else can get them from here.
+  */
+ #if !defined(CONFIG_X86) && (defined(CONFIG_SYSFB) || defined(CONFIG_EFI_EARLYCON))
+-struct screen_info screen_info __section(".data");
+-EXPORT_SYMBOL_GPL(screen_info);
++struct sysfb_display_info sysfb_primary_display __section(".data");
++EXPORT_SYMBOL_GPL(sysfb_primary_display);
+ #endif
+ 
+-static void __init init_screen_info(void)
++static void __init init_primary_display(void)
+ {
+ 	struct screen_info *si;
+ 
+@@ -75,13 +75,13 @@ static void __init init_screen_info(void)
+ 			pr_err("Could not map screen_info config table\n");
+ 			return;
+ 		}
+-		screen_info = *si;
++		sysfb_primary_display.screen = *si;
+ 		memset(si, 0, sizeof(*si));
+ 		early_memunmap(si, sizeof(*si));
+ 
+-		if (memblock_is_map_memory(screen_info.lfb_base))
+-			memblock_mark_nomap(screen_info.lfb_base,
+-					    screen_info.lfb_size);
++		if (memblock_is_map_memory(sysfb_primary_display.screen.lfb_base))
++			memblock_mark_nomap(sysfb_primary_display.screen.lfb_base,
++					    sysfb_primary_display.screen.lfb_size);
+ 
+ 		if (IS_ENABLED(CONFIG_EFI_EARLYCON))
+ 			efi_earlycon_reprobe();
+@@ -274,5 +274,5 @@ void __init efi_init(void)
+ 	if (IS_ENABLED(CONFIG_X86) ||
+ 	    IS_ENABLED(CONFIG_SYSFB) ||
+ 	    IS_ENABLED(CONFIG_EFI_EARLYCON))
+-		init_screen_info();
++		init_primary_display();
+ }
 diff --git a/drivers/firmware/efi/libstub/efi-stub-entry.c b/drivers/firmware/efi/libstub/efi-stub-entry.c
-index 401ecbbdf331..aa85e910fe59 100644
+index a6c049835190..401ecbbdf331 100644
 --- a/drivers/firmware/efi/libstub/efi-stub-entry.c
 +++ b/drivers/firmware/efi/libstub/efi-stub-entry.c
-@@ -14,18 +14,15 @@ static void *kernel_image_addr(void *addr)
- 	return addr + kernel_image_offset;
- }
- 
--struct screen_info *alloc_screen_info(void)
-+struct sysfb_display_info *alloc_primary_display(void)
- {
- 	if (IS_ENABLED(CONFIG_ARM))
--		return __alloc_screen_info();
-+		return __alloc_primary_display();
- 
- 	if (IS_ENABLED(CONFIG_X86) ||
- 	    IS_ENABLED(CONFIG_EFI_EARLYCON) ||
--	    IS_ENABLED(CONFIG_SYSFB)) {
--		struct sysfb_display_info *dpy = kernel_image_addr(&sysfb_primary_display);
--
--		return &dpy->screen;
--	}
-+	    IS_ENABLED(CONFIG_SYSFB))
-+		return kernel_image_addr(&sysfb_primary_display);
- 
- 	return NULL;
- }
-diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
-index 9cb814c5ba1b..42d6073bcd06 100644
---- a/drivers/firmware/efi/libstub/efi-stub.c
-+++ b/drivers/firmware/efi/libstub/efi-stub.c
-@@ -10,7 +10,7 @@
-  */
+@@ -1,13 +1,18 @@
+ // SPDX-License-Identifier: GPL-2.0-only
  
  #include <linux/efi.h>
 -#include <linux/screen_info.h>
 +#include <linux/sysfb.h>
+ 
  #include <asm/efi.h>
  
  #include "efistub.h"
-@@ -48,23 +48,33 @@
- static u64 virtmap_base = EFI_RT_VIRTUAL_BASE;
- static bool flat_va_mapping = (EFI_RT_VIRTUAL_OFFSET != 0);
  
--void __weak free_screen_info(struct screen_info *si)
--{
--}
-+void __weak free_primary_display(struct sysfb_display_info *dpy)
-+{ }
- 
--static struct screen_info *setup_graphics(void)
-+static struct sysfb_display_info *setup_primary_display(void)
- {
--	struct screen_info *si, tmp = {};
-+	struct sysfb_display_info *dpy;
-+	struct screen_info *screen = NULL;
-+	struct edid_info *edid = NULL;
-+	efi_status_t status;
- 
--	if (efi_setup_graphics(&tmp, NULL) != EFI_SUCCESS)
-+	dpy = alloc_primary_display();
-+	if (!dpy)
- 		return NULL;
-+	screen = &dpy->screen;
-+#if defined(CONFIG_FIRMWARE_EDID)
-+	edid = &dpy->edid;
-+#endif
- 
--	si = alloc_screen_info();
--	if (!si)
--		return NULL;
-+	status = efi_setup_graphics(screen, edid);
-+	if (status != EFI_SUCCESS)
-+		goto err_free_primary_display;
- 
--	*si = tmp;
--	return si;
-+	return dpy;
+-static unsigned long screen_info_offset;
++static unsigned long kernel_image_offset;
 +
-+err_free_primary_display:
-+	free_primary_display(dpy);
-+	return NULL;
- }
++static void *kernel_image_addr(void *addr)
++{
++	return addr + kernel_image_offset;
++}
  
- static void install_memreserve_table(void)
-@@ -145,14 +155,14 @@ efi_status_t efi_stub_common(efi_handle_t handle,
- 			     unsigned long image_addr,
- 			     char *cmdline_ptr)
+ struct screen_info *alloc_screen_info(void)
  {
--	struct screen_info *si;
-+	struct sysfb_display_info *dpy;
- 	efi_status_t status;
+@@ -16,8 +21,11 @@ struct screen_info *alloc_screen_info(void)
  
- 	status = check_platform_features();
- 	if (status != EFI_SUCCESS)
+ 	if (IS_ENABLED(CONFIG_X86) ||
+ 	    IS_ENABLED(CONFIG_EFI_EARLYCON) ||
+-	    IS_ENABLED(CONFIG_SYSFB))
+-		return (void *)&screen_info + screen_info_offset;
++	    IS_ENABLED(CONFIG_SYSFB)) {
++		struct sysfb_display_info *dpy = kernel_image_addr(&sysfb_primary_display);
++
++		return &dpy->screen;
++	}
+ 
+ 	return NULL;
+ }
+@@ -73,7 +81,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
  		return status;
+ 	}
  
--	si = setup_graphics();
-+	dpy = setup_primary_display();
+-	screen_info_offset = image_addr - (unsigned long)image->image_base;
++	kernel_image_offset = image_addr - (unsigned long)image->image_base;
  
- 	efi_retrieve_eventlog();
+ 	status = efi_stub_common(handle, image, image_addr, cmdline_ptr);
  
-@@ -172,7 +182,8 @@ efi_status_t efi_stub_common(efi_handle_t handle,
+diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
+index 8e0f9d08397f..46ad95084b50 100644
+--- a/drivers/firmware/efi/sysfb_efi.c
++++ b/drivers/firmware/efi/sysfb_efi.c
+@@ -176,7 +176,7 @@ static int __init efifb_set_system(struct screen_info *si, const struct dmi_syst
  
- 	status = efi_boot_kernel(handle, image, image_addr, cmdline_ptr);
- 
--	free_screen_info(si);
-+	free_primary_display(dpy);
-+
- 	return status;
- }
- 
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index b2fb0c3fa721..979a21818cc1 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -36,6 +36,7 @@
- 
- struct edid_info;
- struct screen_info;
-+struct sysfb_display_info;
- 
- extern bool efi_no5lvl;
- extern bool efi_nochunk;
-@@ -1175,9 +1176,9 @@ efi_enable_reset_attack_mitigation(void) { }
- 
- void efi_retrieve_eventlog(void);
- 
--struct screen_info *alloc_screen_info(void);
--struct screen_info *__alloc_screen_info(void);
--void free_screen_info(struct screen_info *si);
-+struct sysfb_display_info *alloc_primary_display(void);
-+struct sysfb_display_info *__alloc_primary_display(void);
-+void free_primary_display(struct sysfb_display_info *dpy);
- 
- void efi_cache_sync_image(unsigned long image_base,
- 			  unsigned long alloc_size);
-diff --git a/drivers/firmware/efi/libstub/primary_display.c b/drivers/firmware/efi/libstub/primary_display.c
-new file mode 100644
-index 000000000000..cdaebab26514
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/primary_display.c
-@@ -0,0 +1,56 @@
-+// SPDX-License-Identifier: GPL-2.0
-+
-+#include <linux/efi.h>
-+#include <linux/sysfb.h>
-+
-+#include <asm/efi.h>
-+
-+#include "efistub.h"
-+
-+/*
-+ * There are two ways of populating the core kernel's sysfb_primary_display
-+ * via the stub:
-+ *
-+ *   - using a configuration table, which relies on the EFI init code to
-+ *     locate the table and copy the contents; or
-+ *
-+ *   - by linking directly to the core kernel's copy of the global symbol.
-+ *
-+ * The latter is preferred because it makes the EFIFB earlycon available very
-+ * early, but it only works if the EFI stub is part of the core kernel image
-+ * itself. The zboot decompressor can only use the configuration table
-+ * approach.
-+ */
-+
-+static efi_guid_t primary_display_guid = LINUX_EFI_PRIMARY_DISPLAY_TABLE_GUID;
-+
-+struct sysfb_display_info *__alloc_primary_display(void)
-+{
-+	struct sysfb_display_info *dpy;
-+	efi_status_t status;
-+
-+	status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
-+			     sizeof(*dpy), (void **)&dpy);
-+
-+	if (status != EFI_SUCCESS)
-+		return NULL;
-+
-+	memset(dpy, 0, sizeof(*dpy));
-+
-+	status = efi_bs_call(install_configuration_table,
-+			     &primary_display_guid, dpy);
-+	if (status == EFI_SUCCESS)
-+		return dpy;
-+
-+	efi_bs_call(free_pool, dpy);
-+	return NULL;
-+}
-+
-+void free_primary_display(struct sysfb_display_info *dpy)
-+{
-+	if (!dpy)
-+		return;
-+
-+	efi_bs_call(install_configuration_table, &primary_display_guid, NULL);
-+	efi_bs_call(free_pool, dpy);
-+}
-diff --git a/drivers/firmware/efi/libstub/screen_info.c b/drivers/firmware/efi/libstub/screen_info.c
-deleted file mode 100644
-index 5d3a1e32d177..000000000000
---- a/drivers/firmware/efi/libstub/screen_info.c
-+++ /dev/null
-@@ -1,53 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0
--
--#include <linux/efi.h>
--#include <linux/screen_info.h>
--
--#include <asm/efi.h>
--
--#include "efistub.h"
--
--/*
-- * There are two ways of populating the core kernel's struct screen_info via the stub:
-- * - using a configuration table, like below, which relies on the EFI init code
-- *   to locate the table and copy the contents;
-- * - by linking directly to the core kernel's copy of the global symbol.
-- *
-- * The latter is preferred because it makes the EFIFB earlycon available very
-- * early, but it only works if the EFI stub is part of the core kernel image
-- * itself. The zboot decompressor can only use the configuration table
-- * approach.
-- */
--
--static efi_guid_t screen_info_guid = LINUX_EFI_SCREEN_INFO_TABLE_GUID;
--
--struct screen_info *__alloc_screen_info(void)
--{
--	struct screen_info *si;
--	efi_status_t status;
--
--	status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
--			     sizeof(*si), (void **)&si);
--
--	if (status != EFI_SUCCESS)
--		return NULL;
--
--	memset(si, 0, sizeof(*si));
--
--	status = efi_bs_call(install_configuration_table,
--			     &screen_info_guid, si);
--	if (status == EFI_SUCCESS)
--		return si;
--
--	efi_bs_call(free_pool, si);
--	return NULL;
--}
--
--void free_screen_info(struct screen_info *si)
--{
--	if (!si)
--		return;
--
--	efi_bs_call(install_configuration_table, &screen_info_guid, NULL);
--	efi_bs_call(free_pool, si);
--}
-diff --git a/drivers/firmware/efi/libstub/zboot.c b/drivers/firmware/efi/libstub/zboot.c
-index c47ace06f010..4b76f74c56da 100644
---- a/drivers/firmware/efi/libstub/zboot.c
-+++ b/drivers/firmware/efi/libstub/zboot.c
-@@ -26,9 +26,9 @@ void __weak efi_cache_sync_image(unsigned long image_base,
- 	// executable code loaded into memory to be safe for execution.
- }
- 
--struct screen_info *alloc_screen_info(void)
-+struct sysfb_display_info *alloc_primary_display(void)
+ static int __init efifb_set_system_callback(const struct dmi_system_id *id)
  {
--	return __alloc_screen_info();
-+	return __alloc_primary_display();
+-	return efifb_set_system(&screen_info, id);
++	return efifb_set_system(&sysfb_primary_display.screen, id);
  }
  
- asmlinkage efi_status_t __efiapi
+ #define EFIFB_DMI_SYSTEM_ID(vendor, name, enumid)		\
+@@ -316,7 +316,7 @@ static struct device_node *find_pci_overlap_node(void)
+ 		}
+ 
+ 		for_each_of_pci_range(&parser, &range)
+-			if (efifb_overlaps_pci_range(&screen_info, &range))
++			if (efifb_overlaps_pci_range(&sysfb_primary_display.screen, &range))
+ 				return np;
+ 	}
+ 	return NULL;
+diff --git a/drivers/firmware/sysfb.c b/drivers/firmware/sysfb.c
+index 916b28538a29..1f671f9219b0 100644
+--- a/drivers/firmware/sysfb.c
++++ b/drivers/firmware/sysfb.c
+@@ -66,7 +66,7 @@ static bool sysfb_unregister(void)
+  */
+ void sysfb_disable(struct device *dev)
+ {
+-	struct screen_info *si = &screen_info;
++	struct screen_info *si = &sysfb_primary_display.screen;
+ 	struct device *parent;
+ 
+ 	mutex_lock(&disable_lock);
+@@ -92,7 +92,7 @@ EXPORT_SYMBOL_GPL(sysfb_disable);
+  */
+ bool sysfb_handles_screen_info(void)
+ {
+-	const struct screen_info *si = &screen_info;
++	const struct screen_info *si = &sysfb_primary_display.screen;
+ 
+ 	return !!screen_info_video_type(si);
+ }
+@@ -141,7 +141,7 @@ static struct device *sysfb_parent_dev(const struct screen_info *si)
+ 
+ static __init int sysfb_init(void)
+ {
+-	struct screen_info *si = &screen_info;
++	struct screen_info *si = &sysfb_primary_display.screen;
+ 	struct device *parent;
+ 	unsigned int type;
+ 	struct simplefb_platform_data mode;
+diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
+index a53af6fe81a6..9c937190be81 100644
+--- a/drivers/hv/vmbus_drv.c
++++ b/drivers/hv/vmbus_drv.c
+@@ -29,7 +29,7 @@
+ #include <linux/delay.h>
+ #include <linux/panic_notifier.h>
+ #include <linux/ptrace.h>
+-#include <linux/screen_info.h>
++#include <linux/sysfb.h>
+ #include <linux/efi.h>
+ #include <linux/random.h>
+ #include <linux/kernel.h>
+@@ -2340,8 +2340,8 @@ static void __maybe_unused vmbus_reserve_fb(void)
+ 	if (efi_enabled(EFI_BOOT)) {
+ 		/* Gen2 VM: get FB base from EFI framebuffer */
+ 		if (IS_ENABLED(CONFIG_SYSFB)) {
+-			start = screen_info.lfb_base;
+-			size = max_t(__u32, screen_info.lfb_size, 0x800000);
++			start = sysfb_primary_display.screen.lfb_base;
++			size = max_t(__u32, sysfb_primary_display.screen.lfb_size, 0x800000);
+ 		}
+ 	} else {
+ 		/* Gen1 VM: get FB base from PCI */
+diff --git a/drivers/pci/vgaarb.c b/drivers/pci/vgaarb.c
+index 436fa7f4c387..805be9ea4a34 100644
+--- a/drivers/pci/vgaarb.c
++++ b/drivers/pci/vgaarb.c
+@@ -26,7 +26,7 @@
+ #include <linux/poll.h>
+ #include <linux/miscdevice.h>
+ #include <linux/slab.h>
+-#include <linux/screen_info.h>
++#include <linux/sysfb.h>
+ #include <linux/vt.h>
+ #include <linux/console.h>
+ #include <linux/acpi.h>
+@@ -557,7 +557,7 @@ EXPORT_SYMBOL(vga_put);
+ static bool vga_is_firmware_default(struct pci_dev *pdev)
+ {
+ #if defined CONFIG_X86
+-	return pdev == screen_info_pci_dev(&screen_info);
++	return pdev == screen_info_pci_dev(&sysfb_primary_display.screen);
+ #else
+ 	return false;
+ #endif
+diff --git a/drivers/video/screen_info_pci.c b/drivers/video/screen_info_pci.c
+index 66bfc1d0a6dc..8f34d8a74f09 100644
+--- a/drivers/video/screen_info_pci.c
++++ b/drivers/video/screen_info_pci.c
+@@ -4,6 +4,7 @@
+ #include <linux/printk.h>
+ #include <linux/screen_info.h>
+ #include <linux/string.h>
++#include <linux/sysfb.h>
+ 
+ static struct pci_dev *screen_info_lfb_pdev;
+ static size_t screen_info_lfb_bar;
+@@ -26,7 +27,7 @@ static bool __screen_info_relocation_is_valid(const struct screen_info *si, stru
+ 
+ void screen_info_apply_fixups(void)
+ {
+-	struct screen_info *si = &screen_info;
++	struct screen_info *si = &sysfb_primary_display.screen;
+ 
+ 	if (screen_info_lfb_pdev) {
+ 		struct resource *pr = &screen_info_lfb_pdev->resource[screen_info_lfb_bar];
+@@ -75,7 +76,7 @@ static void screen_info_fixup_lfb(struct pci_dev *pdev)
+ 		.flags = IORESOURCE_MEM,
+ 	};
+ 	const struct resource *pr;
+-	const struct screen_info *si = &screen_info;
++	const struct screen_info *si = &sysfb_primary_display.screen;
+ 
+ 	if (screen_info_lfb_pdev)
+ 		return; // already found
+diff --git a/include/linux/screen_info.h b/include/linux/screen_info.h
+index 1690706206e8..c022403c599a 100644
+--- a/include/linux/screen_info.h
++++ b/include/linux/screen_info.h
+@@ -151,6 +151,4 @@ static inline struct pci_dev *screen_info_pci_dev(const struct screen_info *si)
+ }
+ #endif
+ 
+-extern struct screen_info screen_info;
+-
+ #endif /* _SCREEN_INFO_H */
+diff --git a/include/linux/sysfb.h b/include/linux/sysfb.h
+index 8b37247528bf..e8bde392c690 100644
+--- a/include/linux/sysfb.h
++++ b/include/linux/sysfb.h
+@@ -8,11 +8,10 @@
+  */
+ 
+ #include <linux/err.h>
++#include <linux/platform_data/simplefb.h>
+ #include <linux/screen_info.h>
+ #include <linux/types.h>
+ 
+-#include <linux/platform_data/simplefb.h>
+-
+ struct device;
+ struct platform_device;
+ struct screen_info;
+@@ -65,6 +64,8 @@ struct sysfb_display_info {
+ 	struct screen_info screen;
+ };
+ 
++extern struct sysfb_display_info sysfb_primary_display;
++
+ #ifdef CONFIG_SYSFB
+ 
+ void sysfb_disable(struct device *dev);
 -- 
 2.51.1
 
