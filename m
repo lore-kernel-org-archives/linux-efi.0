@@ -1,37 +1,37 @@
 Received: from fanzine2.igalia.com (fanzine2.igalia.com [213.97.179.56])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD0A22D879A
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7B6A2C2363
 	for <linux-efi@vger.kernel.org>; Wed,  3 Dec 2025 09:40:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.97.179.56
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764754806; cv=none; b=dl6uHqJX0eYkc0x6qwhTaqxUOg2PJeO56M4Lx0pKMsFW1TmndX+T/1qr8SuVkbqCi0fLavzVsh37TTucNen3rgF45HKc9Pdmf7/JaeRH3P1S8XroYceiZexVExtbGU14FcyaNG9USA9YJFWQqYi4okshfZaiwvaN6ywbMfgEG70=
+	t=1764754807; cv=none; b=ZbZe8hXRRDLFYiIz0w8N74nk7tHfX4Mq4IUJ3dsvZoSEOc+qsWeSJ0agiUGLOTsdRZuwyuNpjrqjo8rhlYZ/Kz8sA7ZlA2Dftkr1uCjIAC947ramK1v7TAeQx2YFhd3ocMI0wdUaQbU6KHgVhIH6sKJ8sDT9qtaObCWOJywmkt4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764754806; c=relaxed/simple;
-	bh=DWm+k38FX+Ao99POp9HZ/bDgIX5jiTKrW0qdWSLRR2Q=;
+	s=arc-20240116; t=1764754807; c=relaxed/simple;
+	bh=ron9Z0yLFDr166XSuaSfKRCJ6kYuH2WDmX83Q6ecr7E=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=iIk9oAmASo7HZbZivMeIQm8FgqMkf6fMpTdTWJNlRLXCyn4y3rzC9dS4RluvTne7KRoQgWJCKmYuejfomvOsaJ+ya8n2WUxmPC/Gw6Y82NU2On3kQXe+R1Q+S1EGkVsgHsUTgOZ0tM52qy2zibuoy1H/Dfhg3d0ZYi0VbbgeX1w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com; spf=pass smtp.mailfrom=igalia.com; dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b=k1S90vFd; arc=none smtp.client-ip=213.97.179.56
+	 MIME-Version; b=YbUVe7Hbg1zYZ2Ce2Of0K6nv0Hq5ifz1JgeUNiQiCpvQLW2IOrA64Mws1b94xhmkXoxSiKofmLGqqJMqo7eVuHNoiqReggjw/FkgC4x98bJTWYtRf7O7+OIu5tJPcgJSJAf2+dKkOAaD3Hw4HZzocFFWJgj9DMM7whI/MNVKc0k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com; spf=pass smtp.mailfrom=igalia.com; dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b=iyneG3zF; arc=none smtp.client-ip=213.97.179.56
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=igalia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b="k1S90vFd"
+	dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b="iyneG3zF"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
 	s=20170329; h=Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:
 	Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
 	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
 	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
 	List-Post:List-Owner:List-Archive;
-	bh=JnS7zJRU5hs0Ga8wtZ4i1P265SphC/Igkc2CF/pMUqI=; b=k1S90vFdaajyNiFVEnunmF/P9V
-	7F+OKKUsl0ngJdpZOxfGVQw/AjGDZqewgYXxNToxIfuQs066T39ntvwfo6pmgpwiKUbSkgk+S5/fa
-	OSnXplhM610O/dTr/+0e49SJAbv3eodf9FD4A+6sZz1YSCyAicc4BS+eDi+Pq+NDTerbwL98IEkHG
-	4hzdYq5UsHeQcsHjmsRxY1jVBt5feOVhgIKyYJVJnCM/6qjaVaB7gQtvpdmvtMNLlUC40BzRdfDCy
-	a7t28fWWhIdWkf39cpDl7mjlB6/9xASojyr3AnbPm1P2b1CCWRWuBipMkcMfduKfFtldGFNj1eblj
-	xaPvxIUA==;
+	bh=lKGn1CzxAhdrGZVszVj9FBDrL6gSkSoPWkxyoNvNpvw=; b=iyneG3zF8U7tynwnZt7yHVLOm+
+	f7oxQZi6QKkyImz+XN9Z6ogxHbLFRAkXLispMJW1h7cu2nFccE1v2dSjl4C6801uO3KlYEv15tMAA
+	N+ZhiE1vz/YR1V2+bC1YxbIARADQ09gfmUkS+QajblO73TBM1Rm8vOf7laqfIbXcHTJa7YYk0VNyM
+	Lco2EoTXtRB9jZTTEHe9C/soRTVL45LUJA56f7yaHUyjBXR7M1qb/ImCDLaADG5/l3xaCutc0ZYgz
+	yh1H70b8zASWKkDbWUyKl5lqzXopfzxNMt0FyNZKKNZEBy75XYmdfV3sfnHCN4gFhMQ7zC33ClkIE
+	BbT3oFew==;
 Received: from [90.240.106.137] (helo=localhost)
 	by fanzine2.igalia.com with utf8esmtpsa 
 	(Cipher TLS1.3:ECDHE_SECP256R1__RSA_PSS_RSAE_SHA256__AES_256_GCM:256) (Exim)
-	id 1vQjL5-008CWC-Cc; Wed, 03 Dec 2025 10:39:59 +0100
+	id 1vQjL3-008CVw-Vn; Wed, 03 Dec 2025 10:39:58 +0100
 From: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
 To: dri-devel@lists.freedesktop.org
 Cc: kernel-dev@igalia.com,
@@ -40,9 +40,9 @@ Cc: kernel-dev@igalia.com,
 	Ard Biesheuvel <ardb@kernel.org>,
 	Melissa Wen <mwen@igalia.com>,
 	linux-efi@vger.kernel.org
-Subject: [PATCH v3 4/4] efi: sysfb_efi: Fix efidrmfb and simpledrmfb on Valve Steam Deck
-Date: Wed,  3 Dec 2025 09:39:48 +0000
-Message-ID: <20251203093948.54296-5-tvrtko.ursulin@igalia.com>
+Subject: [PATCH v3 2/4] efi: sysfb_efi: Fix lfb_linelength calculation when applying quirks
+Date: Wed,  3 Dec 2025 09:39:46 +0000
+Message-ID: <20251203093948.54296-3-tvrtko.ursulin@igalia.com>
 X-Mailer: git-send-email 2.51.1
 In-Reply-To: <20251203093948.54296-1-tvrtko.ursulin@igalia.com>
 References: <20251203093948.54296-1-tvrtko.ursulin@igalia.com>
@@ -54,93 +54,34 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Valve Steam Deck has a 800x1280 portrait screen installed in a landscape
-orientation. The firmware offers a software rotated 1280x800 mode which
-GRUB can be made to switch to when displaying a boot menu. If this mode
-was selected frame buffer drivers will see this fake mode and fbcon
-rendering will be corrupted.
-
-Lets therefore add a selective quirk inside the current "swap with and
-height" handling, which will detect this exact mode and fix it up back to
-the native one.
-
-This will allow the DRM based frame buffer drivers to detect the correct
-mode and, apply the existing panel orientation quirk, and render the
-console in landscape mode with no corruption.
+PIXEL_BIT_MASK formats can have either less or more than four bytes per
+pixel so lets fix the lfb_linelenght calculation when applying the
+swapped width and height quirks.
 
 Signed-off-by: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
+Suggested-by: Thomas Zimmermann <tzimmermann@suse.de>
 Cc: Thomas Zimmermann <tzimmermann@suse.de>
 Cc: Ard Biesheuvel <ardb@kernel.org>
 Cc: Melissa Wen <mwen@igalia.com>
 Cc: linux-efi@vger.kernel.org
 ---
- drivers/firmware/efi/sysfb_efi.c | 47 ++++++++++++++++++++++++++++++++
- 1 file changed, 47 insertions(+)
+ drivers/firmware/efi/sysfb_efi.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
-index eacf9a50eab2..d69330b4e09c 100644
+index 1d8b6966731c..14b61414c33a 100644
 --- a/drivers/firmware/efi/sysfb_efi.c
 +++ b/drivers/firmware/efi/sysfb_efi.c
-@@ -241,6 +241,33 @@ static int __init efifb_swap_width_height(const struct dmi_system_id *id)
- 	return 1;
+@@ -358,7 +358,9 @@ __init void sysfb_apply_efi_quirks(void)
+ 	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI &&
+ 	    dmi_check_system(efifb_dmi_swap_width_height)) {
+ 		swap(screen_info.lfb_width, screen_info.lfb_height);
+-		screen_info.lfb_linelength = 4 * screen_info.lfb_width;
++		screen_info.lfb_linelength = (unsigned int)screen_info.lfb_depth *
++					     screen_info.lfb_width /
++					     BITS_PER_BYTE;
+ 	}
  }
- 
-+struct efifb_mode_fixup {
-+	unsigned int width;
-+	unsigned int height;
-+	unsigned int linelength;
-+};
-+
-+static int __init
-+efifb_check_and_swap_width_height(const struct dmi_system_id *id)
-+{
-+	const struct efifb_mode_fixup *data = id->driver_data;
-+
-+	if (data->width == screen_info.lfb_width &&
-+	    data->height == screen_info.lfb_height) {
-+		swap(screen_info.lfb_width, screen_info.lfb_height);
-+		screen_info.lfb_linelength = data->linelength;
-+		screen_info.lfb_size = data->linelength * data->width;
-+	}
-+
-+	return 1;
-+}
-+
-+static const struct efifb_mode_fixup efifb_steamdeck_mode_fixup __initconst = {
-+	.width = 1280,
-+	.height = 800,
-+	.linelength = 3328,
-+};
-+
- /*
-  * Some devices have a portrait LCD but advertise a landscape resolution (and
-  * pitch). We simply swap width and height for these devices so that we can
-@@ -296,6 +323,26 @@ static const struct dmi_system_id efifb_dmi_swap_width_height[] __initconst = {
- 		},
- 		.callback = efifb_swap_width_height,
- 	},
-+	{
-+		/* Valve Steam Deck (Jupiter) */
-+		.matches = {
-+			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Valve"),
-+			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "Jupiter"),
-+			DMI_EXACT_MATCH(DMI_PRODUCT_VERSION, "1"),
-+		},
-+		.callback = efifb_check_and_swap_width_height,
-+		.driver_data = (void *)&efifb_steamdeck_mode_fixup,
-+	},
-+	{
-+		/* Valve Steam Deck (Galileo) */
-+		.matches = {
-+			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Valve"),
-+			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "Galileo"),
-+			DMI_EXACT_MATCH(DMI_PRODUCT_VERSION, "1"),
-+		},
-+		.callback = efifb_check_and_swap_width_height,
-+		.driver_data = (void *)&efifb_steamdeck_mode_fixup,
-+	},
- 	{},
- };
  
 -- 
 2.51.1
