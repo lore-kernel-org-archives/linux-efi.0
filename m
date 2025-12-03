@@ -1,125 +1,87 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from fanzine2.igalia.com (fanzine2.igalia.com [213.97.179.56])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A80022DC79D
-	for <linux-efi@vger.kernel.org>; Wed,  3 Dec 2025 09:25:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7A6921CFF6
+	for <linux-efi@vger.kernel.org>; Wed,  3 Dec 2025 09:40:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.97.179.56
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764753901; cv=none; b=TUmb+AA4D8hA8yOJZpwHBHuIK68d22h51wHiZ7fxSrCQWfwXg4jkQ12p1bpu1Tq+S6+v9dFjsnk0jdGkVQRaaBPvynveDAKSpEAUHzBfnd+fBXKvqz/9amOiwhJHSwL1nDXfiYIRUTpE+7fSGokM504gJZqmj3rSyUAEYAmOYjs=
+	t=1764754806; cv=none; b=CoZ59+zgYq1KdLYa2fBuJw4Nk4DlTp3WVH69Y+bD5WxfU3dpapOo59mGQYGNZcizS9hkl4m7zvXR72jIJbGm5bbdghEtSu1+zvmVsppEVQRkss1YnJr1rXNZl8DFo5gvIhZ4HW2gwQ1SUIFFOAblhhWPhBxCnZeZnR/wEsUWmEI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764753901; c=relaxed/simple;
-	bh=5cQoZpxXJzGLGcDuGVHuzwpNUqJ1VJI8wGDmQJMjGLI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Y2momsNl+MOqMXfak74QaPLAdaGq8TB4CryoCRiy2xgV/VHS10uaJBbzXyPyyfXt6afUzIy5G+lTV9s40JX1Y947vdLSgYx957CxRVVtNNH2ZXYl8JMUyA/adFBoLRkDJbSSoiaaTYr/UktSwXm0M1T4RP8sUN3LwoNPQGvTrFU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SL7hIz6U; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1764754806; c=relaxed/simple;
+	bh=j7NcVlVEEpTyFSnuixnorltXYjW7UYpAo8UryAIM5qQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=ul2XRxjCJcKpHjMZFubBBNeLcEZOd+uTMT+vuK2HrVYet1vs7SH3gXcjNROh17ACDgjSM74OUbaTsQY+wgaoDP0PZiW887lcnxKO+C4CTS+xIruZcFMUgQAOdLziiNtHaeFge5CszNtgMoNvZ/R4vx59w164Re0V02hgaEe3crg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com; spf=pass smtp.mailfrom=igalia.com; dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b=Uatke11T; arc=none smtp.client-ip=213.97.179.56
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=igalia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SL7hIz6U"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2C98AC19421
-	for <linux-efi@vger.kernel.org>; Wed,  3 Dec 2025 09:25:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764753901;
-	bh=5cQoZpxXJzGLGcDuGVHuzwpNUqJ1VJI8wGDmQJMjGLI=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=SL7hIz6UipAnpMLsmTBfauhq3ESkZYG+TAd3NSg6QWzpKaDv17JCWRaEJHBNvMUSD
-	 4zC3BZCvp0DN72cM8I7PkTsJUKIBcyfkVqlLjTzdf8WGJFsxbUNPKcIFRlWcFIPX9v
-	 bKXBD1i8E3O013+lXOoaVIxyItFs/BHoMv4AsQhwZjhxUKXtfVPySlU81SAJ2dNT4C
-	 qzdPaDP0oxy6melPZA1M6SClJF9anpiMb414dU1SzmhGXU+5fbqPcrjJU3NK0m0eBC
-	 2k1lFeRQGgmG/K/FpsZZyouuuUoP7F49ogD1sCkGM4wtyai8dmcbvpU544r5xuyTU8
-	 3UdMp0LWugyPA==
-Received: by mail-lj1-f176.google.com with SMTP id 38308e7fff4ca-37d13ddaa6aso45637161fa.1
-        for <linux-efi@vger.kernel.org>; Wed, 03 Dec 2025 01:25:01 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCXC3WTn6gFpK/vJAlWlotEYhRmPM6AsEkmFM5YXYTSSEw6nqVYSx2OuOBB4+9mHjYQNo0Kz3Zv3mi0=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywac2+TYZ34caQor/baPabW2H2mvIegoQEtRs95kfJbiB4rMeRp
-	kAVvYqVdT6oc/tgAdJWVo98MI86Wt/3kURv83m2uQ+SFYCQiQWiGT1OUb3P1ekt4ae47vBpRUNg
-	qZkMPuASXYeP42XLi4DtRb9OAndMYvcQ=
-X-Google-Smtp-Source: AGHT+IFUbFPZkRMHj2S1PXyiHO3cOXOvhIvDv5bYE0J9aAY+JiOdXG5FhZFjbaahnOKR7FFqFseH404EH0QCN7gWjV0=
-X-Received: by 2002:a05:6512:3056:b0:594:55a3:c191 with SMTP id
- 2adb3069b0e04-597d3f234d8mr656196e87.14.1764753899534; Wed, 03 Dec 2025
- 01:24:59 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b="Uatke11T"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
+	s=20170329; h=Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:
+	Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
+	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
+	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+	List-Post:List-Owner:List-Archive;
+	bh=ha0ywpj/3JwjYOCczrwKYC/Pt6jKknOG54Qb0Na/Tic=; b=Uatke11TiXJg8jt4ZyTt8T1SJK
+	myouTE+g/Lfk+rQolL+DXM0WCTJtGWOQF7PasnwbXFgB4bq4SC605s/IeJpcpE58zk40bbamlh3av
+	ka0ePnR5b19R4v/JIkXctEz66zR/Vkt7oG5Sw9C8xZey1maWB8yOFrAdbbOxfnZ0lB8qYsjz9+kI2
+	zxBV2iROO7uzVrzSJ/PjlMrsY1X1JMmqHGUfAX7uFmvhKYkf46lmGWu4zjqLNdBEftU6GgiQIyZnK
+	MVz+Mw6fsSXTumUEK6If06YZGPAgvNJIXbNaW9sYXgD1417YEvzENNbdTSoKjGKyMsw5dwYIzS7oj
+	dhOhjksA==;
+Received: from [90.240.106.137] (helo=localhost)
+	by fanzine2.igalia.com with utf8esmtpsa 
+	(Cipher TLS1.3:ECDHE_SECP256R1__RSA_PSS_RSAE_SHA256__AES_256_GCM:256) (Exim)
+	id 1vQjL3-008CVq-9e; Wed, 03 Dec 2025 10:39:57 +0100
+From: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
+To: dri-devel@lists.freedesktop.org
+Cc: kernel-dev@igalia.com,
+	Tvrtko Ursulin <tvrtko.ursulin@igalia.com>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Melissa Wen <mwen@igalia.com>,
+	linux-efi@vger.kernel.org
+Subject: [PATCH v3 1/4] efi: sysfb_efi: Replace open coded swap with the macro
+Date: Wed,  3 Dec 2025 09:39:45 +0000
+Message-ID: <20251203093948.54296-2-tvrtko.ursulin@igalia.com>
+X-Mailer: git-send-email 2.51.1
+In-Reply-To: <20251203093948.54296-1-tvrtko.ursulin@igalia.com>
+References: <20251203093948.54296-1-tvrtko.ursulin@igalia.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251203090706.53778-1-tvrtko.ursulin@igalia.com> <20251203090706.53778-5-tvrtko.ursulin@igalia.com>
-In-Reply-To: <20251203090706.53778-5-tvrtko.ursulin@igalia.com>
-From: Ard Biesheuvel <ardb@kernel.org>
-Date: Wed, 3 Dec 2025 10:24:48 +0100
-X-Gmail-Original-Message-ID: <CAMj1kXHKAo-kspA73DPYMhrDtqFAQNMVCqRa4nbEGzrf_WBR2g@mail.gmail.com>
-X-Gm-Features: AWmQ_bkpPZGAIs3QlRVhpm1kUYO97u4UYkzmVKBIAJTGNV3gFzrV0rAmH2swZ4c
-Message-ID: <CAMj1kXHKAo-kspA73DPYMhrDtqFAQNMVCqRa4nbEGzrf_WBR2g@mail.gmail.com>
-Subject: Re: [PATCH v2 4/4] efi: sysfb_efi: Fix efidrmfb and simpledrmfb on
- Valve Steam Deck
-To: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
-Cc: dri-devel@lists.freedesktop.org, kernel-dev@igalia.com, 
-	Thomas Zimmermann <tzimmermann@suse.de>, Melissa Wen <mwen@igalia.com>, linux-efi@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Wed, 3 Dec 2025 at 10:07, Tvrtko Ursulin <tvrtko.ursulin@igalia.com> wrote:
->
-> Valve Steam Deck has a 800x1280 portrait screen installed in a landscape
-> orientation. The firmware offers a software rotated 1280x800 mode which
-> GRUB can be made to switch to when displaying a boot menu. If this mode
-> was selected frame buffer drivers will see this fake mode and fbcon
-> rendering will be corrupted.
->
-> Lets therefore add a selective quirk inside the current "swap with and
-> height" handling, which will detect this exact mode and fix it up back to
-> the native one.
->
-> This will allow the DRM based frame buffer drivers to detect the correct
-> mode and, apply the existing panel orientation quirk, and render the
-> console in landscape mode with no corruption.
->
-> Signed-off-by: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
-> Cc: Thomas Zimmermann <tzimmermann@suse.de>
-> Cc: Ard Biesheuvel <ardb@kernel.org>
-> Cc: Melissa Wen <mwen@igalia.com>
-> Cc: linux-efi@vger.kernel.org
-> ---
->  drivers/firmware/efi/sysfb_efi.c | 56 +++++++++++++++++++++++++++++---
->  1 file changed, 51 insertions(+), 5 deletions(-)
->
+Replace the open coded width height swap with the standard macro.
 
-Thanks for respinning this. But seeing the result, I think we can
-simplify this substantially by using two separate callbacks for the
-two cases.
+Signed-off-by: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
+Suggested-by: Thomas Zimmermann <tzimmermann@suse.de>
+Cc: Thomas Zimmermann <tzimmermann@suse.de>
+Cc: Ard Biesheuvel <ardb@kernel.org>
+Cc: Melissa Wen <mwen@igalia.com>
+Cc: linux-efi@vger.kernel.org
+---
+ drivers/firmware/efi/sysfb_efi.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-> diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
-> index eacf9a50eab2..566492e67798 100644
-> --- a/drivers/firmware/efi/sysfb_efi.c
-> +++ b/drivers/firmware/efi/sysfb_efi.c
-> @@ -231,16 +231,42 @@ static const struct dmi_system_id efifb_dmi_system_table[] __initconst = {
->         {},
->  };
->
-> +struct efifb_mode_fixup {
-> +       unsigned int width;
-> +       unsigned int height;
-> +       unsigned int linelength;
-> +};
-> +
->  static int __init efifb_swap_width_height(const struct dmi_system_id *id)
->  {
+diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
+index 1e509595ac03..1d8b6966731c 100644
+--- a/drivers/firmware/efi/sysfb_efi.c
++++ b/drivers/firmware/efi/sysfb_efi.c
+@@ -357,10 +357,7 @@ __init void sysfb_apply_efi_quirks(void)
+ 
+ 	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI &&
+ 	    dmi_check_system(efifb_dmi_swap_width_height)) {
+-		u16 temp = screen_info.lfb_width;
+-
+-		screen_info.lfb_width = screen_info.lfb_height;
+-		screen_info.lfb_height = temp;
++		swap(screen_info.lfb_width, screen_info.lfb_height);
+ 		screen_info.lfb_linelength = 4 * screen_info.lfb_width;
+ 	}
+ }
+-- 
+2.51.1
 
-Leave this one alone, and add
-
-static int __init efifb_check_and_swap_width_height(const struct
-dmi_system_id *id)
-{
-        const struct efifb_mode_fixup *data = id->driver_data;
-
-        if (data->width == screen_info.lfb_width &&
-            data->height == screen_info.lfb_height) {
-                swap(screen_info.lfb_width, screen_info.lfb_height);
-                screen_info.lfb_linelength = data->linelength;
-                screen_info.lfb_size = data->linelength * data->width;
-        }
-        return 1;
-}
-
-Note that we should always return 1 here, given that there is no point
-in trying other matches, even if the width/height check fails.
-
-And please make efifb_steamdeck_mode_fixup __initconst as well
