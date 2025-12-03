@@ -1,44 +1,51 @@
-Received: from out-189.mta1.migadu.com (out-189.mta1.migadu.com [95.215.58.189])
+Received: from fanzine2.igalia.com (fanzine2.igalia.com [213.97.179.56])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E975F27057D
-	for <linux-efi@vger.kernel.org>; Wed,  3 Dec 2025 04:29:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.189
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4FE9628DB46
+	for <linux-efi@vger.kernel.org>; Wed,  3 Dec 2025 09:07:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.97.179.56
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764736183; cv=none; b=fVgDcGyAZ6Z8gLOkBkxFBV4qZaiH1D0wQmn3heH7ZXWiOF1dP2xtAORkZOUxCv7vW76c9VtZrRFvCHa5YhXLbOaxWFjEfcUwAAZfMFTXSeQt0XAbEiRzgg1am421YBMMSgORQU7Jrb0BHm7P196HhoAcZYWmokZB70AfQrfNw+I=
+	t=1764752838; cv=none; b=gmSBomnjFPwQkbUCxCK1NAM8NTrnIFV1Z0gna+ciQaWG3ZA+xrNz3VtB6YFCHLBY938Z4D/+f6UWV4wJqFKzPN4hcavGelOpOQrqWSwcm2FTYsgXcfqDyjk6kPToG5p261xtYkoNzm8YqKTvJTucGTSZrus4f0uSURhbSCHwFRY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764736183; c=relaxed/simple;
-	bh=PRKsoquST5llbW2p7IYcBfsRWWFkLjLhJ2QscrO59LM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Der+vZSGCB6n4qbZvMESqEbW/sblUT8Jp0WmuD45oqol6AmvUNsHuA/BkTR/jniD4TIANTYA4gO+qoU8B6fkrQnFYOKrm5aXcRrmEhDp5xBHzi+K5lEpThDzT7Z4Gx5qA4LB+m91SAneAN9BU0YIUTT3L3T0Cz83h4NOI3UNRng=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=packett.cool; spf=pass smtp.mailfrom=packett.cool; dkim=pass (2048-bit key) header.d=packett.cool header.i=@packett.cool header.b=u1KQvWd2; arc=none smtp.client-ip=95.215.58.189
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=packett.cool
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=packett.cool
+	s=arc-20240116; t=1764752838; c=relaxed/simple;
+	bh=j7NcVlVEEpTyFSnuixnorltXYjW7UYpAo8UryAIM5qQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=BVmMO0iBvi6bNBMD2QdVQBqPC6yesUJ1YOgATbUnDLmbuVSIMYsadDe2hRQIctxuqb3A2dQmmV6QF3Yepq++5X98q8EJd5YmJ5i/EJRFVHzPGTsNnlkjUXxI4/M8gnYBdDRFFve7V5ko4/J8f5YTpCxyx+1mApPCv7+N4f2x/YU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com; spf=pass smtp.mailfrom=igalia.com; dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b=F2edOS9q; arc=none smtp.client-ip=213.97.179.56
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=igalia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=packett.cool header.i=@packett.cool header.b="u1KQvWd2"
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=packett.cool;
-	s=key1; t=1764736168;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=HPuG0LGeUpQwYmuvaU8Ip5v/4vYxot6m+IfFCu3J3gw=;
-	b=u1KQvWd24yzXZPkBz/vFdBoVCQ8o9oRsFBx2dajCx16QXA4SmncNE2rBBY62JzcNrAQR8V
-	BCZKM1dPOQpF7nNsr2v2ab3h53vOxd8/R1EUs8Tx3KMhHyeMimNy5fjDRTbXOpXnjHfzny
-	aLAH4oyii0phwKBdI0WrJ+GpP/AszUmiOF0thBIWaa3rGFLM3VtiV9M9e6y9m98OggeMrR
-	QvZMC9oEFoi3mjXUztMmjT/iF8GI9+kmag4SSLwcNKdigBfOF8DWgtebY53EVOY6K/66wT
-	JuCAHKADdtyfCjYQZbVxOff0KzE1jc9Ve/dTLYwxENTLSj2/g++NhQpvxsbqLA==
-From: Val Packett <val@packett.cool>
-To: Kees Cook <kees@kernel.org>,
-	Tony Luck <tony.luck@intel.com>,
-	"Guilherme G. Piccoli" <gpiccoli@igalia.com>,
-	Ard Biesheuvel <ardb@kernel.org>
-Cc: Val Packett <val@packett.cool>,
-	linux-hardening@vger.kernel.org,
-	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] efi: pstore: Support late setup with TEE-backed efivars ops
-Date: Wed,  3 Dec 2025 01:28:29 -0300
-Message-ID: <20251203042850.14210-1-val@packett.cool>
+	dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b="F2edOS9q"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
+	s=20170329; h=Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:
+	Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
+	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
+	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+	List-Post:List-Owner:List-Archive;
+	bh=ha0ywpj/3JwjYOCczrwKYC/Pt6jKknOG54Qb0Na/Tic=; b=F2edOS9qcXspdwMHSOdzCrxf0f
+	0PMDEYy1/pQC9ewx2mn8QaLTYj4uzi6jRc0ftPZ0lOCjyqE0UiOi60hmAyMVPZL6KRnysVCcbwGFG
+	DPobfnDiyl6xcaa0IsNP5ZQmI2MoGyS6c5p2qphBkjMaS00r+4AmRiSzKJzGc45C92MHXWDLSTFwR
+	42ikBILhNxvA2FRtqkNAW14KRczYhbtVB6ygEIj2hR/P9f1qjHHsoqFqTETAYIVw6Q572JfXXQu3T
+	jBkNXE7d2GWvz65+CluRCzv/qTcSJ999tCl2ez0egjdWtpTVpkdfCwL58VjztgH5Z1JsKSNjVc/F1
+	rPFzdMYg==;
+Received: from [90.240.106.137] (helo=localhost)
+	by fanzine2.igalia.com with utf8esmtpsa 
+	(Cipher TLS1.3:ECDHE_SECP256R1__RSA_PSS_RSAE_SHA256__AES_256_GCM:256) (Exim)
+	id 1vQipJ-008BpR-QB; Wed, 03 Dec 2025 10:07:09 +0100
+From: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
+To: dri-devel@lists.freedesktop.org
+Cc: kernel-dev@igalia.com,
+	Tvrtko Ursulin <tvrtko.ursulin@igalia.com>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Melissa Wen <mwen@igalia.com>,
+	linux-efi@vger.kernel.org
+Subject: [PATCH v2 1/4] efi: sysfb_efi: Replace open coded swap with the macro
+Date: Wed,  3 Dec 2025 09:07:03 +0000
+Message-ID: <20251203090706.53778-2-tvrtko.ursulin@igalia.com>
+X-Mailer: git-send-email 2.51.1
+In-Reply-To: <20251203090706.53778-1-tvrtko.ursulin@igalia.com>
+References: <20251203090706.53778-1-tvrtko.ursulin@igalia.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -46,80 +53,35 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Migadu-Flow: FLOW_OUT
 
-On some platforms, EFI variable services only become available when an
-appropriate TEE driver is initialized such as qseecom, gsmi or stmm.
+Replace the open coded width height swap with the standard macro.
 
-This would work fine when efi_pstore was built as a module and loaded
-late by userspace, but with CONFIG_EFI_VARS_PSTORE=y this driver would
-quit due to non-writable efivars before the necessary driver had any
-chance to load.
-
-Listen to efivar_ops_nh notifications and retry the initialization when
-writable EFI variable ops become available.
-
-Signed-off-by: Val Packett <val@packett.cool>
+Signed-off-by: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
+Suggested-by: Thomas Zimmermann <tzimmermann@suse.de>
+Cc: Thomas Zimmermann <tzimmermann@suse.de>
+Cc: Ard Biesheuvel <ardb@kernel.org>
+Cc: Melissa Wen <mwen@igalia.com>
+Cc: linux-efi@vger.kernel.org
 ---
- drivers/firmware/efi/efi-pstore.c | 32 +++++++++++++++++++++++++++----
- 1 file changed, 28 insertions(+), 4 deletions(-)
+ drivers/firmware/efi/sysfb_efi.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-index a253b6144945..ad5192d5892e 100644
---- a/drivers/firmware/efi/efi-pstore.c
-+++ b/drivers/firmware/efi/efi-pstore.c
-@@ -253,14 +253,11 @@ static struct pstore_info efi_pstore_info = {
- 	.erase		= efi_pstore_erase,
- };
+diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
+index 1e509595ac03..1d8b6966731c 100644
+--- a/drivers/firmware/efi/sysfb_efi.c
++++ b/drivers/firmware/efi/sysfb_efi.c
+@@ -357,10 +357,7 @@ __init void sysfb_apply_efi_quirks(void)
  
--static int efivars_pstore_init(void)
-+static int efivars_pstore_setup(void)
- {
- 	if (!efivar_supports_writes())
- 		return 0;
- 
--	if (pstore_disable)
--		return 0;
+ 	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI &&
+ 	    dmi_check_system(efifb_dmi_swap_width_height)) {
+-		u16 temp = screen_info.lfb_width;
 -
- 	/*
- 	 * Notice that 1024 is the minimum here to prevent issues with
- 	 * decompression algorithms that were spotted during tests;
-@@ -285,8 +282,35 @@ static int efivars_pstore_init(void)
- 	return 0;
+-		screen_info.lfb_width = screen_info.lfb_height;
+-		screen_info.lfb_height = temp;
++		swap(screen_info.lfb_width, screen_info.lfb_height);
+ 		screen_info.lfb_linelength = 4 * screen_info.lfb_width;
+ 	}
  }
- 
-+static int efivars_pstore_ops_notifier(struct notifier_block *nb,
-+				 unsigned long event, void *data)
-+{
-+	if (event == EFIVAR_OPS_RDWR && !efi_pstore_info.bufsize)
-+		efivars_pstore_setup();
-+
-+	return NOTIFY_OK;
-+}
-+
-+static struct notifier_block efivars_pstore_ops_notifier_block = {
-+	.notifier_call = efivars_pstore_ops_notifier,
-+};
-+
-+static int efivars_pstore_init(void)
-+{
-+	if (pstore_disable)
-+		return 0;
-+
-+	blocking_notifier_chain_register(&efivar_ops_nh,
-+					&efivars_pstore_ops_notifier_block);
-+
-+	return efivars_pstore_setup();
-+}
-+
- static void efivars_pstore_exit(void)
- {
-+	blocking_notifier_chain_unregister(&efivar_ops_nh,
-+					&efivars_pstore_ops_notifier_block);
-+
- 	if (!efi_pstore_info.bufsize)
- 		return;
- 
 -- 
-2.51.0
+2.51.1
 
