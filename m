@@ -1,93 +1,102 @@
-Received: from fanzine2.igalia.com (fanzine2.igalia.com [213.97.179.56])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBB0E2EA473
-	for <linux-efi@vger.kernel.org>; Mon,  8 Dec 2025 19:39:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.97.179.56
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79F6623BF9F
+	for <linux-efi@vger.kernel.org>; Tue,  9 Dec 2025 02:05:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765222783; cv=none; b=l9SHPhb2bnDT0L8wc/PLzKC9p+MwjRfrYdcUBAjn32E2QgkA4qXTqmaIWxmppuoaaqWITowoYacwWzBcdeQTC7TwXX/iZ9vtfDCo2qTwzSDyZyIpkvFsDjFrS2asKOE1QUZwMQ92Y/cnhFHrN3K+gUqQ2QA0EBn3Jckp98zCGOI=
+	t=1765245942; cv=none; b=O/LBcY4WXv3SK6z8prLSu9aTa8BS3Z0pILosntQt/QZWxfbQybjYy0xM4GNsPQpcAgXcwMFExABBlK5R7IHzfKjH/Y9cUEbIsDTFfmn+uL0ay30cE4S/mh8Ocxyg0/wUstQocXKaP2eH46OBJZfHkMbHNmt399FgQoNfygDvr5w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765222783; c=relaxed/simple;
-	bh=Iq2mZECxIt/C+bb9VCl8tDLSoMLUMSO3Lnh7c9gWyvw=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=BH0El9jOaDIdz7e0edi/9xjtF7qcmUXcfm2pLDNAQiD1luYprUuSFNNHYA7JM634Qb6TBXRL2nokNL2LV4we+lO8neDQ+DjiOcDBfcw67aoX87V673Raq09Vjv24wMMmnE/ydBtwdwPQMZlgtkGs770g3palUHib9CbFUAcC7h0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com; spf=pass smtp.mailfrom=igalia.com; dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b=gIJ6ilS8; arc=none smtp.client-ip=213.97.179.56
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=igalia.com
+	s=arc-20240116; t=1765245942; c=relaxed/simple;
+	bh=r2TLrXMNY6tdqpLXobOdQ7VcPmjJoeY/D/NczUBVb9c=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ORSds1iMU5cXeqXMyu5i+cehFh0RuWgp+49m80zRV7xrze05DoTFwF5LjaKGBQ6sC93vLVllwrz9erPLbCT5WQyhA5wT/nctJizmONBo8kAvQucNVezXIelnq7/HWrnCQA0I2rDfdsRBWE1RzfgizYYwazMwXW3vKyBTQc8fgAw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=S5+9n0nB; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b="gIJ6ilS8"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
-	s=20170329; h=Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:
-	Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
-	List-Post:List-Owner:List-Archive;
-	bh=+a0TXJulNAzCJTCRKiQoVHa0dypfRvHA2DojjuW46ew=; b=gIJ6ilS81sT7FIzZQLDDuwSBpY
-	DpH8TQTQCHolMBbvRHHh7yYODdxhJa7v83W1xoufxUnkmFKM6zTUGG+LPvuAStBghQj/4L41Mi5Jc
-	3NXbAHW/3o7QHroTeaRafFf9niBFVdHVkHfHGXLnrSe3uqkAbKm6NreFFRXvKaM7WDFk2rYoJU4Eo
-	HHj4xewFZmsyUXCKuF3cGFHLIc1ubTAWY3uDq8YJ8yLbALaOge45OT9y2KSQ5aOghgHcfBRPlZLly
-	sMa3CIDh+A4QBzW9sa6OW2mvQcT+MyhdHaBBkvSh3XNK+vFlWnilFhcRayUd68fWJ5qFYGu4U/Ef6
-	+5XrwZqA==;
-Received: from [86.33.28.86] (helo=localhost)
-	by fanzine2.igalia.com with utf8esmtpsa 
-	(Cipher TLS1.3:ECDHE_SECP256R1__RSA_PSS_RSAE_SHA256__AES_256_GCM:256) (Exim)
-	id 1vSh50-00ACWK-TV; Mon, 08 Dec 2025 20:39:31 +0100
-From: Tvrtko Ursulin <tursulin@igalia.com>
-To: dri-devel@lists.freedesktop.org
-Cc: kernel-dev@igalia.com,
-	Tvrtko Ursulin <tvrtko.ursulin@igalia.com>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Melissa Wen <mwen@igalia.com>,
-	linux-efi@vger.kernel.org
-Subject: [PATCH v5 2/4] efi: sysfb_efi: Fix lfb_linelength calculation when applying quirks
-Date: Mon,  8 Dec 2025 20:39:23 +0100
-Message-ID: <20251208193925.7449-3-tursulin@igalia.com>
-X-Mailer: git-send-email 2.52.0
-In-Reply-To: <20251208193925.7449-1-tursulin@igalia.com>
-References: <20251208193925.7449-1-tursulin@igalia.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="S5+9n0nB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8E83C19421
+	for <linux-efi@vger.kernel.org>; Tue,  9 Dec 2025 02:05:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1765245941;
+	bh=r2TLrXMNY6tdqpLXobOdQ7VcPmjJoeY/D/NczUBVb9c=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=S5+9n0nB615ZurPWCj75TPQeOQKLEF+PlUy/ICSaZbX9qlckBR/2apQcE+3WeY+ZK
+	 fJDJrD+wykBa4ib1qatmEFlI+MMGBL5ML8D0wxtpSffHhMFVoVq4wPOWIZaVJew6UC
+	 ZJNYk6ewGhwfo6fucMNX4YYMNqRtVTP2/QXtZdixUoFFGO1+2O2BDqxhZmDjqK4hBc
+	 Ir/DeQf877PAnDiIOVblz1QDpsGZrNEUalbuyiK6sGC9QqEz63Yzq8gYsoaUL6ds2L
+	 O4wCY5+cOGF4Sy5nXVRjM/2FSmEh8Yl4DVvn0ZvZUEPz19NL62eIc30FgLpai+Z7Sy
+	 /5AMXGopU1GQw==
+Received: by mail-pj1-f54.google.com with SMTP id 98e67ed59e1d1-3436cbb723fso4360374a91.2
+        for <linux-efi@vger.kernel.org>; Mon, 08 Dec 2025 18:05:41 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXXsSkH7mLD3dhEfQggggglGw6UtMP+M2/mVlPv2XVVMTDd0IKXuoAEC7ILOyZbDlnsBil+enwLaFQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy08rLP282UVSRAoEnZ7Ca/C0X3WwfNgmkFGkuBcWfwqPGZmuaJ
+	iQtgN+N5ll8rAG5bupqW6CznQLJ6/NZjme9U6MMRH1rY6Euea2d3CmG1ALZIOIcUZrsaE85vFB8
+	0Te3LuFw5ak+5PDElCNl1nE/zeBhID+g=
+X-Google-Smtp-Source: AGHT+IHyKmMSYrVYsbJSKtDPABE9Jn39tYyzOnWg1/bGf+V3ApboC/uhg8RcVjfRBg5ctgchARRcyQuWCs7J6IUWjpY=
+X-Received: by 2002:a17:90a:d450:b0:340:ec3b:b587 with SMTP id
+ 98e67ed59e1d1-349a24dd160mr7546009a91.1.1765245941305; Mon, 08 Dec 2025
+ 18:05:41 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20251208193925.7449-1-tursulin@igalia.com>
+In-Reply-To: <20251208193925.7449-1-tursulin@igalia.com>
+From: Ard Biesheuvel <ardb@kernel.org>
+Date: Tue, 9 Dec 2025 11:05:26 +0900
+X-Gmail-Original-Message-ID: <CAMj1kXFZD+No6C4MEpmSY5Ha0DtJH+kHfTiO02By4ejUekLaRA@mail.gmail.com>
+X-Gm-Features: AQt7F2pxwyMp3jupjJdnRCACLrDOSnZB2DzSsDgxxn7yVjvGaE4-ePdhmDRIjco
+Message-ID: <CAMj1kXFZD+No6C4MEpmSY5Ha0DtJH+kHfTiO02By4ejUekLaRA@mail.gmail.com>
+Subject: Re: [PATCH v5 0/4] EFI fbcon fixes etc
+To: Tvrtko Ursulin <tursulin@igalia.com>
+Cc: dri-devel@lists.freedesktop.org, kernel-dev@igalia.com, 
+	Tvrtko Ursulin <tvrtko.ursulin@igalia.com>, Thomas Zimmermann <tzimmermann@suse.de>, 
+	Melissa Wen <mwen@igalia.com>, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-From: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
+On Tue, 9 Dec 2025 at 04:39, Tvrtko Ursulin <tursulin@igalia.com> wrote:
+>
+> From: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
+>
+> Two generic fixes split out for easy review, one refactoring as requested, and
+> then the last patch is the panel/mode quirk to allow for corruption free fbcon
+> with simpledrmfb and efidrmfb on the Valve Steam Deck.
+>
+> v2:
+>  * s/unsigned/unsigned int/
+>  * s/pitch/linelength/
+>  * Removed comment explaining the Steam Deck quirk.
+>  * Added patch to refactor quirk application via callbacks.
+>
+> v3:
+>  * Added forgotten __initconst.
+>  * Use separate callback for the fixup quirk.
+>
+> v4:
+>  * Use __screen_info_lfb_bits_per_pixel() instead of accessing lfb_depth directly.
+>
+> v5:
+>  * s/lfb_width/bpp/.
+>  * Grammar and typo tidy in the last patch.
+>
+> Cc: Thomas Zimmermann <tzimmermann@suse.de>
+> Cc: Ard Biesheuvel <ardb@kernel.org>
+> Cc: Melissa Wen <mwen@igalia.com>
+> Cc: linux-efi@vger.kernel.org
+>
+> Tvrtko Ursulin (4):
+>   efi: sysfb_efi: Replace open coded swap with the macro
+>   efi: sysfb_efi: Fix lfb_linelength calculation when applying quirks
+>   efi: sysfb_efi: Convert swap width and height quirk to a callback
+>   efi: sysfb_efi: Fix efidrmfb and simpledrmfb on Valve Steam Deck
+>
+>  drivers/firmware/efi/sysfb_efi.c | 73 ++++++++++++++++++++++++++++----
+>  1 file changed, 65 insertions(+), 8 deletions(-)
+>
 
-PIXEL_BIT_MASK formats can have either less or more than four bytes per
-pixel so lets fix the lfb_linelenght calculation when applying the
-swapped width and height quirks.
+This looks fine to me now. Unless there are more comments, I intend to
+get this queued up as soon as -rc1 comes around.
 
-Signed-off-by: Tvrtko Ursulin <tvrtko.ursulin@igalia.com>
-Suggested-by: Thomas Zimmermann <tzimmermann@suse.de>
-Cc: Thomas Zimmermann <tzimmermann@suse.de>
-Cc: Ard Biesheuvel <ardb@kernel.org>
-Cc: Melissa Wen <mwen@igalia.com>
-Cc: linux-efi@vger.kernel.org
-Tested-by: Melissa Wen <mwen@igalia.com> # v3
----
- drivers/firmware/efi/sysfb_efi.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
-index 1d8b6966731c..60495eb3441c 100644
---- a/drivers/firmware/efi/sysfb_efi.c
-+++ b/drivers/firmware/efi/sysfb_efi.c
-@@ -357,8 +357,11 @@ __init void sysfb_apply_efi_quirks(void)
- 
- 	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI &&
- 	    dmi_check_system(efifb_dmi_swap_width_height)) {
-+		u32 bpp = __screen_info_lfb_bits_per_pixel(&screen_info);
-+
- 		swap(screen_info.lfb_width, screen_info.lfb_height);
--		screen_info.lfb_linelength = 4 * screen_info.lfb_width;
-+		screen_info.lfb_linelength = bpp * screen_info.lfb_width /
-+					     BITS_PER_BYTE;
- 	}
- }
- 
--- 
-2.52.0
-
+Thanks
