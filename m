@@ -1,113 +1,100 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60D2230F802;
-	Tue,  6 Jan 2026 10:01:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CC5132E157
+	for <linux-efi@vger.kernel.org>; Tue,  6 Jan 2026 10:23:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767693712; cv=none; b=Hs/5wRMgwDD/pTpWu7k/Y+6uHEE6h+PwdMCYRsKsu38TI0eYQ99nD6u4w9dpWCXkKKwVJdM4jb0Q9hv0z6PP9rciJfEPCl/9LsYDCgox6DErfR3KMa9ncQYwUg1IvlMxTfDWhVlYMlA9k5mQ/r5nylvuqhRd1l57vC/G7j1/xAM=
+	t=1767695016; cv=none; b=C2pg+0Eb1nTUiN5fwZxLbPvsk9oQls7jfJAIMDc9VC+/aMMwSIH/t5fh2AGN44JMa2wM+MkwvB6zXYiuKySNFOj3IGvX8XazGrAGd51VH/ipCAy8LdCnQ6N6KcSqSIm1eXuZQIvdkobdRoVofYpVqWCRzKQhZkKmVuzVjWuwOYA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767693712; c=relaxed/simple;
-	bh=N13GlUqWB+FxkmAZcovRjJqMegXZ8A3lxIKH7KbwRvs=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Oglgb9o0wxoa9nei7HieCKrNJvc+GAkcuMBopDVOgb1WNUKK1ySCdh3M9fb49Ov45I0pf6pfzEDDaP8RTW22lwcq5rU4iNfjrDwup0dkWyR2nJaFncdh2TgAzUwr/oDfNWLSJFM/1NEJ+iSGruGEcrytdWyifPEzaIhe1bl98IU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TvOorBs3; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1767695016; c=relaxed/simple;
+	bh=7G/63Ebg037MtWPdMChR2/hajf3uRri9rZlipp0hdvw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=fFdF89SiQdVaa/QqvuuH7+F3Rd3kiixzZcY9P/b095NPDGbPafS/5lt8w62117K39KElhjQDj2aw9ntqOkTiULKKT5wJCyoMQA79mo+AtRpWSZzTTCtTu/n2n7EZcH3dJGPtQwIsuU+e1YDAvMTh9dH1Vax/X9XEC+4NhFBHHJ0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=W9AM8XTT; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TvOorBs3"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DCDB8C19424;
-	Tue,  6 Jan 2026 10:01:49 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="W9AM8XTT"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DD662C19425
+	for <linux-efi@vger.kernel.org>; Tue,  6 Jan 2026 10:23:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1767693710;
-	bh=N13GlUqWB+FxkmAZcovRjJqMegXZ8A3lxIKH7KbwRvs=;
-	h=From:To:Cc:Subject:Date:From;
-	b=TvOorBs3oF0WJmvBxhgmcfMSnYSUEMVQF2eWDtidXC8CNLdfGu/UEa1QUsGW2ivKB
-	 cZETNKB4D660Hk5QttLtFIJYq8aMhZztAMnk3oIEaodbQxciB4qZifzI4nn0xf49VY
-	 uReBUd1Q6ehETMmKCpMdnL94o+je8q20/RlX2YnmFgFFTNzSHdgHKPGbmm2Msu36XF
-	 Ze/5kOEmLtIzf1CR3clSEEP3z86lO6BbMqYvmvOOnC7dVkHP4pxIv9P7GGrzKsmooY
-	 MQ0GTXCqJ0FAEBKlFc9PZISY+BLoyC1xvs2P9eJPq2jf3Vn1RLHexVmwIfOIQkOjs3
-	 bXo6u5H7B++Qw==
-Received: from mchehab by mail.kernel.org with local (Exim 4.99)
-	(envelope-from <mchehab+huawei@kernel.org>)
-	id 1vd3sp-000000008ZF-3xPz;
-	Tue, 06 Jan 2026 11:01:47 +0100
-From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
-To: "Rafael J. Wysocki" <rafael@kernel.org>,
-	Robert Moore <robert.moore@intel.com>
-Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Ankit Agrawal <ankita@nvidia.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Breno Leitao <leitao@debian.org>,
-	Dan Williams <dan.j.williams@intel.com>,
-	Dave Jiang <dave.jiang@intel.com>,
-	Gregory Price <gourry@gourry.net>,
-	Hanjun Guo <guohanjun@huawei.com>,
-	Jason Tian <jason@os.amperecomputing.com>,
-	Jonathan Cameron <Jonathan.Cameron@huawei.com>,
-	Jonathan Cameron <jonathan.cameron@huawei.com>,
-	Len Brown <lenb@kernel.org>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Shuai Xue <xueshuai@linux.alibaba.com>,
-	Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>,
-	Tony Luck <tony.luck@intel.com>,
-	acpica-devel@lists.linux.dev,
-	linux-acpi@vger.kernel.org,
-	linux-edac@vger.kernel.org,
-	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	pengdonglin <pengdonglin@xiaomi.com>
-Subject: [PATCH v4 0/4] apei/ghes: don't OOPS with bad ARM error CPER records
-Date: Tue,  6 Jan 2026 11:01:34 +0100
-Message-ID: <cover.1767693532.git.mchehab+huawei@kernel.org>
-X-Mailer: git-send-email 2.52.0
+	s=k20201202; t=1767695015;
+	bh=7G/63Ebg037MtWPdMChR2/hajf3uRri9rZlipp0hdvw=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=W9AM8XTTiEn3d3buU61YhWWO/iV+wvM8AWzOcUCrENr+1LMFqYOQL3NPHjrCv/bBO
+	 lUgyeVkx2QEHvJLtH+O6q4kb65VN6uD9XlgWFZtm8IHSI0NfBHL/3AHRuSNYpzJ3+B
+	 fjEmae8Ytsd96++7EgqD2b2ccRwJdJHO0ZXVQ3xtgu+hE6nNkrN+8CADjKjDeT8tOd
+	 OBhEaxDLawAtthZETP00dUW9XKrubbwoJhRoWpepO2SCAaUoLvQXADGUZ+TVw60qgp
+	 YD3uoMQtyx5rvo2vchc+7yAk+ylRk2yvZBQ4bWDd+T/BKX6wiGHZ8mx2O5Nn0Yx9ck
+	 Uil0DC1Kcu2nw==
+Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-7b22ffa2a88so811797b3a.1
+        for <linux-efi@vger.kernel.org>; Tue, 06 Jan 2026 02:23:35 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCWjIRGiwOuDZRnW1F6+3RtfY5wdM9S1sKWtphndhABwxz/6z1cm5FcLjE3HTjpktNjBGWp2RtSbaI8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwwUGWm7rogliX1yPFPQZTPKtjeddAjRmwvQOxHM9KD5bB6cMWh
+	SGCCCFFKRurHLmJztL9eokC/CRfUcxvEcnOQzwKA4g9UgNg8K8f3IWAeuD7BJP3ky/1CNb63Crv
+	Mmjf2hiMIsA1F8l/5V1IoB4R4MEl137E=
+X-Google-Smtp-Source: AGHT+IGRu6tzZVsaq2B/AJ6p/F7Ga3K9ztaebfR7/XzLB4J/0IxzBLoDP96qpOtIr0VbIrLiDGar8eXDw4yLmfZ/NT8=
+X-Received: by 2002:a05:6a20:549d:b0:34e:1009:4205 with SMTP id
+ adf61e73a8af0-3898227b579mr1971666637.27.1767695015301; Tue, 06 Jan 2026
+ 02:23:35 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Sender: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+References: <20260105135847.1585034-1-ben.horgan@arm.com> <aVvPIdREAdweYqZf@e129823.arm.com>
+ <aVzAvqv8JnjrjJbF@r1chard>
+In-Reply-To: <aVzAvqv8JnjrjJbF@r1chard>
+From: Ard Biesheuvel <ardb@kernel.org>
+Date: Tue, 6 Jan 2026 11:23:24 +0100
+X-Gmail-Original-Message-ID: <CAMj1kXFpvcjtU-j=bQxMkH7h8yTFxGcjtJ0_cbbYPLWv_RXGMA@mail.gmail.com>
+X-Gm-Features: AQt7F2qWXwk26mnOyrsQIoVCqQG-xBmoGdDbnqNwtvhq146Mfo0teG8s7g_Lh_0
+Message-ID: <CAMj1kXFpvcjtU-j=bQxMkH7h8yTFxGcjtJ0_cbbYPLWv_RXGMA@mail.gmail.com>
+Subject: Re: [PATCH v1] arm64/efi: Don't fail check current_in_efi() if preemptible
+To: Richard Lyu <richard.lyu@suse.com>
+Cc: Yeoreum Yun <yeoreum.yun@arm.com>, Ben Horgan <ben.horgan@arm.com>, linux-efi@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, catalin.marinas@arm.com, 
+	will@kernel.org, Mark.Rutland@arm.com
+Content-Type: text/plain; charset="UTF-8"
 
-Rafael,
+On Tue, 6 Jan 2026 at 08:59, Richard Lyu <richard.lyu@suse.com> wrote:
+>
+> This change is good to me.
+> Reviewed-by: Richard Lyu <richard.lyu@suse.com>
+>
+> On 2026/01/05 14:48, Yeoreum Yun wrote:
+> > LGTM. feel free to add:
+> > Reviewed-by: Yeoreum Yun <yeoreum.yun@arm.com>
+> >
+> > > As EFI runtime services can now be run without disabling preemption remove
+> > > the check for non preemptible in current_in_efi(). Without this change,
+> > > firmware errors that were previously recovered from by
+> > > __efi_runtime_kernel_fixup_exception() will lead to a kernel oops.
+> > >
+> > > Fixes: a5baf582f4c0 ("arm64/efi: Call EFI runtime services without disabling preemption")
+> > > Signed-off-by: Ben Horgan <ben.horgan@arm.com>
+> > > ---
+> > > On the partner platform I was testing on this issue caused the boot to fail.
+> > > ---
+> > >  arch/arm64/include/asm/efi.h | 2 +-
+> > >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > >
+> > > diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+> > > index aa91165ca140..e8a9783235cb 100644
+> > > --- a/arch/arm64/include/asm/efi.h
+> > > +++ b/arch/arm64/include/asm/efi.h
+> > > @@ -45,7 +45,7 @@ void arch_efi_call_virt_teardown(void);
+> > >   * switching to the EFI runtime stack.
+> > >   */
+> > >  #define current_in_efi()                                           \
+> > > -   (!preemptible() && efi_rt_stack_top != NULL &&                  \
+> > > +   (efi_rt_stack_top != NULL &&                                    \
+> > >      on_task_stack(current, READ_ONCE(efi_rt_stack_top[-1]), 1))
+> > >
+> > >  #define ARCH_EFI_IRQ_FLAGS_MASK (PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
+> > > --
+> > > 2.43.0
+> > >
+> >
 
-Current parsing logic at apei/ghes for ARM Processor Error
-assumes that the record sizes are correct. Yet, a bad BIOS
-might produce malformed GHES reports.
-
-Worse than that, it may end exposing data from other memory
-addresses, as the logic may end dumping large portions of
-the memory.
-
-Avoid that by checking the buffer sizes where needed.
-
----
-
-v4:
- - addressed Jonathan comments;
- - added two extra patches to prevent other OOM issues.
-
-v3:
-  - addressed Shuai feedback;
-  - moved all ghes code to one patch;
-  - fixed a typo and a bad indent;
-  - cleanup the size check logic at ghes.c.
-
-
-Mauro Carvalho Chehab (4):
-  apei/ghes: ARM processor Error: don't go past allocated memory
-  efi/cper: don't go past the ARM processor CPER record buffer
-  apei/ghes: ensure that won't go past CPER allocated record
-  efi/cper: don't dump the entire memory region
-
- drivers/acpi/apei/ghes.c        | 38 ++++++++++++++++++++++++++++-----
- drivers/firmware/efi/cper-arm.c | 12 +++++++----
- drivers/firmware/efi/cper.c     |  8 ++++++-
- drivers/ras/ras.c               |  6 +++++-
- include/acpi/ghes.h             |  1 +
- include/linux/cper.h            |  3 ++-
- 6 files changed, 56 insertions(+), 12 deletions(-)
-
--- 
-2.52.0
-
+Acked-by: Ard Biesheuvel <ardb@kernel.org>
