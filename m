@@ -1,47 +1,58 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05BAC3803F7;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97C8E36C5B0;
 	Wed,  7 Jan 2026 16:42:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767804131; cv=none; b=dJB7E7fwy1nuz/xhZkPZEaBZJQgtZXO9/90cC/r447e7adjyFjVMiBpIuYiQuFesWmSJ8DHW7GM6VP85DFvuZSxKdaLUnxBwfS1WM3F/6SsJE1L3MDRafVbyKZ/bHFWME/nENtJBlKjT3gl2JWu+OrNETybiNgvALjfoM+Cu5mA=
+	t=1767804130; cv=none; b=TdcbiDdluzQoFfbbfUkgqHrGLzL7p+2kcCuuzWeX5PYTydKuyQrr0tmjnZMzdUtYbzjo1CLY03l0k6Af1Xw+/1SPSCOMFKm79m2cermTlRZM6WFd7AmvWil60xqRR/xPxlXdP8F7VjxsLRVcy77I8VywYVzGYjY7Cpl/8COE6Vg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767804131; c=relaxed/simple;
-	bh=q8mFlp+bD20oQpXP27iO1F9y1ja315WcWvYnI369uAU=;
+	s=arc-20240116; t=1767804130; c=relaxed/simple;
+	bh=ka2CWUl8OjHLpevWXyf+gxSz2g5ApOySVjvxxdnjmW4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=M3aLXbPrrF/sg2TcZLW098U6FGeMPdzAapIIcDZwtH/Czj0jYIwjdedZcOfY0YqacDWx75XbyNhDBHU0PTK0ort1n1R/GOXEq7nLHrcsYV3GsFg3XERGQW4ymB5aqks9Y9Qc5uipFZ7uF7FT9S7SJPfSyAufLhqgJBpXSI++JOc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=F0WZFv8J; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version:Content-Type; b=Dc92xlIsniYJmd68moxxDon6rrULrHGqrKXiIeqZQ6z8fgFkdX0yITeWO+AhMqS5RLrd2W/ileN5yAaP3CLHoNrB2V6tnK0ePSbLRiwhp7xomErxl4fDqn6Dj2K5cz5TYkGnVMsFvrGxQFCfIHLLr+azpKHP2dc+62XtYBjmNpw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EsFnaruM; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="F0WZFv8J"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 206AEC19423;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EsFnaruM"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1DD16C19425;
 	Wed,  7 Jan 2026 16:42:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1767804130;
-	bh=q8mFlp+bD20oQpXP27iO1F9y1ja315WcWvYnI369uAU=;
+	bh=ka2CWUl8OjHLpevWXyf+gxSz2g5ApOySVjvxxdnjmW4=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=F0WZFv8JcxMq1VizvtDNwWgqxu6kCyb3We/VPemED43l8vYwjOFpbNF8kT1rkX3A3
-	 MpM4g+QDGnejPbr718aRBt8hGEBACJCAhJav0mewrn6/wZe5G2cpL5wvQWSdoI0nhz
-	 UWTsWDNTdMiV0LFJKwOJTtyBkjbGKjpWl4+zehvMQbXnd4gV6Lseuh9u9zE7/hEfBk
-	 r6D1TZezXQJqROVnddLt+mSYLWRWNA+RfUZQXcwrb+qlGWUAQfW14hsiiv8m28Qe6T
-	 /WgpbhBQ9qWpBwvyetrfVlPagtQ3SIcBTsHUUUnNBAHCoAtITn/+xNjyQAxl9eROMM
-	 DanBAGI37yPGw==
+	b=EsFnaruMgFEGeAFd2+baWXxx9eAcu0C7qP/rtGDhknDNqwmFSaVEWQKB9tk/3dUXj
+	 flOyZkVPs0CjjMhoYfMsRszGIN7zsONVk9zOGgJJx/DrUxmvITpWw6eWXvsByOanc4
+	 oPovzjogIOFLw46b6RqpCEkQYvvPtzdarR7YHGr9gUgxF+XdAhrOrvkRtyxXOQcj4N
+	 8B0F+yOBOOLrqePpX/LJK6POQlwlw90g8hyPZxlyY8ISf3LboqnwAs4MwL9Fb5q2oy
+	 oRduSdNFKqZMCBiOlrzccZvhTcExD1NokEmwyR0sOIzAEhSvf0KctJhHiA0eAS05HM
+	 KgH3MsO9Z/g9g==
 Received: from mchehab by mail.kernel.org with local (Exim 4.99)
 	(envelope-from <mchehab+huawei@kernel.org>)
-	id 1vdWbo-00000001bUe-184I;
+	id 1vdWbo-00000001bUS-0mDC;
 	Wed, 07 Jan 2026 17:42:08 +0100
 From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
-To: "Rafael J. Wysocki" <rafael@kernel.org>,
-	Ard Biesheuvel <ardb@kernel.org>
+To: "Rafael J. Wysocki" <rafael@kernel.org>
 Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
 	acpica-devel@lists.linux.dev,
 	linux-acpi@vger.kernel.org,
 	linux-edac@vger.kernel.org,
 	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v5 4/4] efi/cper: don't dump the entire memory region
-Date: Wed,  7 Jan 2026 17:41:52 +0100
-Message-ID: <f47447094cfa388042ed3563acaeb06c98ee5248.1767804050.git.mchehab+huawei@kernel.org>
+	linux-kernel@vger.kernel.org,
+	Ankit Agrawal <ankita@nvidia.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Breno Leitao <leitao@debian.org>,
+	Hanjun Guo <guohanjun@huawei.com>,
+	Ingo Molnar <mingo@kernel.org>,
+	Jason Tian <jason@os.amperecomputing.com>,
+	Jonathan Cameron <jonathan.cameron@huawei.com>,
+	Len Brown <lenb@kernel.org>,
+	Mauro Carvalho Chehab <mchehab@kernel.org>,
+	Shuai Xue <xueshuai@linux.alibaba.com>,
+	Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>,
+	Tony Luck <tony.luck@intel.com>
+Subject: [PATCH v5 1/4] apei/ghes: ARM processor Error: don't go past allocated memory
+Date: Wed,  7 Jan 2026 17:41:49 +0100
+Message-ID: <7fd9f38413be05ee2d7cfdb0dc31ea2274cf1a54.1767804050.git.mchehab+huawei@kernel.org>
 X-Mailer: git-send-email 2.52.0
 In-Reply-To: <cover.1767804050.git.mchehab+huawei@kernel.org>
 References: <cover.1767804050.git.mchehab+huawei@kernel.org>
@@ -55,41 +66,118 @@ Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Sender: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 
-The current logic at cper_print_fw_err() doesn't check if the
-error record length is big enough to handle offset. On a bad firmware,
-if the ofset is above the actual record, length -= offset will
-underflow, making it dump the entire memory.
+If the BIOS generates a very small ARM Processor Error, or
+an incomplete one, the current logic will fail to deferrence
 
-The end result can be:
+	err->section_length
+and
+	ctx_info->size
 
-- the logic taking a lot of time dumping large regions of memory;
-- data disclosure due to the memory dumps;
-- an OOPS, if it tries to dump an unmapped memory region.
+Add checks to avoid that. With such changes, such GHESv2
+records won't cause OOPSes like this:
 
-Fix it by checking if the section length is too small before doing
-a hex dump.
+[    1.492129] Internal error: Oops: 0000000096000005 [#1]  SMP
+[    1.495449] Modules linked in:
+[    1.495820] CPU: 0 UID: 0 PID: 9 Comm: kworker/0:0 Not tainted 6.18.0-rc1-00017-gabadcc3553dd-dirty #18 PREEMPT
+[    1.496125] Hardware name: QEMU QEMU Virtual Machine, BIOS unknown 02/02/2022
+[    1.496433] Workqueue: kacpi_notify acpi_os_execute_deferred
+[    1.496967] pstate: 814000c5 (Nzcv daIF +PAN -UAO -TCO +DIT -SSBS BTYPE=--)
+[    1.497199] pc : log_arm_hw_error+0x5c/0x200
+[    1.497380] lr : ghes_handle_arm_hw_error+0x94/0x220
+
+0xffff8000811c5324 is in log_arm_hw_error (../drivers/ras/ras.c:75).
+70		err_info = (struct cper_arm_err_info *)(err + 1);
+71		ctx_info = (struct cper_arm_ctx_info *)(err_info + err->err_info_num);
+72		ctx_err = (u8 *)ctx_info;
+73
+74		for (n = 0; n < err->context_info_num; n++) {
+75			sz = sizeof(struct cper_arm_ctx_info) + ctx_info->size;
+76			ctx_info = (struct cper_arm_ctx_info *)((long)ctx_info + sz);
+77			ctx_len += sz;
+78		}
+79
+
+and similar ones while trying to access section_length on an
+error dump with too small size.
 
 Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+Reviewed-by: Jonathan Cameron <jonathan.cameron@huawei.com>
 ---
- drivers/firmware/efi/cper.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/acpi/apei/ghes.c | 32 ++++++++++++++++++++++++++++----
+ drivers/ras/ras.c        |  6 +++++-
+ 2 files changed, 33 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index 88fc0293f876..0e938fc5ccb1 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -560,6 +560,11 @@ static void cper_print_fw_err(const char *pfx,
- 	} else {
- 		offset = sizeof(*fw_err);
- 	}
-+	if (offset > length) {
-+		printk("%s""error section length is too small: offset=%d, length=%d\n",
-+		       pfx, offset, length);
-+		return;
-+	}
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index 0dc767392a6c..fc3f8aed99d5 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -552,21 +552,45 @@ static bool ghes_handle_arm_hw_error(struct acpi_hest_generic_data *gdata,
+ {
+ 	struct cper_sec_proc_arm *err = acpi_hest_get_payload(gdata);
+ 	int flags = sync ? MF_ACTION_REQUIRED : 0;
++	int length = gdata->error_data_length;
+ 	char error_type[120];
+ 	bool queued = false;
+ 	int sec_sev, i;
+ 	char *p;
  
- 	buf += offset;
- 	length -= offset;
+ 	sec_sev = ghes_severity(gdata->error_severity);
+-	log_arm_hw_error(err, sec_sev);
++	if (length >= sizeof(*err)) {
++		log_arm_hw_error(err, sec_sev);
++	} else {
++		pr_warn(FW_BUG "arm error length: %d\n", length);
++		pr_warn(FW_BUG "length is too small\n");
++		pr_warn(FW_BUG "firmware-generated error record is incorrect\n");
++		return false;
++	}
++
+ 	if (sev != GHES_SEV_RECOVERABLE || sec_sev != GHES_SEV_RECOVERABLE)
+ 		return false;
+ 
+ 	p = (char *)(err + 1);
++	length -= sizeof(err);
++
+ 	for (i = 0; i < err->err_info_num; i++) {
+-		struct cper_arm_err_info *err_info = (struct cper_arm_err_info *)p;
+-		bool is_cache = err_info->type & CPER_ARM_CACHE_ERROR;
+-		bool has_pa = (err_info->validation_bits & CPER_ARM_INFO_VALID_PHYSICAL_ADDR);
++		struct cper_arm_err_info *err_info;
++		bool is_cache, has_pa;
++
++		/* Ensure we have enough data for the error info header */
++		if (length < sizeof(*err_info))
++			break;
++
++		err_info = (struct cper_arm_err_info *)p;
++
++		/* Validate the claimed length before using it */
++		length -= err_info->length;
++		if (length < 0)
++			break;
++
++		is_cache = err_info->type & CPER_ARM_CACHE_ERROR;
++		has_pa = (err_info->validation_bits & CPER_ARM_INFO_VALID_PHYSICAL_ADDR);
+ 
+ 		/*
+ 		 * The field (err_info->error_info & BIT(26)) is fixed to set to
+diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
+index 2a5b5a9fdcb3..03df3db62334 100644
+--- a/drivers/ras/ras.c
++++ b/drivers/ras/ras.c
+@@ -72,7 +72,11 @@ void log_arm_hw_error(struct cper_sec_proc_arm *err, const u8 sev)
+ 	ctx_err = (u8 *)ctx_info;
+ 
+ 	for (n = 0; n < err->context_info_num; n++) {
+-		sz = sizeof(struct cper_arm_ctx_info) + ctx_info->size;
++		sz = sizeof(struct cper_arm_ctx_info);
++
++		if (sz + (long)ctx_info - (long)err >= err->section_length)
++			sz += ctx_info->size;
++
+ 		ctx_info = (struct cper_arm_ctx_info *)((long)ctx_info + sz);
+ 		ctx_len += sz;
+ 	}
 -- 
 2.52.0
 
