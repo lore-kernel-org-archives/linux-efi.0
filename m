@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97C8E36C5B0;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4366375147;
 	Wed,  7 Jan 2026 16:42:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767804130; cv=none; b=TdcbiDdluzQoFfbbfUkgqHrGLzL7p+2kcCuuzWeX5PYTydKuyQrr0tmjnZMzdUtYbzjo1CLY03l0k6Af1Xw+/1SPSCOMFKm79m2cermTlRZM6WFd7AmvWil60xqRR/xPxlXdP8F7VjxsLRVcy77I8VywYVzGYjY7Cpl/8COE6Vg=
+	t=1767804130; cv=none; b=KYXIdTZV8vPqOh2zgCzlQ2+lMrPflE+MLDD/yMySHkkP+BjCUiG/D1iCx/69Rj/xK54WxzmIRUeds5yQTCGihMS2UTxAxrrT7DF4OMm/WWp9qpTAA2+g+gG93RSV5gxrz4idhRIxvKhxj1En6QqnFjzezDyk1rtY9JVLWX+GqTM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1767804130; c=relaxed/simple;
-	bh=ka2CWUl8OjHLpevWXyf+gxSz2g5ApOySVjvxxdnjmW4=;
+	bh=/2sTI+ZMqBflhdzNpuA/tHH+ApzFoxDz3AuVKHALOJs=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Dc92xlIsniYJmd68moxxDon6rrULrHGqrKXiIeqZQ6z8fgFkdX0yITeWO+AhMqS5RLrd2W/ileN5yAaP3CLHoNrB2V6tnK0ePSbLRiwhp7xomErxl4fDqn6Dj2K5cz5TYkGnVMsFvrGxQFCfIHLLr+azpKHP2dc+62XtYBjmNpw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EsFnaruM; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version:Content-Type; b=geA45OU6N9qHt0Df5XAe0coNFpk1oHA0+TTYJc78luo6PVxzIbDScwiOcEbmN3hVofS/lZaVoArxlX3Gz4hPBc7g5DlpoZXbcmIUHX61VtbE5jZa+KLy3+C0ogry89CkfRFWGZcQhdkj6jtTliY91cUQG5RGXs4fHGhtofT7040=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=do6/dmF2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EsFnaruM"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1DD16C19425;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="do6/dmF2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 19164C4CEF7;
 	Wed,  7 Jan 2026 16:42:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1767804130;
-	bh=ka2CWUl8OjHLpevWXyf+gxSz2g5ApOySVjvxxdnjmW4=;
+	bh=/2sTI+ZMqBflhdzNpuA/tHH+ApzFoxDz3AuVKHALOJs=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=EsFnaruMgFEGeAFd2+baWXxx9eAcu0C7qP/rtGDhknDNqwmFSaVEWQKB9tk/3dUXj
-	 flOyZkVPs0CjjMhoYfMsRszGIN7zsONVk9zOGgJJx/DrUxmvITpWw6eWXvsByOanc4
-	 oPovzjogIOFLw46b6RqpCEkQYvvPtzdarR7YHGr9gUgxF+XdAhrOrvkRtyxXOQcj4N
-	 8B0F+yOBOOLrqePpX/LJK6POQlwlw90g8hyPZxlyY8ISf3LboqnwAs4MwL9Fb5q2oy
-	 oRduSdNFKqZMCBiOlrzccZvhTcExD1NokEmwyR0sOIzAEhSvf0KctJhHiA0eAS05HM
-	 KgH3MsO9Z/g9g==
+	b=do6/dmF2v9JUCIn30eVeQuTQBuGtPtuXYPohyxNpMWulIKhHXoxNcSK/R0KdNcVi8
+	 9qYCyWMCmhGXSjvaUNBHYit5VRN7u7ZfKhA6bGumSfU2fWXJgwUx1H1H0xkCXk36Ks
+	 izH/Ax7rjqNUPWHAbLdnkdYeMh33++M5HNxVdiCCoUMGprMCvZX7tGb3OQ/2/NOSq+
+	 G7/v2auJjKQol6N+ytlzh/NZyH9IJ2Egq/TTYOptsX2ullRJThHV+F7Q0vygvYiNUa
+	 Mz9KKxAJ1K40cW9hLnS0kY9K7f67y1xlWD9lZw6xjeqd+9s9Xw6HsAGhHN+mjw7Iv3
+	 wCIsBzW3P6YQg==
 Received: from mchehab by mail.kernel.org with local (Exim 4.99)
 	(envelope-from <mchehab+huawei@kernel.org>)
-	id 1vdWbo-00000001bUS-0mDC;
+	id 1vdWbo-00000001bUa-11CE;
 	Wed, 07 Jan 2026 17:42:08 +0100
 From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 To: "Rafael J. Wysocki" <rafael@kernel.org>
@@ -42,17 +42,18 @@ Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
 	Borislav Petkov <bp@alien8.de>,
 	Breno Leitao <leitao@debian.org>,
 	Hanjun Guo <guohanjun@huawei.com>,
-	Ingo Molnar <mingo@kernel.org>,
+	Huang Yiwei <quic_hyiwei@quicinc.com>,
 	Jason Tian <jason@os.amperecomputing.com>,
 	Jonathan Cameron <jonathan.cameron@huawei.com>,
 	Len Brown <lenb@kernel.org>,
 	Mauro Carvalho Chehab <mchehab@kernel.org>,
+	Robert Moore <robert.moore@intel.com>,
 	Shuai Xue <xueshuai@linux.alibaba.com>,
 	Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>,
 	Tony Luck <tony.luck@intel.com>
-Subject: [PATCH v5 1/4] apei/ghes: ARM processor Error: don't go past allocated memory
-Date: Wed,  7 Jan 2026 17:41:49 +0100
-Message-ID: <7fd9f38413be05ee2d7cfdb0dc31ea2274cf1a54.1767804050.git.mchehab+huawei@kernel.org>
+Subject: [PATCH v5 3/4] apei/ghes: ensure that won't go past CPER allocated record
+Date: Wed,  7 Jan 2026 17:41:51 +0100
+Message-ID: <a6500921db6bd3f09f010ecfc1900a2faac3f6bc.1767804050.git.mchehab+huawei@kernel.org>
 X-Mailer: git-send-email 2.52.0
 In-Reply-To: <cover.1767804050.git.mchehab+huawei@kernel.org>
 References: <cover.1767804050.git.mchehab+huawei@kernel.org>
@@ -66,118 +67,124 @@ Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Sender: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 
-If the BIOS generates a very small ARM Processor Error, or
-an incomplete one, the current logic will fail to deferrence
+The logic at ghes_new() prevents allocating too large records, by
+checking if they're bigger than GHES_ESTATUS_MAX_SIZE (currently, 64KB).
+Yet, the allocation is done with the actual number of pages from the
+CPER bios table location, which can be smaller.
 
-	err->section_length
-and
-	ctx_info->size
+Yet, a bad firmware could send data with a different size, which might
+be bigger than the allocated memory, causing an OOPS:
 
-Add checks to avoid that. With such changes, such GHESv2
-records won't cause OOPSes like this:
+[13095.899926] Unable to handle kernel paging request at virtual address fff00000f9b40000
+[13095.899961] Mem abort info:
+[13095.900017]   ESR = 0x0000000096000007
+[13095.900088]   EC = 0x25: DABT (current EL), IL = 32 bits
+[13095.900156]   SET = 0, FnV = 0
+[13095.900181]   EA = 0, S1PTW = 0
+[13095.900211]   FSC = 0x07: level 3 translation fault
+[13095.900255] Data abort info:
+[13095.900421]   ISV = 0, ISS = 0x00000007, ISS2 = 0x00000000
+[13095.900486]   CM = 0, WnR = 0, TnD = 0, TagAccess = 0
+[13095.900525]   GCS = 0, Overlay = 0, DirtyBit = 0, Xs = 0
+[13095.900713] swapper pgtable: 4k pages, 52-bit VAs, pgdp=000000008ba16000
+[13095.900752] [fff00000f9b40000] pgd=180000013ffff403, p4d=180000013fffe403, pud=180000013f85b403, pmd=180000013f68d403, pte=0000000000000000
+[13095.901312] Internal error: Oops: 0000000096000007 [#1]  SMP
+[13095.901659] Modules linked in:
+[13095.902201] CPU: 0 UID: 0 PID: 303 Comm: kworker/0:1 Not tainted 6.19.0-rc1-00002-gda407d200220 #34 PREEMPT
+[13095.902461] Hardware name: QEMU QEMU Virtual Machine, BIOS unknown 02/02/2022
+[13095.902719] Workqueue: kacpi_notify acpi_os_execute_deferred
+[13095.903778] pstate: 214020c5 (nzCv daIF +PAN -UAO -TCO +DIT -SSBS BTYPE=--)
+[13095.903892] pc : hex_dump_to_buffer+0x30c/0x4a0
+[13095.904146] lr : hex_dump_to_buffer+0x328/0x4a0
+[13095.904204] sp : ffff800080e13880
+[13095.904291] x29: ffff800080e13880 x28: ffffac9aba86f6a8 x27: 0000000000000083
+[13095.904704] x26: fff00000f9b3fffc x25: 0000000000000004 x24: 0000000000000004
+[13095.905335] x23: ffff800080e13905 x22: 0000000000000010 x21: 0000000000000083
+[13095.905483] x20: 0000000000000001 x19: 0000000000000008 x18: 0000000000000010
+[13095.905617] x17: 0000000000000001 x16: 00000007c7f20fec x15: 0000000000000020
+[13095.905850] x14: 0000000000000008 x13: 0000000000081020 x12: 0000000000000008
+[13095.906175] x11: ffff800080e13905 x10: ffff800080e13988 x9 : 0000000000000000
+[13095.906733] x8 : 0000000000000000 x7 : 0000000000000001 x6 : 0000000000000020
+[13095.907197] x5 : 0000000000000030 x4 : 00000000fffffffe x3 : 0000000000000000
+[13095.907623] x2 : ffffac9aba78c1c8 x1 : ffffac9aba76d0a8 x0 : 0000000000000008
+[13095.908284] Call trace:
+[13095.908866]  hex_dump_to_buffer+0x30c/0x4a0 (P)
+[13095.909135]  print_hex_dump+0xac/0x170
+[13095.909179]  cper_estatus_print_section+0x90c/0x968
+[13095.909336]  cper_estatus_print+0xf0/0x158
+[13095.909348]  __ghes_print_estatus+0xa0/0x148
+[13095.909656]  ghes_proc+0x1bc/0x220
+[13095.909883]  ghes_notify_hed+0x5c/0xb8
+[13095.909957]  notifier_call_chain+0x78/0x148
+[13095.910180]  blocking_notifier_call_chain+0x4c/0x80
+[13095.910246]  acpi_hed_notify+0x28/0x40
+[13095.910558]  acpi_ev_notify_dispatch+0x50/0x80
+[13095.910576]  acpi_os_execute_deferred+0x24/0x48
+[13095.911161]  process_one_work+0x15c/0x3b0
+[13095.911326]  worker_thread+0x2d0/0x400
+[13095.911775]  kthread+0x148/0x228
+[13095.912082]  ret_from_fork+0x10/0x20
+[13095.912687] Code: 6b14033f 540001ad a94707e2 f100029f (b8747b44)
+[13095.914085] ---[ end trace 0000000000000000 ]---
 
-[    1.492129] Internal error: Oops: 0000000096000005 [#1]  SMP
-[    1.495449] Modules linked in:
-[    1.495820] CPU: 0 UID: 0 PID: 9 Comm: kworker/0:0 Not tainted 6.18.0-rc1-00017-gabadcc3553dd-dirty #18 PREEMPT
-[    1.496125] Hardware name: QEMU QEMU Virtual Machine, BIOS unknown 02/02/2022
-[    1.496433] Workqueue: kacpi_notify acpi_os_execute_deferred
-[    1.496967] pstate: 814000c5 (Nzcv daIF +PAN -UAO -TCO +DIT -SSBS BTYPE=--)
-[    1.497199] pc : log_arm_hw_error+0x5c/0x200
-[    1.497380] lr : ghes_handle_arm_hw_error+0x94/0x220
-
-0xffff8000811c5324 is in log_arm_hw_error (../drivers/ras/ras.c:75).
-70		err_info = (struct cper_arm_err_info *)(err + 1);
-71		ctx_info = (struct cper_arm_ctx_info *)(err_info + err->err_info_num);
-72		ctx_err = (u8 *)ctx_info;
-73
-74		for (n = 0; n < err->context_info_num; n++) {
-75			sz = sizeof(struct cper_arm_ctx_info) + ctx_info->size;
-76			ctx_info = (struct cper_arm_ctx_info *)((long)ctx_info + sz);
-77			ctx_len += sz;
-78		}
-79
-
-and similar ones while trying to access section_length on an
-error dump with too small size.
+Prevent that by taking the actual allocated are into account when
+checking for CPER length.
 
 Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
-Reviewed-by: Jonathan Cameron <jonathan.cameron@huawei.com>
 ---
- drivers/acpi/apei/ghes.c | 32 ++++++++++++++++++++++++++++----
- drivers/ras/ras.c        |  6 +++++-
- 2 files changed, 33 insertions(+), 5 deletions(-)
+ drivers/acpi/apei/ghes.c | 6 +++++-
+ include/acpi/ghes.h      | 1 +
+ 2 files changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 0dc767392a6c..fc3f8aed99d5 100644
+index fc3f8aed99d5..77ea7a5b761f 100644
 --- a/drivers/acpi/apei/ghes.c
 +++ b/drivers/acpi/apei/ghes.c
-@@ -552,21 +552,45 @@ static bool ghes_handle_arm_hw_error(struct acpi_hest_generic_data *gdata,
- {
- 	struct cper_sec_proc_arm *err = acpi_hest_get_payload(gdata);
- 	int flags = sync ? MF_ACTION_REQUIRED : 0;
-+	int length = gdata->error_data_length;
- 	char error_type[120];
- 	bool queued = false;
- 	int sec_sev, i;
- 	char *p;
- 
- 	sec_sev = ghes_severity(gdata->error_severity);
--	log_arm_hw_error(err, sec_sev);
-+	if (length >= sizeof(*err)) {
-+		log_arm_hw_error(err, sec_sev);
-+	} else {
-+		pr_warn(FW_BUG "arm error length: %d\n", length);
-+		pr_warn(FW_BUG "length is too small\n");
-+		pr_warn(FW_BUG "firmware-generated error record is incorrect\n");
-+		return false;
-+	}
-+
- 	if (sev != GHES_SEV_RECOVERABLE || sec_sev != GHES_SEV_RECOVERABLE)
- 		return false;
- 
- 	p = (char *)(err + 1);
-+	length -= sizeof(err);
-+
- 	for (i = 0; i < err->err_info_num; i++) {
--		struct cper_arm_err_info *err_info = (struct cper_arm_err_info *)p;
--		bool is_cache = err_info->type & CPER_ARM_CACHE_ERROR;
--		bool has_pa = (err_info->validation_bits & CPER_ARM_INFO_VALID_PHYSICAL_ADDR);
-+		struct cper_arm_err_info *err_info;
-+		bool is_cache, has_pa;
-+
-+		/* Ensure we have enough data for the error info header */
-+		if (length < sizeof(*err_info))
-+			break;
-+
-+		err_info = (struct cper_arm_err_info *)p;
-+
-+		/* Validate the claimed length before using it */
-+		length -= err_info->length;
-+		if (length < 0)
-+			break;
-+
-+		is_cache = err_info->type & CPER_ARM_CACHE_ERROR;
-+		has_pa = (err_info->validation_bits & CPER_ARM_INFO_VALID_PHYSICAL_ADDR);
- 
- 		/*
- 		 * The field (err_info->error_info & BIT(26)) is fixed to set to
-diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
-index 2a5b5a9fdcb3..03df3db62334 100644
---- a/drivers/ras/ras.c
-+++ b/drivers/ras/ras.c
-@@ -72,7 +72,11 @@ void log_arm_hw_error(struct cper_sec_proc_arm *err, const u8 sev)
- 	ctx_err = (u8 *)ctx_info;
- 
- 	for (n = 0; n < err->context_info_num; n++) {
--		sz = sizeof(struct cper_arm_ctx_info) + ctx_info->size;
-+		sz = sizeof(struct cper_arm_ctx_info);
-+
-+		if (sz + (long)ctx_info - (long)err >= err->section_length)
-+			sz += ctx_info->size;
-+
- 		ctx_info = (struct cper_arm_ctx_info *)((long)ctx_info + sz);
- 		ctx_len += sz;
+@@ -29,6 +29,7 @@
+ #include <linux/cper.h>
+ #include <linux/cleanup.h>
+ #include <linux/platform_device.h>
++#include <linux/minmax.h>
+ #include <linux/mutex.h>
+ #include <linux/ratelimit.h>
+ #include <linux/vmalloc.h>
+@@ -294,6 +295,7 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+ 		error_block_length = GHES_ESTATUS_MAX_SIZE;
  	}
+ 	ghes->estatus = kmalloc(error_block_length, GFP_KERNEL);
++	ghes->estatus_length = error_block_length;
+ 	if (!ghes->estatus) {
+ 		rc = -ENOMEM;
+ 		goto err_unmap_status_addr;
+@@ -365,13 +367,15 @@ static int __ghes_check_estatus(struct ghes *ghes,
+ 				struct acpi_hest_generic_status *estatus)
+ {
+ 	u32 len = cper_estatus_len(estatus);
++	u32 max_len = min(ghes->generic->error_block_length,
++			  ghes->estatus_length);
+ 
+ 	if (len < sizeof(*estatus)) {
+ 		pr_warn_ratelimited(FW_WARN GHES_PFX "Truncated error status block!\n");
+ 		return -EIO;
+ 	}
+ 
+-	if (len > ghes->generic->error_block_length) {
++	if (!len || len > max_len) {
+ 		pr_warn_ratelimited(FW_WARN GHES_PFX "Invalid error status block length!\n");
+ 		return -EIO;
+ 	}
+diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+index ebd21b05fe6e..93db60da5934 100644
+--- a/include/acpi/ghes.h
++++ b/include/acpi/ghes.h
+@@ -21,6 +21,7 @@ struct ghes {
+ 		struct acpi_hest_generic_v2 *generic_v2;
+ 	};
+ 	struct acpi_hest_generic_status *estatus;
++	unsigned int estatus_length;
+ 	unsigned long flags;
+ 	union {
+ 		struct list_head list;
 -- 
 2.52.0
 
