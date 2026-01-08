@@ -1,63 +1,51 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0FEA64AA358;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F779495529;
 	Thu,  8 Jan 2026 11:35:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767872137; cv=none; b=ueuUumwi0Toi2EvHlinNXeC38I5/oTmHGo/jKBD0Awgax7q8qvhVNNtAS9WzRiKg618T84vyeF2mpX/PuaCgXrUIsmLY2FoacUsU6//mdkL4ySoER7CpUGazjmvGq9HTNg5TNNyACiF8S8dnPN5VFYszjawZJVhSJh2t7frW8As=
+	t=1767872137; cv=none; b=g/lvxJQZ0BGXnuhSjO2XdbclyETcXL4Y3LLXAVatBhL6yBF3OgqxT9PutoymRQVrn95uwIM8ou9Bj5F/SGfxV8VoiWN4NDJ20s4Zm9wKFg+0hLcjJUZ8LhyQGqjVEpU40KjC9sxe514WnNzSEPQa6X2s6iLH5vtist9HV1Vk3vU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1767872137; c=relaxed/simple;
-	bh=scgRQtvxWe1bibGyPBtCn2uk3uO+2XmBApMOmNEAjqM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=KJv6v2vY1KtDVmBVAyc4hZJqToHUtobN42ySZdWsG7JVxgWbZsxEMsI9EGYPq5saMBKDFKCN3tYs0FwPi+ePinF4Rmf/yKPPYNr71aCmgV5qG8Crv/FRheWuIrn4K5UKwNbFK3DQjvxOAeA3RTvDb77Nk/6FKI8OHNo1KtT9R7k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rzAtJkp8; arc=none smtp.client-ip=10.30.226.201
+	bh=7ClOr2/SXZvL7/2ZcJPhfqf9+Zeyoc7xjpGBwuIaGtc=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=e5Xd3CSEq63EAVZHujxCtJ6kbZx4QdBpyLao4gFatn2i+AccSyXGrrRvmg6crJDxmqweo43saE3GPvF96xoG4P+vgPu/NVZ8hluyF/QL/fwxs8Mglr/uici61zu9nnumduCPYgAkG0C7OaTfCOYdQ+53U2jd1VKnuq9/erhBrQY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=R3xSQKI6; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rzAtJkp8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6A459C19422;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="R3xSQKI6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6E93DC19421;
 	Thu,  8 Jan 2026 11:35:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1767872136;
-	bh=scgRQtvxWe1bibGyPBtCn2uk3uO+2XmBApMOmNEAjqM=;
-	h=From:To:Cc:Subject:Date:From;
-	b=rzAtJkp8XOdmkDPXGBJuYVQzhczJz27F7HpfSa3hKFr19exjpdmDNPF8LZIsSiZRQ
-	 glWm4xiIzDdlCBvTJmKUZSFz/LFw/zNjvBHwRwwY2Yf2ZYzHGbUUpbXLIzjWIEiSK3
-	 TtoeNU3kOVcqluVzPjiUyXQlvBweN4D/Auix/g0GZtqc687A+zDhAVR6+2gq630vpA
-	 HK+NkIEcKW9nClstA7TwXERnpk0xce3+FPV7KQZulRhMNbTWiCvgtCl6PA0Y8z5YAW
-	 uqOSg2lXTHM/+TL372QQzN6CEMnGDo8RKNMrNSgLZP8TWGs1VoWW6Alr+JlYGxj8kF
-	 06wfj0JsUut5Q==
+	bh=7ClOr2/SXZvL7/2ZcJPhfqf9+Zeyoc7xjpGBwuIaGtc=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=R3xSQKI6e8ONZTUffaDWdBa9taK+4xZA1ufJmKzvcNUEqrzOQaXb5uEM5t6Tvp21j
+	 Aq7c38CL2HsuJOTaCF0ZwnsxHm9yO8nJn7SoZWy5l6HwDVL9rK42gbhmqpoA2fcCnj
+	 o8y3O0SX9RVpLIdEn51RkhxbJvcF+v1QvmqFd8lgUyz36aL2C2f6nAr2sEJ5fQqwfQ
+	 6k3CqTc6o+1Lr2LvkMjgy6SchZqhoiR4tAedDRJhZNLS09baRdKLyO6/UsmoOGez7W
+	 jlYZ2cBWqLsvMgk2d45ShitMo5kVU+toIQVJrzzuxyRo+VC1+3EAceWpg4Ius6rBfd
+	 Blq6nMhfLMq1A==
 Received: from mchehab by mail.kernel.org with local (Exim 4.99)
 	(envelope-from <mchehab+huawei@kernel.org>)
-	id 1vdoIf-000000033y5-40SB;
-	Thu, 08 Jan 2026 12:35:33 +0100
+	id 1vdoIg-000000033yK-0JFk;
+	Thu, 08 Jan 2026 12:35:34 +0100
 From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 To: "Rafael J. Wysocki" <rafael@kernel.org>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Robert Moore <robert.moore@intel.com>
+	Ard Biesheuvel <ardb@kernel.org>
 Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
 	acpica-devel@lists.linux.dev,
 	linux-acpi@vger.kernel.org,
 	linux-edac@vger.kernel.org,
 	linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	Ankit Agrawal <ankita@nvidia.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Breno Leitao <leitao@debian.org>,
-	Dan Williams <dan.j.williams@intel.com>,
-	Dave Jiang <dave.jiang@intel.com>,
-	Hanjun Guo <guohanjun@huawei.com>,
-	Huang Yiwei <quic_hyiwei@quicinc.com>,
-	Ira Weiny <ira.weiny@intel.com>,
-	Jason Tian <jason@os.amperecomputing.com>,
-	Jonathan Cameron <jonathan.cameron@huawei.com>,
-	Len Brown <lenb@kernel.org>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Shuai Xue <xueshuai@linux.alibaba.com>,
-	Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>,
-	Tony Luck <tony.luck@intel.com>
-Subject: [PATCH v6 0/4] apei/ghes: don't OOPS with bad ARM error CPER records
-Date: Thu,  8 Jan 2026 12:35:02 +0100
-Message-ID: <cover.1767871950.git.mchehab+huawei@kernel.org>
+	Jonathan Cameron <jonathan.cameron@huawei.com>
+Subject: [PATCH v6 4/4] efi/cper: don't dump the entire memory region
+Date: Thu,  8 Jan 2026 12:35:06 +0100
+Message-ID: <1752b5ba63a3e2f148ddee813b36c996cc617e86.1767871950.git.mchehab+huawei@kernel.org>
 X-Mailer: git-send-email 2.52.0
+In-Reply-To: <cover.1767871950.git.mchehab+huawei@kernel.org>
+References: <cover.1767871950.git.mchehab+huawei@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -68,51 +56,42 @@ Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Sender: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 
-Rafael,
+The current logic at cper_print_fw_err() doesn't check if the
+error record length is big enough to handle offset. On a bad firmware,
+if the ofset is above the actual record, length -= offset will
+underflow, making it dump the entire memory.
 
-Current parsing logic at apei/ghes for ARM Processor Error
-assumes that the record sizes are correct. Yet, a bad BIOS
-might produce malformed GHES reports.
+The end result can be:
 
-Worse than that, it may end exposing data from other memory
-addresses, as the logic may end dumping large portions of
-the memory.
+- the logic taking a lot of time dumping large regions of memory;
+- data disclosure due to the memory dumps;
+- an OOPS, if it tries to dump an unmapped memory region.
 
-Avoid that by checking the buffer sizes where needed.
+Fix it by checking if the section length is too small before doing
+a hex dump.
 
+Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+Reviewed-by: Jonathan Cameron <jonathan.cameron@huawei.com>
 ---
+ drivers/firmware/efi/cper.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-v6:
- - No code changes, just a cosmetic change at patch 3 description
- - Added Jonathan's review on all patches
-
-v5:
- - Changed the name of a var as requested by Jonathan
-
-v4:
- - addressed Jonathan comments;
- - added two extra patches to prevent other OOM issues.
-
-v3:
-  - addressed Shuai feedback;
-  - moved all ghes code to one patch;
-  - fixed a typo and a bad indent;
-  - cleanup the size check logic at ghes.c.
-
-Mauro Carvalho Chehab (4):
-  apei/ghes: ARM processor Error: don't go past allocated memory
-  efi/cper: don't go past the ARM processor CPER record buffer
-  apei/ghes: ensure that won't go past CPER allocated record
-  efi/cper: don't dump the entire memory region
-
- drivers/acpi/apei/ghes.c        | 38 ++++++++++++++++++++++++++++-----
- drivers/firmware/efi/cper-arm.c | 12 +++++++----
- drivers/firmware/efi/cper.c     |  8 ++++++-
- drivers/ras/ras.c               |  6 +++++-
- include/acpi/ghes.h             |  1 +
- include/linux/cper.h            |  3 ++-
- 6 files changed, 56 insertions(+), 12 deletions(-)
-
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index 88fc0293f876..0e938fc5ccb1 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -560,6 +560,11 @@ static void cper_print_fw_err(const char *pfx,
+ 	} else {
+ 		offset = sizeof(*fw_err);
+ 	}
++	if (offset > length) {
++		printk("%s""error section length is too small: offset=%d, length=%d\n",
++		       pfx, offset, length);
++		return;
++	}
+ 
+ 	buf += offset;
+ 	length -= offset;
 -- 
 2.52.0
 
