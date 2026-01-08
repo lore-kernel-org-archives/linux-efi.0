@@ -1,217 +1,138 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from sender4-of-o50.zoho.com (sender4-of-o50.zoho.com [136.143.188.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0F4C4F7988;
-	Thu,  8 Jan 2026 12:38:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767875932; cv=none; b=VvMYeM9ABgj949+HlkSkQZhrkaQhCBYgUVMIv1uAKOe7iTf8lOwfpdA2fph8XVKwzBYwQH0iZJgUFu3caC2aKlYotgr1NgqaTL+dqmTp388vxn4n2F5F58gc1GTW1yF0PyvZY/PdJOvaVGmHNqyNTIsA7daqpBjtiwpv1Ws8zAg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767875932; c=relaxed/simple;
-	bh=rRFi3QZQyDSaI7EXHpS+Y+kBFm4kORrlVSy4ytIs2fw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=bDNag115vHsWlTOqDYnsdU68esDDb1FEKxqwn7kspNPKlo4Cymr/EzNgart3tLYJ1ZwbnQdWHcoNQa+OVK9iZSqq34mlgQ1vekoV/xqiwe4WKy6i5GlJv/Lq/V28LZiKmoOeGYwoByZRo/g9AZbnv8f3MA1QkyeAi+CO2uh5L+c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fcQ03nkU; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 348772F85B;
+	Thu,  8 Jan 2026 16:22:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.50
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1767889375; cv=pass; b=ufus9ogG5DwBsBoOFlxyEoxzgi5CXTp+OuzdZ5w/yuT1kdsA6kPRCC8p4+qsz/ErYwC3oqIAvTClh5RWD0WlCFx47kjkxaQTvGIlp2E4ZJBJ5u3brg0876PtfTK8hMGUTdLKvYvAj0Hb32kbQMYS4NIuYx2qHdrtwKasj14k18U=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1767889375; c=relaxed/simple;
+	bh=+zUpWzhBo4C4q4QtCguT1lWr97eOh1cfKA9jqI4g5Ug=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=bsCQTwT4/K861wxWK1FsA9HsXjM7tEayLT2L9RdYcCBR0sqyN4xfP3cvHbFsWEh3rQKUxfYeSF83kTZ++6B5drvrCcQjkqXkqfsO5DwRQx/cV9lxFG6nou45VzTPHl914XTHdatCYdGhB4Je8jprpB9SRY08r+faYiDXydLDxcQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=apertussolutions.com; spf=pass smtp.mailfrom=apertussolutions.com; dkim=pass (1024-bit key) header.d=apertussolutions.com header.i=dpsmith@apertussolutions.com header.b=dlxv/K6Z; arc=pass smtp.client-ip=136.143.188.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=apertussolutions.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=apertussolutions.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fcQ03nkU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3D6B5C19421;
-	Thu,  8 Jan 2026 12:38:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1767875932;
-	bh=rRFi3QZQyDSaI7EXHpS+Y+kBFm4kORrlVSy4ytIs2fw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=fcQ03nkULZY4K2hMjKQzQb8YD9w6WhEP3klYpCG+pWcCHsTOBSZ90PqbgcJKXJovv
-	 u8OD+4y7+CncU5AcgUfx1htEWuUa0cIq7hb4dxyjOtdlPB1eulPhveHYa5j73fdcl6
-	 sH9lG5DXnX4gp9r69jltDWJkQje7FeNkCYdX9/GtKapJHSqB6kBBfoFa+BgmM24s52
-	 brKBSleGLrtxHlIUi8E1D76cIKGJvhYJLQ8eD0ELJt3SKAdBthw3NijmMKitI/gaQw
-	 vqbpoJIClRizqweRds5+lj/l1xCPIcjQG6a36w/jNXfn5OuZFhSuCGHvoDrFqM4VMH
-	 UC/ME8YN46EpQ==
-Date: Thu, 8 Jan 2026 14:38:47 +0200
-From: Jarkko Sakkinen <jarkko@kernel.org>
-To: Jens Wiklander <jens.wiklander@linaro.org>
-Cc: Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@baylibre.com>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Sumit Garg <sumit.garg@kernel.org>,
-	Olivia Mackall <olivia@selenic.com>,
-	Herbert Xu <herbert@gondor.apana.org.au>,
-	=?iso-8859-1?Q?Cl=E9ment_L=E9ger?= <clement.leger@bootlin.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-	Alexandre Torgue <alexandre.torgue@foss.st.com>,
-	Sumit Garg <sumit.garg@oss.qualcomm.com>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Jan Kiszka <jan.kiszka@siemens.com>,
-	Sudeep Holla <sudeep.holla@arm.com>,
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-	=?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <zajec5@gmail.com>,
-	Michael Chan <michael.chan@broadcom.com>,
-	Pavan Chebbi <pavan.chebbi@broadcom.com>,
-	James Bottomley <James.Bottomley@hansenpartnership.com>,
-	Mimi Zohar <zohar@linux.ibm.com>,
-	David Howells <dhowells@redhat.com>,
-	Paul Moore <paul@paul-moore.com>, James Morris <jmorris@namei.org>,
-	"Serge E. Hallyn" <serge@hallyn.com>,
-	Peter Huewe <peterhuewe@gmx.de>, op-tee@lists.trustedfirmware.org,
-	linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
-	linux-crypto@vger.kernel.org, linux-rtc@vger.kernel.org,
-	linux-efi@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com,
-	linux-arm-kernel@lists.infradead.org,
-	Cristian Marussi <cristian.marussi@arm.com>,
-	arm-scmi@vger.kernel.org, linux-mips@vger.kernel.org,
-	netdev@vger.kernel.org, linux-integrity@vger.kernel.org,
-	keyrings@vger.kernel.org, linux-security-module@vger.kernel.org,
-	Jason Gunthorpe <jgg@ziepe.ca>
-Subject: Re: [PATCH v2 00/17] tee: Use bus callbacks instead of driver
- callbacks
-Message-ID: <aV-lV5l-rwyceWqr@kernel.org>
-References: <cover.1765791463.git.u.kleine-koenig@baylibre.com>
- <CAHUa44FrDZbvRvfN8obf80_k=Eqxe9YxHpjaE5jU7nkxPUwfag@mail.gmail.com>
- <20251218135332f323fa91@mail.local>
- <CAHUa44GpW5aO26GDyL9RZub9vVYvVcJ7etwO0yXBN_mUi0W4AA@mail.gmail.com>
- <CAHUa44HqRbCJTXsrTCm0G5iwtkQtq+Si=yOspCjpAn-N2uVSVg@mail.gmail.com>
+	dkim=pass (1024-bit key) header.d=apertussolutions.com header.i=dpsmith@apertussolutions.com header.b="dlxv/K6Z"
+ARC-Seal: i=1; a=rsa-sha256; t=1767889297; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=IXM3IwQSRjpf/AjEz0IjjgNpQjKhbp5nQ8u43T/PE0S2VoEpHrCn41jycdM712iwf9SCmkXoHzMIahruw+OiMdoiMDU65J49RY54wL/zZJJwPKVDBCcDoveqL4CBjR4yE9wL/S0hCXYHl4a3+rJ6q4JdT07ezzAMed44GQyD5w0=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1767889297; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=oqv29i/Jkyku4YGsPHEwXi5y4vCYAIfyZbGbk20cx3Q=; 
+	b=V4u9qhFfLwuC/8Ag3Sr7TEjepvSGOCV/0ZLCktSz/x6xG7OdamVnnr7uXXtZ8K05UG6IkM2ElQmmVgs2MgnTSYFX8utd266JxvnAhmeeOd5+bfetzHyFAJxsbX51kZa008dUmX9puWqIpF2mcE2Ew2pQNnqeiiGZ8FHA5+0eop4=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=apertussolutions.com;
+	spf=pass  smtp.mailfrom=dpsmith@apertussolutions.com;
+	dmarc=pass header.from=<dpsmith@apertussolutions.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1767889297;
+	s=zoho; d=apertussolutions.com; i=dpsmith@apertussolutions.com;
+	h=Message-ID:Date:Date:MIME-Version:Subject:Subject:To:To:Cc:Cc:References:From:From:In-Reply-To:Content-Type:Content-Transfer-Encoding:Message-Id:Reply-To;
+	bh=oqv29i/Jkyku4YGsPHEwXi5y4vCYAIfyZbGbk20cx3Q=;
+	b=dlxv/K6ZtChdyvl/fMxeMprD8qzLhwyyhoGEar4fSoaloeGwKaCIeVO/F2y/Q5Ka
+	T744G8PcyfblQWZlsHFeICcqT+L/mnCRbA9zEbnGSZ4EGhtqWDeoxqlA7dmfI0TpyXU
+	7GSm0GZP1/k+gmQmJ7byGqtM0ntYyCd6Cup03B7E=
+Received: by mx.zohomail.com with SMTPS id 1767889293888361.3114789025136;
+	Thu, 8 Jan 2026 08:21:33 -0800 (PST)
+Message-ID: <adb92eca-440b-4322-b65b-c21279710a0a@apertussolutions.com>
+Date: Thu, 8 Jan 2026 11:21:31 -0500
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAHUa44HqRbCJTXsrTCm0G5iwtkQtq+Si=yOspCjpAn-N2uVSVg@mail.gmail.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v15 19/28] x86/tpm: Early TPM PCR extending driver
+Content-Language: en-US
+To: Dave Hansen <dave.hansen@intel.com>,
+ Ross Philipson <ross.philipson@oracle.com>, linux-kernel@vger.kernel.org,
+ x86@kernel.org, linux-integrity@vger.kernel.org, linux-doc@vger.kernel.org,
+ linux-crypto@vger.kernel.org, kexec@lists.infradead.org,
+ linux-efi@vger.kernel.org, iommu@lists.linux.dev
+Cc: tglx@linutronix.de, mingo@redhat.com, bp@alien8.de, hpa@zytor.com,
+ dave.hansen@linux.intel.com, ardb@kernel.org, mjg59@srcf.ucam.org,
+ James.Bottomley@hansenpartnership.com, peterhuewe@gmx.de, jarkko@kernel.org,
+ jgg@ziepe.ca, luto@amacapital.net, nivedita@alum.mit.edu,
+ herbert@gondor.apana.org.au, davem@davemloft.net, corbet@lwn.net,
+ ebiederm@xmission.com, dwmw2@infradead.org, baolu.lu@linux.intel.com,
+ kanth.ghatraju@oracle.com, andrew.cooper3@citrix.com,
+ trenchboot-devel@googlegroups.com
+References: <20251215233316.1076248-1-ross.philipson@oracle.com>
+ <20251215233316.1076248-20-ross.philipson@oracle.com>
+ <56929e8b-a7cf-4390-b4ec-0b4c2c32b311@intel.com>
+ <62227ed3-3804-4795-93c9-ce2bbad3f2a7@apertussolutions.com>
+ <a507a85c-e1dd-4c63-94b2-9756ea9ece63@intel.com>
+From: "Daniel P. Smith" <dpsmith@apertussolutions.com>
+Autocrypt: addr=dpsmith@apertussolutions.com; keydata=
+ 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
+In-Reply-To: <a507a85c-e1dd-4c63-94b2-9756ea9ece63@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ZohoMailClient: External
 
-On Mon, Jan 05, 2026 at 10:16:09AM +0100, Jens Wiklander wrote:
-> Hi,
+On 1/3/26 15:44, Dave Hansen wrote:
+> On 12/19/25 13:26, Daniel P. Smith wrote:
+> ...
+>>> I also seem to remember that there are special rules around the US
+>>> federal government's inability to hold copyrights. This seems worth at
+>>> least a mention ... somewhere.
+>>
+>> IANAL either, but in general the safest/correct approach is to retain
+>> any CRs placed on the code being reused, and the above is the CR on the
+>> source from the Xen tree.
 > 
-> On Thu, Dec 18, 2025 at 5:29 PM Jens Wiklander
-> <jens.wiklander@linaro.org> wrote:
-> >
-> > On Thu, Dec 18, 2025 at 2:53 PM Alexandre Belloni
-> > <alexandre.belloni@bootlin.com> wrote:
-> > >
-> > > On 18/12/2025 08:21:27+0100, Jens Wiklander wrote:
-> > > > Hi,
-> > > >
-> > > > On Mon, Dec 15, 2025 at 3:17 PM Uwe Kleine-König
-> > > > <u.kleine-koenig@baylibre.com> wrote:
-> > > > >
-> > > > > Hello,
-> > > > >
-> > > > > the objective of this series is to make tee driver stop using callbacks
-> > > > > in struct device_driver. These were superseded by bus methods in 2006
-> > > > > (commit 594c8281f905 ("[PATCH] Add bus_type probe, remove, shutdown
-> > > > > methods.")) but nobody cared to convert all subsystems accordingly.
-> > > > >
-> > > > > Here the tee drivers are converted. The first commit is somewhat
-> > > > > unrelated, but simplifies the conversion (and the drivers). It
-> > > > > introduces driver registration helpers that care about setting the bus
-> > > > > and owner. (The latter is missing in all drivers, so by using these
-> > > > > helpers the drivers become more correct.)
-> > > > >
-> > > > > v1 of this series is available at
-> > > > > https://lore.kernel.org/all/cover.1765472125.git.u.kleine-koenig@baylibre.com
-> > > > >
-> > > > > Changes since v1:
-> > > > >
-> > > > >  - rebase to v6.19-rc1 (no conflicts)
-> > > > >  - add tags received so far
-> > > > >  - fix whitespace issues pointed out by Sumit Garg
-> > > > >  - fix shutdown callback to shutdown and not remove
-> > > > >
-> > > > > As already noted in v1's cover letter, this series should go in during a
-> > > > > single merge window as there are runtime warnings when the series is
-> > > > > only applied partially. Sumit Garg suggested to apply the whole series
-> > > > > via Jens Wiklander's tree.
-> > > > > If this is done the dependencies in this series are honored, in case the
-> > > > > plan changes: Patches #4 - #17 depend on the first two.
-> > > > >
-> > > > > Note this series is only build tested.
-> > > > >
-> > > > > Uwe Kleine-König (17):
-> > > > >   tee: Add some helpers to reduce boilerplate for tee client drivers
-> > > > >   tee: Add probe, remove and shutdown bus callbacks to tee_client_driver
-> > > > >   tee: Adapt documentation to cover recent additions
-> > > > >   hwrng: optee - Make use of module_tee_client_driver()
-> > > > >   hwrng: optee - Make use of tee bus methods
-> > > > >   rtc: optee: Migrate to use tee specific driver registration function
-> > > > >   rtc: optee: Make use of tee bus methods
-> > > > >   efi: stmm: Make use of module_tee_client_driver()
-> > > > >   efi: stmm: Make use of tee bus methods
-> > > > >   firmware: arm_scmi: optee: Make use of module_tee_client_driver()
-> > > > >   firmware: arm_scmi: Make use of tee bus methods
-> > > > >   firmware: tee_bnxt: Make use of module_tee_client_driver()
-> > > > >   firmware: tee_bnxt: Make use of tee bus methods
-> > > > >   KEYS: trusted: Migrate to use tee specific driver registration
-> > > > >     function
-> > > > >   KEYS: trusted: Make use of tee bus methods
-> > > > >   tpm/tpm_ftpm_tee: Make use of tee specific driver registration
-> > > > >   tpm/tpm_ftpm_tee: Make use of tee bus methods
-> > > > >
-> > > > >  Documentation/driver-api/tee.rst             | 18 +----
-> > > > >  drivers/char/hw_random/optee-rng.c           | 26 ++----
-> > > > >  drivers/char/tpm/tpm_ftpm_tee.c              | 31 +++++---
-> > > > >  drivers/firmware/arm_scmi/transports/optee.c | 32 +++-----
-> > > > >  drivers/firmware/broadcom/tee_bnxt_fw.c      | 30 ++-----
-> > > > >  drivers/firmware/efi/stmm/tee_stmm_efi.c     | 25 ++----
-> > > > >  drivers/rtc/rtc-optee.c                      | 27 ++-----
-> > > > >  drivers/tee/tee_core.c                       | 84 ++++++++++++++++++++
-> > > > >  include/linux/tee_drv.h                      | 12 +++
-> > > > >  security/keys/trusted-keys/trusted_tee.c     | 17 ++--
-> > > > >  10 files changed, 164 insertions(+), 138 deletions(-)
-> > > > >
-> > > > > base-commit: 8f0b4cce4481fb22653697cced8d0d04027cb1e8
-> > > > > --
-> > > > > 2.47.3
-> > > > >
-> > > >
-> > > > Thank you for the nice cleanup, Uwe.
-> > > >
-> > > > I've applied patch 1-3 to the branch tee_bus_callback_for_6.20 in my
-> > > > tree at https://git.kernel.org/pub/scm/linux/kernel/git/jenswi/linux-tee.git/
-> > > >
-> > > > The branch is based on v6.19-rc1, and I'll try to keep it stable for
-> > > > others to depend on, if needed. Let's see if we can agree on taking
-> > > > the remaining patches via that branch.
-> > >
-> > > 6 and 7 can go through your branch.
-> >
-> > Good, I've added them to my branch now.
+> Yeah, in general, that's a good thing to do.
 > 
-> This entire patch set should go in during a single merge window. I
-> will not send any pull request until I'm sure all patches will be
-> merged.
-> 
-> So far (if I'm not mistaken), only the patches I've already added to
-> next have appeared next. I can take the rest of the patches, too, but
-> I need OK for the following:
-> 
-> Jarkko, you seem happy with the following patches
-> - KEYS: trusted: Migrate to use tee specific driver registration function
-> - KEYS: trusted: Make use of tee bus methods
-> - tpm/tpm_ftpm_tee: Make use of tee specific driver registration
-> - tpm/tpm_ftpm_tee: Make use of tee bus methods
-> OK if I take them via my tree, or would you rather take them yourself?
+> But I'm puzzled by your response. Are you making an attempt to justify
+> the past choice to copy the copyrights verbatim? Or are you declining to
+> follow my request to involve your companies' legal experts given that
+> you used the "safest/correct approach"?
 
-I don't mind.
+My apologies that it came across like I was rebuffing your request. I 
+was just trying to inform as to why it was there. Yes, we are working to 
+determine the answer to your concern and what should be the correct 
+course of action.
 
+> FWIW, I don't think what you did was bad here. You _did_ use a quite
+> reasonable approach in the case that a copyright was copied verbatim
+> from an existing legitimate* project.
 > 
-> Herbert, you seem happy with the following patches
-> - hwrng: optee - Make use of module_tee_client_driver()
-> - hwrng: optee - Make use of tee bus methods
-> OK if I take them via my tree, or would you rather take them yourself?
-> 
-> Sudeep, you seem happy with the following patches
-> - firmware: arm_scmi: optee: Make use of module_tee_client_driver()
-> - firmware: arm_scmi: Make use of tee bus methods
-> OK if I take them via my tree, or would you rather take them yourself?
-> 
-> Michael, Pavan, are you OK with the following patches
-> - firmware: tee_bnxt: Make use of module_tee_client_driver()
-> - firmware: tee_bnxt: Make use of tee bus methods
-> OK if I take them via my tree, or would you rather take them yourself?
-> 
-> Thanks,
-> Jens
+>   * I'll give Xen the benefit of the doubt just this one time and put it
+>     in the "legitimate" bucket. :P
 
-BR, Jarkko
+As a Xen contributor/maintainer, thanks ... I think. (^_^)
+
+V/r,
+dps
