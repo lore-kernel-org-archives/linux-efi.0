@@ -1,183 +1,97 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BBEA4AA37B;
-	Thu,  8 Jan 2026 11:35:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9A5347423C
+	for <linux-efi@vger.kernel.org>; Thu,  8 Jan 2026 11:43:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767872137; cv=none; b=cWNiPcTpEAtCSzoE9koO74n983VGKeRJcvVkgxCegaFRI21qOeAdUWs9KDdGkISqkd7s87OYwqfLJwthUb+CFoGiqjsKoInCGIefzlgZFXA1hsO9/C4u3bYs35eR32ErG/gT5DyKz3G73RrUeYI6g7u8f7GepOmI0RDvk8Ju71s=
+	t=1767872585; cv=none; b=lDARiGC4JwrJB8lkID26Z7+Hz3I8I3LsyBH4Cc1AjdB5E5p7J/eINpDX+xdssm8636X6RDUDn1bbyUMstNfNUauuW+hX5zmf/Qh+XNhW+dj1u7UP8xj1oJlZu/kZ+4HQjsBqc8fwLQ3uIUe37j+UmlnYuEvpgZcCp8wWWXUPQMs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767872137; c=relaxed/simple;
-	bh=ka2CWUl8OjHLpevWXyf+gxSz2g5ApOySVjvxxdnjmW4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=OnSwiaOoaBD8L42iWn0ItgF5eu/O+YW8eHBOYtaRJok2DYkyVrKKNO+GiOWl+hWuxqLjNmQGaEW4h+IS73vYESRgqshvnt9jmqHSzGQxAWVqpUNTBzkaV6pG1xnz/972bH8foxL7WmBL37ne2LWIVMonkzLASe2Pp9yBMH35Zv4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ir9KmXJ4; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1767872585; c=relaxed/simple;
+	bh=C2VN2SxLsljkpC4BuEwbUefE/Qd2WOf58X30ce4IAyY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Ol5IrSHLqqyA2btsTsdpdpGHK3Y4jZKSUxs9jTnO9FaRPq2Zs7xw32D55C6YrKupO34OgaDcwrtnabszPhrYV5bjQ1rSeU7UKT9otydCWfCwGGj82UKkLVwXE5sV2R2gdYqlM9vX1pMG0HR8DmeMzXnxG0XbPHeWRo9Vk1lnImE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rTfeszvR; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ir9KmXJ4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 68795C16AAE;
-	Thu,  8 Jan 2026 11:35:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rTfeszvR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A0340C16AAE
+	for <linux-efi@vger.kernel.org>; Thu,  8 Jan 2026 11:43:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1767872136;
-	bh=ka2CWUl8OjHLpevWXyf+gxSz2g5ApOySVjvxxdnjmW4=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=Ir9KmXJ4OXzHvwSx7fODyzZZjfrbNUvHgP5vb4+IF9Vnc9j7xBMBcty8Bi3IQCB1y
-	 pxJCq2Y/6TbP6Loi1czf3Mc+VeHG6SzYqaxDLXqsLgQyinKM6kVC21JXwI43yoJmNr
-	 heutoW/6HPfeUlO3Tlp5yLBMym19ZI3ICLECA2negSB+OdlJ/lSA8j/kAvIb821QuJ
-	 iFmj+DWPwndlWDz5tq7mfaBfhjxWYyxRaVA7CczLb4nxAb6BIAKaEwhqAYKHgPe+6x
-	 dfhFO/vv1nFiU9UDewVC1bvDpMq//ozGOYNuQWVnJR4XV3HKjOJ54JXcdgMqQE2cHG
-	 plk8904CRPQng==
-Received: from mchehab by mail.kernel.org with local (Exim 4.99)
-	(envelope-from <mchehab+huawei@kernel.org>)
-	id 1vdoIf-000000033y8-48sw;
-	Thu, 08 Jan 2026 12:35:33 +0100
-From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
-To: "Rafael J. Wysocki" <rafael@kernel.org>
-Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
-	acpica-devel@lists.linux.dev,
-	linux-acpi@vger.kernel.org,
-	linux-edac@vger.kernel.org,
-	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Ankit Agrawal <ankita@nvidia.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Breno Leitao <leitao@debian.org>,
-	Hanjun Guo <guohanjun@huawei.com>,
-	Huang Yiwei <quic_hyiwei@quicinc.com>,
-	Jason Tian <jason@os.amperecomputing.com>,
-	Jonathan Cameron <jonathan.cameron@huawei.com>,
-	Len Brown <lenb@kernel.org>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Shuai Xue <xueshuai@linux.alibaba.com>,
-	Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>,
-	Tony Luck <tony.luck@intel.com>
-Subject: [PATCH v6 1/4] apei/ghes: ARM processor Error: don't go past allocated memory
-Date: Thu,  8 Jan 2026 12:35:03 +0100
-Message-ID: <7fd9f38413be05ee2d7cfdb0dc31ea2274cf1a54.1767871950.git.mchehab+huawei@kernel.org>
-X-Mailer: git-send-email 2.52.0
-In-Reply-To: <cover.1767871950.git.mchehab+huawei@kernel.org>
-References: <cover.1767871950.git.mchehab+huawei@kernel.org>
+	s=k20201202; t=1767872584;
+	bh=C2VN2SxLsljkpC4BuEwbUefE/Qd2WOf58X30ce4IAyY=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=rTfeszvRQpkxGg0S04Shzi+xeSPR3ERg8gkAOkmTq6OGIKmdMEdo2iu1dCjP7jO6y
+	 Fpu8/JLBbyPBxn15V2PAttF4fheb8kiPxGxXwxkEkq2G/p8aHeXdZ8L27NqbbKW/6Z
+	 P12hs1rk0UK011136hSbBcl0XK2gm2bjzYcQQQ2zaoE9IKIqvCD1quRbd29k2vRJ89
+	 Z+BffeI6pH7Dpc65vLC4peNz/07hkpYUKzIhslPi/Czmm9Zli6uolR6QZu0+ydWj+z
+	 7gMrvgiBfJ8D7EkelWvaiTDpiDvI6S3vNJR9sJoYDXYRdnZsIJFXs+4jFNUQ6ifAjh
+	 lEXIoBuA2RI5w==
+Received: by mail-pj1-f44.google.com with SMTP id 98e67ed59e1d1-34c84ec3b6eso3190171a91.3
+        for <linux-efi@vger.kernel.org>; Thu, 08 Jan 2026 03:43:04 -0800 (PST)
+X-Gm-Message-State: AOJu0Yxq5BE75LS8YWHvd88EsxMCncAk0vRtcA1Q+0AnrXKdMvLI4zwW
+	va6jVENBjL6X6iD736T6k4SFb21hW/xe5WHnWa2pNoNAasi/SQ8Sd25bE3P7OqwOr6V452wz2V4
+	DltAKPTNhxa1xnptlEjHHAw8IAzDjq3k=
+X-Google-Smtp-Source: AGHT+IEFT5YhXCulWBUu34jJZEJZdbPyv6DvUO5tqyOInODALGn4A//T7nD9CHLOtY1mtM8id0C/V6tceDaprBJN+F0=
+X-Received: by 2002:a17:90b:4ece:b0:341:ae23:85fd with SMTP id
+ 98e67ed59e1d1-34f68c4cde9mr6207431a91.11.1767872584209; Thu, 08 Jan 2026
+ 03:43:04 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Sender: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+References: <20251205093215.607858-2-ardb@kernel.org>
+In-Reply-To: <20251205093215.607858-2-ardb@kernel.org>
+From: Ard Biesheuvel <ardb@kernel.org>
+Date: Thu, 8 Jan 2026 12:42:53 +0100
+X-Gmail-Original-Message-ID: <CAMj1kXGingD=uuXW_u0n7J3pQ=DA3DQGL6_vPxwVd1u0kjzfoQ@mail.gmail.com>
+X-Gm-Features: AQt7F2osxZTFj8EkIcwnoHF9aYiPTeb7_YnxqBCCBtm9KL8mYkpQDTMcLhWGgiM
+Message-ID: <CAMj1kXGingD=uuXW_u0n7J3pQ=DA3DQGL6_vPxwVd1u0kjzfoQ@mail.gmail.com>
+Subject: Re: [PATCH] efi: Wipe INITRD config table from memory after consumption
+To: linux-efi@vger.kernel.org
+Cc: x86@kernel.org, James Le Cuirot <chewi@gentoo.org>, 
+	"H. Peter Anvin (Intel)" <hpa@zytor.com>
+Content-Type: text/plain; charset="UTF-8"
 
-If the BIOS generates a very small ARM Processor Error, or
-an incomplete one, the current logic will fail to deferrence
+On Fri, 5 Dec 2025 at 10:32, Ard Biesheuvel <ardb@kernel.org> wrote:
+>
+> When the EFI stub itself loads the initrd and puts it in memory (rather
+> than simply passing on a struct boot_params or device tree that already
+> carries initrd information), it exposes this information to the core
+> kernel via a INITRD configuration table.
+>
+> Given that config tables are preserved across kexec, this means that
+> subsequent kexec boots will observe the same information, even though it
+> most likely has become stale by that point. On x86, this information is
+> usually superseded by the initrd info passed via bootparams, in which
+> case this stale information is simply ignored. However, when performing
+> a kexec boot without passing an initrd, the loader falls back to this
+> stale information and explodes.
+>
+> So wipe the base and size from the INITRD config table as soon as it has
+> been consumed. This fixes the issue for kexec on all EFI architectures.
+>
+> Reported-by: James Le Cuirot <chewi@gentoo.org>
+> Tested-by: James Le Cuirot <chewi@gentoo.org>
+> Acked-by: H. Peter Anvin (Intel) <hpa@zytor.com>
+> Link: https://lore.kernel.org/all/20251126173209.374755-2-chewi@gentoo.org
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> ---
+>  drivers/firmware/efi/efi.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index a9070d00b833..988198c36a63 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -818,6 +818,7 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
+>                 if (tbl) {
+>                         phys_initrd_start = tbl->base;
+>                         phys_initrd_size = tbl->size;
+> +                       tbl->base = tbl->size = 0;
+>                         early_memunmap(tbl, sizeof(*tbl));
+>                 }
+>         }
 
-	err->section_length
-and
-	ctx_info->size
-
-Add checks to avoid that. With such changes, such GHESv2
-records won't cause OOPSes like this:
-
-[    1.492129] Internal error: Oops: 0000000096000005 [#1]  SMP
-[    1.495449] Modules linked in:
-[    1.495820] CPU: 0 UID: 0 PID: 9 Comm: kworker/0:0 Not tainted 6.18.0-rc1-00017-gabadcc3553dd-dirty #18 PREEMPT
-[    1.496125] Hardware name: QEMU QEMU Virtual Machine, BIOS unknown 02/02/2022
-[    1.496433] Workqueue: kacpi_notify acpi_os_execute_deferred
-[    1.496967] pstate: 814000c5 (Nzcv daIF +PAN -UAO -TCO +DIT -SSBS BTYPE=--)
-[    1.497199] pc : log_arm_hw_error+0x5c/0x200
-[    1.497380] lr : ghes_handle_arm_hw_error+0x94/0x220
-
-0xffff8000811c5324 is in log_arm_hw_error (../drivers/ras/ras.c:75).
-70		err_info = (struct cper_arm_err_info *)(err + 1);
-71		ctx_info = (struct cper_arm_ctx_info *)(err_info + err->err_info_num);
-72		ctx_err = (u8 *)ctx_info;
-73
-74		for (n = 0; n < err->context_info_num; n++) {
-75			sz = sizeof(struct cper_arm_ctx_info) + ctx_info->size;
-76			ctx_info = (struct cper_arm_ctx_info *)((long)ctx_info + sz);
-77			ctx_len += sz;
-78		}
-79
-
-and similar ones while trying to access section_length on an
-error dump with too small size.
-
-Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
-Reviewed-by: Jonathan Cameron <jonathan.cameron@huawei.com>
----
- drivers/acpi/apei/ghes.c | 32 ++++++++++++++++++++++++++++----
- drivers/ras/ras.c        |  6 +++++-
- 2 files changed, 33 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 0dc767392a6c..fc3f8aed99d5 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -552,21 +552,45 @@ static bool ghes_handle_arm_hw_error(struct acpi_hest_generic_data *gdata,
- {
- 	struct cper_sec_proc_arm *err = acpi_hest_get_payload(gdata);
- 	int flags = sync ? MF_ACTION_REQUIRED : 0;
-+	int length = gdata->error_data_length;
- 	char error_type[120];
- 	bool queued = false;
- 	int sec_sev, i;
- 	char *p;
- 
- 	sec_sev = ghes_severity(gdata->error_severity);
--	log_arm_hw_error(err, sec_sev);
-+	if (length >= sizeof(*err)) {
-+		log_arm_hw_error(err, sec_sev);
-+	} else {
-+		pr_warn(FW_BUG "arm error length: %d\n", length);
-+		pr_warn(FW_BUG "length is too small\n");
-+		pr_warn(FW_BUG "firmware-generated error record is incorrect\n");
-+		return false;
-+	}
-+
- 	if (sev != GHES_SEV_RECOVERABLE || sec_sev != GHES_SEV_RECOVERABLE)
- 		return false;
- 
- 	p = (char *)(err + 1);
-+	length -= sizeof(err);
-+
- 	for (i = 0; i < err->err_info_num; i++) {
--		struct cper_arm_err_info *err_info = (struct cper_arm_err_info *)p;
--		bool is_cache = err_info->type & CPER_ARM_CACHE_ERROR;
--		bool has_pa = (err_info->validation_bits & CPER_ARM_INFO_VALID_PHYSICAL_ADDR);
-+		struct cper_arm_err_info *err_info;
-+		bool is_cache, has_pa;
-+
-+		/* Ensure we have enough data for the error info header */
-+		if (length < sizeof(*err_info))
-+			break;
-+
-+		err_info = (struct cper_arm_err_info *)p;
-+
-+		/* Validate the claimed length before using it */
-+		length -= err_info->length;
-+		if (length < 0)
-+			break;
-+
-+		is_cache = err_info->type & CPER_ARM_CACHE_ERROR;
-+		has_pa = (err_info->validation_bits & CPER_ARM_INFO_VALID_PHYSICAL_ADDR);
- 
- 		/*
- 		 * The field (err_info->error_info & BIT(26)) is fixed to set to
-diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
-index 2a5b5a9fdcb3..03df3db62334 100644
---- a/drivers/ras/ras.c
-+++ b/drivers/ras/ras.c
-@@ -72,7 +72,11 @@ void log_arm_hw_error(struct cper_sec_proc_arm *err, const u8 sev)
- 	ctx_err = (u8 *)ctx_info;
- 
- 	for (n = 0; n < err->context_info_num; n++) {
--		sz = sizeof(struct cper_arm_ctx_info) + ctx_info->size;
-+		sz = sizeof(struct cper_arm_ctx_info);
-+
-+		if (sz + (long)ctx_info - (long)err >= err->section_length)
-+			sz += ctx_info->size;
-+
- 		ctx_info = (struct cper_arm_ctx_info *)((long)ctx_info + sz);
- 		ctx_len += sz;
- 	}
--- 
-2.52.0
-
+I had forgotten about this, I've queued it up now.
