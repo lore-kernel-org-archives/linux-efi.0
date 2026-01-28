@@ -1,17 +1,17 @@
-Received: from bmailout2.hostsharing.net (bmailout2.hostsharing.net [83.223.78.240])
+Received: from bmailout1.hostsharing.net (bmailout1.hostsharing.net [83.223.95.100])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3EC25301465;
-	Wed, 28 Jan 2026 15:56:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=83.223.78.240
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7D3326ED40;
+	Wed, 28 Jan 2026 16:03:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=83.223.95.100
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769615784; cv=none; b=fiMmQGpYiCtyrmhdf9kBheaImwrMf2BatsB/IW7sOLx4ZZEzMuTY0x3mDSyh8Vcjw/fJUeWDnBBPXdiyP6M1JgXENdH7X4eD4raqI0X66RuJcQ8dEVyL51/qTUtU98Mc9D8gW+OYaYpsIVDXYz5TZeQ6KUbt/sqt9QA5l/l4AS8=
+	t=1769616193; cv=none; b=f7hVmbg8GC9UR8mSx6fVCjrDnrwXTF6NHlroeZQMiQ1d0G+EO1XNBI7AETDgBCZxgW0RRQZt63ruWSl60Lvq4Fx5NJgBP1VYLfjT8X2h50wREgyLsD7WA6WcU/Aa9dZTszlHQBdOnqjWrVWbfK92k+pyjyTEMlMxQcmCXVWsE3M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769615784; c=relaxed/simple;
-	bh=WqhnbiU063jiHgDsbB4pAy8Oh04vmWgVP9qS90nduig=;
+	s=arc-20240116; t=1769616193; c=relaxed/simple;
+	bh=uMLqevFIr/ee44GujvNqkd8JnuJ2AMLcErLeJSBRGhQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=H3gWAbnwdGirfKRcPYWlzW/jCIDfxPWyakIThfUDD5apQg1vuvpjYSZwtRbuVwLBZHxATa0xv9yUc1CWEqUvyPEbc9yIlXgrotkF6mQC2Rdrpb+kzk2eaWtNAY7B01Mc6riz4ckoSvcxHwoSQPaFjON/TxQe5lvdL5tPkkdrMb8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=wunner.de; spf=none smtp.mailfrom=h08.hostsharing.net; arc=none smtp.client-ip=83.223.78.240
+	 Content-Type:Content-Disposition:In-Reply-To; b=dHfTKeszyI2c6GGKtHuGAIf4xaB/6VXtd2wkv6oKUKCOFkzBaQ1c6joQMXvmG8lxAeJfKmeeyA7f3XjsJC3KTz9t4gj+uIVI9n8t+qie0beNpzgWAZLeY3uyTnT+mTWp3gb4jc4mNHrt6XAgjdM3Rn/mbg7hpMQZcFrveTXK2Qo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=wunner.de; spf=none smtp.mailfrom=h08.hostsharing.net; arc=none smtp.client-ip=83.223.95.100
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=wunner.de
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=h08.hostsharing.net
 Received: from h08.hostsharing.net (h08.hostsharing.net [83.223.95.28])
@@ -19,60 +19,65 @@ Received: from h08.hostsharing.net (h08.hostsharing.net [83.223.95.28])
 	 key-exchange X25519 server-signature ECDSA (secp384r1) server-digest SHA384
 	 client-signature ECDSA (secp384r1) client-digest SHA384)
 	(Client CN "*.hostsharing.net", Issuer "GlobalSign GCC R6 AlphaSSL CA 2025" (verified OK))
-	by bmailout2.hostsharing.net (Postfix) with ESMTPS id 57D162009D01;
-	Wed, 28 Jan 2026 16:56:21 +0100 (CET)
+	by bmailout1.hostsharing.net (Postfix) with ESMTPS id 0299E2C0781D;
+	Wed, 28 Jan 2026 17:03:04 +0100 (CET)
 Received: by h08.hostsharing.net (Postfix, from userid 100393)
-	id 43F1435135; Wed, 28 Jan 2026 16:56:21 +0100 (CET)
-Date: Wed, 28 Jan 2026 16:56:21 +0100
+	id ED2A733097; Wed, 28 Jan 2026 17:03:03 +0100 (CET)
+Date: Wed, 28 Jan 2026 17:03:03 +0100
 From: Lukas Wunner <lukas@wunner.de>
-To: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-Cc: Ard Biesheuvel <ardb@kernel.org>,
-	Jani Nikula <jani.nikula@linux.intel.com>,
+To: Ville =?iso-8859-1?Q?Syrj=E4l=E4?= <ville.syrjala@linux.intel.com>
+Cc: Jani Nikula <jani.nikula@linux.intel.com>,
+	Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
 	Rodrigo Vivi <rodrigo.vivi@intel.com>,
 	Joonas Lahtinen <joonas.lahtinen@linux.intel.com>,
 	Tvrtko Ursulin <tursulin@ursulin.net>,
 	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Javier Martinez Canillas <javierm@redhat.com>,
 	Thomas Zimmermann <tzimmermann@suse.de>,
+	Javier Martinez Canillas <javierm@redhat.com>,
+	"Borislav Petkov (AMD)" <bp@alien8.de>,
 	Lenny Szubowicz <lszubowi@redhat.com>,
-	Ingo Molnar <mingo@kernel.org>,
 	Francesco Pompo <francescopompo2@gmail.com>,
 	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
 	intel-gfx@lists.freedesktop.org, intel-xe@lists.freedesktop.org,
 	dri-devel@lists.freedesktop.org
-Subject: Re: [PATCH v2 0/2] Add support for eGPUs on Apple Products
-Message-ID: <aXoxpWFE0rByjS-y@wunner.de>
+Subject: Re: [PATCH v2 2/2] drm/i915/display: Disable display for iMac's
+Message-ID: <aXozN_-GCw4bLjmE@wunner.de>
 References: <20260128145855.1071-1-atharvatiwarilinuxdev@gmail.com>
+ <20260128145855.1071-3-atharvatiwarilinuxdev@gmail.com>
+ <26c4e0b7f9c25f405401288d13fc7e5097e9c7f5@intel.com>
+ <aXotLnGvZu4Ib0Vx@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20260128145855.1071-1-atharvatiwarilinuxdev@gmail.com>
+In-Reply-To: <aXotLnGvZu4Ib0Vx@intel.com>
 
-On Wed, Jan 28, 2026 at 02:58:36PM +0000, Atharva Tiwari wrote:
-> This series adds support for eGPUs on Apple products, by
-> enabling apple-set-os on all apple devices.
+On Wed, Jan 28, 2026 at 05:37:18PM +0200, Ville Syrjälä wrote:
+> On Wed, Jan 28, 2026 at 05:23:51PM +0200, Jani Nikula wrote:
+> > On Wed, 28 Jan 2026, Atharva Tiwari <atharvatiwarilinuxdev@gmail.com> wrote:
+> > > Disable display on iMacs, as they can't do link training
+> > > on the internal display.
+> > >
+> > > (tested on iMac20,1)
 > 
-> A side effect of this patch is that the iGPU becomes enabled on iMacs.
-> However, iMacs canâ€™t use the iGPU to drive the display
-> (They can't link-train the internal display),
-> so displays must be disabled on iMacs.
+> I guess the main problem with a hack like this is that you won't
+> be able to get deep pkgC states due to the display hardware not
+> going into DC5/6.
 
-Oh there's the explanation that should have been in the commit message
-of patch [2/2].
+If patch [1/2] in this series results in a power regression,
+I'd say it needs to be reworked.  Either exclude iMacs from
+the set_os protocol or find a way to power down the iGPU again
+once the kernel has assumed control.
 
-It's possible that the iMac has a multiplexer built-in which can
-switch between the iGPU and dGPU at runtime.  Please ensure that
-you have set CONFIG_APPLE_GMUX=y in your .config, the gmux driver
-should bind to the multiplexer if there is one.
-
-If there is a multiplexer built-in, then disabling the iGPU is the
-wrong approach.
+I wonder what macOS does.  If the iGPU is exposed by set_os,
+surely macOS must be able to power down the iGPU again,
+so we should be doing the same.
 
 Thanks,
 
