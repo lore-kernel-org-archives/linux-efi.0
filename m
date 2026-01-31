@@ -1,67 +1,80 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F2321CAA65
-	for <linux-efi@vger.kernel.org>; Sat, 31 Jan 2026 01:19:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769822379; cv=none; b=lGkrfIKdsUGXEATVpdVGmtOVS4JFcPjAHzM2ezFrSTQkmX/a0w799XyI+qaBTG7+jjvKV03ERql6P3qKXGzcZ0XnYp0R2XihkI4Y6pA66/PcXEvVZeqMsJr85d2fAOHFEE0hcvlON7C1V3wfoeismfuf+WcJL2eNHoi9Wfq/xWY=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769822379; c=relaxed/simple;
-	bh=P/AkJ7VMQl7xg3h+SCs73opP330uFlSO7pps2YFNAtA=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA5BE2FD7B1
+	for <linux-efi@vger.kernel.org>; Sat, 31 Jan 2026 02:09:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.49
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1769825355; cv=pass; b=jEUmgjK9oEkquhvtwvWhrq/tzGBXOrUaHz5y9OUYE98P0MTm3d+V8dnqzCSfXEZ9q7cH/pSR3apvPrxX4DtlS9H746m4GUHqeOjRmZgQj4bbXTKFi94u7IN6yctOm1PiN9tkrembInpCvnmp7geeO1Kfxh5xBFIjXNMCEh7HqKM=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1769825355; c=relaxed/simple;
+	bh=q1+m69AC8OyppS+g1qL0airmm2fN+rGF7m5h75RejBg=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=NTd84TQJirPNiVaotquGL83OgY13Ta+G6l4lteLWt5s3jNsTzjNKMKXtnAxSGjnpYRDgHHHcv8nVbIprnv0BetUzhdm+dRJrkYaPwq4Lx5KaGoghhszwLxUD6gk2mSwot4S22NuIsbnlQilFZGtWKrESJ1Y5SKDNfBGG7NjI+FA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=Czvb2QDl; arc=none smtp.client-ip=209.85.167.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+	 To:Cc:Content-Type; b=P+BNFxKREAIksMawfrwwigPe+MVvdOInoTicJAwuGW86jXZQ1QyidN13r5mmyils9jrHsUyhaCbX9qNABf58+KzH3101FfdRSQEem61aeiGVKjeyphl1HgqVzC47NLL3sp3bqsCA2yGWYvz7WCWJ15ppfPsTbVk9lrQ36Y719m8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=mdY9sAoL; arc=pass smtp.client-ip=209.85.218.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="Czvb2QDl"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-59dd7bfeb8aso3102482e87.0
-        for <linux-efi@vger.kernel.org>; Fri, 30 Jan 2026 17:19:37 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="mdY9sAoL"
+Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-b8849dc12f6so406058366b.1
+        for <linux-efi@vger.kernel.org>; Fri, 30 Jan 2026 18:09:13 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1769825352; cv=none;
+        d=google.com; s=arc-20240605;
+        b=YRfcv/0+UGOLY61NfBeWXmg0Ypa3vz3FDCnXyYJ8LR4iT5nYa60cDDsPpJp2ZqhSDE
+         /2g8Tlh+uGPodNMwZjR8Vef6SEs/bFQr045m2OzfUCFlG+Nlr6Q09j+1dxGuSR9uPPtg
+         SEzFbpPKgBmdh5dGncspf1giV3HGFwO7/6Fu5NFzX38cvRy+unMhVKSsPvhBeC+8qGbw
+         0mS5qQ6IEBFWzBusTHQf6QPxgfxAc/5MjExGdjEqiEUV8JzF4yqFtyHc03V/su41E5p5
+         aqaQGn1IeM674FT6H9YqqPoeK1c+YPUifiaX4nTbpZGWJQPaoY3CwbQjtJ5wAAK2T5ll
+         Wbsw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=fXBSGIys3SzCpVetTGHBAjMTb+eZCN0LoIysZIFKUFQ=;
+        fh=NxTbjVRpUsQf1Gs+uLc3BIqFLhMI3HZfNK8Cv4xpznQ=;
+        b=cFctxcOldsvvvASMVbMh/bGcshl6b72rMQeIlNZJsasXlle3Y1Urfn8+c98pnMptp8
+         1qd/rsqusxwpGstrcAISFEf/UEBCBUA1u83OQnVrUtg4g801PGteU26cqcrTvDCsv+Aq
+         PvjLNXPHEKizlCgl641IWUn0KVwHlkTEXsloFeIbbhck/5e2C0lxjLu7VjeCLCYqB5k6
+         6BxoEe70GC4ZX152oyhqCxyj1H6fwopIEYJQxBVSrRu3d750vLGPRTXtoyTbwLcCt+4b
+         eCatVijYoPMsy61S8ra1cP705ugAhwB2as/9MsZZ7xNDfEBJjYHwmgJImfz1RLLRJvQq
+         BiAQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1769822376; x=1770427176; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=EPpl6A64UKlYlKR2j1fRkib4LdNnz2WqgktVIjm2uzU=;
-        b=Czvb2QDltq7M8634vLJNNzvHWgcuzDWoIB5XftT0RVRrzd7zhbYN8wja4EbJO8LyVj
-         yeWebQBvwgVpceS6B9qJwNCiOnzQp0HPvd3iPEI4a/gI3/dF9Laaekgqbw9m4A34ektt
-         2JQ7YNFN4ubt1rrsf9Js8ArRt4ft/9r2BZsqE=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769822376; x=1770427176;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=google.com; s=20230601; t=1769825352; x=1770430152; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=EPpl6A64UKlYlKR2j1fRkib4LdNnz2WqgktVIjm2uzU=;
-        b=fhc1COhvUWYs8QyMHUjc7GBRac6zFoQbC0IfVAVoY26SquGyWMp2Nfn5DapBTsauYZ
-         b61OnBhj/blqLknvJMd5KDocomtVjjn9OD1N6oh9wMnfZiMrvOMDPDA35LQbPGX/Ooah
-         d78fZ5M14OLqLVFq9XWKEEmdI+CXEImzryUxh7zV7C2+/2id9Q8Tt0ak81WDvkyQlOxm
-         eRWxl8jFLKdHe5M6CQmjhdK7Vd4xGGr4y5raFgZpMEtvYOU6NXX6zuB99+uLZLn8C/q+
-         t01weri7pHWIrG3zCcUe3s8KeSBYBNeljRQcetnA2fsSn3xjRJKZFeQhFbSZDVvHZUK1
-         jtmQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVLAvWGCLiL+0vpsvi/QKDJhZauNMBZF6fDsJB8TBqftTc041JTTdlmV3N5PzeuN0J2wTwbOf+DGkg=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx/7qv0RY2bZqZmQZN1amqQGJXoWyRi+V0mHOJeQiELvuY5P383
-	TSFw2YgM3CBr1VblDrPIeExIgPoCQRrnfWy3wqISCYoaUjli3TWh8EjVwb7fEAshorsl4kbNhTj
-	0iyT0ACdryQ==
-X-Gm-Gg: AZuq6aJ3/lpG2GvKaccwdswcs8VJniHGQEehH5XDv1WHhZJlMhIo8MGxtP8Ed7+UjQe
-	gL41ypGrq9ioFedI3f/rR9VewzHpOMhlVVZSeIcdKMU4FbRQc2B5kZoAVm4+6YbANr+uoAnDY3z
-	icJWhTUvPMaeNSq3qy6BRhfz9HdlcJCD3LPuxZj9CulxFrq0XWxHF1U9ZGzt7qxNukdrRwzxjmM
-	V1EFwKcCeVH+zz/H6+T1ED0hGw86hrh2SfdDTMAo444Jhvig27gAm0vrU3348z5VxfRx3MfgLzf
-	I6v4sw9QM8nP2eusmGwUry2TrSc8jfsaq4s2Qm+OiOGjIt67pRvHp3GgtkD6AQeN8lS9AQug6fz
-	M0u8IZMIyNFThYYqkiMiHwqbdphj4SuoUbIGa+AVZLsOWlskQBtTB5fHaq0Yg88qTUTQwA1ALvR
-	lwYoahrpGZRGEMiyAv81FPOEWE3T+e0k2sMn+zwAxBMhR9RBFx5bCkjThZIW0o
-X-Received: by 2002:ac2:4c52:0:b0:59d:db01:e0e6 with SMTP id 2adb3069b0e04-59e16401a65mr1710911e87.20.1769822376206;
-        Fri, 30 Jan 2026 17:19:36 -0800 (PST)
-Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com. [209.85.167.46])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-59e0748eb3csm2081611e87.45.2026.01.30.17.19.36
-        for <linux-efi@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 30 Jan 2026 17:19:36 -0800 (PST)
-Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-59b76844f89so2498326e87.1
-        for <linux-efi@vger.kernel.org>; Fri, 30 Jan 2026 17:19:36 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCVhq8lKAbYHSC2WW2B6FzRuytmS1qhbNRzFDH1fQ69DUiBq2V1b3co/pYKYQUatfMfSyz9Ehp9wH7Y=@vger.kernel.org
-X-Received: by 2002:a05:6402:35c7:b0:658:ba49:96c2 with SMTP id
- 4fb4d7f45d1cf-658de54e61dmr2863591a12.6.1769821915767; Fri, 30 Jan 2026
- 17:11:55 -0800 (PST)
+        bh=fXBSGIys3SzCpVetTGHBAjMTb+eZCN0LoIysZIFKUFQ=;
+        b=mdY9sAoLvV09pJjCxND5Iu74NfN+XMMgrupYs9by8DK5G2zZFOokwzfRRZKmBD1gRY
+         AjgQpgB5EjSE4J0xzK51/PodGanFU83GL26fHQqfL9/acxZXA7eQC4icggJ3OPvsx39F
+         rYB9x3Oswo696/SSnggh0yy/9Iw7SYfPVlLnKssfKPM5puJqBDEgC8TBKfmP2p9p8y9J
+         mT2bVhCFO3fDAmUxql8ri6GZjywb818fU2vt3kLT6LeM+Nf8WkTqwYY0efhXBrLT+AY4
+         ERI/xwg6zoS67zkSfCmJiRPlXMmkdYhH8jWl+xYzOwFG7Hx6lv8E8XyifBvgTABOhkOv
+         aGXA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1769825352; x=1770430152;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=fXBSGIys3SzCpVetTGHBAjMTb+eZCN0LoIysZIFKUFQ=;
+        b=krerLGW+p+MFWPqUbWIa706z2k2Fq0PWLegD6lrksHndGmueUvaLW+Ve4F3a6g7xjr
+         RpYMRSf/b73pt9BjiPngR6Rkf31XCXzD0jxLsPcmLPUA8V6fnBG67QEjz+L49bQdaW4W
+         GJBXUyrlhBFLUFxK93Lp/tVeKVscBP14EF6EY4RQGVIAle7BmzoUCvnkaTufrFcJySMC
+         o28+OUYtbkh5iDdkAZc3OvNE75vKPNR/XhdfJz3evE6zz7MjkcNDayqglIra+FyQktLX
+         PRe9pWr3KvfwNS9BHvVbUfzvw55Jh6Y9ROVTvnbTG9RC31gZyVOeawsTdwkMcLjlNAcl
+         s8ug==
+X-Forwarded-Encrypted: i=1; AJvYcCUNEVJ16SV5jBMlm/mHSkzFwuJX5FcOa2m9+0xzpbzRTqYufDpWYzH/wpfmZSs7B6POuwG5sv3YL9g=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yye3FaqnuY8bjsTYSpo6heyyp7bgMHno1aW1YoWpoH3DJlouENS
+	9HtrFcsuYkLeZD7ltM8khU03ADdjAhqGSHM+9FWzU97T9+DdXHijowuzVpa1jy+Km4plTfMYRUX
+	QzjNvORArEprYiQal1ImneeLLW/8AoSOQGaq/Z6Qv
+X-Gm-Gg: AZuq6aLhZGPkDzTzdcP/Afcek4acz9+MYQt6Cpir1nVskMn/88GbAf+h8cIymx47mc4
+	d/FridqSV2wE/82pag4+9wIUyiZOEJmcIfGZKEU4Dq4UbxB2q9pJ+fF1mUCoIsEg4DNbhNazWiA
+	A2H+K6nng8VttBR5HWXsZ1zKLz9/N5vOLr09Ezbhb9dHi29v0YCGu7EBuGcHvTysYldBVgved5X
+	UO26XM3IBXr4tEV4SEr/z/dJ7Wa9CmggLtToc7FOOEestVo732oP5916ioOgafB0yerBDksFWXF
+	LSM=
+X-Received: by 2002:a17:906:f5a8:b0:b74:984c:a3de with SMTP id
+ a640c23a62f3a-b8dff5d84a1mr304116566b.28.1769825351931; Fri, 30 Jan 2026
+ 18:09:11 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -73,18 +86,17 @@ References: <CAG2Kctoo=xiVdhRZnLaoePuu2cuQXMCdj2q6L-iTnb8K1RMHkw@mail.gmail.com>
  <20260129032335.GT3183987@ZenIV> <20260129225433.GU3183987@ZenIV>
  <CAG2KctoNjktJTQqBb7nGeazXe=ncpwjsc+Lm+JotcpaO3Sf9gw@mail.gmail.com>
  <20260130070424.GV3183987@ZenIV> <CAG2Kctoqja9R1bBzdEAV15_yt=sBGkcub6C2nGE6VHMJh13=FQ@mail.gmail.com>
- <20260130235743.GW3183987@ZenIV> <CAHk-=wgk7MRBj4iwQLHocVCa94Jf0cMEz2HzUAS9+6rGtnp4JA@mail.gmail.com>
- <20260131010821.GY3183987@ZenIV>
-In-Reply-To: <20260131010821.GY3183987@ZenIV>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Fri, 30 Jan 2026 17:11:39 -0800
-X-Gmail-Original-Message-ID: <CAHk-=wiXq-bPyKywNOw7z6ehrVReyS-hSPuQkJvuhJWfXGFm=A@mail.gmail.com>
-X-Gm-Features: AZwV_QiG_nByRrd83VYAdhaCU5_carsYUlImGLyJR9w-28CTqo3phlyWLRwFL8I
-Message-ID: <CAHk-=wiXq-bPyKywNOw7z6ehrVReyS-hSPuQkJvuhJWfXGFm=A@mail.gmail.com>
+ <20260130235743.GW3183987@ZenIV> <CAG2KctotL+tpHQMWWAFOQEy=3NX-7fa9YroqsjnxKmTuunJ2AQ@mail.gmail.com>
+ <20260131011831.GZ3183987@ZenIV>
+In-Reply-To: <20260131011831.GZ3183987@ZenIV>
+From: Samuel Wu <wusamuel@google.com>
+Date: Fri, 30 Jan 2026 18:09:00 -0800
+X-Gm-Features: AZwV_QgpcNm32QTyYTJNZ2e8MpZD_azq4tiS_evKebHi_xWHPJAAyFUDpR04HdE
+Message-ID: <CAG2KctoKDsfbyopQYq3-nJBg3fG+7Nrer17S6HqQ+nCWEcHeWQ@mail.gmail.com>
 Subject: Re: [PATCH v4 00/54] tree-in-dcache stuff
 To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Samuel Wu <wusamuel@google.com>, Greg KH <gregkh@linuxfoundation.org>, 
-	linux-fsdevel@vger.kernel.org, brauner@kernel.org, jack@suse.cz, 
+Cc: Greg KH <gregkh@linuxfoundation.org>, linux-fsdevel@vger.kernel.org, 
+	torvalds@linux-foundation.org, brauner@kernel.org, jack@suse.cz, 
 	raven@themaw.net, miklos@szeredi.hu, neil@brown.name, a.hindborg@kernel.org, 
 	linux-mm@kvack.org, linux-efi@vger.kernel.org, ocfs2-devel@lists.linux.dev, 
 	kees@kernel.org, rostedt@goodmis.org, linux-usb@vger.kernel.org, 
@@ -93,15 +105,40 @@ Cc: Samuel Wu <wusamuel@google.com>, Greg KH <gregkh@linuxfoundation.org>,
 	borntraeger@linux.ibm.com, bpf@vger.kernel.org, clm@meta.com, 
 	android-kernel-team <android-kernel-team@google.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 30 Jan 2026 at 17:06, Al Viro <viro@zeniv.linux.org.uk> wrote:
+On Fri, Jan 30, 2026 at 5:16=E2=80=AFPM Al Viro <viro@zeniv.linux.org.uk> w=
+rote:
 >
-> I'd rather go for a spinlock there, protecting these FFS_DEACTIVATED
-> transitions;
+> On Fri, Jan 30, 2026 at 05:05:34PM -0800, Samuel Wu wrote:
+>
+> > > How lovely...  Could you slap
+> > >         WARN_ON(ret =3D=3D -EAGAIN);
+> > > right before that
+> > >         if (ret < 0)
+> > >                 return ret;
+> >
+> > Surprisingly ret =3D=3D 0 every time, so no difference in dmesg logs wi=
+th
+> > this addition.
+>
+> What the hell?  Other than that mutex_lock(), the only change in there
+> is the order of store to file->private_data and call of ffs_data_opened()=
+;
+> that struct file pointer is not visible to anyone at that point...
 
-Yes, that's the much better solution.  The locking in this thing is horrendous.
+Agree, 09e88dc22ea2 (serialize ffs_ep0_open() on ffs->mutex) in itself
+is quite straightforward. Not familiar with this code path so just
+speculating, but is there any interaction with previous patches (e.g.
+refcounting)?
 
-But judging by Samuel's recent email, there's something else than the
-open locking thing going on.
+> Wait, it also brings ffs_data_reset() on that transition under ffs->mutex=
+...
+> For a quick check: does
+> git fetch git://git.kernel.org/pub/scm/linux/kernel/git/viro/vfs.git for-=
+wsamuel2
+> git switch --detach FETCH_HEAD
+> demonstrate the same breakage?
 
-          Linus
+Had to adjust forward declaration of ffs_data_reset() to build, but
+unfortunately same breakage.
