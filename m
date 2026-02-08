@@ -1,273 +1,72 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bmailout2.hostsharing.net (bmailout2.hostsharing.net [83.223.78.240])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A681427AC28;
-	Sun,  8 Feb 2026 10:45:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 187762459EA;
+	Sun,  8 Feb 2026 13:16:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=83.223.78.240
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770547559; cv=none; b=ogcZMDq0BrE0xhnQsU3XcVC6O/KFFdHrJtyVSe39mkVPSKzTSqfN/U8XEobTq803JUKD3Mb922efg9n361JdJVMVDDEPBhz3DvytnA+/loyzGPGYsPJPablwflp2gyjwLaZFtYoN8V2wxEh74xdo1951opkvq19OYI9CCcfqs1w=
+	t=1770556595; cv=none; b=Fn3nQzHV9ZZ/EAUUV7V95+6AhENU7hpLivjkM8bIhCnZbyC1kUptL//cvX27YETl/4xJwgr8XwxKAkTC438hcj8ysfm6/nZmGf2jztY4QHZpioAgXWOB4X7rnZLqXploN4sNTqyLqwkMNne8NCGNLs2AFI9ZCECCaMzUAlMp1Cg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770547559; c=relaxed/simple;
-	bh=oCOks4Zu7lnr+Dn0QAI7n4eMmSuai+UyfMfboMsdGlY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=swt4ddwBwqQXW5WZTUvt8dI8hBnNqkZ8rogyiAXzTrtEpgPHJSIMw57RXOiLCAPdshwob2tIPainSJPczdz73CsrnSNcKKZ7yWsuPosjn8SttYDl8oxUH+C6wRtApiTkXNH/TUKNoYYIFxKMXnpUWz1jAW1vQ+zMVdjMBIfg/8U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=szMovIaU; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="szMovIaU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C6F83C4CEF7;
-	Sun,  8 Feb 2026 10:45:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1770547559;
-	bh=oCOks4Zu7lnr+Dn0QAI7n4eMmSuai+UyfMfboMsdGlY=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=szMovIaUZmX2u8cIlV4PbkpacHnR3bebZelZbbP1/i+8/7hUYK0VcJ+HEceivEVyt
-	 /VWx0Z+UaxQEI1PwKgNzCUGcf4J80cmIpa9c0Didmx7hqhYrxY+JIIedxH29TAcMGO
-	 jhRIqM/FNPC+BhpTfNi7RFgoNaCDbnCPuwK3LW8JvXrN0fuoNAQ8zt/2CTibJCo7a3
-	 72yXIOpAdz1hkMEH2gzlJ3yVsjXpFWOJYOVcgwwtE7p0fQ/WInFiw4ZiOnmLdjXV7U
-	 iPWXhyM6Ubuucjxf1s7hZ6w+9109n1MeoCGenz6knXhkqVutK3aghrQJR0s0DtTKh0
-	 enFrlJ1Jdj7KA==
-Message-ID: <c2d14818-1c34-47c7-a210-1f7c737f0bc9@kernel.org>
-Date: Sun, 8 Feb 2026 11:45:55 +0100
+	s=arc-20240116; t=1770556595; c=relaxed/simple;
+	bh=vZSO0u+h+fAEP3OmnIeujZGeCVVtx0zSVtopGXmExW8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=o5vrTUE0NwORlLeNMSpqBzZi4m6P1e1pGqB7HhX9AikGVDpWqn9rA5hGcm4LanMGACH7/ZJl4WS0DOB8UheI0QM117bDVQyHLLZdF3Eofvrov3lHFdC68loMFUwEoSj99hx8iwV0x2+PgvavatuJyh5bjEgUenoVso/gMk1/Gds=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=wunner.de; spf=none smtp.mailfrom=h08.hostsharing.net; arc=none smtp.client-ip=83.223.78.240
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=wunner.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=h08.hostsharing.net
+Received: from h08.hostsharing.net (h08.hostsharing.net [IPv6:2a01:37:1000::53df:5f1c:0])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (secp384r1) server-digest SHA384
+	 client-signature ECDSA (secp384r1) client-digest SHA384)
+	(Client CN "*.hostsharing.net", Issuer "GlobalSign GCC R6 AlphaSSL CA 2025" (verified OK))
+	by bmailout2.hostsharing.net (Postfix) with ESMTPS id C651C2007F9D;
+	Sun,  8 Feb 2026 14:16:24 +0100 (CET)
+Received: by h08.hostsharing.net (Postfix, from userid 100393)
+	id B78E9EA2B; Sun,  8 Feb 2026 14:16:24 +0100 (CET)
+Date: Sun, 8 Feb 2026 14:16:24 +0100
+From: Lukas Wunner <lukas@wunner.de>
+To: Hans de Goede <hansg@kernel.org>
+Cc: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Ilpo =?iso-8859-1?Q?J=E4rvinen?= <ilpo.jarvinen@linux.intel.com>,
+	linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+	platform-driver-x86@vger.kernel.org
+Subject: Re: [PATCH 1/2] efi: Save Brightness using EFI on Macs
+Message-ID: <aYiMqKJgtaah8pLW@wunner.de>
+References: <20260206125641.12983-1-atharvatiwarilinuxdev@gmail.com>
+ <20260206125641.12983-2-atharvatiwarilinuxdev@gmail.com>
+ <c2d14818-1c34-47c7-a210-1f7c737f0bc9@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/2] efi: Save Brightness using EFI on Macs
-To: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-Cc: Lukas Wunner <lukas@wunner.de>, Ard Biesheuvel <ardb@kernel.org>,
- =?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
- linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
- platform-driver-x86@vger.kernel.org
-References: <20260206125641.12983-1-atharvatiwarilinuxdev@gmail.com>
- <20260206125641.12983-2-atharvatiwarilinuxdev@gmail.com>
-From: Hans de Goede <hansg@kernel.org>
-Content-Language: en-US, nl
-In-Reply-To: <20260206125641.12983-2-atharvatiwarilinuxdev@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c2d14818-1c34-47c7-a210-1f7c737f0bc9@kernel.org>
 
-Hi,
+On Sun, Feb 08, 2026 at 11:45:55AM +0100, Hans de Goede wrote:
+> I was already worried about the shutdown approach on v1,
+> but did not say anything since I'm not that familiar
+> with apple hw and other apple code is already doing
+> something similar.
 
-On 6-Feb-26 13:56, Atharva Tiwari wrote:
-> Currently when a Mac reboots, the brightness is not the same
-> as the previous boot instead its the same as the last time the
-> Mac booted macOS.
-> 
-> We can fix this issue by saving the brightness level to the efivar
-> backlight-level.
-> 
-> We use delayed work instead of a shutdown callback,
-> as it still applies the brightness
-> even during forced shutdowns and at 0% battery.
-> 
-> (tested on iMac20,1)
-> 
-> Suggested-by: Lukas Wunner <lukas@wunner.de>
-> Signed-off-by: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-> ---
->  drivers/firmware/efi/Kconfig                  | 10 ++
->  drivers/firmware/efi/Makefile                 |  1 +
->  drivers/firmware/efi/apple-brightness.c       | 91 +++++++++++++++++++
->  .../linux/platform_data/apple-brightness.h    | 21 +++++
->  4 files changed, 123 insertions(+)
->  create mode 100644 drivers/firmware/efi/apple-brightness.c
->  create mode 100644 include/linux/platform_data/apple-brightness.h
-> 
-> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-> index 29e0729299f5..dd0a9c9a772a 100644
-> --- a/drivers/firmware/efi/Kconfig
-> +++ b/drivers/firmware/efi/Kconfig
-> @@ -167,6 +167,16 @@ config APPLE_PROPERTIES
->  
->  	  If unsure, say Y if you have a Mac.  Otherwise N.
->  
-> +config APPLE_BRIGHTNESS
-> +	bool "Apple Backlight control for EFI"
-> +	depends on X86
-> +	help
-> +	  This will save the brightness level to EFI, so brightness
-> +	  level is preserved across reboots and shutdows. allowing
-> +	  for improved support of Apple hardware.
-> +
-> +	  If unsure, say Y if you have a Mac, Otherwise N.
-> +
->  config RESET_ATTACK_MITIGATION
->  	bool "Reset memory attack mitigation"
->  	depends on EFI_STUB
-> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-> index 8efbcf699e4f..1f5705cc87a2 100644
-> --- a/drivers/firmware/efi/Makefile
-> +++ b/drivers/firmware/efi/Makefile
-> @@ -26,6 +26,7 @@ obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
->  obj-$(CONFIG_EFI_TEST)			+= test/
->  obj-$(CONFIG_EFI_DEV_PATH_PARSER)	+= dev-path-parser.o
->  obj-$(CONFIG_APPLE_PROPERTIES)		+= apple-properties.o
-> +obj-$(CONFIG_APPLE_BRIGHTNESS)		+= apple-brightness.o
->  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
->  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
->  obj-$(CONFIG_LOAD_UEFI_KEYS)		+= mokvar-table.o
-> diff --git a/drivers/firmware/efi/apple-brightness.c b/drivers/firmware/efi/apple-brightness.c
-> new file mode 100644
-> index 000000000000..c32e365dc511
-> --- /dev/null
-> +++ b/drivers/firmware/efi/apple-brightness.c
-> @@ -0,0 +1,91 @@
-> +// SPDX-License-Identifier: GPL-2.0-only OR MIT
-> +/*
-> + * apple-brightness.c - EFI brightness saver on Macs
-> + * Copyright (C) 2026 Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-> + */
-> +
-> +#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-> +
-> +#include <linux/backlight.h>
-> +#include <linux/cleanup.h>
-> +#include <linux/efi.h>
-> +#include <linux/mutex.h>
-> +#include <linux/workqueue.h>
-> +#include <linux/platform_data/apple-brightness.h>
-> +
-> +static DEFINE_MUTEX(apple_brightness_mutex);
-> +static struct delayed_work apple_brightness_work;
-> +
-> +static u32 efi_attr;
-> +static u16 last_saved_level;
-> +
-> +static int (*get_brightness)(struct backlight_device *bl);
-> +static struct backlight_device *bl_dev;
-> +
-> +static void apple_brightness_workfn(struct work_struct *work)
-> +{
-> +	u16 level;
-> +	efi_status_t status;
-> +
-> +	mutex_lock(&apple_brightness_mutex);
-> +
-> +	level = (u16)get_brightness(bl_dev);
-> +
-> +	if (level == last_saved_level)
-> +		goto out;
-> +
-> +	status = efivar_set_variable(APPLE_BRIGHTNESS_NAME, &APPLE_BRIGHTNESS_GUID,
-> +				efi_attr, sizeof(level), &level);
-> +	if (status != EFI_SUCCESS)
-> +		pr_debug("Unable to set brightness: 0x%lx\n", status);
-> +	else
-> +		last_saved_level = level;
-> +
-> +out:
-> +	mutex_unlock(&apple_brightness_mutex);
-> +
-> +	mod_delayed_work(system_wq, &apple_brightness_work,
-> +			msecs_to_jiffies(APPLE_BRIGHTNESS_POLL));
+Yes, macOS saves the brightness so that it's persisted across reboots
+and can be set already by the EFI firmware, avoiding a bloom effect
+(brightness change) on handover to the OS.  We want to provide the
+same seamless user experience on Linux that users have grown accustomed
+to on macOS, I think that's a reasonable thing to do.
 
-Wait so this now writes an non-volatile EFI variable every
-300ms ?  I don't know how these are backed on Apple hw,
-but typically these are backed by some SPI-nor flash or
-something similar.
+> But writing a non-volatile EFI variable every 300ms is
+> just a very very bad idea.
 
-Writing this every 300ms is a sure fire way to wear out
-the flash and brick the machine real fast.
+Agreed.  But what do you think about a delayed write when brightness
+is changed, so that brightness is persisted even if the OS crashes?
+Users don't change brightness that often, I can't imagine that it
+amounts to a significantly higher number of writes than if it's
+only done on shutdown.
 
-So NACK.
+Thanks,
 
-I was already worried about the shutdown approach on v1,
-but did not say anything since I'm not that familiar
-with apple hw and other apple code is already doing
-something similar.
-
-But writing a non-volatile EFI variable every 300ms is
-just a very very bad idea.
-
-Also I do not understand why this is necessary at all?
-
-Systemd already has a service which saves the value
-of all /sys/class/backlight and /sys/class/leds/*kbd_backlight
-devices on shutdown/reboot and restores these on boot.
-
-So what is the advantage here? Only advantage I can
-see is having the old-brightness value right away
-rather then getting it restored during boot?
-
-Regards,
-
-Hans
-
-
-
-
-
-> +}
-> +
-> +int apple_brightness_probe(struct backlight_device *bl,
-> +	int (*get_brightnessfn)(struct backlight_device *bl))
-> +{
-> +	efi_status_t status;
-> +	unsigned long size = sizeof(last_saved_level);
-> +	int ret;
-> +
-> +	guard(mutex)(&apple_brightness_mutex);
-> +
-> +	bl_dev = bl;
-> +	get_brightness = get_brightnessfn;
-> +
-> +	if (!efi_rt_services_supported(EFI_RT_SUPPORTED_SET_VARIABLE))
-> +		return -ENODEV;
-> +
-> +	ret = efivar_lock();
-> +	if (ret)
-> +		return ret;
-> +
-> +	status = efivar_get_variable(APPLE_BRIGHTNESS_NAME, &APPLE_BRIGHTNESS_GUID,
-> +				&efi_attr, &size, &last_saved_level);
-> +
-> +	efivar_unlock();
-> +
-> +	if (status != EFI_SUCCESS)
-> +		return -ENODEV;
-> +
-> +	bl_dev = bl;
-> +	get_brightness = get_brightnessfn;
-> +
-> +	INIT_DELAYED_WORK(&apple_brightness_work, apple_brightness_workfn);
-> +	mod_delayed_work(system_wq, &apple_brightness_work,
-> +			msecs_to_jiffies(APPLE_BRIGHTNESS_POLL));
-> +
-> +	return 0;
-> +}
-> +EXPORT_SYMBOL(apple_brightness_probe);
-> +
-> +MODULE_AUTHOR("Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>");
-> +MODULE_DESCRIPTION("EFI Brightness saver for Macs");
-> +MODULE_LICENSE("Dual MIT/GPL");
-> diff --git a/include/linux/platform_data/apple-brightness.h b/include/linux/platform_data/apple-brightness.h
-> new file mode 100644
-> index 000000000000..4cf5e2d346cb
-> --- /dev/null
-> +++ b/include/linux/platform_data/apple-brightness.h
-> @@ -0,0 +1,21 @@
-> +/* SPDX-License-Identifier: GPL-2.0-only OR MIT */
-> +/*
-> + * apple-brightness.h - EFI brightness saver for Macs
-> + * Copyright (C) 2026 Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-> + */
-> +
-> +#ifndef _APPLE_BL_H_
-> +#define _APPLE_BL_H_
-> +
-> +#include <linux/backlight.h>
-> +#include <linux/efi.h>
-> +
-> +#define APPLE_BRIGHTNESS_NAME           L"backlight-level"
-> +#define APPLE_BRIGHTNESS_GUID           EFI_GUID(0x7c436110, 0xab2a, 0x4bbb, 0xa8, 0x80, 0xfe, 0x41, 0x99, 0x5c, 0x9f, 0x82)
-> +
-> +#define APPLE_BRIGHTNESS_POLL           300
-> +
-> +int apple_brightness_probe(struct backlight_device *bl,
-> +	int (*get_brightnessfn)(struct backlight_device *bl));
-> +
-> +#endif /* _APPLE_BL_H */
-
+Lukas
