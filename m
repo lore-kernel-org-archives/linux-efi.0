@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3AC7A37B41B;
-	Mon, 23 Feb 2026 22:53:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A5B7A34CFC4;
+	Mon, 23 Feb 2026 23:02:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771887201; cv=none; b=Q01vmrRJMUp5/Ri1XziR8hiY9MTvQu/LRPccLerH9pGpHWRFi+kcKyP0smsEQdcYogLDxkZnmAUUWj7ilQSurD/BZjcBSDYTYXW2Ydga7EFqjgNijQZTEktRoKal9tRU9Ks/h4Fdptj0hqhmQSrYshJPnpLJe/TtXZHnfjYuLjM=
+	t=1771887753; cv=none; b=NpYZan65GizD0C+pNKFrtOaD2xYW6Cs65/bJWVTuzChpiWdjYTqwweBbfXwVljibNt+2AH5FeU7O5WwEBwfN9t/qzH2pmOFR2TtAHKgy0R4GRiTXqtd3bFmZe2BayOhBy8oyIHBd1uXj/XXveagP+tCGhYQ8Yn26yyCmaRSPD3k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771887201; c=relaxed/simple;
-	bh=XGtuTf6Jcf122l6S01HJPRF+WchS/Q65b0NtmqAoVfE=;
+	s=arc-20240116; t=1771887753; c=relaxed/simple;
+	bh=nT0awucs3thOhxybhtypZ+eYhg7lv1UzxhZoWxrV7JE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=V8ksSwmniot5m9kixAItuQoKNdBwSumI94SuOOovFH8sbTCRn4aRiDCTueanr/CuM8ocHuEvxTtr94l7IR7pKeuHPiyhmbjl8koO+Eaa9+6x8CUOWpE21J6LLK0ulrGqPpA2zu9k57qBIS1T0e6ddpJi85wr5+2AuldmgxIZrwE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZmfHgfUr; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=sqphRfl4aNtD6t5VL2lspO1UMpjWrQoZl+HFe+TP3BCHroxfst+Y4zz+WbhojUnqCVcDE9rFsOwC/4UkFfJI3Ft/jec6FPHjECgAtviATzJin3l1Gw98PqFkbXQIRQWEU90AwUjZ9KxxjuT8Paj6JAicxZkfCEO5h0J2h5Kwkcg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=V+fu9p4B; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZmfHgfUr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3AAC4C116C6;
-	Mon, 23 Feb 2026 22:53:14 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="V+fu9p4B"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 48409C116C6;
+	Mon, 23 Feb 2026 23:02:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771887200;
-	bh=XGtuTf6Jcf122l6S01HJPRF+WchS/Q65b0NtmqAoVfE=;
+	s=k20201202; t=1771887753;
+	bh=nT0awucs3thOhxybhtypZ+eYhg7lv1UzxhZoWxrV7JE=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ZmfHgfUrB8rf7SxS+m7i6Nbm83akA5w9OLDipQGSOaVcHUJGhBGr5JleV+lvbT9Ih
-	 ES1jeEYODvs6SIXAPyGAAqikZa4UUtROdKJg27d0BjUclgv47EtSp4h3ptI4rsvsT/
-	 A/Q6dW5mmG7a+LrrgsNs234f6ShddcgHYyrsN1srQ7REoeTAP28vUOzECSlNUqNnLH
-	 G9qNJfAkWQ76V6BqhrsUIj/wgc43wW4DjMi+HPcfE29HwNkfPdhL31UnAXovXRGfzq
-	 1HY/4jllrJt2uUrbR8H93TaAt2kzOEpXk+3SA5YCx8OLMs+sxQjnNO3yfFcXNCeWQl
-	 UR0qUMHlXOhng==
-Date: Mon, 23 Feb 2026 15:53:11 -0700
-From: Nathan Chancellor <nathan@kernel.org>
-To: Kees Cook <kees@kernel.org>
+	b=V+fu9p4BCluguUa+f3d7BCn1pI2i9AqAEMBzkLqH4bddGKT5WSOohV6ymAwB0/TBL
+	 lXNzrl+hmSZblzdOixCvwDFcjW9iJo5ImvPlqCzkT22dc1XMIZWAMVzlyyqxTDXaZ5
+	 4A5XwGEGtPXUctEhtggMXSRCQOq7U1cR9rpjbXPVnxUBOrPDtTlXe7A3JD/7+OhTOF
+	 pTf4SXBjLVNbVuMyClIxv9c3QaOT9qAcBGv/vWbbNANtpasn+pQ210tXeKbMh0saY3
+	 VU3OBF9raOPDCjnuuQKM50HH+X66NKDZ7QZi6Z7SFHAdAZXCsNZW64QbGHR00fFjZH
+	 58/1MtBytYDmg==
+Date: Mon, 23 Feb 2026 15:02:32 -0800
+From: Kees Cook <kees@kernel.org>
+To: Nathan Chancellor <nathan@kernel.org>
 Cc: Nicolas Schier <nsc@kernel.org>,
 	Linus Torvalds <torvalds@linux-foundation.org>,
 	Catalin Marinas <catalin.marinas@arm.com>,
@@ -59,10 +59,11 @@ Cc: Nicolas Schier <nsc@kernel.org>,
 	linux-efi@vger.kernel.org, llvm@lists.linux.dev
 Subject: Re: [PATCH 2/2] kbuild: Use '-fms-anonymous-structs' if it is
  available
-Message-ID: <20260223225311.GA2462602@ax162>
+Message-ID: <202602231459.2A1DD53E0@keescook>
 References: <20260223-fms-anonymous-structs-v1-0-8ee406d3c36c@kernel.org>
  <20260223-fms-anonymous-structs-v1-2-8ee406d3c36c@kernel.org>
  <202602231432.20F3F0CF@keescook>
+ <20260223225311.GA2462602@ax162>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -71,22 +72,31 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <202602231432.20F3F0CF@keescook>
+In-Reply-To: <20260223225311.GA2462602@ax162>
 
-On Mon, Feb 23, 2026 at 02:33:35PM -0800, Kees Cook wrote:
-> Series looks good to me. One style question, why go the round-trip with
-> Kconfig instead of doing it all with a fallback in the Makefile:
+On Mon, Feb 23, 2026 at 03:53:11PM -0700, Nathan Chancellor wrote:
+> On Mon, Feb 23, 2026 at 02:33:35PM -0800, Kees Cook wrote:
+> > Series looks good to me. One style question, why go the round-trip with
+> > Kconfig instead of doing it all with a fallback in the Makefile:
+> > 
+> > CC_FLAGS_DIALECT += $(call cc-option,-fms-anonymous-structs,-fms-extensions)
 > 
-> CC_FLAGS_DIALECT += $(call cc-option,-fms-anonymous-structs,-fms-extensions)
+> I might be misunderstanding how Kbuild works but
+> arch/$(SRCARCH)/Makefile may have logic for selecting CROSS_COMPILE,
+> which can impact the selection of $(CC), so I cannot use cc-option prior
+> to its inclusion but I need CC_FLAGS_DIALECT to be included before
+> arch/$(SRCARCH)/Makefile in the main build so that they can be used
+> within it, which is only possible after Kconfig has run. This is
+> probably worth more flushing out in the code or a comment since it is
+> subtle.
 
-I might be misunderstanding how Kbuild works but
-arch/$(SRCARCH)/Makefile may have logic for selecting CROSS_COMPILE,
-which can impact the selection of $(CC), so I cannot use cc-option prior
-to its inclusion but I need CC_FLAGS_DIALECT to be included before
-arch/$(SRCARCH)/Makefile in the main build so that they can be used
-within it, which is only possible after Kconfig has run. This is
-probably worth more flushing out in the code or a comment since it is
-subtle.
+Will Kconfig see a different CC than Makefile? Regardless, I trust your
+judgement here! I actually rather prefer having it exposed via Kconfig.
+:)
 
-Cheers,
-Nathan
+Reviewed-by: Kees Cook <kees@kernel.org>
+
+-Kees
+
+-- 
+Kees Cook
