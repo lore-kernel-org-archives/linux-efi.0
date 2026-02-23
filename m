@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49750379982;
-	Mon, 23 Feb 2026 22:33:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3AC7A37B41B;
+	Mon, 23 Feb 2026 22:53:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771886016; cv=none; b=oPmr8ygmg53vL15qVwPGGjGm5WhqUxG5jrpu6IXGqjIxuw91HaH0eXWd+UfO5M4JzK8G1VoSZrS45EPtqROp02YLIFzNeEBKyrJPl0QJ4MtBv1WoaFjUR1auT4vkQgWijHlf8f546sAAulNR4sP0U/3oQOTUP+YgxfMNYuJCKGg=
+	t=1771887201; cv=none; b=Q01vmrRJMUp5/Ri1XziR8hiY9MTvQu/LRPccLerH9pGpHWRFi+kcKyP0smsEQdcYogLDxkZnmAUUWj7ilQSurD/BZjcBSDYTYXW2Ydga7EFqjgNijQZTEktRoKal9tRU9Ks/h4Fdptj0hqhmQSrYshJPnpLJe/TtXZHnfjYuLjM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771886016; c=relaxed/simple;
-	bh=6luMqdKSuq9XRD6Jc4ImEhLDZ+nlkl7La9U57PIctFw=;
+	s=arc-20240116; t=1771887201; c=relaxed/simple;
+	bh=XGtuTf6Jcf122l6S01HJPRF+WchS/Q65b0NtmqAoVfE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TNs8tpeJ2M9mdNf1J3pWtyV7iWPI0qMEXs0iNttYJnA9tBJ7rnzYuQOEG1Eskr5A0uCJGK8Xn+/+9h4DMySKPnarZwkUZQEfOu4MGe7AJ/pylSpcZfDdoEvaqLjAReqcOXTUEYLSDMPV6o6kEiNidI0zWzSuR9mpZbF5Xp/fa8s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=J983x/DU; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=V8ksSwmniot5m9kixAItuQoKNdBwSumI94SuOOovFH8sbTCRn4aRiDCTueanr/CuM8ocHuEvxTtr94l7IR7pKeuHPiyhmbjl8koO+Eaa9+6x8CUOWpE21J6LLK0ulrGqPpA2zu9k57qBIS1T0e6ddpJi85wr5+2AuldmgxIZrwE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZmfHgfUr; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="J983x/DU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DAEB5C116C6;
-	Mon, 23 Feb 2026 22:33:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZmfHgfUr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3AAC4C116C6;
+	Mon, 23 Feb 2026 22:53:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771886015;
-	bh=6luMqdKSuq9XRD6Jc4ImEhLDZ+nlkl7La9U57PIctFw=;
+	s=k20201202; t=1771887200;
+	bh=XGtuTf6Jcf122l6S01HJPRF+WchS/Q65b0NtmqAoVfE=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=J983x/DUXe3wWA3l+3Y64rA0CyNpkzQkwiWNeGpfi4mVEVqwUoxLSa6SgDkizaiuU
-	 kyf+CQXTpoeB+BorC0kiHBzbL7iajtQVbKZostEWGW0GTy+zMQ2EO0UAxWNsXvZSC3
-	 pYwsPqARByxjspf6jCgBrNJRjb+aVsM3582OK2Z86dHZ4/AT3JjWfCQ7qzfd8TdDO3
-	 HYeH2KFUSJokM4IASGtQF+43uR5nJAj3Me2nQddduKJWxtNjoQfmxUNtzNPpVAXvwE
-	 LXapQT/2pi7TKjubvmD9ZBhqaEtpqEdZ/k1WaiC8FlfJvMknXYqOOUyAsPpsR2WUfK
-	 Z3GgEPZNO4NJQ==
-Date: Mon, 23 Feb 2026 14:33:35 -0800
-From: Kees Cook <kees@kernel.org>
-To: Nathan Chancellor <nathan@kernel.org>
+	b=ZmfHgfUrB8rf7SxS+m7i6Nbm83akA5w9OLDipQGSOaVcHUJGhBGr5JleV+lvbT9Ih
+	 ES1jeEYODvs6SIXAPyGAAqikZa4UUtROdKJg27d0BjUclgv47EtSp4h3ptI4rsvsT/
+	 A/Q6dW5mmG7a+LrrgsNs234f6ShddcgHYyrsN1srQ7REoeTAP28vUOzECSlNUqNnLH
+	 G9qNJfAkWQ76V6BqhrsUIj/wgc43wW4DjMi+HPcfE29HwNkfPdhL31UnAXovXRGfzq
+	 1HY/4jllrJt2uUrbR8H93TaAt2kzOEpXk+3SA5YCx8OLMs+sxQjnNO3yfFcXNCeWQl
+	 UR0qUMHlXOhng==
+Date: Mon, 23 Feb 2026 15:53:11 -0700
+From: Nathan Chancellor <nathan@kernel.org>
+To: Kees Cook <kees@kernel.org>
 Cc: Nicolas Schier <nsc@kernel.org>,
 	Linus Torvalds <torvalds@linux-foundation.org>,
 	Catalin Marinas <catalin.marinas@arm.com>,
@@ -59,9 +59,10 @@ Cc: Nicolas Schier <nsc@kernel.org>,
 	linux-efi@vger.kernel.org, llvm@lists.linux.dev
 Subject: Re: [PATCH 2/2] kbuild: Use '-fms-anonymous-structs' if it is
  available
-Message-ID: <202602231432.20F3F0CF@keescook>
+Message-ID: <20260223225311.GA2462602@ax162>
 References: <20260223-fms-anonymous-structs-v1-0-8ee406d3c36c@kernel.org>
  <20260223-fms-anonymous-structs-v1-2-8ee406d3c36c@kernel.org>
+ <202602231432.20F3F0CF@keescook>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -70,66 +71,22 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260223-fms-anonymous-structs-v1-2-8ee406d3c36c@kernel.org>
+In-Reply-To: <202602231432.20F3F0CF@keescook>
 
-On Mon, Feb 23, 2026 at 12:10:29PM -0700, Nathan Chancellor wrote:
-> Clang recently added '-fms-anonymous-structs' [1] to specifically enable
-> the Microsoft tagged anonymous structure / union extension, for which
-> the kernel added '-fms-extensions' in commit c4781dc3d1cf ("Kbuild:
-> enable -fms-extensions"). Switch to this more narrow option if it is
-> available, which would have helped avoid the issue addressed by
-> commit a6773e6932cb ("jfs: Rename _inline to avoid conflict with clang's
-> '-fms-extensions'"). GCC has talked about adding a similar flag [2] as
-> well but potentially naming it differently.
+On Mon, Feb 23, 2026 at 02:33:35PM -0800, Kees Cook wrote:
+> Series looks good to me. One style question, why go the round-trip with
+> Kconfig instead of doing it all with a fallback in the Makefile:
 > 
-> Move the selection of the flag to Kconfig to make it easier to use
-> cc-option (as CC_FLAGS_DIALECT may be used in arch Makefiles, which may
-> be too early for cc-option in Kbuild) and customize based on compiler
-> flag names.
-> 
-> Link: https://github.com/llvm/llvm-project/commit/c391efe6fb67329d8e2fd231692cc6b0ea902956 [1]
-> Link: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=123623 [2]
-> Signed-off-by: Nathan Chancellor <nathan@kernel.org>
-> ---
->  Makefile     | 2 +-
->  init/Kconfig | 5 +++++
->  2 files changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/Makefile b/Makefile
-> index 06ff3032a6bc..1d5c0ab9ed5c 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -791,7 +791,7 @@ endif
->  
->  CC_FLAGS_DIALECT := -std=gnu11
->  # Allow including a tagged struct or union anonymously in another struct/union.
-> -CC_FLAGS_DIALECT += -fms-extensions
-> +CC_FLAGS_DIALECT += $(CONFIG_CC_MS_EXTENSIONS)
->  # Clang enables warnings about GNU and Microsoft extensions by default, disable
->  # them because this is expected with the above options.
->  ifdef CONFIG_CC_IS_CLANG
-> diff --git a/init/Kconfig b/init/Kconfig
-> index c25869cf59c1..c4282d049463 100644
-> --- a/init/Kconfig
-> +++ b/init/Kconfig
-> @@ -960,6 +960,11 @@ config CC_IMPLICIT_FALLTHROUGH
->  	default "-Wimplicit-fallthrough=5" if CC_IS_GCC && $(cc-option,-Wimplicit-fallthrough=5)
->  	default "-Wimplicit-fallthrough" if CC_IS_CLANG && $(cc-option,-Wunreachable-code-fallthrough)
->  
-> +config CC_MS_EXTENSIONS
-> +	string
-> +	default "-fms-anonymous-structs" if $(cc-option,-fms-anonymous-structs)
-> +	default "-fms-extensions"
-> +
->  # Currently, disable gcc-10+ array-bounds globally.
->  # It's still broken in gcc-13, so no upper bound yet.
->  config GCC10_NO_ARRAY_BOUNDS
+> CC_FLAGS_DIALECT += $(call cc-option,-fms-anonymous-structs,-fms-extensions)
 
-Series looks good to me. One style question, why go the round-trip with
-Kconfig instead of doing it all with a fallback in the Makefile:
+I might be misunderstanding how Kbuild works but
+arch/$(SRCARCH)/Makefile may have logic for selecting CROSS_COMPILE,
+which can impact the selection of $(CC), so I cannot use cc-option prior
+to its inclusion but I need CC_FLAGS_DIALECT to be included before
+arch/$(SRCARCH)/Makefile in the main build so that they can be used
+within it, which is only possible after Kconfig has run. This is
+probably worth more flushing out in the code or a comment since it is
+subtle.
 
-CC_FLAGS_DIALECT += $(call cc-option,-fms-anonymous-structs,-fms-extensions)
-
-
--- 
-Kees Cook
+Cheers,
+Nathan
