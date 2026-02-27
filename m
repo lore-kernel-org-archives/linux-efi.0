@@ -1,44 +1,41 @@
 Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D593135A39F;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A88F83596E3;
 	Fri, 27 Feb 2026 17:01:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772211671; cv=none; b=KVYAgcJvbirjPn6vmVtXG16ijvCDhBu6jMPigFcVsz3ULluy4y0ijB/7tuMvOCcv4CyypU/QhoCq+n6Lf9hb+P9/CGss8RAFYE3B+0T708Hwo/TB4Z6Gf9Zt9BW1QJ9HR9ldSGfFr00uFUHUDMlvtBsPj22kNGz5xjDhvmhVhyU=
+	t=1772211671; cv=none; b=kNh6Wtfzp36jDRX2BErxB2cLlojRP4QwgDA+gql2QNCRmdBxr5O41TSKfgKx1c9MESuopy/X/XlJfMszuUGvFB5mJdrx7zIYI/e1k48SrISzJckcO4Uhps9ED1uYAhbyThwSQx6psoZqPE5/aBBPJR/3hDLdxQbrSTi42x/trEQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1772211671; c=relaxed/simple;
-	bh=1cjoIDiqLFttBjFaCvVhjgWaa8GFJ/AZ1WWKyZUjN3U=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=rYyNFbm0IAN4sVKzcyHRMCdvr/zwXRF4yMUxIueLmCCokkUJ8nQ+gxwTQT82MzqVcDr83IFq0jp/wfhBQu9ALBi9wV6zeTORZpCaiWo9Y3ruOahereAmySsKxMujgIHQ265E/j5uyajUsNTmgpC1cXyGxUf3LHQLsKbeOGFlCFg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=GSwGN+41; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=dVfhfQr8; arc=none smtp.client-ip=193.142.43.55
+	bh=JahL2tOGcgic3e0Bs7zgdPhXJKZeV7/BSGnhuhVA2w8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=dLTGXpnQkDKvRS3a8BxNNF7l0eYllvgjg9EwFWO9CK51GhGRfLn3fgY93Q5WV98yWWDQD51XaqK8QTvXA3thRTPVp6mZ/hqJUF6NnCBF7g74TeFsQIcVUKuNe1+iMGw7WRXVLOQzFXF2DYPdE5Ro3H6GThhijJvwdH1v6objX9Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=ufQKFHiW; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=K3HkD5Og; arc=none smtp.client-ip=193.142.43.55
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="GSwGN+41";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="dVfhfQr8"
+	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="ufQKFHiW";
+	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="K3HkD5Og"
 From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020; t=1772211668;
+	s=2020; t=1772211667;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=JOq5V4/dwverftSI+2e+3Cqh4irrH3bkTVizH8crF4U=;
-	b=GSwGN+41eVc362HWs+g02Ef5kzye1jRNkZXJGDY7MfKWVc2qArkwCpFJ90aRZdUGZ4Lfk0
-	NQZoW7MJpSLKtAscrcc+QG00VjUGKkS/Xc1ETMfgbKqFoB2GHZqbpdj1cmUjJuQ8nD900P
-	tFQnKqBtxlFmQ2Imuuf4X2z3IJy6fBywywRB4EJ+cWf1ecGBe4tMiNtNHVkNhbm4C9WJhl
-	jUnReFtm/5ERReVp3IBYvKHJEehWq8DcITTMi9bZHHqPlnZnlcFpyVgtxWU6jbYw+nTDBX
-	xa8Jv5KXKl9H60sA923Ab7ZAwVqS6t84hpY8Aagn+zbz/gblR97sWqH01o1sWQ==
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=sUQDovDnjtjrQEYpPSXKCbaD70SmTedmAp/MkQu7vNM=;
+	b=ufQKFHiWEviBxtHlFCcoFGk/eG6nLaUlcAtMbIEUHk0dyJ5gsjhOstxvY8XTr/v9mXKQzb
+	TlMORPAJuJv8elGWlVdqdgA/4QUvwCwa5S2V+9tc4bhPXZZDLabSWbNKYMiYy0aS3xr8v5
+	chfSkkhuwwCMTVGkF/s1AJs4vz1CNddzGuzncCrYQxvWVg+gTO752/cV21LaXa3rsMLhCh
+	5aUcnK0j1PzqP7Ng/S1IBi9q5OScHkXpDC8GpX5oanI/Owlc/3U/rPegypU+JiM03eXNE6
+	anWu9zdJt9hE1ptShmWSLVgtPS2K+bX25VEBKbWdmR+eVPKOzJ10v8DctGQUqw==
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020e; t=1772211668;
+	s=2020e; t=1772211667;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=JOq5V4/dwverftSI+2e+3Cqh4irrH3bkTVizH8crF4U=;
-	b=dVfhfQr8605EhTgyzWVqj5uvifvBdgVRkCG14gfim0k92nLxY7DMdf5M7gHiFEgTHNeQ7I
-	W36Q9NO10oF4moAA==
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=sUQDovDnjtjrQEYpPSXKCbaD70SmTedmAp/MkQu7vNM=;
+	b=K3HkD5Ogf/Stcoto+VC8DRYtjTFchuOs5ca6Go/IAYBQoUw2kArgABh0m0MsuFP98VMlDH
+	fzmAwUKp2xdcdhBA==
 To: linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	linux-rt-devel@lists.linux.dev
@@ -49,45 +46,58 @@ Cc: "Luis Claudio R. Goncalves" <lgoncalv@redhat.com>,
 	Tejun Heo <tj@kernel.org>,
 	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
 	Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-Subject: [PATCH v2 2/2] efi: Allow to expose the workqueue via sysfs
-Date: Fri, 27 Feb 2026 18:01:03 +0100
-Message-ID: <20260227170103.4042157-3-bigeasy@linutronix.de>
-In-Reply-To: <20260227170103.4042157-1-bigeasy@linutronix.de>
-References: <20260227170103.4042157-1-bigeasy@linutronix.de>
+Subject: [PATCH v2 0/2] efi: Expose the runtime-services workqueue via sysfs
+Date: Fri, 27 Feb 2026 18:01:01 +0100
+Message-ID: <20260227170103.4042157-1-bigeasy@linutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Exposing the efi_rts_wq workqueue via sysfs provides an easy mechanism
-to restrict EFI firmware invocation to certain CPU(s).
-This can be used to restrict EFI invocations to specific CPUs while
-allowing other workqueue to use the remaning CPUs.
+EFI runtime services are disabled on PREEMPT_RT by default which can be
+overwritten on the boot command line. For native EFI, an invocation
+requires to disable preemption an x86 while a call is made into EFI.
+Even if it does not (as it is the case on arm64) the EFI function can
+disable interrupts. This makes the time spent in EFI is not
+deterministic.
+While accessing the efi-rtc device can be avoided by using a native
+driver, accessing the "variables" is important and there is no second
+path.
 
-Expose the workqueue via sysfs. Change the name to efi_runtime which is
-what will be visible under sysfs.
+The "runtime-wrappers" is wrapping access to the EFI callback via a
+workqueue. On a SMP system one CPU could be declared as housekeeping/
+not-realtime-capable and force all EFI invocation to be performed on
+this CPU. This could be achieved by setting workqueue.unbound_cpus or
+	/sys/devices/virtual/workqueue/cpumask
 
-Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
----
- drivers/firmware/efi/efi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+at runtime. This however will affect all workqueues and might not be
+desired. With an explicit setting such as
+	/sys/devices/virtual/workqueue/efi_runtime/cpumask
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index b2fb92a4bbd11..3dab284a7754d 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -423,7 +423,7 @@ static int __init efisubsys_init(void)
- 		 * ordered workqueue (which creates only one execution context)
- 		 * should suffice for all our needs.
- 		 */
--		efi_rts_wq =3D alloc_ordered_workqueue("efi_rts_wq", 0);
-+		efi_rts_wq =3D alloc_ordered_workqueue("efi_runtime", WQ_SYSFS);
- 		if (!efi_rts_wq) {
- 			pr_err("Creating efi_rts_wq failed, EFI runtime services disabled.\n");
- 			clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+it looks like an official way to limit the CPUs involved here.
+
+With this in place I was wondering if EFI_DISABLE_RUNTIME could be
+lifted at runtime on SMP systems. But given the unbound_cpus option
+and the auto-config based on NOHZ-full it might not be wise to add yet
+another smart option here. Also it needs to be a subset of root cpumask
+or it won't be effective.
+
+v1=E2=80=A6v2: https://lore.kernel.org/all/20260205115559.1625236-1-bigeasy=
+@linutronix.de/
+  - For BH and WQ_ORDERED worker make the max_active RO.
+
+Sebastian Andrzej Siewior (2):
+  workqueue: Allow to expose ordered workqueues via sysfs
+  efi: Allow to expose the workqueue via sysfs
+
+ drivers/firmware/efi/efi.c |  2 +-
+ kernel/workqueue.c         | 28 ++++++++++++++++++++--------
+ 2 files changed, 21 insertions(+), 9 deletions(-)
+
 --=20
 2.51.0
 
