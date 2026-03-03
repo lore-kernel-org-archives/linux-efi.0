@@ -1,50 +1,50 @@
 Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1F6E3E51E6;
-	Tue,  3 Mar 2026 17:41:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2008C351C00;
+	Tue,  3 Mar 2026 17:42:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772559681; cv=none; b=LR30WYmQVyf2oWuZ7qpOfhYv6flIcw/ih/9rdCSyNPVUoX2FHkVDaB2usPhSWDEmItc8k413QeJkkRBE2R8laQGUPH23MfKDsh/la5wlS5D75AKXLqBclt5eOFJR0Lq0KzgVVpnQmeaF4py7jwp6VWcYnFpYE8K7Sluxt5jzTsM=
+	t=1772559744; cv=none; b=pTNeuaU8ugDmRy8AWmtSsLuAW+2UpDX6xx8NI0RBXrTke8O4uowCKDD57eJJ5L1ltu+DD1jJIEJXyHO9r7m/MN+jfXtgLDvTG+QpIlBapjqsE8CZ0jDpSJpC3oHOxtmNrJ7L/cCVasFb0a67e4vYoKwjKqGcZKWlRevYqHkQy6U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772559681; c=relaxed/simple;
-	bh=6hxmk5ekmZw9CXKlwyvqcyff0SoROKeOko3hcDNHiU0=;
+	s=arc-20240116; t=1772559744; c=relaxed/simple;
+	bh=4vSqs+UjSmfudYIwPgIxG2FMOzXvhVXOnpnKNCKorXU=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=mSryNLx1NIVetuSHDkuMMrqtxoQZvIpmm0f8Rj2iUfGD1lW85VILoHZNNMnFtN0/yIsoLOYlw9h04wAe82wHndijOkJ/dqgf5LHsWustfKDL7E237PMNhyFOPmTzRGgPrqU4GFr52c+/D2mOVXwDLCw5Kyo1ofbNOfHnGAsxrRo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Mog1paM2; arc=none smtp.client-ip=192.198.163.19
+	 In-Reply-To:Content-Type; b=TkIpj3eLZdYdyC9ljB3nqss4Tl64l4rFQUTNTbVzTCC5WIDSfj2VPz9RV5CmZJsAHZowuNrwjaMWkQixBb2jcx7HSyUP92Fs+YGHmtOc8QX2szP2GVGjgZC5vC7RqHpGCyWEag92zHfN3aPoOj3JOlarspmdnMk6owzaVTAqchs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=HSX10pF3; arc=none smtp.client-ip=192.198.163.19
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Mog1paM2"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="HSX10pF3"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1772559680; x=1804095680;
+  t=1772559742; x=1804095742;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=6hxmk5ekmZw9CXKlwyvqcyff0SoROKeOko3hcDNHiU0=;
-  b=Mog1paM2PnfAvlbXJmvxGquc5bdLziu1wcTTUWY4X1FV0N8ZviYzPMYj
-   9KIr8wxpdivierr1Nx13pG78EWfz432Sq4zbwHGTWgwCt36Ss71ESF+IE
-   oHWBmdWrUnS08LWcgdRHwNKKKOLlFygnYO53ryT+6Nj7m7sT57Ww6QvO5
-   2HmO+Wi1vPQHg7Jj7Wia5HaBTLmUpEoxWlvZSazi7vmUGljxxxM9P/i0O
-   9M1nHQkdHc4wwo2u5zclvtVB2JsHwBl6mf6giz/ZtK4aLveaEfcNa6EAX
-   DYdt1lMPX52U46uprMNwUqwjfNCvSzaJqqAD7DPL2/UeF23t/DH8bcPuN
+  bh=4vSqs+UjSmfudYIwPgIxG2FMOzXvhVXOnpnKNCKorXU=;
+  b=HSX10pF3ftNdv5C9FiHm+5uxMVQgOzNulqNLTH9KCmbEL+YyyT8ssGDc
+   oFDp64b0n05IHVOKYNt0ppmS8gz496FIWneYTZzVidNMdNFxEv4g/msHo
+   m3jICqFMg48lHB16503p4abvW4ifcvCdSWd2uNRZTxLF5gdAj4RWMaFtz
+   ggWdWuN+P66WUYiRlbDRlxcoHL+ANzhDpnfeYTK0VruHaVYTlbCiC1wyT
+   U9Dz1DYA89j4R0X/TPdaiGujsDelcLBb7F4+bzt4lRLaY4moYrEryavpV
+   wQ95PZq99ao4wJnrTZt52iW3rzXqY24p+XeD888bAahnHR4vzUTVyW55c
    g==;
-X-CSE-ConnectionGUID: +s39+AQFS+SntHjnirhLiA==
-X-CSE-MsgGUID: 5UO1VY93RN24GZXILV5dOA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11718"; a="72634344"
+X-CSE-ConnectionGUID: Q/EAFDVMR6ykxP8egllXvA==
+X-CSE-MsgGUID: TocVoedvRAqjLL3jTSWimg==
+X-IronPort-AV: E=McAfee;i="6800,10657,11718"; a="72634414"
 X-IronPort-AV: E=Sophos;i="6.21,322,1763452800"; 
-   d="scan'208";a="72634344"
+   d="scan'208";a="72634414"
 Received: from orviesa008.jf.intel.com ([10.64.159.148])
-  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Mar 2026 09:41:19 -0800
-X-CSE-ConnectionGUID: 9YkpKWEhRqKc+SyftYaLaQ==
-X-CSE-MsgGUID: IZN2ofM1QlKGyPmtnpY9UQ==
+  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Mar 2026 09:42:21 -0800
+X-CSE-ConnectionGUID: jLyy9GmpQAOqJnfEh+Fgzw==
+X-CSE-MsgGUID: A29b2anMQhan50ceDa4WbA==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.21,322,1763452800"; 
-   d="scan'208";a="218041952"
+   d="scan'208";a="218042272"
 Received: from rchatre-mobl4.amr.corp.intel.com (HELO [10.125.108.135]) ([10.125.108.135])
-  by orviesa008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Mar 2026 09:41:18 -0800
-Message-ID: <f9e4ef3f-2844-481c-82d6-03f7347b11f3@intel.com>
-Date: Tue, 3 Mar 2026 09:41:24 -0800
+  by orviesa008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Mar 2026 09:42:21 -0800
+Message-ID: <78349c8c-99bf-4358-9190-b6d14caed93b@intel.com>
+Date: Tue, 3 Mar 2026 09:42:26 -0800
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -52,22 +52,20 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/3] x86/cpu: Defer LASS enabling until userspace comes
- up
+Subject: Re: [PATCH v2 0/3] x86: Extend LASS support to EFI configurations
 To: Sohil Mehta <sohil.mehta@intel.com>, x86@kernel.org,
  Dave Hansen <dave.hansen@linux.intel.com>,
  Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>,
- Borislav Petkov <bp@alien8.de>, Ard Biesheuvel <ardb@kernel.org>,
- "Nikunj A. Dadhania" <nikunj@amd.com>
+ Borislav Petkov <bp@alien8.de>, Ard Biesheuvel <ardb@kernel.org>
 Cc: "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>,
  Peter Zijlstra <peterz@infradead.org>, "Kirill A . Shutemov"
  <kas@kernel.org>, Rick Edgecombe <rick.p.edgecombe@intel.com>,
  Andrew Cooper <andrew.cooper3@citrix.com>, Tony Luck <tony.luck@intel.com>,
  Alexander Shishkin <alexander.shishkin@linux.intel.com>,
- linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+ linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+ Maciej Wieczor-Retman <m.wieczorretman@pm.me>
 References: <20260120234730.2215498-1-sohil.mehta@intel.com>
- <20260120234730.2215498-2-sohil.mehta@intel.com>
- <ee807044-42f7-4fe5-9304-588a93a24656@intel.com>
+ <b476c206-08f0-4582-a924-2164ba6ae84b@intel.com>
 From: Dave Hansen <dave.hansen@intel.com>
 Content-Language: en-US
 Autocrypt: addr=dave.hansen@intel.com; keydata=
@@ -113,22 +111,14 @@ Autocrypt: addr=dave.hansen@intel.com; keydata=
  MTsCeQDdjpgHsj+P2ZDeEKCbma4m6Ez/YWs4+zDm1X8uZDkZcfQlD9NldbKDJEXLIjYWo1PH
  hYepSffIWPyvBMBTW2W5FRjJ4vLRrJSUoEfJuPQ3vW9Y73foyo/qFoURHO48AinGPZ7PC7TF
  vUaNOTjKedrqHkaOcqB185ahG2had0xnFsDPlx5y
-In-Reply-To: <ee807044-42f7-4fe5-9304-588a93a24656@intel.com>
+In-Reply-To: <b476c206-08f0-4582-a924-2164ba6ae84b@intel.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 2/19/26 13:02, Sohil Mehta wrote:
-> The current patch
-> 	https://lore.kernel.org/lkml/1bc0b798-9cef-4dfd-af06-7674b699af1b@intel.com/
-> 
-> ..to defer CR pinning enforcement until CPU online makes sense for the
-> FRED fix. Eventually, I am thinking we can defer CR pinning even further
-> until userspace comes up.
-> 
-> setup_cr_pinning(), which enables the static key, can be moved to a
-> late_initcall() such as above. The cpu_online() check to enforce CR
-> pinning would still be needed to make it play nice with CPU hotplug.
-> 
-> Do you see an issue with that approach?
+On 2/24/26 10:45, Sohil Mehta wrote:
+> Overall, the approach in patch 1 seems useful. The implementation is
+> based on a combination of late_initcall() and CPU hotplug callbacks.
+> Thoughts?
 
-Seems fine to me.
+It looks great, actually. It's really nice how the CPU hotplug
+infrastructure takes care of all the hard work.
