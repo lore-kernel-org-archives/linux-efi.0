@@ -1,107 +1,153 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41268379991
-	for <linux-efi@vger.kernel.org>; Thu,  5 Mar 2026 11:11:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7482F2989B0;
+	Thu,  5 Mar 2026 12:56:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772709094; cv=none; b=rP3SodBxKcQlkD8EVQGqFDXGmeGDTT/Pbdv3KUSW2KQo46C1NGxYQ5xA0qmlcajPxLYKnAr3jUfMX8/mUC1Pf0/XsXkqC6TTsq5Y/3iZm8bMQ/wHyX8YCfdInPGCsZ3Q3M8shi8pEy4EIWFOc6jJMfasj1tH5VRrJEP5LYMP9Ns=
+	t=1772715362; cv=none; b=simAn024MslzQ91yoxwIRNOm2bpzDpUbmlMWkc4++7abgaB2F9xSI9FmMqOD7gD2A9MsCyafWattb4EmBS+ISjQyoh1uj8qBH+KF3rZOZBVGTXge4iuiPcSfeVbGv2mvPwS5rAycsJ/pZw2mF3blRrEG0wV77JDJ1XHxVznlmO4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772709094; c=relaxed/simple;
-	bh=NICvv8J3MIUF9ByAPF1vMZRw9pZ9D4dvv1VCtt3dYU4=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=luIUydJLswP+qdoio19cgUuW6ta6S8z7Nk8+gtiAtqj9ij0g+mJnV4qTiojWMllTnWtTqFd2P2zDWRpZexQ2SQRJeTiEN47zE/WhmsvUeEXpG+LH3xxVYdGyZPuyfFCuJ9F0eD/OSs4YQpCA9cN8Ks2m8MBwveLsMJJiS74c+68=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EvAgJJnr; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1772715362; c=relaxed/simple;
+	bh=B7EMvc3myE97Jkf7cH5kQkeIoARk8LOW3DPlHDFB3OM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=mZGUFq07EBC7Kmr1r3MsiVMSj9FXP+7qX6xBsKzIGdzbZSI6Zh5VelQ6PS4o6e6wUtzoByywdGoC+LLdcTvrsBnTIJaGviK0cmqiNVv5FnGHwisn/XMYWmTmcURndoni52HOJlOc/hm0DQDhO2o2gHr3HtoR0fhOsGQItCm6ufs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=Go259zIj; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EvAgJJnr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A221CC19423;
-	Thu,  5 Mar 2026 11:11:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772709093;
-	bh=NICvv8J3MIUF9ByAPF1vMZRw9pZ9D4dvv1VCtt3dYU4=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=EvAgJJnryaqujXE2dARD97LtcPKl7wltiLzQZqUQrrRC6hc34BjcLsUhSnKdoya5h
-	 z/c2Gd4E3Y1SWD5KR56lb4xkuXWZzyAdxbihaebpLg+ueePuXDl3Y5v3ftVHw/TTyT
-	 Dig5xVIU6X/L9x12WJRHV4/JNQkUFdbF3KN9DITZ9mp/HRBAcLGAbEgJzZa4OsFlnZ
-	 FGyz/oeLkdD6cvQNTMGXHMIItKPEKBTM1dfnhpsbU2sNj8a5cQGGJ/W8sF4wjsG6Q2
-	 EwlA2uiTrykPkZk+o/z4U+AYzXn7jzf0BlEIC4iG4rFCJOcjJTDLpPhQN6dC0WCC07
-	 BugRcJ85j8++Q==
-Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id 8D7F2F40068;
-	Thu,  5 Mar 2026 06:11:32 -0500 (EST)
-Received: from phl-imap-02 ([10.202.2.81])
-  by phl-compute-01.internal (MEProxy); Thu, 05 Mar 2026 06:11:32 -0500
-X-ME-Sender: <xms:5GSpaSk5SyAKmyIflqUXYy9VMs699eQjD-Z-eC2fmpBlMXy7su9T6g>
-    <xme:5GSpaUoAvXC_OHFMrlo57ko8vFr2y3wZqm4mIokfdltCnsowdSEmrfFx6ADhbCZEl
-    cr3yEFsa_33kV10cqXgSEhfj151Ts978iTg1FPax8Pup8TmRCvk2mk>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefgedrtddtgddvieeivdefucetufdoteggodetrf
-    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
-    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
-    gurhepofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrugcu
-    uehivghshhgvuhhvvghlfdcuoegrrhgusgeskhgvrhhnvghlrdhorhhgqeenucggtffrrg
-    htthgvrhhnpedvueehiedtvedtleekuddutefgffdtleetfeetveejveejieehfefhjeei
-    jeefudenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
-    grrhguodhmvghsmhhtphgruhhthhhpvghrshhonhgrlhhithihqdduieejtdehtddtjeel
-    qdeffedvudeigeduhedqrghruggspeepkhgvrhhnvghlrdhorhhgseifohhrkhhofhgrrh
-    gurdgtohhmpdhnsggprhgtphhtthhopedufedpmhhouggvpehsmhhtphhouhhtpdhrtghp
-    thhtohepsghpsegrlhhivghnkedruggvpdhrtghpthhtohepsggvnhhhsehkvghrnhgvlh
-    drtghrrghshhhinhhgrdhorhhgpdhrtghpthhtoheprhhpphhtsehkvghrnhgvlhdrohhr
-    ghdprhgtphhtthhopehtghhlgieskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepgiekie
-    eskhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqmhhmsehkvhgrtghkrdho
-    rhhgpdhrtghpthhtohepihhlihgrshdrrghprghlohguihhmrghssehlihhnrghrohdroh
-    hrghdprhgtphhtthhopegurghvvgdrhhgrnhhsvghnsehlihhnuhigrdhinhhtvghlrdgt
-    ohhmpdhrtghpthhtohepmhhinhhgohesrhgvughhrghtrdgtohhm
-X-ME-Proxy: <xmx:5GSpaSfxGytkM113DN7Mwym-LRxF2ufvjMsVoSKkjCAXKaZI4gbUHQ>
-    <xmx:5GSpabz2oDU9ZdPs8giRBhgh44XriiI_Yc0fFfDT1ZeIwhpHCuc6VA>
-    <xmx:5GSpaX2JAdOBMS_5wFuMYuM5_WtTbstyxDcl6obfNmF3MV6hALwATg>
-    <xmx:5GSpaSdYSp__UK0sQAJCt3_zJwpnhZwff_t24xTQZD3fI_aXLyEFcA>
-    <xmx:5GSpacUjivZtZ3ABUWxmfwUB-Y0cfnK8BHxZJYQt1ORxQxg_8z9jOSGu>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 5F204700065; Thu,  5 Mar 2026 06:11:32 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="Go259zIj"
+Received: from pps.filterd (m0360083.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 624LUFuQ2339714;
+	Thu, 5 Mar 2026 12:55:18 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=pp1; bh=j46n/C
+	l/uiusceyLFOPeUtqO6xM+QOc9rxRmh/YsaFw=; b=Go259zIjpiUsEZ2/VSp1+C
+	ajKQN/kmWvrD0WAn+M79WyyoB6eOAjm9paqjImI05Yg622mR0mwRGhjnXuimibrj
+	imWAt59vofH6aAXQmFuz70TaypdqlBR1ZzA6Q5Z5HE8VzRH1/+Y0FyFZ11MP2xg/
+	djIhFxbFZxz7DOBJRaJdWke1zUk+0N1OmXQDfXEf2VNEd46D1UE09yiJ1eusG9k0
+	TpQSWdUgSf/SkopozJf/rEgUa0cx+Cr0vmZQFa/YYWdSqG4hPqJtlcLM9LOt4m4v
+	GQPiWRGYBa+47ir2Dyv3nQxU1LEyXbjQ7/2wgwFTH/D8FD4SmraXknK5jBRt0EGA
+	==
+Received: from ppma21.wdc07v.mail.ibm.com (5b.69.3da9.ip4.static.sl-reverse.com [169.61.105.91])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4cksrjbrkg-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 05 Mar 2026 12:55:17 +0000 (GMT)
+Received: from pps.filterd (ppma21.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma21.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 6259TYY3016397;
+	Thu, 5 Mar 2026 12:55:16 GMT
+Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
+	by ppma21.wdc07v.mail.ibm.com (PPS) with ESMTPS id 4cmbpnbb4u-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 05 Mar 2026 12:55:16 +0000
+Received: from smtpav01.fra02v.mail.ibm.com (smtpav01.fra02v.mail.ibm.com [10.20.54.100])
+	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 625CtCPS24380116
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 5 Mar 2026 12:55:12 GMT
+Received: from smtpav01.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 85D2E20043;
+	Thu,  5 Mar 2026 12:55:12 +0000 (GMT)
+Received: from smtpav01.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id AAC6C20040;
+	Thu,  5 Mar 2026 12:55:10 +0000 (GMT)
+Received: from localhost (unknown [9.111.42.248])
+	by smtpav01.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Thu,  5 Mar 2026 12:55:10 +0000 (GMT)
+Date: Thu, 5 Mar 2026 13:55:09 +0100
+From: Vasily Gorbik <gor@linux.ibm.com>
+To: Mimi Zohar <zohar@linux.ibm.com>
+Cc: linux-integrity@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>,
+        Alexander Egorenkov <egorenar@linux.ibm.com>,
+        Ard Biesheuvel <ardb@kernel.org>, Dave Hansen <dave.hansen@intel.com>,
+        Coiby Xu <coxu@redhat.com>, Roberto Sassu <roberto.sassu@huawei.com>,
+        Madhavan Srinivasan <maddy@linux.ibm.com>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Nicholas Piggin <npiggin@gmail.com>,
+        "Christophe Leroy (CS GROUP)" <chleroy@kernel.org>,
+        Alexander Gordeev <agordeev@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@linux.ibm.com>,
+        Sven Schnelle <svens@linux.ibm.com>, Thomas Gleixner <tglx@kernel.org>,
+        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
+        "H. Peter Anvin" <hpa@zytor.com>,
+        Dmitry Kasatkin <dmitry.kasatkin@gmail.com>,
+        Eric Snowberg <eric.snowberg@oracle.com>,
+        Paul Moore <paul@paul-moore.com>, James Morris <jmorris@namei.org>,
+        "Serge E. Hallyn" <serge@hallyn.com>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        "open list:LINUX FOR POWERPC (32-BIT AND 64-BIT)" <linuxppc-dev@lists.ozlabs.org>,
+        "open list:S390 ARCHITECTURE" <linux-s390@vger.kernel.org>,
+        "open list:EXTENSIBLE FIRMWARE INTERFACE (EFI)" <linux-efi@vger.kernel.org>,
+        "open list:SECURITY SUBSYSTEM" <linux-security-module@vger.kernel.org>,
+        "open list:KEYS/KEYRINGS_INTEGRITY" <keyrings@vger.kernel.org>
+Subject: [PATCH 1/1] s390/ipl: Fix missing arch_get_secureboot() prototype
+ warning
+Message-ID: <p01-01.g9ec0a81d34d1.ttbfdx5@ub.hpns>
+References: <20260213012851.2532722-2-coxu@redhat.com>
+ <c00-01.ttbfdx5@ub.hpns>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: AusYBuezkfp3
-Date: Thu, 05 Mar 2026 12:11:12 +0100
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Mike Rapoport" <rppt@kernel.org>, x86@kernel.org,
- linux-kernel@vger.kernel.org
-Cc: "Benjamin Herrenschmidt" <benh@kernel.crashing.org>,
- "Borislav Petkov" <bp@alien8.de>,
- "Dave Hansen" <dave.hansen@linux.intel.com>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- "Ingo Molnar" <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>,
- "Thomas Gleixner" <tglx@kernel.org>, linux-efi@vger.kernel.org,
- linux-mm@kvack.org, stable@vger.kernel.org
-Message-Id: <7e4f6a4b-fe41-482d-a4cd-5a059e1626e6@app.fastmail.com>
-In-Reply-To: <20260225065555.2471844-1-rppt@kernel.org>
-References: <20260225065555.2471844-1-rppt@kernel.org>
-Subject: Re: [PATCH v2] x86/efi: defer freeing of boot services memory
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <c00-01.ttbfdx5@ub.hpns>
+X-Patchwork-Bot: notify
+X-TM-AS-GCONF: 00
+X-Proofpoint-Reinject: loops=2 maxloops=12
+X-Authority-Analysis: v=2.4 cv=Rp/I7SmK c=1 sm=1 tr=0 ts=69a97d36 cx=c_pps
+ a=GFwsV6G8L6GxiO2Y/PsHdQ==:117 a=GFwsV6G8L6GxiO2Y/PsHdQ==:17
+ a=IkcTkHD0fZMA:10 a=Yq5XynenixoA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=RnoormkPH1_aCDwRdu11:22 a=iQ6ETzBq9ecOQQE5vZCe:22 a=VnNF1IyMAAAA:8
+ a=xVpku4ZQUFglSi1p0tMA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzA1MDEwMyBTYWx0ZWRfX+RUQn6BMd6jT
+ SH21bGK5IhuRS3+4aQfGKCoOdauWr6O8JO/otto6IL/mxask6aIaBTJKuK/BfMWXbWSVe7hJqMS
+ IclNLXFmKCZ6YKMVqlWCSzEpHzITp8/HIx8PMJjdO2RzdiROBdj2xXW/ydOeq/9toaBoUxpzllk
+ 1aMqO/wmDBfEDrpAEQaCC4q39mStv0Ds3eBLOiGR0LCffXuc30hXi1plumFympjJRXPfrmVi6Vc
+ ey1yJs4AgDFoEi4HVj+fU3G50EgNmoeslm5M/Y+8PZDtx+khYV+Lyt7KSJ9iaGPANH1DcvJ14ZB
+ X1YdAuHhY3EuO47eqGxtmP32mRip1+IQQxDlFcKiQf4ba8UHtCjjqayW+Wx0WmNOeGbExaBTXOQ
+ pRdskS0tqYVg+SufInrncQzxcQ+rSORmJLb+dGRtryi+DMoXnxzhFrzxjlhLPrEd9Qu/UUOrA1B
+ aoUYVM+cJv650sOf6xQ==
+X-Proofpoint-GUID: 18tUCaDZUazDvapJ0KrrVhGhLVF5GXbk
+X-Proofpoint-ORIG-GUID: ySm98qxoHM4Lds6ch4Hca4o4NZD8yC-P
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-03-05_04,2026-03-04_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 priorityscore=1501 spamscore=0 phishscore=0 adultscore=0
+ bulkscore=0 clxscore=1015 impostorscore=0 malwarescore=0 lowpriorityscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2602130000 definitions=main-2603050103
 
+Include <linux/secure_boot.h> so arch_get_secureboot() has a visible
+prototype and -Wmissing-prototypes no longer triggers.
 
-On Wed, 25 Feb 2026, at 07:55, Mike Rapoport wrote:
-> From: "Mike Rapoport (Microsoft)" <rppt@kernel.org>
->
-> efi_free_boot_services() frees memory occupied by EFI_BOOT_SERVICES_CODE
-> and EFI_BOOT_SERVICES_DATA using memblock_free_late().
->
-> There are two issue with that: memblock_free_late() should be used for
-> memory allocated with memblock_alloc() while the memory reserved with
-> memblock_reserve() should be freed with free_reserved_area().
->
-> More acutely, with CONFIG_DEFERRED_STRUCT_PAGE_INIT=y
-> efi_free_boot_services() is called before deferred initialization of the
-> memory map is complete.
->
-> Benjamin Herrenschmidt reports that this causes a leak of ~140MB of
-> RAM on EC2 t3a.nano instances which only have 512MB or RAM.
->
+arch/s390/kernel/ipl.c:2507:6: warning: no previous prototype for ‘arch_get_secureboot’ [-Wmissing-prototypes]
+ 2507 | bool arch_get_secureboot(void)
+      |      ^~~~~~~~~~~~~~~~~~~
 
-Putting a fixes tag referencing a patch that dates back to 2011 doesn't seem that useful here. Is this really an issue that goes all the way back? Or did a later change trigger the actual leak?
+Fixes: 63e8a44395a4 ("integrity: Make arch_ima_get_secureboot integrity-wide")
+Signed-off-by: Vasily Gorbik <gor@linux.ibm.com>
+---
+ arch/s390/kernel/ipl.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
+index bdbbedf52580..2d01a1713938 100644
+--- a/arch/s390/kernel/ipl.c
++++ b/arch/s390/kernel/ipl.c
+@@ -21,6 +21,7 @@
+ #include <linux/crash_dump.h>
+ #include <linux/debug_locks.h>
+ #include <linux/vmalloc.h>
++#include <linux/secure_boot.h>
+ #include <asm/asm-extable.h>
+ #include <asm/machine.h>
+ #include <asm/diag.h>
+-- 
+2.53.0
