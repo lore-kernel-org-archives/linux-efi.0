@@ -1,76 +1,75 @@
-Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
+Received: from mail-pj1-f50.google.com (mail-pj1-f50.google.com [209.85.216.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74D7237B3F2
-	for <linux-efi@vger.kernel.org>; Sun, 15 Mar 2026 21:53:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE54C37CD2C
+	for <linux-efi@vger.kernel.org>; Sun, 15 Mar 2026 21:53:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773611600; cv=none; b=nr/EmKqHdaSrZwQVGJah/qxdrZ2U5tDifJS6n6KBrvxrHrVQyJ5fzuhyotAkPYwU298jXBA078fAnySSqCwsRMkxuUEBI1Q6khJSo0FPdS3Cz6kPu8QerasWK9VkJfjCyzTb4q/uoCbICQ3PsCq//bspT85TIPamore55JkGrGc=
+	t=1773611607; cv=none; b=p/3rImJ+nHrYGA27Stdwg74P31jxBZAK+NXWRgxN1wqvQzsLG/5q//WS/RhIuQ93Pk0p6hMwflNIFiyuNHzdKYsuWvQPb1T4SajaXYxkiR5ZaNXxbQ+td52ZfcYnj/RnPfhBUygtSKrRS4xDMwuImTfV3PYJQ55tgGaxGaHHjxw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773611600; c=relaxed/simple;
-	bh=d4jChEeUUc0f0rEMKPi4UAZuovkMFjwzj0INK1YLEaU=;
+	s=arc-20240116; t=1773611607; c=relaxed/simple;
+	bh=IBDYUK+3O1y5VL1z6GzT5aRoM2+wTLMn0ghXsNI6iG0=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=kS3s2Juiw+lQUPKRaaFcr6J0Cq/mb6dVhhrWjnfW2cXh+F6zGoOr3sUJHAYPHrahQJjJBW6Q23UkkDuwn7SbacLRuraTiwKsJqbOtftex4s5qH/brPF52BiBBrdxvm3b80s8OxwqCP4xRMA/JhK3gXQudgsOXN2v62C7oRz+cWU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PnRfJkl5; arc=none smtp.client-ip=209.85.216.51
+	 MIME-Version; b=NwZ1S5f5unHPfDospRYMowOQ9KR9C2C8JKWEBnsH3SNunYGVprVvv4S0dVSCHkWxiNKn9dw0lWUqRijlcrJhc5pLiyFfPNkRW0qf4YSF8+PTBX+9G/Ja32WXBph/61omPQUixqOFp5RXiOS5ARDRDbKj6lRZeICxQnPeD+59U7k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BP1DUyCy; arc=none smtp.client-ip=209.85.216.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PnRfJkl5"
-Received: by mail-pj1-f51.google.com with SMTP id 98e67ed59e1d1-35b95a7444bso423128a91.1
-        for <linux-efi@vger.kernel.org>; Sun, 15 Mar 2026 14:53:18 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BP1DUyCy"
+Received: by mail-pj1-f50.google.com with SMTP id 98e67ed59e1d1-35a09e0dd63so4214778a91.3
+        for <linux-efi@vger.kernel.org>; Sun, 15 Mar 2026 14:53:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773611598; x=1774216398; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1773611606; x=1774216406; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=R6JQWklIlJSZA3P4ZxqqueLAj4IsTzAWLg/HK7yKGJM=;
-        b=PnRfJkl5cG6QDT2F+yTcDk3/uBzdacQUw4nTbBHCnjSV0dmzIGTusuRWBYIUcSbgt4
-         BNdTsh+ae2VLCuu/BYCOQDXzS/rfvHXCr2l6jQmOg7pbhIRio9rmI4WGJJBnEP4L1W3R
-         xRZRL5mOeYx7rD//CQZVlLOSITfbBW4D9maC0KVv/S7d8ITEeuzpMRetj/xjy0VeKFLO
-         FzlQwYjhACGsMSFFbY66fIs0WpOW853QbtgbFU9q62fE8M1/axNDaRjp6aa3jDQNO/T2
-         YBQHGhVIYfBZS5WFJkWY+hphMWrjIEBEP3RO+OlJZVtD0UqoPWRWuXofkeDEcj42bNov
-         CNjA==
+        bh=cXUioPAqGCi/G7aJUPOn/95wAygcdDsF9zmaY+F6+Nc=;
+        b=BP1DUyCy6qjgkEJ3qgba6JOxkZFgdWn3EWp3cyU3eZEMWKES+ljoamOpMNjrcOvTBL
+         sHq03gDDtFj3OCdBVJXwNVEqLSigHsWzc45VW+jJb1czsNFvdgkD7x9PsHWG+IJ3JUfD
+         iXGsfb4CK72PEZv/syyqg1TFlbOyHw5USbX1qBklhg96V4h7gTupbaO8imu9ej9y0ER9
+         YP5zaNvoUN9oVT9WDqCrEKdyhjKspE5wjh67oN6zvOM9Gixb4PBh1lny8duW6pVy0a4L
+         zBP6fLU5PasQBdHB2HTxQXKQgAXCsPX4v2yvU3opqMOWumA86yssLCbRzCB27bcP8MUd
+         IGSw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773611598; x=1774216398;
+        d=1e100.net; s=20251104; t=1773611606; x=1774216406;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=R6JQWklIlJSZA3P4ZxqqueLAj4IsTzAWLg/HK7yKGJM=;
-        b=IGexFk5rr4W+d8sHmj8NcdjMdOHuoRhFw/7iQ/FtWn4IIvulyFK3MHaG8CJL+3Vhpl
-         LSajYlkGivZY5MqFLONR/0cfc5rQH0+GoMYRTh15xvOwVn0ZXxwvYkY+RAdaZl/q6Cai
-         avtTx2U27bxqjF7LlAPeJzbJH82LamJvsW8PkN0ZN9QHdADwddYf0qoo5d+QxEOCV0mn
-         JsVVFNfZnT2bGN+4QYybcOzr5ThOprBFuDXH6rK7qufe+3c/lGJ7LRaO1oaEOKqSReU1
-         Xb08vwb7kTQjclZ1qmAUslyOnBmuUyXgAz/3NpAqlIBf646MlPl2gIDnb2ZH+bI3Yyst
-         JEwA==
-X-Forwarded-Encrypted: i=1; AJvYcCV+Jw82mXtmscPeokkW0ZgtKwM2mMhZNfGyUfFQ6fc8mEb8BIYjzme8QcL7wkOXKfm1VNYcfsPmufw=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxF5iv17ZvNsYBWZcCcL2dsTqpt2brliojiiTh9Nvp0M+jASTKa
-	evKB9+QF8mQ7y8wlpAKtutF+ayEDPuIEm3QxFMuAoROe3/8sX6BepCs=
-X-Gm-Gg: ATEYQzxdl3ti6k5bIEzMoAE7PHz+OtfdM1jAimhAxNTXxJre1U1ElMtJQDJuHYA3pct
-	CJJpTv7ZU4Bei2k0bJngTDWc7nerVasyTmSo6bqe2rWa3Rk4RkiPAsz+j5nvxDJjr6E2hcY1Gjc
-	Blyj7noHdf+expv4trwy0pUA/i57D+vipzwTYwgYjGoBxwtU3dKTfA9mWE8WhCXL7xVxo2/hArU
-	WcluzfHNPS15c+nCpDTWDTclAdw6QhiZzwpTH/FFk9NDnbsPbpcVn7sVfp5GCoNsKYrEc0W9Z6l
-	VBcxvJ68CyhskLhBo3bQfy19hAYHbLPHKyIJ92x7HGZ2H6UFfwBEmN0IJhFpn+tOnSE/yS+JVH5
-	oP8RhW9gs94nOeiRVvGwH1hRYLs1Dz/nrgYce3qIqPgeOvz9qLhT8PMiqiglDQyzzDhz+Q6bbal
-	58A0eX9Wk2C7EM7IVZKbVC/OkoyHvlmwo8TU2tZm31oWp9wAPDunV333Gvx0W//t0=
-X-Received: by 2002:a17:90b:28cc:b0:359:fc88:fa99 with SMTP id 98e67ed59e1d1-35a22055572mr8857270a91.26.1773611597857;
-        Sun, 15 Mar 2026 14:53:17 -0700 (PDT)
+        bh=cXUioPAqGCi/G7aJUPOn/95wAygcdDsF9zmaY+F6+Nc=;
+        b=PIUXCxgPmlhIzgQAqfifRYleKK1gEjuA64NBPXwFRUDIkEapBDEdKJFkkxlW9K/Cvb
+         p+V1cSBKStux/JuYT4YLAbWx5g+6VkdjaTPrq7Tevphx6iJP1zihGZIQo+ejPJp4LsXO
+         7p4XeqO8Z6gO5rV/LYUnOmr7KTP6d/Wip8PmADsW/kQ89jO5+R/nTAD/AYNNHicK+Njj
+         67q8j6ZiZo2J4NOJRrjvYmEWwKNMfq/1ShiWSU+gqPbxWy0KDBFgbO5NNOAS3XWgva9J
+         9Fo2J/TAIP0FGsOULGoURerpLLVES9XZRCeZeUayX7QA9BuNdpJTYTv4lb2ZVFUXaFP3
+         WRTw==
+X-Forwarded-Encrypted: i=1; AJvYcCUIQkD4Ygp8Yi8TToA3MyAr5N1WLhXyj/TJnOwSrrM9RkBGSGgq+gOUWy9mtbHLlorbOIaaxrzyxoY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YznG0OI6luKI9H2FUmLwRgZ/3mL/kZSp2gpmAWvjeeF7GvVUyUo
+	VhwoshcXudnuK7Wyg7DhCztZJDyG8Xvqax2BxUj4miPpYVa+fZ5NywlscYND
+X-Gm-Gg: ATEYQzyw/u1zasGFUGx17DgLz63ehI3xMgPp3tcSJdRwOeYtJ70Ad9Zff0daFr5ddAS
+	A+84sQoIzErOEOyv7Q3edR0hdqVXdgYwxudjykI4b2QGCiqi0ZEsx0TrV+okvYljWjX1utsbYLn
+	UD9GGGPjzq6IARQUq/asxe8oAsBLo6HVZu5R7xinrQBZ/eCzDCZj/2OacRVCUpkBT1L26tbFRZs
+	VJnerHWySIsQJT+tYgCk4uPQ+arhg0spxtihIzd9CKYuOOICQfxWEEZweIQCK50Mip+eTPgHNXx
+	R5m8Hzw7JkWF6zNRJpLguhPOTBEouPn9fBX2aoNSs8zD5JQdsZ+QxppUrnRuyXtRJP989zPieez
+	Iw3MUYzhY6jgjE9X93nTNe+wc3PogsbvU5iag13fb7qO4AnE0Cr0x62LpLop+xKaGL6+KIZKzoi
+	/GiKdb/SpcIv+qroqYz9ezPbmdV7b6SNErzFmBnonnXIsSK1D9M6TUouu8WCCyld0=
+X-Received: by 2002:a17:90b:1d08:b0:359:409:49bf with SMTP id 98e67ed59e1d1-35a22063fb8mr10339166a91.21.1773611606207;
+        Sun, 15 Mar 2026 14:53:26 -0700 (PDT)
 Received: from at-Standard-PC-Q35-ICH9-2009.. ([171.61.163.197])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-35b9303eb9bsm3074980a91.8.2026.03.15.14.53.14
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-35b9303eb9bsm3074980a91.8.2026.03.15.14.53.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 15 Mar 2026 14:53:17 -0700 (PDT)
+        Sun, 15 Mar 2026 14:53:25 -0700 (PDT)
 From: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
 To: 
 Cc: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>,
-	Lukas Wunner <lukas@wunner.de>,
 	Ard Biesheuvel <ardb@kernel.org>,
 	Hans de Goede <hansg@kernel.org>,
 	=?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
 	linux-kernel@vger.kernel.org,
 	linux-efi@vger.kernel.org,
 	platform-driver-x86@vger.kernel.org
-Subject: [PATCH v2 1/2] efi: Save Brightness using EFI on Macs
-Date: Mon, 16 Mar 2026 03:22:41 +0530
-Message-ID: <20260315215302.24087-2-atharvatiwarilinuxdev@gmail.com>
+Subject: [PATCH v2 2/2] platform/apple-gmux: use apple_brightness to save brightness to EFI
+Date: Mon, 16 Mar 2026 03:22:42 +0530
+Message-ID: <20260315215302.24087-3-atharvatiwarilinuxdev@gmail.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20260315215302.24087-1-atharvatiwarilinuxdev@gmail.com>
 References: <20260315215302.24087-1-atharvatiwarilinuxdev@gmail.com>
@@ -82,158 +81,75 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Currently when a Mac reboots, the brightness is not the same
-as the previous boot instead its the same as the last time the
-Mac booted macOS.
-
-We can fix this issue by saving the brightness level to the efivar
-backlight-level.
+use apple_brightness to save brightness to EFI.
 
 (tested on iMac20,1)
 
-Suggested-by: Lukas Wunner <lukas@wunner.de>
 Signed-off-by: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
 ---
- drivers/firmware/efi/Kconfig                  | 10 +++
- drivers/firmware/efi/Makefile                 |  1 +
- drivers/firmware/efi/apple-brightness.c       | 67 +++++++++++++++++++
- .../linux/platform_data/apple-brightness.h    | 20 ++++++
- 4 files changed, 98 insertions(+)
- create mode 100644 drivers/firmware/efi/apple-brightness.c
- create mode 100644 include/linux/platform_data/apple-brightness.h
+ drivers/platform/x86/apple-gmux.c | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
 
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 29e0729299f5..dd0a9c9a772a 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -167,6 +167,16 @@ config APPLE_PROPERTIES
- 
- 	  If unsure, say Y if you have a Mac.  Otherwise N.
- 
-+config APPLE_BRIGHTNESS
-+	bool "Apple Backlight control for EFI"
-+	depends on X86
-+	help
-+	  This will save the brightness level to EFI, so brightness
-+	  level is preserved across reboots and shutdows. allowing
-+	  for improved support of Apple hardware.
-+
-+	  If unsure, say Y if you have a Mac, Otherwise N.
-+
- config RESET_ATTACK_MITIGATION
- 	bool "Reset memory attack mitigation"
- 	depends on EFI_STUB
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 8efbcf699e4f..1f5705cc87a2 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -26,6 +26,7 @@ obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
- obj-$(CONFIG_EFI_TEST)			+= test/
- obj-$(CONFIG_EFI_DEV_PATH_PARSER)	+= dev-path-parser.o
- obj-$(CONFIG_APPLE_PROPERTIES)		+= apple-properties.o
-+obj-$(CONFIG_APPLE_BRIGHTNESS)		+= apple-brightness.o
- obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
- obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
- obj-$(CONFIG_LOAD_UEFI_KEYS)		+= mokvar-table.o
-diff --git a/drivers/firmware/efi/apple-brightness.c b/drivers/firmware/efi/apple-brightness.c
-new file mode 100644
-index 000000000000..b060861b0795
---- /dev/null
-+++ b/drivers/firmware/efi/apple-brightness.c
-@@ -0,0 +1,67 @@
-+// SPDX-License-Identifier: GPL-2.0-only OR MIT
-+/*
-+ * apple-brightness.c - EFI brightness saver on Macs
-+ * Copyright (C) 2026 Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-+ */
-+
-+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-+
-+#include <linux/backlight.h>
-+#include <linux/efi.h>
+diff --git a/drivers/platform/x86/apple-gmux.c b/drivers/platform/x86/apple-gmux.c
+index 1417e230edbd..5a13c917c496 100644
+--- a/drivers/platform/x86/apple-gmux.c
++++ b/drivers/platform/x86/apple-gmux.c
+@@ -22,6 +22,7 @@
+ #include <linux/pci.h>
+ #include <linux/vga_switcheroo.h>
+ #include <linux/debugfs.h>
 +#include <linux/platform_data/apple-brightness.h>
+ #include <acpi/video.h>
+ #include <asm/io.h>
+ 
+@@ -78,6 +79,8 @@ struct apple_gmux_data {
+ 	/* debugfs data */
+ 	u8 selected_port;
+ 	struct dentry *debug_dentry;
 +
-+static u32 efi_attr;
-+static u16 last_saved_level;
++	bool save_efi;
+ };
+ 
+ static struct apple_gmux_data *apple_gmux_data;
+@@ -960,6 +963,13 @@ static int gmux_probe(struct pnp_dev *pnp, const struct pnp_device_id *id)
+ 	}
+ 
+ 	gmux_init_debugfs(gmux_data);
++	if (IS_ENABLED(CONFIG_APPLE_BRIGHTNESS)) {
++		ret = apple_brightness_probe(gmux_data->bdev, &gmux_get_brightness);
++		if (ret)
++			pr_warn("Unable to Enable EFI brightness save: %d\n", ret);
 +
-+static int (*get_brightness)(struct backlight_device *bl);
-+static struct backlight_device *bl_dev;
-+
-+void apple_brightness_shutdown(void)
++		gmux_data->save_efi = true;
++	}
+ 	return 0;
+ 
+ err_register_handler:
+@@ -1012,6 +1022,16 @@ static void gmux_remove(struct pnp_dev *pnp)
+ 	kfree(gmux_data);
+ }
+ 
++static void gmux_shutdown(struct pnp_dev *pnp)
 +{
-+	u16 level;
-+	efi_status_t status;
++	struct apple_gmux_data *gmux_data = pnp_get_drvdata(pnp);
 +
-+	level = (u16)get_brightness(bl_dev);
++	if (gmux_data->save_efi)
++		apple_brightness_shutdown();
 +
-+	if (level == last_saved_level)
-+		return;
-+
-+	status = efivar_set_variable(APPLE_BRIGHTNESS_NAME, &APPLE_BRIGHTNESS_GUID,
-+				efi_attr, sizeof(level), &level);
-+	if (status != EFI_SUCCESS)
-+		pr_debug("Unable to set brightness: 0x%lx\n", status);
++	gmux_remove(pnp);
 +}
-+EXPORT_SYMBOL(apple_brightness_shutdown);
 +
-+int apple_brightness_probe(struct backlight_device *bl,
-+	int (*get_brightnessfn)(struct backlight_device *bl))
-+{
-+	efi_status_t status;
-+	unsigned long size = sizeof(last_saved_level);
-+	int ret;
-+
-+	bl_dev = bl;
-+	get_brightness = get_brightnessfn;
-+
-+	if (!efi_rt_services_supported(EFI_RT_SUPPORTED_SET_VARIABLE))
-+		return -ENODEV;
-+
-+	ret = efivar_lock();
-+	if (ret)
-+		return ret;
-+
-+	status = efivar_get_variable(APPLE_BRIGHTNESS_NAME, &APPLE_BRIGHTNESS_GUID,
-+				&efi_attr, &size, &last_saved_level);
-+
-+	efivar_unlock();
-+
-+	if (status != EFI_SUCCESS)
-+		return -ENODEV;
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL(apple_brightness_probe);
-+
-+MODULE_AUTHOR("Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>");
-+MODULE_DESCRIPTION("EFI Brightness saver for Macs");
-+MODULE_LICENSE("Dual MIT/GPL");
-diff --git a/include/linux/platform_data/apple-brightness.h b/include/linux/platform_data/apple-brightness.h
-new file mode 100644
-index 000000000000..54e3f3f8aa1c
---- /dev/null
-+++ b/include/linux/platform_data/apple-brightness.h
-@@ -0,0 +1,20 @@
-+/* SPDX-License-Identifier: GPL-2.0-only OR MIT */
-+/*
-+ * apple-brightness.h - EFI brightness saver for Macs
-+ * Copyright (C) 2026 Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-+ */
-+
-+#ifndef _APPLE_BL_H_
-+#define _APPLE_BL_H_
-+
-+#include <linux/backlight.h>
-+#include <linux/efi.h>
-+
-+#define APPLE_BRIGHTNESS_NAME           L"backlight-level"
-+#define APPLE_BRIGHTNESS_GUID           EFI_GUID(0x7c436110, 0xab2a, 0x4bbb, 0xa8, 0x80, 0xfe, 0x41, 0x99, 0x5c, 0x9f, 0x82)
-+
-+int apple_brightness_probe(struct backlight_device *bl,
-+	int (*get_brightnessfn)(struct backlight_device *bl));
-+
-+void apple_brightness_shutdown(void);
-+#endif /* _APPLE_BL_H */
+ static const struct pnp_device_id gmux_device_ids[] = {
+ 	{GMUX_ACPI_HID, 0},
+ 	{"", 0}
+@@ -1026,6 +1046,7 @@ static struct pnp_driver gmux_pnp_driver = {
+ 	.name		= "apple-gmux",
+ 	.probe		= gmux_probe,
+ 	.remove		= gmux_remove,
++	.shutdown	= gmux_shutdown,
+ 	.id_table	= gmux_device_ids,
+ 	.driver		= {
+ 			.pm = &gmux_dev_pm_ops,
 -- 
 2.43.0
 
