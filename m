@@ -1,291 +1,89 @@
-Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com [209.85.218.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA5735B5AB
-	for <linux-efi@vger.kernel.org>; Sun, 15 Mar 2026 13:51:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.44
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773582703; cv=pass; b=VcvQtq5taGOuMktJx1qx57dINH7EnhisqSyEG9FF7cMi/jfJUjh3fgX+A+52dlImII5U7ButNN68zcE0dGMGCtx7eUf6QsBY0hrOrURfdPMJjoB353lvgg5osZUybQMRFOhA0CfMWgrbUHs7DDCNJADFVxQuqrk73Bam8imaDHM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773582703; c=relaxed/simple;
-	bh=Vs01mlsWygXmaXPS3h5z1k3Hf3KZR9yElATURfIfNww=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=bDaaqF19suhNrprom3Q5zmFWI/n8dTWxjqIzX2rv/fwx0b7+xAAsWBhmdYYTBOrmsbCW1X5EprkHag33QSz7hlHMh3zdLBzuJMeEc5ePyIGAgjyN2MXMbwalByvJNiQHhM8kZewo5keqM0tPxLx2O0LHogCEouPa6XoOMXkZ+KI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=niOi+68t; arc=pass smtp.client-ip=209.85.218.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91EFA365A1C;
+	Sun, 15 Mar 2026 14:15:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773584160; cv=none; b=Kb1vP0274wK1Fp9ieIQUB5D0oPNR/xFeyJwyPQxogbHj6Pk1xGWzYHr+nD1wtPylfcNpQVFsFWGA3fL7u/JVgTrTWZxNofLSrsFTx7p5i/PKczU4704nwEpU1PVUCNLH5Zb6P5DDrVgVQecuJs0ZLfMyNWvsSyqIe+xoJJ6njew=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773584160; c=relaxed/simple;
+	bh=agFxp7/+DmzOfwyTxuEGMhbMU3mctxR6EiAxomWVZjA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Nta1fVSyU02JfdJmds1XSAV4zVXRGesroFTgcapL9mtS7x+UsmdrY2K0kBZMxwG+Ljwc7/rlmFOlGHiaV6gQVXiLbAjrSPj64/JT4NAgiPWj2jmcbzrQDu0dJeT2Qdsg/HnqHSIpGCcCbS+KoqBNFy2ITHeAYAKtzQMkhy3XsFk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=roL1M/sn; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="niOi+68t"
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-b94358796a1so519484566b.2
-        for <linux-efi@vger.kernel.org>; Sun, 15 Mar 2026 06:51:41 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773582700; cv=none;
-        d=google.com; s=arc-20240605;
-        b=KnHi+kcXmhwuAMPfHsDk7B8U/QiwTveQgfX/CxqDBAP6PU38yrHER0H2iQGlL01JhY
-         QF5bM/w4+oijtLxamRC/xLsL4vogUEH+7wVaw9Hgz5Hfio5IqdwOXqRPAaZVkStwcYb2
-         7c0mBnhC6VY1WU0/YjyPd6yv0O+IlxGAuMv9lfMXxmG2XxS+m6lGp01IYeV+DUzspnPl
-         R/giJIEhPMjPk4KP+D0jT/S6qFnExfSVIMGjPd7k5g8npJjh1lgLbA/DUG/k63GUMaC9
-         h+YmFDfE5L+qSWV/fT9Aloog6cN+U2km7Hxqk4qyPWwKcTnJKe1gS2oKPzVV/A4t9IRt
-         apcQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=LD1Y/Z+QIVaxjTqqF6DEde0TPCIZAs/xYcpmNl5+JUA=;
-        fh=KQ0I3e1Ylzu88WBwhXfZu0Pbp+6CNJyuYR3YTyPMPCM=;
-        b=G0gRuYZvhpaTBPpB8py70iUB/IbXmMvX5RAjqbVT/gtQ/1CLQc9s07as2ROkwauQAI
-         3JJ16fn8p80bdpDkEEyi3ljmbUWjTNbBpLsIJV96+piJRuLni/EK/N+AIuv+0juXOvvn
-         7BS1obXqdyk2tv4kMaCsxnXso7N1vx3/ECPs0BMkyan70rhHQoP4ctYqFzapcDqs8V0j
-         rlabUrO902Kjey2muAyt8BzLWlkTKtNM3YNQD6t41tbJtDHl60RPTBFjUUL80uDjCGR+
-         njeDdHSLIkp1+U2CS+sjX8wP/tyaZDubQZJjL9CWIl+HOZt+wJbH4kbEOzWm7JlbCEOL
-         e5oQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773582700; x=1774187500; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=LD1Y/Z+QIVaxjTqqF6DEde0TPCIZAs/xYcpmNl5+JUA=;
-        b=niOi+68t+4ftQYvaTzVsRIkap5gRXpAugLlwQHpWZCH0WvCYllQe1U7gpK6TQ746LN
-         sNb6+5qFVJvATOEcP8S1YSgpJuP99izxvfE9uv+ymv5s8v7mpmYBgjxzgmmrMIO20ol5
-         XRphCrEl9BexTpEgwv+wQSN4mImqSAHd9JsJo3w0NsYQAB6tOh/4qcvYp8Jff3IdmD2I
-         4tSEzLy6dzy72soZcqjVHMHgUtghx14Tou/mIE3WQ2HWt4arTCyksDfNfZAyf2iOSfXz
-         lwavfOdGwvHNzVdTXiKTbMW4WZkF9yE9MfkZ1gT2J9g25fenbgVIVPyGiFfk/1mzFyNE
-         UBEw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773582700; x=1774187500;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=LD1Y/Z+QIVaxjTqqF6DEde0TPCIZAs/xYcpmNl5+JUA=;
-        b=oKmwcvkyvsK/ta5BEps/jTIaMgoF9E4nozO3M1Fe5RE/xEkMBofSvTBtenS7XE7ZHr
-         8MaJJ5kiKJ0dYB9CF8pThyv8QkaQzdSH4gadtju1j7FASm/GvbCNzxHtd3dghSLyaXO2
-         8Ge+qHaUmCFEkj9H0/H5cNL2gQmiZ3w30xvJBZdrLaeMQNkpNjA3WR7t2dvvcIvoO4XI
-         aJ5OlZYEXAJFL7+/FGpqKGa0vn6Q9nwij/YGLdiUXetFtXhvfTvmWVfmm65bQ0NeWqwE
-         brF2zbaaD++r6q5vr69LCrHmunHDf0Qzea2Z8qeEukvo1rWzyumf8NdGILw+3GCyfsZa
-         CUag==
-X-Forwarded-Encrypted: i=1; AJvYcCUx68uO4oIpVG3NRq2iRr3t029jJN19c9mUg7m40MY0/G2p9n/Fxzqk32DfEbeWcpuJ+XK7wc0OOmg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxxfGIizNRHqCtk/5bYoNm21VaiX3RKmawdJ96cI8jSrVRdXvdf
-	UI4I4Qt+UEZsgaW5aQkMc+YW5ZBzDg+M0cwY5kEHN6mTrAiAsA2t8/uwX74lnezzLnL3cljJmM+
-	IAVOj7scniDnDgWG2DMA93AgkU7nmrgY=
-X-Gm-Gg: ATEYQzwKE3qmAA1zOkxaQrKi2x/+DwPWlZ0bZwwoQLns6DdeRAVS5IrUpJ/Q5cWT2QJ
-	ey1rR+Jk/JxvhNpIFg1xzLMfvMb2ZFbNciGzwZO0LALd5bhqxi2IJUxPANNYULG6y8aJpK0ZB7S
-	HkN8eh/ZZRJ8UP3A+BoqeDLpqRGMKrdC/aEjXS1+09I086oW9N+Ww9/eY7AXDmZtnRLmV/0qPTV
-	SHYKAJvyg/xRwGzcUsry/VkpAjZGY3TXmVxeVrCT+W4Zin7GQC59ztQid5FypyHI9y5HelmwPzV
-	ocOTXy7L4LO+kdLkCA9Q/tpfwAp4caXj7SqIRy5Uag==
-X-Received: by 2002:a17:907:8dcd:b0:b93:c5a9:a5e6 with SMTP id
- a640c23a62f3a-b976507af92mr500109966b.2.1773582699724; Sun, 15 Mar 2026
- 06:51:39 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="roL1M/sn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7DF01C4CEF7;
+	Sun, 15 Mar 2026 14:15:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1773584159;
+	bh=agFxp7/+DmzOfwyTxuEGMhbMU3mctxR6EiAxomWVZjA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=roL1M/sncI7syFKC+9EAQl1eCZCHmJRgd6pDWPCUMZ1EXZw6eMIBYdBqGlooV8+Cz
+	 WG3hLBXqLVlZAyHyTeksN6hrbhZxwYTrK7Wd4q8RIbgN1JcM0aQkL0CIRTAxbnky/N
+	 llZEm7aaanH9Q+Arg3PCOb5TdJxe8lOcuZ9t2ijKVqCKiy04H4pgFLSfDUtojc9k84
+	 4MyFWx4I3cT5s7XGmir14ybXW295nx5o76Zy7Dtz1gMlHGjQhEZSFXCwkwP5OrFRgK
+	 kkqBIrGUBwc5g+NXoR9z7J1yP9qE+pYk0UY42I+bT0OuTv4iqeWqi3wwSlE1yzF+3m
+	 2I9oF3TCISnKw==
+Date: Sun, 15 Mar 2026 10:15:58 -0400
+From: Sasha Levin <sashal@kernel.org>
+To: Peter Zijlstra <peterz@infradead.org>
+Cc: Chuck Wolber <chuck@wolber.net>, nathan@kernel.org,
+	Matt.Kelly2@boeing.com, akpm@linux-foundation.org,
+	andrew.j.oppelt@boeing.com, anton.ivanov@cambridgegreys.com,
+	ardb@kernel.org, arnd@arndb.de, bhelgaas@google.com, bp@alien8.de,
+	chuck.wolber@boeing.com, dave.hansen@linux.intel.com,
+	dvyukov@google.com, hpa@zytor.com, jinghao7@illinois.edu,
+	johannes@sipsolutions.net, jpoimboe@kernel.org,
+	justinstitt@google.com, kees@kernel.org, kent.overstreet@linux.dev,
+	linux-arch@vger.kernel.org, linux-efi@vger.kernel.org,
+	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-trace-kernel@vger.kernel.org, linux-um@lists.infradead.org,
+	llvm@lists.linux.dev, luto@kernel.org, marinov@illinois.edu,
+	masahiroy@kernel.org, maskray@google.com,
+	mathieu.desnoyers@efficios.com, matthew.l.weber3@boeing.com,
+	mhiramat@kernel.org, mingo@redhat.com, morbo@google.com,
+	ndesaulniers@google.com, oberpar@linux.ibm.com, paulmck@kernel.org,
+	richard@nod.at, rostedt@goodmis.org, samitolvanen@google.com,
+	samuel.sarkisian@boeing.com, steven.h.vanderleest@boeing.com,
+	tglx@linutronix.de, tingxur@illinois.edu, tyxu@illinois.edu,
+	wentaoz5@illinois.edu, x86@kernel.org
+Subject: Re: [RFC PATCH 0/4] Enable Clang's Source-based Code Coverage and
+ MC/DC for x86-64
+Message-ID: <aba_HgSbzLGm6VBQ@laps>
+References: <20250829181007.GA468030@ax162>
+ <20251014232639.673260-1-sashal@kernel.org>
+ <20251015073701.GZ3419281@noisy.programming.kicks-ass.net>
+ <DDIR4HE5C74G.1U5TA0KDN9O5J@wolber.net>
+ <20251015092145.GB3419281@noisy.programming.kicks-ass.net>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260312214330.3885211-1-neilb@ownmail.net> <20260312214330.3885211-17-neilb@ownmail.net>
-In-Reply-To: <20260312214330.3885211-17-neilb@ownmail.net>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 15 Mar 2026 14:51:27 +0100
-X-Gm-Features: AaiRm50yYPhN2uA9nBAPVNuAVUOhGIEBVS5rPtx5ZlpdDP1j4SB9NhEOC_7KNWo
-Message-ID: <CAOQ4uxjmcNxsCmDSVgkTns=3BAuQcT3pVvsQzza+u3iqXqrz5g@mail.gmail.com>
-Subject: Re: [PATCH 16/53] ovl: drop dir lock for lookups in impure readdir
-To: NeilBrown <neil@brown.name>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Alexander Viro <viro@zeniv.linux.org.uk>, 
-	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, Jeff Layton <jlayton@kernel.org>, 
-	Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, Carlos Maiolino <cem@kernel.org>, 
-	Miklos Szeredi <miklos@szeredi.hu>, Jan Harkes <jaharkes@cs.cmu.edu>, Hugh Dickins <hughd@google.com>, 
-	Baolin Wang <baolin.wang@linux.alibaba.com>, David Howells <dhowells@redhat.com>, 
-	Marc Dionne <marc.dionne@auristor.com>, Steve French <sfrench@samba.org>, 
-	Namjae Jeon <linkinjeon@kernel.org>, Sungjong Seo <sj1557.seo@samsung.com>, 
-	Yuezhang Mo <yuezhang.mo@sony.com>, Andreas Hindborg <a.hindborg@kernel.org>, 
-	Breno Leitao <leitao@debian.org>, "Theodore Ts'o" <tytso@mit.edu>, 
-	Andreas Dilger <adilger.kernel@dilger.ca>, Steven Rostedt <rostedt@goodmis.org>, 
-	Masami Hiramatsu <mhiramat@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, 
-	Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, Tyler Hicks <code@tyhicks.com>, 
-	Andreas Gruenbacher <agruenba@redhat.com>, Richard Weinberger <richard@nod.at>, 
-	Anton Ivanov <anton.ivanov@cambridgegreys.com>, Johannes Berg <johannes@sipsolutions.net>, 
-	Jeremy Kerr <jk@ozlabs.org>, Ard Biesheuvel <ardb@kernel.org>, linux-fsdevel@vger.kernel.org, 
-	linux-nfs@vger.kernel.org, linux-xfs@vger.kernel.org, 
-	linux-unionfs@vger.kernel.org, coda@cs.cmu.edu, linux-mm@kvack.org, 
-	linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, 
-	linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-trace-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, 
-	ecryptfs@vger.kernel.org, gfs2@lists.linux.dev, linux-um@lists.infradead.org, 
-	linux-efi@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Disposition: inline
+In-Reply-To: <20251015092145.GB3419281@noisy.programming.kicks-ass.net>
 
-On Thu, Mar 12, 2026 at 10:49=E2=80=AFPM NeilBrown <neilb@ownmail.net> wrot=
-e:
+On Wed, Oct 15, 2025 at 11:21:45AM +0200, Peter Zijlstra wrote:
+>On Wed, Oct 15, 2025 at 08:26:50AM +0000, Chuck Wolber wrote:
+>> Optimization makes it nearly impossible to correlate GCov results back to
+>> actual lines of source. llvm-cov instruments at the AST level which enables
+>> precise mapping back to source code regardless of optimization level.
+>>
+>>
+>> A detailed rundown on this issue can be found here[1], with the most relevant
+>> excerpt reproduced here:
 >
-> From: NeilBrown <neil@brown.name>
->
-> When performing an "impure" readdir, ovl needs to perform a lookup on som=
-e
-> of the names that it found.
-> With proposed locking changes it will not be possible to perform this
-> lookup (in particular, not safe to wait for d_alloc_parallel()) while
-> holding a lock on the directory.
->
-> ovl doesn't really need the lock at this point.
+>Yes read and understand this, but that doesn't mean you have to have 3
+>different kernel interfaces for all of this, right?
 
-Not exactly. see below.
+To clarify, are you suggesting that we'll have something like a single
+/sys/kernel/debug/coverage interface that is producing the same structured
+output whether we use gcov or llvm?
 
-> It has already iterated
-> the directory and has cached a list of the contents.  It now needs to
-> gather extra information about some contents.  It can do this without
-> the lock.
->
-> After gathering that info it needs to retake the lock for API
-> correctness.  After doing this it must check IS_DEADDIR() again to
-> ensure readdir always returns -ENOENT on a removed directory.
->
-> Note that while ->iterate_shared is called with a shared lock, ovl uses
-> WRAP_DIR_ITER() so an exclusive lock is held and so we drop and retake
-> that exclusive lock.
->
-> As the directory is no longer locked in ovl_cache_update() we need
-> dget_parent() to get a reference to the parent.
->
-> Signed-off-by: NeilBrown <neil@brown.name>
-> ---
->  fs/overlayfs/readdir.c | 19 ++++++++++++-------
->  1 file changed, 12 insertions(+), 7 deletions(-)
->
-> diff --git a/fs/overlayfs/readdir.c b/fs/overlayfs/readdir.c
-> index 1dcc75b3a90f..d5123b37921c 100644
-> --- a/fs/overlayfs/readdir.c
-> +++ b/fs/overlayfs/readdir.c
-> @@ -568,13 +568,12 @@ static int ovl_cache_update(const struct path *path=
-, struct ovl_cache_entry *p,
->                         goto get;
->                 }
->                 if (p->len =3D=3D 2) {
-> -                       /* we shall not be moved */
-> -                       this =3D dget(dir->d_parent);
-> +                       this =3D dget_parent(dir);
->                         goto get;
->                 }
->         }
->         /* This checks also for xwhiteouts */
-> -       this =3D lookup_one(mnt_idmap(path->mnt), &QSTR_LEN(p->name, p->l=
-en), dir);
-> +       this =3D lookup_one_unlocked(mnt_idmap(path->mnt), &QSTR_LEN(p->n=
-ame, p->len), dir);
-
-ovl_cache_update() is also called from ovl_iterate_merged() where inode
-is locked.
-
->         if (IS_ERR_OR_NULL(this) || !this->d_inode) {
->                 /* Mark a stale entry */
->                 p->is_whiteout =3D true;
-> @@ -666,11 +665,12 @@ static int ovl_dir_read_impure(const struct path *p=
-ath,  struct list_head *list,
->         if (err)
->                 return err;
->
-> +       inode_unlock(path->dentry->d_inode);
->         list_for_each_entry_safe(p, n, list, l_node) {
->                 if (!name_is_dot_dotdot(p->name, p->len)) {
->                         err =3D ovl_cache_update(path, p, true);
->                         if (err)
-> -                               return err;
-> +                               break;
->                 }
->                 if (p->ino =3D=3D p->real_ino) {
->                         list_del(&p->l_node);
-> @@ -680,14 +680,19 @@ static int ovl_dir_read_impure(const struct path *p=
-ath,  struct list_head *list,
->                         struct rb_node *parent =3D NULL;
->
->                         if (WARN_ON(ovl_cache_entry_find_link(p->name, p-=
->len,
-> -                                                             &newp, &par=
-ent)))
-> -                               return -EIO;
-> +                                                             &newp, &par=
-ent))) {
-> +                               err =3D -EIO;
-> +                               break;
-> +                       }
->
->                         rb_link_node(&p->node, parent, newp);
->                         rb_insert_color(&p->node, root);
->                 }
->         }
-> -       return 0;
-> +       inode_lock(path->dentry->d_inode);
-> +       if (IS_DEADDIR(path->dentry->d_inode))
-> +               err =3D -ENOENT;
-> +       return err;
->  }
->
->  static struct ovl_dir_cache *ovl_cache_get_impure(const struct path *pat=
-h)
-> --
-
-You missed the fact that overlayfs uses the dir inode lock
-to protect the readdir inode cache, so your patch introduces
-a risk for storing a stale readdir cache when dir modify operations
-invalidate the readdir cache version while lock is dropped
-and also introduces memory leak when cache is stomped
-without freeing cache created by a competing thread.
-I think something like the untested patch below should fix this.
-
-I did not look into ovl_iterate_merged() to see if it has a simple
-fix and I am not 100% sure that this fix for impure dir is enough.
-
+-- 
 Thanks,
-Amir.
-
-diff --git a/fs/overlayfs/readdir.c b/fs/overlayfs/readdir.c
-index d5123b37921c8..9e90064b252ce 100644
---- a/fs/overlayfs/readdir.c
-+++ b/fs/overlayfs/readdir.c
-@@ -702,15 +702,13 @@ static struct ovl_dir_cache
-*ovl_cache_get_impure(const struct path *path)
-        struct inode *inode =3D d_inode(dentry);
-        struct ovl_fs *ofs =3D OVL_FS(dentry->d_sb);
-        struct ovl_dir_cache *cache;
-+       /* Snapshot version before ovl_dir_read_impure() drops i_rwsem */
-+       u64 version =3D ovl_inode_version_get(inode);
-
-        cache =3D ovl_dir_cache(inode);
--       if (cache && ovl_inode_version_get(inode) =3D=3D cache->version)
-+       if (cache && version =3D=3D cache->version)
-                return cache;
-
--       /* Impure cache is not refcounted, free it here */
--       ovl_dir_cache_free(inode);
--       ovl_set_dir_cache(inode, NULL);
--
-        cache =3D kzalloc_obj(struct ovl_dir_cache);
-        if (!cache)
-                return ERR_PTR(-ENOMEM);
-@@ -721,6 +719,14 @@ static struct ovl_dir_cache
-*ovl_cache_get_impure(const struct path *path)
-                kfree(cache);
-                return ERR_PTR(res);
-        }
-+
-+       /*
-+        * Impure cache is not refcounted, free it here.
-+        * Also frees cache stored by concurrent readdir during i_rwsem dro=
-p.
-+        */
-+       ovl_dir_cache_free(inode);
-+       ovl_set_dir_cache(inode, NULL);
-+
-        if (list_empty(&cache->entries)) {
-                /*
-                 * A good opportunity to get rid of an unneeded "impure" fl=
-ag.
-@@ -736,7 +742,7 @@ static struct ovl_dir_cache
-*ovl_cache_get_impure(const struct path *path)
-                return NULL;
-        }
-
--       cache->version =3D ovl_inode_version_get(inode);
-+       cache->version =3D version;
-        ovl_set_dir_cache(inode, cache);
-
-        return cache;
+Sasha
