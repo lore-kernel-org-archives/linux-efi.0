@@ -1,87 +1,112 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE0CB1B81D3;
-	Sun, 15 Mar 2026 22:47:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CA5F34B404;
+	Mon, 16 Mar 2026 06:53:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773614855; cv=none; b=EA44bX6LoxzV5Y8/wIniHFNOge4huiYNc/W+mtUSUHCPayBIjcmmrX55UUs1H5ckbK3/zazF20lVQ/GgQrHKwxsJgU0C8DcYpMDP4YhdJG/zZxfD49iH46EpA/lHQAxsdGh0j3zZGzF1/7NEPDsCIksUuqiD3YrmyOSFhgpGZSE=
+	t=1773644038; cv=none; b=pfwywpKvUMLg9kFI41JX5HKSgfHTEhrPkyfB1zXUKUmPv3CJE/y3m8KpPnWACN8xi9dUcbxFwiC1xG60aOWH4SCPVcZSucdVnRiUp4enBf0Dx/whzLnoAg758BYuQpVwlTrHLI+PEys9W/HUnVkumcADfQePyKv6NlET/1uFfDU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773614855; c=relaxed/simple;
-	bh=qCd0mzfTyx9kSm0CTmwDgmXX3my8KnJ1XBHs59mm93A=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=B9YtxR9R5pM1ak+XWoCUJ4xUS5pdaW+LvJ+2ehA/qLG/m1JnjEJ2MlAb15XDwiMa7lynm4Ia2tLWiWYcgvSoEZUZj1Tt66wPgDd0UhPxq9c9Cxs8xw/Rf3qh+WbiM6VZP07Juf29Od0Fbp6qgid+lpb/2XMdE8gCDNdt566NB/8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=UUBfNrz3; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
+	s=arc-20240116; t=1773644038; c=relaxed/simple;
+	bh=7+64g1YYk9bvms7oHN6eUuMTVwOc53O2+8MQK1i1plk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=J1QNFRfQow5skaYzaaIbBZ1pydL8USzFdslKS38kFLTU8rTkZxEA6qv4m5BC79cRPQuK9bT1a2I0vd66lKooKHP+BA2WRFhN9B3RYXk4Rek/JoqLalZws1NyXdg8TlIcU9ZsT6Abps0xtDi98HqYJtl/w5ZAFZIx+Z1c0JERMT4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OEaFIlC/; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="UUBfNrz3"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	Content-Type:In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:
-	Message-ID:Sender:Reply-To:Content-ID:Content-Description;
-	bh=HD9oZHYyldQTz8nJeqJW1FoNAd16YVBd9jooVkYzrPU=; b=UUBfNrz3wtT9+/tlKlWhgynlFW
-	ziwn1sqTMoOX6Z3LeQaERhi7CjU4poCk96YRDx4iF9tdttRyl9NukeAhdI5WxTU3HeLbhbtcslkwK
-	zE3FA8rzbIM+FtVfuXFAlzBVTqa/jk5kACFrGuUs02x8f/LdjXiPU6Esx45Npw4w94dLLL0dpaQxc
-	o3vlLpj+dclJibe7H7fOW6RC7ASepjuKTh9bHQxPEpv4KOawvrtNNqj4i1ZX3Q8PogTnV8R1eTTkJ
-	g+in0hjMPlSwNygH9vqTGiqZ4gMLCfMa9fkb1YXJBzty5RJP+ybKESBriaByiuJarjyQ6fUm619+Y
-	Llok3j6w==;
-Received: from [50.53.43.113] (helo=[192.168.254.34])
-	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1w1uF7-00000002yY0-4ABl;
-	Sun, 15 Mar 2026 22:47:30 +0000
-Message-ID: <f6447530-821d-49cc-b8e4-f7a21d1305f6@infradead.org>
-Date: Sun, 15 Mar 2026 15:47:29 -0700
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OEaFIlC/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CEA7AC19425;
+	Mon, 16 Mar 2026 06:53:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1773644038;
+	bh=7+64g1YYk9bvms7oHN6eUuMTVwOc53O2+8MQK1i1plk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=OEaFIlC/je7KlOjsYEWQrvooxKMn47n8ffF6euBdpI3Nd6R8zsCX+N3k8emWmKQnT
+	 8v/ZYtj3fIWtnLU/wEA+zNnkc2MxuEG2ZOmU8kflt8HmPUXgWdcJMAGwUG20QOw17R
+	 XjEp0n0yukXTttB6l8H1bw7J+8yAeP3DS+xhvGrOCQJT7rVfQsyabm6/w2I76mtnFJ
+	 EXMdQQM3pQ+iG/sxxIp13fyThysAYBT3qPA98s8rRIQDPyGc8ueYa305FPYn4jQoYD
+	 6qsSOrSXvi1Z8kfxWjvjWO1z5va9iwyq6AAl9bPyT0R1Q0spgXA/ylgyS2amJyQnXa
+	 N+85t0/r/A8zQ==
+Date: Mon, 16 Mar 2026 08:53:52 +0200
+From: Mike Rapoport <rppt@kernel.org>
+To: Ard Biesheuvel <ardb+git@google.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Subject: Re: [RFC PATCH 1/9] memblock: Permit existing reserved regions to be
+ marked RSRV_KERN
+Message-ID: <abepAJrN7bjeNLzr@kernel.org>
+References: <20260306155703.815272-12-ardb+git@google.com>
+ <20260306155703.815272-13-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/2] efi: Save Brightness using EFI on Macs
-To: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-Cc: Lukas Wunner <lukas@wunner.de>, Ard Biesheuvel <ardb@kernel.org>,
- Hans de Goede <hansg@kernel.org>,
- =?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
- open list <linux-kernel@vger.kernel.org>,
- "open list:EXTENSIBLE FIRMWARE INTERFACE (EFI)" <linux-efi@vger.kernel.org>,
- "open list:X86 PLATFORM DRIVERS" <platform-driver-x86@vger.kernel.org>
-References: <20260315222020.24341-1-atharvatiwarilinuxdev@gmail.com>
- <20260315222020.24341-2-atharvatiwarilinuxdev@gmail.com>
-Content-Language: en-US
-From: Randy Dunlap <rdunlap@infradead.org>
-In-Reply-To: <20260315222020.24341-2-atharvatiwarilinuxdev@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260306155703.815272-13-ardb+git@google.com>
 
+On Fri, Mar 06, 2026 at 04:57:05PM +0100, Ard Biesheuvel wrote:
+> From: Ard Biesheuvel <ardb@kernel.org>
+> 
+> Permit existing memblock reservations to be marked as RSRV_KERN. This
+> will be used by the EFI code on x86 to distinguish between reservations
+> of boot services data regions that have actual significance to the
+> kernel and regions that are reserved temporarily to work around buggy
+> firmware.
+> 
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 
+Acked-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
 
-On 3/15/26 3:19 PM, Atharva Tiwari wrote:
-> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-> index 29e0729299f5..dd0a9c9a772a 100644
-> --- a/drivers/firmware/efi/Kconfig
-> +++ b/drivers/firmware/efi/Kconfig
-> @@ -167,6 +167,16 @@ config APPLE_PROPERTIES
+> ---
+>  include/linux/memblock.h |  1 +
+>  mm/memblock.c            | 15 +++++++++++++++
+>  2 files changed, 16 insertions(+)
+> 
+> diff --git a/include/linux/memblock.h b/include/linux/memblock.h
+> index 6ec5e9ac0699..9eac4f268359 100644
+> --- a/include/linux/memblock.h
+> +++ b/include/linux/memblock.h
+> @@ -155,6 +155,7 @@ int memblock_mark_mirror(phys_addr_t base, phys_addr_t size);
+>  int memblock_mark_nomap(phys_addr_t base, phys_addr_t size);
+>  int memblock_clear_nomap(phys_addr_t base, phys_addr_t size);
+>  int memblock_reserved_mark_noinit(phys_addr_t base, phys_addr_t size);
+> +int memblock_reserved_mark_kern(phys_addr_t base, phys_addr_t size);
+>  int memblock_mark_kho_scratch(phys_addr_t base, phys_addr_t size);
+>  int memblock_clear_kho_scratch(phys_addr_t base, phys_addr_t size);
 >  
->  	  If unsure, say Y if you have a Mac.  Otherwise N.
+> diff --git a/mm/memblock.c b/mm/memblock.c
+> index b3ddfdec7a80..2505ce8b319c 100644
+> --- a/mm/memblock.c
+> +++ b/mm/memblock.c
+> @@ -1115,6 +1115,21 @@ int __init_memblock memblock_reserved_mark_noinit(phys_addr_t base, phys_addr_t
+>  				    MEMBLOCK_RSRV_NOINIT);
+>  }
 >  
-> +config APPLE_BRIGHTNESS
-> +	bool "Apple Backlight control for EFI"
-> +	depends on X86
-> +	help
-> +	  This will save the brightness level to EFI, so brightness
-> +	  level is preserved across reboots and shutdows. allowing
-
-	                                        shutdowns, allowing
-
-> +	  for improved support of Apple hardware.
+> +/**
+> + * memblock_reserved_mark_kern - Mark a reserved memory region with flag
+> + * MEMBLOCK_RSRV_KERN
+> + *
+> + * @base: the base phys addr of the region
+> + * @size: the size of the region
+> + *
+> + * Return: 0 on success, -errno on failure.
+> + */
+> +int __init_memblock memblock_reserved_mark_kern(phys_addr_t base, phys_addr_t size)
+> +{
+> +	return memblock_setclr_flag(&memblock.reserved, base, size, 1,
+> +				    MEMBLOCK_RSRV_KERN);
+> +}
 > +
-> +	  If unsure, say Y if you have a Mac, Otherwise N.
-
-	                                      otherwise N.
-
+>  /**
+>   * memblock_mark_kho_scratch - Mark a memory region as MEMBLOCK_KHO_SCRATCH.
+>   * @base: the base phys addr of the region
+> -- 
+> 2.53.0.473.g4a7958ca14-goog
+> 
 
 -- 
-~Randy
-
+Sincerely yours,
+Mike.
