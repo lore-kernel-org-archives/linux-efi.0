@@ -1,103 +1,121 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f49.google.com (mail-pj1-f49.google.com [209.85.216.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E0E738D6BC;
-	Mon, 16 Mar 2026 10:16:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5B643A1E70
+	for <linux-efi@vger.kernel.org>; Mon, 16 Mar 2026 15:34:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773656211; cv=none; b=r3CSrr2uQJ6MrwIQBFfHScEBXN1r6LqkIRAHHeclcHHtk/2qnZse/DiGDRyPW83Ysxzku2aU63NYEi7PEuFC9m+24uHr7ysF+kfXWqx6BFZ+08rLMNbOQiY6Pxtzf7zXDNmnjAyaUjFf+sjxvGgai9uEr5idNA45adQJXz8YTNA=
+	t=1773675257; cv=none; b=AgifGtUvOPUraFapN/leEW070BkaJfHw+BrBMkm6Ffn8AcK1oGJx0W66bTwcWD8F8kWWhM8dwI5kPGW0CnJylkw+wj5y84R4lH5ccL233jxDWukAaa6KE1JJEeTKvz5MqjP6C8D5TW5GfUZX5Yd7hw4LVRDR9d9JJb/LJDrnCmQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773656211; c=relaxed/simple;
-	bh=fLFv03guTdqoxn8S5olGvdGgfX5YsKowSFIRL2L2AMI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VJHn7lFVPMZA5cRG3u4BSNvL1UOnEZ8dEnQ14nvKOhxvc8lAqL6js4/0kZgJUgESUmaJeXMiVrW8/K4pAMEleIaOIq33mWZ+5rz59g2fLbOoT0vQjAawP+0SNNlE935LYhW9dqMi6PuMWM7p6uo/bWOl1Vv7oPfOtDyyoffKwO4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=iqpzDpd0; arc=none smtp.client-ip=192.198.163.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1773675257; c=relaxed/simple;
+	bh=y/ZLibchuQj7YlYLpkVr+2Z0sBYMwEjJK8GbheI4gus=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=rWoqoBBQKI4R30NlNJzrTVjHuPYY2ALkfNu8jnrVYEQXtjGVxgLIAMfOc2iTKwG274Qn4pJHpo6uFF1VZ9vyWf/NGaGNnq8In4I3vqRhdzcNr7pkoU9ENZPwnvTtGq8p2gQULs13tnsIqFXbiARlHAUAc+IKGpsWszk+yzlKQL8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NE1l/chP; arc=none smtp.client-ip=209.85.216.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="iqpzDpd0"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1773656211; x=1805192211;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=fLFv03guTdqoxn8S5olGvdGgfX5YsKowSFIRL2L2AMI=;
-  b=iqpzDpd0P7B16ktC8MJLy51q4F5U1lO8Y9egiKMR4jDu6YsOPcAL4gdL
-   p/QOC1ElRLmn+vgToQ4jzyiSlwlkOAeAgOohK/k3iejZL/10dysMLMg2a
-   ruABDMaroBNIcXXZFmeVt3neqGVbYMCHulPFmxLmae/Oy4vp0dYRRTCtl
-   9x5KN7NPewqTJjtNJznGXbkJhJ98LlfgH9299/8CNcn+q1SNb0JbKzD5f
-   HPR5cn+pPAMHMFZLNCf5qSPeTol2Pqt5EIR4AX5Cr5Y33GYx1Cu2zEVkj
-   CPHK1VoUPLbK2DoEeNo0ZbVxzWJhYEgUKosBNrMCqnaX5clncfj7s8x7H
-   g==;
-X-CSE-ConnectionGUID: FI49hGwaQze3+rwq9mPZFw==
-X-CSE-MsgGUID: zdLZyZx2RtmO9Ss/dWFccw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11730"; a="74584647"
-X-IronPort-AV: E=Sophos;i="6.23,123,1770624000"; 
-   d="scan'208";a="74584647"
-Received: from orviesa004.jf.intel.com ([10.64.159.144])
-  by fmvoesa111.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2026 03:16:46 -0700
-X-CSE-ConnectionGUID: Z7mT+CIJS/2m4XGlZID7Kg==
-X-CSE-MsgGUID: tN6qWwrPQ2av/M0yiJS7SQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,123,1770624000"; 
-   d="scan'208";a="226334765"
-Received: from igk-lkp-server01.igk.intel.com (HELO 9958d990ccf2) ([10.211.93.152])
-  by orviesa004.jf.intel.com with ESMTP; 16 Mar 2026 03:16:44 -0700
-Received: from kbuild by 9958d990ccf2 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1w2505-000000004Cf-21ua;
-	Mon, 16 Mar 2026 10:16:41 +0000
-Date: Mon, 16 Mar 2026 11:16:11 +0100
-From: kernel test robot <lkp@intel.com>
-To: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-Cc: oe-kbuild-all@lists.linux.dev,
-	Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>,
-	Ard Biesheuvel <ardb@kernel.org>, Hans de Goede <hansg@kernel.org>,
-	Ilpo =?iso-8859-1?Q?J=E4rvinen?= <ilpo.jarvinen@linux.intel.com>,
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NE1l/chP"
+Received: by mail-pj1-f49.google.com with SMTP id 98e67ed59e1d1-358e3cc5e7eso2496469a91.0
+        for <linux-efi@vger.kernel.org>; Mon, 16 Mar 2026 08:34:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1773675255; x=1774280055; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=31hFqWE+7CsGeugLW57EQWcnO71gJWH1yfQQssYWeNc=;
+        b=NE1l/chPmhzwOJQgiGj91utWJOlMAk5TcyxjNy8ZPysExemvpKgWgelSrAF/Gi14Mh
+         vn48JDCFPWGKM/rxTboQDQHOmQUvNbdxUOQtRK0Nn4uINcosJ1ifvl5DvhRQiR6UAtfv
+         upI/A8GAFthL+Cv/JuCDFUH6Kn6SbyiKdoK1wfLo84HpomMc7YXxtmTYc3IyE/+P6uth
+         bZO3rmNfBfls0YGsBPDTDKZscprb8P1tCu/1EQNSe6LZP6a+HNL//5fjhhTJvqfPm1wG
+         7WF6W9GT/vUzafNZO5FHo7AwDF+6KoQWLZaLUJ8S9duk4dUhGHrVB0vtimVxvpXOC5en
+         hbSg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1773675255; x=1774280055;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=31hFqWE+7CsGeugLW57EQWcnO71gJWH1yfQQssYWeNc=;
+        b=f8oM9pOHMv9gKZddiEnR7ThQtz8QNbF+lTfp3dcPuCxuOBXbo8a0vRqaGnbMZtxlHO
+         Yo5HMHOsW1gvYFoL8SvICJczjk4AmYeu4U4nYBSWb4Mho7s7njqpqvf5b3GhVZhqJr3t
+         WgGTzsCoHj7yhEeC+6YxRgu0Bd+zgifrsHg9WaNkTmSPi8n7BtUqnGJK7R7jaEdQDGM4
+         R3rAygXNhCxw8WOv6zj02HLqnmMNCiZgeM9Qe/EVEzCwSlX4OlL9JEYnAssIRYdhlJkm
+         7y8mAVCfBu4pn4GFbEGkLT9CdYJcCnWwQal1C4Z1ACx/a9iAhXZWiEEkyuMxz5Dxcv41
+         Qp2w==
+X-Forwarded-Encrypted: i=1; AJvYcCXjWUoeB7uqJGAR72PYajTVZH5rJ657Geg+LzmO+fw/yX8c95DOl4m+soNCd77bHD/nHKsSny7KcrQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyP7mpgs6tQ3DPavqAjB9mVBAOsUK/+fG3LCpMmzLSyIXL061uj
+	UBMOFjknbeH4NKxAvloXyn5lmhUeaJDusVWPBeZ0bd9qyu19voPQcLz2H29v
+X-Gm-Gg: ATEYQzzDzZRHYhma12+6YoK6c6svXDy13pSJfgFlnvQk0I48hq718tlOA+qUZ67fE9c
+	2jXtrzypNqWTqR4oiHrSINNiagCDTb++ZuCTczOksxpM1rVsNuSMkLV5h75CQSQzgxHDae3JU72
+	P0FV4KvVg5zsODXOsTEep3OnjdSAua/Ti1cI+IsEe3CIwmZSKijy5SpE7Wtv56U0LTrEbZuS/IM
+	EPx7KO3lu4bkyPIBG9ImtDkJaVQhFjpV8/mbyndaQAZ3VJTabIz96kdHjgFsMGRnY8AfGwIZJbT
+	AH4OB81Ykw85JMoM8PHGeAXGP7vpqNs+we/K5VrqoS6uDGC9vix4PbdSV8pPeKCt87Gzq4Z5D/i
+	Tf7eDn15ndgYfcf5N6kQ1p2z7sPASxZayLhrDCMEw+wYCCXB+BFzL9/SlE6sa+qhMoJWdoC0iSU
+	SkpiH0/YZ2FzYLGiRY8pQnCnufMzX88K13N/0JozgY2/saG3g7VvMTnIGF1Ue5geU=
+X-Received: by 2002:a17:90b:2ccb:b0:35b:947d:9fca with SMTP id 98e67ed59e1d1-35b947da15amr4932335a91.19.1773675255126;
+        Mon, 16 Mar 2026 08:34:15 -0700 (PDT)
+Received: from at-Standard-PC-Q35-ICH9-2009.. ([171.61.163.197])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-35badb906c6sm2685a91.9.2026.03.16.08.34.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Mar 2026 08:34:14 -0700 (PDT)
+From: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
+To: 
+Cc: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Hans de Goede <hansg@kernel.org>,
+	=?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
 	linux-kernel@vger.kernel.org,
-	"(open list:EXTENSIBLE FIRMWARE INTERFACE \\(EFI\\))" <linux-efi@vger.kernel.org>,
+	linux-efi@vger.kernel.org,
 	platform-driver-x86@vger.kernel.org
-Subject: Re: [PATCH v3 2/2] platform/apple-gmux: use apple_brightness to save
- brightness to EFI
-Message-ID: <202603161105.ILZkpASC-lkp@intel.com>
-References: <20260315222020.24341-3-atharvatiwarilinuxdev@gmail.com>
+Subject: [PATCH v4 0/2] Save Brightness on Macs
+Date: Mon, 16 Mar 2026 21:03:45 +0530
+Message-ID: <20260316153407.1781-1-atharvatiwarilinuxdev@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260315222020.24341-3-atharvatiwarilinuxdev@gmail.com>
+Content-Transfer-Encoding: 8bit
 
-Hi Atharva,
+Currently, when a Mac is rebooted, the display brightness does not reflect
+the level used during the previous boot. Instead, the brightness is
+reset to the value last stored by macOS, causing the system to
+ignore any changes made since that time.
 
-kernel test robot noticed the following build errors:
+We fix this by writing the brightness value to efivar 'backlight-level'
+at shutdown only, when it is changed since the last boot.
 
-[auto build test ERROR on efi/next]
-[also build test ERROR on linus/master v7.0-rc4 next-20260313]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Changes in v4:
+- Fixed build error, when apple-gmux is compiled without
+  apple-brightness.
+- Fix grammatical errors.
+Changes in v3:
+- Fixed a bug, in which apple_brightness_shutdown is still called on
+  non-supported devices.
+Changes in v2:
+- Saved the brightness only when it is different than the previous boot.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Atharva-Tiwari/efi-Save-Brightness-using-EFI-on-Macs/20260316-084441
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
-patch link:    https://lore.kernel.org/r/20260315222020.24341-3-atharvatiwarilinuxdev%40gmail.com
-patch subject: [PATCH v3 2/2] platform/apple-gmux: use apple_brightness to save brightness to EFI
-config: x86_64-rhel-9.4 (https://download.01.org/0day-ci/archive/20260316/202603161105.ILZkpASC-lkp@intel.com/config)
-compiler: gcc-14 (Debian 14.2.0-19) 14.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260316/202603161105.ILZkpASC-lkp@intel.com/reproduce)
+Link to v3:
+https://lore.kernel.org/all/20260315222020.24341-1-atharvatiwarilinuxdev@gmail.com/
+Link to v2:
+https://lore.kernel.org/all/20260315215302.24087-1-atharvatiwarilinuxdev@gmail.com/
+Link to v1:
+https://lore.kernel.org/all/20260206125641.12983-1-atharvatiwarilinuxdev@gmail.com/
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202603161105.ILZkpASC-lkp@intel.com/
 
-All errors (new ones prefixed by >>, old ones prefixed by <<):
+Atharva Tiwari (2):
+  efi: Save Brightness using EFI on Macs
+  platform/apple-gmux: use apple_brightness to save brightness to EFI
 
->> ERROR: modpost: "apple_brightness_shutdown" [drivers/platform/x86/apple-gmux.ko] undefined!
+ drivers/firmware/efi/Kconfig                  | 10 +++
+ drivers/firmware/efi/Makefile                 |  1 +
+ drivers/firmware/efi/apple-brightness.c       | 67 +++++++++++++++++++
+ drivers/platform/x86/apple-gmux.c             | 21 ++++++
+ .../linux/platform_data/apple-brightness.h    | 20 ++++++
+ 5 files changed, 119 insertions(+)
+ create mode 100644 drivers/firmware/efi/apple-brightness.c
+ create mode 100644 include/linux/platform_data/apple-brightness.h
 
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.43.0
+
