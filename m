@@ -1,175 +1,273 @@
-Received: from PNYPR01CU001.outbound.protection.outlook.com (mail-centralindiaazolkn19010005.outbound.protection.outlook.com [52.103.68.5])
+Received: from PNZPR01CU001.outbound.protection.outlook.com (mail-centralindiaazolkn19011031.outbound.protection.outlook.com [52.103.68.31])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2684A269B1C;
-	Tue, 17 Mar 2026 09:39:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.103.68.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABB683A0B29;
+	Tue, 17 Mar 2026 09:53:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.103.68.31
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773740350; cv=fail; b=eVx5fPhr+mMqKUM2eDmX2fDrQm53Rj7/jVISwDyV5uLd1Z6RTNN+Rok1kBWproGmVsbAmjpByWwrtilNkMjk39mmp+mIgggmx7YLh3nnaYxzT3BubE6Qe6JzNnewQ1FE/4pshUdEvsgXTyA2Cj//b0vHo0ynarSD9iDrnPJ1lMU=
+	t=1773741194; cv=fail; b=JX/1T+L+IVc2s7NNhO1b/wODggISGiVitccrzjGpbbLFlmRNRXE6JWZjbFOOphAdrCxgZn0TPRd4s9NKeIMVeBo11ThrKgGSA08ulAMXP+8okZzvd+L9Tf79+JcHZKSjdPxSvTNf1kD00S1TbEtA45k/+Nwcv3VOifZwAAdLt0M=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773740350; c=relaxed/simple;
-	bh=L64u+5EsJjCC1SvaIKANFn3+kBgZlffxLL/1HAdWKr8=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=AIfhQedSw1rvxQj/goVosfij1qUj31Dz9t94Uxkh5U0vKKGI9+Nm5LV5KT/iMidMO52SqQW2hlA0Xle2JQnYxaVRVD6vh1myGSOePeQXp1dKSD0klFWTuLxnUC0iKUANpYndzuUJL3g8w/laizYlHXRMpIpwxcP/MnCEZCvCK4Y=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=live.com; spf=pass smtp.mailfrom=live.com; dkim=pass (2048-bit key) header.d=live.com header.i=@live.com header.b=u4nxvSI3; arc=fail smtp.client-ip=52.103.68.5
+	s=arc-20240116; t=1773741194; c=relaxed/simple;
+	bh=Of/OEl5WRQoagPst4mU792hDdqKgqpRIh7Wb9F6yjpg=;
+	h=Message-ID:Date:Subject:From:To:Cc:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=Y7+b1S89djn1B8fFP/dCEFBGOVmqFKlNsZ35rEZpGdE1We3sTMZfztRkgVyHefptuVbTF8NHAAjBq1nF5/+lGZczZBlGiJJoHDub34ZrcFNuEswiE3KM3SH4HL6INjsN3iMZ4/QBFKxmrBCdfJUXHg87sl7lVhS/wbp3US6ma8Q=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=live.com; spf=pass smtp.mailfrom=live.com; dkim=pass (2048-bit key) header.d=live.com header.i=@live.com header.b=g1j8l6eZ; arc=fail smtp.client-ip=52.103.68.31
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=live.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=live.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=live.com header.i=@live.com header.b="u4nxvSI3"
+	dkim=pass (2048-bit key) header.d=live.com header.i=@live.com header.b="g1j8l6eZ"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=CMoagOk204SvbmLspURbiRBRnqjV5npIW+pVpR8GQPou6laxOE4SFHvauDCf+xYgAtEte1kt7r4rFMjhKZeOJdD1JyovTMOxG93TIENzxUqnJ/ixPFYcU8l3BxaB5UZQU+A9HRyD8lw2GdFWakcT04Zlpsfzm5qkw/Qb4rD/Yuh5ohe5F9+qA2hOSzSBXYufqPMqivrf6EimZImYNFCyBkZKC6Z+uhZaYTsOWTZ8RXBHPDxMa1j3K/Z6aohkOvhktL1Dj4TaY6scJPjeuqwzOJR1q5tmPYsVVL+TAZ6TI5lZneuXkNbyRMaG1PSh2uAhLPFS+9Y5DulZZ32OAB66Ww==
+ b=yuPMJT4+Uos2OP7msX8tVZzVqotfYemK47D/vA3OGW9yaNF0WPrkndPuc7kAaReisdascCNhQQlLXLj4M79tjiLJmIXqJFwOyzV3Z41U8TfLVVvtrZF85AHwBkC0yAvVOAXMAABSdi74VEX1/j5qwnJF/fFYK3+SQ4Ma+sPfsgYxAQVvwL8wSBlNFbGX/VkR5EQzDLK4nM2bhnc2DyQpA8oX92XpiI443oVpBMgeL+u0SF45aXruKFxK9fiZokfmzrQavdWoeZ6jh5Z/EceYxwc1T7MiQ/FS+EaAUfkz4q5FnahCfbN3IQpwf2yAOjwb5uNv1nW4LaiAd0j5aj0fNQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=L64u+5EsJjCC1SvaIKANFn3+kBgZlffxLL/1HAdWKr8=;
- b=X32lZog6k5q2Du/FI2O6Fh1I1H1P1Pb6r8lgdgg0f3NxRhH/jL28yOPDj4WIe/HO25VcdV/yW7tBMFOAMMW5sDuliLPSxMaYj26zJJ4Tx83T6xLQALmfeE7h/mvODXT13Ayo4IkW0uC89ZnX+fOGUow0ffCf7UHvLYUCycSVEBvmgPS00S0/0jm2yvmFyju3BOrqswedAhB+/KGwxjLHm6wzN2hx12KVOAqCqZZJjhBB1RKlDhp2WbYluxm5qx2v2iNsLDqvVmCwB1raFZPCHq16aIFB65PRk0vsKpyldEbNTRuBVPhtsANlKdsGCx19PWYJByVs1dMnev9J9aOM+Q==
+ bh=aFC9oLZBe/VERjik0ipWrkgUMjgkO4DzwhAk+9BvaFY=;
+ b=gv8IPDGTgoz3C1rQ8cJBGKIlIBZLg78zvWPdLA0Ilv5xBnGEVKhfgRqEtyzMGC9O5fmYjSyd/dBHonlQJmoDJMy4WC8VAbemK48KUNmRgMQgT5YrmxbTEEU0DMVrKsTqaHlQathcRcjxhR1my4q6s5xKI3f7pMlPpnYk1+/nNXUf7lCxt3/5EvIxuEalQ7rAxXjiK8eiMWXpl8OQKPH3z0sx4F1tPRHoujH5zX8zIjLrSF0DgU5WGBpqZfUSHh82AriDEqnimB/AiZHWZQC+fEmkkszMwSMeINVlJE/nFi0oAK4qp+ewZxaQVoPVITOudyjRMM19R5hMHvaKF9X6gQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
  dkim=none; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=live.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=L64u+5EsJjCC1SvaIKANFn3+kBgZlffxLL/1HAdWKr8=;
- b=u4nxvSI3KEfFOH3h9F8KcLppkz992kHMQ+CzSAnh+HVnC75qN3xxCNtFc+R7uxTyX8lMFbT3ahaOdmDDse/MO+TeqgUNqueDT/uGmZeF+J+17D9q8D4QAwAxO7Zk/wE6vcoAbCXMqe3aTgsDZES/W2Zy6NyNwEegqBSIYHfutS1buxNbpx9Cxgcen0FD8vl21PBJsL1Ui/0+/ZPlSCUpp9rdhYmTZYf7zvxR7d2h9T8AogSu5sIXVXyh9Na9SSgcKSNYr4CP2BJ1JRtExOKh0yKrhQOg1XGSzAE3abvM8rEwjCEFamG9sDIlZlHJfw6WvLSuC7JZEZG47atnQj+Yfw==
+ bh=aFC9oLZBe/VERjik0ipWrkgUMjgkO4DzwhAk+9BvaFY=;
+ b=g1j8l6eZzfW7V5XXCtodtDNzULfwC2LLA9vimxo7bSs9rIjgPPiu7YPvKUqIqEkaUVcPsOZ60EvPMsjAaZjvl/3NsZhEK0S5BHdgY0x2ZGTeUYgztZM/iIzwA9k///7lGw3Y9B3vNdKZrMplLFp5iDIc4EXmBPPbxFUjLbHMixXHfGndbvPBK0+29oqr+PAUK6AJBY+nCR1k62B0ApemlxHlvWFUTWgiefkVUpYTX1hv5ki6xopejBzmWKxiwiwMOAPFZCfUC0+A978vBmq/CDaWiIbJeHQ4KvR+GCJd+Ep0UiSVie9on5YeRletAg4nUrcLzexJMWS1GM5ebSNKBw==
 Received: from MAUPR01MB11546.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:a01:19c::18) by MAZPR01MB6438.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:a01:71::8) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9700.27; Tue, 17 Mar
- 2026 09:39:03 +0000
+ (2603:1096:a01:19c::18) by PN4PR01MB10999.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:c01:2f3::16) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9700.25; Tue, 17 Mar
+ 2026 09:53:03 +0000
 Received: from MAUPR01MB11546.INDPRD01.PROD.OUTLOOK.COM
  ([fe80::1fed:9b0b:69b:9295]) by MAUPR01MB11546.INDPRD01.PROD.OUTLOOK.COM
  ([fe80::1fed:9b0b:69b:9295%6]) with mapi id 15.20.9700.024; Tue, 17 Mar 2026
- 09:39:02 +0000
+ 09:53:02 +0000
+Message-ID:
+ <MAUPR01MB11546F8AAA79A199DC1523C0EB841A@MAUPR01MB11546.INDPRD01.PROD.OUTLOOK.COM>
+Date: Tue, 17 Mar 2026 15:22:58 +0530
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 1/2] efi: Save Brightness using EFI on Macs
 From: Aditya Garg <gargaditya08@live.com>
 To: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-CC: Lukas Wunner <lukas@wunner.de>, Ard Biesheuvel <ardb@kernel.org>, Hans de
- Goede <hansg@kernel.org>, =?utf-8?B?SWxwbyBKw6RydmluZW4=?=
-	<ilpo.jarvinen@linux.intel.com>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org"
-	<linux-efi@vger.kernel.org>, "platform-driver-x86@vger.kernel.org"
-	<platform-driver-x86@vger.kernel.org>
-Subject: Re: [PATCH v4 1/2] efi: Save Brightness using EFI on Macs
-Thread-Topic: [PATCH v4 1/2] efi: Save Brightness using EFI on Macs
-Thread-Index: AQHctfHjCufMSGihhEyd3va7QX/g7w==
-Date: Tue, 17 Mar 2026 09:39:02 +0000
-Message-ID: <9FF2FDB9-17D4-4B01-A872-F26BFF74C5CC@live.com>
+Cc: Lukas Wunner <lukas@wunner.de>, Ard Biesheuvel <ardb@kernel.org>,
+ Hans de Goede <hansg@kernel.org>,
+ =?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
+ linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+ platform-driver-x86@vger.kernel.org
 References: <20260316153407.1781-1-atharvatiwarilinuxdev@gmail.com>
  <20260316153407.1781-2-atharvatiwarilinuxdev@gmail.com>
-In-Reply-To: <20260316153407.1781-2-atharvatiwarilinuxdev@gmail.com>
-Accept-Language: en-IN, en-US
+ <9FF2FDB9-17D4-4B01-A872-F26BFF74C5CC@live.com>
 Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-exchange-messagesentrepresentingtype: 1
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MAUPR01MB11546:EE_|MAZPR01MB6438:EE_
-x-ms-office365-filtering-correlation-id: 6859efff-5699-4a5f-dac8-08de8409064a
-x-microsoft-antispam:
- BCL:0;ARA:14566002|25031999004|461199028|15080799012|31061999003|8022599003|19110799012|8060799015|8062599012|440099028|3412199025|102099032|11031999003;
-x-microsoft-antispam-message-info:
- /yGhKVWAbN3El/PRngcYvL+w/BFupihqW9JS+++kb9Dw59k5k1Uel3LzwA+aH66zUQuK23WS8RaSbPLKKFNSnf7zjYn9x1XdTWScBUM3aZaQ7k4umXXQmmfVP+u2eRXaKxt/dzX58tJIBveY1gWmj4vYsQ1UgP6wNYvhZJ0e3lg15zsivuBu8JeAJmZ/4K7C6c14uQ6K76UNpOzSaK1HCpEYh4auxUdbi5XIjte1rbFx8rrQSmTjfj+X3QX7FJ/r42Y7l8jHGZtlVbS2pJdv0gPN6hLShVpj7v5ExoI2lRQbKrPnCP10NSNCs710HAYygVTdXzxibBelTyivMb+b5J6q8irIO9nVFW88bHcuFl5a1czmCiomQuB2dTkwp7CyEn/k1Xl3sul+IpJGdvCJH0cVMELmIqep2Tt77NZ04EvXinicWYF0xY1EOALeJETZJ880EcU03e7E+4Dv7zLwq5OQJNSe18e9YIHXR20SGiyCxyQEIfd1YRgPnQnKP0RoplgHmviXf+7XaAWuEOHHFAiQuJxT5b+3KRROcCXE9JvI6b97juh/27EPQay2pcQ+sVf4L8U1glrVxmDXTb76ny4ca618E9DAwpvSYxOqSnGnLDvP6h8WAvXVxYKMIoLBhC/VAIR9/nomGjXm0TER1zseTAHCtoA9O7c3Bfmz78aV1DoQM4qwuexD40dNIqsrBjDGX241N6zKj/M4HpI737mbcRkPfawKa2poB43tbQp46eFzXicpbzhGwJmhRTd243nfol0MT4YUw9dSSYsp6bzJWNlc6WrAdyCjBPdfV/ezP4tj1CMBP7GMU+XvYdzTA2auMANFcfDiEpkJZ6yEw/BoxLK+mo9c7jqCMGBs2SO65nUZ9Pdpajs2vu4sZjVGFd3NpUiOzwvMhkrqZ31GgzWJg7Y0jPhcgXEkymwxA8Ol6vglAeDzPj+D1KqdAzRc
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?Rk5jT2NETUloYWUxdmJhbXVtbW8wZ1YxWVdBRDBRd0ZBU0JpTWtKcWVDLzhw?=
- =?utf-8?B?bTZIVGdyQ21VMFM3dmZNQktRekxCY294NWR3RDc2dnllSHJzOE9xTEE4VWVa?=
- =?utf-8?B?WldmdFFDb0FFTW9xWEJWUDVDZ09JeVRWZCtKMEpJNldVMHFIRXdDa25JeFdR?=
- =?utf-8?B?OVpnQ1Z3MWcxZEtxcHJpLzc2QWdNY3lQVk1QcmdBSnNicFFNUHNVUmNSZkky?=
- =?utf-8?B?bE5sZDBGSjFJSW5KWURuTjJRTHkvUzI5TVVRdk14STVtTDF2ZVFhMk9lMkJJ?=
- =?utf-8?B?Zkl5MTRUMEthZk04NGYyakllYXdDazRTeVhXTkpheHpkSzExSFpaRG9JNlFM?=
- =?utf-8?B?c0NXUGVhcHdsenBwTEdQK2dJZWdLWXMyZSsyTGtwTlk5UU5qdnlaZEF6aUJn?=
- =?utf-8?B?eW5iZ3B5QXlxT0lWbjRjakM5QTJ6TTIzS2ZyRUczbW9zYTY0WWN4TGc5N0x6?=
- =?utf-8?B?V0NxbjNSWXVXUndXbTJtQ3luSEhjNU1hWVNOUmZkb0J2Tjg0K2ZwVm9XbFI2?=
- =?utf-8?B?QXFPSUlXWXhmNXRzc1RFd2tYRm5sQVlIcS91VTQ5RUphUi9yWElZYWladmRZ?=
- =?utf-8?B?TjYyRHJjZXlBeWJmUWZDLzcrMm95MW8veTVETitCaUNrbm1MV1lEQUs2b08w?=
- =?utf-8?B?c3FsMWZlWkUrbjQ0Q05ycWh3Q0NVeEUrOS9MRUMyNUFkcnA0K2RCY21Xbkhl?=
- =?utf-8?B?NFVxaGhNYjNSY3dYbHlyU0dKYS8xa042cEVUeGdCSHlHMm9SWXJoVEgveC9I?=
- =?utf-8?B?NGxSZk9GbEJrZjE3M1dhUTlxN1RyNXg3ZGVYeTRhSWlOYzRnQjJEQ2JLZVBF?=
- =?utf-8?B?VUg1bEVsdVhOK29Ra01BMDE2OWVRQXliN3BpOVR1ekJkaElkMlNsOXBRVHpF?=
- =?utf-8?B?RzgvQTQwQkV6TUJKUW9YemNlSFpzRWRPTHBXM0NGR2JITHRFQS84dzJrWEpW?=
- =?utf-8?B?ZTM3cnY5Uytxd3BpK2lpVkY0b0dzcDVGUld1THhuZWpQU3dwWjJqY2plQUZU?=
- =?utf-8?B?NjlMaG5CZ0VKSUJZcW9IdHVVWmhvZjVxenI2SzBIM1E1eC9VZCt2VHZhUGVC?=
- =?utf-8?B?MW5TLzBGcWtaRVBGbTFFYllDQWtwaDJYUkhoSlNZV0YvSU8rUWlmbU9xU21O?=
- =?utf-8?B?TmpvRXNLVm5YeStkeUN0TTQ2K2tMY0ZoT0tLQTRwazNnNllJc1VxMmtXQk0r?=
- =?utf-8?B?QmN4RkpjbWxEVi9tc3MwU3hSWHZQQ0RQNC9mcmV4SzlOK2lZaEIzeVFvZEZ0?=
- =?utf-8?B?MktXZHI5czVtSmFyZTNDanlCMFUybjhNa0U3cTdHVG5hdHhnSFZXZGxqbjc5?=
- =?utf-8?B?aVdRTVZwL0t6cGwrcU84eDhLcGhUNXBvdnd3UXgxV1RWai9IQmFLd096V2hJ?=
- =?utf-8?B?MFJlUFZMSmxCK1F0Y3lmSWtBQjBEMXRnbDZSNXFFd0FWY3AyVEp4aGNPUXBN?=
- =?utf-8?B?dFhEb2k3UTZCZmpzWnp5d3Zsb2tpYmhDRVRoZ0NQTUNUb2dXZ3NQNHVvc2hp?=
- =?utf-8?B?M2hlcEZmMHhXSTE2YTI0MEF2Q3NnMHIvU1VOUld1YlRuT3RaK3MyVzJpNlJk?=
- =?utf-8?B?akw4bjRuVmhsZHFYN3ZPYXpVY3QvamdHNllvc005TFZCYzMzYXQ3RVUzNDRB?=
- =?utf-8?B?VmpzT1BON1NLdnVxcjBacFh5NU5QV1hudXlUREEwR2NHZVFVQlN0Y0dyaWt4?=
- =?utf-8?B?U3RDZjNKT0pGemZoZnlRRzl3TXFJNVY1ZDRzVXlqK2JnSTR5OVNPOVdzcmZV?=
- =?utf-8?B?YTc4VGNOWllVWWFwOEc5Ry9SWmpkK3R5OVJOQTRPbHVxSmF5N0hOOGVJYXRk?=
- =?utf-8?B?YWVlMVcyM1NsbEdkUUhGcDcvaUl3R1FNWjRjYklOd29JeFFpNFZ1M1dxcUI4?=
- =?utf-8?B?ZkxjMER2RnNNZmF3NnQvS0R0Y3o0WGc0MldQWEVHT2lBY3VMSi81T0ppdzJP?=
- =?utf-8?Q?1MP+eVFlPpo=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <9A4D2D3A51E6964D80537510EFFABD1F@INDPRD01.PROD.OUTLOOK.COM>
-Content-Transfer-Encoding: base64
+In-Reply-To: <9FF2FDB9-17D4-4B01-A872-F26BFF74C5CC@live.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: BMXPR01CA0073.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:b00:54::13) To MAUPR01MB11546.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:a01:19c::18)
+X-Microsoft-Original-Message-ID:
+ <f04ce7e3-8cb0-444f-a05a-91622106219a@live.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+X-MS-Exchange-MessageSentRepresentingType: 1
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: MAUPR01MB11546:EE_|PN4PR01MB10999:EE_
+X-MS-Office365-Filtering-Correlation-Id: 10ea6b8f-7a60-4e27-1360-08de840afae2
+X-Microsoft-Antispam:
+	BCL:0;ARA:14566002|19110799012|15080799012|8060799015|23021999003|5072599009|461199028|51005399006|25031999004|6090799003|10035399007|440099028|3412199025|11031999003|40105399003;
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?dTdPMEltbmt6RkFOc2VpL1JSNzR4WDA2SmMwRDFiOFpDaDUxNXUyVzZLU3RS?=
+ =?utf-8?B?eVZKeGU1eHlOR3BYNWFsK1lDQVBBcldiYTFsN3ppWHdGVnNYMUxsZUtEYXY2?=
+ =?utf-8?B?RVhQbEt5aHU4ZzlhSFNhR3ZHaW4yWlZoTVRSRkFBR1N5NDh2NXF4RjVURUxS?=
+ =?utf-8?B?aDhzVTVJMHlzdThRRmpjT0dxVE04ajg5NDU1NkZMbFJjMHhubVdvN0txT1Nm?=
+ =?utf-8?B?NEMrMkZBeE83N3VrRGl0OHVlZjEyUGppRHhNRVRKd3VSS083UEN3VVpBNGxy?=
+ =?utf-8?B?emczODFCbDlQYjc0R04xdDhHRDhveGJaa204R3RoT2wxY3ZvMWpIdEIrZzJB?=
+ =?utf-8?B?clFrRzRrUzBuVFRjZUEvTGJoY09WeVdlMEVqMjVleEtQUUJZYSttOXE2TTEw?=
+ =?utf-8?B?SDlxTStGNFdjL1NhcnJjVGJLL25WVzk3bVlwSDIzQi9kRDZpWUsxdmJxN25E?=
+ =?utf-8?B?NXlKaHFyVndEZ1RLU2FkNStBdTJITlVSR0VoMlVQaEduVjVmNWxlb3hURERs?=
+ =?utf-8?B?cXpHYmtlUmdxS2hLb0hXaTdrMjA5ZDl0Unlwcm9xd2xvSHNjdUFhOEQ5STlm?=
+ =?utf-8?B?eHRCZ0FJVVp4VUwvVHZUbjBxaCsrVERQd2hoUlBGeTd1WjM4NmlXTDhON3FJ?=
+ =?utf-8?B?WWx3dGZLaTZGOTJTd0tYak0zTGJiVnVIc2JKNkFSZ1FJek55TlFWTy9aL0s4?=
+ =?utf-8?B?SnVzSHdYK1BFdi9mQWRYZGVJN3pPeHJlb3hRUlVnU1VveU02dExrR3BHdE1N?=
+ =?utf-8?B?TGs4Vml3VkVKNjZobVIxd3FCajNSMG5QTTBhQU90VThrNGdVT29IdDZIZGxN?=
+ =?utf-8?B?QmN3ZGIxamEyQnVuZmI1MEdOaEJYaXErZWg2N2V5Sk5mc2NmQlUySXBMemhF?=
+ =?utf-8?B?R1BWdXY4L3dkRER3MTNGSW8vZjZkenhidEdBUEhZSFY3RlM2a2V4VXptSGRD?=
+ =?utf-8?B?eDJaUnZCbjdzc3l5OHlIN1NyYXFpSkJGZVN5V1Q1YVk1dlRGRXFoRG9IcTEv?=
+ =?utf-8?B?Y2xvWFdiRGRxd3FXdjgrQ3dvMG9TNXZPWVdPdDBCMjFYMkROalk0ekE3TVhS?=
+ =?utf-8?B?YkZUL3o5cW13Uk9qVU9zY1VKYXBpM2orcFBIc3lLdGdyRVhKWk5hTXpKZ3No?=
+ =?utf-8?B?NVdKSTR5aFgzU1VhdE9nc0d6ZDd4bHRPYTViSUs3THBYRktWb3NHdzdOQVlW?=
+ =?utf-8?B?ZzZZSnYyM201UUZXVi95S1NIUmJaOWpsOU5zNk5DWlZIL2w5SDEzYTBnZVRa?=
+ =?utf-8?B?VyszNU1wYk4rUjJ5QjBjMlJyaFJLeko2Q3B0NEt1STNtYXlScmZKb2piMGZK?=
+ =?utf-8?B?eHlRbDFJbW5rblNFcFh1N3RUOTZxczRvTjArb0VWeGxBVXdWcnR0Y0d4ZFd3?=
+ =?utf-8?B?TlMwblF1WElhNXc9PQ==?=
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?WDh4YnMrKzNqczBmeE5KK0xhUU1vWGN5dVNuVFErVVVGRzI3WXdhQ0p1OVJ5?=
+ =?utf-8?B?emF2K3QwZTc5OHFBOWt6aVhpTjcrNUtQVU1nay9LR3dBa0xsbU9QdnRRVVYv?=
+ =?utf-8?B?ZmV1bWJUT1MvdVZWemQ0R2ZpbHFVR240WTF5WGxYdURaTDZOdVFkUUhQQ0Vr?=
+ =?utf-8?B?R2NXN2o1N1JvdUp6WFl6MjJ6YjdydmNVZDdmYXNLVDNDcHVRdXgzeHNZeXZ6?=
+ =?utf-8?B?NHdsN1gwbTlyd3J1N1ZDTU1lK0NObnRoaWYrd3A2aW9vT1pZNU5yNEFVbnEy?=
+ =?utf-8?B?OVZyakNsTEwrS2hVeTFhbDRKNHZyT2FPRTZCenRrcmJ4NGlnOWhwdlkrTTRv?=
+ =?utf-8?B?ODZnWjJCNG1vdGtDNTZpMVZRdlJtMVRoTWU2RGVjaGtHczBpM2I1aENBOHpR?=
+ =?utf-8?B?RnJMcW8rQnU5VzMrZzdNOE1OakU3My82RkRibUM4a0JURGQwOERxL0drSHN6?=
+ =?utf-8?B?T1JndXIxSmtKekoxZFV3bURtNndHaE9RaWRQbnU1Zit6d3R4czlrcUg2bElN?=
+ =?utf-8?B?YXRlV01iWEVjYzFnK2orVU5lQVN0MTJmSUN1WGpOTlVDMHNuRFg5TFFvYVl0?=
+ =?utf-8?B?Yms2bUdVZXFGTStCNCsyWHFUeldtcEhXa1Z0b2E2SmNLZis4ZkpUcEhJUHBL?=
+ =?utf-8?B?Z01XbS8rWitkZEJxYVRTUGNZbmk3WTBMeWt6eHZHcGgzWk9MVlN5ZW9ET0hU?=
+ =?utf-8?B?ZnRvWmR6Ym41Ukd6dVJkbXRISDJEc3lOMHpTN1FsV0NBY0JRSzdvekg2RzN3?=
+ =?utf-8?B?VmtZOVREOVJ1NmFjOHlIVFBmckJnN21FcU9Bb1JKZmRJamhwVlNFVnYwdGdF?=
+ =?utf-8?B?SUs3dnBkNWcreU40cHVmY3JlbGE4OVEwUEFScXphSzRsOFhCekVETHdFN1Q0?=
+ =?utf-8?B?U0h3V29SSlp6VE4vc1RpL1BFM3FVa2RORWFTdWZnUWI0Y05iMFB6b3ZzcTJu?=
+ =?utf-8?B?TGMzSzd1R2pBdGR5c1NvSk1CZEo5eDNWbTJRUVBXZ1hyTlZvUVlIZ0tLKzV1?=
+ =?utf-8?B?bXRNNHptbzdqNmlzUC8rRk1tSEs0ZG00VCtiMnlXWEdKa283cEhLUDV6U3Ev?=
+ =?utf-8?B?cDJVMSs2cVBCZ3M2U05MWTEvdXJDVzMzak5jRXMyS3NhNFRVSElROGFOeVRZ?=
+ =?utf-8?B?b2pnMmVrZWRTOVFDYzEvaFBCV09PSXlMM2hhc1duMVU5bVdrR2hlb3VNYjJW?=
+ =?utf-8?B?V1VDbDRnZGVQdzhvR2EyWjRwU3FmNVFtck1zVDB4S3RkUDVyY1dTWlh5TjNr?=
+ =?utf-8?B?ZnpUV1IrU3B0RkRIQ3dOVjFZeU50cXg0SG5DY3lrZE5wRnZNcEcxaTh5Vkly?=
+ =?utf-8?B?eHJGbCs4UDFLNlBSZWsxaWZBZUpFNFdlcFkweVl6ejV5NWIzRGtvQ1FmZ21R?=
+ =?utf-8?B?UEU3MXpNdDhDMDkxcThKdFdFOVJSTVRrdnJaSVNtZ3k5WC9Lc21IL0l6MVRZ?=
+ =?utf-8?B?UXpiNEZmdXZ0RmVDdllEWDRZSlRDTUVzL1oyR040VEZ2dUdoR2ozSWZFV25M?=
+ =?utf-8?B?WjM4Q2JhZ2VXWENTVTJ6aU5oSXBlTzJ6RU14V3RtekZ3Z0xzNWZUdVRMbTlC?=
+ =?utf-8?B?cXQrSDNUSnJoM3R2RUdrcUtKeGZWRHdtbTZNQUhJTXBwTTZRRTlZVDRORmJD?=
+ =?utf-8?B?V0p0K3R5Y2FOVVBtMlg0ZE9SVFFMWXFMM2ltOG9UTnVDMVJkZEZIc284Y0d3?=
+ =?utf-8?B?ZkZMcGxGV3VzTDZWbzRtTWlKMlpybWx3eXdKU1R2bjJ3RktCRjlKejBpZWJM?=
+ =?utf-8?B?VmxDNTRzNGoxVEVjK2NZa1k5QTdISjdJYWd1S3QwR0NISGF3cGhybXRPSkxo?=
+ =?utf-8?B?cnQ2aUFyZmhnOGJXSGRyWk1NQ2pnWGl6TlZrbWRXVmZ5Y2I4MjNPZ29wZUs3?=
+ =?utf-8?B?cnhMMDVld00vbWc4NzZ1a0FENVlONzhkVDJHRGdHZlpXWE9uL0gyL3p3S3d6?=
+ =?utf-8?Q?hvA31RZ9n1BCcCVFSmzE4QQA95/3nMEy?=
 X-OriginatorOrg: sct-15-20-9412-4-msonline-outlook-63b91.templateTenant
-X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-Network-Message-Id: 10ea6b8f-7a60-4e27-1360-08de840afae2
 X-MS-Exchange-CrossTenant-AuthSource: MAUPR01MB11546.INDPRD01.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg: 00000000-0000-0000-0000-000000000000
-X-MS-Exchange-CrossTenant-Network-Message-Id: 6859efff-5699-4a5f-dac8-08de8409064a
-X-MS-Exchange-CrossTenant-originalarrivaltime: 17 Mar 2026 09:39:02.8230
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 17 Mar 2026 09:53:02.8957
  (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
-X-MS-Exchange-CrossTenant-rms-persistedconsumerorg: 00000000-0000-0000-0000-000000000000
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MAZPR01MB6438
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
+X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
+	00000000-0000-0000-0000-000000000000
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PN4PR01MB10999
 
-DQoNCj4gT24gMTYgTWFyIDIwMjYsIGF0IDk6MDPigK9QTSwgQXRoYXJ2YSBUaXdhcmkgPGF0aGFy
-dmF0aXdhcmlsaW51eGRldkBnbWFpbC5jb20+IHdyb3RlOg0KPiANCj4gQ3VycmVudGx5IHdoZW4g
-YSBNYWMgcmVib290cywgdGhlIGJyaWdodG5lc3MgaXMgbm90IHRoZSBzYW1lDQo+IGFzIHRoZSBw
-cmV2aW91cyBib290IGluc3RlYWQgaXRzIHRoZSBzYW1lIGFzIHRoZSBsYXN0IHRpbWUgdGhlDQo+
-IE1hYyBib290ZWQgbWFjT1MuDQo+IA0KPiBXZSBjYW4gZml4IHRoaXMgaXNzdWUgYnkgc2F2aW5n
-IHRoZSBicmlnaHRuZXNzIGxldmVsIHRvIHRoZSBlZml2YXINCj4gYmFja2xpZ2h0LWxldmVsLg0K
-PiANCj4gKHRlc3RlZCBvbiBpTWFjMjAsMSkNCj4gDQo+IFN1Z2dlc3RlZC1ieTogTHVrYXMgV3Vu
-bmVyIDxsdWthc0B3dW5uZXIuZGU+DQo+IFNpZ25lZC1vZmYtYnk6IEF0aGFydmEgVGl3YXJpIDxh
-dGhhcnZhdGl3YXJpbGludXhkZXZAZ21haWwuY29tPg0KPiAtLS0NCj4gZHJpdmVycy9maXJtd2Fy
-ZS9lZmkvS2NvbmZpZyAgICAgICAgICAgICAgICAgIHwgMTAgKysrDQo+IGRyaXZlcnMvZmlybXdh
-cmUvZWZpL01ha2VmaWxlICAgICAgICAgICAgICAgICB8ICAxICsNCj4gZHJpdmVycy9maXJtd2Fy
-ZS9lZmkvYXBwbGUtYnJpZ2h0bmVzcy5jICAgICAgIHwgNjcgKysrKysrKysrKysrKysrKysrKw0K
-PiAuLi4vbGludXgvcGxhdGZvcm1fZGF0YS9hcHBsZS1icmlnaHRuZXNzLmggICAgfCAyMCArKysr
-KysNCj4gNCBmaWxlcyBjaGFuZ2VkLCA5OCBpbnNlcnRpb25zKCspDQo+IGNyZWF0ZSBtb2RlIDEw
-MDY0NCBkcml2ZXJzL2Zpcm13YXJlL2VmaS9hcHBsZS1icmlnaHRuZXNzLmMNCj4gY3JlYXRlIG1v
-ZGUgMTAwNjQ0IGluY2x1ZGUvbGludXgvcGxhdGZvcm1fZGF0YS9hcHBsZS1icmlnaHRuZXNzLmgN
-Cg0KSSB0ZXN0ZWQgdGhpcyBwYXRjaCBvbiBhIE1hY0Jvb2tQcm8xNiwxLCB3aGljaCBpcyBhIFQy
-IEludGVsIE1hYywgYW5kIHRoZSBiZWhhdmlvdXIgaXMgdmVyeSB3ZWlyZDoNCg0KMS4gbWFjT1Mg
-d2lsbCBuZXZlciByZXNwZWN0IGFueSBicmlnaHRuZXNzIHNldCBieSBMaW51eA0KMi4gVGhlIE1h
-eCBicmlnaHRuZXNzIHNldCBieSBtYWNPUyBpcyBub3QgdGhlIG1heCBicmlnaHRuZXNzIG9uIExp
-bnV4LiBJIGdldCB0aGVzZSB2YWx1ZXMgb24gTGludXg6DQoNCmFkaXR5YUBNYWNCb29rOn4kIGVm
-aXZhciAtcCAtbiAnN2M0MzYxMTAtYWIyYS00YmJiLWE4ODAtZmU0MTk5NWM5ZjgyLWJhY2tsaWdo
-dC1sZXZlbCcNCkdVSUQ6IDdjNDM2MTEwLWFiMmEtNGJiYi1hODgwLWZlNDE5OTVjOWY4Mg0KTmFt
-ZTogImJhY2tsaWdodC1sZXZlbCINCkF0dHJpYnV0ZXM6DQoJTm9uLVZvbGF0aWxlDQoJQm9vdCBT
-ZXJ2aWNlIEFjY2Vzcw0KCVJ1bnRpbWUgU2VydmljZSBBY2Nlc3MNClZhbHVlOg0KMDAwMDAwMDAg
-IGYxIDAyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfC4uICAg
-ICAgICAgICAgICB8DQoNCmFkaXR5YUBNYWNCb29rOn4kIGNhdCAvc3lzL2NsYXNzL2JhY2tsaWdo
-dC9nbXV4X2JhY2tsaWdodC9icmlnaHRuZXNzDQo0ODIzOA0KDQozLiBJIHNldCB0aGUgTWF4IGJy
-aWdodG5lc3Mgb24gTGludXgsIGFuZCByZXN0YXJ0ZWQuIEkgZ2V0IHRoaXM6DQoNCmFkaXR5YUBN
-YWNCb29rOn4kIGVmaXZhciAtcCAtbiAnN2M0MzYxMTAtYWIyYS00YmJiLWE4ODAtZmU0MTk5NWM5
-ZjgyLWJhY2tsaWdodC1sZXZlbCcNCkdVSUQ6IDdjNDM2MTEwLWFiMmEtNGJiYi1hODgwLWZlNDE5
-OTVjOWY4Mg0KTmFtZTogImJhY2tsaWdodC1sZXZlbCINCkF0dHJpYnV0ZXM6DQoJTm9uLVZvbGF0
-aWxlDQoJQm9vdCBTZXJ2aWNlIEFjY2Vzcw0KCVJ1bnRpbWUgU2VydmljZSBBY2Nlc3MNClZhbHVl
-Og0KMDAwMDAwMDAgIDdhIGZmICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgfHouICAgICAgICAgICAgICB8DQoNCmFkaXR5YUBNYWNCb29rOn4kIGNhdCAvc3lzL2Ns
-YXNzL2JhY2tsaWdodC9nbXV4X2JhY2tsaWdodC9icmlnaHRuZXNzDQo2NTQwMg0KDQoNCjQuIEZp
-bmFsbHksIGFueSBhdHRlbXB0IHRvIHJlZHVjZSB0aGUgYnJpZ2h0bmVzcyBzZWVtcyB3b3J0aGxl
-c3MgYXMgdW5sZXNzIGJvb3RlZCBiYWNrIHRvIG1hY09TLCBMaW51eCBhbHdheXMgYm9vdHMgYXQg
-bWF4IGJyaWdodG5lc3MsIGJ1dCB0aGUgbnZyYW0gdmFyaWFibGUgaXMgY2hhbmdlZCBzdWNjZXNz
-ZnVsbHk6DQoNCmFkaXR5YUBNYWNCb29rOn4kIGVmaXZhciAtcCAtbiAnN2M0MzYxMTAtYWIyYS00
-YmJiLWE4ODAtZmU0MTk5NWM5ZjgyLWJhY2tsaWdodC1sZXZlbCcNCkdVSUQ6IDdjNDM2MTEwLWFi
-MmEtNGJiYi1hODgwLWZlNDE5OTVjOWY4Mg0KTmFtZTogImJhY2tsaWdodC1sZXZlbCINCkF0dHJp
-YnV0ZXM6DQoJTm9uLVZvbGF0aWxlDQoJQm9vdCBTZXJ2aWNlIEFjY2Vzcw0KCVJ1bnRpbWUgU2Vy
-dmljZSBBY2Nlc3MNClZhbHVlOg0KMDAwMDAwMDAgIGViIDQxICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgfC5BICAgICAgICAgICAgICB8DQoNCmFkaXR5YUBNYWNC
-b29rOn4kIGNhdCAvc3lzL2NsYXNzL2JhY2tsaWdodC9nbXV4X2JhY2tsaWdodC9icmlnaHRuZXNz
-DQo2NTQwMg0KDQoNCk92ZXJhbGwsIGl04oCZcyB2ZXJ5IGluY29uc2lzdGVudC4gQWxzbywgSeKA
-mXZlIG5vdGljZWQgV2luZG93cyBkb2Vzbid0IG1lc3MgYXJvdW5kIHdpdGggZWZpdmFycywgcmF0
-aGVyIHN0b3JlcyB0aGUgYnJpZ2h0bmVzcyBsb2NhbGx5IGFuZCBpbXBsZW1lbnRzIGl0IG9uIGV2
-ZXJ5IGJvb3QsIHNvbWV0aGluZyB3aGljaCBzeXN0ZW1kIHNob3VsZCBkbyBvbiBMaW51eC4NCg0K
-DQo=
+
+
+On 3/17/26 15:08, Aditya Garg wrote:
+> 
+> 
+>> On 16 Mar 2026, at 9:03 PM, Atharva Tiwari <atharvatiwarilinuxdev@gmail.com> wrote:
+>>
+>> Currently when a Mac reboots, the brightness is not the same
+>> as the previous boot instead its the same as the last time the
+>> Mac booted macOS.
+>>
+>> We can fix this issue by saving the brightness level to the efivar
+>> backlight-level.
+>>
+>> (tested on iMac20,1)
+>>
+>> Suggested-by: Lukas Wunner <lukas@wunner.de>
+>> Signed-off-by: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
+>> ---
+>> drivers/firmware/efi/Kconfig                  | 10 +++
+>> drivers/firmware/efi/Makefile                 |  1 +
+>> drivers/firmware/efi/apple-brightness.c       | 67 +++++++++++++++++++
+>> .../linux/platform_data/apple-brightness.h    | 20 ++++++
+>> 4 files changed, 98 insertions(+)
+>> create mode 100644 drivers/firmware/efi/apple-brightness.c
+>> create mode 100644 include/linux/platform_data/apple-brightness.h
+> 
+> I tested this patch on a MacBookPro16,1, which is a T2 Intel Mac, and the behaviour is very weird:
+> 
+> 1. macOS will never respect any brightness set by Linux
+> 2. The Max brightness set by macOS is not the max brightness on Linux. I get these values on Linux:
+> 
+> aditya@MacBook:~$ efivar -p -n '7c436110-ab2a-4bbb-a880-fe41995c9f82-backlight-level'
+> GUID: 7c436110-ab2a-4bbb-a880-fe41995c9f82
+> Name: "backlight-level"
+> Attributes:
+> 	Non-Volatile
+> 	Boot Service Access
+> 	Runtime Service Access
+> Value:
+> 00000000  f1 02                                             |..              |
+> 
+> aditya@MacBook:~$ cat /sys/class/backlight/gmux_backlight/brightness
+> 48238
+> 
+> 3. I set the Max brightness on Linux, and restarted. I get this:
+> 
+> aditya@MacBook:~$ efivar -p -n '7c436110-ab2a-4bbb-a880-fe41995c9f82-backlight-level'
+> GUID: 7c436110-ab2a-4bbb-a880-fe41995c9f82
+> Name: "backlight-level"
+> Attributes:
+> 	Non-Volatile
+> 	Boot Service Access
+> 	Runtime Service Access
+> Value:
+> 00000000  7a ff                                             |z.              |
+> 
+> aditya@MacBook:~$ cat /sys/class/backlight/gmux_backlight/brightness
+> 65402
+> 
+> 
+> 4. Finally, any attempt to reduce the brightness seems worthless as unless booted back to macOS, Linux always boots at max brightness, but the nvram variable is changed successfully:
+> 
+> aditya@MacBook:~$ efivar -p -n '7c436110-ab2a-4bbb-a880-fe41995c9f82-backlight-level'
+> GUID: 7c436110-ab2a-4bbb-a880-fe41995c9f82
+> Name: "backlight-level"
+> Attributes:
+> 	Non-Volatile
+> 	Boot Service Access
+> 	Runtime Service Access
+> Value:
+> 00000000  eb 41                                             |.A              |
+> 
+> aditya@MacBook:~$ cat /sys/class/backlight/gmux_backlight/brightness
+> 65402
+> 
+> 
+> Overall, it’s very inconsistent. Also, I’ve noticed Windows doesn't mess around with efivars, rather stores the brightness locally and implements it on every boot, something which systemd should do on Linux.
+> 
+> 
+
+I've done another test as well:
+
+1. I booted into macOS, and set a normal brightness, not too low, not 
+too high.
+2. I booted back to Linux. The brightness was consistent. These are the 
+values:
+
+aditya@MacBook:~$ efivar -p -n 
+'7c436110-ab2a-4bbb-a880-fe41995c9f82-backlight-level'
+GUID: 7c436110-ab2a-4bbb-a880-fe41995c9f82
+Name: "backlight-level"
+Attributes:
+	Non-Volatile
+	Boot Service Access
+	Runtime Service Access
+Value:
+00000000  92 00                                             |.. 
+     |
+
+aditya@MacBook:~$ cat /sys/class/backlight/gmux_backlight/brightness
+7792
+
+This is the journalctl of that boot: https://termbin.com/p0vf
+
+3. I slightly modified the brightness and restarted. Upon a restart, the 
+brightness was max again:
+
+aditya@MacBook:~$ efivar -p -n 
+'7c436110-ab2a-4bbb-a880-fe41995c9f82-backlight-level'
+GUID: 7c436110-ab2a-4bbb-a880-fe41995c9f82
+Name: "backlight-level"
+Attributes:
+	Non-Volatile
+	Boot Service Access
+	Runtime Service Access
+Value:
+00000000  51 3a                                             |Q: 
+     |
+
+aditya@MacBook:~$ cat /sys/class/backlight/gmux_backlight/brightness
+63589
+
+This is the journalctl of that boot: https://termbin.com/1z9r
+
