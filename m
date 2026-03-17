@@ -1,108 +1,85 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from mail-dl1-f51.google.com (mail-dl1-f51.google.com [74.125.82.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 64F383A452A
-	for <linux-efi@vger.kernel.org>; Tue, 17 Mar 2026 10:00:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 742932DA756
+	for <linux-efi@vger.kernel.org>; Tue, 17 Mar 2026 17:14:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773741652; cv=none; b=Wx2gRFo9aN8+cjTU64CwUBET7FMAZ/IOSXZ3XHCRWa+pukQDpEnKjn0Mf1NAMRIGG4lxXc7XlnmR0c59fkcB/MVeCRWdJE0R4HNBtuw4wNtiUaCT5Pg9XQEhck2yJ24q+FaaUAtK1aib5JqccgcN9GNptiwGegAmX7JrDSDvT04=
+	t=1773767670; cv=none; b=upVs7qtcu8XJyIZUzhW1rGLv3qsvd/vgun4UoyYSAbSmR+lz8Aoyg4TRjQjgcinlAtWdPqIt/UxZi78Ac3fV6rlWPC3kmOxpw11omnricwHoKX0a3Uvhlgnns2xkzCHbwiPGBIG0O3Uw0ZQTmbAALf53fRDJH8mIQIej8XfSb+s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773741652; c=relaxed/simple;
-	bh=xQClvtHmcR6w8TrLUiGiLIoF7WZTm3EhitOCJri8BXE=;
+	s=arc-20240116; t=1773767670; c=relaxed/simple;
+	bh=SgMZNTr7eiDdRK0c6nHHbt9yANr1xsIuSarJONAu7V4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=oFOCKwEoD8MCycPV/n0K/mPIqOZpX6zKFRv0Vea+X+xIpveJSyKl5jP61udihnIDxNZvYX6gkXVsphYDwNlAx7RBY1/N9EPiODhM1uSykRL0Dp08NZW/ztrrlL9H/ALpbLOtLRLmYPpSF8qVdnOb3FO88uCz5ODpuxvwNlWD1wk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=oZJ3/cY6; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=z8+9L0n+; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=CX35RV4c; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=t/jEKk2C; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	 Content-Type:Content-Disposition:In-Reply-To; b=MytBIbNJ6/o9Qv6PuvPWVxkxOe9gY4fK7zGFncrTHHQnDQHCiF02JFx1PcYsroSVaNrIROe+3/bVphpxVhedgf946pjeFmlHtR8LrGZM/P+K6bJ4kOlTP/zHa/yWsoXElt/+ECBjdJK+2tu3hVdH8gizrwO7X1XA7QC6J1v92a8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=M/SrFkhE; arc=none smtp.client-ip=74.125.82.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="oZJ3/cY6";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="z8+9L0n+";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="CX35RV4c";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="t/jEKk2C"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 9C3725BDB1;
-	Tue, 17 Mar 2026 10:00:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1773741643; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=3NxxYZ0Z73C+D6nMp9RM66Emm5gr807GrvA6Zh/dc0A=;
-	b=oZJ3/cY6ydGUBsEkcn4dEP5dVa8+6N5TCpbl/uoiRyk4zmmW7J9KBCWw5LYg5qJ9sSUBYN
-	kDXicji+Mmuu83eTS1GuU5bfaeUnybdFqqkL+Jwnv/gBugxmNyvsnLCjytkBMSabdBzeo2
-	pLuxV3JV9Bq7GlVOwyPPk0QMnb/TzHw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1773741643;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=3NxxYZ0Z73C+D6nMp9RM66Emm5gr807GrvA6Zh/dc0A=;
-	b=z8+9L0n+2BvyNILizCEGBPcuF7FXAXX68hzMw03OLmlBtux01ucO78gQQUP6lspoRnVAHU
-	fjJTL+Fs+WzbkkBg==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=CX35RV4c;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b="t/jEKk2C"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1773741638; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=3NxxYZ0Z73C+D6nMp9RM66Emm5gr807GrvA6Zh/dc0A=;
-	b=CX35RV4cPd92rVX9pIFlpypFdx5RdDbqy0m6JgL3N9BAb1bDqCFP/C0Zs6abuDaJbL268b
-	RKMPUfa+HwHLtaL4MRvpjsvnT/cJx39tZuQLpkJt2PNatB2G8g6k6iWLCggoPL5w+fPupt
-	OQrs5XNahoIFDxhNI9Hmnmsh9lYPs30=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1773741638;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=3NxxYZ0Z73C+D6nMp9RM66Emm5gr807GrvA6Zh/dc0A=;
-	b=t/jEKk2CCIPbv8gHZqK1jU4ncUvF5g0vCKqzpoNhRGjc3w+LQQ99i+VJ4D9TTFrf362JNo
-	vbna+wrOzVfO1uAg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 833EB4273C;
-	Tue, 17 Mar 2026 10:00:38 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id ZhkGIEYmuWn0SwAAD6G6ig
-	(envelope-from <jack@suse.cz>); Tue, 17 Mar 2026 10:00:38 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-	id 40DE4A0AB1; Tue, 17 Mar 2026 11:00:34 +0100 (CET)
-Date: Tue, 17 Mar 2026 11:00:34 +0100
-From: Jan Kara <jack@suse.cz>
-To: NeilBrown <neil@brown.name>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
-	Alexander Viro <viro@zeniv.linux.org.uk>, Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, 
-	Jeff Layton <jlayton@kernel.org>, Trond Myklebust <trondmy@kernel.org>, 
-	Anna Schumaker <anna@kernel.org>, Carlos Maiolino <cem@kernel.org>, 
-	Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>, 
-	Jan Harkes <jaharkes@cs.cmu.edu>, Hugh Dickins <hughd@google.com>, 
-	Baolin Wang <baolin.wang@linux.alibaba.com>, David Howells <dhowells@redhat.com>, 
-	Marc Dionne <marc.dionne@auristor.com>, Steve French <sfrench@samba.org>, 
-	Namjae Jeon <linkinjeon@kernel.org>, Sungjong Seo <sj1557.seo@samsung.com>, 
-	Yuezhang Mo <yuezhang.mo@sony.com>, Andreas Hindborg <a.hindborg@kernel.org>, 
-	Breno Leitao <leitao@debian.org>, Theodore Ts'o <tytso@mit.edu>, 
-	Andreas Dilger <adilger.kernel@dilger.ca>, Steven Rostedt <rostedt@goodmis.org>, 
-	Masami Hiramatsu <mhiramat@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, 
-	Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, 
-	Tyler Hicks <code@tyhicks.com>, Andreas Gruenbacher <agruenba@redhat.com>, 
-	Richard Weinberger <richard@nod.at>, Anton Ivanov <anton.ivanov@cambridgegreys.com>, 
-	Johannes Berg <johannes@sipsolutions.net>, Jeremy Kerr <jk@ozlabs.org>, Ard Biesheuvel <ardb@kernel.org>, 
-	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org, linux-xfs@vger.kernel.org, 
-	linux-unionfs@vger.kernel.org, coda@cs.cmu.edu, linux-mm@kvack.org, 
-	linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-trace-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, 
-	ecryptfs@vger.kernel.org, gfs2@lists.linux.dev, linux-um@lists.infradead.org, 
-	linux-efi@vger.kernel.org
-Subject: Re: [PATCH 32/53] ext4: move dcache modifying code out of
- __ext4_link()
-Message-ID: <imo3cvhqtvginngr2ofsotmrsxixutn2jagbkj6322cfgxm3lj@wosdq3xvlym5>
-References: <20260312214330.3885211-1-neilb@ownmail.net>
- <20260312214330.3885211-33-neilb@ownmail.net>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="M/SrFkhE"
+Received: by mail-dl1-f51.google.com with SMTP id a92af1059eb24-1279eced0b9so8343941c88.0
+        for <linux-efi@vger.kernel.org>; Tue, 17 Mar 2026 10:14:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1773767668; x=1774372468; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:sender:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=7fZGlThRHKOZEcqCV8UkZyE5CKR9QF/JZoCrQJeiv38=;
+        b=M/SrFkhEeT1NzcF7fejqGxblFhqej5lE6d8Xdfznod1EhIGGJ62Ew08nEgfML7UzMo
+         Cpapg4nYb9izUsYdIaDVj7TSGJLsFy+yKrPL40sCtsfiV9F6rRfLFNExbBeKmgEEtYas
+         rWgccsSQMC9eRi2q4rdSojLexsPA2IsC7utAovu5IM2FOU//BgUHNI/glRT+wI0vi3pk
+         WJpt4/x+Gv7PKI2BWM7R1H6gyCMFj6OlUDtsD4wqMcFFiMc1Nk7vGV1GHBhh7eiroyce
+         EHhGNqOov4MeX82lpuyMcfSxCY9ufPOZIgiGoYjqCi53OhMgew6dNMTm8WgdLiBSg2Fx
+         KPkQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1773767668; x=1774372468;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:sender:x-gm-gg:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=7fZGlThRHKOZEcqCV8UkZyE5CKR9QF/JZoCrQJeiv38=;
+        b=dwdeEyPx8/O0EwiUt9vznr4BREih+PYl1ZVatfr5inSxXcCDZEiv8/WkKhAuGa3cbj
+         YetVr2CMOWBmbjmx6Vx0bpnI7yZkqDl+yR5pWyJ7PiuuIlOPn1SeMJmtcpK0B1HceqSD
+         Hm1G0ES77SPGT8AsAn2dntlWEFlPZdIM88cCcKBeEqfr8cKiB6pYB3mRvop7u+/dZ8s+
+         9mQBNtn7y3kZmYVYYHaf8vap4SsAraOUZnQJ4XlO6idMAatYW5vZZlDFxf82T/t9+i7S
+         eXVbCz5Jdm1W6Sarqu2FEh+78IohUVr6xVmo81WNqXrw5ejfpMzylvbPDZ7CSpKKcwHr
+         bsbQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWvpwMPGdkQJm1UGENW9HNgbqYRjAdPpz50jS3u16IMaq/ZyOm4x/mXpcqEr8CQaM23Y+X+N1lefMo=@vger.kernel.org
+X-Gm-Message-State: AOJu0YymYlZvZpRdyaw3b4e8gOSQc3kvuNDjHwOF+EOoR1ogtv4GesZJ
+	O4mxz+sA21/L7e1kLjNvz+C1+5Oikwd+cs33LNpk/plrxf5JbpwouxTb
+X-Gm-Gg: ATEYQzzegg+FeY3yzVM8gSUFihjRdF9v1Pytnc0linmZAMN/BkYmpUqj2W6juxHDwb/
+	nj9Hfd6UAbLXD8nLhg2iTy2UR/Pt/VM7Gaz+yFaNoYtWTxtO8Wpoz978D0lkG7l49dx6b6g+TeD
+	CenNu0Q85lTWXKDOdGIvcoGNW+UVPLzBOSSCRYZsMYHXpg7NH3FQPJ7S2OTAlmxy0zve7ee8eR8
+	0cPOX70ccYUqYjxeGWaQ8IwnQGSQHIa8aGg6G8ZFOsRhNYCklIkffFht/CO6gXB1WubkydPMedC
+	0aqsdpREmFB7SdK+zHAcdipPcu/hhx6grUVs9USr+BPMtLhvsmGGKAN/sxnFXFcw9MZzkjeO+R3
+	YXvZYb8EmExJP4rlBokk4xP7D9bnI4OVHBZwqYpj1iWTVwfuoC/NQLw2nZcqh3HafDLq3DR4IaO
+	/skgbt5otOWHjJlJUcXr/xV9pqUKjjv6bVr4j9
+X-Received: by 2002:a05:7022:60a2:b0:128:d20a:2f40 with SMTP id a92af1059eb24-1299baa02e9mr144968c88.8.1773767667391;
+        Tue, 17 Mar 2026 10:14:27 -0700 (PDT)
+Received: from server.roeck-us.net ([2600:1700:e321:62f0:da43:aeff:fecc:bfd5])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-129b41289e7sm174147c88.10.2026.03.17.10.14.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 Mar 2026 10:14:26 -0700 (PDT)
+Sender: Guenter Roeck <groeck7@gmail.com>
+Date: Tue, 17 Mar 2026 10:14:25 -0700
+From: Guenter Roeck <linux@roeck-us.net>
+To: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+Cc: "Rafael J. Wysocki" <rafael@kernel.org>, acpica-devel@lists.linux.dev,
+	linux-acpi@vger.kernel.org, linux-edac@vger.kernel.org,
+	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+	Ankit Agrawal <ankita@nvidia.com>, Borislav Petkov <bp@alien8.de>,
+	Breno Leitao <leitao@debian.org>, Hanjun Guo <guohanjun@huawei.com>,
+	Huang Yiwei <quic_hyiwei@quicinc.com>,
+	Jason Tian <jason@os.amperecomputing.com>,
+	Jonathan Cameron <jonathan.cameron@huawei.com>,
+	Len Brown <lenb@kernel.org>,
+	Mauro Carvalho Chehab <mchehab@kernel.org>,
+	Shuai Xue <xueshuai@linux.alibaba.com>,
+	Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>,
+	Tony Luck <tony.luck@intel.com>
+Subject: Re: [PATCH v6 1/4] apei/ghes: ARM processor Error: don't go past
+ allocated memory
+Message-ID: <1f87994f-22cb-44b8-9878-7ff375325a43@roeck-us.net>
+References: <cover.1767871950.git.mchehab+huawei@kernel.org>
+ <7fd9f38413be05ee2d7cfdb0dc31ea2274cf1a54.1767871950.git.mchehab+huawei@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -111,135 +88,144 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260312214330.3885211-33-neilb@ownmail.net>
-X-Spamd-Result: default: False [-2.51 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	SUSPICIOUS_RECIPS(1.50)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	RCVD_TLS_LAST(0.00)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	RCVD_COUNT_THREE(0.00)[3];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	TO_DN_SOME(0.00)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	FREEMAIL_CC(0.00)[linux-foundation.org,zeniv.linux.org.uk,kernel.org,suse.cz,szeredi.hu,gmail.com,cs.cmu.edu,google.com,linux.alibaba.com,redhat.com,auristor.com,samba.org,samsung.com,sony.com,debian.org,mit.edu,dilger.ca,goodmis.org,dubeyko.com,tyhicks.com,nod.at,cambridgegreys.com,sipsolutions.net,ozlabs.org,vger.kernel.org,kvack.org,lists.infradead.org,lists.linux.dev];
-	DKIM_TRACE(0.00)[suse.cz:+];
-	TO_MATCH_ENVRCPT_SOME(0.00)[];
-	RCPT_COUNT_GT_50(0.00)[52];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	ASN(0.00)[asn:32098, ipnet:2800::/6, country:US];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	R_RATELIMIT(0.00)[to_ip_from(RL51pwup9t9rrf6fhpcri3z6a5)];
-	MISSING_XM_UA(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.cz:dkim,suse.com:email,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns]
-X-Rspamd-Action: no action
-X-Spam-Flag: NO
-X-Spam-Score: -2.51
-X-Spam-Level: 
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Rspamd-Queue-Id: 9C3725BDB1
+In-Reply-To: <7fd9f38413be05ee2d7cfdb0dc31ea2274cf1a54.1767871950.git.mchehab+huawei@kernel.org>
 
-On Fri 13-03-26 08:12:19, NeilBrown wrote:
-...
-> diff --git a/fs/dcache.c b/fs/dcache.c
-> index a1219b446b74..c48337d95f9a 100644
-> --- a/fs/dcache.c
-> +++ b/fs/dcache.c
-> @@ -358,7 +358,7 @@ static inline int dname_external(const struct dentry *dentry)
->  	return dentry->d_name.name != dentry->d_shortname.string;
->  }
->  
-> -void take_dentry_name_snapshot(struct name_snapshot *name, struct dentry *dentry)
-> +void take_dentry_name_snapshot(struct name_snapshot *name, const struct dentry *dentry)
+Hi,
+
+On Thu, Jan 08, 2026 at 12:35:03PM +0100, Mauro Carvalho Chehab wrote:
+> If the BIOS generates a very small ARM Processor Error, or
+> an incomplete one, the current logic will fail to deferrence
+> 
+> 	err->section_length
+> and
+> 	ctx_info->size
+> 
+> Add checks to avoid that. With such changes, such GHESv2
+> records won't cause OOPSes like this:
+> 
+> [    1.492129] Internal error: Oops: 0000000096000005 [#1]  SMP
+> [    1.495449] Modules linked in:
+> [    1.495820] CPU: 0 UID: 0 PID: 9 Comm: kworker/0:0 Not tainted 6.18.0-rc1-00017-gabadcc3553dd-dirty #18 PREEMPT
+> [    1.496125] Hardware name: QEMU QEMU Virtual Machine, BIOS unknown 02/02/2022
+> [    1.496433] Workqueue: kacpi_notify acpi_os_execute_deferred
+> [    1.496967] pstate: 814000c5 (Nzcv daIF +PAN -UAO -TCO +DIT -SSBS BTYPE=--)
+> [    1.497199] pc : log_arm_hw_error+0x5c/0x200
+> [    1.497380] lr : ghes_handle_arm_hw_error+0x94/0x220
+> 
+> 0xffff8000811c5324 is in log_arm_hw_error (../drivers/ras/ras.c:75).
+> 70		err_info = (struct cper_arm_err_info *)(err + 1);
+> 71		ctx_info = (struct cper_arm_ctx_info *)(err_info + err->err_info_num);
+> 72		ctx_err = (u8 *)ctx_info;
+> 73
+> 74		for (n = 0; n < err->context_info_num; n++) {
+> 75			sz = sizeof(struct cper_arm_ctx_info) + ctx_info->size;
+> 76			ctx_info = (struct cper_arm_ctx_info *)((long)ctx_info + sz);
+> 77			ctx_len += sz;
+> 78		}
+> 79
+> 
+> and similar ones while trying to access section_length on an
+> error dump with too small size.
+> 
+> Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+> Reviewed-by: Jonathan Cameron <jonathan.cameron@huawei.com>
+
+AI code review feedback inline. I don't claim to understand the code or
+its purpose, but it does seem to have a point. Please have a look.
+
+Thanks,
+Guenter
+
+> ---
+>  drivers/acpi/apei/ghes.c | 32 ++++++++++++++++++++++++++++----
+>  drivers/ras/ras.c        |  6 +++++-
+>  2 files changed, 33 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 0dc767392a6c..fc3f8aed99d5 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -552,21 +552,45 @@ static bool ghes_handle_arm_hw_error(struct acpi_hest_generic_data *gdata,
 >  {
->  	unsigned seq;
->  	const unsigned char *s;
+>  	struct cper_sec_proc_arm *err = acpi_hest_get_payload(gdata);
+>  	int flags = sync ? MF_ACTION_REQUIRED : 0;
+> +	int length = gdata->error_data_length;
+>  	char error_type[120];
+>  	bool queued = false;
+>  	int sec_sev, i;
+>  	char *p;
+>  
+>  	sec_sev = ghes_severity(gdata->error_severity);
+> -	log_arm_hw_error(err, sec_sev);
+> +	if (length >= sizeof(*err)) {
+> +		log_arm_hw_error(err, sec_sev);
+> +	} else {
+> +		pr_warn(FW_BUG "arm error length: %d\n", length);
+> +		pr_warn(FW_BUG "length is too small\n");
+> +		pr_warn(FW_BUG "firmware-generated error record is incorrect\n");
+> +		return false;
+> +	}
+> +
+>  	if (sev != GHES_SEV_RECOVERABLE || sec_sev != GHES_SEV_RECOVERABLE)
+>  		return false;
+>  
+>  	p = (char *)(err + 1);
+> +	length -= sizeof(err);
+> +
 
-The constification of take_dentry_name_snapshot() should probably be a
-separate patch? Also I'd note that this constification (and the
-constification of __ext4_fc_track_link()) isn't really needed here because
-ext4_fc_track_link() will immediately bail through ext4_fc_disabled() when
-fast commit replay is happening so __ext4_fc_track_link() never gets called
-in that case - more about that below.
+Does this code subtract the size of the pointer instead of the size of the
+structure? It looks like length will be larger than the remaining buffer,
+which could allow out-of-bounds accesses in the loop below.
 
-> @@ -1471,7 +1471,15 @@ static int ext4_fc_replay_link_internal(struct super_block *sb,
->  		goto out;
+>  	for (i = 0; i < err->err_info_num; i++) {
+> -		struct cper_arm_err_info *err_info = (struct cper_arm_err_info *)p;
+> -		bool is_cache = err_info->type & CPER_ARM_CACHE_ERROR;
+> -		bool has_pa = (err_info->validation_bits & CPER_ARM_INFO_VALID_PHYSICAL_ADDR);
+> +		struct cper_arm_err_info *err_info;
+> +		bool is_cache, has_pa;
+> +
+> +		/* Ensure we have enough data for the error info header */
+> +		if (length < sizeof(*err_info))
+> +			break;
+> +
+> +		err_info = (struct cper_arm_err_info *)p;
+> +
+> +		/* Validate the claimed length before using it */
+> +		length -= err_info->length;
+> +		if (length < 0)
+> +			break;
+> +
+> +		is_cache = err_info->type & CPER_ARM_CACHE_ERROR;
+> +		has_pa = (err_info->validation_bits & CPER_ARM_INFO_VALID_PHYSICAL_ADDR);
+>  
+>  		/*
+>  		 * The field (err_info->error_info & BIT(26)) is fixed to set to
+> diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
+> index 2a5b5a9fdcb3..03df3db62334 100644
+> --- a/drivers/ras/ras.c
+> +++ b/drivers/ras/ras.c
+> @@ -72,7 +72,11 @@ void log_arm_hw_error(struct cper_sec_proc_arm *err, const u8 sev)
+>  	ctx_err = (u8 *)ctx_info;
+>  
+>  	for (n = 0; n < err->context_info_num; n++) {
+> -		sz = sizeof(struct cper_arm_ctx_info) + ctx_info->size;
+> +		sz = sizeof(struct cper_arm_ctx_info);
+> +
+> +		if (sz + (long)ctx_info - (long)err >= err->section_length)
+> +			sz += ctx_info->size;
+> +
+
+Is this condition inverted? It looks like we add ctx_info->size to sz only if
+the context info header is already out of bounds. This might cause us to read
+ctx_info->size from unallocated memory.
+
+Also, if the header is completely within bounds, sz does not include
+ctx_info->size. Could this cause the loop to parse the register context array
+as the next cper_arm_ctx_info header?
+
+>  		ctx_info = (struct cper_arm_ctx_info *)((long)ctx_info + sz);
+>  		ctx_len += sz;
 >  	}
->  
-> +	ihold(inode);
-> +	inc_nlink(inode);
->  	ret = __ext4_link(dir, inode, dentry_inode);
-> +	if (ret) {
-> +		drop_nlink(inode);
-> +		iput(inode);
-> +	} else {
-> +		d_instantiate(dentry_inode, inode);
-> +	}
->  	/*
->  	 * It's possible that link already existed since data blocks
->  	 * for the dir in question got persisted before we crashed OR
-...
-> @@ -3460,8 +3460,6 @@ int __ext4_link(struct inode *dir, struct inode *inode, struct dentry *dentry)
->  		ext4_handle_sync(handle);
->  
->  	inode_set_ctime_current(inode);
-> -	ext4_inc_count(inode);
-> -	ihold(inode);
->  
->  	err = ext4_add_entry(handle, dentry, inode);
->  	if (!err) {
-> @@ -3471,11 +3469,7 @@ int __ext4_link(struct inode *dir, struct inode *inode, struct dentry *dentry)
->  		 */
->  		if (inode->i_nlink == 1)
->  			ext4_orphan_del(handle, inode);
-> -		d_instantiate(dentry, inode);
-> -		ext4_fc_track_link(handle, dentry);
-> -	} else {
-> -		drop_nlink(inode);
-> -		iput(inode);
-> +		__ext4_fc_track_link(handle, inode, dentry);
-
-This looks wrong. If fastcommit replay is running, we must skip calling
-__ext4_fc_track_link(). Similarly if the filesystem is currently
-inelligible for fastcommit (due to some complex unsupported operations
-running in parallel). Why did you change ext4_fc_track_link() to
-__ext4_fc_track_link()?
-
-> @@ -3504,7 +3498,16 @@ static int ext4_link(struct dentry *old_dentry,
->  	err = dquot_initialize(dir);
->  	if (err)
->  		return err;
-> -	return __ext4_link(dir, inode, dentry);
-> +	ihold(inode);
-> +	ext4_inc_count(inode);
-
-I'd put inc_nlink() here instead. We are guaranteed to have a regular file
-anyway and it matches what we do in ext4_fc_replay_link_internal().
-Alternatively we could consistently use ext4_inc_count() &
-ext4_dec_count() in these functions.
-
-> +	err = __ext4_link(dir, inode, dentry);
-> +	if (err) {
-> +		drop_nlink(inode);
-> +		iput(inode);
-> +	} else {
-> +		d_instantiate(dentry, inode);
-> +	}
-> +	return err;
->  }
-
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+> -- 
+> 2.52.0
+> 
