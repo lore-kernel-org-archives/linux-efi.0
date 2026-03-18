@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F2763BE163;
-	Wed, 18 Mar 2026 10:59:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B1A83B8BBC;
+	Wed, 18 Mar 2026 10:59:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773831544; cv=none; b=EPgDyUNdOgS7+q0OmrPTV/8YBENMULs7JMHI0Ef3KgoMPl5WUo6Lj75xNR5BB1Zvq2264B4zG1WBNlpo7VWsDn483wwn3b4wEUK1hiUiB7WEGHF7ns2aPjd27w11r7NpTeRRKO9zXEYAxsY8Z60UAAa3uDl2+N3Ck1Lfkr82m4A=
+	t=1773831555; cv=none; b=kVt/bGnhOSQFEaytQjLb0DFXXWMv052JxqCHxBmLSdthpxEdmnioXXbuRg2wdD/bm0X2NSGBF6NGea+i7LsO6WNy8sPZciwOq7Gg9wpEhsUDfASzlp2Bbk/IDQO67Al3AkQiMZF5il0blobAxuDrXQt969OjMgfQ3NS6aa/wheA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773831544; c=relaxed/simple;
-	bh=eXHAfMqh6RkD93DEJUVdAwdOv0hR8c1CLNcm1BQYW+k=;
+	s=arc-20240116; t=1773831555; c=relaxed/simple;
+	bh=Zoj4gf8i7wyLd0/obmXgnP8SmqlA2rGZ2C3jdfoF95I=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=QmeI0WpYzMW9kA920GI6xUXlx8wbAlehoybiarWn4TTggggHypBKQDkK/VlHVj7DeplFuinaN1uZVJwleVSr0aeoBYjzazNrIJBtTa3ockDTWOAMB8BreNpifwff25PEx0MxAMx5sA6ZqKGLctJVKk5QEhqX8XFWIXODcC5ojC4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=F6uE4wnF; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=uRms/CXZOCoC1whGgubhU8pkC5P2NJl40M3Qnl+VCV6mpB/jsXEXZBXUH8zGcspKPdcZdyg4tQxmblxmKgm72IMPWu0r8QPTtlBciX0Sj+ZH8VkwCaDN/pbrtMHd/OiHkjBoNRcyYS0xzd3y9VAm/FDh0PDhRS6DASdsDA9OEUs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rU9KH6SS; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="F6uE4wnF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4541BC2BCB9;
-	Wed, 18 Mar 2026 10:58:53 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rU9KH6SS"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4FF89C2BCB2;
+	Wed, 18 Mar 2026 10:59:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1773831543;
-	bh=eXHAfMqh6RkD93DEJUVdAwdOv0hR8c1CLNcm1BQYW+k=;
+	s=k20201202; t=1773831554;
+	bh=Zoj4gf8i7wyLd0/obmXgnP8SmqlA2rGZ2C3jdfoF95I=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=F6uE4wnFoYpsxRBiKT/PjPuXliQ4seo8S9062AZ7tk37rf3ZX++agKVae57LX+29I
-	 yOZFWkz8+D78t+J+kBeYs9Qs2oAecfpTnD+o1T2HG0HpEjZo810U5evd+qliij5IiW
-	 IgYK3nOftqn6sOZlY2YDSpVWlBfQ8TEo4vTV4YniZHRCKn43nBCEaPD8oZfh0eyMZ+
-	 QGWYVHomaz+gh+eL5gKQAhKHGEpiUT2Io7PAeJF3RBHLzyCpPPWb8FuXF0KgA94nWR
-	 GlEeCRmq1FL9VNkiAAH6yRt6OeunWDVw1taBsLaZn/I5l4CSyZG2rax4i3zH87YD7F
-	 F+nbWE7Og683g==
+	b=rU9KH6SSU1eVwCpzSqG52mlBGTcHrnXJ5NciS3FbIP6iXmaONG7+xGMFW+GrF35KS
+	 zApVxwPoOJ5fh+Co7piBNJXn3gxE+VHO8+L3iQYdzjxIlcHmmjxtFljUbD8p1qNJoT
+	 z/1yZqOnDz1d497ur2v46avMjjrGtSJk9mzG1pXYvXZuFRG3crBPg1olXJFtQVl1yF
+	 fNWDB+4gQ6fV+7YL6m3tMRlyfsZiQWIlpYAnNSJ2HqhGu9LvLzjynIP10m2Jc3PE8u
+	 h1HkHzkZfEUXm8Q9p8zEJnkpY6RZa5ZmY6CN8WUzLeIxFjjq2BkX7EHPJYF8Wiua/3
+	 UCiMaIWQPw4rA==
 From: Mike Rapoport <rppt@kernel.org>
 To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Alexander Potapenko <glider@google.com>,
@@ -76,9 +76,9 @@ Cc: Alexander Potapenko <glider@google.com>,
 	linuxppc-dev@lists.ozlabs.org,
 	sparclinux@vger.kernel.org,
 	x86@kernel.org
-Subject: [PATCH 2/8] powerpc: opal-core: pair alloc_pages_exact() with free_pages_exact()
-Date: Wed, 18 Mar 2026 12:58:21 +0200
-Message-ID: <20260318105827.1358927-3-rppt@kernel.org>
+Subject: [PATCH 3/8] mm: move free_reserved_area() to mm/memblock.c
+Date: Wed, 18 Mar 2026 12:58:22 +0200
+Message-ID: <20260318105827.1358927-4-rppt@kernel.org>
 X-Mailer: git-send-email 2.51.0
 In-Reply-To: <20260318105827.1358927-1-rppt@kernel.org>
 References: <20260318105827.1358927-1-rppt@kernel.org>
@@ -92,55 +92,122 @@ Content-Transfer-Encoding: 8bit
 
 From: "Mike Rapoport (Microsoft)" <rppt@kernel.org>
 
-opal-core allocates buffers with alloc_pages_exact(), but then
-marks them as reserved and frees using free_reserved_area().
+free_reserved_area() is related to memblock as it frees reserved memory
+back to the buddy allocator, similar to what memblock_free_late() does.
 
-This is completely unnecessary and the pages allocated with
-alloc_pages_exact() can be naturally freed with free_pages_exact().
+Move free_reserved_area() to mm/memblock.c to prepare for further
+consolidation of the functions that free reserved memory.
 
-Replace freeing of memory in opalcore_cleanup() with
-free_pages_exact() and simplify allocation code so that it won't mark
-allocated pages as reserved.
+No functional changes.
 
 Signed-off-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
 ---
- arch/powerpc/platforms/powernv/opal-core.c | 9 +--------
- 1 file changed, 1 insertion(+), 8 deletions(-)
+ mm/memblock.c   | 37 ++++++++++++++++++++++++++++++++++++-
+ mm/page_alloc.c | 36 ------------------------------------
+ 2 files changed, 36 insertions(+), 37 deletions(-)
 
-diff --git a/arch/powerpc/platforms/powernv/opal-core.c b/arch/powerpc/platforms/powernv/opal-core.c
-index e76e462f55f6..abd99ddbf21f 100644
---- a/arch/powerpc/platforms/powernv/opal-core.c
-+++ b/arch/powerpc/platforms/powernv/opal-core.c
-@@ -303,7 +303,6 @@ static int __init create_opalcore(void)
- 	struct device_node *dn;
- 	struct opalcore *new;
- 	loff_t opalcore_off;
--	struct page *page;
- 	Elf64_Phdr *phdr;
- 	Elf64_Ehdr *elf;
- 	int i, ret;
-@@ -329,9 +328,6 @@ static int __init create_opalcore(void)
- 		return -ENOMEM;
+diff --git a/mm/memblock.c b/mm/memblock.c
+index b3ddfdec7a80..8f3010dddc58 100644
+--- a/mm/memblock.c
++++ b/mm/memblock.c
+@@ -893,6 +893,42 @@ int __init_memblock memblock_remove(phys_addr_t base, phys_addr_t size)
+ 	return memblock_remove_range(&memblock.memory, base, size);
+ }
+ 
++unsigned long free_reserved_area(void *start, void *end, int poison, const char *s)
++{
++	void *pos;
++	unsigned long pages = 0;
++
++	start = (void *)PAGE_ALIGN((unsigned long)start);
++	end = (void *)((unsigned long)end & PAGE_MASK);
++	for (pos = start; pos < end; pos += PAGE_SIZE, pages++) {
++		struct page *page = virt_to_page(pos);
++		void *direct_map_addr;
++
++		/*
++		 * 'direct_map_addr' might be different from 'pos'
++		 * because some architectures' virt_to_page()
++		 * work with aliases.  Getting the direct map
++		 * address ensures that we get a _writeable_
++		 * alias for the memset().
++		 */
++		direct_map_addr = page_address(page);
++		/*
++		 * Perform a kasan-unchecked memset() since this memory
++		 * has not been initialized.
++		 */
++		direct_map_addr = kasan_reset_tag(direct_map_addr);
++		if ((unsigned int)poison <= 0xFF)
++			memset(direct_map_addr, poison, PAGE_SIZE);
++
++		free_reserved_page(page);
++	}
++
++	if (pages && s)
++		pr_info("Freeing %s memory: %ldK\n", s, K(pages));
++
++	return pages;
++}
++
+ /**
+  * memblock_free - free boot memory allocation
+  * @ptr: starting address of the  boot memory allocation
+@@ -1776,7 +1812,6 @@ void __init memblock_free_late(phys_addr_t base, phys_addr_t size)
+ 		totalram_pages_inc();
  	}
- 	count = oc_conf->opalcorebuf_sz / PAGE_SIZE;
--	page = virt_to_page(oc_conf->opalcorebuf);
--	for (i = 0; i < count; i++)
--		mark_page_reserved(page + i);
- 
- 	pr_debug("opalcorebuf = 0x%llx\n", (u64)oc_conf->opalcorebuf);
- 
-@@ -437,10 +433,7 @@ static void opalcore_cleanup(void)
- 
- 	/* free the buffer used for setting up OPAL core */
- 	if (oc_conf->opalcorebuf) {
--		void *end = (void *)((u64)oc_conf->opalcorebuf +
--				     oc_conf->opalcorebuf_sz);
+ }
 -
--		free_reserved_area(oc_conf->opalcorebuf, end, -1, NULL);
-+		free_pages_exact(oc_conf->opalcorebuf, oc_conf->opalcorebuf_sz);
- 		oc_conf->opalcorebuf = NULL;
- 		oc_conf->opalcorebuf_sz = 0;
- 	}
+ /*
+  * Remaining API functions
+  */
+diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+index 2d4b6f1a554e..df3d61253001 100644
+--- a/mm/page_alloc.c
++++ b/mm/page_alloc.c
+@@ -6234,42 +6234,6 @@ void adjust_managed_page_count(struct page *page, long count)
+ }
+ EXPORT_SYMBOL(adjust_managed_page_count);
+ 
+-unsigned long free_reserved_area(void *start, void *end, int poison, const char *s)
+-{
+-	void *pos;
+-	unsigned long pages = 0;
+-
+-	start = (void *)PAGE_ALIGN((unsigned long)start);
+-	end = (void *)((unsigned long)end & PAGE_MASK);
+-	for (pos = start; pos < end; pos += PAGE_SIZE, pages++) {
+-		struct page *page = virt_to_page(pos);
+-		void *direct_map_addr;
+-
+-		/*
+-		 * 'direct_map_addr' might be different from 'pos'
+-		 * because some architectures' virt_to_page()
+-		 * work with aliases.  Getting the direct map
+-		 * address ensures that we get a _writeable_
+-		 * alias for the memset().
+-		 */
+-		direct_map_addr = page_address(page);
+-		/*
+-		 * Perform a kasan-unchecked memset() since this memory
+-		 * has not been initialized.
+-		 */
+-		direct_map_addr = kasan_reset_tag(direct_map_addr);
+-		if ((unsigned int)poison <= 0xFF)
+-			memset(direct_map_addr, poison, PAGE_SIZE);
+-
+-		free_reserved_page(page);
+-	}
+-
+-	if (pages && s)
+-		pr_info("Freeing %s memory: %ldK\n", s, K(pages));
+-
+-	return pages;
+-}
+-
+ void free_reserved_page(struct page *page)
+ {
+ 	clear_page_tag_ref(page);
 -- 
 2.51.0
 
