@@ -1,170 +1,93 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C35336CDEB;
-	Wed, 18 Mar 2026 20:52:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD6C4392C5A;
+	Wed, 18 Mar 2026 23:50:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773867158; cv=none; b=m/5t9bhECYXyR57iZg9hcGnOM+mHrXwKEmSbzOFcXfHBbRMASxOlkh10nswASmUYveoH1yTHXb1t8S/CRW1qAszBnIVzcUiAs8ba4kJZ5W2z4yPRYWgWvJDulydd7dfcQXK8NWdqotrdUCUAdf+/2IsYz7knJLlz09UlhhiTPyg=
+	t=1773877822; cv=none; b=MxoksA4NWoT3UJmuhbMJscGLDv/rsDUbuDVjz1bV5LolS9rawMfAGF5OWrapQMBZ13EjmRiqqfmsSLFIDT+95al17g1WU4344ThcwQUTbsMQ+kdaFPdrT5ACZZh4i4tj8+y4mdS+91GyrVB0uhKOUBXKqB7qW4vgmrevAAskBfc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773867158; c=relaxed/simple;
-	bh=kbGM3c4xh2xtlPKItuu8b0plWdnAptUOEmkS13CYnz8=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=khU+CvzlJ6E3i8P/yZqbQ78bHcQSp04efTuoG5gRRpqgKcpxagUxlPHjwfcJfqLGN9j/Nwo1IjJmDSrFWgchtAzkFvs2XSilLw2+C2+Ac6yn9DtJ6h8vS2fJJVsMaUNgOfAdIa/aUYzNUXOF6y41NAcw1QksAQKmKnaiCHHkjmY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=k7zvu5MI; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1773877822; c=relaxed/simple;
+	bh=6IWzCQaHerAAvhD/9gGP9tDIay/QPLUaKA6cLOAZF60=;
+	h=Date:From:To:Cc:Subject:Message-Id:In-Reply-To:References:
+	 Mime-Version:Content-Type; b=FJnkR3rhVIDhEzBDcSNNjRz+P+Q6FtJuFaNTdFgkZrGG7n5m1rhko6RSvJpxD6oeIa8yKrW/KIEdQMv04u1HZg3HIdD1doQK0ePjUUx8XB9fGCn4yaKkm5JxoBAbtULrdwiUSV6RfwTW2rA1mXcW42ddN+RkePIOyemHjn7eip4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O/wgGU3N; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="k7zvu5MI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2EF7BC19421;
-	Wed, 18 Mar 2026 20:52:26 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O/wgGU3N"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9ABA7C19421;
+	Wed, 18 Mar 2026 23:50:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1773867157;
-	bh=kbGM3c4xh2xtlPKItuu8b0plWdnAptUOEmkS13CYnz8=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=k7zvu5MIc5CYIGmjWx+P+mS8/hs2GooJWHfXhDPqFeWyum4sz6NQ2neYQyXlUtlCv
-	 SOoz9lLS4EQYDGViVf0oRa8oUQ4wZWHCy5DjVMkrRZlzhDZfSxX8btIRC6pKKcZtqq
-	 HqFvYKZdPu6NZcu/RPV8yxBpMtnFC8Ki3vcf/rOBJrcG5AcAzdMR2gnTomxyf7IP8H
-	 zHZMPsz/wlq4Amx6dQtpM7EHwIuIilXwCtH35+nfGyIdYuPry8qYRVdyy1g3sS3ITk
-	 esmcmpAq0Qm7xqoPTPtpTIaBIFFTr4xbzEGttviQsDf6G2SgDxhQSQi5C5yhB9KCwG
-	 yOFQuYZFuGWzw==
-From: Mike Rapoport <rppt@kernel.org>
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Alexander Potapenko <glider@google.com>,
-	Alexander Viro <viro@zeniv.linux.org.uk>,
-	Andreas Larsson <andreas@gaisler.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Borislav Petkov <bp@alien8.de>,
-	Brendan Jackman <jackmanb@google.com>,
-	"Christophe Leroy (CS GROUP)" <chleroy@kernel.org>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Christian Brauner <brauner@kernel.org>,
-	"David S. Miller" <davem@davemloft.net>,
-	Dave Hansen <dave.hansen@linux.intel.com>,
-	David Hildenbrand <david@kernel.org>,
-	Dmitry Vyukov <dvyukov@google.com>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Ingo Molnar <mingo@redhat.com>,
-	Jan Kara <jack@suse.cz>,
-	Johannes Weiner <hannes@cmpxchg.org>,
-	"Liam R. Howlett" <Liam.Howlett@oracle.com>,
-	Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
-	Madhavan Srinivasan <maddy@linux.ibm.com>,
-	Marco Elver <elver@google.com>,
-	Marek Szyprowski <m.szyprowski@samsung.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	Michael Ellerman <mpe@ellerman.id.au>,
-	Michal Hocko <mhocko@suse.com>,
-	Mike Rapoport <rppt@kernel.org>,
-	Nicholas Piggin <npiggin@gmail.com>,
-	"H. Peter Anvin" <hpa@zytor.com>,
-	Rob Herring <robh@kernel.org>,
-	Robin Murphy <robin.murphy@arm.com>,
-	Saravana Kannan <saravanak@kernel.org>,
-	Suren Baghdasaryan <surenb@google.com>,
-	Thomas Gleixner <tglx@kernel.org>,
-	Vlastimil Babka <vbabka@kernel.org>,
-	Will Deacon <will@kernel.org>,
-	Zi Yan <ziy@nvidia.com>,
-	devicetree@vger.kernel.org,
-	iommu@lists.linux.dev,
-	kasan-dev@googlegroups.com,
-	linux-arm-kernel@lists.infradead.org,
-	linux-efi@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mm@kvack.org,
-	linux-trace-kernel@vger.kernel.org,
-	linuxppc-dev@lists.ozlabs.org,
-	sparclinux@vger.kernel.org,
-	x86@kernel.org
-Subject: [PATCH 9/8] memblock tests: add stubs required for free_reserved_area()
-Date: Wed, 18 Mar 2026 22:52:21 +0200
-Message-ID: <20260318205221.1402161-1-rppt@kernel.org>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <20260318105827.1358927-1-rppt@kernel.org>
-References: <20260318105827.1358927-1-rppt@kernel.org>
+	s=k20201202; t=1773877822;
+	bh=6IWzCQaHerAAvhD/9gGP9tDIay/QPLUaKA6cLOAZF60=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+	b=O/wgGU3N7Tvc2nhLZ3qg0Y82l1XO2cSiirCMPhF4+QUX6/lQvBeFSkfL/oSf6KEg7
+	 xhnUBAvlAxLeeY2sdgRd3tv5ALPAhjlTMo5lEVf1JdtAp0goepa3FBcAzRldrZ0P8N
+	 XldUZOOhr7l81nOZjLkbddr1pUHOzA7UpEouEwk1DY2U68ZdpmSEtkbAq5gtED3lGx
+	 HrMHuIq9sHP8ieQVUlCnvvpFq+twwg1RbzqZZcjz4ASUHR7Ex3o/UfFHlUysw7ulHy
+	 G/mZD+p1TO/CIgqQYbGrhNGO7srohL6XeOG22uz8q79GVY6rdcemdv0o7Lyorc0KYa
+	 DifUqmhee9zQg==
+Date: Thu, 19 Mar 2026 08:50:17 +0900
+From: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+To: "Masami Hiramatsu (Google)" <mhiramat@kernel.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>, Ilias Apalodimas
+ <ilias.apalodimas@linaro.org>, Steven Rostedt <rostedt@goodmis.org>, Josh
+ Law <objecting@objecting.org>, Andrew Morton <akpm@linux-foundation.org>,
+ linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [RFC PATCH 1/1] lib/vsprintf: Limit the returning size to
+ INT_MAX
+Message-Id: <20260319085017.f636870059cf37f59b346f5d@kernel.org>
+In-Reply-To: <177379679625.535490.15253547806594621828.stgit@devnote2>
+References: <177379678638.535490.18200744206158553364.stgit@devnote2>
+	<177379679625.535490.15253547806594621828.stgit@devnote2>
+X-Mailer: Sylpheed 3.8.0beta1 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 
-From: "Mike Rapoport (Microsoft)" <rppt@kernel.org>
+On Wed, 18 Mar 2026 10:19:56 +0900
+"Masami Hiramatsu (Google)" <mhiramat@kernel.org> wrote:
 
-After moving free_reserved_area() function to mm/memblock.c memblock
-tests lack stubs for several functions and macros this function calls.
+> From: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+> 
+> There seems a design flaw of vsnprintf() whose return value can
+> overflow the INT_MAX even on 32bit arch, because the buffer size is
+> passed by 'size_t' but it returns the printed or required size in 'int'.
+> 
+> The size_t is unsigned long, thus the caller can pass bigger than INT_MAX
+> as the size of buffer (that is OK). But even the vsnprintf calculates
+> the required/printed length correctly, if it overflows the INT_MAX,
+> it can not return the size correctly by int.
+> 
+> This should never happen but it should be checked and limited.
+> 
+> Signed-off-by: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+> ---
+>  drivers/firmware/efi/libstub/vsprintf.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/firmware/efi/libstub/vsprintf.c b/drivers/firmware/efi/libstub/vsprintf.c
+> index 71c71c222346..1713cacecc25 100644
+> --- a/drivers/firmware/efi/libstub/vsprintf.c
+> +++ b/drivers/firmware/efi/libstub/vsprintf.c
 
-Add them.
+Ooops, I saw a wrong code. Nevermind.
 
-Signed-off-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
----
- tools/include/linux/mm.h          |  1 +
- tools/testing/memblock/internal.h | 28 +++++++++++++++++++++++++---
- 2 files changed, 26 insertions(+), 3 deletions(-)
+> @@ -549,7 +549,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
+>  	if (size)
+>  		buf[min(pos, size-1)] = '\0';
+>  
+> -	return pos;
+> +	return (pos > INT_MAX) ? INT_MAX : pos;
+>  }
+>  
+>  int snprintf(char *buf, size_t size, const char *fmt, ...)
+> 
 
-diff --git a/tools/include/linux/mm.h b/tools/include/linux/mm.h
-index 028f3faf46e7..4407d8396108 100644
---- a/tools/include/linux/mm.h
-+++ b/tools/include/linux/mm.h
-@@ -17,6 +17,7 @@
- 
- #define __va(x) ((void *)((unsigned long)(x)))
- #define __pa(x) ((unsigned long)(x))
-+#define __pa_symbol(x) ((unsigned long)(x))
- 
- #define pfn_to_page(pfn) ((void *)((pfn) * PAGE_SIZE))
- 
-diff --git a/tools/testing/memblock/internal.h b/tools/testing/memblock/internal.h
-index 009b97bbdd22..7ff61172ab24 100644
---- a/tools/testing/memblock/internal.h
-+++ b/tools/testing/memblock/internal.h
-@@ -11,9 +11,16 @@ static int memblock_debug = 1;
- 
- #define pr_warn_ratelimited(fmt, ...)    printf(fmt, ##__VA_ARGS__)
- 
-+#define K(x) ((x) << (PAGE_SHIFT-10))
-+
- bool mirrored_kernelcore = false;
- 
- struct page {};
-+static inline void *page_address(struct page *page)
-+{
-+	BUG();
-+	return page;
-+}
- 
- void memblock_free_pages(unsigned long pfn, unsigned int order)
- {
-@@ -23,10 +30,25 @@ static inline void accept_memory(phys_addr_t start, unsigned long size)
- {
- }
- 
--static inline unsigned long free_reserved_area(void *start, void *end,
--					       int poison, const char *s)
-+unsigned long free_reserved_area(void *start, void *end, int poison, const char *s);
-+void free_reserved_page(struct page *page);
-+
-+static inline bool deferred_pages_enabled(void)
-+{
-+	return false;
-+}
-+
-+#define for_each_valid_pfn(pfn, start_pfn, end_pfn)			 \
-+	for ((pfn) = (start_pfn); (pfn) < (end_pfn); (pfn)++)
-+
-+static inline void *kasan_reset_tag(const void *addr)
-+{
-+	return (void *)addr;
-+}
-+
-+static inline bool __is_kernel(unsigned long addr)
- {
--	return 0;
-+	return false;
- }
- 
- #endif
+
 -- 
-2.51.0
-
+Masami Hiramatsu (Google) <mhiramat@kernel.org>
