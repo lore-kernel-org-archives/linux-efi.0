@@ -1,85 +1,133 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E13922356C6;
-	Wed, 18 Mar 2026 01:20:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 378133AE194;
+	Wed, 18 Mar 2026 10:58:42 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773796801; cv=none; b=pEU/j7W6+5rMKk8lcRv4vUdawZU2HKqr618dy6m0LwEbInct8xkkqessSpBPd4dhkFSqJbB/LNHxB6+LL4wfuAmyLqh0jnE0zmYUHGIFJpuqIbYFubEfKnPXmFKRdoqqkWDWDRwzu0L15voWBlmbNNJKAS0Qb7CqKzNhMbxoAmI=
+	t=1773831522; cv=none; b=FdycXJ70l6vSdQMEqo9QFPndZWiNEPgUAGkp+kwENtYH7YW3wsZ95TBFDjG6r2yoX5JFyuM3jWDCnt7nO0YB4O1rHwY4Gr1rGxXshlbby+AbMmGR9s4vXcvdcyZ6mMUp3LniWzCXC6MpC/M1so67EiYFtyheaO7QlbO+VGAFQBM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773796801; c=relaxed/simple;
-	bh=yAifhaYQwQRjdJupdCMOzJ9YPeXTiObHutsV8aw8X6o=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=GeL1D33h9s3klEyrsj5U7hWV5wW8j+sJbSZxEbfgsHu2equBf5WLj2Plxok6vJbMTvdUP3CXEIq2v9Z3JYFF3KPbMWJC3tGMVs99L2Xf8yNPUk9DZHLWZn9QF009MbfMAURf8LZ6iTxzdP8UetaQWt/gW+uCi4cjJBdYHsFgmG0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MB2Y8Nuj; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1773831522; c=relaxed/simple;
+	bh=kLYySycm4Q+kO2x2jmLEs+z7oAnQtdjmqDIbHrWcbjw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FkrwECbg3IvgAO1goomj0dMiHNJE6Vc3Vq3XhGmg0OFAcloAvlmdMSZsQHZw0d7weI12MXG4mUTP13qATgSV2r0ch+PDyGp3PFIKjEWL6yIcXqNWCVlOG40sZWdTk5OZi0vwa8vzW/Y8Yisl7Ds8CaInm3dmh4arWvTEBi8058E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eKiMcZ85; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MB2Y8Nuj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CA6C3C4CEF7;
-	Wed, 18 Mar 2026 01:19:58 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eKiMcZ85"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 65881C19421;
+	Wed, 18 Mar 2026 10:58:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1773796800;
-	bh=yAifhaYQwQRjdJupdCMOzJ9YPeXTiObHutsV8aw8X6o=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=MB2Y8Nujj7OLQ6XUrzM5gGFaRjeiHEFoJNCKlWSpXyDmJVi3WKMYYYU2BFxMhUa9C
-	 sPKw7cyXkEt+mRLYB3gX4CBSL9/jOVxPqE0Zi3lgjCfyJGF7hasoQAyW3oCUCf6K51
-	 Q26QgBH9qRCEmTQq9aQWswYv1XMcE4mddbMAfhjkxW1sTckcFNkuMAWyikzPVH6Cl6
-	 eyziKzgB/iuFxfM7E7gA+4lMBiZJcZuOE6Gms7dewHPj2hDUlgB5LN1UOkq0LQfrg+
-	 m6zFb8iK+iV5PNTfqT9mjGGG4MX36a/VwGP3XKmkQMR0lnfgQsbBHefkyvMDAeRKVE
-	 38rR4B1l7e2mw==
-From: "Masami Hiramatsu (Google)" <mhiramat@kernel.org>
-To: Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Cc: Steven Rostedt <rostedt@goodmis.org>,
-	Josh Law <objecting@objecting.org>,
-	Andrew Morton <akpm@linux-foundation.org>,
+	s=k20201202; t=1773831521;
+	bh=kLYySycm4Q+kO2x2jmLEs+z7oAnQtdjmqDIbHrWcbjw=;
+	h=From:To:Cc:Subject:Date:From;
+	b=eKiMcZ85WLFC8bXWA/cKx5AD46CSeZMTj7t+7hTK626aenEZLjVU/M1bTaE/8BRRS
+	 X6S1Y6bTAssMWXPL91D/crg1FtPFmAE77lAntj2Q7m/PYz0wUHGJzu4AZOtr5VKYhD
+	 O9x+2NB3x0e+Qee3RPqpqmkTck/x41t2dPoDUPGIkmdpXAuih590JlibeZmTDiQlQj
+	 +q9tqVFXNLT50Bo4J93EDhzKNN36MtH2iOtNw1iebPTvJL5rSLJyP/H3K7GSINY4cU
+	 Jl739DvgI4xC+TxFvGCyIhqDj4Pg7a/bTjrprZ63VJjVDKtRWfpfjBV+NYDfdH+Dsr
+	 4yKWpa/0srIqQ==
+From: Mike Rapoport <rppt@kernel.org>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Alexander Potapenko <glider@google.com>,
+	Alexander Viro <viro@zeniv.linux.org.uk>,
+	Andreas Larsson <andreas@gaisler.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Borislav Petkov <bp@alien8.de>,
+	Brendan Jackman <jackmanb@google.com>,
+	"Christophe Leroy (CS GROUP)" <chleroy@kernel.org>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Christian Brauner <brauner@kernel.org>,
+	"David S. Miller" <davem@davemloft.net>,
+	Dave Hansen <dave.hansen@linux.intel.com>,
+	David Hildenbrand <david@kernel.org>,
+	Dmitry Vyukov <dvyukov@google.com>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Ingo Molnar <mingo@redhat.com>,
+	Jan Kara <jack@suse.cz>,
+	Johannes Weiner <hannes@cmpxchg.org>,
+	"Liam R. Howlett" <Liam.Howlett@oracle.com>,
+	Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
+	Madhavan Srinivasan <maddy@linux.ibm.com>,
+	Marco Elver <elver@google.com>,
+	Marek Szyprowski <m.szyprowski@samsung.com>,
 	Masami Hiramatsu <mhiramat@kernel.org>,
+	Michael Ellerman <mpe@ellerman.id.au>,
+	Michal Hocko <mhocko@suse.com>,
+	Mike Rapoport <rppt@kernel.org>,
+	Nicholas Piggin <npiggin@gmail.com>,
+	"H. Peter Anvin" <hpa@zytor.com>,
+	Rob Herring <robh@kernel.org>,
+	Robin Murphy <robin.murphy@arm.com>,
+	Saravana Kannan <saravanak@kernel.org>,
+	Suren Baghdasaryan <surenb@google.com>,
+	Thomas Gleixner <tglx@kernel.org>,
+	Vlastimil Babka <vbabka@kernel.org>,
+	Will Deacon <will@kernel.org>,
+	Zi Yan <ziy@nvidia.com>,
+	devicetree@vger.kernel.org,
+	iommu@lists.linux.dev,
+	kasan-dev@googlegroups.com,
+	linux-arm-kernel@lists.infradead.org,
 	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [RFC PATCH 1/1] lib/vsprintf: Limit the returning size to INT_MAX
-Date: Wed, 18 Mar 2026 10:19:56 +0900
-Message-ID: <177379679625.535490.15253547806594621828.stgit@devnote2>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <177379678638.535490.18200744206158553364.stgit@devnote2>
-References: <177379678638.535490.18200744206158553364.stgit@devnote2>
-User-Agent: StGit/0.19
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-mm@kvack.org,
+	linux-trace-kernel@vger.kernel.org,
+	linuxppc-dev@lists.ozlabs.org,
+	sparclinux@vger.kernel.org,
+	x86@kernel.org
+Subject: [PATCH 0/8] memblock: improve late freeing of reserved memory
+Date: Wed, 18 Mar 2026 12:58:19 +0200
+Message-ID: <20260318105827.1358927-1-rppt@kernel.org>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 
-From: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+From: "Mike Rapoport (Microsoft)" <rppt@kernel.org>
 
-There seems a design flaw of vsnprintf() whose return value can
-overflow the INT_MAX even on 32bit arch, because the buffer size is
-passed by 'size_t' but it returns the printed or required size in 'int'.
+Hi,
 
-The size_t is unsigned long, thus the caller can pass bigger than INT_MAX
-as the size of buffer (that is OK). But even the vsnprintf calculates
-the required/printed length correctly, if it overflows the INT_MAX,
-it can not return the size correctly by int.
+Following a recent discussion about leaks in x86 EFI [1], I audited usage of
+memblock_free_late() and free_reserved_area() and made some imporovements how
+we handle late freeing of the memory allocated with memblock.
 
-This should never happen but it should be checked and limited.
+[1] https://lore.kernel.org/all/ec2aaef14783869b3be6e3c253b2dcbf67dbc12a.camel@kernel.crashing.org/
 
-Signed-off-by: Masami Hiramatsu (Google) <mhiramat@kernel.org>
----
- drivers/firmware/efi/libstub/vsprintf.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Mike Rapoport (Microsoft) (8):
+  powerpc: fadump: pair alloc_pages_exact() with free_pages_exact()
+  powerpc: opal-core: pair alloc_pages_exact() with free_pages_exact()
+  mm: move free_reserved_area() to mm/memblock.c
+  memblock: make free_reserved_area() more robust
+  memblock: extract page freeing from free_reserved_area() into a helper
+  memblock: make free_reserved_area() update memblock if ARCH_KEEP_MEMBLOCK=y
+  memblock, treewide: make memblock_free() handle late freeing
+  memblock: warn when freeing reserved memory before memory map is
+    initialized
 
-diff --git a/drivers/firmware/efi/libstub/vsprintf.c b/drivers/firmware/efi/libstub/vsprintf.c
-index 71c71c222346..1713cacecc25 100644
---- a/drivers/firmware/efi/libstub/vsprintf.c
-+++ b/drivers/firmware/efi/libstub/vsprintf.c
-@@ -549,7 +549,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
- 	if (size)
- 		buf[min(pos, size-1)] = '\0';
- 
--	return pos;
-+	return (pos > INT_MAX) ? INT_MAX : pos;
- }
- 
- int snprintf(char *buf, size_t size, const char *fmt, ...)
+ arch/arm64/mm/init.c                       |   3 -
+ arch/powerpc/kernel/fadump.c               |  16 +--
+ arch/powerpc/platforms/powernv/opal-core.c |   9 +-
+ arch/sparc/kernel/mdesc.c                  |   4 +-
+ arch/x86/kernel/setup.c                    |   2 +-
+ arch/x86/platform/efi/memmap.c             |   5 +-
+ arch/x86/platform/efi/quirks.c             |   2 +-
+ drivers/firmware/efi/apple-properties.c    |   2 +-
+ drivers/of/kexec.c                         |   2 +-
+ include/linux/memblock.h                   |   2 -
+ init/initramfs.c                           |   7 --
+ kernel/dma/swiotlb.c                       |   6 +-
+ lib/bootconfig.c                           |   2 +-
+ mm/internal.h                              |  10 ++
+ mm/kfence/core.c                           |   4 +-
+ mm/memblock.c                              | 110 ++++++++++++++-------
+ mm/page_alloc.c                            |  46 ---------
+ 17 files changed, 102 insertions(+), 130 deletions(-)
 
+
+base-commit: 1f318b96cc84d7c2ab792fcc0bfd42a7ca890681
+--
+2.51.0
