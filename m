@@ -1,53 +1,53 @@
 Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE3783B8BAE
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2518A3B27E3
 	for <linux-efi@vger.kernel.org>; Thu, 19 Mar 2026 09:06:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773911184; cv=none; b=SuHPRinEfgOLXcxpyFt0mLi33gyM7NiwyaMrO/uIhcZ11o4p+GfB/2kP9onH/UKNj9WND9znXCT4UtQBgzQ72u/dvLYEXBeCrko3/35mKuPIZgGaCb8V9rkNyCEvXs5TBzt52Fuqe31jV8iMeC7WEvaR5gJLBnxiqICS7YiQ0qs=
+	t=1773911185; cv=none; b=stovC5rwaVEEqNdvXER8IUkqtPEx2LOxEjGA0GJyRSG4JLvnTUSaYGOT9HZdfPWiFp3Qk7EgtXB2tnedckwwRn6kkCJrChnD0D2wX7SrwHusY/R5x250uSe3qJyjQb9W8lf94c3TYtg3JZxAxbrGJLvbMKZfLp5x6zTJ50TFZ9o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773911184; c=relaxed/simple;
-	bh=mj1/FdNrxSJomn4MqIFLdYl2xhCRYAPFvrFp7cM1XGg=;
+	s=arc-20240116; t=1773911185; c=relaxed/simple;
+	bh=nI4mHJyEteFzkyvhEuW7RcAeMyYIXmhiDsYHb2L7p68=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=S2wyFVSaf38/A+Uq6ucnkAY8UclGTPojKTRG8CNykl+QhBJYOo+ps1r8+MNgmxFREv+piCUBDeUrYtVgHAhoqiOaYHm/A+RArO3zd6OcKSOuSYQem9y20eb8EYb3PNO7oU0lEFwAw7t2cOLufqutj1JGE1dUmOFG/QmTxQXWhXI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=FWZ1d8y+; arc=none smtp.client-ip=209.85.128.74
+	 To:Cc:Content-Type; b=dsd3e8qwn7vneJStYQljr4iYPjIaZXnuw8YNThD0q2i0L2CRnOdayKhz1/NqUjbE9XzKgclbO9MjF7XZ2SwERIkPybvtFjO+cA3/hjPEiDnq+PcYfo2mIuZ+VQlWFzN6pTiatgHBYqDSQfkaff0jC0b61jkpL9hThQ7PRhxr7Z0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=neXXHhvo; arc=none smtp.client-ip=209.85.128.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="FWZ1d8y+"
-Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-4853466655dso9566255e9.3
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="neXXHhvo"
+Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-48544725bdeso4008895e9.2
         for <linux-efi@vger.kernel.org>; Thu, 19 Mar 2026 02:06:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1773911181; x=1774515981; darn=vger.kernel.org;
+        d=google.com; s=20251104; t=1773911180; x=1774515980; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=FUd0sbvQPAQ2xS+BnxTruRhjwkkPtC2MAYLp44Di0G0=;
-        b=FWZ1d8y+uyicpXySBLl5Rz1PHbCmma5CJrIfZm1F3nnwgRtiQFXuqiKwtd7d/tLzdd
-         ZbStXY3oennDnoTUh2l861GRV29V8+C+mmG4gkS1ZAIIDBjjDKPA/1XmAe2BKS/ra53u
-         FYaZe48LBHAt3Oh6cpv5V+fGD/WVUMBEGspknLVI9506zWT0mkLWLgxJJ91WW2gIXHeC
-         7coQ15VLnKVImMksdtcntoG9fnc6tFAZqZEfd581atiAgfbyugmRXu94pn+Dq/Uj9KYy
-         QgRByIFLEEK4ZZ4ApeZcVQ5rlmW2A1XRPU0O/Ql742XZzFHqxyWtCVQjy0OrQJ+hSMyG
-         I2gg==
+        bh=URGE+FNnkxaT+QXVuJx3nb8mizqLFv3DlCZi6MMrS8M=;
+        b=neXXHhvoiuF3UPY1TF+kV9uWak3RFLPiHxDGCNEuF+Ic5DWqbmOfIPiVRyEGcwPzCd
+         T6WUc1Z/gou4xPtlSgmvvb+tdgOeHKzURrLeRsEto9WHb/ZHX/Yvq1Bb94/iSO847E0H
+         ClrHhMyhmMk/WcuWV5YM1lQHxruckzk6YU3kqlnQk/TxRivvyOEo5l5v5kFcRYxjAJin
+         +yZPPSgzhN2Tz05pl60nM4BpmkC8IIjdCKC00lWGFs9Marg7aFMZZjcWOWHsd+1ASgKJ
+         AeLstJVPxqfhJEVmzxzg2y0FgCTXCByfac/BbAFShcsbEjxept1CEM/+LiOBTTXVo6xk
+         iR0g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20251104; t=1773911181; x=1774515981;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=FUd0sbvQPAQ2xS+BnxTruRhjwkkPtC2MAYLp44Di0G0=;
-        b=Z5P9YykgPg2NFchxDbP1FNiBHlNBclTQ8ZvQUsG5qFS9kcAbCEYEzI1pJdCVS2GAZ1
-         ZzEMOMWyGjQnuVmlO0RWBrotI0VLhrxQuXMf1xZsh+6uD/RNYchacNHREMs0pHrmaaRs
-         9ERTQ5e4j8KjaBVL/9vqrH+Me1oWhMpijBSGv/Ab+IpFKH4lOfNSf3/zhnf7lPCfaAbE
-         ConcAwIseLFpVbOU+fHwJSzuMdUC1o5VMudQT23PgxKGAMo6kQyNhxjEIcKrTnKTPGrN
-         mMi9f+mOD4dgRLgGXC3vdu/Nw63bZy67zmvoRmJ+M2ppn3rYT1VCcDlw9iswHq6OUi7H
-         b1Ng==
-X-Gm-Message-State: AOJu0Yyb1KZOVrylc1gbIB9/P8ry+t+myebXSvg8YNofiDb2JqNPjxWh
-	UKiW05pUyMJGqCf39R7mSZ6q1skhao3l7FYEgTaFZMDQlF4+SJEGHYtwT3giSlA7aAfQxhvKwg=
+        bh=URGE+FNnkxaT+QXVuJx3nb8mizqLFv3DlCZi6MMrS8M=;
+        b=Kh58zKYOtt3+WVmW6XL48D/kClaLaEsU05fgQv7TdmEegjl05R+RWmJYuJXu1r/8je
+         0QLeqwLtDxVZtcz5sjQXsJgZCCH2GUVV7Z6k3btk5F0FTPgehPQsn+AcEDQQ0g8qSoYv
+         ErRvLHN54QAxDZ5ljSOAeAlXr5cMunKZUvyTmoLltYOJHDPqmBobd+lmY+UlIhV+JEny
+         /gwrrYYkXei+3VZg+3lsJti4O2Ntf6mCm1fXA6cetIjMXTwyPk8U4VtstyHASUJDwkDM
+         xzTftj84izcGb9XdlvVW25ak1PW+rrOhbrG4rtYwardxZZCojCcfhUIDX94icqdniDub
+         WKWA==
+X-Gm-Message-State: AOJu0YyiE2Abzi7NCWfn9aKnKsVHOFuolVlPp4Is6brN1KjMYPMETCxd
+	yBiTRpNKG6iEV418RlEC9v4GiaTzr5nnO3x0x73b7vDrER/DmRzdzzsnrN9pzOXM9GHKVlSv7Q=
 	=
-X-Received: from wmla9.prod.google.com ([2002:a05:600d:2389:b0:483:2ce9:2b05])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:19d4:b0:483:6a8d:b2f9
- with SMTP id 5b1f17b1804b1-486f4440f10mr104373905e9.5.1773911181125; Thu, 19
- Mar 2026 02:06:21 -0700 (PDT)
-Date: Thu, 19 Mar 2026 10:05:48 +0100
+X-Received: from wrwr1.prod.google.com ([2002:a5d:6941:0:b0:439:cf20:ddf7])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:198f:b0:485:5981:1411
+ with SMTP id 5b1f17b1804b1-486f4472ee8mr109908875e9.23.1773911180344; Thu, 19
+ Mar 2026 02:06:20 -0700 (PDT)
+Date: Thu, 19 Mar 2026 10:05:47 +0100
 In-Reply-To: <20260319090529.1091660-21-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -57,15 +57,14 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20260319090529.1091660-21-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3551; i=ardb@kernel.org;
- h=from:subject; bh=RgYBBHo63dVXcto8c6eRW4IKNVj2ghfqwhRHPXlXxVo=;
- b=kA0DAAoWMG4JVi59LVwByyZiAGm7vHDIobmpC70ggS1pj4SINEncGlW8wWrCfQ0jZalrKMRXE
- 4h1BAAWCgAdFiEEEJv97rnLkRp9Q5odMG4JVi59LVwFAmm7vHAACgkQMG4JVi59LVxv0gD/aujA
- z6zrIy1wbJRsucHeItyXF97MaCh3f6yCiQw6osIBALb4WdyVOHpr3KsQxhZgsDHRj0VeMhhAEog 4NeVDeFUO
+X-Developer-Signature: v=1; a=openpgp-sha256; l=5938; i=ardb@kernel.org;
+ h=from:subject; bh=eNWFdjaeeovD+4Yb/UStx9oLjOGRMrmlsCh1tKCjcgI=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIXP3nvy39kftbt9f8+z3rwD9C1rfEnQ6+97uatHlyVg7M
+ 4A5Le9gRykLgxgXg6yYIovA7L/vdp6eKFXrPEsWZg4rE8gQBi5OAZiI+QuG/94rHGOtDsv8Mdb5
+ U9hRKR+bPGFi3d75roz8ftfN52mXzmRk6Fi306h9rczpvav4ddku2jw/UfM+Y6I8p6L1A2ur2ux cRgA=
 X-Mailer: git-send-email 2.53.0.851.ga537e3e6e9-goog
-Message-ID: <20260319090529.1091660-39-ardb+git@google.com>
-Subject: [PATCH v2 18/19] x86/efi: Do not abuse RUNTIME bit to mark boot
- regions as reserved
+Message-ID: <20260319090529.1091660-38-ardb+git@google.com>
+Subject: [PATCH v2 17/19] x86/efi: Defer compaction of the EFI memory map
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, x86@kernel.org, 
@@ -75,98 +74,185 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-efi_reserve_boot_regions() marks all EFI boot services memory regions as
-memblock_reserve()'d temporarily, so that they can be mapped in the EFI
-page tables during the call to the SetVirtualAddressMap() runtime
-service.
+Currently, the EFI memory map is compacted early at boot, to leave only
+the entries that are significant to the current kernel or potentially a
+kexec'ed kernel that comes after, and to suppress all boot services code
+and data entries that have no correspondence with anything that either
+the firmware or the kernel treats as reserved for firmware use.
 
-This means it has to take care to distinguish between regions that are
-entirely unused from regions that are already covered by some prior
-reservations, either by the kernel itself via memblock, or via the
-firmware or bootloader via the E820 map.
+Given that actually freeing those regions to the page allocator is not
+possible yet at this point, those suppressed entries are converted into
+yet another type of temporary memory reservation map, and freed during
+an arch_initcall(), which is the earliest convenient time to actually
+perform this operation.
 
-For this reason, it only memblock_reserve()'s boot services regions that
-are not covered by any prior memblock reservation. Otherwise, it will
-set the EFI_MEMORY_RUNTIME flag for the region, which indicates to the
-freeing code that runs later that the region must remain reserved.
-
-It also sets the EFI_MEMORY_RUNTIME flag for the region if it covers any
-E820 region that is not E820_RAM, so that -again- the entire region
-remains reserved indefinitely.
-
-This is inefficient, and abusing the EFI_MEMORY_RUNTIME flag for this is
-not great either. It would be better to respect the actual memblock or
-E820 reservations instead, which is feasible now that the freeing code
-takes the MEMBLOCK_RSRV_KERN flag into account.
-
-So drop the EFI_MEMORY_RUNTIME hack, and instead, respect existing
-memblock reservations by upgrading them to MEMBLOCK_RSRV_KERN
-reservations. Take E820 reservations into account by cross-referencing
-them with the EFI and memblock reservations when actually returning the
-pages back to the page allocator.
+Given that compacting the memory map does not need to occur that early
+to begin with, move it to the arch_initcall(). This removes the need for
+the special memory reservation map, as the entries still exist at this
+point, and can be consulted directly to decide whether they need to be
+preserved in their entirety or only partially.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/platform/efi/quirks.c | 29 ++++++--------------
- 1 file changed, 9 insertions(+), 20 deletions(-)
+ arch/x86/platform/efi/quirks.c | 110 +++++++-------------
+ 1 file changed, 39 insertions(+), 71 deletions(-)
 
 diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index bc9dfe7925aa..8f2dc477eee0 100644
+index dc90c35480f8..bc9dfe7925aa 100644
 --- a/arch/x86/platform/efi/quirks.c
 +++ b/arch/x86/platform/efi/quirks.c
-@@ -298,26 +298,13 @@ void __init efi_reserve_boot_services(void)
- 		 */
- 		if (!already_reserved) {
- 			memblock_reserve(start, size);
--
-+		} else {
- 			/*
--			 * If we are the first to reserve the region, no
--			 * one else cares about it. We own it and can
--			 * free it later.
-+			 * Mark existing reservations as MEMBLOCK_RSRV_KERN so
-+			 * they will be respected by efi_free_boot_services().
- 			 */
--			if (can_free_region(start, size))
--				continue;
-+			memblock_reserved_mark_kern(start, size);
- 		}
--
--		/*
--		 * We don't own the region. We must not free it.
--		 *
--		 * Setting this bit for a boot services region really
--		 * doesn't make sense as far as the firmware is
--		 * concerned, but it does provide us with a way to tag
--		 * those regions that must not be paired with
--		 * memblock_free_late().
--		 */
--		md->attribute |= EFI_MEMORY_RUNTIME;
- 	}
+@@ -347,36 +347,11 @@ static void __init efi_unmap_pages(efi_memory_desc_t *md)
+ 		pr_err("Failed to unmap VA mapping for 0x%llx\n", va);
  }
  
-@@ -392,6 +379,9 @@ efi_free_unreserved_subregions(u64 range_start, u64 range_end)
- 		if (start >= end)
- 			continue;
+-struct efi_freeable_range {
+-	u64 start;
+-	u64 end;
+-};
+-
+-static struct efi_freeable_range *ranges_to_free;
+-
+ void __init efi_unmap_boot_services(void)
+ {
+ 	efi_memory_desc_t *md;
+-	void *new_md;
+-	int idx = 0;
+-	size_t sz;
  
-+		if (!can_free_region(start, end - start))
-+			continue;
-+
- 		free_reserved_area(phys_to_virt(start),
- 				   phys_to_virt(end), -1, NULL);
- 		freed += (end - start);
-@@ -428,9 +418,8 @@ static int __init efi_free_boot_services(void)
- 		if (md_start >= md_end)
+-	/* Keep all regions for /sys/kernel/debug/efi */
+-	if (efi_enabled(EFI_DBG))
+-		return;
+-
+-	sz = sizeof(*ranges_to_free) * efi.memmap.num_valid_entries + 1;
+-	ranges_to_free = kzalloc(sz, GFP_KERNEL);
+-	if (!ranges_to_free) {
+-		pr_err("Failed to allocate storage for freeable EFI regions\n");
+-		return;
+-	}
+-
+-	new_md = efi.memmap.map;
+ 	for_each_efi_memory_desc(md) {
+-		unsigned long long start = md->phys_addr;
+-		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
+-
+ 		if (md->type != EFI_BOOT_SERVICES_CODE &&
+ 		    md->type != EFI_BOOT_SERVICES_DATA) {
  			continue;
- 
+@@ -385,47 +360,10 @@ void __init efi_unmap_boot_services(void)
+ 		/*
+ 		 * Before calling set_virtual_address_map(), EFI boot services
+ 		 * code/data regions were mapped as a quirk for buggy firmware.
+-		 * Unmap them from efi_pgd before freeing them up.
++		 * Unmap them from efi_pgd, they will be freed later.
+ 		 */
+ 		efi_unmap_pages(md);
+-
+-		/* Do not free, someone else owns it: */
+-		if ((md->attribute & EFI_MEMORY_RUNTIME) ||
+-		    !can_free_region(start, size)) {
+-			continue;
+-		}
+-
+-		/*
+-		 * With CONFIG_DEFERRED_STRUCT_PAGE_INIT parts of the memory
+-		 * map are still not initialized and we can't reliably free
+-		 * memory here.
+-		 * Queue the ranges to free at a later point.
+-		 */
+-		ranges_to_free[idx].start = start;
+-		ranges_to_free[idx].end = start + size;
+-		idx++;
+ 	}
+-
+-	/*
+-	 * Build a new EFI memmap that excludes any boot services
+-	 * regions that are not tagged EFI_MEMORY_RUNTIME, since those
+-	 * regions have now been freed.
+-	 */
+-	new_md = efi.memmap.map;
+-	for_each_efi_memory_desc(md) {
 -		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
 -		    (md->type == EFI_BOOT_SERVICES_CODE ||
--		     md->type == EFI_BOOT_SERVICES_DATA)) {
-+		if (md->type == EFI_BOOT_SERVICES_CODE ||
-+		    md->type == EFI_BOOT_SERVICES_DATA) {
- 			u64 f = efi_free_unreserved_subregions(md_start, md_end);
+-		     md->type == EFI_BOOT_SERVICES_DATA) &&
+-		    can_free_region(md->phys_addr,
+-				    md->num_pages << EFI_PAGE_SHIFT)) {
+-			continue;
+-		}
+-
+-		memcpy(new_md, md, efi.memmap.desc_size);
+-		new_md += efi.memmap.desc_size;
+-	}
+-
+-	efi.memmap.num_valid_entries = (new_md - efi.memmap.map) / efi.memmap.desc_size;
+ }
  
- 			/*
+ static unsigned long __init
+@@ -464,27 +402,57 @@ efi_free_unreserved_subregions(u64 range_start, u64 range_end)
+ 
+ static int __init efi_free_boot_services(void)
+ {
+-	struct efi_freeable_range *range = ranges_to_free;
+ 	unsigned long freed = 0;
++	efi_memory_desc_t *md;
++	void *new_md;
++
++	/* No EFI memory map or it came from the preceding kernel? */
++	if (efi_setup || !efi_enabled(EFI_MEMMAP))
++		return 0;
+ 
+-	if (!ranges_to_free)
++	/* Keep all regions for /sys/kernel/debug/efi */
++	if (efi_enabled(EFI_DBG))
+ 		return 0;
+ 
+-	while (range->start) {
++	new_md = efi.memmap.map;
++	for_each_efi_memory_desc(md) {
+ 		/*
+ 		 * Don't free memory under 1M for two reasons:
+ 		 * - BIOS might clobber it
+ 		 * - Crash kernel needs it to be reserved
+ 		 */
+-		u64 start = max(range->start, SZ_1M);
++		u64 md_start = max(md->phys_addr, SZ_1M);
++		u64 md_end = md->phys_addr + md->num_pages * EFI_PAGE_SIZE;
++		bool preserve_entry = md->attribute & EFI_MEMORY_RUNTIME;
+ 
+-		if (start >= range->end)
++		if (md_start >= md_end)
+ 			continue;
+ 
+-		freed += efi_free_unreserved_subregions(start, range->end);
+-		range++;
++		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
++		    (md->type == EFI_BOOT_SERVICES_CODE ||
++		     md->type == EFI_BOOT_SERVICES_DATA)) {
++			u64 f = efi_free_unreserved_subregions(md_start, md_end);
++
++			/*
++			 * Omit the memory map entry of this region only if it
++			 * has been freed entirely. This ensures that boot data
++			 * regions for things like ESRT and BGRT tables carry
++			 * over correctly during kexec.
++			 */
++			if (f < md_end - md_start)
++				preserve_entry = true;
++
++			freed += f;
++		}
++
++		if (preserve_entry) {
++			if (new_md != md)
++				memcpy(new_md, md, efi.memmap.desc_size);
++			new_md += efi.memmap.desc_size;
++		}
+ 	}
+-	kfree(ranges_to_free);
++
++	efi.memmap.num_valid_entries = (new_md - efi.memmap.map) / efi.memmap.desc_size;
+ 
+ 	if (freed)
+ 		pr_info("Freeing EFI boot services memory: %ldK\n", freed / SZ_1K);
 -- 
 2.53.0.851.ga537e3e6e9-goog
 
