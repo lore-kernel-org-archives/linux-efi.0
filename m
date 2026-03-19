@@ -1,150 +1,157 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f73.google.com (mail-wm1-f73.google.com [209.85.128.73])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3537E54B;
-	Thu, 19 Mar 2026 00:07:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A0003AEF2D
+	for <linux-efi@vger.kernel.org>; Thu, 19 Mar 2026 09:06:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773878831; cv=none; b=nAPL41TETr7iWC4RkMNX3iHjG+35E3bwwUPKF1ZU7qUFk9YqY6f7MfkiSJwBWjxFohA7bWEset4R3zLKqyVoewvhKMNEmHSv7TTySOQyalSKtF6Q+9ylHsKuzl3ltOWO7baBhjekI6GKaa1yMLCEBbLAmIx58s6mzran0i3GIAQ=
+	t=1773911166; cv=none; b=DKLWwwC4dQsquchDPMSCHuXrNGvhmQGhwFBy8FMsoDsQraMn3BA/BubQN7/dkjVYMo14AtgtbUPdr7ifgySx0Zlw/NkzlSC0RFjlHq66oQVo0DyWmUHIXvkpDx3dvBK8Ia7oOVbo/8ryLR/hTNvrtNDWq60QaEylqwSYA+MMlak=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773878831; c=relaxed/simple;
-	bh=QLqSvP0FhwGkNF1lUURbKaXvOWYhMfVrXp9IZq9ijWE=;
-	h=Date:From:To:Cc:Subject:Message-Id:In-Reply-To:References:
-	 Mime-Version:Content-Type; b=cu9VJIH2j0LeHplO/KG2dRRQh4I50HVzKb9zsfgSqF8qu7tlt+niLyu+oFWAV3nHwog6PYNXtPYg1SMa/Lyvv69EpMOidsCkQjR9HK0PJ02TdhxMqLwjLpyeR2ZSn2ylQcyUYDMZwhS507XvaEBM7quHSNJuTuJ6amOyqiJ1EVI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GaQzIcbj; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1773911166; c=relaxed/simple;
+	bh=UhRbffPHR4xaRrOY3SlHxBc36WXKGHb7cGdhs1/qzuo=;
+	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=r0+4ZOfN3c+CaUUIIZtl0vvD8hIY5Jk4CN8/408nbToR+MAnXOFhLN0FqpLtFwahxwflPXYj7ADmLmvw1b50YAw7i8xT74dHrwtDlo+sJXB6U9X4BFEJUs/2SMx4DA9IynFWAveFGa0OBS2TsKkfyxvh0wfw29VLTQV82JIvmCs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=akA6197h; arc=none smtp.client-ip=209.85.128.73
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GaQzIcbj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2CFA0C19421;
-	Thu, 19 Mar 2026 00:07:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1773878830;
-	bh=QLqSvP0FhwGkNF1lUURbKaXvOWYhMfVrXp9IZq9ijWE=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-	b=GaQzIcbjeAzFL6/7e2UgzIHLYXizYYZ+5WaHL2nSZG2mqhuqVERSTxp/t8XgycMfi
-	 DI8/EW00/cuGF0PC59Cyd9Aj2kPURh8iWo4LTHatJ8qm+LfF4nIEiYUlmuM4qiQd0i
-	 w3dVqm9cfUro+4hakU2MgSNzTk2lyYYPbYyj3SqdjQ79bdye+iuFeR9hpvKTFOx+tk
-	 HkmAf4ibFRXF4cGWSRnQuf0HDNUHUBFskWRD41e7sHOenpCYcRrbWxoFT+LiWlQY4v
-	 KELhCgwkC64IVyeWJh/fZMZhdBnDtjp9gR+vNb4VUUd+eAEm5Tdvu3xzcIYQ3jY393
-	 zZCLJBJCzhggA==
-Date: Thu, 19 Mar 2026 09:07:05 +0900
-From: Masami Hiramatsu (Google) <mhiramat@kernel.org>
-To: David Laight <david.laight.linux@gmail.com>
-Cc: Steven Rostedt <rostedt@goodmis.org>, "Masami Hiramatsu (Google)"
- <mhiramat@kernel.org>, Ard Biesheuvel <ardb@kernel.org>, Ilias Apalodimas
- <ilias.apalodimas@linaro.org>, Josh Law <objecting@objecting.org>, Andrew
- Morton <akpm@linux-foundation.org>, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Subject: Re: [RFC PATCH 1/1] lib/vsprintf: Limit the returning size to
- INT_MAX
-Message-Id: <20260319090705.5e8e9b01c00558d4af512356@kernel.org>
-In-Reply-To: <20260318151250.40fef0ab@pumpkin>
-References: <177379678638.535490.18200744206158553364.stgit@devnote2>
-	<177379679625.535490.15253547806594621828.stgit@devnote2>
-	<20260318094733.1ada0513@gandalf.local.home>
-	<20260318151250.40fef0ab@pumpkin>
-X-Mailer: Sylpheed 3.8.0beta1 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="akA6197h"
+Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-4839fc4cef6so18557665e9.0
+        for <linux-efi@vger.kernel.org>; Thu, 19 Mar 2026 02:06:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20251104; t=1773911161; x=1774515961; darn=vger.kernel.org;
+        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=lqHnVRy+4N6H3/myt2w5WB+syGlQGLfAKUfJ5JisA6E=;
+        b=akA6197hYivUcU40cQjGB/FCIMNdxWcfo2m8ddPhSsO5Ec7DtEhlvEaYOyRLgq21S8
+         ZcmEhuzz7BeZUhHMyagZqDAszrSrJCquLRkTmV58LXV4yYYIILXLbRR8iD3gaF08SHDH
+         P++fron2QrRuO5Va+n1LxY4cjxccJlr3iIl9HcTEZuH1VQCpt4Ur8bBK/TMsb4pNi90F
+         fCQfCNCQ6xTyERqO2bXVIY60LW9CgH5l1/8igyy+l1naW7Vq1ApxhN74abuQQRJatpID
+         bpXgawVq8CzyJYoCsWQ2xGBdx8QSLQ43Te8btDELHomr5XFnOQjwdm2yP0E0Nb3cAsEO
+         EE6A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1773911161; x=1774515961;
+        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=lqHnVRy+4N6H3/myt2w5WB+syGlQGLfAKUfJ5JisA6E=;
+        b=KeFP/NDe+cBxawMFENdy1RaACLZX+OwDKd/IQkIOeGlkOjMVTraDgy2OaCoQzE7Ctq
+         rqj93orpJZcqB5lEonSt41Hepkfrgkj+d8atmlzrIENyzj9K9uKqBOhilQpehSd0aoc4
+         MocjfMQNiUR0c3H8d5xMFnnEpHZyaYFsKuPWBzfmdncuTj1bOLofAaxSgwpGtyGlpXJD
+         nd2xgP29y65Eh2VmsYSWDA7oSAaSgAxPSPOB5A2UaGy8jtdnQ0VqADILp4rVLZhG6SNh
+         D+Ha9AuNB6frRlUJmLSHB/tDAazZtjO2M4xsQ02IsMqQAzBzonDdlh/N1cMEBCF3doty
+         +G6A==
+X-Gm-Message-State: AOJu0Ywlas2I0gECt69CzqqtsRn8iIihhd9ydPtugdg5VsCMs48GuIaO
+	7jBjVNfUvgJ2ujqqq9zP1PhTxBv6MXmTNNacusnuZoMBZ5K6vWGMLycD/DxVB5TE1YVwem4W4g=
+	=
+X-Received: from wmqn21.prod.google.com ([2002:a05:600c:4f95:b0:480:4be7:3f3a])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:8b10:b0:486:f893:56c6
+ with SMTP id 5b1f17b1804b1-486f8b46651mr40619935e9.10.1773911161203; Thu, 19
+ Mar 2026 02:06:01 -0700 (PDT)
+Date: Thu, 19 Mar 2026 10:05:30 +0100
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3964; i=ardb@kernel.org;
+ h=from:subject; bh=C29TbN8FYL2Jar0q2tz+iaf8aS/IZ1gkOCU4Mq+Lfxw=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIXP3niiOGc2NXsfmsm5Y0/3iTymLFROHY+29qWY737dsb
+ lPjUdnXUcrCIMbFICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACZypYKRYVefqlHtvJRMscsL
+ V7CXaKu9vH7uxHZ35w2P7i98uGFyzwuGv/IaBi5zX5cutFSY/uTaa69XXhlbX5o57eKftargjde +bCYA
+X-Mailer: git-send-email 2.53.0.851.ga537e3e6e9-goog
+Message-ID: <20260319090529.1091660-21-ardb+git@google.com>
+Subject: [PATCH v2 00/19] efi/x86: Avoid the need to mangle the EFI memory map
+From: Ard Biesheuvel <ardb+git@google.com>
+To: linux-kernel@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, x86@kernel.org, 
+	Ard Biesheuvel <ardb@kernel.org>, "Mike Rapoport (Microsoft)" <rppt@kernel.org>, 
+	Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 18 Mar 2026 15:12:50 +0000
-David Laight <david.laight.linux@gmail.com> wrote:
+From: Ard Biesheuvel <ardb@kernel.org>
 
-> On Wed, 18 Mar 2026 09:47:33 -0400
-> Steven Rostedt <rostedt@goodmis.org> wrote:
-> 
-> > On Wed, 18 Mar 2026 10:19:56 +0900
-> > "Masami Hiramatsu (Google)" <mhiramat@kernel.org> wrote:
-> > 
-> > > From: Masami Hiramatsu (Google) <mhiramat@kernel.org>
-> > > 
-> > > There seems a design flaw of vsnprintf() whose return value can
-> > > overflow the INT_MAX even on 32bit arch, because the buffer size is
-> > > passed by 'size_t' but it returns the printed or required size in 'int'.
-> > > 
-> > > The size_t is unsigned long, thus the caller can pass bigger than INT_MAX
-> > > as the size of buffer (that is OK). But even the vsnprintf calculates
-> > > the required/printed length correctly, if it overflows the INT_MAX,
-> > > it can not return the size correctly by int.
-> > > 
-> > > This should never happen but it should be checked and limited.
-> > > 
-> > > Signed-off-by: Masami Hiramatsu (Google) <mhiramat@kernel.org>
-> > > ---
-> > >  drivers/firmware/efi/libstub/vsprintf.c |    2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > 
-> > > diff --git a/drivers/firmware/efi/libstub/vsprintf.c b/drivers/firmware/efi/libstub/vsprintf.c
-> > > index 71c71c222346..1713cacecc25 100644
-> > > --- a/drivers/firmware/efi/libstub/vsprintf.c
-> > > +++ b/drivers/firmware/efi/libstub/vsprintf.c
-> > > @@ -549,7 +549,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
-> > >  	if (size)
-> > >  		buf[min(pos, size-1)] = '\0';
-> > >  
-> > > -	return pos;
-> > > +	return (pos > INT_MAX) ? INT_MAX : pos;
-> > >  }
-> > >  
-> > >  int snprintf(char *buf, size_t size, const char *fmt, ...)  
-> > 
-> > Since this would require a buffer of size greater than 2G to be passed in,
-> > I highly doubt this would happen anywhere in the kernel.
-> > 
-> > If anything, it would be for "correctness" only, but I don't see this ever
-> > being an issue within this century.
-> 
-> What about the return value (on 32bit) from:
-> 	snprintf(NULL, 0, " %*s %*s ", INT_MAX, "", INT_MAX, "");
-> 
-> This is more of a problem for libc.
-> 
-> In reality there are easier ways to crash the kernel....
+At boot, x86 uses E820 tables, memblock tables and the EFI memory map to
+reason about which parts of system RAM are available to the OS, and
+which are reserved.
 
-Good catch! I found that size >= INT_MAX has been handled correctly,
-(see lib/vsprintf.c:2875) but width check has been removed by
-commit 938df695e98d ("vsprintf: associate the format state with the
- format pointer") accidentally.
+While other EFI architectures treat the EFI memory map as immutable, the
+x86 boot code modifies it to keep track of memory reservations of boot
+services data regions, in order to distinguish which parts have been
+memblock_reserve()'d permanently, and which ones have been reserved only
+temporarily to work around buggy implementations of the EFI runtime
+service [SetVirtualAddressMap()] that reconfigures the VA space of the
+runtime services themselves.
 
-diff --git a/lib/vsprintf.c b/lib/vsprintf.c
-index 800b8ac49f53..054c9758118e 100644
---- a/lib/vsprintf.c
-+++ b/lib/vsprintf.c
-@@ -2803,7 +2803,8 @@ static void
- set_field_width(struct printf_spec *spec, int width)
- {
- 	spec->field_width = width;
--	if (WARN_ONCE(spec->field_width != width, "field width %d too large", width)) {
-+	if (WARN_ONCE(spec->field_width > FIELD_WIDTH_MAX ||
-+		      spec->field_width < -FIELD_WIDTH_MAX, "field width %d too large", width)) {
- 		spec->field_width = clamp(width, -FIELD_WIDTH_MAX, FIELD_WIDTH_MAX);
- 	}
- }
-@@ -2812,7 +2813,8 @@ static void
- set_precision(struct printf_spec *spec, int prec)
- {
- 	spec->precision = prec;
--	if (WARN_ONCE(spec->precision != prec, "precision %d too large", prec)) {
-+	if (WARN_ONCE(spec->precision > PRECISION_MAX || spec->precision < 0,
-+		      "precision %d too large", prec)) {
- 		spec->precision = clamp(prec, 0, PRECISION_MAX);
- 	}
- }
+This method is mostly fine for marking entire regions as reserved, but
+it gets complicated when the code decides to split EFI memory map
+entries in order to mark some of it permanently reserved, and the rest
+of it temporarily reserved.
 
-> 
-> 	David
-> 
-> 
-> > 
-> > -- Steve
-> > 
-> 
+Let's clean this up, by
+- marking permanent reservations of EFI boot services data memory as
+  MEMBLOCK_RSRV_KERN
+- taking this marking into account when deciding whether or not a EFI
+  boot services data region can be freed
+- dropping all of the EFI memory map insertion/splitting logic and the
+  allocation/freeing logic, all of which have become redundant.
+
+Changes since v1:
+- Also get rid of all reallocation logic, and just reuse the initial
+  allocation throughout, and keep track of the number of valid entries
+- Drop abuse of the EFI_MEMORY_RUNTIME flag
+- Add acks from Mike to #1-#2
+
+This v2 now gets rid of all manipulations of the EFI memory map except
+for setting the virtual address field and suppressing unwanted entries.
+
+Cc: Mike Rapoport (Microsoft) <rppt@kernel.org>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+
+Ard Biesheuvel (19):
+  memblock: Permit existing reserved regions to be marked RSRV_KERN
+  efi: Tag memblock reservations of boot services regions as RSRV_KERN
+  x86/efi: Unmap kernel-reserved boot regions from EFI page tables
+  x86/efi: Drop EFI_MEMORY_RUNTIME check from __ioremap_check_other()
+  x86/efi: Omit RSRV_KERN memblock reservations when freeing boot
+    regions
+  x86/efi: Defer sub-1M check from unmap to free stage
+  x86/efi: Simplify real mode trampoline allocation quirk
+  x86/efi: Omit redundant kernel image overlap check
+  x86/efi: Drop redundant EFI_PARAVIRT check
+  x86/efi: Do not rely on EFI_MEMORY_RUNTIME bit and avoid entry
+    splitting
+  efi: Use nr_map not map_end to find the last valid memory map entry
+  x86/efi: Only merge EFI memory map entries on 32-bit systems
+  x86/efi: Clean the memory map using iterator and filter API
+  x86/efi: Update the runtime map in place
+  x86/efi: Use iterator API when mapping EFI regions for runtime
+  x86/efi: Reuse memory map instead of reallocating it
+  x86/efi: Defer compaction of the EFI memory map
+  x86/efi: Do not abuse RUNTIME bit to mark boot regions as reserved
+  x86/efi: Free unused tail of the EFI memory map
+
+ arch/x86/include/asm/efi.h           |  15 +-
+ arch/x86/mm/ioremap.c                |   6 +-
+ arch/x86/platform/efi/Makefile       |   2 +-
+ arch/x86/platform/efi/efi.c          | 247 ++++-------------
+ arch/x86/platform/efi/efi_32.c       |  31 +++
+ arch/x86/platform/efi/memmap.c       | 250 -----------------
+ arch/x86/platform/efi/quirks.c       | 287 ++++++--------------
+ arch/x86/platform/efi/runtime-map.c  |   4 +-
+ drivers/firmware/efi/arm-runtime.c   |   2 +-
+ drivers/firmware/efi/efi.c           |   4 +-
+ drivers/firmware/efi/memattr.c       |   2 +-
+ drivers/firmware/efi/memmap.c        |   8 +-
+ drivers/firmware/efi/riscv-runtime.c |   2 +-
+ include/linux/efi.h                  |  29 +-
+ include/linux/memblock.h             |   1 +
+ mm/memblock.c                        |  15 +
+ 16 files changed, 236 insertions(+), 669 deletions(-)
+ delete mode 100644 arch/x86/platform/efi/memmap.c
 
 
+base-commit: 1f318b96cc84d7c2ab792fcc0bfd42a7ca890681
 -- 
-Masami Hiramatsu (Google) <mhiramat@kernel.org>
+2.53.0.851.ga537e3e6e9-goog
+
