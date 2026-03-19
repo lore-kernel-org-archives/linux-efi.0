@@ -1,53 +1,53 @@
 Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 993502BE7CD
-	for <linux-efi@vger.kernel.org>; Thu, 19 Mar 2026 09:06:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6392936C0DE
+	for <linux-efi@vger.kernel.org>; Thu, 19 Mar 2026 09:06:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773911168; cv=none; b=Arw41MXKLUoH0Zo0FluYTs/C879chIxATTG8G8i0yQL/ZQ5+fXqcw5I7W5Cm+8OCAVbSCBTeho+LyUJ6TU4jrN6Tb4Gb1aRPzIrX+dSXKKTx+MEU5Qb2tqznUO1fMebMb8S9arEuUWIQUZFEeiyUKqa6kwGPiLD81HDpbpUjzCc=
+	t=1773911168; cv=none; b=e1IIBa+3Jf+Jb6ncWmmfrouwABsEfLInx2NVYLmumaIyG1G6iFlHZJa2+Fpeit8CyjSQC3A6h2nqTtvVa4/BPRiaVmp+RiIcKzufDnQmDb70yE6eYc8j0EvhkPxOKD3pxfVBKA9zWPmGl/ltPpjQ9Z8s4xxy/VZZZT+LeiHdIHs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1773911168; c=relaxed/simple;
-	bh=r9Vz9NqghlFORjUZYdo1Ptfh1K/PtuFgYpapuy/P9kM=;
+	bh=SnsylKaR6XKsL6r4nGeFPuFvYgu+US9QjRHnBUE+4rc=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=nH2HUQgquAWvXnEsKcQEfI6F1+S4elrv9M/24zTwbZFw4RyfJXHLwioNpFNTN5ubRPY73uMTaNy+nzll0BZ6ogZLb2thhTuo9KmBnAvlHz3Tu9VStyPGm57Hi5QetESFTPF6d7+/q4Ab4pN35gqG5sftkKw0GN/efP2lg7J3j6w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=SSHxAAo6; arc=none smtp.client-ip=209.85.128.74
+	 To:Cc:Content-Type; b=dH2YqDCkUqDYPHma1Hv54v7YgdDGqiWioty5MbKRHX0UuIiirZU1BSxHVWvLnmVr3ajLRTybpdObTpCWng51/DOLPn+D6AlFmTBaTZmnEiGQKy7W1ivTdpWI8pD36HpH3M4prnayJUgvfUDBiQP9P0EiW6tm7unDNsFuOZPihyE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=g+JloLkZ; arc=none smtp.client-ip=209.85.128.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="SSHxAAo6"
-Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-48532df52c5so7166175e9.1
-        for <linux-efi@vger.kernel.org>; Thu, 19 Mar 2026 02:06:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="g+JloLkZ"
+Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-486fcc05b20so909025e9.3
+        for <linux-efi@vger.kernel.org>; Thu, 19 Mar 2026 02:06:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1773911164; x=1774515964; darn=vger.kernel.org;
+        d=google.com; s=20251104; t=1773911165; x=1774515965; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=E1s5SdGot5lUTMBrHwcD4YZ4DKEFwdicOeXDJpxhF+0=;
-        b=SSHxAAo61vpVdjF7yGxOrrqe7JvAw6Ub5PtQ7tH4btvDRy61HydXzaG0Xmgihw7nL1
-         xYJu4In3ZHI1Koebo2NP2xBvTCveSlV2liw3oShiYC8Y1hY6CEcVoPVhly1AAfA7qIAu
-         eguAtVhFrTAc2YOtFIi3tgw1utFlu4ipSKxKy1WFfkRTq/bDWf+XpZVGutsmRQMClFnl
-         m4Bm5DBwRBH0NgKlce5wAo+dSNx5T5530RrFAAMyK8VdH1MpRwHp5S/sSh9Ka9hXfzTM
-         9Bky71FmigjwHOUX443LM2N7BtbSXfgLmlJWOGdAzN+PP/IRWZ1VGkuyZbOAlieBkUfU
-         RV2A==
+        bh=cN0DSOT4FMFHSpYhHh0KxRkDumLq71iDg3aOibYQgUs=;
+        b=g+JloLkZnfVRXXdjfHQVG4MYYYRXgsGdeD1vQrkDP+5yc5xsAeQIhmix8fYr4VbfDv
+         MSLc7jUeRDo5kj4FNRQHWPdzmPSjdyQLhBgdySGuFUHG0Wck2d5ihLJUTBYrzxV5ACSo
+         1R8X7Vd4Zkj7DWE4wBT5H0t6A9PnYFBzA7fV06t6eKO756dGZ7jayaNg+6E/rer11BH1
+         BGE5e4HSZCtowx6LVddKHhIseAZwI1z1EOhyTmyyfdj/N8WlUbQZxO+TP0GeeU6E4Z4A
+         RmThAoynODf0978rSSTqTv2TtLGL2vdXMNvwe2svx6ZBnku7yh9MrQyLIRNmj7RtoLQ+
+         A0CA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773911164; x=1774515964;
+        d=1e100.net; s=20251104; t=1773911165; x=1774515965;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=E1s5SdGot5lUTMBrHwcD4YZ4DKEFwdicOeXDJpxhF+0=;
-        b=NUyLODiMmk0ZVTWRzBqoJorurmXd7lctnhD3rpgYSyjS9eMUhGFWs5ksT2EfZCyxeQ
-         EBtmBs199sDhjMJ3m0SLZ113+zH8t6cPNPG9IqpkIIfWU3V+vl82vLpBFzS3iVVVR7IK
-         6Ck5fJZTxGhOEOgCo4X01OODIAra0t6BGBzdsbBUJCtgIVoMuB1wukz0ht5oUA/IPsKE
-         /2ZLDiOLOVm8cc67o97zWev4XWXFLAFB32blRQw49vrID53/39DJOSJA3w9XzL7XbajB
-         ChKBUBR+5s1XsQE5YDuUO/ACTXOYKAxq2PgSjuLrRujT0C1txzLfbPqsj9fxGWiZHyxx
-         k53w==
-X-Gm-Message-State: AOJu0Yy8Cph3WiGsXy0uNxQaAshr6cDaElBxiNdeTR6lz9+oD5nHSQkw
-	RZcPVAJIVZiHdhWGaiXh1TLmWgFYWtSJpbVps+Oh1OkkgIONprH71E5frW/VRBj8fsYJbZUlXA=
+        bh=cN0DSOT4FMFHSpYhHh0KxRkDumLq71iDg3aOibYQgUs=;
+        b=qYCvntb9gg6h/ra/NFFwjuQYiRehzlJ3uaHLVvi4qhk7zVn+HMvnSc2YaOJ7mWI5If
+         QX9YlxFgy/NmW3uMwTJFe2tmBLm8qlmlU0O0aK9dA3gjMxI438ybxPlf8ZhURq6upeqK
+         cP11o4r/ZjCWZmVFwcH1Ro3poSM8uy8tlE8MHyA95k3VXzVFuVqT0ON5rgB6FZJjrwHH
+         B/QhfwGPgEkESuxR7Ak8RTv4cJ6g29oQVlwWjP3POu9xuSahxYMMabznYPnoeVFT+Ca7
+         0i1RXdHgL7QwExmZnSa1EO5k15LXVTNjxNAvnOkMIw1lq3AePNV1FHjy1JMPuqYQaxtt
+         3qhA==
+X-Gm-Message-State: AOJu0YwdWNQwHCRdc8/1n1UY41B4RyZxR75f7P30Xk374t6cGtUb6QIG
+	XcQnb0LNAPaEfYZgLAhd0Y3qfWdVZ75N/+cF0Cze02bHHAOOQkdYkseLHgYmE0s1u6w31ztYMw=
 	=
-X-Received: from wmma23.prod.google.com ([2002:a05:600c:2257:b0:485:7f49:ccc1])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a7b:cd95:0:b0:483:71f7:2782
- with SMTP id 5b1f17b1804b1-486f44462d6mr74588345e9.12.1773911163415; Thu, 19
- Mar 2026 02:06:03 -0700 (PDT)
-Date: Thu, 19 Mar 2026 10:05:32 +0100
+X-Received: from wmlu26.prod.google.com ([2002:a05:600c:211a:b0:486:f89b:7f11])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:4e49:b0:485:4136:99a8
+ with SMTP id 5b1f17b1804b1-486f4441072mr95249125e9.22.1773911164511; Thu, 19
+ Mar 2026 02:06:04 -0700 (PDT)
+Date: Thu, 19 Mar 2026 10:05:33 +0100
 In-Reply-To: <20260319090529.1091660-21-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -57,15 +57,15 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20260319090529.1091660-21-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1630; i=ardb@kernel.org;
- h=from:subject; bh=nZezo0cCrAQqX5A/WjlHKfqCVN4vt8TmOwEAeiC7jRc=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIXP3npgUw2jm3yzx3nkNP3avXZWxsf24iPP35vJY/vzlc
- n48Ig86SlkYxLgYZMUUWQRm/3238/REqVrnWbIwc1iZQIYwcHEKwEQWKTIybLvO/HDT6Zu5B/en
- Pv5Zc1eq7ZPkznu/EqV5X2QdnPY0ZyEjw4ZPF/InJmTzJHkqzLg74/DidHaPksWVspelq89IrL1 4ghsA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1532; i=ardb@kernel.org;
+ h=from:subject; bh=JO9hOFF5DJXI3o8vMSXVUdCxa1qCtfQllbLj7lJACi8=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIXP3ntgl865zO81VqV1yL3TyltBDlcfiFzrvC58rtMM7p
+ uWkaPqyjlIWBjEuBlkxRRaB2X/f7Tw9UarWeZYszBxWJpAhDFycAjCRk1sZ/qnf1H3sV7+s+ahI
+ UOeTy5sZLjgs6TojF8GyQ2PPwzNSL5oZfjE1PlD65qXyb10jR/dfiQ2z/Q3muL9WKPfS3vA1X+g kHwMA
 X-Mailer: git-send-email 2.53.0.851.ga537e3e6e9-goog
-Message-ID: <20260319090529.1091660-23-ardb+git@google.com>
-Subject: [PATCH v2 02/19] efi: Tag memblock reservations of boot services
- regions as RSRV_KERN
+Message-ID: <20260319090529.1091660-24-ardb+git@google.com>
+Subject: [PATCH v2 03/19] x86/efi: Unmap kernel-reserved boot regions from EFI
+ page tables
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, x86@kernel.org, 
@@ -75,42 +75,50 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-By definition, EFI memory regions of type boot services code or data
-have no special significance to the firmware at runtime, only to the OS.
-In some cases, the firmware will allocate tables and other assets that
-are passed in memory in regions of this type, and leave it up to the OS
-to decide whether or not to treat the allocation as special, or simply
-consume the contents at boot and recycle the RAM for ordinary use. The
-reason for this approach is that it avoids needless memory reservations
-for assets that the OS knows nothing about, and therefore doesn't know
-how to free either.
+Currently, the logic that unmaps boot services code and data regions
+that were mapped temporarily to work around firmware bugs disregards
+regions that have been marked as EFI_MEMORY_RUNTIME. However, such
+regions only have significance to the OS, and there is no reason to
+retain the mapping in the EFI page tables, given that the runtime
+firmware must never touch those regions.
 
-This means that any memblock reservations covering such regions can be
-marked as MEMBLOCK_RSRV_KERN - this is a better match semantically, and
-is useful on x86 to distinguish true reservations from temporary
-reservations that are only needed to work around firmware bugs.
+So pull the unmap forward.
 
-Acked-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/efi.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ arch/x86/platform/efi/quirks.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index b2fb92a4bbd1..e4ab7481bbf6 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -600,7 +600,9 @@ void __init efi_mem_reserve(phys_addr_t addr, u64 size)
- 		return;
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 35caa5746115..30b8012eafaa 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -442,12 +442,6 @@ void __init efi_unmap_boot_services(void)
+ 			continue;
+ 		}
  
- 	if (!memblock_is_region_reserved(addr, size))
--		memblock_reserve(addr, size);
-+		memblock_reserve_kern(addr, size);
-+	else
-+		memblock_reserved_mark_kern(addr, size);
+-		/* Do not free, someone else owns it: */
+-		if (md->attribute & EFI_MEMORY_RUNTIME) {
+-			num_entries++;
+-			continue;
+-		}
+-
+ 		/*
+ 		 * Before calling set_virtual_address_map(), EFI boot services
+ 		 * code/data regions were mapped as a quirk for buggy firmware.
+@@ -455,6 +449,12 @@ void __init efi_unmap_boot_services(void)
+ 		 */
+ 		efi_unmap_pages(md);
  
- 	/*
- 	 * Some architectures (x86) reserve all boot services ranges
++		/* Do not free, someone else owns it: */
++		if (md->attribute & EFI_MEMORY_RUNTIME) {
++			num_entries++;
++			continue;
++		}
++
+ 		/*
+ 		 * Nasty quirk: if all sub-1MB memory is used for boot
+ 		 * services, we can get here without having allocated the
 -- 
 2.53.0.851.ga537e3e6e9-goog
 
