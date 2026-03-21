@@ -1,203 +1,1002 @@
-Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A3A03C73C0
-	for <linux-efi@vger.kernel.org>; Fri, 20 Mar 2026 14:53:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 004752E63C;
+	Sat, 21 Mar 2026 00:48:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774018392; cv=none; b=hTMt3sYiKWNZBbPEevjOmoVtu6Eb3vThbo9QDKxSSLmVimaMY1voZCnvE5YcUuW5Eq82lijIzdizwHSrac9RCAtrbU3LodawrJW6ky2NiIEN2s0m0v8v/cQRyDnJ6nOb0Ro5WHmGcttmO52dHhAe6I/rGBqtGmDpdfu7IQd4VZc=
+	t=1774054128; cv=none; b=sr8MS5O94jiEnHmwLtPxvjdBtAR9/+V7YUDq4krS/QHdYgD65DKIRgpkro32wpSpkatLOPkrSDdLdkQcpuFcUbSSgcWWaqZ3tYVo0f0b68uCgOvtWRCfQDZmQoKLgdUrzLxLOhZF8jQYGiCQLCw82dXk/pVMtkQuSO8bz0dzNWk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774018392; c=relaxed/simple;
-	bh=Jfmttwx8FBEnXpEGQIu0ujjRU8fBebfRwySfXrGmTaA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=aDXjUgajAL0QKueCGbp9n71mseJnEDZWK82YQp3HLP5Vx5sk1c4aRm+a+XBHQg8doNp9q1hMYEZDGwAD1CH0Oeg+uwmzvHNZ7ajH3LydsXmyU9/wxxQNbKuBrUXruo9dQiHwdoxyj8RYqn7243HjJ+jjpoucjyU+tYlc7CW31qY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=IQltsbGi; arc=none smtp.client-ip=209.85.210.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1774054128; c=relaxed/simple;
+	bh=PXDjtHsarXchDljFi8Sb99Lra+EG3QFnvt6RCNWu18o=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=nVivxu+EE0slqW7T6zLvKB2EPsag8dXTQtYF1vQ9DAyFEleGRaH6K/0j1kzvtbWt/VBOfxS4hDjlr3qyh44/aFTcLNLlaIeIi96fUk7aGiC+t98Q8l/5CUV++afGKsw3NEF6tGrvCfZTTMcfAoZUcdh5kymAYppidjplhNBoWIc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DNgDCJyd; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IQltsbGi"
-Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-82c20f1e890so308777b3a.3
-        for <linux-efi@vger.kernel.org>; Fri, 20 Mar 2026 07:53:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1774018390; x=1774623190; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:sender:from:to:cc:subject:date:message-id:reply-to;
-        bh=rTHKXCWTdDkx4cn++Ba0jyyHVgHk9d/lYR5yOZKUNRA=;
-        b=IQltsbGiz6ehLog+mWJ2KaQqA55FebXU+UpXz7b//FMAY7KE1Wl02lRyC7603Bb1QX
-         0gLe5IfAYano0fqjTeNvhHzGEcvaRUYvBQIk6Fbct1BIXV81xOeHAfPmPeX9h8l6P7fT
-         QxWp1mile5sH3hAxjAUnhAarGFbMFf5gUBkaW5cWpCZf4CaXjcuI1j8vBHsG7TyffcVg
-         n+WtggHZMmIYSX6s6bhlVi3i/ugWjdAeL7KGG9p11iZovBKC/QvHB2YUhbm1cpotpsTL
-         LZYR+PCLtzW6xSWSatCD2FOTdHJuk8y/Jam+l3W/NB55QiEMJ0Vq/RK6mfZ7jesnEgiZ
-         /0pw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774018390; x=1774623190;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:sender:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=rTHKXCWTdDkx4cn++Ba0jyyHVgHk9d/lYR5yOZKUNRA=;
-        b=AHhVMZigrYPt50SnCvR0Zdy8x/bBUbgQiVJkANSOzAAxkn1KhjlqX8UH9FEwMM+V/o
-         lGDGWeVtAjsybOrr7Qb+QIyyd/8Cu1fSTvA+W4LUB41TgA4209TWSl8no/OJb8/jleCa
-         GK3OP5I8gbTULjTku3qYMwtSc63GV38xOmn0tspwOd41bEU7VPKeiDJO/TNsIqeFYuSu
-         OkNy9/mfkWkSyeiLcOa+4IIKoIU3m3QBt9NMCK2LQ7C9XxHilqb2vTgmQvBk5W3Nehgy
-         A6ult7G5BGfbufAzNAqJwwa9f0CVQvAV29PMZ+W4Hz0NMZ2s4fvapvkdLBcQn6FpD1cZ
-         1n6Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUtdX4aLBsS+y59CDHiV2JR+YGVOvTMHhllMf3950CMEwR9q9PX0tvUeKFAmFAK70XV0Tt2YzyyzYQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwTcu5BCHFjhtqLKSuYquVezQvLQ+AQAZ+qAgnH4ydR+rifjjah
-	n6JZJySon6M0qbLKssTV/awZuX9lPxhvWbjpbWdOQc3KLU3dnmulDQcE
-X-Gm-Gg: ATEYQzyfS8X8xlFku2/iBp72nN2RSDvSr1ReXXHVMcZoKZgX6MLCsky+/CknzJrN3NZ
-	OPwicYHvJ2yTXI+duyNpetTgCpxxxTTGP59qi8Yr44Sz8CYan2oGKv8BhLTKTJWbD9gBs2Zj0vl
-	XvQuCGii76uUZQj4eD39esUcecVfTVzFb/7+7H9SnJp3GQHMB1sYvn16TkmNBTb3yLJEPl/lC4T
-	gFZma91Vpzkxrh46kQtcjryWvYKCZXfmCM35gnO62OfJwI7p0hwz9vqKU2LyfaUfcf9xKMdb76h
-	4a3V1w9tKOAUtJB4B8YDyvmr/egtwVA9npldv1Nr/G72Gc0xi6re0WXrT9z4DrX7FWiU5MDbfWh
-	xTVQgF/cPGkFUJ+2PDa3KF6gjVn5ysQep0O9evxrN2P4stwlj6tSbSeHjW6of0yZqWX0z5YIXyH
-	0+muliyW8SgQv0mtGS/sfVaec+qajhYgTmARWipoMSC3SIipJ3EjmTLJOs3IQ6aceYbheKVoPh
-X-Received: by 2002:a05:6a00:3491:b0:82a:955:50d3 with SMTP id d2e1a72fcca58-82a8c395ad2mr2483562b3a.45.1774018390304;
-        Fri, 20 Mar 2026 07:53:10 -0700 (PDT)
-Received: from ?IPV6:2600:1700:e321:62f0:da43:aeff:fecc:bfd5? ([2600:1700:e321:62f0:da43:aeff:fecc:bfd5])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-82b03bbf0c2sm2799129b3a.15.2026.03.20.07.53.09
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 20 Mar 2026 07:53:09 -0700 (PDT)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Message-ID: <b58a981a-6264-42d9-b158-650dd194ca9c@roeck-us.net>
-Date: Fri, 20 Mar 2026 07:53:08 -0700
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DNgDCJyd"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3FC7FC4CEF7;
+	Sat, 21 Mar 2026 00:48:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1774054127;
+	bh=PXDjtHsarXchDljFi8Sb99Lra+EG3QFnvt6RCNWu18o=;
+	h=From:To:Cc:Subject:Date:From;
+	b=DNgDCJydGq1dFENgsZ7UMgJzw2gTBArpiFeWADpTHYhsPkei9j4xSODONZ40s+kWj
+	 MFszr32zOTYQjdPt0yK/EJY2p4rl4Lh76eB+W9JsyJr9R7JhG1JSYPPAVB0+2TDP91
+	 C8MZ7OmmqlMrFVZ6IjhaOGmJXvpc3YzXK4UdS4CmdQD9JdDZx64noiK6eFUFXt0K0c
+	 GphoFU2+9sQcdvpnPRJppxIUa7Q/2XxbrPGoWoSlaI+Z230I2lTAXS+Qp6fbXiYQgk
+	 IHpIF1FLmVGSDnLy50PsmB1qRJs9JVjPabe9Wkf+/PCywyPjTqjQqyJVrkGYwVwq24
+	 QVW9ewcWQxwPg==
+From: Kees Cook <kees@kernel.org>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Kees Cook <kees@kernel.org>,
+	Josh Law <objecting@objecting.org>,
+	Jens Axboe <axboe@kernel.dk>,
+	Davidlohr Bueso <dave@stgolabs.net>,
+	Stefan Haberland <sth@linux.ibm.com>,
+	Jan Hoeppner <hoeppner@linux.ibm.com>,
+	"Richard Russon (FlatCap)" <ldm@flatcap.org>,
+	Thorsten Blum <thorsten.blum@linux.dev>,
+	linux-kernel@vger.kernel.org,
+	linux-block@vger.kernel.org,
+	linux-efi@vger.kernel.org,
+	linux-s390@vger.kernel.org,
+	linux-ntfs-dev@lists.sourceforge.net,
+	linux-hardening@vger.kernel.org
+Subject: [PATCH] block: partitions: Replace pp_buf with struct seq_buf
+Date: Fri, 20 Mar 2026 17:48:44 -0700
+Message-Id: <20260321004840.work.670-kees@kernel.org>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] x86/efi: defer freeing of boot services memory
-To: Mike Rapoport <rppt@kernel.org>
-Cc: x86@kernel.org, linux-kernel@vger.kernel.org,
- Ard Biesheuvel <ardb@kernel.org>,
- Benjamin Herrenschmidt <benh@kernel.crashing.org>,
- Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>,
- Thomas Gleixner <tglx@kernel.org>, linux-efi@vger.kernel.org,
- linux-mm@kvack.org, stable@vger.kernel.org
-References: <20260225065555.2471844-1-rppt@kernel.org>
- <100b9ae1-74cc-48b3-ba63-1a72cfa2ebbd@roeck-us.net>
- <ab1U59ye2eBOz6x3@kernel.org>
-Content-Language: en-US
-From: Guenter Roeck <linux@roeck-us.net>
-Autocrypt: addr=linux@roeck-us.net; keydata=
- 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
- np3900V20aS7eD9K8GTU0TGC1pyz6IVJwIE=
-In-Reply-To: <ab1U59ye2eBOz6x3@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-Developer-Signature: v=1; a=openpgp-sha256; l=32418; i=kees@kernel.org; h=from:subject:message-id; bh=PXDjtHsarXchDljFi8Sb99Lra+EG3QFnvt6RCNWu18o=; b=owGbwMvMwCVmps19z/KJym7G02pJDJl7X70pmZfTq3f/y14X2YUJJ54/mC58fb7H3sM3eU33l /SXym583FHKwiDGxSArpsgSZOce5+Lxtj3cfa4izBxWJpAhDFycAjCRiSsY/llM9ZDd3sG3k1fW 6tij72kHJ/6/qv3jqsytxsK8g++XbdvE8E/XKLl+8vWtKRJTL5tZeIRITmeoFqtqOTDLXuumyW3 bM8wA
+X-Developer-Key: i=kees@kernel.org; a=openpgp; fpr=A5C3F68F229DD60F723E6E138972F4DFDC6DC026
+Content-Transfer-Encoding: 8bit
 
-On 3/20/26 07:08, Mike Rapoport wrote:
-> On Thu, Mar 19, 2026 at 09:06:52PM -0700, Guenter Roeck wrote:
->> Hi,
->>
->>> +void __init efi_unmap_boot_services(void)
->>>   {
->>>   	struct efi_memory_map_data data = { 0 };
->>>   	efi_memory_desc_t *md;
->>>   	int num_entries = 0;
->>> +	int idx = 0;
->>> +	size_t sz;
->>>   	void *new, *new_md;
->>>   
->>>   	/* Keep all regions for /sys/kernel/debug/efi */
->>>   	if (efi_enabled(EFI_DBG))
->>>   		return;
->>>   
->>> +	sz = sizeof(*ranges_to_free) * efi.memmap.nr_map + 1;
->>
->> Was this possibly supposed to be
->> 	sz = sizeof(*ranges_to_free) * (efi.memmap.nr_map + 1);
->> 				       ^		     ^
->> ?
-> 
-> Yes, thanks for catching this.
->   
+In preparation for removing the strlcat API[1], replace the char *pp_buf
+with a struct seq_buf, which tracks the current write position and
+remaining space internally. This allows for:
 
-Thanks for confirming.
+- Direct use of seq_buf_printf() in place of snprintf()+strlcat()
+  pairs, eliminating local tmp buffers throughout.
+- Adjacent strlcat() calls that build strings piece-by-piece
+  (e.g., strlcat("["); strlcat(name); strlcat("]")) to be collapsed
+  into single seq_buf_printf() calls.
+- Simpler call sites: seq_buf_puts() takes only the buffer and string,
+  with no need to pass PAGE_SIZE at every call.
 
-Just for the record, it wasn't really me, it was an instance of Sashiko
-running on the LTS backport of the patch.
+The backing buffer allocation is unchanged (__get_free_page), and the
+output path uses seq_buf_str() to NUL-terminate before passing to
+printk().
 
-Guenter
+Link: https://github.com/KSPP/linux/issues/370 [1]
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Josh Law <objecting@objecting.org>
+Signed-off-by: Kees Cook <kees@kernel.org>
+---
+I couldn't help myself. Here's the full patch, as I suggested in
+https://lore.kernel.org/lkml/202603201230.74BBFFABAD@keescook/
+There are plenty more like this to do...
+---
+ block/partitions/check.h   |  8 ++---
+ block/partitions/core.c    | 20 ++++++------
+ block/partitions/acorn.c   | 32 ++++++++----------
+ block/partitions/aix.c     | 21 +++++-------
+ block/partitions/amiga.c   | 35 +++++++++-----------
+ block/partitions/atari.c   | 12 +++----
+ block/partitions/cmdline.c |  6 ++--
+ block/partitions/efi.c     |  2 +-
+ block/partitions/ibm.c     | 27 ++++++---------
+ block/partitions/karma.c   |  2 +-
+ block/partitions/ldm.c     |  4 +--
+ block/partitions/mac.c     |  4 +--
+ block/partitions/msdos.c   | 67 +++++++++++++-------------------------
+ block/partitions/of.c      |  6 ++--
+ block/partitions/osf.c     |  2 +-
+ block/partitions/sgi.c     |  2 +-
+ block/partitions/sun.c     |  2 +-
+ block/partitions/sysv68.c  |  9 ++---
+ block/partitions/ultrix.c  |  2 +-
+ 19 files changed, 106 insertions(+), 157 deletions(-)
 
-> @Ard, can you please pick the fix:
-> 
->  From 8fc5c5e828e7d127e6210bc9952451300591cdce Mon Sep 17 00:00:00 2001
-> From: "Mike Rapoport (Microsoft)" <rppt@kernel.org>
-> Date: Fri, 20 Mar 2026 15:59:48 +0200
-> Subject: [PATCH] x86/efi: efi_unmap_boot_services: fix calculation of
->   ranges_to_free size
-> 
-> ranges_to_free array should have enough room to store the entire EFI
-> memmap plus an extra element for NULL entry.
-> The calculation of this array size wrongly adds 1 to the overall size
-> instead of adding 1 to the number of elements.
-> 
-> Add parentheses to properly size the array.
-> 
-> Reported-by: Guenter Roeck <linux@roeck-us.net>
-> Fixes: a4b0bf6a40f3 ("x86/efi: defer freeing of boot services memory")
-> Signed-off-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
-> ---
->   arch/x86/platform/efi/quirks.c | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> index 35caa5746115..79f0818131e8 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -424,7 +424,7 @@ void __init efi_unmap_boot_services(void)
->   	if (efi_enabled(EFI_DBG))
->   		return;
->   
-> -	sz = sizeof(*ranges_to_free) * efi.memmap.nr_map + 1;
-> +	sz = sizeof(*ranges_to_free) * (efi.memmap.nr_map + 1);
->   	ranges_to_free = kzalloc(sz, GFP_KERNEL);
->   	if (!ranges_to_free) {
->   		pr_err("Failed to allocate storage for freeable EFI regions\n");
+diff --git a/block/partitions/check.h b/block/partitions/check.h
+index e5c1c61eb353..b0997467b61a 100644
+--- a/block/partitions/check.h
++++ b/block/partitions/check.h
+@@ -1,6 +1,7 @@
+ /* SPDX-License-Identifier: GPL-2.0 */
+ #include <linux/pagemap.h>
+ #include <linux/blkdev.h>
++#include <linux/seq_buf.h>
+ #include "../blk.h"
+ 
+ /*
+@@ -20,7 +21,7 @@ struct parsed_partitions {
+ 	int next;
+ 	int limit;
+ 	bool access_beyond_eod;
+-	char *pp_buf;
++	struct seq_buf pp_buf;
+ };
+ 
+ typedef struct {
+@@ -37,12 +38,9 @@ static inline void
+ put_partition(struct parsed_partitions *p, int n, sector_t from, sector_t size)
+ {
+ 	if (n < p->limit) {
+-		char tmp[1 + BDEVNAME_SIZE + 10 + 1];
+-
+ 		p->parts[n].from = from;
+ 		p->parts[n].size = size;
+-		snprintf(tmp, sizeof(tmp), " %s%d", p->name, n);
+-		strlcat(p->pp_buf, tmp, PAGE_SIZE);
++		seq_buf_printf(&p->pp_buf, " %s%d", p->name, n);
+ 	}
+ }
+ 
+diff --git a/block/partitions/core.c b/block/partitions/core.c
+index 740228750aaf..3b5928836c69 100644
+--- a/block/partitions/core.c
++++ b/block/partitions/core.c
+@@ -123,16 +123,16 @@ static struct parsed_partitions *check_partition(struct gendisk *hd)
+ 	state = allocate_partitions(hd);
+ 	if (!state)
+ 		return NULL;
+-	state->pp_buf = (char *)__get_free_page(GFP_KERNEL);
+-	if (!state->pp_buf) {
++	state->pp_buf.buffer = (char *)__get_free_page(GFP_KERNEL);
++	if (!state->pp_buf.buffer) {
+ 		free_partitions(state);
+ 		return NULL;
+ 	}
+-	state->pp_buf[0] = '\0';
++	seq_buf_init(&state->pp_buf, state->pp_buf.buffer, PAGE_SIZE);
+ 
+ 	state->disk = hd;
+ 	strscpy(state->name, hd->disk_name);
+-	snprintf(state->pp_buf, PAGE_SIZE, " %s:", state->name);
++	seq_buf_printf(&state->pp_buf, " %s:", state->name);
+ 	if (isdigit(state->name[strlen(state->name)-1]))
+ 		sprintf(state->name, "p");
+ 
+@@ -151,9 +151,9 @@ static struct parsed_partitions *check_partition(struct gendisk *hd)
+ 
+ 	}
+ 	if (res > 0) {
+-		printk(KERN_INFO "%s", state->pp_buf);
++		printk(KERN_INFO "%s", seq_buf_str(&state->pp_buf));
+ 
+-		free_page((unsigned long)state->pp_buf);
++		free_page((unsigned long)state->pp_buf.buffer);
+ 		return state;
+ 	}
+ 	if (state->access_beyond_eod)
+@@ -164,12 +164,12 @@ static struct parsed_partitions *check_partition(struct gendisk *hd)
+ 	if (err)
+ 		res = err;
+ 	if (res) {
+-		strlcat(state->pp_buf,
+-			" unable to read partition table\n", PAGE_SIZE);
+-		printk(KERN_INFO "%s", state->pp_buf);
++		seq_buf_puts(&state->pp_buf,
++			     " unable to read partition table\n");
++		printk(KERN_INFO "%s", seq_buf_str(&state->pp_buf));
+ 	}
+ 
+-	free_page((unsigned long)state->pp_buf);
++	free_page((unsigned long)state->pp_buf.buffer);
+ 	free_partitions(state);
+ 	return ERR_PTR(res);
+ }
+diff --git a/block/partitions/acorn.c b/block/partitions/acorn.c
+index d2fc122d7426..9f7389f174d0 100644
+--- a/block/partitions/acorn.c
++++ b/block/partitions/acorn.c
+@@ -40,9 +40,7 @@ adfs_partition(struct parsed_partitions *state, char *name, char *data,
+ 		   (le32_to_cpu(dr->disc_size) >> 9);
+ 
+ 	if (name) {
+-		strlcat(state->pp_buf, " [", PAGE_SIZE);
+-		strlcat(state->pp_buf, name, PAGE_SIZE);
+-		strlcat(state->pp_buf, "]", PAGE_SIZE);
++		seq_buf_printf(&state->pp_buf, " [%s]", name);
+ 	}
+ 	put_partition(state, slot, first_sector, nr_sects);
+ 	return dr;
+@@ -78,14 +76,14 @@ static int riscix_partition(struct parsed_partitions *state,
+ 	if (!rr)
+ 		return -1;
+ 
+-	strlcat(state->pp_buf, " [RISCiX]", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, " [RISCiX]");
+ 
+ 
+ 	if (rr->magic == RISCIX_MAGIC) {
+ 		unsigned long size = nr_sects > 2 ? 2 : nr_sects;
+ 		int part;
+ 
+-		strlcat(state->pp_buf, " <", PAGE_SIZE);
++		seq_buf_puts(&state->pp_buf, " <");
+ 
+ 		put_partition(state, slot++, first_sect, size);
+ 		for (part = 0; part < 8; part++) {
+@@ -94,13 +92,11 @@ static int riscix_partition(struct parsed_partitions *state,
+ 				put_partition(state, slot++,
+ 					le32_to_cpu(rr->part[part].start),
+ 					le32_to_cpu(rr->part[part].length));
+-				strlcat(state->pp_buf, "(", PAGE_SIZE);
+-				strlcat(state->pp_buf, rr->part[part].name, PAGE_SIZE);
+-				strlcat(state->pp_buf, ")", PAGE_SIZE);
++				seq_buf_printf(&state->pp_buf, "(%s)", rr->part[part].name);
+ 			}
+ 		}
+ 
+-		strlcat(state->pp_buf, " >\n", PAGE_SIZE);
++		seq_buf_puts(&state->pp_buf, " >\n");
+ 	} else {
+ 		put_partition(state, slot++, first_sect, nr_sects);
+ 	}
+@@ -130,7 +126,7 @@ static int linux_partition(struct parsed_partitions *state,
+ 	struct linux_part *linuxp;
+ 	unsigned long size = nr_sects > 2 ? 2 : nr_sects;
+ 
+-	strlcat(state->pp_buf, " [Linux]", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, " [Linux]");
+ 
+ 	put_partition(state, slot++, first_sect, size);
+ 
+@@ -138,7 +134,7 @@ static int linux_partition(struct parsed_partitions *state,
+ 	if (!linuxp)
+ 		return -1;
+ 
+-	strlcat(state->pp_buf, " <", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, " <");
+ 	while (linuxp->magic == cpu_to_le32(LINUX_NATIVE_MAGIC) ||
+ 	       linuxp->magic == cpu_to_le32(LINUX_SWAP_MAGIC)) {
+ 		if (slot == state->limit)
+@@ -148,7 +144,7 @@ static int linux_partition(struct parsed_partitions *state,
+ 				 le32_to_cpu(linuxp->nr_sects));
+ 		linuxp ++;
+ 	}
+-	strlcat(state->pp_buf, " >", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, " >");
+ 
+ 	put_dev_sector(sect);
+ 	return slot;
+@@ -293,7 +289,7 @@ int adfspart_check_ADFS(struct parsed_partitions *state)
+ 			break;
+ 		}
+ 	}
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	return 1;
+ }
+ #endif
+@@ -366,7 +362,7 @@ int adfspart_check_ICS(struct parsed_partitions *state)
+ 		return 0;
+ 	}
+ 
+-	strlcat(state->pp_buf, " [ICS]", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, " [ICS]");
+ 
+ 	for (slot = 1, p = (const struct ics_part *)data; p->size; p++) {
+ 		u32 start = le32_to_cpu(p->start);
+@@ -400,7 +396,7 @@ int adfspart_check_ICS(struct parsed_partitions *state)
+ 	}
+ 
+ 	put_dev_sector(sect);
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	return 1;
+ }
+ #endif
+@@ -460,7 +456,7 @@ int adfspart_check_POWERTEC(struct parsed_partitions *state)
+ 		return 0;
+ 	}
+ 
+-	strlcat(state->pp_buf, " [POWERTEC]", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, " [POWERTEC]");
+ 
+ 	for (i = 0, p = (const struct ptec_part *)data; i < 12; i++, p++) {
+ 		u32 start = le32_to_cpu(p->start);
+@@ -471,7 +467,7 @@ int adfspart_check_POWERTEC(struct parsed_partitions *state)
+ 	}
+ 
+ 	put_dev_sector(sect);
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	return 1;
+ }
+ #endif
+@@ -542,7 +538,7 @@ int adfspart_check_EESOX(struct parsed_partitions *state)
+ 
+ 		size = get_capacity(state->disk);
+ 		put_partition(state, slot++, start, size - start);
+-		strlcat(state->pp_buf, "\n", PAGE_SIZE);
++		seq_buf_puts(&state->pp_buf, "\n");
+ 	}
+ 
+ 	return i ? 1 : 0;
+diff --git a/block/partitions/aix.c b/block/partitions/aix.c
+index a886cefbefbb..29b8f4cebb63 100644
+--- a/block/partitions/aix.c
++++ b/block/partitions/aix.c
+@@ -173,24 +173,22 @@ int aix_partition(struct parsed_partitions *state)
+ 	if (d) {
+ 		struct lvm_rec *p = (struct lvm_rec *)d;
+ 		u16 lvm_version = be16_to_cpu(p->version);
+-		char tmp[64];
+ 
+ 		if (lvm_version == 1) {
+ 			int pp_size_log2 = be16_to_cpu(p->pp_size);
+ 
+ 			pp_bytes_size = 1 << pp_size_log2;
+ 			pp_blocks_size = pp_bytes_size / 512;
+-			snprintf(tmp, sizeof(tmp),
+-				" AIX LVM header version %u found\n",
+-				lvm_version);
++			seq_buf_printf(&state->pp_buf,
++				       " AIX LVM header version %u found\n",
++				       lvm_version);
+ 			vgda_len = be32_to_cpu(p->vgda_len);
+ 			vgda_sector = be32_to_cpu(p->vgda_psn[0]);
+ 		} else {
+-			snprintf(tmp, sizeof(tmp),
+-				" unsupported AIX LVM version %d found\n",
+-				lvm_version);
++			seq_buf_printf(&state->pp_buf,
++				       " unsupported AIX LVM version %d found\n",
++				       lvm_version);
+ 		}
+-		strlcat(state->pp_buf, tmp, PAGE_SIZE);
+ 		put_dev_sector(sect);
+ 	}
+ 	if (vgda_sector && (d = read_part_sector(state, vgda_sector, &sect))) {
+@@ -251,14 +249,11 @@ int aix_partition(struct parsed_partitions *state)
+ 				continue;
+ 			}
+ 			if (lp_ix == lvip[lv_ix].pps_per_lv) {
+-				char tmp[70];
+-
+ 				put_partition(state, lv_ix + 1,
+ 				  (i + 1 - lp_ix) * pp_blocks_size + psn_part1,
+ 				  lvip[lv_ix].pps_per_lv * pp_blocks_size);
+-				snprintf(tmp, sizeof(tmp), " <%s>\n",
+-					 n[lv_ix].name);
+-				strlcat(state->pp_buf, tmp, PAGE_SIZE);
++				seq_buf_printf(&state->pp_buf, " <%s>\n",
++					       n[lv_ix].name);
+ 				lvip[lv_ix].lv_is_contiguous = 1;
+ 				ret = 1;
+ 				next_lp_ix = 1;
+diff --git a/block/partitions/amiga.c b/block/partitions/amiga.c
+index 506921095412..8325046a14eb 100644
+--- a/block/partitions/amiga.c
++++ b/block/partitions/amiga.c
+@@ -81,13 +81,8 @@ int amiga_partition(struct parsed_partitions *state)
+ 	/* blksize is blocks per 512 byte standard block */
+ 	blksize = be32_to_cpu( rdb->rdb_BlockBytes ) / 512;
+ 
+-	{
+-		char tmp[7 + 10 + 1 + 1];
+-
+-		/* Be more informative */
+-		snprintf(tmp, sizeof(tmp), " RDSK (%d)", blksize * 512);
+-		strlcat(state->pp_buf, tmp, PAGE_SIZE);
+-	}
++	/* Be more informative */
++	seq_buf_printf(&state->pp_buf, " RDSK (%d)", blksize * 512);
+ 	blk = be32_to_cpu(rdb->rdb_PartitionList);
+ 	put_dev_sector(sect);
+ 	for (part = 1; (s32) blk>0 && part<=16; part++, put_dev_sector(sect)) {
+@@ -179,27 +174,27 @@ int amiga_partition(struct parsed_partitions *state)
+ 		{
+ 			/* Be even more informative to aid mounting */
+ 			char dostype[4];
+-			char tmp[42];
+ 
+ 			__be32 *dt = (__be32 *)dostype;
+ 			*dt = pb->pb_Environment[16];
+ 			if (dostype[3] < ' ')
+-				snprintf(tmp, sizeof(tmp), " (%c%c%c^%c)",
+-					dostype[0], dostype[1],
+-					dostype[2], dostype[3] + '@' );
++				seq_buf_printf(&state->pp_buf,
++					       " (%c%c%c^%c)",
++					       dostype[0], dostype[1],
++					       dostype[2],
++					       dostype[3] + '@');
+ 			else
+-				snprintf(tmp, sizeof(tmp), " (%c%c%c%c)",
+-					dostype[0], dostype[1],
+-					dostype[2], dostype[3]);
+-			strlcat(state->pp_buf, tmp, PAGE_SIZE);
+-			snprintf(tmp, sizeof(tmp), "(res %d spb %d)",
+-				be32_to_cpu(pb->pb_Environment[6]),
+-				be32_to_cpu(pb->pb_Environment[4]));
+-			strlcat(state->pp_buf, tmp, PAGE_SIZE);
++				seq_buf_printf(&state->pp_buf,
++					       " (%c%c%c%c)",
++					       dostype[0], dostype[1],
++					       dostype[2], dostype[3]);
++			seq_buf_printf(&state->pp_buf, "(res %d spb %d)",
++				       be32_to_cpu(pb->pb_Environment[6]),
++				       be32_to_cpu(pb->pb_Environment[4]));
+ 		}
+ 		res = 1;
+ 	}
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 
+ rdb_done:
+ 	return res;
+diff --git a/block/partitions/atari.c b/block/partitions/atari.c
+index 9655c728262a..2438d1448f38 100644
+--- a/block/partitions/atari.c
++++ b/block/partitions/atari.c
+@@ -70,7 +70,7 @@ int atari_partition(struct parsed_partitions *state)
+ 	}
+ 
+ 	pi = &rs->part[0];
+-	strlcat(state->pp_buf, " AHDI", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, " AHDI");
+ 	for (slot = 1; pi < &rs->part[4] && slot < state->limit; slot++, pi++) {
+ 		struct rootsector *xrs;
+ 		Sector sect2;
+@@ -89,7 +89,7 @@ int atari_partition(struct parsed_partitions *state)
+ #ifdef ICD_PARTS
+ 		part_fmt = 1;
+ #endif
+-		strlcat(state->pp_buf, " XGM<", PAGE_SIZE);
++		seq_buf_puts(&state->pp_buf, " XGM<");
+ 		partsect = extensect = be32_to_cpu(pi->st);
+ 		while (1) {
+ 			xrs = read_part_sector(state, partsect, &sect2);
+@@ -128,14 +128,14 @@ int atari_partition(struct parsed_partitions *state)
+ 				break;
+ 			}
+ 		}
+-		strlcat(state->pp_buf, " >", PAGE_SIZE);
++		seq_buf_puts(&state->pp_buf, " >");
+ 	}
+ #ifdef ICD_PARTS
+ 	if ( part_fmt!=1 ) { /* no extended partitions -> test ICD-format */
+ 		pi = &rs->icdpart[0];
+ 		/* sanity check: no ICD format if first partition invalid */
+ 		if (OK_id(pi->id)) {
+-			strlcat(state->pp_buf, " ICD<", PAGE_SIZE);
++			seq_buf_puts(&state->pp_buf, " ICD<");
+ 			for (; pi < &rs->icdpart[8] && slot < state->limit; slot++, pi++) {
+ 				/* accept only GEM,BGM,RAW,LNX,SWP partitions */
+ 				if (!((pi->flg & 1) && OK_id(pi->id)))
+@@ -144,13 +144,13 @@ int atari_partition(struct parsed_partitions *state)
+ 						be32_to_cpu(pi->st),
+ 						be32_to_cpu(pi->siz));
+ 			}
+-			strlcat(state->pp_buf, " >", PAGE_SIZE);
++			seq_buf_puts(&state->pp_buf, " >");
+ 		}
+ 	}
+ #endif
+ 	put_dev_sector(sect);
+ 
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 
+ 	return 1;
+ }
+diff --git a/block/partitions/cmdline.c b/block/partitions/cmdline.c
+index a2b1870c3fd4..4fd52ed154b4 100644
+--- a/block/partitions/cmdline.c
++++ b/block/partitions/cmdline.c
+@@ -229,7 +229,6 @@ static int add_part(int slot, struct cmdline_subpart *subpart,
+ 		struct parsed_partitions *state)
+ {
+ 	struct partition_meta_info *info;
+-	char tmp[sizeof(info->volname) + 4];
+ 
+ 	if (slot >= state->limit)
+ 		return 1;
+@@ -244,8 +243,7 @@ static int add_part(int slot, struct cmdline_subpart *subpart,
+ 
+ 	strscpy(info->volname, subpart->name, sizeof(info->volname));
+ 
+-	snprintf(tmp, sizeof(tmp), "(%s)", info->volname);
+-	strlcat(state->pp_buf, tmp, PAGE_SIZE);
++	seq_buf_printf(&state->pp_buf, "(%s)", info->volname);
+ 
+ 	state->parts[slot].has_info = true;
+ 
+@@ -379,7 +377,7 @@ int cmdline_partition(struct parsed_partitions *state)
+ 	cmdline_parts_set(parts, disk_size, state);
+ 	cmdline_parts_verifier(1, state);
+ 
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 
+ 	return 1;
+ }
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 75474fb3848e..9865d59093fa 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -751,6 +751,6 @@ int efi_partition(struct parsed_partitions *state)
+ 	}
+ 	kfree(ptes);
+ 	kfree(gpt);
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	return 1;
+ }
+diff --git a/block/partitions/ibm.c b/block/partitions/ibm.c
+index 9311ad5fb95d..54047e722a9d 100644
+--- a/block/partitions/ibm.c
++++ b/block/partitions/ibm.c
+@@ -173,15 +173,13 @@ static int find_vol1_partitions(struct parsed_partitions *state,
+ {
+ 	sector_t blk;
+ 	int counter;
+-	char tmp[64];
+ 	Sector sect;
+ 	unsigned char *data;
+ 	loff_t offset, size;
+ 	struct vtoc_format1_label f1;
+ 	int secperblk;
+ 
+-	snprintf(tmp, sizeof(tmp), "VOL1/%8s:", name);
+-	strlcat(state->pp_buf, tmp, PAGE_SIZE);
++	seq_buf_printf(&state->pp_buf, "VOL1/%8s:", name);
+ 	/*
+ 	 * get start of VTOC from the disk label and then search for format1
+ 	 * and format8 labels
+@@ -219,7 +217,7 @@ static int find_vol1_partitions(struct parsed_partitions *state,
+ 		blk++;
+ 		data = read_part_sector(state, blk * secperblk, &sect);
+ 	}
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 
+ 	if (!data)
+ 		return -1;
+@@ -237,11 +235,9 @@ static int find_lnx1_partitions(struct parsed_partitions *state,
+ 				dasd_information2_t *info)
+ {
+ 	loff_t offset, geo_size, size;
+-	char tmp[64];
+ 	int secperblk;
+ 
+-	snprintf(tmp, sizeof(tmp), "LNX1/%8s:", name);
+-	strlcat(state->pp_buf, tmp, PAGE_SIZE);
++	seq_buf_printf(&state->pp_buf, "LNX1/%8s:", name);
+ 	secperblk = blocksize >> 9;
+ 	if (label->lnx.ldl_version == 0xf2) {
+ 		size = label->lnx.formatted_blocks * secperblk;
+@@ -258,7 +254,7 @@ static int find_lnx1_partitions(struct parsed_partitions *state,
+ 		size = nr_sectors;
+ 		if (size != geo_size) {
+ 			if (!info) {
+-				strlcat(state->pp_buf, "\n", PAGE_SIZE);
++				seq_buf_puts(&state->pp_buf, "\n");
+ 				return 1;
+ 			}
+ 			if (!strcmp(info->type, "ECKD"))
+@@ -270,7 +266,7 @@ static int find_lnx1_partitions(struct parsed_partitions *state,
+ 	/* first and only partition starts in the first block after the label */
+ 	offset = labelsect + secperblk;
+ 	put_partition(state, 1, offset, size - offset);
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	return 1;
+ }
+ 
+@@ -282,7 +278,6 @@ static int find_cms1_partitions(struct parsed_partitions *state,
+ 				sector_t labelsect)
+ {
+ 	loff_t offset, size;
+-	char tmp[64];
+ 	int secperblk;
+ 
+ 	/*
+@@ -291,14 +286,12 @@ static int find_cms1_partitions(struct parsed_partitions *state,
+ 	blocksize = label->cms.block_size;
+ 	secperblk = blocksize >> 9;
+ 	if (label->cms.disk_offset != 0) {
+-		snprintf(tmp, sizeof(tmp), "CMS1/%8s(MDSK):", name);
+-		strlcat(state->pp_buf, tmp, PAGE_SIZE);
++		seq_buf_printf(&state->pp_buf, "CMS1/%8s(MDSK):", name);
+ 		/* disk is reserved minidisk */
+ 		offset = label->cms.disk_offset * secperblk;
+ 		size = (label->cms.block_count - 1) * secperblk;
+ 	} else {
+-		snprintf(tmp, sizeof(tmp), "CMS1/%8s:", name);
+-		strlcat(state->pp_buf, tmp, PAGE_SIZE);
++		seq_buf_printf(&state->pp_buf, "CMS1/%8s:", name);
+ 		/*
+ 		 * Special case for FBA devices:
+ 		 * If an FBA device is CMS formatted with blocksize > 512 byte
+@@ -314,7 +307,7 @@ static int find_cms1_partitions(struct parsed_partitions *state,
+ 	}
+ 
+ 	put_partition(state, 1, offset, size-offset);
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	return 1;
+ }
+ 
+@@ -391,11 +384,11 @@ int ibm_partition(struct parsed_partitions *state)
+ 		 */
+ 		res = 1;
+ 		if (info->format == DASD_FORMAT_LDL) {
+-			strlcat(state->pp_buf, "(nonl)", PAGE_SIZE);
++			seq_buf_puts(&state->pp_buf, "(nonl)");
+ 			size = nr_sectors;
+ 			offset = (info->label_block + 1) * (blocksize >> 9);
+ 			put_partition(state, 1, offset, size-offset);
+-			strlcat(state->pp_buf, "\n", PAGE_SIZE);
++			seq_buf_puts(&state->pp_buf, "\n");
+ 		}
+ 	} else
+ 		res = 0;
+diff --git a/block/partitions/karma.c b/block/partitions/karma.c
+index 4d93512f4bd4..a4e3c5050177 100644
+--- a/block/partitions/karma.c
++++ b/block/partitions/karma.c
+@@ -53,7 +53,7 @@ int karma_partition(struct parsed_partitions *state)
+ 		}
+ 		slot++;
+ 	}
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	put_dev_sector(sect);
+ 	return 1;
+ }
+diff --git a/block/partitions/ldm.c b/block/partitions/ldm.c
+index 776b4ad95091..c0bdcae58a3e 100644
+--- a/block/partitions/ldm.c
++++ b/block/partitions/ldm.c
+@@ -582,7 +582,7 @@ static bool ldm_create_data_partitions (struct parsed_partitions *pp,
+ 		return false;
+ 	}
+ 
+-	strlcat(pp->pp_buf, " [LDM]", PAGE_SIZE);
++	seq_buf_puts(&pp->pp_buf, " [LDM]");
+ 
+ 	/* Create the data partitions */
+ 	list_for_each (item, &ldb->v_part) {
+@@ -597,7 +597,7 @@ static bool ldm_create_data_partitions (struct parsed_partitions *pp,
+ 		part_num++;
+ 	}
+ 
+-	strlcat(pp->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&pp->pp_buf, "\n");
+ 	return true;
+ }
+ 
+diff --git a/block/partitions/mac.c b/block/partitions/mac.c
+index b02530d98629..df03ca428e15 100644
+--- a/block/partitions/mac.c
++++ b/block/partitions/mac.c
+@@ -86,7 +86,7 @@ int mac_partition(struct parsed_partitions *state)
+ 	if (blocks_in_map >= state->limit)
+ 		blocks_in_map = state->limit - 1;
+ 
+-	strlcat(state->pp_buf, " [mac]", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, " [mac]");
+ 	for (slot = 1; slot <= blocks_in_map; ++slot) {
+ 		int pos = slot * secsize;
+ 		put_dev_sector(sect);
+@@ -152,6 +152,6 @@ int mac_partition(struct parsed_partitions *state)
+ #endif
+ 
+ 	put_dev_sector(sect);
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	return 1;
+ }
+diff --git a/block/partitions/msdos.c b/block/partitions/msdos.c
+index 073be78ba0b0..200ea53ea6a2 100644
+--- a/block/partitions/msdos.c
++++ b/block/partitions/msdos.c
+@@ -263,18 +263,11 @@ static void parse_solaris_x86(struct parsed_partitions *state,
+ 		put_dev_sector(sect);
+ 		return;
+ 	}
+-	{
+-		char tmp[1 + BDEVNAME_SIZE + 10 + 11 + 1];
+-
+-		snprintf(tmp, sizeof(tmp), " %s%d: <solaris:", state->name, origin);
+-		strlcat(state->pp_buf, tmp, PAGE_SIZE);
+-	}
++	seq_buf_printf(&state->pp_buf, " %s%d: <solaris:", state->name, origin);
+ 	if (le32_to_cpu(v->v_version) != 1) {
+-		char tmp[64];
+-
+-		snprintf(tmp, sizeof(tmp), "  cannot handle version %d vtoc>\n",
+-			 le32_to_cpu(v->v_version));
+-		strlcat(state->pp_buf, tmp, PAGE_SIZE);
++		seq_buf_printf(&state->pp_buf,
++			       "  cannot handle version %d vtoc>\n",
++			       le32_to_cpu(v->v_version));
+ 		put_dev_sector(sect);
+ 		return;
+ 	}
+@@ -282,12 +275,10 @@ static void parse_solaris_x86(struct parsed_partitions *state,
+ 	max_nparts = le16_to_cpu(v->v_nparts) > 8 ? SOLARIS_X86_NUMSLICE : 8;
+ 	for (i = 0; i < max_nparts && state->next < state->limit; i++) {
+ 		struct solaris_x86_slice *s = &v->v_slice[i];
+-		char tmp[3 + 10 + 1 + 1];
+ 
+ 		if (s->s_size == 0)
+ 			continue;
+-		snprintf(tmp, sizeof(tmp), " [s%d]", i);
+-		strlcat(state->pp_buf, tmp, PAGE_SIZE);
++		seq_buf_printf(&state->pp_buf, " [s%d]", i);
+ 		/* solaris partitions are relative to current MS-DOS
+ 		 * one; must add the offset of the current partition */
+ 		put_partition(state, state->next++,
+@@ -295,7 +286,7 @@ static void parse_solaris_x86(struct parsed_partitions *state,
+ 				 le32_to_cpu(s->s_size));
+ 	}
+ 	put_dev_sector(sect);
+-	strlcat(state->pp_buf, " >\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, " >\n");
+ #endif
+ }
+ 
+@@ -359,7 +350,6 @@ static void parse_bsd(struct parsed_partitions *state,
+ 	Sector sect;
+ 	struct bsd_disklabel *l;
+ 	struct bsd_partition *p;
+-	char tmp[64];
+ 
+ 	l = read_part_sector(state, offset + 1, &sect);
+ 	if (!l)
+@@ -369,8 +359,7 @@ static void parse_bsd(struct parsed_partitions *state,
+ 		return;
+ 	}
+ 
+-	snprintf(tmp, sizeof(tmp), " %s%d: <%s:", state->name, origin, flavour);
+-	strlcat(state->pp_buf, tmp, PAGE_SIZE);
++	seq_buf_printf(&state->pp_buf, " %s%d: <%s:", state->name, origin, flavour);
+ 
+ 	if (le16_to_cpu(l->d_npartitions) < max_partitions)
+ 		max_partitions = le16_to_cpu(l->d_npartitions);
+@@ -391,18 +380,16 @@ static void parse_bsd(struct parsed_partitions *state,
+ 			/* full parent partition, we have it already */
+ 			continue;
+ 		if (offset > bsd_start || offset+size < bsd_start+bsd_size) {
+-			strlcat(state->pp_buf, "bad subpartition - ignored\n", PAGE_SIZE);
++			seq_buf_puts(&state->pp_buf, "bad subpartition - ignored\n");
+ 			continue;
+ 		}
+ 		put_partition(state, state->next++, bsd_start, bsd_size);
+ 	}
+ 	put_dev_sector(sect);
+-	if (le16_to_cpu(l->d_npartitions) > max_partitions) {
+-		snprintf(tmp, sizeof(tmp), " (ignored %d more)",
+-			 le16_to_cpu(l->d_npartitions) - max_partitions);
+-		strlcat(state->pp_buf, tmp, PAGE_SIZE);
+-	}
+-	strlcat(state->pp_buf, " >\n", PAGE_SIZE);
++	if (le16_to_cpu(l->d_npartitions) > max_partitions)
++		seq_buf_printf(&state->pp_buf, " (ignored %d more)",
++			       le16_to_cpu(l->d_npartitions) - max_partitions);
++	seq_buf_puts(&state->pp_buf, " >\n");
+ }
+ #endif
+ 
+@@ -496,12 +483,7 @@ static void parse_unixware(struct parsed_partitions *state,
+ 		put_dev_sector(sect);
+ 		return;
+ 	}
+-	{
+-		char tmp[1 + BDEVNAME_SIZE + 10 + 12 + 1];
+-
+-		snprintf(tmp, sizeof(tmp), " %s%d: <unixware:", state->name, origin);
+-		strlcat(state->pp_buf, tmp, PAGE_SIZE);
+-	}
++	seq_buf_printf(&state->pp_buf, " %s%d: <unixware:", state->name, origin);
+ 	p = &l->vtoc.v_slice[1];
+ 	/* I omit the 0th slice as it is the same as whole disk. */
+ 	while (p - &l->vtoc.v_slice[0] < UNIXWARE_NUMSLICE) {
+@@ -515,7 +497,7 @@ static void parse_unixware(struct parsed_partitions *state,
+ 		p++;
+ 	}
+ 	put_dev_sector(sect);
+-	strlcat(state->pp_buf, " >\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, " >\n");
+ #endif
+ }
+ 
+@@ -546,10 +528,7 @@ static void parse_minix(struct parsed_partitions *state,
+ 	 * the normal boot sector. */
+ 	if (msdos_magic_present(data + 510) &&
+ 	    p->sys_ind == MINIX_PARTITION) { /* subpartition table present */
+-		char tmp[1 + BDEVNAME_SIZE + 10 + 9 + 1];
+-
+-		snprintf(tmp, sizeof(tmp), " %s%d: <minix:", state->name, origin);
+-		strlcat(state->pp_buf, tmp, PAGE_SIZE);
++		seq_buf_printf(&state->pp_buf, " %s%d: <minix:", state->name, origin);
+ 		for (i = 0; i < MINIX_NR_SUBPARTITIONS; i++, p++) {
+ 			if (state->next == state->limit)
+ 				break;
+@@ -558,7 +537,7 @@ static void parse_minix(struct parsed_partitions *state,
+ 				put_partition(state, state->next++,
+ 					      start_sect(p), nr_sects(p));
+ 		}
+-		strlcat(state->pp_buf, " >\n", PAGE_SIZE);
++		seq_buf_puts(&state->pp_buf, " >\n");
+ 	}
+ 	put_dev_sector(sect);
+ #endif /* CONFIG_MINIX_SUBPARTITION */
+@@ -602,7 +581,7 @@ int msdos_partition(struct parsed_partitions *state)
+ #ifdef CONFIG_AIX_PARTITION
+ 		return aix_partition(state);
+ #else
+-		strlcat(state->pp_buf, " [AIX]", PAGE_SIZE);
++		seq_buf_puts(&state->pp_buf, " [AIX]");
+ 		return 0;
+ #endif
+ 	}
+@@ -629,7 +608,7 @@ int msdos_partition(struct parsed_partitions *state)
+ 			fb = (struct fat_boot_sector *) data;
+ 			if (slot == 1 && fb->reserved && fb->fats
+ 				&& fat_valid_media(fb->media)) {
+-				strlcat(state->pp_buf, "\n", PAGE_SIZE);
++				seq_buf_puts(&state->pp_buf, "\n");
+ 				put_dev_sector(sect);
+ 				return 1;
+ 			} else {
+@@ -678,9 +657,9 @@ int msdos_partition(struct parsed_partitions *state)
+ 			n = min(size, max(sector_size, n));
+ 			put_partition(state, slot, start, n);
+ 
+-			strlcat(state->pp_buf, " <", PAGE_SIZE);
++			seq_buf_puts(&state->pp_buf, " <");
+ 			parse_extended(state, start, size, disksig);
+-			strlcat(state->pp_buf, " >", PAGE_SIZE);
++			seq_buf_puts(&state->pp_buf, " >");
+ 			continue;
+ 		}
+ 		put_partition(state, slot, start, size);
+@@ -688,12 +667,12 @@ int msdos_partition(struct parsed_partitions *state)
+ 		if (p->sys_ind == LINUX_RAID_PARTITION)
+ 			state->parts[slot].flags = ADDPART_FLAG_RAID;
+ 		if (p->sys_ind == DM6_PARTITION)
+-			strlcat(state->pp_buf, "[DM]", PAGE_SIZE);
++			seq_buf_puts(&state->pp_buf, "[DM]");
+ 		if (p->sys_ind == EZD_PARTITION)
+-			strlcat(state->pp_buf, "[EZD]", PAGE_SIZE);
++			seq_buf_puts(&state->pp_buf, "[EZD]");
+ 	}
+ 
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 
+ 	/* second pass - output for each on a separate line */
+ 	p = (struct msdos_partition *) (0x1be + data);
+diff --git a/block/partitions/of.c b/block/partitions/of.c
+index 4e760fdffb3f..c22b60661098 100644
+--- a/block/partitions/of.c
++++ b/block/partitions/of.c
+@@ -36,7 +36,6 @@ static void add_of_partition(struct parsed_partitions *state, int slot,
+ 			     struct device_node *np)
+ {
+ 	struct partition_meta_info *info;
+-	char tmp[sizeof(info->volname) + 4];
+ 	const char *partname;
+ 	int len;
+ 
+@@ -63,8 +62,7 @@ static void add_of_partition(struct parsed_partitions *state, int slot,
+ 		partname = of_get_property(np, "name", &len);
+ 	strscpy(info->volname, partname, sizeof(info->volname));
+ 
+-	snprintf(tmp, sizeof(tmp), "(%s)", info->volname);
+-	strlcat(state->pp_buf, tmp, PAGE_SIZE);
++	seq_buf_printf(&state->pp_buf, "(%s)", info->volname);
+ }
+ 
+ int of_partition(struct parsed_partitions *state)
+@@ -104,7 +102,7 @@ int of_partition(struct parsed_partitions *state)
+ 		slot++;
+ 	}
+ 
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 
+ 	return 1;
+ }
+diff --git a/block/partitions/osf.c b/block/partitions/osf.c
+index 84560d0765ed..2a692584dba9 100644
+--- a/block/partitions/osf.c
++++ b/block/partitions/osf.c
+@@ -81,7 +81,7 @@ int osf_partition(struct parsed_partitions *state)
+ 				le32_to_cpu(partition->p_size));
+ 		slot++;
+ 	}
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	put_dev_sector(sect);
+ 	return 1;
+ }
+diff --git a/block/partitions/sgi.c b/block/partitions/sgi.c
+index b5ecddd5181a..2383ca63cd66 100644
+--- a/block/partitions/sgi.c
++++ b/block/partitions/sgi.c
+@@ -79,7 +79,7 @@ int sgi_partition(struct parsed_partitions *state)
+ 		}
+ 		slot++;
+ 	}
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	put_dev_sector(sect);
+ 	return 1;
+ }
+diff --git a/block/partitions/sun.c b/block/partitions/sun.c
+index 2419af76120f..92c645fcd2e0 100644
+--- a/block/partitions/sun.c
++++ b/block/partitions/sun.c
+@@ -121,7 +121,7 @@ int sun_partition(struct parsed_partitions *state)
+ 		}
+ 		slot++;
+ 	}
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	put_dev_sector(sect);
+ 	return 1;
+ }
+diff --git a/block/partitions/sysv68.c b/block/partitions/sysv68.c
+index 6f6257fd4eb4..470e0f9de7be 100644
+--- a/block/partitions/sysv68.c
++++ b/block/partitions/sysv68.c
+@@ -54,7 +54,6 @@ int sysv68_partition(struct parsed_partitions *state)
+ 	unsigned char *data;
+ 	struct dkblk0 *b;
+ 	struct slice *slice;
+-	char tmp[64];
+ 
+ 	data = read_part_sector(state, 0, &sect);
+ 	if (!data)
+@@ -74,8 +73,7 @@ int sysv68_partition(struct parsed_partitions *state)
+ 		return -1;
+ 
+ 	slices -= 1; /* last slice is the whole disk */
+-	snprintf(tmp, sizeof(tmp), "sysV68: %s(s%u)", state->name, slices);
+-	strlcat(state->pp_buf, tmp, PAGE_SIZE);
++	seq_buf_printf(&state->pp_buf, "sysV68: %s(s%u)", state->name, slices);
+ 	slice = (struct slice *)data;
+ 	for (i = 0; i < slices; i++, slice++) {
+ 		if (slot == state->limit)
+@@ -84,12 +82,11 @@ int sysv68_partition(struct parsed_partitions *state)
+ 			put_partition(state, slot,
+ 				be32_to_cpu(slice->blkoff),
+ 				be32_to_cpu(slice->nblocks));
+-			snprintf(tmp, sizeof(tmp), "(s%u)", i);
+-			strlcat(state->pp_buf, tmp, PAGE_SIZE);
++			seq_buf_printf(&state->pp_buf, "(s%u)", i);
+ 		}
+ 		slot++;
+ 	}
+-	strlcat(state->pp_buf, "\n", PAGE_SIZE);
++	seq_buf_puts(&state->pp_buf, "\n");
+ 	put_dev_sector(sect);
+ 	return 1;
+ }
+diff --git a/block/partitions/ultrix.c b/block/partitions/ultrix.c
+index 4aaa81043ca0..b4b9ddc57a5d 100644
+--- a/block/partitions/ultrix.c
++++ b/block/partitions/ultrix.c
+@@ -39,7 +39,7 @@ int ultrix_partition(struct parsed_partitions *state)
+ 					      label->pt_part[i].pi_blkoff,
+ 					      label->pt_part[i].pi_nblocks);
+ 		put_dev_sector(sect);
+-		strlcat(state->pp_buf, "\n", PAGE_SIZE);
++		seq_buf_puts(&state->pp_buf, "\n");
+ 		return 1;
+ 	} else {
+ 		put_dev_sector(sect);
+-- 
+2.34.1
 
