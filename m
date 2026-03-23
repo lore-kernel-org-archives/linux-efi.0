@@ -1,205 +1,238 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 083F436308D;
-	Mon, 23 Mar 2026 07:50:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 864573603FC;
+	Mon, 23 Mar 2026 08:51:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774252231; cv=none; b=SJXUg2kwfKVeZhf5njkEjK1oul8mz5PhTx8SMy0TvPzeToyDMKpxSx7tiRQc7dWfGvk62dmeoehpFTxBsHTMMM2Ih303Cb6d1RvnNrz5mhnHvkJ6QC+bOvdkfr+t2bjlGgxJX6a+6OfrCG1F/m96Nli8cltKJ7OwO9XAnKER6tA=
+	t=1774255911; cv=none; b=XLEf6Hv408AYrCPI3JiF4qYh3kktj6qN594g0DjjlPVGdVlB/8L06VHHE1zXrx3axApv37wmd9WjYl1lFarmoLswj1y2MHrd1EjHdWTwmgBF53vaWmNb8J6xypNeSpWHp0M2zgEQVZktKC/kKz71fWVWQeOK0OOhsPb99VmMS6Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774252231; c=relaxed/simple;
-	bh=2YaMKdXLS6q2N8eU5YUjQf/EJjPIOHb0bH+1NaX/nR8=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=T37gVZujdNj49xbzwWAIzY1pQxduGL7T0k7JuZVTY9sUvteO9EBp1cBUCW+0QP8Oq/b12EZ6lvld5ERA30MmvwbhWwdype0QhNteNq/aEJn732shu1uYoED+spA1kvspXasvAQDzBpMltUcJLERbqQ/670KMvWj/7N15DJii0R4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=l2yPHSZJ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1774255911; c=relaxed/simple;
+	bh=dmgQeU3RW0ZvG5Al9Vg1ngqjadpe9kAbYXZbA7yKC/o=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=iWq1o58dUn4M/Fq9IINUpCx6i2sPo2Kb9gMpIDfuyy9hVSG3xaVoucEzHVgfk1p2ipdoEVAV5oQNZUmpcBUBvTdHsxWCJePBDrQQ68LlrAsQqFvYqz/+bzSc4hghn9KTr2qPBlfD9u4+2jt007sdGGOiFXtoIBNDsyOoyD8tU3g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=pass smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=lBCwxNgK; arc=none smtp.client-ip=192.198.163.18
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="l2yPHSZJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0A012C4CEF7;
-	Mon, 23 Mar 2026 07:50:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774252230;
-	bh=2YaMKdXLS6q2N8eU5YUjQf/EJjPIOHb0bH+1NaX/nR8=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=l2yPHSZJSFV/2Xg29g07aWdlpqOxb4al6/yvYuIOUOc2J7tJq3yci9lYgN2Ad0Btc
-	 nh8HF9hH3MVm8s1S/WvMnipPqcfHyqAWEvEIecCcyDRi1zIUz73z0ufinHvS2jUzLd
-	 5aN1Ha8QPGf10iolGEgBJSw3s3hSAP0Nc5WD7PS9QgwP1azCodE+X0whKC6tqHZLc6
-	 x38IZNl+bgo7TYx0jvflmrbVMoc8805c5TR7QMdkpN9XA29LY99N0h9RQbpDy+SrSX
-	 EuBPFYqGifP/Y+eDtcoJ7SoPLUbAZ5a/FJM8kp8xH+wzmAySKlRhhdc4rhpWSVh4yl
-	 yYvsW9iWMARwA==
-From: Mike Rapoport <rppt@kernel.org>
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Alexander Potapenko <glider@google.com>,
-	Alexander Viro <viro@zeniv.linux.org.uk>,
-	Andreas Larsson <andreas@gaisler.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Borislav Petkov <bp@alien8.de>,
-	Brendan Jackman <jackmanb@google.com>,
-	"Christophe Leroy (CS GROUP)" <chleroy@kernel.org>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Christian Brauner <brauner@kernel.org>,
-	"David S. Miller" <davem@davemloft.net>,
-	Dave Hansen <dave.hansen@linux.intel.com>,
-	David Hildenbrand <david@kernel.org>,
-	Dmitry Vyukov <dvyukov@google.com>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Ingo Molnar <mingo@redhat.com>,
-	Jan Kara <jack@suse.cz>,
-	Johannes Weiner <hannes@cmpxchg.org>,
-	"Liam R. Howlett" <Liam.Howlett@oracle.com>,
-	Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
-	Madhavan Srinivasan <maddy@linux.ibm.com>,
-	Marco Elver <elver@google.com>,
-	Marek Szyprowski <m.szyprowski@samsung.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	Michael Ellerman <mpe@ellerman.id.au>,
-	Michal Hocko <mhocko@suse.com>,
-	Mike Rapoport <rppt@kernel.org>,
-	Nicholas Piggin <npiggin@gmail.com>,
-	"H. Peter Anvin" <hpa@zytor.com>,
-	Rob Herring <robh@kernel.org>,
-	Robin Murphy <robin.murphy@arm.com>,
-	Saravana Kannan <saravanak@kernel.org>,
-	Suren Baghdasaryan <surenb@google.com>,
-	Thomas Gleixner <tglx@kernel.org>,
-	Vlastimil Babka <vbabka@kernel.org>,
-	Will Deacon <will@kernel.org>,
-	Zi Yan <ziy@nvidia.com>,
-	devicetree@vger.kernel.org,
-	iommu@lists.linux.dev,
-	kasan-dev@googlegroups.com,
-	linux-arm-kernel@lists.infradead.org,
-	linux-efi@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mm@kvack.org,
-	linux-trace-kernel@vger.kernel.org,
-	linuxppc-dev@lists.ozlabs.org,
-	sparclinux@vger.kernel.org,
-	x86@kernel.org
-Subject: [PATCH v2 9/9] memblock: warn when freeing reserved memory before memory map is initialized
-Date: Mon, 23 Mar 2026 09:48:36 +0200
-Message-ID: <20260323074836.3653702-10-rppt@kernel.org>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260323074836.3653702-1-rppt@kernel.org>
-References: <20260323074836.3653702-1-rppt@kernel.org>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="lBCwxNgK"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1774255911; x=1805791911;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=dmgQeU3RW0ZvG5Al9Vg1ngqjadpe9kAbYXZbA7yKC/o=;
+  b=lBCwxNgKcecwvuVqHTY8XuWxg+ZvN7vTfOdmwscnFhTN1VpD8/ysmAwL
+   UVcYKpH3fWMGFvRpBbim6nusqR9HMKPPuRXEPYmo/8tOhCq6srIIU1Q85
+   bDjiI+Y1kydw9kNBm/6KyTO7ZtQD+ltZ/graT9sKnCDfFUykgTPrx8MIV
+   JVPuXLdhEt7FaD4csZ/NRF3tyvtDbKAleCKu/Z9FXJJvloPS2e8ZX788d
+   b9pULmi+SeSIS6Ag2bSroCVcEcJvGgE9IGXeVvey2f4/ssthHSPh8twWi
+   W6cm1BXez+99ieSPqsYMOZvHtMxbJTn7E92rujDj9NEyLyU49kTTLe5ad
+   g==;
+X-CSE-ConnectionGUID: 8iRTGY8GTzG8mf/USL/7FA==
+X-CSE-MsgGUID: Y0rQz1TNTHKTuRqsN6y1lg==
+X-IronPort-AV: E=McAfee;i="6800,10657,11737"; a="74427215"
+X-IronPort-AV: E=Sophos;i="6.23,136,1770624000"; 
+   d="scan'208";a="74427215"
+Received: from orviesa002.jf.intel.com ([10.64.159.142])
+  by fmvoesa112.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Mar 2026 01:51:50 -0700
+X-CSE-ConnectionGUID: ock8Tlp0TquOEKkUY4ALRA==
+X-CSE-MsgGUID: kxhnSGJ+Sq+epLMtPDxTVw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.23,136,1770624000"; 
+   d="scan'208";a="254438657"
+Received: from vpanait-mobl.ger.corp.intel.com (HELO localhost) ([10.245.244.22])
+  by orviesa002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Mar 2026 01:51:46 -0700
+Date: Mon, 23 Mar 2026 10:51:44 +0200
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: Kees Cook <kees@kernel.org>
+Cc: Josh Law <objecting@objecting.org>, Jens Axboe <axboe@kernel.dk>,
+	Davidlohr Bueso <dave@stgolabs.net>,
+	Stefan Haberland <sth@linux.ibm.com>,
+	Jan Hoeppner <hoeppner@linux.ibm.com>,
+	"Richard Russon (FlatCap)" <ldm@flatcap.org>,
+	Thorsten Blum <thorsten.blum@linux.dev>,
+	linux-kernel@vger.kernel.org, linux-block@vger.kernel.org,
+	linux-efi@vger.kernel.org, linux-s390@vger.kernel.org,
+	linux-ntfs-dev@lists.sourceforge.net,
+	linux-hardening@vger.kernel.org
+Subject: Re: [PATCH] block: partitions: Replace pp_buf with struct seq_buf
+Message-ID: <acD_IIEXmhnVlO0C@ashevche-desk.local>
+References: <20260321004840.work.670-kees@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260321004840.work.670-kees@kernel.org>
+Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
+ krs, Bertel Jungin Aukio 5, 02600 Espoo
 
-From: "Mike Rapoport (Microsoft)" <rppt@kernel.org>
+On Fri, Mar 20, 2026 at 05:48:44PM -0700, Kees Cook wrote:
+> In preparation for removing the strlcat API[1], replace the char *pp_buf
+> with a struct seq_buf, which tracks the current write position and
+> remaining space internally. This allows for:
+> 
+> - Direct use of seq_buf_printf() in place of snprintf()+strlcat()
+>   pairs, eliminating local tmp buffers throughout.
+> - Adjacent strlcat() calls that build strings piece-by-piece
+>   (e.g., strlcat("["); strlcat(name); strlcat("]")) to be collapsed
+>   into single seq_buf_printf() calls.
+> - Simpler call sites: seq_buf_puts() takes only the buffer and string,
+>   with no need to pass PAGE_SIZE at every call.
+> 
+> The backing buffer allocation is unchanged (__get_free_page), and the
+> output path uses seq_buf_str() to NUL-terminate before passing to
+> printk().
 
-When CONFIG_DEFERRED_STRUCT_PAGE_INIT is enabled, freeing of reserved
-memory before the memory map is fully initialized in deferred_init_memmap()
-would cause access to uninitialized struct pages and may crash when
-accessing spurious list pointers, like was recently discovered during
-discussion about memory leaks in x86 EFI code [1].
+Thanks a lot! A few comments below.
+Personally I'm in favour of this patch as it also removes a lot of ugly code
+(which is scoped string manipulations), FWIW,
+Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-The trace below is from an attempt to call free_reserved_page() before
-page_alloc_init_late():
+> Link: https://github.com/KSPP/linux/issues/370 [1]
 
-[    0.076840] BUG: unable to handle page fault for address: ffffce1a005a0788
-[    0.078226] #PF: supervisor read access in kernel mode
-[    0.078226] #PF: error_code(0x0000) - not-present page
-[    0.078226] PGD 0 P4D 0
-[    0.078226] Oops: Oops: 0000 [#1] PREEMPT SMP NOPTI
-[    0.078226] CPU: 0 UID: 0 PID: 0 Comm: swapper/0 Not tainted 6.12.68-92.123.amzn2023.x86_64 #1
-[    0.078226] Hardware name: Amazon EC2 t3a.nano/, BIOS 1.0 10/16/2017
-[    0.078226] RIP: 0010:__list_del_entry_valid_or_report+0x32/0xb0
+> Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> Cc: Josh Law <objecting@objecting.org>
+
+While not long, this still can be placed...
+
+> Signed-off-by: Kees Cook <kees@kernel.org>
+> ---
+
+...somewhere here to reduce unneeded noise in the commit message.
+
+> I couldn't help myself. Here's the full patch, as I suggested in
+> https://lore.kernel.org/lkml/202603201230.74BBFFABAD@keescook/
+> There are plenty more like this to do...
+
+Indeed, but thanks for the example on how to do that!
+
 ...
-[    0.078226]  __free_one_page+0x170/0x520
-[    0.078226]  free_pcppages_bulk+0x151/0x1e0
-[    0.078226]  free_unref_page_commit+0x263/0x320
-[    0.078226]  free_unref_page+0x2c8/0x5b0
-[    0.078226]  ? srso_return_thunk+0x5/0x5f
-[    0.078226]  free_reserved_page+0x1c/0x30
-[    0.078226]  memblock_free_late+0x6c/0xc0
 
-Currently there are not many callers of free_reserved_area() and they all
-appear to be at the right timings.
+> @@ -78,14 +76,14 @@ static int riscix_partition(struct parsed_partitions *state,
+>  	if (!rr)
+>  		return -1;
+>  
+> -	strlcat(state->pp_buf, " [RISCiX]", PAGE_SIZE);
+> +	seq_buf_puts(&state->pp_buf, " [RISCiX]");
+>  
+>  
 
-Still, in order to protect against problematic code moves or additions of
-new callers add a warning that will inform that reserved pages cannot be
-freed until the memory map is fully initialized.
+While at it, you can also drop a second blank line.
 
-[1] https://lore.kernel.org/all/e5d5a1105d90ee1e7fe7eafaed2ed03bbad0c46b.camel@kernel.crashing.org/
+>  	if (rr->magic == RISCIX_MAGIC) {
+>  		unsigned long size = nr_sects > 2 ? 2 : nr_sects;
+>  		int part;
+>  
+> -		strlcat(state->pp_buf, " <", PAGE_SIZE);
+> +		seq_buf_puts(&state->pp_buf, " <");
+>  
+>  		put_partition(state, slot++, first_sect, size);
+>  		for (part = 0; part < 8; part++) {
 
-Signed-off-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
----
- mm/internal.h   | 10 ++++++++++
- mm/memblock.c   |  5 +++++
- mm/page_alloc.c | 10 ----------
- 3 files changed, 15 insertions(+), 10 deletions(-)
+...
 
-diff --git a/mm/internal.h b/mm/internal.h
-index cb0af847d7d9..f60c1edb2e02 100644
---- a/mm/internal.h
-+++ b/mm/internal.h
-@@ -1233,7 +1233,17 @@ static inline void vunmap_range_noflush(unsigned long start, unsigned long end)
- #ifdef CONFIG_DEFERRED_STRUCT_PAGE_INIT
- DECLARE_STATIC_KEY_TRUE(deferred_pages);
- 
-+static inline bool deferred_pages_enabled(void)
-+{
-+	return static_branch_unlikely(&deferred_pages);
-+}
-+
- bool __init deferred_grow_zone(struct zone *zone, unsigned int order);
-+#else
-+static inline bool deferred_pages_enabled(void)
-+{
-+	return false;
-+}
- #endif /* CONFIG_DEFERRED_STRUCT_PAGE_INIT */
- 
- void init_deferred_page(unsigned long pfn, int nid);
-diff --git a/mm/memblock.c b/mm/memblock.c
-index dc8811861c11..ab8f35c3bd41 100644
---- a/mm/memblock.c
-+++ b/mm/memblock.c
-@@ -899,6 +899,11 @@ static unsigned long __free_reserved_area(phys_addr_t start, phys_addr_t end,
- {
- 	unsigned long pages = 0, pfn;
- 
-+	if (deferred_pages_enabled()) {
-+		WARN(1, "Cannot free reserved memory because of deferred initialization of the memory map");
-+		return 0;
-+	}
-+
- 	for_each_valid_pfn(pfn, PFN_UP(start), PFN_DOWN(end)) {
- 		struct page *page = pfn_to_page(pfn);
- 		void *direct_map_addr;
-diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-index df3d61253001..9ac47bab2ea7 100644
---- a/mm/page_alloc.c
-+++ b/mm/page_alloc.c
-@@ -331,11 +331,6 @@ int page_group_by_mobility_disabled __read_mostly;
-  */
- DEFINE_STATIC_KEY_TRUE(deferred_pages);
- 
--static inline bool deferred_pages_enabled(void)
--{
--	return static_branch_unlikely(&deferred_pages);
--}
--
- /*
-  * deferred_grow_zone() is __init, but it is called from
-  * get_page_from_freelist() during early boot until deferred_pages permanently
-@@ -348,11 +343,6 @@ _deferred_grow_zone(struct zone *zone, unsigned int order)
- 	return deferred_grow_zone(zone, order);
- }
- #else
--static inline bool deferred_pages_enabled(void)
--{
--	return false;
--}
--
- static inline bool _deferred_grow_zone(struct zone *zone, unsigned int order)
- {
- 	return false;
+> @@ -173,24 +173,22 @@ int aix_partition(struct parsed_partitions *state)
+>  	if (d) {
+>  		struct lvm_rec *p = (struct lvm_rec *)d;
+>  		u16 lvm_version = be16_to_cpu(p->version);
+> -		char tmp[64];
+>  
+>  		if (lvm_version == 1) {
+>  			int pp_size_log2 = be16_to_cpu(p->pp_size);
+>  
+>  			pp_bytes_size = 1 << pp_size_log2;
+>  			pp_blocks_size = pp_bytes_size / 512;
+> -			snprintf(tmp, sizeof(tmp),
+> -				" AIX LVM header version %u found\n",
+> -				lvm_version);
+> +			seq_buf_printf(&state->pp_buf,
+> +				       " AIX LVM header version %u found\n",
+> +				       lvm_version);
+
+Hmm... here it's %u...
+
+>  			vgda_len = be32_to_cpu(p->vgda_len);
+>  			vgda_sector = be32_to_cpu(p->vgda_psn[0]);
+>  		} else {
+> -			snprintf(tmp, sizeof(tmp),
+> -				" unsupported AIX LVM version %d found\n",
+> -				lvm_version);
+> +			seq_buf_printf(&state->pp_buf,
+> +				       " unsupported AIX LVM version %d found\n",
+> +				       lvm_version);
+
+...and here it's %d. Perhaps also fix specifiers to be aligned with the actual
+data type?
+
+>  		}
+> -		strlcat(state->pp_buf, tmp, PAGE_SIZE);
+>  		put_dev_sector(sect);
+>  	}
+>  	if (vgda_sector && (d = read_part_sector(state, vgda_sector, &sect))) {
+
+...
+
+> -			char tmp[42];
+>  
+>  			__be32 *dt = (__be32 *)dostype;
+>  			*dt = pb->pb_Environment[16];
+>  			if (dostype[3] < ' ')
+> -				snprintf(tmp, sizeof(tmp), " (%c%c%c^%c)",
+> -					dostype[0], dostype[1],
+> -					dostype[2], dostype[3] + '@' );
+> +				seq_buf_printf(&state->pp_buf,
+> +					       " (%c%c%c^%c)",
+> +					       dostype[0], dostype[1],
+> +					       dostype[2],
+> +					       dostype[3] + '@');
+>  			else
+> -				snprintf(tmp, sizeof(tmp), " (%c%c%c%c)",
+> -					dostype[0], dostype[1],
+> -					dostype[2], dostype[3]);
+> -			strlcat(state->pp_buf, tmp, PAGE_SIZE);
+> -			snprintf(tmp, sizeof(tmp), "(res %d spb %d)",
+> -				be32_to_cpu(pb->pb_Environment[6]),
+> -				be32_to_cpu(pb->pb_Environment[4]));
+> -			strlcat(state->pp_buf, tmp, PAGE_SIZE);
+> +				seq_buf_printf(&state->pp_buf,
+> +					       " (%c%c%c%c)",
+> +					       dostype[0], dostype[1],
+> +					       dostype[2], dostype[3]);
+
+Wouldn't
+				seq_buf_printf(&state->pp_buf, " (%.4s)", dostype);
+
+work?
+
+But probably okay as in the previous branch it needs more work to follow,
+something like
+
+			char dostype[8];
+			...
+			if (dostype[3] < ' ') {
+				/* Escape control character */
+				dostype[4] = dostype[3] + '@';
+				dostype[3] = '^';
+				seq_buf_printf(&state->pp_buf, " (%.5s)", dostype);
+			} else {
+				seq_buf_printf(&state->pp_buf, " (%.4s)", dostype);
+			}
+
+Taking how invasive is this, it might be better to done separately.
+
+> +			seq_buf_printf(&state->pp_buf, "(res %d spb %d)",
+> +				       be32_to_cpu(pb->pb_Environment[6]),
+> +				       be32_to_cpu(pb->pb_Environment[4]));
+>  		}
+>  		res = 1;
+
 -- 
-2.53.0
+With Best Regards,
+Andy Shevchenko
+
 
