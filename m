@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13E032D63F8;
-	Mon, 23 Mar 2026 07:49:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CC11363090;
+	Mon, 23 Mar 2026 07:49:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774252153; cv=none; b=Hgf3naqIXQA1j/ZXw9/bBALNB1FmUuUNAxrLbZ+AC8biG+rQvncXoM7Ny/ivQ5PeyjhwflcYfnqCjsRAUMM3abn6r4Csry9BhOePnyRAnVpr3KmNk4JPjgnUHIw/ff+dx/rxyYC1t3dD65jgdhzzNWlYR1je0N6qXK9tGVj2Qls=
+	t=1774252164; cv=none; b=HhZ2XFO9SXtYMM/66hTJL1Ohy9NgsyEIb0/K6Xw0VIdfWIrjGa400RNbnRlue2CUwLYQfjIllMQD31OVt8eL2v0X8Qbk8Nuujw7Z8B61rQH5e0RVGg9N+qE/Ktq3I2LCSGEPHq/snzq1RN/mK14qZMnfry2P4Oiq59PHyFNzcO4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774252153; c=relaxed/simple;
-	bh=IEszaCrFLo/Rs8yG7tIln7RmG7s5ArmJTUt7L+grDBM=;
+	s=arc-20240116; t=1774252164; c=relaxed/simple;
+	bh=H66xl/BIJkTq28ukNF8WEu/fNAsPeeebsB5A/nwWYaQ=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=S8gQxFYmG+7rxamV6HRl2biVrXxlBQtvDTRmUw2vmyAjI/ck5cKyUt0Cvq5etuUoa5Ihzt86lEKR1Aq0olMQvTg/NpkNQgiamTwzc3TH5kV8cZaIW8o3TSsqNb5kuucfPedsMV+T2c6ZkpvixqbrDwapIMjXpWqUNpaISy1Kox4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mJkHNMOm; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=oAzKc21/oTyCm+hmKhGKiFf8xK+8Kt0Id4VyX4OR+jm0oJp++CSElXKPKF3k33vya8c/b6vp5MZ5o3I5ScPe9PoOt7d5YIFYWMd0OdX0Tob8AJ4dxkRSExqvb6wdX8TOUQjKMSOio+egmVzknYJpWDrWMvqteduXquJQmNKytSk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=I5My3+MQ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mJkHNMOm"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 161B9C2BC9E;
-	Mon, 23 Mar 2026 07:49:01 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="I5My3+MQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3804AC4CEF7;
+	Mon, 23 Mar 2026 07:49:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774252152;
-	bh=IEszaCrFLo/Rs8yG7tIln7RmG7s5ArmJTUt7L+grDBM=;
+	s=k20201202; t=1774252163;
+	bh=H66xl/BIJkTq28ukNF8WEu/fNAsPeeebsB5A/nwWYaQ=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=mJkHNMOmwoIFLTcd31YucBrDfzfANQW+xkkREf7kQp1YDYI6vfV8/hVhcG3l8g/jK
-	 sQngYeWtYhv0ZkW+8RpdtrXoti30446exi6Ju2/Ux3my4Q287Qpr4iWYaKli+PF0u9
-	 vL/UiFYGZsmNZ4bQKMUXEy7AH5R6vF3zaUA3sbrcBu/WMLiPFtPcKLGomrzmqCTzqi
-	 PwkOo9OAQEaeopupEyTaQ/a8bAo4WgnB6AuNb75FaxwKNBNMNqccFmqdvaop/ltQA0
-	 aYjKEuyW1vof5rqfOJ6PkR20WHVtA+dub6QcUQQxq3ViDq6QsOyMq2uvJPowcDC5VL
-	 AoERA5+OddeHw==
+	b=I5My3+MQvuPzdJ/eqnURHDufO2mFAIraPI31J+w/BDj7mSnOzz+bBSQ1nkIe6BHbp
+	 XVpJh7sZx9NFenINTf9GYQ137cP6vq3WlrCC8bnp6YDsHPgO8DCjw+QUFpZuyiQRev
+	 4ZiDp6rsouY8nD13d6IOzKlDukyiP/rqJ1UKAgnZiOiYzFhPGMGLMTbUTFoLqAqxjQ
+	 tmiRSnujVaLodu+eJjuLWv5yflUsq2SZE3WtD7/jj+hDdLQLtnmbP8EpnzzEK7QIi7
+	 D0NRQA1iQ/GFpfYatJJU9GNNL+T6vp+PtI6c81WogxjFBeSkYizd+xg4X95TFNbYpb
+	 0iF2JqU+gfR1g==
 From: Mike Rapoport <rppt@kernel.org>
 To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Alexander Potapenko <glider@google.com>,
@@ -76,9 +76,9 @@ Cc: Alexander Potapenko <glider@google.com>,
 	linuxppc-dev@lists.ozlabs.org,
 	sparclinux@vger.kernel.org,
 	x86@kernel.org
-Subject: [PATCH v2 2/9] powerpc: fadump: pair alloc_pages_exact() with free_pages_exact()
-Date: Mon, 23 Mar 2026 09:48:29 +0200
-Message-ID: <20260323074836.3653702-3-rppt@kernel.org>
+Subject: [PATCH v2 3/9] powerpc: opal-core: pair alloc_pages_exact() with free_pages_exact()
+Date: Mon, 23 Mar 2026 09:48:30 +0200
+Message-ID: <20260323074836.3653702-4-rppt@kernel.org>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260323074836.3653702-1-rppt@kernel.org>
 References: <20260323074836.3653702-1-rppt@kernel.org>
@@ -92,52 +92,57 @@ Content-Transfer-Encoding: 8bit
 
 From: "Mike Rapoport (Microsoft)" <rppt@kernel.org>
 
-fadump allocates buffers with alloc_pages_exact(), but then marks them
-as reserved and frees using free_reserved_area().
+opal-core allocates buffers with alloc_pages_exact(), but then
+marks them as reserved and frees using free_reserved_area().
 
 This is completely unnecessary and the pages allocated with
 alloc_pages_exact() can be naturally freed with free_pages_exact().
 
-Replace freeing of memory in fadump_free_buffer() with
+Replace freeing of memory in opalcore_cleanup() with
 free_pages_exact() and simplify allocation code so that it won't mark
 allocated pages as reserved.
 
 Signed-off-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
 ---
- arch/powerpc/kernel/fadump.c | 16 ++--------------
- 1 file changed, 2 insertions(+), 14 deletions(-)
+ arch/powerpc/platforms/powernv/opal-core.c | 11 +----------
+ 1 file changed, 1 insertion(+), 10 deletions(-)
 
-diff --git a/arch/powerpc/kernel/fadump.c b/arch/powerpc/kernel/fadump.c
-index 4ebc333dd786..501d43bf18f3 100644
---- a/arch/powerpc/kernel/fadump.c
-+++ b/arch/powerpc/kernel/fadump.c
-@@ -775,24 +775,12 @@ void __init fadump_update_elfcore_header(char *bufp)
- 
- static void *__init fadump_alloc_buffer(unsigned long size)
- {
--	unsigned long count, i;
+diff --git a/arch/powerpc/platforms/powernv/opal-core.c b/arch/powerpc/platforms/powernv/opal-core.c
+index e76e462f55f6..32662d30d70f 100644
+--- a/arch/powerpc/platforms/powernv/opal-core.c
++++ b/arch/powerpc/platforms/powernv/opal-core.c
+@@ -303,7 +303,6 @@ static int __init create_opalcore(void)
+ 	struct device_node *dn;
+ 	struct opalcore *new;
+ 	loff_t opalcore_off;
 -	struct page *page;
--	void *vaddr;
--
--	vaddr = alloc_pages_exact(size, GFP_KERNEL | __GFP_ZERO);
--	if (!vaddr)
--		return NULL;
--
--	count = PAGE_ALIGN(size) / PAGE_SIZE;
--	page = virt_to_page(vaddr);
+ 	Elf64_Phdr *phdr;
+ 	Elf64_Ehdr *elf;
+ 	int i, ret;
+@@ -328,11 +327,6 @@ static int __init create_opalcore(void)
+ 		oc_conf->opalcorebuf_sz = 0;
+ 		return -ENOMEM;
+ 	}
+-	count = oc_conf->opalcorebuf_sz / PAGE_SIZE;
+-	page = virt_to_page(oc_conf->opalcorebuf);
 -	for (i = 0; i < count; i++)
 -		mark_page_reserved(page + i);
--	return vaddr;
-+	return  alloc_pages_exact(size, GFP_KERNEL | __GFP_ZERO);
- }
+-
+ 	pr_debug("opalcorebuf = 0x%llx\n", (u64)oc_conf->opalcorebuf);
  
- static void fadump_free_buffer(unsigned long vaddr, unsigned long size)
- {
--	free_reserved_area((void *)vaddr, (void *)(vaddr + size), -1, NULL);
-+	free_pages_exact((void *)vaddr, size);
- }
+ 	/* Read OPAL related device-tree entries */
+@@ -437,10 +431,7 @@ static void opalcore_cleanup(void)
  
- s32 __init fadump_setup_cpu_notes_buf(u32 num_cpus)
+ 	/* free the buffer used for setting up OPAL core */
+ 	if (oc_conf->opalcorebuf) {
+-		void *end = (void *)((u64)oc_conf->opalcorebuf +
+-				     oc_conf->opalcorebuf_sz);
+-
+-		free_reserved_area(oc_conf->opalcorebuf, end, -1, NULL);
++		free_pages_exact(oc_conf->opalcorebuf, oc_conf->opalcorebuf_sz);
+ 		oc_conf->opalcorebuf = NULL;
+ 		oc_conf->opalcorebuf_sz = 0;
+ 	}
 -- 
 2.53.0
 
