@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC450363090;
-	Mon, 23 Mar 2026 07:49:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13E032D63F8;
+	Mon, 23 Mar 2026 07:49:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774252141; cv=none; b=UfFGeD+UpJnPiEO1+4n7bPebcCrt9ygQ6263IdRE2dZWaEfOsOpuxijMV+ODQAPlBrTxTRyc5PMHnhrHBu+e7SCSszL7FIK83iaufvpMJU7qb8TUiDUzgfzzrAgTjCFZU9EBX0EMQmTXqHZJ9RWQYgCcev4Dqaj2TMqok0ZA+lc=
+	t=1774252153; cv=none; b=Hgf3naqIXQA1j/ZXw9/bBALNB1FmUuUNAxrLbZ+AC8biG+rQvncXoM7Ny/ivQ5PeyjhwflcYfnqCjsRAUMM3abn6r4Csry9BhOePnyRAnVpr3KmNk4JPjgnUHIw/ff+dx/rxyYC1t3dD65jgdhzzNWlYR1je0N6qXK9tGVj2Qls=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774252141; c=relaxed/simple;
-	bh=ZPayAoUZgLwz6EhVKnVbCR0MqW3d3UF4hy1nzr/kEys=;
+	s=arc-20240116; t=1774252153; c=relaxed/simple;
+	bh=IEszaCrFLo/Rs8yG7tIln7RmG7s5ArmJTUt7L+grDBM=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=L9twtqjIIZahydnIRGdVoPTVOd8jRp/zgvWDRFJm43PuiYjNaLjMwdoXyQU1rtZEHhKgyQ7U6zVxWNqFtuyPDjqg0DMYvdWlnQwszYRbpa/psvb8BEaBSbTQJrlu22SSNifP8JgbstsTrK3vWmDJIkupNV4KWvYxjfayCXQdcRI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=soMwPHB4; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=S8gQxFYmG+7rxamV6HRl2biVrXxlBQtvDTRmUw2vmyAjI/ck5cKyUt0Cvq5etuUoa5Ihzt86lEKR1Aq0olMQvTg/NpkNQgiamTwzc3TH5kV8cZaIW8o3TSsqNb5kuucfPedsMV+T2c6ZkpvixqbrDwapIMjXpWqUNpaISy1Kox4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mJkHNMOm; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="soMwPHB4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E6B1FC2BC9E;
-	Mon, 23 Mar 2026 07:48:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mJkHNMOm"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 161B9C2BC9E;
+	Mon, 23 Mar 2026 07:49:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774252141;
-	bh=ZPayAoUZgLwz6EhVKnVbCR0MqW3d3UF4hy1nzr/kEys=;
+	s=k20201202; t=1774252152;
+	bh=IEszaCrFLo/Rs8yG7tIln7RmG7s5ArmJTUt7L+grDBM=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=soMwPHB478isjyOEuq0IFRN9Cief5Jqwxg1OL7jUkDAL9y4hBeM9dbR/1MWaRqGWi
-	 ib0jpyTzOuLzovqiLkfFzH/sitT7zv4W8SFvjQAfIZyXowACHhmqxuqnkiN4Ye2w/b
-	 fqdb/4qzrOD886HOPMUSVszQTzLVwA06GpzpYZb9RUwXxMKzldKhDOEpdPGEiqzvEz
-	 d8ZnoMumXfNyr/H7/zGCKqVZFhNYMDERdxkrZ9jFtVB2x96iGjkhmG/En+iUsCJUVO
-	 API6o3jBTJGcQaw3dzn8rTLMq1L6nSmRBE/0It/iNumPWF5phnJ73bZcJMJHMFZdCH
-	 C3sxaPr5Q/wkA==
+	b=mJkHNMOmwoIFLTcd31YucBrDfzfANQW+xkkREf7kQp1YDYI6vfV8/hVhcG3l8g/jK
+	 sQngYeWtYhv0ZkW+8RpdtrXoti30446exi6Ju2/Ux3my4Q287Qpr4iWYaKli+PF0u9
+	 vL/UiFYGZsmNZ4bQKMUXEy7AH5R6vF3zaUA3sbrcBu/WMLiPFtPcKLGomrzmqCTzqi
+	 PwkOo9OAQEaeopupEyTaQ/a8bAo4WgnB6AuNb75FaxwKNBNMNqccFmqdvaop/ltQA0
+	 aYjKEuyW1vof5rqfOJ6PkR20WHVtA+dub6QcUQQxq3ViDq6QsOyMq2uvJPowcDC5VL
+	 AoERA5+OddeHw==
 From: Mike Rapoport <rppt@kernel.org>
 To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Alexander Potapenko <glider@google.com>,
@@ -76,9 +76,9 @@ Cc: Alexander Potapenko <glider@google.com>,
 	linuxppc-dev@lists.ozlabs.org,
 	sparclinux@vger.kernel.org,
 	x86@kernel.org
-Subject: [PATCH v2 1/9] memblock: reserve_mem: fix end caclulation in reserve_mem_release_by_name()
-Date: Mon, 23 Mar 2026 09:48:28 +0200
-Message-ID: <20260323074836.3653702-2-rppt@kernel.org>
+Subject: [PATCH v2 2/9] powerpc: fadump: pair alloc_pages_exact() with free_pages_exact()
+Date: Mon, 23 Mar 2026 09:48:29 +0200
+Message-ID: <20260323074836.3653702-3-rppt@kernel.org>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260323074836.3653702-1-rppt@kernel.org>
 References: <20260323074836.3653702-1-rppt@kernel.org>
@@ -92,31 +92,52 @@ Content-Transfer-Encoding: 8bit
 
 From: "Mike Rapoport (Microsoft)" <rppt@kernel.org>
 
-free_reserved_area() expects end parameter to point to the first address
-after the area, but reserve_mem_release_by_name() passes it the last
-address inside the area.
+fadump allocates buffers with alloc_pages_exact(), but then marks them
+as reserved and frees using free_reserved_area().
 
-Remove subtraction of one in calculation of the area end.
+This is completely unnecessary and the pages allocated with
+alloc_pages_exact() can be naturally freed with free_pages_exact().
 
-Fixes: 74e2498ccf7b ("mm/memblock: Add reserved memory release function")
+Replace freeing of memory in fadump_free_buffer() with
+free_pages_exact() and simplify allocation code so that it won't mark
+allocated pages as reserved.
+
 Signed-off-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
 ---
- mm/memblock.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/powerpc/kernel/fadump.c | 16 ++--------------
+ 1 file changed, 2 insertions(+), 14 deletions(-)
 
-diff --git a/mm/memblock.c b/mm/memblock.c
-index b3ddfdec7a80..d4a02f1750e9 100644
---- a/mm/memblock.c
-+++ b/mm/memblock.c
-@@ -2434,7 +2434,7 @@ int reserve_mem_release_by_name(const char *name)
- 		return 0;
+diff --git a/arch/powerpc/kernel/fadump.c b/arch/powerpc/kernel/fadump.c
+index 4ebc333dd786..501d43bf18f3 100644
+--- a/arch/powerpc/kernel/fadump.c
++++ b/arch/powerpc/kernel/fadump.c
+@@ -775,24 +775,12 @@ void __init fadump_update_elfcore_header(char *bufp)
  
- 	start = phys_to_virt(map->start);
--	end = start + map->size - 1;
-+	end = start + map->size;
- 	snprintf(buf, sizeof(buf), "reserve_mem:%s", name);
- 	free_reserved_area(start, end, 0, buf);
- 	map->size = 0;
+ static void *__init fadump_alloc_buffer(unsigned long size)
+ {
+-	unsigned long count, i;
+-	struct page *page;
+-	void *vaddr;
+-
+-	vaddr = alloc_pages_exact(size, GFP_KERNEL | __GFP_ZERO);
+-	if (!vaddr)
+-		return NULL;
+-
+-	count = PAGE_ALIGN(size) / PAGE_SIZE;
+-	page = virt_to_page(vaddr);
+-	for (i = 0; i < count; i++)
+-		mark_page_reserved(page + i);
+-	return vaddr;
++	return  alloc_pages_exact(size, GFP_KERNEL | __GFP_ZERO);
+ }
+ 
+ static void fadump_free_buffer(unsigned long vaddr, unsigned long size)
+ {
+-	free_reserved_area((void *)vaddr, (void *)(vaddr + size), -1, NULL);
++	free_pages_exact((void *)vaddr, size);
+ }
+ 
+ s32 __init fadump_setup_cpu_notes_buf(u32 num_cpus)
 -- 
 2.53.0
 
