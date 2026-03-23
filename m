@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8342B36308C;
-	Mon, 23 Mar 2026 07:49:46 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BC1E3603D9;
+	Mon, 23 Mar 2026 07:49:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774252186; cv=none; b=HlF+myv387sItmH9+potVmbjYGehfAFscs9xRFpxndrUbtkwrXRVhtrqchVSqU+5o0lalN4G5cpf1DhnFwBqUz3TWdFNFDvfEG9fjHIRYjFXgE/N2bVWPZ2IbPUkAqyKCpF2Ai8bHRPOAatTZZ8vf+RVH0r6T0ZfB0LdHkt/jfo=
+	t=1774252197; cv=none; b=LI8+oCP81mL92dE3QKO/GZyKY9Biws+h9MoDxyodIRB1lv92taPNh4IM7PrvJMKvEePP73OmF1uTK9Jl1rEnx/6T/d/0MfbzPhfeBJ821+zBTh22Vh8MXxMBoGdmNwNnTLop+XXhSzjbuQr2JtR88GpnDLp7vmoSpIGIZm1W/2o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774252186; c=relaxed/simple;
-	bh=oTjYKF2HzgnTzfVt/T4KR/aYoXu0jvREAeLPVzJjchU=;
+	s=arc-20240116; t=1774252197; c=relaxed/simple;
+	bh=CusCegPCNb++eRZgEnFYAhQJhnAtG3gjmvQHWQKqyPY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=MlZpmO6Nm7zbrfXslQ24f4GxQqNy6VkTaxxqm+aAnsqGEYZp5yPiFlmVIo8GgC3yMhnwvhps8dy31o7X08KGvk72s3ZZRvhfxT2dMRCoZGl6hVmrpSpURk8QqowWKGNTYC2MRk6vDrrvGl32b4r7g7jfds1QsqJHrfK14/S1CYk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ApW+Ttb+; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=QS68z+wLHqtx4CbRT4DPwnbG0Pmk4dEJHpULohmsv2hT5V6yMggG5SVqUgVfinYwRWs8ORWzc7/x9iaNsWo7nk6HwHv3zf8G2vcOK5fOuH4PtyrykYE2VFFjl6HvaoRw3Xi8HbTYcu6Tq/7/ZEO9I3CW4VhtEu6bmZWRexCZWL4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=B6fPKlxH; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ApW+Ttb+"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7A752C4CEF7;
-	Mon, 23 Mar 2026 07:49:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="B6fPKlxH"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9B693C2BC9E;
+	Mon, 23 Mar 2026 07:49:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774252186;
-	bh=oTjYKF2HzgnTzfVt/T4KR/aYoXu0jvREAeLPVzJjchU=;
+	s=k20201202; t=1774252197;
+	bh=CusCegPCNb++eRZgEnFYAhQJhnAtG3gjmvQHWQKqyPY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=ApW+Ttb+jFMzL2PVxO2byAuk+A4fmPJnMaO15oJq2IHN6Zecm4hgjhBgwx8npbKST
-	 TGIhzz69K5K4pqQrfkuVb111Ir4KwV9TblQWUzh9dnGHx88hKymgGX1Jv2l7vvSHbM
-	 eeOwB1tP4IvmYQA/ieHNVxEm4eqUCFiuavhCV8w4JZLIDlqV+RrBsQ6RutKPB1KiCx
-	 CTJ9HkxBlgZ4IexKCBXnmCd9iYf4bnQmxV5OCKwv84oMEH+prH6i6fEMCUVPImpnIq
-	 IFbjWI+qGUrIe7+ITN828go5miiQUt8iDKr+D1nvEix/c2fD9Fsz6E0RBqR/E2a1+7
-	 j3bxw4hqbLsrw==
+	b=B6fPKlxHQgWSYzAKTM8G/WWrhZHeaeNsETUGqkQueGTMK64wv6WfUMzzorQkeopo7
+	 hBHZE+Gqs69UQLXKRy/u5tAt1wOavloqFcv52lzntc3bYHhMnIBwNhwWERo67xoRWs
+	 e+V1fc4IuFsAILvV17/Umo0CswXHiww2G9w5Xmd5bUZ/65HujbklLiPL0z9Ta4QPPB
+	 jXAaAUCkB5sI+cmP91/5BYP+gLzDhZrZBjNKcAP9UvluKbCVPCd5xFSjRu5OWYWMU0
+	 Gk6PiNYwrqh+5Y8Mj243Ec5aEbQi2bt8Ki9ITja32vtDHNFNfgb/1VhVG4vtHkAh/C
+	 1xTA2fQLh15Mg==
 From: Mike Rapoport <rppt@kernel.org>
 To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Alexander Potapenko <glider@google.com>,
@@ -76,9 +76,9 @@ Cc: Alexander Potapenko <glider@google.com>,
 	linuxppc-dev@lists.ozlabs.org,
 	sparclinux@vger.kernel.org,
 	x86@kernel.org
-Subject: [PATCH v2 5/9] memblock: make free_reserved_area() more robust
-Date: Mon, 23 Mar 2026 09:48:32 +0200
-Message-ID: <20260323074836.3653702-6-rppt@kernel.org>
+Subject: [PATCH v2 6/9] memblock: extract page freeing from free_reserved_area() into a helper
+Date: Mon, 23 Mar 2026 09:48:33 +0200
+Message-ID: <20260323074836.3653702-7-rppt@kernel.org>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260323074836.3653702-1-rppt@kernel.org>
 References: <20260323074836.3653702-1-rppt@kernel.org>
@@ -92,46 +92,74 @@ Content-Transfer-Encoding: 8bit
 
 From: "Mike Rapoport (Microsoft)" <rppt@kernel.org>
 
-There are two potential problems in free_reserved_area():
-* it may free a page with not-existent buddy page
-* it may be passed a virtual address from an alias mapping that won't
-  be properly translated by virt_to_page(), for example a symbol on arm64
+There are two functions that release pages to the buddy allocator late in
+the boot: free_reserved_area() and memblock_free_late().
 
-While first issue is quite theoretical and the second one does not manifest
-itself because all the callers do the right thing, it is easy to make
-free_reserved_area() robust enough to avoid these potential issues.
+Currently they are using different underlying functionality,
+free_reserved_area() runs each page being freed via free_reserved_page()
+and memblock_free_late() uses memblock_free_pages() -> __free_pages_core(),
+but in the end they both boil down to a loop that frees a range page by
+page.
 
-Replace the loop by virtual address with a loop by pfn that uses
-for_each_valid_pfn() and use __pa() or __pa_symbol() depending on the
-virtual mapping alias to correctly determine the loop boundaries.
+Extract the loop frees pages from free_reserved_area() into a helper and
+use that helper in memblock_free_late().
 
 Signed-off-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
 ---
- mm/memblock.c | 34 +++++++++++++++++++++++-----------
- 1 file changed, 23 insertions(+), 11 deletions(-)
+ mm/memblock.c | 55 +++++++++++++++++++++++++++------------------------
+ 1 file changed, 29 insertions(+), 26 deletions(-)
 
 diff --git a/mm/memblock.c b/mm/memblock.c
-index c0896efbee97..eb086724802a 100644
+index eb086724802a..ccdf3d225626 100644
 --- a/mm/memblock.c
 +++ b/mm/memblock.c
-@@ -895,21 +895,32 @@ int __init_memblock memblock_remove(phys_addr_t base, phys_addr_t size)
+@@ -893,26 +893,12 @@ int __init_memblock memblock_remove(phys_addr_t base, phys_addr_t size)
+ 	return memblock_remove_range(&memblock.memory, base, size);
+ }
  
- unsigned long free_reserved_area(void *start, void *end, int poison, const char *s)
+-unsigned long free_reserved_area(void *start, void *end, int poison, const char *s)
++static unsigned long __free_reserved_area(phys_addr_t start, phys_addr_t end,
++					  int poison)
  {
--	void *pos;
--	unsigned long pages = 0;
-+	phys_addr_t start_pa, end_pa;
-+	unsigned long pages = 0, pfn;
+-	phys_addr_t start_pa, end_pa;
+ 	unsigned long pages = 0, pfn;
  
--	start = (void *)PAGE_ALIGN((unsigned long)start);
--	end = (void *)((unsigned long)end & PAGE_MASK);
--	for (pos = start; pos < end; pos += PAGE_SIZE, pages++) {
--		struct page *page = virt_to_page(pos);
+-	/*
+-	 * end is the first address past the region and it may be beyond what
+-	 * __pa() or __pa_symbol() can handle.
+-	 * Use the address included in the range for the conversion and add
+-	 * back 1 afterwards.
+-	 */
+-	if (__is_kernel((unsigned long)start)) {
+-		start_pa = __pa_symbol(start);
+-		end_pa = __pa_symbol(end - 1) + 1;
+-	} else {
+-		start_pa = __pa(start);
+-		end_pa = __pa(end - 1) + 1;
+-	}
+-
+-	for_each_valid_pfn(pfn, PFN_UP(start_pa), PFN_DOWN(end_pa)) {
++	for_each_valid_pfn(pfn, PFN_UP(start), PFN_DOWN(end)) {
+ 		struct page *page = pfn_to_page(pfn);
+ 		void *direct_map_addr;
+ 
+@@ -934,7 +920,29 @@ unsigned long free_reserved_area(void *start, void *end, int poison, const char
+ 		free_reserved_page(page);
+ 		pages++;
+ 	}
++	return pages;
++}
++
++unsigned long free_reserved_area(void *start, void *end, int poison, const char *s)
++{
++	phys_addr_t start_pa, end_pa;
++	unsigned long pages;
++
 +	/*
 +	 * end is the first address past the region and it may be beyond what
 +	 * __pa() or __pa_symbol() can handle.
-+	 * Use the address included in the range for the conversion and add
-+	 * back 1 afterwards.
++	 * Use the address included in the range for the conversion and add back
++	 * 1 afterwards.
 +	 */
 +	if (__is_kernel((unsigned long)start)) {
 +		start_pa = __pa_symbol(start);
@@ -140,32 +168,36 @@ index c0896efbee97..eb086724802a 100644
 +		start_pa = __pa(start);
 +		end_pa = __pa(end - 1) + 1;
 +	}
-+
-+	for_each_valid_pfn(pfn, PFN_UP(start_pa), PFN_DOWN(end_pa)) {
-+		struct page *page = pfn_to_page(pfn);
- 		void *direct_map_addr;
  
- 		/*
--		 * 'direct_map_addr' might be different from 'pos'
--		 * because some architectures' virt_to_page()
--		 * work with aliases.  Getting the direct map
--		 * address ensures that we get a _writeable_
--		 * alias for the memset().
-+		 * 'direct_map_addr' might be different from the kernel virtual
-+		 * address because some architectures use aliases.
-+		 * Going via physical address, pfn_to_page() and page_address()
-+		 * ensures that we get a _writeable_ alias for the memset().
- 		 */
- 		direct_map_addr = page_address(page);
- 		/*
-@@ -921,6 +932,7 @@ unsigned long free_reserved_area(void *start, void *end, int poison, const char
- 			memset(direct_map_addr, poison, PAGE_SIZE);
- 
- 		free_reserved_page(page);
-+		pages++;
- 	}
- 
++	pages = __free_reserved_area(start_pa, end_pa, poison);
  	if (pages && s)
+ 		pr_info("Freeing %s memory: %ldK\n", s, K(pages));
+ 
+@@ -1810,20 +1818,15 @@ void *__init __memblock_alloc_or_panic(phys_addr_t size, phys_addr_t align,
+  */
+ void __init memblock_free_late(phys_addr_t base, phys_addr_t size)
+ {
+-	phys_addr_t cursor, end;
++	phys_addr_t end = base + size - 1;
+ 
+-	end = base + size - 1;
+ 	memblock_dbg("%s: [%pa-%pa] %pS\n",
+ 		     __func__, &base, &end, (void *)_RET_IP_);
+-	kmemleak_free_part_phys(base, size);
+-	cursor = PFN_UP(base);
+-	end = PFN_DOWN(base + size);
+ 
+-	for (; cursor < end; cursor++) {
+-		memblock_free_pages(cursor, 0);
+-		totalram_pages_inc();
+-	}
++	kmemleak_free_part_phys(base, size);
++	__free_reserved_area(base, base + size, -1);
+ }
++
+ /*
+  * Remaining API functions
+  */
 -- 
 2.53.0
 
