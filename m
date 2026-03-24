@@ -1,130 +1,111 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC02329B216;
-	Mon, 23 Mar 2026 22:29:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8C743D3CED
+	for <linux-efi@vger.kernel.org>; Tue, 24 Mar 2026 09:50:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774304949; cv=none; b=XpiFic8P/2YT+Ib9p0Q5NqlWvnJxMF6/+/ZLN7sg3B3Q2dzYPlzgM5FfYNNkN7SdSIze18vdror6xqkjl3N3d8FsJ5Rswk4cW1e4cA72siQHl1rRxhcNeTYY+0Eemcfue46gFXSb8TbuHDY4J1f/Wjo9fV0b1wZgeii1l+JaSlI=
+	t=1774345827; cv=none; b=nYPOV0Q5dC+z+C4HB7Z91tP6LH1ncLtj8TwH/c0LQBH/GgWeFFL+3BHzDQskbLKCXoxxHrnS9uV5XiZ1G35wDgBxMhaa41buWbqVGOKThCdSHMluJVokFDfVsKIZN4cJl8GNP0KWjAD7so0fUf9WTqIP4CtFILdrignDV3tKJMY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774304949; c=relaxed/simple;
-	bh=b4z8RgLa9KqoZ38u5S4ocRd0tOm+QXwxO4X2MfnCi7Y=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IAmNmaFlYxHaMGKtNCmWwUK8N2qVsrzB4SFQaIyilVxgn8g4SQBqE2ykybtGrd4SPlOTtVVqN+BoSyOIcEcpxsVuKjObrudr94sLe98q4hpGaa7TmqgBq9nCUk6N2B1yyx2JHSl6xxNOPO7qD/jx63JcX23YGKI+CsKG82Gw5Q4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dBipcaOJ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1774345827; c=relaxed/simple;
+	bh=IS0+rfgdfuUFu4ufXz4Qc8ExzjqQwFAH2zh54FD20do=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=OmLYitgfjq1N283eGcVABqfWptOwB2xoXvzTVNZqvCtL+B9SIvWzFHOgJwIDlvq4MPAEh6X6z7F73Ri0y5bO4pjZ68CVgtDfmUITZ/pMyWFCZrdrpgJCBQEFRZ+h71XaUd0T0VlFJWEH1NO9/ur4wQOTyVm6WgUnF1N9nSurzsI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MyKz2qy3; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dBipcaOJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 44742C4CEF7;
-	Mon, 23 Mar 2026 22:29:09 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MyKz2qy3"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 49B65C4AF0B;
+	Tue, 24 Mar 2026 09:50:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774304949;
-	bh=b4z8RgLa9KqoZ38u5S4ocRd0tOm+QXwxO4X2MfnCi7Y=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=dBipcaOJ+VHy+PWYPWbTp/nW0J4Eq+iG9DKF1PTYjy0Pr+a99n9AUaZccVbq/ElqB
-	 526h0R5Q3MF3vyTZOmj6il4Kcz4Y1qasG1mVTwDznLFGNvAntA+qMzh/ujNIxMXGE+
-	 FjxRQzYRKIY1bjuTi6og3JE97XGm9gTilj0Z8Myw2MPSi7fQBZSAiUCCP6WNHR3P0N
-	 BSUTA//MonKdOmM4zIgeCmbEGMDZn5igm2wCvdYdZSNMS3OSNbpSTwqUfAn2uEdf/n
-	 RpI4QxzLCoEST40o1kayMlWU5aucwJikC+95VsvNSCQrEethpdkjWQTF8o7p8oYCIf
-	 eKta88neJs9sw==
-Date: Mon, 23 Mar 2026 15:29:08 -0700
-From: Kees Cook <kees@kernel.org>
-To: David Laight <david.laight.linux@gmail.com>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-	Josh Law <objecting@objecting.org>, Jens Axboe <axboe@kernel.dk>,
-	Davidlohr Bueso <dave@stgolabs.net>,
-	Stefan Haberland <sth@linux.ibm.com>,
-	Jan Hoeppner <hoeppner@linux.ibm.com>,
-	"Richard Russon (FlatCap)" <ldm@flatcap.org>,
-	Thorsten Blum <thorsten.blum@linux.dev>,
-	linux-kernel@vger.kernel.org, linux-block@vger.kernel.org,
-	linux-efi@vger.kernel.org, linux-s390@vger.kernel.org,
-	linux-ntfs-dev@lists.sourceforge.net,
-	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH] block: partitions: Replace pp_buf with struct seq_buf
-Message-ID: <202603231528.26AA606EA8@keescook>
-References: <20260321004840.work.670-kees@kernel.org>
- <acD_IIEXmhnVlO0C@ashevche-desk.local>
- <20260323200807.71535b6c@pumpkin>
+	s=k20201202; t=1774345827;
+	bh=IS0+rfgdfuUFu4ufXz4Qc8ExzjqQwFAH2zh54FD20do=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
+	b=MyKz2qy3yVkslXM21GcvP+NTJt4Q/9wN8XUTwYSGqGsFP/C6i4OksSxu1DW0ApBYY
+	 AhrRutaYPuqMKlHBkw8JHx5fgVvuJ5nIF6n+5WHLjQ1AVS/9q97ZS1qYVnwMUac2//
+	 avARt5jY4nzhbJiN6Qe2uqhtGzr1MHeeNBuN6+HHSabkviDMHz0/U2gGOY12s3CHly
+	 Hhv87gWa9D6JTRGoMKDEejuSQDis5pa1K1yAHY2fw1rLD/qndlR4FcBJSIz6AW1nDt
+	 WIVN1mqxyF7miToc4ot7ikheeSj9OEtSeBxCD0Hd4Juwv3RZusspJINHjepgEaeEEK
+	 NJsmFyriDpUNA==
+Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
+	by mailfauth.phl.internal (Postfix) with ESMTP id 3846DF4006B;
+	Tue, 24 Mar 2026 05:50:26 -0400 (EDT)
+Received: from phl-imap-02 ([10.202.2.81])
+  by phl-compute-01.internal (MEProxy); Tue, 24 Mar 2026 05:50:26 -0400
+X-ME-Sender: <xms:Yl7CaRz_4FNqW_p6HCrr_ASnHvUDgfUggyg3G_m2swC1H4CTE2qwNw>
+    <xme:Yl7CacGaXi1oZsRyCBtb8REivENwALylFUt_SvIINvcP47YW3GCLK9R0jE2wbVbTU
+    n3rMF64F16mzSOA_BVKxhcepy4lclfAwUmy_7cb1ZH_y2CYFFyDQA>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefgedrtddtgdefvdduvdeiucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
+    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
+    gurhepofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrugcu
+    uehivghshhgvuhhvvghlfdcuoegrrhgusgeskhgvrhhnvghlrdhorhhgqeenucggtffrrg
+    htthgvrhhnpedvueehiedtvedtleekuddutefgffdtleetfeetveejveejieehfefhjeei
+    jeefudenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    grrhguodhmvghsmhhtphgruhhthhhpvghrshhonhgrlhhithihqdduieejtdehtddtjeel
+    qdeffedvudeigeduhedqrghruggspeepkhgvrhhnvghlrdhorhhgseifohhrkhhofhgrrh
+    gurdgtohhmpdhnsggprhgtphhtthhopeeipdhmohguvgepshhmthhpohhuthdprhgtphht
+    thhopegrrhgusgdoghhithesghhoohhglhgvrdgtohhmpdhrtghpthhtohepsggvnhhhse
+    hkvghrnhgvlhdrtghrrghshhhinhhgrdhorhhgpdhrtghpthhtoheprhhpphhtsehkvghr
+    nhgvlhdrohhrghdprhgtphhtthhopeigkeeisehkvghrnhgvlhdrohhrghdprhgtphhtth
+    hopehlihhnuhigqdgvfhhisehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtohep
+    lhhinhhugidqkhgvrhhnvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhg
+X-ME-Proxy: <xmx:Yl7CaeXCR11Jcfv4wviBlpeCxNj7HxzKVX7l-uTvrPv-l6wLCCmhdQ>
+    <xmx:Yl7Cac29kXCGNkbSqpnxDDrQhlKsISvWvk1_WHEP7kU1-wiRghEHHQ>
+    <xmx:Yl7CaUra04hGvBomZBgmLQlRqAAaZvMvfxFxTL0MrrlXqa2gRZ7UDQ>
+    <xmx:Yl7CabXbOY9IuUNGNWbtsVgd3OOzaQNR_X2PkFlwxdAIL1x4p4yd-A>
+    <xmx:Yl7CaXb-l7_Ls_qxq-3hH76bdGUwgLM7KHHR17knR0qU_GC7twwynOdf>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id 0F22C700065; Tue, 24 Mar 2026 05:50:26 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260323200807.71535b6c@pumpkin>
-
-On Mon, Mar 23, 2026 at 08:08:07PM +0000, David Laight wrote:
-> On Mon, 23 Mar 2026 10:51:44 +0200
-> Andy Shevchenko <andriy.shevchenko@linux.intel.com> wrote:
-> 
-> > On Fri, Mar 20, 2026 at 05:48:44PM -0700, Kees Cook wrote:
-> > > In preparation for removing the strlcat API[1], replace the char *pp_buf
-> > > with a struct seq_buf, which tracks the current write position and
-> > > remaining space internally. This allows for:
-> > > 
-> > > - Direct use of seq_buf_printf() in place of snprintf()+strlcat()
-> > >   pairs, eliminating local tmp buffers throughout.
-> > > - Adjacent strlcat() calls that build strings piece-by-piece
-> > >   (e.g., strlcat("["); strlcat(name); strlcat("]")) to be collapsed
-> > >   into single seq_buf_printf() calls.
-> > > - Simpler call sites: seq_buf_puts() takes only the buffer and string,
-> > >   with no need to pass PAGE_SIZE at every call.
-> > > 
-> > > The backing buffer allocation is unchanged (__get_free_page), and the
-> > > output path uses seq_buf_str() to NUL-terminate before passing to
-> > > printk().  
-> > 
-> > Thanks a lot! A few comments below.
-> > Personally I'm in favour of this patch as it also removes a lot of ugly code
-> > (which is scoped string manipulations), FWIW,
-> > Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> > 
-> > > Link: https://github.com/KSPP/linux/issues/370 [1]  
-> > 
-> > > Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> > > Cc: Josh Law <objecting@objecting.org>  
-> > 
-> > While not long, this still can be placed...
-> > 
-> > > Signed-off-by: Kees Cook <kees@kernel.org>
-> > > ---  
-> > 
-> > ...somewhere here to reduce unneeded noise in the commit message.
-> > 
-> > > I couldn't help myself. Here's the full patch, as I suggested in
-> > > https://lore.kernel.org/lkml/202603201230.74BBFFABAD@keescook/
-> > > There are plenty more like this to do...  
-> > 
-> > Indeed, but thanks for the example on how to do that!
-> > 
-> ...
-> > But probably okay as in the previous branch it needs more work to follow,
-> > something like
-> > 
-> > 			char dostype[8];
-> > 			...
-> > 			if (dostype[3] < ' ') {
-> > 				/* Escape control character */
-> > 				dostype[4] = dostype[3] + '@';
-> > 				dostype[3] = '^';
-> > 				seq_buf_printf(&state->pp_buf, " (%.5s)", dostype);
-> 
-> Or just:
-> 				seq_buf_printf(&state->pp_buf, " (%.3s^%c)", dostype, dostype[3] + '@');
-> 
-> 	David
-> 
-> > 			} else {
-> > 				seq_buf_printf(&state->pp_buf, " (%.4s)", dostype);
-> > 			}
-> > 
-> > Taking how invasive is this, it might be better to done separately.
-
-I tried to make this as 1-to-1 replacement as possible. The logic here
-was "complex" enough that I just left it as-is.
+X-ThreadId: A_C-dXp6MCYk
+Date: Tue, 24 Mar 2026 10:50:05 +0100
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Ard Biesheuvel" <ardb+git@google.com>, linux-kernel@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, x86@kernel.org,
+ "Mike Rapoport" <rppt@kernel.org>,
+ "Benjamin Herrenschmidt" <benh@kernel.crashing.org>
+Message-Id: <f4c11afa-e934-4457-8a3b-89a0ad2f4263@app.fastmail.com>
+In-Reply-To: <20260319090529.1091660-21-ardb+git@google.com>
+References: <20260319090529.1091660-21-ardb+git@google.com>
+Subject: Re: [PATCH v2 00/19] efi/x86: Avoid the need to mangle the EFI memory map
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
 
--- 
-Kees Cook
+On Thu, 19 Mar 2026, at 10:05, Ard Biesheuvel wrote:
+> From: Ard Biesheuvel <ardb@kernel.org>
+>
+> At boot, x86 uses E820 tables, memblock tables and the EFI memory map to
+> reason about which parts of system RAM are available to the OS, and
+> which are reserved.
+>
+> While other EFI architectures treat the EFI memory map as immutable, the
+> x86 boot code modifies it to keep track of memory reservations of boot
+> services data regions, in order to distinguish which parts have been
+> memblock_reserve()'d permanently, and which ones have been reserved only
+> temporarily to work around buggy implementations of the EFI runtime
+> service [SetVirtualAddressMap()] that reconfigures the VA space of the
+> runtime services themselves.
+>
+> This method is mostly fine for marking entire regions as reserved, but
+> it gets complicated when the code decides to split EFI memory map
+> entries in order to mark some of it permanently reserved, and the rest
+> of it temporarily reserved.
+>
+> Let's clean this up, by
+> - marking permanent reservations of EFI boot services data memory as
+>   MEMBLOCK_RSRV_KERN
+> - taking this marking into account when deciding whether or not a EFI
+>   boot services data region can be freed
+> - dropping all of the EFI memory map insertion/splitting logic and the
+>   allocation/freeing logic, all of which have become redundant.
+>
+
+Please disregard this for now. Sashiko pointed out some fundamental issues in this series, and I think it might be better to take a different approach entirely.
