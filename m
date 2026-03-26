@@ -1,54 +1,54 @@
-Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
+Received: from mail-ej1-f73.google.com (mail-ej1-f73.google.com [209.85.218.73])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 967DC33F8D4
-	for <linux-efi@vger.kernel.org>; Thu, 26 Mar 2026 13:27:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC90839C011
+	for <linux-efi@vger.kernel.org>; Thu, 26 Mar 2026 13:27:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774531641; cv=none; b=cY75htTHQn/yFjiRDbzdP2oKVVhTUuRPmAGgIEVzG+vtiZt8zGmHHgTXM/e33Mk1pGfsuiXDx8mlh9qbumH1qChk6rmmWFOJTTgA0BzLijheCJNUpm4AJ6guthgoBnavitgrX/zKFHo4K/0u4y4GyKpyEYzLAwJ03AdcGsSPFWQ=
+	t=1774531643; cv=none; b=Hmza5lfJBOdZhBCNUUwjNdukYumOITlS9APtJ2euuEmS+toeEyRnchfccFEfMMqSbsvtz7OoBcZu6Awb/PIrnuRAB4YY2P7IhjEfJaodjDqa1TC3rFnLa2CuFTmYdF3bH7V1c5UyJl44dkD66/kFeqlc/TFvOK3eAEqm2PA67gQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774531641; c=relaxed/simple;
-	bh=w0gWF+fnU+EyIm0hi+wVX5jP3BFK5kjYtXeIFBo8VfY=;
+	s=arc-20240116; t=1774531643; c=relaxed/simple;
+	bh=fZjPOaIGiInXb9FfsWODgJoFCvX+VTlkGFglUy+3XQw=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=PfO8zTv+Akqxa5xYETNuPe9+ojGVn74bdJVSQmvQv6+euyRQiR7EeM21JwWA1QcXw/+7h/xLds7ecJJomEwvU4oJDeMdOoCgFhwPt15rHDYu6JlAY+BJuuEpoe4AP6scKq9jIlhScXmD4wZiVImEPEKm9WH/Ai0aas+7lTzE1Fc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=L4ttQcJP; arc=none smtp.client-ip=209.85.128.74
+	 To:Cc:Content-Type; b=GlQi8apZVFYnmoOCZPlzURZeCLTzgvTLA0uO3qR90zCel0Py6t/L25xY74JOwk1SIFrhBo5CQZYOOYZSDNUyMDJXIb5vslQvwc5z40yQkux9fbzotnvVn1DxwHPK2K7bcRBLaQUkgsC4wr0zjmqWexaPy8dJ3LAgWm0NjUVz5KI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=pctTHLze; arc=none smtp.client-ip=209.85.218.73
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="L4ttQcJP"
-Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-486fb142205so15113705e9.1
-        for <linux-efi@vger.kernel.org>; Thu, 26 Mar 2026 06:27:20 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="pctTHLze"
+Received: by mail-ej1-f73.google.com with SMTP id a640c23a62f3a-b97a381912eso69554466b.0
+        for <linux-efi@vger.kernel.org>; Thu, 26 Mar 2026 06:27:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1774531639; x=1775136439; darn=vger.kernel.org;
+        d=google.com; s=20251104; t=1774531640; x=1775136440; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=GHIQwAWhL9cMJE4WuFrzIdPhFDdaY3JclpZnGu+ZbFk=;
-        b=L4ttQcJPdzQesZ0KRvq7QIjZJVSVHBbfaDLRHuD3Jv159MtmCkNrmR87dQyqj8Txue
-         qvUhNyD52sgaPT/M6hdk2RZV6RnK6026ANdZ9nQztsmjBsHTEHhC5vytjk7IVhOOx3YO
-         FwzFe8meXrgzXIma4md+gDNKCQcXrRBLQHH7m4Wc3lnxSBlw2YX8StnlOSgN9BpMo3RB
-         5GZ5lN99101JCPtQxm+s5JnJKWHgjdT+ZMz3BwbGajacNiI0P6crjONzMvdtNjzZEFRp
-         JWVnPrcYXJyLc0vif/VFMPo6Wb+abPPter4oww1ntJLv1qKULQmC5ZogRvBjQk3joCyd
-         xRiA==
+        bh=WBiR9gxXBcLOHofBlDWTXR6in2B24aoi6pN3TLZufuY=;
+        b=pctTHLzeoXp+RRtgp6CRnQ2OArnqzGUA1v8Xm76ZuTKgs4DmD4/5dRHiORas/vZfAC
+         mvS/G80d+ClqHeBN4TVKl2ruCe8Q7w9uzb26Jqck8D10fPxx+fJ4iuP2LO5YLjgd/T92
+         JJ57IvqoebBD2JNkjvy7afEnUbcGwjWmXbGZoo9iNlZOJQ9byg4TgZWAy2CL0voGn0Qk
+         FyWlAUvcfTEBjnOWb68yPal/la9ob1BoAwg9S9kkooaXjtN97T3O2kea0/Gfw+r8A1fQ
+         iuJL3FEaJ3G7VayBO9IArRStJcEOSRqdu8EWSOxu0HziQTYk5PCqZleIaAzBZbQPasc9
+         zhPg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774531639; x=1775136439;
+        d=1e100.net; s=20251104; t=1774531640; x=1775136440;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=GHIQwAWhL9cMJE4WuFrzIdPhFDdaY3JclpZnGu+ZbFk=;
-        b=agUTYqtohxP/Z162uhSYLxkJIAMzZ4/HgctPNyrLGmwgu3d+PlLdVUL49gRWWFTWQS
-         qZS+PTPLCE4+n53XTO7w/0wwYQiqtKQQ4vRr/m0jQa2SU+Ir+TEDGHHADV63Wwr2q2if
-         NX9Xc0IEuCuDAtb5YR/dSL1XYizb7CJMGb4YlHjB0fTXHxJMR7E1QMOlDoeHI3aS+tsb
-         LzUz3w0yO6lJcfAR3nq8vb0h5uICAHwbV45Ud+KoKy9wT26i/nXOopJ7/ZD+eWluIfO6
-         CzBRDw71qozhxv5Qz0LaUoWybfuGd1yRca03I+/jTKEJpNVzctICJNEvcNgM389lUJd9
-         +UuA==
-X-Gm-Message-State: AOJu0YwrXiy5rnlDavSDsaAhdnBYA98D42aZI4uNyJYOx6EEhF4TtT8S
-	9ZPyOT15FePfX8SrDbQMilwKW4MtXuHfaLfcGggVdoR2btmR1ihUEC9BLSnhktbLSh4vQKUgeZM
-	a1N6XDReZusoh3VYOHq0cOi17mYIiH+PFFuHD7gvq0YsFWF1bZVXQCdT4Ga74sI73Ylk8WWkLkJ
-	syY3KNrhrVynKReYJGJA1Cm4x5Jx/UVA==
-X-Received: from wmjv19.prod.google.com ([2002:a7b:cb53:0:b0:485:2ff0:b4ad])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:890b:b0:485:6ec7:2df
- with SMTP id 5b1f17b1804b1-48715fd50abmr89023025e9.8.1774531638838; Thu, 26
- Mar 2026 06:27:18 -0700 (PDT)
-Date: Thu, 26 Mar 2026 14:26:59 +0100
+        bh=WBiR9gxXBcLOHofBlDWTXR6in2B24aoi6pN3TLZufuY=;
+        b=dX5lTuJqqg7NYhohGmUBJXPT5icoVCZO6zWahA/UcJHDsufjNHj7Y7V879QJ0XwSdV
+         6/gyFnI0/XYtwFNrpAzLHGEiCRXo/ksN1JJEKnorwyHocezSagt17p3MOvKU0l4BMBNf
+         wzKuJlugRK2u4rsiPt13l3ScdZk8oV8SgJr548f+6dJABWG9VOxCHAj6MESJqY6MpWQ/
+         9rIgL1OtnQ3gc+r1coLdWsTIGnWLkYsPujjwLbL5fXJuLy0581NdRkx3PWOZiDEfSIlX
+         I1zad5ciZtjXujb5dVI2FxVZvcNRH3dLdy9LLUg5rKmihG9RfuFf2RLQN8lg2mC7UD+l
+         Hfcw==
+X-Gm-Message-State: AOJu0YyhNb2WTk3hJj3HmqlOQJPf6wwewItA4m6hK/QdcRJhsMQAsHRg
+	Tgsv4BYMNn0RkfcVtw2AJYbHF+n9ZKpEwAUV186QG2ZetouFb57eC6e99nv8urdNizG69bhdE/l
+	Ke0JwWIVot10JdVrAUks7X75rlNXicRcG1Eip6dQjjiQwavv2IFQM+aEv33xYN9i6oAFSLnHSiK
+	nuF/LT6BN90BG73gZ7i/EjWpn0GvUXpQ==
+X-Received: from ejchk6.prod.google.com ([2002:a17:907:3cc6:b0:b98:24c1:423])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a17:907:806:b0:b98:44b3:7e95
+ with SMTP id a640c23a62f3a-b9a54268840mr536267166b.40.1774531639913; Thu, 26
+ Mar 2026 06:27:19 -0700 (PDT)
+Date: Thu, 26 Mar 2026 14:27:00 +0100
 In-Reply-To: <20260326132655.1733873-7-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -58,14 +58,15 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20260326132655.1733873-7-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1578; i=ardb@kernel.org;
- h=from:subject; bh=dWW9mhL2BAGt3mcyh6Fj0ZP76AqTMt2tFZlrnJvD3Uc=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfOoiYrV7Z89zbnNE6ezfVOKjP12Z75YAN9hgSlemSyJ1
- w7aqxR1lLIwiHExyIopsgjM/vtu5+mJUrXOs2Rh5rAygQxh4OIUgIl4PmVkmBmwUrrgJO+KSwbv
- xWdVPqu8ZWqess+t/nOi2+5Pc1ZMYmNkWD2pM+SWqKnpNe9it7bqJaYvwtef61Oe9fbDtW+5Nzq YWQE=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=855; i=ardb@kernel.org;
+ h=from:subject; bh=IrDXJ0SpMQSirNYm+oXKTNnBUrUZx/I6yCygt5YygRQ=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfOoiep0/vCVPsd970wKP8j1PcfNqM9EccMx/0yNx5zTD
+ J8uEPnfUcrCIMbFICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACbin8rwv2waW3d79KJGNuFJ
+ civbdL02XfVZHVbzSPmVisrOGXLu/owMb0+IPuPO1pBQrLw4iT/I+0jUPjaDUyz/WDVOHXrT2/6 UFwA=
 X-Mailer: git-send-email 2.53.0.1018.g2bb0e51243-goog
-Message-ID: <20260326132655.1733873-10-ardb+git@google.com>
-Subject: [PATCH 3/5] x86/efi: Defer the call to efi_memattr_init()
+Message-ID: <20260326132655.1733873-11-ardb+git@google.com>
+Subject: [PATCH 4/5] efi: Use efi_mem_reserve() to reserve the memory
+ attribute table
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, x86@kernel.org, 
@@ -76,49 +77,29 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-efi_memattr_init() should call efi_mem_reserve() rather than
-memblock_reserve() to preserve the memory contents of the region when
-the EFI memory attributes table is loaded by the firmware.
-
-However, efi_mem_reserve() can only be called later during the boot on
-x86, due to the fact that it may need to memblock_alloc() memory for the
-EFI memory map.
-
-So move the call to efi_memattr_init() to a later stage when building
-for x86_64.
+Use efi_mem_reserve() rather than memblock_reserve() to reserve the EFI
+memory attributes table. This is needed on x86, where memblock_reserve()
+is not sufficient for assets that may be placed in EFI boot services
+data memory.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/platform/efi/efi.c | 2 ++
- drivers/firmware/efi/efi.c  | 2 +-
- 2 files changed, 3 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/memattr.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index f32276bd8d4e..107dcdf354ba 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -167,6 +167,8 @@ static void __init do_add_efi_memmap(void)
- 
- void __init efi_init_reservations(void)
- {
-+	if (IS_ENABLED(CONFIG_X86_64) && efi_enabled(EFI_MEMMAP))
-+		efi_memattr_init();
- 	efi_find_mirror();
- 	efi_esrt_init();
- 	efi_mokvar_table_init();
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index b2fb92a4bbd1..d28ed1ce9a33 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -761,7 +761,7 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
- 		}
+diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
+index 8d4004149297..f9cfdec1fb51 100644
+--- a/drivers/firmware/efi/memattr.c
++++ b/drivers/firmware/efi/memattr.c
+@@ -59,7 +59,7 @@ void __init efi_memattr_init(void)
  	}
  
--	if (!IS_ENABLED(CONFIG_X86_32) && efi_enabled(EFI_MEMMAP))
-+	if (!IS_ENABLED(CONFIG_X86) && efi_enabled(EFI_MEMMAP))
- 		efi_memattr_init();
+ 	tbl_size = sizeof(*tbl) + size;
+-	memblock_reserve(efi_mem_attr_table, tbl_size);
++	efi_mem_reserve(efi_mem_attr_table, tbl_size);
+ 	set_bit(EFI_MEM_ATTR, &efi.flags);
  
- 	efi_tpm_eventlog_init();
+ unmap:
 -- 
 2.53.0.1018.g2bb0e51243-goog
 
