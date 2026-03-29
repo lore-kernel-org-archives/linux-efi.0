@@ -1,130 +1,106 @@
-Received: from mail-qk1-f177.google.com (mail-qk1-f177.google.com [209.85.222.177])
+Received: from mail-dl1-f45.google.com (mail-dl1-f45.google.com [74.125.82.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 90795264A97
-	for <linux-efi@vger.kernel.org>; Sun, 29 Mar 2026 17:55:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE04830EF75
+	for <linux-efi@vger.kernel.org>; Sun, 29 Mar 2026 22:57:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774806927; cv=none; b=n1fLyN6CDkL9vF3Y/76m58E/T1QhA2BNX+vNtMbddzWH4fItUAzp1Ga/LEhYEQFPyvTLPqE/67XgYcEtfph/xGq8u1asJbFAv12ZOV1piUckxTnwYtxWs/wwfcX65Z5cwBvlq4dRmrd8aZUcRhAf6TINudzRaEl5ChYZSVtwDt8=
+	t=1774825078; cv=none; b=aK7o8FIBeR1N1wvkH+yUuTZ1jcztDbYE3ltPVjCrkC/h11AQMNLsLX/MkmnxL7NW77bAgfKC7NqSO4krRhGRLXROluxO0Mn8H3Hf6gHVn+O9SQBTO9fuCdkx13wobw+tR6cUuhP6vohYnBh1kiIcypO6xuu9sVRQIVqYW6N8zEM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774806927; c=relaxed/simple;
-	bh=UBWQH1pqb31aIAq/6OcggWSs3frKEtuJ3nEvyubtDyw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=LhC8nT6/fISk/QKBJ1sqVqHTv8D8h5u/SAzzfy2r71Cwi4ilohVveVWAi7Tahvj3P3QWa4Cj1PQlH1PB9G8D7GOtD5NgPEHjhn5zImx5/6gLr/7LR2gwl8SOBgzTk32YJbShy8gWiasKU2OfzB24H6oyHys6UOJ+XzXBacWEKYc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net; spf=pass smtp.mailfrom=gourry.net; dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b=p38bPscG; arc=none smtp.client-ip=209.85.222.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gourry.net
+	s=arc-20240116; t=1774825078; c=relaxed/simple;
+	bh=DkXLUmcpu+vp7QMomsKqeu+nj8dpLA67HJln8CiZhFw=;
+	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jTUPSYXjDxTE+iYT7E7TuivyqGKL1KCBE4x5DP460wRima+a9UiLwfV/fVmWnflBZCGss35KJ9TUh0V5Es6dHbEbaU6ZVGhTqAzeFjAo9SoMmYRqjXml68MdTlyIq1HEiavMMui8CotNDahJ9aeL/71c5hWYxzRqBDxl/wvtORo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=code406.com; spf=pass smtp.mailfrom=code406.com; dkim=pass (1024-bit key) header.d=code406.com header.i=@code406.com header.b=Fbh9/3k5; arc=none smtp.client-ip=74.125.82.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=code406.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=code406.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b="p38bPscG"
-Received: by mail-qk1-f177.google.com with SMTP id af79cd13be357-8cfc497a604so521868585a.3
-        for <linux-efi@vger.kernel.org>; Sun, 29 Mar 2026 10:55:26 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=code406.com header.i=@code406.com header.b="Fbh9/3k5"
+Received: by mail-dl1-f45.google.com with SMTP id a92af1059eb24-128b9b7e3edso1936114c88.0
+        for <linux-efi@vger.kernel.org>; Sun, 29 Mar 2026 15:57:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gourry.net; s=google; t=1774806925; x=1775411725; darn=vger.kernel.org;
+        d=code406.com; s=google; t=1774825076; x=1775429876; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=Ap9dPuw0mQr3chOD7n0lkw4KTbjyl1V2xyuJ5AjqmVI=;
-        b=p38bPscGV28eQkbHfQC0f8liYNAaLiou80JaQsBxLD2xtFvQ6Jh2ARwpK9VcE4xrQu
-         2IUWs0eDYbXC7shN+Ho9CydZLvc7MXxOSNwEjuwqr45Noa6r9+HpmDtgZTjk5o6GZ7wZ
-         ls3LXhSlXYNIBBak3J6ODbC33gI3fM/KUuYM6KUsTqEQZ56mP4C9oIamBYaTAC0dfCY0
-         V+rIh4Of00ZZO19wK28MR5mO35BmR0zgq8uXQWgbqXJRZLOBhUCFaw3u4TVozfrJYO7l
-         fmEP9DvpA5vncWw/40WeQvMgNnEuwoMgz6CjVdW5GiGMvty4orhHFCv0/vZvEP+yJTtj
-         1jYA==
+         :subject:cc:to:date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=EmjkZkbbVjjgaCUxuu5+nE0xjPd5gN1qT4GlMrecGi4=;
+        b=Fbh9/3k5YE4y04oqhexqsWQeQ2Y6SKUKF3WuZwp0/6sj4phYuWiRBU/C08fCMQ2EHr
+         BTyUJU8glTj+XLWy4pSTzGR2CL+smGXsOx1wY2z0jpGncGQmq+hfW8XyZbnfVMVXViUl
+         GswqzKhrEh+7vquNe+fGCoklacbwOR0ccnIpI=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774806925; x=1775411725;
+        d=1e100.net; s=20251104; t=1774825076; x=1775429876;
         h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:cc:to:date:from:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=Ap9dPuw0mQr3chOD7n0lkw4KTbjyl1V2xyuJ5AjqmVI=;
-        b=hlBUuqeE5Dk7AJvvC3sc/8PIoHeZeAk7H7X5yZSg0egH4eLZs7ZJes9OLhQYZkH9LI
-         YKrGLQx8Kyx41zmtCKUwmvAi1QlzVLMLw3GSdYL5KV51VxjJqCFP2kRwNFN1Bm3aShzw
-         gWEYq1RaKxPYkblbHo7pXDAgn1vCBkvMtSgoZY3UwDajlgR+VRx9K2W1cTgY/tQdilqv
-         VVyC43MOU3JXrHA4EoQA70YtvRfIwMFn1a5RVpi53/UDx0vsPPP0R2/ohydJfdSET/7R
-         Miiqif23NpwWtBefcts3mOY2eelfpr6zHTuzHMNx6Rv3jA8FVsv0ElgDR/MgrVZ/7VY2
-         6e8g==
-X-Gm-Message-State: AOJu0Yw+D+5xlpUIA4wVy/DnjvpRyiFHMHLrIVYzlazugmUra9k2xCCM
-	Bk4+xoXamSXN6xKLsqiM9BjMMhBf95yz5dV8btJdM+rxJcakjJMfdXlAb3uvkSwF398=
-X-Gm-Gg: ATEYQzxoKuJXPK8Hs6Lt9ZawrAIJ/AAU186Ai2oSjbxjxnMn7WNvot1ljTwQ3zATHJQ
-	9s48TYWcGfdyW6Z3qjln0i2wM85hP82ppgfJN6Er2MdXCHJWQX11pNedTHhi2IdB7GzAy+/EdAa
-	eD80Jv8A/ii81W1K3gPrBNGVF47FRvrIsGftvfUIqbQutFxrOv5q4mR4fAOVjH0z0tGEUJCMlp4
-	V+TaMF3XWFwTr8VlMABGNorexNzy9TCrGBmLj5gfA7D9CuYyhj5qnBCU44c1W5Mt4xgPOkg/C/s
-	8803lSYcdcKXc0G0cL1pqm/8zy38gxd/3BUR8Dn5wydht7naKo1zoHyIYGPcfuaZFTOMvveuq7O
-	7O8GoDnN+JZzWitKXyeF7DmqkC3uIOBJuiaUZSE+HKSitz0hlAcmmRg89uITj6J5ML0M2hAGG/a
-	Nd5y3xPiN/0ahX2MQqiiLfkQLBWi2kUEPXIvYBTrQEf299clwYaRHukvSdQHthEf6EZ+OaPCuas
-	+O7a87rZs94KyDaDA==
-X-Received: by 2002:a05:620a:29cb:b0:8cd:b90f:fc14 with SMTP id af79cd13be357-8d01c7e4b6dmr1256165885a.61.1774806925541;
-        Sun, 29 Mar 2026 10:55:25 -0700 (PDT)
-Received: from gourry-fedora-PF4VCD3F (pool-173-79-68-72.washdc.fios.verizon.net. [173.79.68.72])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-8d027f0e687sm470620385a.18.2026.03.29.10.55.24
+        bh=EmjkZkbbVjjgaCUxuu5+nE0xjPd5gN1qT4GlMrecGi4=;
+        b=fD4qg6BHThDoviLe4nl4U0hjiJiQJtcDrlU+NZXQ2RrCp/UuK3z0xcZFtC0V+Mwr6d
+         cq/f/Ig/+rrul5T6Q53VwHcQDUGjDokCa19s36NI4uhb45IvmNXsBAHaE2O9xUVnWCRQ
+         MWMv9VHEYRSX2AhkSFdMUc1nVsJBS06H0XciIl26JX4YbGQecEo5sp+Cp0cTW+EGwCae
+         I5yT2jfOYAtH8X9aEz+sACFmRgMK4qwanS6pr+5J0Wdd6sX2LmIMtWn2LHbjL09PSD/B
+         DoNOR0sUcxoqpGd460R2MeMsBHwp16HGvqlFRMY1I7drLxdzwssZUwSluQRM+s6tZkLO
+         P+Cw==
+X-Forwarded-Encrypted: i=1; AJvYcCVkbeMueByDRtmTh7SgjpwFeKIIcZ5G7SQB0FJQV+m1crXC0RuUyMYZsDohF6zfKHY1tIRiY0DIcEk=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyuvkaBpd6F3Ixt8zVBF5UvxZ9QYrozjj8mL8cWAKW/tYIrP+Id
+	rGmUEg0OmNUDNlp5ix/YzOcS7Ob7/P99DY3Jk4+8tRWIX2y5rspb8BwfvSLvBT97Hg==
+X-Gm-Gg: ATEYQzydlhBcu4nNww7x6oXXRLd5tXsrKGf4vP5EeYzTEbnDZ+Dgfdsp1w0MW2HJG+d
+	tKQOskGVgLymCuLrma+q5lRNMsR8g+bbm/5C15mKRvfVyVKOPr0uVSs1H1unadlSQPsKy/LklkK
+	rEnzYU+GxtWQTwqPBxLi1C/H2PgKlFjfdfGyO6aIAyf/20dr6eSYYTLIRieMvEM6K1iwnn2my1G
+	/64sqDP8OuLCqqnct9Y7DwDJLgrwJnHk/XFkjW3UdGgehb3MS3nB+o0j69XH2+x5tfpoExtkVSN
+	TudAMg+lBaTgOIsVtQowPXs8bRGJE3fcBilX/mRQ7Fo5uLSq6KCSc196GCMuQjZIHxw0aEee4zW
+	f8oUudSdiGZHn6QEyfOxUdRSHWSibYsTgVWJZTEHND5dA971CtkpXscxtNy5ASQ1GdpuMwu021k
+	oEUKtBN50of+OGTx74XSu1/oC8nLEgjcbn7u9m0JIidezaHp55dTE3N7vEK7FQv3ozUpPWhyV7r
+	oyzDBtZ6+YCgTbVETgVRisYI2h1
+X-Received: by 2002:a05:7022:2209:b0:11d:f89d:85a0 with SMTP id a92af1059eb24-12ab2912740mr5861569c88.27.1774825075962;
+        Sun, 29 Mar 2026 15:57:55 -0700 (PDT)
+Received: from ubuntu ([2601:645:8a00:6e44:958e:90e9:e30b:7ecc])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-12ab970da7fsm6096026c88.0.2026.03.29.15.57.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 29 Mar 2026 10:55:24 -0700 (PDT)
-Date: Sun, 29 Mar 2026 13:55:22 -0400
-From: Gregory Price <gourry@gourry.net>
-To: Ard Biesheuvel <ardb+git@google.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org,
-	Ard Biesheuvel <ardb@kernel.org>, Dave Young <dyoung@redhat.com>,
-	Usama Arif <usamaarif642@gmail.com>,
-	Jiri Slaby <jirislaby@kernel.org>, Breno Leitao <leitao@debian.org>
-Subject: Re: [PATCH 0/5] x86/efi: Re-enable memory attributes table for kexec
-Message-ID: <aclnisM4_DGNS2U0@gourry-fedora-PF4VCD3F>
-References: <20260326132655.1733873-7-ardb+git@google.com>
+        Sun, 29 Mar 2026 15:57:55 -0700 (PDT)
+From: Josh Snyder <josh@code406.com>
+X-Google-Original-From: Josh Snyder <josh@cod406.com>
+Date: Sun, 29 Mar 2026 15:57:51 -0700
+To: Ross Philipson <ross.philipson@oracle.com>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, 
+	linux-integrity@vger.kernel.org, linux-doc@vger.kernel.org, linux-crypto@vger.kernel.org, 
+	kexec@lists.infradead.org, linux-efi@vger.kernel.org, iommu@lists.linux.dev, 
+	dpsmith@apertussolutions.com, tglx@linutronix.de, mingo@redhat.com, bp@alien8.de, 
+	hpa@zytor.com, dave.hansen@linux.intel.com, ardb@kernel.org, 
+	mjg59@srcf.ucam.org, James.Bottomley@hansenpartnership.com, peterhuewe@gmx.de, 
+	jarkko@kernel.org, jgg@ziepe.ca, luto@amacapital.net, nivedita@alum.mit.edu, 
+	herbert@gondor.apana.org.au, davem@davemloft.net, corbet@lwn.net, ebiederm@xmission.com, 
+	dwmw2@infradead.org, baolu.lu@linux.intel.com, kanth.ghatraju@oracle.com, 
+	andrew.cooper3@citrix.com, trenchboot-devel@googlegroups.com
+Subject: Re: [PATCH v15 08/28] tpm/tpm_tis: Close all localities
+Message-ID: <v2l4v5imh2lmsayevxz3palyjeglpxo3qu475gjpchitgfzil2@l24ax4vevjp7>
+References: <20251215233316.1076248-1-ross.philipson@oracle.com>
+ <20251215233316.1076248-9-ross.philipson@oracle.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260326132655.1733873-7-ardb+git@google.com>
+In-Reply-To: <20251215233316.1076248-9-ross.philipson@oracle.com>
 
-On Thu, Mar 26, 2026 at 02:26:56PM +0100, Ard Biesheuvel wrote:
-> From: Ard Biesheuvel <ardb@kernel.org>
-> 
-> The EFI memory attributes table augments the EFI memory map, and
-> provides permission attributes for all runtime code and data regions
-> that are otherwise mapped read-write-execute in their entirety.
-> 
-> Currently, this table is disregarded when doing kexec boot on x86, for
-> two reasons:
-> - the boot services data region that holds the table is not reserved
->   correctly, and may contain garbage at kexec time
-> - a misguided sanity check on the size of the table is likely to trigger
->   on kexec, as the EFI memory map has been trimmed down by that time.
-> 
-> Fix both issues, so that the EFI memory attributes table can be taken
-> into account again at kexec time. Note that this requires that the call
-> to efi_memattr_init() is moved to a later point for x86.
-> 
+On Mon, Dec 15, 2025 at 03:32:56PM -0800, Ross Philipson wrote:
+> From: "Daniel P. Smith" <dpsmith@apertussolutions.com>
+> +		if (check_locality(chip, i))
+> +			tpm_tis_relinquish_locality(chip, i);
 
-I appreciate this fixup, I'll try to give it a test in some known host
-configuration switch scenarios I know don't work across multiple kexecs
-and see if it is an improvement.
+When I applied this patch locally, tpm_chip's locality_count underflowed to -1
+and no IO was performed. That is because tpm_tis_relinquish_locality is
+implemented like so:
 
-~Gregory
+  struct tpm_tis_data *priv = dev_get_drvdata(&chip->dev);
 
-> Cc: Dave Young <dyoung@redhat.com>
-> Cc: Gregory Price <gourry@gourry.net>
-> Cc: Usama Arif <usamaarif642@gmail.com>
-> Cc: Jiri Slaby <jirislaby@kernel.org>
-> Cc: Breno Leitao <leitao@debian.org>
-> 
-> Ard Biesheuvel (5):
->   efi/memattr: Fix thinko in table size sanity check
->   x86/efi: Gather initial memory reservation and table handling logic
->   x86/efi: Defer the call to efi_memattr_init()
->   efi: Use efi_mem_reserve() to reserve the memory attribute table
->   x86/efi: Drop kexec quirk for the EFI memory attributes table
-> 
->  arch/x86/include/asm/efi.h     |  5 ++---
->  arch/x86/kernel/setup.c        | 11 ++---------
->  arch/x86/platform/efi/efi.c    | 15 +++++++++++++++
->  arch/x86/platform/efi/quirks.c |  4 ----
->  drivers/firmware/efi/efi.c     |  2 +-
->  drivers/firmware/efi/memattr.c | 17 ++++++++++-------
->  6 files changed, 30 insertions(+), 24 deletions(-)
-> 
-> 
-> base-commit: 217c0a5c177a3d4f7c8497950cbf5c36756e8bbb
-> -- 
-> 2.53.0.1018.g2bb0e51243-goog
-> 
+  mutex_lock(&priv->locality_count_mutex);
+  priv->locality_count--;
+  if (priv->locality_count == 0)
+	  __tpm_tis_relinquish_locality(priv, l);
+
+I was able to work around the issue by calling __tpm_tis_relinquish_locality
+instead.
+
+Thanks,
+Josh
