@@ -1,139 +1,123 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 285BF3A1A28
-	for <linux-efi@vger.kernel.org>; Mon, 30 Mar 2026 10:52:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=170.10.129.124
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774867975; cv=pass; b=f1NTvNr5x6DsKjGvR2Q4fvWkbYAEL0NTiZSAI8AhD5hmf7lQYqSp1qgNZTfaCg/940qq5tqy7Feg4iD+nzTXMdXwXIAdSGmIBo4d+fwGvk5btSGQFtrH3P50L32AcstpNbnV2ILffHV3H31aTqGJu2tfCWk2h23AibpokXxdkac=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774867975; c=relaxed/simple;
-	bh=F3VazHzopeDjZWarFbUGSy9fAQOZAtVoVtrCnQM3z+U=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=QRUJ0vAdE6soET26orFHVVJwuTMHsI/I+0ghdbBd+43T3W+sycuB1V3niJ+R6+VB9zzjNBgQwVgRZ/vTXFbFu33QbNleCiMwOCicSj272BGZ3gfPiRglgnBCrUQpO3EqO27fIbhHVVxWYeIYsZ7eVMLeXKT/XCWBOTWG7blUShw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=eXJclH3B; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=BsowsSTM; arc=pass smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38E9F3B3BE3
+	for <linux-efi@vger.kernel.org>; Tue, 31 Mar 2026 07:07:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1774940854; cv=none; b=EW7eBZU6ga/hgG6c2I0yUFvbMIXkBDDHRp4ITP7IFVl1DxkHQmaC0h8tmQEIQfDX5TfSiaoA/qLCcKMe+rFcIsTEI3pALCqRsGagVxopP4VBSMuAWKmoPZwyiT1UxbbZSUhv7U2+2Os8aC82iP2NPp7fLraoYxyoadOh7vt9pCo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1774940854; c=relaxed/simple;
+	bh=5hhsjDLE9pNupvcpyt3pLkHUAnRs5UEgXGmbpLk3fUk=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=OVKotXdqdJoUDSmKuMtGweigDw3v519tX1Ua8LeMOarwSejhQIypW//KbD5JOAgs7Z+bjbZs+8MLPIqk2bHuySFZKf3ZrpKK9yqpW+nar4xUkfKFLS1rQ/7SMZQuF3polSDcDmSLaSee/FAvrEfUb/ZGhsITCb3UxWVcGDi3zN8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WFzyNyvM; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="eXJclH3B";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="BsowsSTM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1774867973;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=rscamLmE47bElMCajG81H3iJ8AJKAGLT4qfMLFw7Qms=;
-	b=eXJclH3Bdf06KVb2T2v/S4L8DafxCIOBoyx6u1bC+xXI3kONv0Ue8ZgLTnZ/yZYI6E5i/+
-	W3MJ+zLo+fTUVgYulpHPAxyYoiFHdqd5J503co9EeNTzdDdsGxHlVYquL2fZV3x7HYq1Yv
-	RXAdxItprWE5hqy0E3oyJ/8f/fjZ73k=
-Received: from mail-lj1-f198.google.com (mail-lj1-f198.google.com
- [209.85.208.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-605-Hirr1Ue9PLia26cDxLuDgw-1; Mon, 30 Mar 2026 06:52:52 -0400
-X-MC-Unique: Hirr1Ue9PLia26cDxLuDgw-1
-X-Mimecast-MFC-AGG-ID: Hirr1Ue9PLia26cDxLuDgw_1774867970
-Received: by mail-lj1-f198.google.com with SMTP id 38308e7fff4ca-38a469b8bcbso18331241fa.1
-        for <linux-efi@vger.kernel.org>; Mon, 30 Mar 2026 03:52:51 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774867970; cv=none;
-        d=google.com; s=arc-20240605;
-        b=VG3dDxSwPADtgWDyEgg3rMOoTSs/5ZmFHSKyZD2VXubMgXXOwSZU1wmJnewp4UshTf
-         6Bjo6tjoB54KiD3u9oVlx9yQLevRJ1bk3XyZAsS0k2Xk9vDc/d6JATnfg+QLanfulCy3
-         3Zs+ppHGdDnCfIiIu4lAwe54HK4Vexx+WljtokZnYqkPGc59QwrxrNHnEieXpg3LcCY2
-         D2eVVOMQBpqOxPIxbz4iwc1QERtQiHVchmr4485jSzEOyCaeA1EgtrQIcszuPF/CxdHQ
-         WgD72LwjkwV9V/42ghExGxHDOTpjFYwjaW7ZWAADPGHxCkRUWs/etuLkkkUdTQcFGCqR
-         KYDw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=rscamLmE47bElMCajG81H3iJ8AJKAGLT4qfMLFw7Qms=;
-        fh=iR8LFXi0+EpyzoFW3HX7A2mdFnLKxBt70BxRhRdeZXM=;
-        b=AVGynS+64vGvC68ewIqZvSHukZm4LUG2efMV4NN3qLPE8xxORfz68p6TwKjUejxL+E
-         fOXzhJJFnMiQjpF3hC1idIOn7yxXpx3AMEF/atay0rFGHp1lb1+LV/QWzZQBSTLJfsu8
-         RYtyvyERViuRil6t0OBBr1/1M1pEf7UdwNUHEcJKaiKVil6oPVF+G+pPo3ixXHLKN5b6
-         t38U1wNosFglAO/TOS2D4KxaWgoDm3e/m1HdvAXumram+tRxysw4Kfp0E6ZQ9c/coKqC
-         YXSyOutcj7dNvwCPpO0vE/le3mDzW1LYuk+6PThLP10PDjEtgpCkXvaW1KnPnYRV1hdc
-         VCww==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1774867970; x=1775472770; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=rscamLmE47bElMCajG81H3iJ8AJKAGLT4qfMLFw7Qms=;
-        b=BsowsSTMleJkcbgLVPGfL539lK/KIfkYzdVjOu/nsZ7IM6sZ2XzXoJPeDvlnytsAl/
-         EJTL3KPpBSXAe1R3sIOY8Fk9ISwHWD4+siEyD0MwgTHP+hfNiZ4XyMKdW+jb0SvKQ91/
-         UHHSb+q1nYYzJGu/2W360QylJDT4zytBLQ79N8WObRoe63omQJk4MQlWEcnbLP3tAmmt
-         YYUYCsk87KIzBJaWh7WOCs3ajM03iQXs6HIhJNElnZ5y4/mr9fBHHyq1blC2997+cAyF
-         4HFWCpqixwwlPf0Swzc7YPLosZmFwAGqvKRctSPf6NawtYBN/IDM91Zr+TMZHe3fj2nd
-         G4xQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774867970; x=1775472770;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=rscamLmE47bElMCajG81H3iJ8AJKAGLT4qfMLFw7Qms=;
-        b=SpS0Gpss69RSgKXt1Z4IG3CqIA9c9Ux7gDszNIRCCR5QQDZ5z6rHBO1MlJOqfCMCIg
-         cmnMIue7l+FQlKDBE1dkC/uCqj7tyJ3QeXk3lxQZA5nyQmhvcqC+iD4FDMQF0kTWBavt
-         R4W2CBQj/6H4/bHecJHHvnfiJ/h85/BP+auPehSnNtHPx6br6qKFs/IPHmllrqEmcKtz
-         UJVCqk1vBsCdM4ySNCwhds5/gUmGflBGQdWoUUKWxxM2eW5E8Hj6lyUdQE+yEcscVv4d
-         omowRb4XuKf3+CClrBNfyKy+kWn/ASDxURCwtebIlfsXazFwBkHDrjL8uD6cLTKzLOfx
-         pq8A==
-X-Gm-Message-State: AOJu0YxHbBe9CEu5wEUaH1HhmPZJlX98nubCZc4yAenZlmbXz3UP1Vbt
-	fZJoHxR+lNkegm93BwJV1wN7M6A08Oup+0YhxUnpsF16RiNWfkcG118LBGn/2vPlrnYCz+Bq5GM
-	GnbzgMc+SAo6jnLjYCTWUHPTO5mkqERTNyM2+GfMtAF+9KXi6zQVf7Idjc5ZbPqnNCTLTmFUXOa
-	ijD/O6JcIl+CgusCXZ+SKlyjfQ2bKa7zdAXE3f
-X-Gm-Gg: ATEYQzyacWHjFjKJ6dQUWDwyLOMBmTid8GMuMbz2GM/plXVhM5jxHInxe+aXpPzgVIt
-	W3hytK6IKxvqJkB78xQEgUpnKLhAMKjabqXKleGjfqbTZnJN2JKAs0t+qlsWDcCdwDE0xuFZ3qS
-	5qMsP5KS6yxLCdTT53VxanDv9Db1Rq85BfPPx38ESGr84Z95AN185ANyW/YhPZ7fYdJapvXf0wg
-	Ai9EQGF5kOUWMZO5hwjHEjUr4JCgDxn+ED3hrDMP6/rCBymCJrKrqJiKWZmrVJZhyZX
-X-Received: by 2002:a05:651c:552:b0:38a:4e7a:c236 with SMTP id 38308e7fff4ca-38c731604fcmr45046901fa.12.1774867970164;
-        Mon, 30 Mar 2026 03:52:50 -0700 (PDT)
-X-Received: by 2002:a05:651c:552:b0:38a:4e7a:c236 with SMTP id
- 38308e7fff4ca-38c731604fcmr45046851fa.12.1774867969648; Mon, 30 Mar 2026
- 03:52:49 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WFzyNyvM"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ADFAEC19423;
+	Tue, 31 Mar 2026 07:07:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1774940854;
+	bh=5hhsjDLE9pNupvcpyt3pLkHUAnRs5UEgXGmbpLk3fUk=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
+	b=WFzyNyvM84zF5PzozJTJrhLPYa1KFDKwXZwxmFHJ83R9ztGPRIiWaWCPZ9CvKK5F0
+	 JSxXiwn4j3c+lHr8CDtYbhrhqEeTbjsO4UuawwwYZ/d5WbFX5XuPPx1SMyWzUEyRwW
+	 0A5Y0Z1jKagrubmQ3Vf3zcJwURWWd2lUjg8CrCNZAOdttvkCgav0viJu4IQZP0NYtV
+	 slXO30+UiRxNLmqyeOSiyx+4A9b6KiT9XlJIbfCggKaUDmeDpDcGr83GfORzBYT9vH
+	 qyVo/J8XyVMEeo2o+9UXqK4lsiqp++wdyv8moAoyyTrNzq+azV+kj8CJnzwm2lBLDA
+	 RZJ3Xl8j1Pymg==
+Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
+	by mailfauth.phl.internal (Postfix) with ESMTP id C4C86F4006E;
+	Tue, 31 Mar 2026 03:07:32 -0400 (EDT)
+Received: from phl-imap-02 ([10.202.2.81])
+  by phl-compute-01.internal (MEProxy); Tue, 31 Mar 2026 03:07:32 -0400
+X-ME-Sender: <xms:tHLLadocK8sL8RDGILdHR5O04fECPuhMVhZUJxhi5KV6j4XZEuzVCQ>
+    <xme:tHLLaaf4zb0Ya6Zg380XOt3-_M_ojUsRgHlF58EqG1ffR_JplLfAi0RKtYL_0A9-x
+    RqHcGFsUwYh7-aDkei25Lp2b8i5vPp678hxG_xK4LHw1qh-dcNjGfA>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefgedrtddtgdefgeduvdefucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
+    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
+    gurhepofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrugcu
+    uehivghshhgvuhhvvghlfdcuoegrrhgusgeskhgvrhhnvghlrdhorhhgqeenucggtffrrg
+    htthgvrhhnpedvueehiedtvedtleekuddutefgffdtleetfeetveejveejieehfefhjeei
+    jeefudenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    grrhguodhmvghsmhhtphgruhhthhhpvghrshhonhgrlhhithihqdduieejtdehtddtjeel
+    qdeffedvudeigeduhedqrghruggspeepkhgvrhhnvghlrdhorhhgseifohhrkhhofhgrrh
+    gurdgtohhmpdhnsggprhgtphhtthhopeelpdhmohguvgepshhmthhpohhuthdprhgtphht
+    thhopehlvghithgrohesuggvsghirghnrdhorhhgpdhrtghpthhtohepuhhsrghmrggrrh
+    hifheigedvsehgmhgrihhlrdgtohhmpdhrtghpthhtoheprghruggsodhgihhtsehgohho
+    ghhlvgdrtghomhdprhgtphhtthhopehgohhurhhrhiesghhouhhrrhihrdhnvghtpdhrtg
+    hpthhtohepjhhirhhishhlrggshieskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepgiek
+    ieeskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepugihohhunhhgsehrvgguhhgrthdrtg
+    homhdprhgtphhtthhopehlihhnuhigqdgvfhhisehvghgvrhdrkhgvrhhnvghlrdhorhhg
+    pdhrtghpthhtoheplhhinhhugidqkhgvrhhnvghlsehvghgvrhdrkhgvrhhnvghlrdhorh
+    hg
+X-ME-Proxy: <xmx:tHLLaU6U2OXL-Ek790KlJsXEpX4cYv1Bpwab5sy_Naed9HLQElQ4xQ>
+    <xmx:tHLLaWXv_t_8lUbucJIXWsabnYmTnBbE_gunUvGyJQb8zAYrqhqSHg>
+    <xmx:tHLLaUKow3pe-kr093hgMpQRBHKJWfNQfUhxzYzXRJNGa1cCMojSow>
+    <xmx:tHLLaQvXHd_h_b8C9LM62XvzZxd9uGlTwQpGuilQfB_t7OruvC7tdg>
+    <xmx:tHLLaZKqsgr30Voms5ayqjvo47pLVKfhQ6i5se0CesViE4cmpKYu9ubg>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id 8544F700065; Tue, 31 Mar 2026 03:07:32 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+X-ThreadId: AatMSBWUS2yF
+Date: Tue, 31 Mar 2026 09:07:12 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Gregory Price" <gourry@gourry.net>,
+ "Ard Biesheuvel" <ardb+git@google.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org,
+ "Dave Young" <dyoung@redhat.com>, "Usama Arif" <usamaarif642@gmail.com>,
+ "Jiri Slaby" <jirislaby@kernel.org>, "Breno Leitao" <leitao@debian.org>
+Message-Id: <5d2213b7-a792-4eb7-9c2f-b029cde099e4@app.fastmail.com>
+In-Reply-To: <aclmumCA5ADfT7-Z@gourry-fedora-PF4VCD3F>
 References: <20260326132655.1733873-7-ardb+git@google.com>
-In-Reply-To: <20260326132655.1733873-7-ardb+git@google.com>
-From: Dave Young <dyoung@redhat.com>
-Date: Mon, 30 Mar 2026 18:53:35 +0800
-X-Gm-Features: AQROBzBbiXW0SDOlACTBp8fxmD0IeOpVpE4TSNGZihiC1yy_raUcvWo2SHWGYH4
-Message-ID: <CALu+AoS-mbOfRV+ZOJSgd4PJUGxuszw_EoKojkK+T8Vq-=K+6g@mail.gmail.com>
-Subject: Re: [PATCH 0/5] x86/efi: Re-enable memory attributes table for kexec
-To: Ard Biesheuvel <ardb+git@google.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, 
-	Ard Biesheuvel <ardb@kernel.org>, Gregory Price <gourry@gourry.net>, Usama Arif <usamaarif642@gmail.com>, 
-	Jiri Slaby <jirislaby@kernel.org>, Breno Leitao <leitao@debian.org>
-Content-Type: text/plain; charset="UTF-8"
+ <20260326132655.1733873-8-ardb+git@google.com>
+ <aclmumCA5ADfT7-Z@gourry-fedora-PF4VCD3F>
+Subject: Re: [PATCH 1/5] efi/memattr: Fix thinko in table size sanity check
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Thu, 26 Mar 2026 at 21:27, Ard Biesheuvel <ardb+git@google.com> wrote:
->
-> From: Ard Biesheuvel <ardb@kernel.org>
->
-> The EFI memory attributes table augments the EFI memory map, and
-> provides permission attributes for all runtime code and data regions
-> that are otherwise mapped read-write-execute in their entirety.
->
-> Currently, this table is disregarded when doing kexec boot on x86, for
-> two reasons:
-> - the boot services data region that holds the table is not reserved
->   correctly, and may contain garbage at kexec time
-> - a misguided sanity check on the size of the table is likely to trigger
->   on kexec, as the EFI memory map has been trimmed down by that time.
->
-> Fix both issues, so that the EFI memory attributes table can be taken
-> into account again at kexec time. Note that this requires that the call
-> to efi_memattr_init() is moved to a later point for x86.
 
-I vaguely remember when we discussed this issue in old threads
-efi_mem_reserve can not work for kexec_load syscall, but I think after
-the commit a2498e5c453b it should just work.   So I think it looks
-good, thanks Ard!
 
-Thanks
-Dave
+On Sun, 29 Mar 2026, at 19:51, Gregory Price wrote:
+> On Thu, Mar 26, 2026 at 02:26:57PM +0100, Ard Biesheuvel wrote:
+>> From: Ard Biesheuvel <ardb@kernel.org>
+>> 
+>> While it is true that each PE/COFF runtime driver in memory can
+>> generally be split into 3 different regions (the header, the code/rodata
+>> region and the data/bss region), each with different permissions, it
+>> does not mean that 3x the size of the memory map is a suitable upper
+>> bound. This is due to the fact that all runtime drivers could be
+>> coalesced into a single EFI runtime code region by the firmware, and if
+>> the firmware does a good job of keeping the fragmentation down, it is
+>> conceivable that the memory attributes table has more entries than the
+>> EFI memory map itself.
+>> 
+>> So instead, base the sanity check on whether the descriptor size matches
+>> the EFI memory map's descriptor size (which is not mandated by the spec
+>> but extremely unlikely to differ in practice), and whether the size of
+>> the whole table does not exceed 2 MiB.
+>> 
+>> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+>
+> The 2MB limit is a bit odd to me - but then i don't see a legitimate
+> reason to need 50k+ entries here unless the system is doing something
+> absolutely nutty - it would mean a wildly fragmented system and most
+> likely an indicator of a bug rather than a legitimately intended
+> configuration.
+>
 
+The 2MB is completely arbitrary. We could use 1M or 32M for all I care. The original report was about a bogus table eating up all the memory.
+
+> Otherwise, this does seem like a better check regardless.
+>
+> Reviewed-by: Gregory Price <gourry@gourry.net>
+
+Thanks.
