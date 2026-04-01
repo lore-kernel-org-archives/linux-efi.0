@@ -1,68 +1,71 @@
-Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
+Received: from mail-wr1-f74.google.com (mail-wr1-f74.google.com [209.85.221.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7EF3D3E1213
-	for <linux-efi@vger.kernel.org>; Wed,  1 Apr 2026 12:24:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF4E338238B
+	for <linux-efi@vger.kernel.org>; Wed,  1 Apr 2026 12:24:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775046248; cv=none; b=oVqrzGM0/+Narc2AEBxMmQDXmvecH4WMwYkFvIOz8CEQf7nCKUI7r1zYYf2HOwEbIGlhNC4nGw5slphNwiQVNEmJf7fTIz0/zf3qlgzO+HkHlECGe/1MTFZOMn3M32g2cNw3gXw8IA0990eXl1TbTHXebxFxMQvgP0Vd1ltUJm0=
+	t=1775046249; cv=none; b=FXq4vDDxxs46ZoWCkB5fuvizrf/dzeP2LvmjUgBIoPYCdGID3aKVsrFHLf0IeS+MIWLNXontlxF+2qO4r6Bwxket/SX0o/jFNjQ4z0t9XmAvBHROGtOj8aGBtmHvomXFe8ovXaVkt+3fBBaADOO2cQCPlPRnewFp3CZOol/iOmg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775046248; c=relaxed/simple;
-	bh=WuqgWm4tRRJ/HF1ruEzlW086PxFxDAs+CB8zrINGCMc=;
-	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=LJB1neKW1o+UbzMrWeEdFumcDDx/u+poxP8cy8S+ODOFGV6uB8VsNvtDHL8ePO/cVNJGFIz4qHk7sm8YYgF+WML6xH+0UjR3TybntTiP+zzp5vRJU6nW0z1kxh3uNbLQNN3mV33UhBz4f0Xk0udLpvfSSuU9LzyL04KGA/xPOEs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=khA5pFVH; arc=none smtp.client-ip=209.85.128.74
+	s=arc-20240116; t=1775046249; c=relaxed/simple;
+	bh=fH7t4CLoMxZ4hGmlSQX/UeCrlLK1h+wo/X3EJch0vls=;
+	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
+	 To:Cc:Content-Type; b=V3qjvGGUHBPxkIrAPZLhd+Vz4NdoX3NfFJG3pI6KJo/G9ZxjODKltr0iinlFVj00xHw9uUXgSpiAXmPVs+VVxewkvgvoPuSF4EhcTqiYVacspDhW/87demvlYMXWIbQjYaoBZj5A2aZrabfD/Ku2Uy3u9QNdrJK6fsE2aQreGrY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=tNZKFUUy; arc=none smtp.client-ip=209.85.221.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="khA5pFVH"
-Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-4887f8a8df3so9567205e9.0
-        for <linux-efi@vger.kernel.org>; Wed, 01 Apr 2026 05:24:06 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="tNZKFUUy"
+Received: by mail-wr1-f74.google.com with SMTP id ffacd0b85a97d-43cfb72377bso2708932f8f.2
+        for <linux-efi@vger.kernel.org>; Wed, 01 Apr 2026 05:24:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1775046245; x=1775651045; darn=vger.kernel.org;
-        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=uJnlNfF4DL5QOFNkv/8qBSM0QCh2jsjugcRVmCaUg4g=;
-        b=khA5pFVHaLArYzlWXu54VFbH8xhc1AWKCGHnDhT3ebbtULsw1qy9fOfq98pOEocwJs
-         0Vd40/UHnNHqgr7cI//XWgf48zIemFhnGpl3YNEWqacFvyku8K6R7iHLBPNBRggxizEP
-         K6N1kLcunULzqQmHgssRS4jNu8kbPPpt4yh7zGzUaScBQ81n6RY7nt4kRnoKS33K0fMH
-         8q/+b1on7oeaqRVleeIIv+85SrBp5QWD0UqQ+X/LHp529vqOi8aEVkQ/qwxLRes3++/k
-         RWLAV5KuWOMC88Pmh6Fvz1/RSvUBzAQdrI+XouRO29LqzUELvL8UkEebj9FctJjRsZOr
-         mEPg==
+        d=google.com; s=20251104; t=1775046246; x=1775651046; darn=vger.kernel.org;
+        h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
+         :date:from:to:cc:subject:date:message-id:reply-to;
+        bh=ubtZTgynj1xoqNeD7/xyduK3+fryeNVENJKTAAs0vMo=;
+        b=tNZKFUUybvXQJoTco7t0/PSEmxZq60qcSFtgLzIm/6YPG5Eqt+GmH7MsAV+cX0+eUD
+         PkjSzJ/pj+GoKr4+D8Wgs4oO19vbL/ti75LiRLLjUbB3sczrsMXiQ2OYjLqqU004HOxK
+         je1pYcAKrLXd4G+nCdt4Rh3IOX1niE66f5+1/b+JTAIdM/aI765PVSN8OUoTXiJ1+gjd
+         a+Ej33i/xDaW51/L9SWmTm3qQWAFHmT6h3JYQPfXVSKQBU+gV623jwXkjaKz3pBTkvGw
+         yQTRtZDBxP9PZxZLpQHOs2gxrAO+8ULZGG/CzFphBk2XmdPtdDIAeUmJpzJp8iNXHWGQ
+         73Zg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1775046245; x=1775651045;
-        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=uJnlNfF4DL5QOFNkv/8qBSM0QCh2jsjugcRVmCaUg4g=;
-        b=ooZz/F/r/GW0EhrjicilARo3C/gMY3GDd24c3ONU8go1QeGRpbFl6D5B5X0XR/5ogP
-         7idDj66cK86vx1dDx5Hlk4tFYXi0xdKlJj4Frxaiy4x5Xf3TXigcyASfxUzy8Qlef35U
-         B6QIR/KSsmouudGmVCzyediOS0XtE5Ndfb07yhHpq6IzcVqqqCZNfuQt/JnyDueF+gzB
-         rguNPmN1n4Zm2Kigxhfph5/a/c7YDT3RSy9rMmWJEcdfgxtDxEwM57ep2aiOdfH/Dpi9
-         A4ILbqryMoo2qL/XbnUjmUCbGu0rY1xhZMuMQROIwe5doLnmN7wkFq5qw9SSynUHnHE5
-         hHJQ==
-X-Gm-Message-State: AOJu0YzF8dWvf9hhaOqvv8cTB2G8pfcCqRg0iZHWLyMShV32G0uLVqSh
-	XDAvWd9Wr9xw/xSLNdMyJDvXv/Y0OsV1TebSipQnuRkrveLmZuhpWRSvC+GTOxAcYuY9ZyVni5C
-	GgsuyTWulOEQ48hg19X/GRePPVeok7z5Wq8dshNKWt7vDH9njJdKmZMB0DtgzSLfvGztomXZ2NN
-	Lm6uGZugnLUzZwgyTE2JEBOGkW9J0Cgg==
-X-Received: from wrwp15.prod.google.com ([2002:a5d:68cf:0:b0:439:f5bc:2087])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:1d0f:b0:485:3d3e:167b
- with SMTP id 5b1f17b1804b1-4888355ec9bmr53692675e9.5.1775046244729; Wed, 01
- Apr 2026 05:24:04 -0700 (PDT)
-Date: Wed,  1 Apr 2026 14:23:52 +0200
+        d=1e100.net; s=20251104; t=1775046246; x=1775651046;
+        h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
+         :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=ubtZTgynj1xoqNeD7/xyduK3+fryeNVENJKTAAs0vMo=;
+        b=qP4q9NS68p4m3wnhEbgefikrxxqojSSCmU2rpOPDIQFx1k47uzFEpyD6k5c6X5jufX
+         mmHup5hPozM7FGBUsLZN5EZqEdc3+bmbm6uRg88bfChG4PtRRT8tBtopTXcGSjI5kFWO
+         tEycQdnJ7JrqMPUBhf+bAnwvFUx6fBYBZLRqiMY2+QNSaJMD79zKyhSWvWxXdVDB/bu4
+         4ztNGuGZiOjKmuk4NQk6PwJhIHGv3SJ79y2/Nx91Pr+Y3KLgvN2cFaFCCTb2sHeADjGs
+         57FS39F3mnMJKuSfTnxZ67m9f9SOye0b/nOjmAADqr5y93Xuf7FnihKrU34l/xjsp9N6
+         sWmQ==
+X-Gm-Message-State: AOJu0YxsacOFYyv2DNWORq+w3tM8sFGZTO7dlegdEOKT3UdvHPtFV0fd
+	Bm2l1QeRdT5/6x3sUWBwCZ14GL6ryMQBazMFGhzneIiCc+KE8GH5uesqLA4cCRz4+y4zmTCUxKh
+	tPX2dm5dcQpmdK1vYkXCjLCJKc2jtAck64m2/WY+/mcc9id2QCzROSulhgvBsCMRNbMTXx+jURG
+	Bmub3LQI+5fl/CpoEeqsBBdQ0Zw6t3jQ==
+X-Received: from wrpv1.prod.google.com ([2002:adf:f681:0:b0:43c:fab7:4ffb])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:178d:b0:43d:184:8aa2
+ with SMTP id ffacd0b85a97d-43d15051ecbmr6088304f8f.16.1775046245895; Wed, 01
+ Apr 2026 05:24:05 -0700 (PDT)
+Date: Wed,  1 Apr 2026 14:23:53 +0200
+In-Reply-To: <20260401122351.2058145-7-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
+References: <20260401122351.2058145-7-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2230; i=ardb@kernel.org;
- h=from:subject; bh=va67uiHDdkHMSmpZ0o0Av6Eknku8i4k9On556G319i8=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfMsX8RUbvm7c+wXG24KfldipKDE3R3V37X4vP6hM9/MN
- ISsl7zvKGVhEONikBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABMpzWL4HyL/O//Me6Gvl4zs
- 5Ze1/lJ89SVd7O3hO/znNnhULbz/OpKR4ebFWUpa3+uULNbFL7xYLnOjz3zZojsiU789+2YX2x/ lwgAA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3875; i=ardb@kernel.org;
+ h=from:subject; bh=Jx0PtHjYP7r1fy/2H9zhi0ODRUOUmIUV3b1pYSgmzlo=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfMsX6T0nAiOC64fqt7lLXl74l28S5X1gr7pfma28Vt85
+ 67ZoXWmo5SFQYyLQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAEwkiY/hf1m045NPK9+uWCzN
+ 6/EzSVd043TnJaJJ3+ebRilryJy8tJLhf/nJtc0S4oHeet2e8e3P+9ZNdjx358C9eOUdr+KOBz+ LZgAA
 X-Mailer: git-send-email 2.53.0.1118.gaef5881109-goog
-Message-ID: <20260401122351.2058145-7-ardb+git@google.com>
-Subject: [PATCH v2 0/5] x86/efi: Re-enable memory attributes table for kexec
+Message-ID: <20260401122351.2058145-8-ardb+git@google.com>
+Subject: [PATCH v2 1/5] efi/memattr: Fix thinko in table size sanity check
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, x86@kernel.org, 
@@ -73,55 +76,89 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-The EFI memory attributes table augments the EFI memory map, and
-provides permission attributes for all runtime code and data regions
-that are otherwise mapped read-write-execute in their entirety.
+While it is true that each PE/COFF runtime driver in memory can
+generally be split into 3 different regions (the header, the code/rodata
+region and the data/bss region), each with different permissions, it
+does not mean that 3x the size of the memory map is a suitable upper
+bound. This is due to the fact that all runtime drivers could be
+coalesced into a single EFI runtime code region by the firmware, and if
+the firmware does a good job of keeping the fragmentation down, it is
+conceivable that the memory attributes table has more entries than the
+EFI memory map itself.
 
-Currently, this table is disregarded when doing kexec boot on x86, for
-two reasons:
-- the boot services data region that holds the table is not reserved
-  correctly, and may contain garbage at kexec time
-- a misguided sanity check on the size of the table is likely to trigger
-  on kexec, as the EFI memory map has been trimmed down by that time.
+So instead, base the sanity check on whether the descriptor size matches
+the EFI memory map's descriptor size closely enough (which is not
+mandated by the spec but extremely unlikely to differ in practice), and
+whether the size of the whole table does not exceed 64k entries.
 
-Fix both issues, so that the EFI memory attributes table can be taken
-into account again at kexec time. Note that this requires that the call
-to efi_memattr_init() is moved to a later point for x86.
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ drivers/firmware/efi/memattr.c | 37 +++++++++++++++-----
+ 1 file changed, 28 insertions(+), 9 deletions(-)
 
-Changes since v1:
-- Sanity check the descriptor size and entry count individually: this
-  prevents integer overflow, and avoid noisy diagnostics when using
-  kexec_load(), which reconstructs the EFI memory map using a different
-  descriptor size.
-- Apply Gregory's Rb to patch #1 (but not patch #1)
-
-I'd like to take this through the EFI tree as a whole, or take the
-first patch now (which is a fix) and leave the rest for -tip during the
-next cycle. (Patches #3 and #4 should be queued together in any case)
-
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Gregory Price <gourry@gourry.net>
-Cc: Usama Arif <usamaarif642@gmail.com>
-Cc: Jiri Slaby <jirislaby@kernel.org>
-Cc: Breno Leitao <leitao@debian.org>
-
-Ard Biesheuvel (5):
-  efi/memattr: Fix thinko in table size sanity check
-  x86/efi: Gather initial memory reservation and table handling logic
-  x86/efi: Defer the call to efi_memattr_init()
-  efi: Use efi_mem_reserve() to reserve the memory attribute table
-  x86/efi: Drop kexec quirk for the EFI memory attributes table
-
- arch/x86/include/asm/efi.h     |  5 +--
- arch/x86/kernel/setup.c        | 11 +-----
- arch/x86/platform/efi/efi.c    | 15 ++++++++
- arch/x86/platform/efi/quirks.c |  4 --
- drivers/firmware/efi/efi.c     |  2 +-
- drivers/firmware/efi/memattr.c | 39 +++++++++++++++-----
- 6 files changed, 49 insertions(+), 27 deletions(-)
-
-
-base-commit: d0c3bcd5b8976159d835a897254048e078f447e6
+diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
+index e727cc5909cb..b83f1c5a9164 100644
+--- a/drivers/firmware/efi/memattr.c
++++ b/drivers/firmware/efi/memattr.c
+@@ -22,7 +22,6 @@ unsigned long __ro_after_init efi_mem_attr_table = EFI_INVALID_TABLE_ADDR;
+ void __init efi_memattr_init(void)
+ {
+ 	efi_memory_attributes_table_t *tbl;
+-	unsigned long size;
+ 
+ 	if (efi_mem_attr_table == EFI_INVALID_TABLE_ADDR)
+ 		return;
+@@ -40,22 +39,42 @@ void __init efi_memattr_init(void)
+ 		goto unmap;
+ 	}
+ 
++	/*
++	 * The EFI memory attributes table descriptors might potentially be
++	 * smaller than those used by the EFI memory map, as long as they can
++	 * fit a efi_memory_desc_t. However, a larger descriptor size makes no
++	 * sense, and might be an indication that the table is corrupted.
++	 *
++	 * The only exception is kexec_load(), where the EFI memory map is
++	 * reconstructed by user space, and may use a smaller descriptor size
++	 * than the original. Given that, ignoring this companion table is
++	 * still the right thing to do here, but don't complain too loudly when
++	 * this happens.
++	 */
++	if (tbl->desc_size < sizeof(efi_memory_desc_t) ||
++	    tbl->desc_size > efi.memmap.desc_size) {
++		pr_warn("Unexpected EFI Memory Attributes descriptor size %d (expected: %ld)\n",
++			tbl->desc_size, efi.memmap.desc_size);
++		goto unmap;
++	}
+ 
+ 	/*
+-	 * Sanity check: the Memory Attributes Table contains up to 3 entries
+-	 * for each entry of type EfiRuntimeServicesCode in the EFI memory map.
+-	 * So if the size of the table exceeds 3x the size of the entire EFI
+-	 * memory map, there is clearly something wrong, and the table should
+-	 * just be ignored altogether.
++	 * Sanity check: the Memory Attributes Table contains multiple entries
++	 * for each EFI runtime services code or data region in the EFI memory
++	 * map, each with the permission attributes that may be applied when
++	 * mapping the region.  There is no upper bound for the number of
++	 * entries, as it could conceivably contain more entries than the EFI
++	 * memory map itself. So pick an arbitrary limit of 64k, which is
++	 * ludicrously high. This prevents a corrupted table from eating all
++	 * system RAM.
+ 	 */
+-	size = tbl->num_entries * tbl->desc_size;
+-	if (size > 3 * efi.memmap.nr_map * efi.memmap.desc_size) {
++	if (tbl->num_entries > SZ_64K) {
+ 		pr_warn(FW_BUG "Corrupted EFI Memory Attributes Table detected! (version == %u, desc_size == %u, num_entries == %u)\n",
+ 			tbl->version, tbl->desc_size, tbl->num_entries);
+ 		goto unmap;
+ 	}
+ 
+-	tbl_size = sizeof(*tbl) + size;
++	tbl_size = sizeof(*tbl) + tbl->num_entries * tbl->desc_size;
+ 	memblock_reserve(efi_mem_attr_table, tbl_size);
+ 	set_bit(EFI_MEM_ATTR, &efi.flags);
+ 
 -- 
 2.53.0.1118.gaef5881109-goog
 
