@@ -1,96 +1,76 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 78DE3188713
-	for <linux-efi@vger.kernel.org>; Wed,  1 Apr 2026 14:31:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C68F83176EE;
+	Wed,  1 Apr 2026 14:35:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775053909; cv=none; b=JeaZ1DF6Aqb/JEMRoPdRwgu8aHppLAqaqW3LpsBlHwusdwpBFUdYOfWkBkekp7u1XylYw4ZsBK96h9v3m4EvLPxrecBASBMbPrTdw3T24sGeqDkFPhb2GemOQKgZPx5VEj/utMYmLfhOlpcNwQ68q4wwCwX5mqdcXreDft6MZCo=
+	t=1775054113; cv=none; b=NoV7CSuY+kPdsQSpGA7TRY7tvP6MZOIV4HcNoQKsvuWMfwgjBHjGkQa1Cj1E5V36y4BgzMCmfv9rmC18fluGSsxwYRip7lIoI76ZG/HJPw6B9QUla+6hViLbxq8mbkXKC6Fw32wCB6On6mVyfHHRcME/u78LsjU274saZYXGjDk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775053909; c=relaxed/simple;
-	bh=0PDjTbqpJYMUU/5bt30Gc+OY76/IAV/10T65mSIjE7k=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=OAcE0WcJrWyhlNgcXBSmTooGFSyTz8gHgs0agG/1P8T4lJrnxP2rB05BOuJhpRZS3j94IOGIo0uLhC6fe/q/1c/EEvRfc2tWRkTxA2wuYBW2FNYHmaDxPxZ/cMywT8vCmamP60kVleJRVGLUBUZKT8dzOUzfCtkMtTIuGMXFz38=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=B8USsARG; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1775054113; c=relaxed/simple;
+	bh=snHcW5q0pmyzez0BMGcVwHnuUY2dugCo0VKxeFlQaE4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=RR/qlXxPEsD5V94KEqXLf9fR8IUQfkFNGi3dQywtEdBUfEJXM3CjqkhsPXlLgRPM95jvIzet0tmB9OZv5Dvv7fS4cR6oyuOi8MiS8XLIA68NK9ZnWhNeti1ZsFF2FgpJFWxX80BUtiK8kw5ZeeeWQDyXTGz3T8e9fwhRCF2UoZk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=debian.org; spf=none smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=lA4TfXun; arc=none smtp.client-ip=82.195.75.108
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=debian.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="B8USsARG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 11CBCC19421
-	for <linux-efi@vger.kernel.org>; Wed,  1 Apr 2026 14:31:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1775053909;
-	bh=0PDjTbqpJYMUU/5bt30Gc+OY76/IAV/10T65mSIjE7k=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=B8USsARG8vc1UanLp2FOzPt+S0LoxUA8/duJpImhH4nQrjQAbXNhrJCL8W7RbIvhR
-	 bAcXQdXROObuZUgZLolG5Hti5JzmsL3rPGj1bJvKhmMolkiQUsc0EiffLyYYfcrCiR
-	 9WtQ3yBd4UbeRu1tJdaTwLxVWVQ5XKwYiWkhDIFKn6bEB3Gbu4qjvNY7Z8Lww5VYm7
-	 9UNdpHUTCqBR2hYjbo8wPbvZ8tJIXnMvjDq2bmuwOHO3cscWa7wRhPHMhigU06+G0w
-	 zkCfLp+bE5Asm2hSZOCm5RcOE2+7qMwoUHtALbZ9rWw5d+nux2+NXzWq8QuucFSjH5
-	 HTsGI8zgsEdeQ==
-Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id 1A2ABF4006E;
-	Wed,  1 Apr 2026 10:31:48 -0400 (EDT)
-Received: from phl-imap-02 ([10.202.2.81])
-  by phl-compute-01.internal (MEProxy); Wed, 01 Apr 2026 10:31:48 -0400
-X-ME-Sender: <xms:VCzNafYT0AOlSGrrsxj_WpY26AtxiRHKOmkI0SjVb3W_EeaAnqcJ6A>
-    <xme:VCzNaZNX3icAAtC8eS1Y8GiRtTYJ0HatUkMkcBzTBgTPcYrrSBWoFyRimIfSZRkIS
-    gKp5fYp7lIR44jwNpMZvaWzK-ObDYl8yr9Qaq4IMaNyokoX4VYYeYQ>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdeffeejucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceurghi
-    lhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurh
-    epofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrugcuuehi
-    vghshhgvuhhvvghlfdcuoegrrhgusgeskhgvrhhnvghlrdhorhhgqeenucggtffrrghtth
-    gvrhhnpedvueehiedtvedtleekuddutefgffdtleetfeetveejveejieehfefhjeeijeef
-    udenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrh
-    guodhmvghsmhhtphgruhhthhhpvghrshhonhgrlhhithihqdduieejtdehtddtjeelqdef
-    fedvudeigeduhedqrghruggspeepkhgvrhhnvghlrdhorhhgseifohhrkhhofhgrrhgurd
-    gtohhmpdhnsggprhgtphhtthhopeekpdhmohguvgepshhmthhpohhuthdprhgtphhtthho
-    pehlvghithgrohesuggvsghirghnrdhorhhgpdhrtghpthhtohepuhhsrghmrggrrhhifh
-    eigedvsehgmhgrihhlrdgtohhmpdhrtghpthhtohepghhouhhrrhihsehgohhurhhrhidr
-    nhgvthdprhgtphhtthhopehjihhrihhslhgrsgihsehkvghrnhgvlhdrohhrghdprhgtph
-    htthhopeigkeeisehkvghrnhgvlhdrohhrghdprhgtphhtthhopeguhihouhhnghesrhgv
-    ughhrghtrdgtohhmpdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnh
-    gvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghr
-    nhgvlhdrohhrgh
-X-ME-Proxy: <xmx:VCzNaZaMEBAH3rNmsEA2CQ2UIo41w_Z-fNj694-w7r366WBwJ1RTOg>
-    <xmx:VCzNacadWkRubZ_YR7mx-BnZ-a9JLSX2FtoOHKk-GHAbPK-eDOx9DA>
-    <xmx:VCzNaeJhoC0mwtEmrd7xrfL8X0sVwOpG6RrsrXsJgB4DEfurk_KbFw>
-    <xmx:VCzNaYuZRvCtnksXcsPajKJvdRfWgdc52M56V3Omt2MDy183HD8P5A>
-    <xmx:VCzNaSUXRFkz3tMpIYes3zlTBeUkEhAK_PywnuzBCoGnVpJhuzhOP2K2>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id F00E8700065; Wed,  1 Apr 2026 10:31:47 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="lA4TfXun"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
+	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
+	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=Lx4y61s5G0gu5xutUJPNdblgqDAhWb/FUK34GrLD7F0=; b=lA4TfXunn1uCZZQnl/AuomfgI8
+	CfWH8F9T2dgFQXB5IBdVnix5jyT08DiuO5KZAq6Cb97iteFLiQkbV+KiRAhGMJmlue+M+EAt0p1XH
+	Jq60/kTcSePz5U/EiJU9j0045Csp9ouc7onQ6Han6Roib2jFNBiXco031ZOFH0NeKKcVOfODzPUrA
+	pYyjWAbrAKSy3J6E8pjIAhUs8zV1RtFyGh1jIvykgyfTnGP3yYDubuD9zcxPYPMTNLgjCHMnSgzgb
+	urSMPaYoh4ZjV5KQt8M0l3F+vjxJSes+5uqfUrpj0d+NA30XPzfqzyzm6AsBmbZjhZ78SRgvfQZYz
+	bh6zBq7Q==;
+Received: from authenticated user
+	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
+	(Exim 4.96)
+	(envelope-from <leitao@debian.org>)
+	id 1w7wf0-0033OF-2Z;
+	Wed, 01 Apr 2026 14:35:09 +0000
+Date: Wed, 1 Apr 2026 07:35:04 -0700
+From: Breno Leitao <leitao@debian.org>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	x86@kernel.org, Dave Young <dyoung@redhat.com>, 
+	Gregory Price <gourry@gourry.net>, Usama Arif <usamaarif642@gmail.com>, 
+	Jiri Slaby <jirislaby@kernel.org>
+Subject: Re: [PATCH v2 1/5] efi/memattr: Fix thinko in table size sanity check
+Message-ID: <ac0tBmNkY3UMSsYa@gmail.com>
+References: <20260401122351.2058145-7-ardb+git@google.com>
+ <20260401122351.2058145-8-ardb+git@google.com>
+ <ac0SynMEZTkodole@gmail.com>
+ <eb368b0d-4acc-4dc6-a86b-7a1a81762960@app.fastmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: AzaxcsQTxqiw
-Date: Wed, 01 Apr 2026 16:31:27 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Breno Leitao" <leitao@debian.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org,
- "Dave Young" <dyoung@redhat.com>, "Gregory Price" <gourry@gourry.net>,
- "Usama Arif" <usamaarif642@gmail.com>, "Jiri Slaby" <jirislaby@kernel.org>
-Message-Id: <eb368b0d-4acc-4dc6-a86b-7a1a81762960@app.fastmail.com>
-In-Reply-To: <ac0SynMEZTkodole@gmail.com>
-References: <20260401122351.2058145-7-ardb+git@google.com>
- <20260401122351.2058145-8-ardb+git@google.com> <ac0SynMEZTkodole@gmail.com>
-Subject: Re: [PATCH v2 1/5] efi/memattr: Fix thinko in table size sanity check
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <eb368b0d-4acc-4dc6-a86b-7a1a81762960@app.fastmail.com>
+X-Debian-User: leitao
 
+On Wed, Apr 01, 2026 at 04:31:27PM +0200, Ard Biesheuvel wrote:
+> 
+> On Wed, 1 Apr 2026, at 14:45, Breno Leitao wrote:
+> > On Wed, Apr 01, 2026 at 02:23:53PM +0200, Ard Biesheuvel wrote:
+> >> +	if (tbl->desc_size < sizeof(efi_memory_desc_t) ||
+> >> +	    tbl->desc_size > efi.memmap.desc_size) {
+> >> +		pr_warn("Unexpected EFI Memory Attributes descriptor size %d (expected: %ld)\n",
+> >> +			tbl->desc_size, efi.memmap.desc_size);
+> >
+> > Should tbl->desc_size be printed as %u and %lu?  tbl->desc_size is u32
+> > and.  The pr_warn a few lines below already uses %u for the same field:
+> >
+> 
+> Yes, good point - will fix.
 
-On Wed, 1 Apr 2026, at 14:45, Breno Leitao wrote:
-> On Wed, Apr 01, 2026 at 02:23:53PM +0200, Ard Biesheuvel wrote:
->> +	if (tbl->desc_size < sizeof(efi_memory_desc_t) ||
->> +	    tbl->desc_size > efi.memmap.desc_size) {
->> +		pr_warn("Unexpected EFI Memory Attributes descriptor size %d (expected: %ld)\n",
->> +			tbl->desc_size, efi.memmap.desc_size);
->
-> Should tbl->desc_size be printed as %u and %lu?  tbl->desc_size is u32
-> and.  The pr_warn a few lines below already uses %u for the same field:
->
+Thanks. With the fix, please add:
 
-Yes, good point - will fix.
+Reviewed-by: Breno Leitao <leitao@debian.org>
