@@ -1,118 +1,194 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD5893CA4B6
-	for <linux-efi@vger.kernel.org>; Wed,  1 Apr 2026 17:48:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9AF7138C407
+	for <linux-efi@vger.kernel.org>; Thu,  2 Apr 2026 09:23:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775065682; cv=none; b=JXh+8DSi1Az1xTEDvdg+HjhfZtNzmklENHaPgwEC0Lr21siCKfKHXO0FYmDCdt9nERpudlOy8vs0FDNTaIWRVPEMjnzeNagr+FlAMgtyI36YJBjlkHPx0TQZnNowGISkjbLbzfbpokmt50I00++DnLAJqx8+PgWIeiiapkiFftU=
+	t=1775121797; cv=none; b=evTWUUDWOhNlrkvL1VJmP39G8Eatx445LMyxXm3URnWgFH6DG2VxJlet+dWZpx4PMiLZ9UyKNj1E7549fXfyvfG/K4d2SVnvPTKabekY8I6X2+LJo8025vmxMKPB2LV+3W0b7Q/f2337DMFN4wsX6DGP7e2Mwj9iAuTSyLlYY5k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775065682; c=relaxed/simple;
-	bh=LLqoJIi67bkezxSWE5ihVWy2DsafQ5h4eCOtpIAZYGg=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=J9Jv43Fo32KtGYOX1JlRVMsqsQ2yDflXFHgKLnxcjKguSp5ESxZioAg+g9gK0xUE+EcGHcI1yCyvM/Krz0aXlanBgY2JqzALQPi5NKGpfAgZt3nszdwIR/H8T247Rs56Wu/n2Uc8GrHmhsUdJaIRFSOwMWvYh1aRNCsXgu4SZEU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NuST5rNN; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1775121797; c=relaxed/simple;
+	bh=WDFGYZtyYLp+z0Rt0Kel9cVAj0zOatIGepwcVXk3ziw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=bq7c94vS2Ax0Urz+wN70qoWBEGSwoIesje3vv3OAb1NYjE3/Tf5PFumBUS1uoU1TCkB1GF+EvIrq4CCS0CsuTX5xu7S+YbucM2C87nynuWt7Qri4IQZxY0XmAMVQUWD9tpwcKPaNjL87pb8Cs5ezkctzQCpRJQtczpVgzeiW9og=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=gsm5A9Ww; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=E+OksCf8; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=gsm5A9Ww; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=E+OksCf8; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NuST5rNN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 02555C19423;
-	Wed,  1 Apr 2026 17:48:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1775065682;
-	bh=LLqoJIi67bkezxSWE5ihVWy2DsafQ5h4eCOtpIAZYGg=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=NuST5rNNCghIasVWC1RAADHgpjeYGu5qWFzXvDTzQe1ZJRbtq/9Jet49co1/SA54T
-	 ugZc1z/WoCSN08iP/QtsZdryqXEFUhle/9fAQQRMvAUEFTztUUtT+vwG0/1vmseFsg
-	 aTZi+ABhPYKnQG96JY/eDkYiT5JGznKu0R+2jVmMqRzRBGki7qq5VguS67wkaBfFFt
-	 VFTDO+odeTAlxIAwoYx/N3GtG0yAZF66w9nJVIvsv4qF0Bz/aIqH75BYTrtcDHb0ER
-	 knybPPCqkvricI/+u2q6UQqB07ANjQFFtATO7E5PHheGxmDdvf7fcBCU7Vw96uyyrM
-	 wW/qFy0duIKpQ==
-Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id 0D08AF4006B;
-	Wed,  1 Apr 2026 13:48:01 -0400 (EDT)
-Received: from phl-imap-02 ([10.202.2.81])
-  by phl-compute-01.internal (MEProxy); Wed, 01 Apr 2026 13:48:01 -0400
-X-ME-Sender: <xms:UFrNaZAjgsrbpmGFdmfjE6jP5HzNXRx8Szyd48_HjkUF8wCtn4HCcQ>
-    <xme:UFrNaSVYq6niPIPIJLXLu95Phx4vcTO_2RZhe3GcENO9em3Aegw0stXSOAVbznJUA
-    21fZVUd71YpSzRhXCSdziBLe4OeSMHhzDotIUQN2tcylQ4vWdlVZVs>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdefjeeiucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceurghi
-    lhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurh
-    epofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrugcuuehi
-    vghshhgvuhhvvghlfdcuoegrrhgusgeskhgvrhhnvghlrdhorhhgqeenucggtffrrghtth
-    gvrhhnpedvueehiedtvedtleekuddutefgffdtleetfeetveejveejieehfefhjeeijeef
-    udenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrh
-    guodhmvghsmhhtphgruhhthhhpvghrshhonhgrlhhithihqdduieejtdehtddtjeelqdef
-    fedvudeigeduhedqrghruggspeepkhgvrhhnvghlrdhorhhgseifohhrkhhofhgrrhgurd
-    gtohhmpdhnsggprhgtphhtthhopeelpdhmohguvgepshhmthhpohhuthdprhgtphhtthho
-    pehlvghithgrohesuggvsghirghnrdhorhhgpdhrtghpthhtohepuhhsrghmrggrrhhifh
-    eigedvsehgmhgrihhlrdgtohhmpdhrtghpthhtoheprghruggsodhgihhtsehgohhoghhl
-    vgdrtghomhdprhgtphhtthhopehgohhurhhrhiesghhouhhrrhihrdhnvghtpdhrtghpth
-    htohepjhhirhhishhlrggshieskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepgiekiees
-    khgvrhhnvghlrdhorhhgpdhrtghpthhtohepugihohhunhhgsehrvgguhhgrthdrtghomh
-    dprhgtphhtthhopehlihhnuhigqdgvfhhisehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhr
-    tghpthhtoheplhhinhhugidqkhgvrhhnvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhg
-X-ME-Proxy: <xmx:UFrNaaSBiqXse4VMPRbxEdcymG7n_sNKxU-k_f84z6naNkmU6vAREg>
-    <xmx:UVrNaQNBRLmh0a27Jz_W2EkAzLiXHxu5NX0gtnnXTOQaHDQDuAXQUA>
-    <xmx:UVrNaYhcQ4YCONaBlsDhMsGI06wJ7j-J2-XYWw-iOV8Ng7-nbp8SYg>
-    <xmx:UVrNadl8_GRQzjT7PaBZuZfyQBV2hzrFk48LY0Rupsfi-JvYtMopQQ>
-    <xmx:UVrNaUhXXpGc9rDUfC85g2X7ZO4pt4c8JSlmeRokvS8RFhezJZD9CV-4>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id E22E7700065; Wed,  1 Apr 2026 13:48:00 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="gsm5A9Ww";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="E+OksCf8";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="gsm5A9Ww";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="E+OksCf8"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id A0F135BD6C;
+	Thu,  2 Apr 2026 09:23:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1775121790; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=kSnvgggqRkoalA14gFVa+si+vwQUWHJ4fW14t/f7Flc=;
+	b=gsm5A9WwczrN8KBvtiNgHReeh6vzRdEDmvSkijVERMrM96Lrh6k+dyva2m3YxaelxhrbVJ
+	KmhYowDyFSzzrxzl1OCQcxRSJIP4/VTXKA7fgnVL0rPfVQf2b6vPsCCk6n+DCc9xF6dLed
+	n/+MIHFlpnr1oXZMTTwA7SkzEcD3ot8=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1775121790;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=kSnvgggqRkoalA14gFVa+si+vwQUWHJ4fW14t/f7Flc=;
+	b=E+OksCf8Wp6yroWxHqGqPDGC0Wa+UhIKpl9J5/QANWV+4vcCfsixYIPCh8etEBI6NDxiIE
+	Egm7Jn5mWLpqyeBA==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1775121790; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=kSnvgggqRkoalA14gFVa+si+vwQUWHJ4fW14t/f7Flc=;
+	b=gsm5A9WwczrN8KBvtiNgHReeh6vzRdEDmvSkijVERMrM96Lrh6k+dyva2m3YxaelxhrbVJ
+	KmhYowDyFSzzrxzl1OCQcxRSJIP4/VTXKA7fgnVL0rPfVQf2b6vPsCCk6n+DCc9xF6dLed
+	n/+MIHFlpnr1oXZMTTwA7SkzEcD3ot8=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1775121790;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=kSnvgggqRkoalA14gFVa+si+vwQUWHJ4fW14t/f7Flc=;
+	b=E+OksCf8Wp6yroWxHqGqPDGC0Wa+UhIKpl9J5/QANWV+4vcCfsixYIPCh8etEBI6NDxiIE
+	Egm7Jn5mWLpqyeBA==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 07D344A0B0;
+	Thu,  2 Apr 2026 09:23:10 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id SQWwAH41zmlVYAAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Thu, 02 Apr 2026 09:23:10 +0000
+From: Thomas Zimmermann <tzimmermann@suse.de>
+To: javierm@redhat.com,
+	arnd@arndb.de,
+	ardb@kernel.org,
+	ilias.apalodimas@linaro.org,
+	chenhuacai@kernel.org,
+	kernel@xen0n.name,
+	maarten.lankhorst@linux.intel.com,
+	mripard@kernel.org,
+	airlied@gmail.com,
+	simona@ffwll.ch,
+	kys@microsoft.com,
+	haiyangz@microsoft.com,
+	wei.liu@kernel.org,
+	decui@microsoft.com,
+	longli@microsoft.com,
+	deller@gmx.de
+Cc: linux-arm-kernel@lists.infradead.org,
+	loongarch@lists.linux.dev,
+	linux-efi@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	dri-devel@lists.freedesktop.org,
+	linux-hyperv@vger.kernel.org,
+	linux-fbdev@vger.kernel.org,
+	Thomas Zimmermann <tzimmermann@suse.de>
+Subject: [PATCH 0/8] firmware: sysfb: Consolidate config/code wrt. sysfb_primary_screen
+Date: Thu,  2 Apr 2026 11:09:14 +0200
+Message-ID: <20260402092305.208728-1-tzimmermann@suse.de>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: AHKieutuY5AR
-Date: Wed, 01 Apr 2026 19:47:39 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Breno Leitao" <leitao@debian.org>, "Ard Biesheuvel" <ardb+git@google.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org,
- "Dave Young" <dyoung@redhat.com>, "Gregory Price" <gourry@gourry.net>,
- "Usama Arif" <usamaarif642@gmail.com>, "Jiri Slaby" <jirislaby@kernel.org>
-Message-Id: <26c58b96-d41c-45e4-aaef-2e10ed4328ab@app.fastmail.com>
-In-Reply-To: <ac1YPh9xuRyMHVX3@gmail.com>
-References: <20260401122351.2058145-7-ardb+git@google.com>
- <20260401122351.2058145-11-ardb+git@google.com> <ac1YPh9xuRyMHVX3@gmail.com>
-Subject: Re: [PATCH v2 4/5] efi: Use efi_mem_reserve() to reserve the memory attribute
- table
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-Spam-Score: -2.80
+X-Spam-Level: 
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-0.996];
+	MIME_GOOD(-0.10)[text/plain];
+	ARC_NA(0.00)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	FREEMAIL_TO(0.00)[redhat.com,arndb.de,kernel.org,linaro.org,xen0n.name,linux.intel.com,gmail.com,ffwll.ch,microsoft.com,gmx.de];
+	RCVD_COUNT_TWO(0.00)[2];
+	RCPT_COUNT_TWELVE(0.00)[24];
+	MIME_TRACE(0.00)[0:+];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:mid];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com,gmx.de]
+X-Spam-Flag: NO
+
+The global state sysfb_primary_screen holds information about the
+framebuffer provided by EFI/BIOS systems. It is part of the sysfb
+module, but used in several places without direct connection to
+sysfb. Fix this by making users of sysfb_primary_screen depend on
+CONFIG_SYSFB. Fix a few issues in the process.
+
+Patches 1 and 2 fix general errors in the Kconfig rules. In any case,
+these patches should be considered even without the rest of the series.
+
+Patch 3 makes CONFIG_SYSFB a user-controlled option, which gives users
+more control over the configuration.
+
+Patches 4 to 6 slightly refactor the sysfb code. The PCI helpers are
+now in a separate source file. Support for relocating the PCI framebuffer
+is now located in sysfb, where it belongs.
+
+Patches 7 and 8 make earlycon and the firmware EDID depend on sysfb. Both
+rely on sysfb_primary_display to work correctly.
+
+Smoke-tested with bochs on qemu. Built with/without CONFIG_SYSFB enabled.
+
+Note: vgaarb still guards sysfb_primary_display with CONFIG_X86 instead
+of CONFIG_SYSFB. That works reliably and is left in place, as a change to
+guard with SYSFB_SYSFB might affect non-x86 systems in unknown ways.
+
+Thomas Zimmermann (8):
+  hv: Select CONFIG_SYSFB only for CONFIG_HYPERV_VMBUS
+  firmware: efi: Never declare sysfb_primary_display on x86
+  firmware: sysfb: Make CONFIG_SYSFB a user-selectable option
+  firmware: sysfb: Split sysfb.c into sysfb_primary.c and sysfb_pci.c
+  firmware: sysfb: Implement screen_info relocation for primary display
+  firmware: sysfb: Avoid forward-declaring sysfb_parent_dev()
+  firmware: efi: Make CONFIG_EFI_EARLYCON depend on CONFIG_SYSFB; clean
+    up
+  firmware: sysfb: Move CONFIG_FIRMWARE_EDID to firmware options
+
+ arch/arm64/kernel/image-vars.h                |   2 +-
+ arch/loongarch/configs/loongson32_defconfig   |   1 +
+ arch/loongarch/configs/loongson64_defconfig   |   1 +
+ arch/loongarch/kernel/efi.c                   |   4 +-
+ arch/loongarch/kernel/image-vars.h            |   2 +-
+ arch/riscv/kernel/image-vars.h                |   2 +-
+ drivers/firmware/Kconfig                      |  38 ++++-
+ drivers/firmware/Makefile                     |   7 +-
+ drivers/firmware/efi/Kconfig                  |   3 +-
+ drivers/firmware/efi/efi-init.c               |   6 +-
+ drivers/firmware/efi/libstub/efi-stub-entry.c |   4 +-
+ drivers/firmware/sysfb.h                      |  24 ++++
+ drivers/firmware/sysfb_pci.c                  | 132 ++++++++++++++++++
+ drivers/firmware/{sysfb.c => sysfb_primary.c} |  70 ++++------
+ drivers/gpu/drm/sysfb/Kconfig                 |   4 +-
+ drivers/hv/Kconfig                            |   2 +-
+ drivers/video/Kconfig                         |  19 ---
+ drivers/video/fbdev/Kconfig                   |   5 +-
+ drivers/video/screen_info_pci.c               | 110 ---------------
+ include/linux/screen_info.h                   |   3 -
+ 20 files changed, 241 insertions(+), 198 deletions(-)
+ create mode 100644 drivers/firmware/sysfb.h
+ create mode 100644 drivers/firmware/sysfb_pci.c
+ rename drivers/firmware/{sysfb.c => sysfb_primary.c} (90%)
 
 
-
-On Wed, 1 Apr 2026, at 19:39, Breno Leitao wrote:
-> On Wed, Apr 01, 2026 at 02:23:56PM +0200, Ard Biesheuvel wrote:
->> From: Ard Biesheuvel <ardb@kernel.org>
->> 
->> Use efi_mem_reserve() rather than memblock_reserve() to reserve the EFI
->> memory attributes table. This is needed on x86, where memblock_reserve()
->> is not sufficient for assets that may be placed in EFI boot services
->> data memory.
->> 
->> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
->
-> Reviewed-by: Breno Leitao <leitao@debian.org>
->
->> ---
->>  drivers/firmware/efi/memattr.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->> 
->> diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
->> index b83f1c5a9164..785b7fc687fe 100644
->> --- a/drivers/firmware/efi/memattr.c
->> +++ b/drivers/firmware/efi/memattr.c
->> @@ -75,7 +75,7 @@ void __init efi_memattr_init(void)
->>  	}
->>  
->>  	tbl_size = sizeof(*tbl) + tbl->num_entries * tbl->desc_size;
->> -	memblock_reserve(efi_mem_attr_table, tbl_size);
->
-> nit: memblock_reserve seems to be the only memblock usage in the file,
-> so after this patch, the #include <linux/memblock.h> becomes dead.
-
-Thanks for spotting that. Will fix.
+base-commit: 5d36e6d54e963f0c1137aaf2249d2baa781f08c2
+-- 
+2.53.0
 
