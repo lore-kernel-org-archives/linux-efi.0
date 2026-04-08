@@ -1,59 +1,64 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81EAD38C434;
-	Wed,  8 Apr 2026 11:50:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 895B13D0919;
+	Wed,  8 Apr 2026 13:46:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775649033; cv=none; b=PEqsYDCmGlxGRKZ/2s9EtUDgJQvK4UCOTBa/DgKWbPyRzOdvmPAE6tUnrsQr+/tOefK2CIj1Av5uxWZPKJVbtXSUKTbeVlGSGwtzS9WIxcAaSk7xsIMj+uxYhyMqAS3T0NFQ1eezTMKZj4hWE9Fl6wCTAX0+BlWR9e+aHszxHMw=
+	t=1775655971; cv=none; b=Hl2bjJvm/xSAvUCTj7LgBw77wvE3XcStCawYFi8oqKnWCHCEfC46WUhZNbdrH/r1wScGpoKLPbKhXJzk0hH3OZ0ezuQvJGic78ZHi1qfQ11eNPgt8DTzMyZ9+j2ING/gUiufGFbz8Va4MSXn87tQtzFE4A1QRddhoMqLtt32iOc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775649033; c=relaxed/simple;
-	bh=8fZDPM3xiCftkDHiJn5TV/jH0Spm1UGKJBtbZuNzyCs=;
+	s=arc-20240116; t=1775655971; c=relaxed/simple;
+	bh=YHXEtl2oP+cV8K2Sx7ZVkKvy3aol+D7ON1x6VTixXeE=;
 	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=VuuS0f6Hs0gnk9aauwEfToc0P+HMbBbhCBUFAYCxdPj+jPjpsfVPLpPFW5izd9sNoDCR6HBp/7PSwExvgY1cZaxwvMa/qBsMVcoJxg3lC6m22MS4gu134IQnFFc3zRhcMAwGPi24C5e0DXcUg2A+/dpwJMgeYCf0mhgRtufWc0U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OFpx77or; arc=none smtp.client-ip=10.30.226.201
+	 Subject:Content-Type; b=ISQKOdeX3jEfzXuXbiyLHIBBRhwAUu3d37Er8MUd4NoBhBoFtW5DkxLifIKkKtf2PhSr6/aa1G0IvSQb+imDbWOGRhOMqKY45T9/43yfQmHs4t4jxGmBfseAWnJsQcQQa0PTn4tMG33J+/t36qPw74FAwKwavdSwsNNrWiLX/JA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dBkMBPLS; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OFpx77or"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA1B9C19424;
-	Wed,  8 Apr 2026 11:50:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dBkMBPLS"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B016DC4AF0C;
+	Wed,  8 Apr 2026 13:46:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1775649033;
-	bh=8fZDPM3xiCftkDHiJn5TV/jH0Spm1UGKJBtbZuNzyCs=;
+	s=k20201202; t=1775655971;
+	bh=YHXEtl2oP+cV8K2Sx7ZVkKvy3aol+D7ON1x6VTixXeE=;
 	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=OFpx77ors7Pxe9MRBKwd/lyTM3pvQWAw/Fwj+EfynYkfkNg2UlOCeS8d6/4kgVxIT
-	 9zrVATTkHEZYh4rKxMyPqpMBsp4vWiVCpJCbftKWQEtY13chhEshM9gbAddvr81Fs7
-	 yxuRNP8TTudXP3zMuwM9ars54QZ48wVStzKp8KvLDjIJEwaANEB7HZvK2ROccq7AF+
-	 CDc+41zSKzNVnyyQ1FBYh/vTxEwy7RFihXSSPnCjtBm9Lw9j1Fj9czXqhKMHKt9dFW
-	 q5883bq107gt3wV6Uy3+ZjYgtwYALAk6gdgBApkpOqEvT0eOr2H6bhYlOFfB5DU4Y4
-	 CyPEVQx4KnFHQ==
+	b=dBkMBPLSwNn5Oz4u9q3bGUCkZ+SspH2Ijjj38IvisJBYF9sksjdgH+mtTTO+AR+zU
+	 o7GqqJOqTVvf+63hMJIqTDO6ZtjBBZ1KWW/WEM1jq/pC8roF6HkoAjxBzye3QvgmX6
+	 4AU1uBSTwtvFJ8ioX3WFVljd5WPvCr6heCscIHLQwkujU6jTc4f3oFecfcfmyVlc3G
+	 il4BSPfgpM0ptAu9TXPBLy4NxtakufGYa9keUdDXNo/h6qwtRIAN2hRUTCZaTqSTbl
+	 cJHZ7FKTJtflrQmamStLcBH/HK2RYMbakCEqi1EyriG8h+O1UHlasySLyATodXywVQ
+	 1V+omoKGXWyew==
 Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id D913AF4007C;
-	Wed,  8 Apr 2026 07:50:31 -0400 (EDT)
+	by mailfauth.phl.internal (Postfix) with ESMTP id 9F0F3F40088;
+	Wed,  8 Apr 2026 09:46:09 -0400 (EDT)
 Received: from phl-imap-02 ([10.202.2.81])
-  by phl-compute-01.internal (MEProxy); Wed, 08 Apr 2026 07:50:31 -0400
-X-ME-Sender: <xms:B0HWaZ9JGTWB1vMrUx8_LpaJLSTmewY1NaB5Pki2wo6cmXCsAGYBMA>
-    <xme:B0HWaYgGDPAx_SzVeBDw2uBc4j-5gDREjnHoZ3LuWvTGdUNYE44h2j3l2MyRXdefe
-    TGyL_0YADLYSDn9Va9JK5UBF9eGC9zFNUe9fjlJmr5QHKusGbIdt9o>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgddvfeeglecutefuodetggdotefrod
+  by phl-compute-01.internal (MEProxy); Wed, 08 Apr 2026 09:46:09 -0400
+X-ME-Sender: <xms:IVzWaQ4gcC0NrhVrSbE7q39Jy8Zs90inCIjRlTv77A8Mp_4oLiEC8A>
+    <xme:IVzWacsNAaKM24d1q05XDE15sD7k6VfQ_JONTPYalB4YNSwmfOvkNTkt__f5WDfEU
+    UpSgwn1kHJ8hjhgwf2_iTuG7ncqzDYTAqrFEJhGfenOEcLHND357SbL>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgddvfeejfecutefuodetggdotefrod
     ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
-    ihhlohhuthemuceftddtnecunecujfgurhepofggfffhvfevkfgjfhfutgfgsehtjeertd
-    ertddtnecuhfhrohhmpedftehrugcuuehivghshhgvuhhvvghlfdcuoegrrhgusgeskhgv
-    rhhnvghlrdhorhhgqeenucggtffrrghtthgvrhhnpedvueehiedtvedtleekuddutefgff
-    dtleetfeetveejveejieehfefhjeeijeefudenucevlhhushhtvghrufhiiigvpedtnecu
-    rfgrrhgrmhepmhgrihhlfhhrohhmpegrrhguodhmvghsmhhtphgruhhthhhpvghrshhonh
-    grlhhithihqdduieejtdehtddtjeelqdeffedvudeigeduhedqrghruggspeepkhgvrhhn
-    vghlrdhorhhgseifohhrkhhofhgrrhgurdgtohhmpdhnsggprhgtphhtthhopeefpdhmoh
-    guvgepshhmthhpohhuthdprhgtphhtthhopegthhhlohhrsehstghhohhurdgukhdprhgt
-    phhtthhopehlihhnuhigqdgvfhhisehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpth
-    htoheplhhinhhugidqkhgvrhhnvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhg
-X-ME-Proxy: <xmx:B0HWaVj79lCpD-JXqGP3ZpxR8JHcMfZk00K31AnA31SivicZTtxi_Q>
-    <xmx:B0HWaaKVq25IuFylhcJhLx-XihpTrXZfaMOKfgfATBTLizrzGpqVcQ>
-    <xmx:B0HWadBLqSJoFvlBGR0hs8Hkx2mAlW9tK3NDF4CF-1UrCRfuVZeHcg>
-    <xmx:B0HWaSjoIIPjsocm7sneGg9_2jJNcIMtIXcw_bkAcLtsSa_qMS3Hug>
-    <xmx:B0HWadnWYIji57ZxSTARTrvC6ommtXtuZNKZbsts-te9BuqY5VRDY4kC>
+    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
+    hrpefoggffhffvvefkjghfufgtgfesthejredtredttdenucfhrhhomhepfdetrhguuceu
+    ihgvshhhvghuvhgvlhdfuceorghruggssehkvghrnhgvlhdrohhrgheqnecuggftrfgrth
+    htvghrnhepvdeuheeitdevtdelkeduudetgffftdelteefteevjeevjeeiheefhfejieej
+    fedunecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
+    hrugdomhgvshhmthhprghuthhhphgvrhhsohhnrghlihhthidqudeijedthedttdejledq
+    feefvdduieegudehqdgrrhgusgeppehkvghrnhgvlhdrohhrghesfihorhhkohhfrghrug
+    drtghomhdpnhgspghrtghpthhtohepvdegpdhmohguvgepshhmthhpohhuthdprhgtphht
+    thhopegrrhhnugesrghrnhgusgdruggvpdhrtghpthhtohepshhimhhonhgrsehffhiflh
+    hlrdgthhdprhgtphhtthhopegrihhrlhhivggusehgmhgrihhlrdgtohhmpdhrtghpthht
+    ohepuggvlhhlvghrsehgmhigrdguvgdprhgtphhtthhopehlkhhpsehinhhtvghlrdgtoh
+    hmpdhrtghpthhtoheptghhvghnhhhurggtrghisehkvghrnhgvlhdrohhrghdprhgtphht
+    thhopehmrhhiphgrrhgusehkvghrnhgvlhdrohhrghdprhgtphhtthhopeifvghirdhlih
+    husehkvghrnhgvlhdrohhrghdprhgtphhtthhopehilhhirghsrdgrphgrlhhoughimhgr
+    sheslhhinhgrrhhordhorhhg
+X-ME-Proxy: <xmx:IVzWaTohtTCLTzK5RuZnM8D9Itdv2WHQBKKyNoyMaFKu0eapZJVl7w>
+    <xmx:IVzWaWs34L-eVayQRFMw-hmGQqMr3RyX_a4_YGEVpp9P84QMCxjuZQ>
+    <xmx:IVzWaZQXUgl4XDOWrkZg1fghcJu5vqZKe8oRI_jSFT21hz53vxmb1A>
+    <xmx:IVzWaSqBde724jlvJJubSeIH38atd9oljibiK1xBTJLWwuwC1KTrIQ>
+    <xmx:IVzWacLBo-9hqk7SC2t5E8zD_ydnfSqJl57bKu4NkiP__s0nMKrMx48d>
 Feedback-ID: ice86485a:Fastmail
 Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id B746F700065; Wed,  8 Apr 2026 07:50:31 -0400 (EDT)
+	id 67B23700069; Wed,  8 Apr 2026 09:46:09 -0400 (EDT)
 X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -61,69 +66,49 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: AhAuoRtCUE3w
-Date: Wed, 08 Apr 2026 13:50:11 +0200
+X-ThreadId: AXf1VD975dY-
+Date: Wed, 08 Apr 2026 15:45:49 +0200
 From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Hans Schou" <chlor@schou.dk>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Message-Id: <85ad7864-6ea6-4d78-97aa-f67cbe4eb22d@app.fastmail.com>
-In-Reply-To: 
- <CAApBw345j80D3hvYzc47Wc9aDpr+HBJPQDpyeVZhvQ4b98a3QA@mail.gmail.com>
-References: 
- <CAApBw345j80D3hvYzc47Wc9aDpr+HBJPQDpyeVZhvQ4b98a3QA@mail.gmail.com>
-Subject: Re: EFI stub: WARNING: Failed to measure data for event 1: 0x800000000000000b
+To: "Thomas Zimmermann" <tzimmermann@suse.de>,
+ "Javier Martinez Canillas" <javierm@redhat.com>,
+ "Arnd Bergmann" <arnd@arndb.de>,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "Huacai Chen" <chenhuacai@kernel.org>, "WANG Xuerui" <kernel@xen0n.name>,
+ maarten.lankhorst@linux.intel.com, mripard@kernel.org,
+ "David Airlie" <airlied@gmail.com>, "Simona Vetter" <simona@ffwll.ch>,
+ kys@microsoft.com, haiyangz@microsoft.com, "Wei Liu" <wei.liu@kernel.org>,
+ decui@microsoft.com, "Long Li" <longli@microsoft.com>,
+ "Helge Deller" <deller@gmx.de>
+Cc: linux-arm-kernel@lists.infradead.org, loongarch@lists.linux.dev,
+ linux-efi@vger.kernel.org, linux-riscv@lists.infradead.org,
+ dri-devel@lists.freedesktop.org, linux-hyperv@vger.kernel.org,
+ linux-fbdev@vger.kernel.org, "kernel test robot" <lkp@intel.com>
+Message-Id: <d0624a61-b96b-4b2f-89c2-029e8671039d@app.fastmail.com>
+In-Reply-To: <20260402092305.208728-3-tzimmermann@suse.de>
+References: <20260402092305.208728-1-tzimmermann@suse.de>
+ <20260402092305.208728-3-tzimmermann@suse.de>
+Subject: Re: [PATCH 2/8] firmware: efi: Never declare sysfb_primary_display on x86
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 
-Hello Hans,
+Hi Thomas,
 
-On Sat, 4 Apr 2026, at 12:54, Hans Schou wrote:
-> Hi Ard
+On Thu, 2 Apr 2026, at 11:09, Thomas Zimmermann wrote:
+> The x86 architecture comes with its own instance of the global
+> state variable sysfb_primary_display. Never declare it in the EFI
+> subsystem. Fix the test for CONFIG_FIRMWARE_EDID accordingly.
 >
-> This message has start showing for 3 seconds when booting:
-> EFI stub: WARNING: Failed to measure data for event 1: 0x800000000000000b
->
-
-This is a harmless warning from the TPM code in your BIOS.
-
-> Afterwards my Linux Mint boots up normally.
->
-> Linux p52 6.8.0-107-generic #107-Ubuntu SMP PREEMPT_DYNAMIC Fri Mar 13 
-> 19:51:50 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
->
-> GRUB 2.12
->
-> This warning occurs only in several different events.
-> It can be eliminated in different work arounds:
-> 1. Having too many kernels installed. 19 is too many. 4 is few. 
-> Solution: Remove some old kernels.
-> 2. Enable/Disable secure boot in BIOS (if posssible)
-> 3. Having Linux/Windows dual boot. Work around: add 
-> "CONFIG_EFI_HANDOVER_PROTOCOL=N EFI_STUB=N" to 
-> GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub. 
->
-> Only "1." is my own experience.
+> Signed-off-by: Thomas Zimmermann <tzimmermann@suse.de>
+> Fixes: e65ca1646311 ("efi: export sysfb_primary_display for EDID")
+> Cc: kernel test robot <lkp@intel.com>
+> Cc: Arnd Bergmann <arnd@arndb.de>
+> Cc: Thomas Zimmermann <tzimmermann@suse.de>
+> Cc: Ard Biesheuvel <ardb@kernel.org>
+> Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+> Cc: linux-efi@vger.kernel.org
+> ---
+>  drivers/firmware/efi/efi-init.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
 
-3. seems implausible to me: putting those strings on the command line has no effect, those are build options that must be taken into account while compiling the kernel.
-
-
-> It seems like this situation happens as a combination of GRUB and the 
-> kernel.
-> The kernel should not be able to see I have more than 4 kernel 
-> installed, as at the time of reporting the warning, one of my the 
-> kernels are already about to boot.
-> So it could be GRUB which gives some extra parameters to the kernel 
-> when booting. How else could the kernel know there are "too many" 
-> kernels installed? In that case the bug is in GRUB and the kernel is 
-> just reporting it.
->
-> By searching internet I found:
-> * First seen year 2023 (kernel version not reported)
-> * OS reported used: Mint, SuSE, Ubuntu, Ubuntu MATE, Kubuntu
->
-> If it's due to GRUB, I apologize for the inconvenience.
-
-You can just ignore this warning. I wouldn't recommend turning off secure boot just for this reason.
-
-
+Should this be sent out as a fix?
