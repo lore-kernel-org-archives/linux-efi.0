@@ -1,54 +1,54 @@
-Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
+Received: from mail-wr1-f74.google.com (mail-wr1-f74.google.com [209.85.221.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 314663A9D82
-	for <linux-efi@vger.kernel.org>; Fri, 10 Apr 2026 08:00:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 319733AB263
+	for <linux-efi@vger.kernel.org>; Fri, 10 Apr 2026 08:00:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775808032; cv=none; b=n+5S0kNbU/s0LDKGN3i9L2zQs2HcNJxe4zCjpJ3oTCYMbr/qd78AhasrE5r6X7sJi6h3zfXHJTtZ+iRn2Wx5zV9vBm4yY1Z6w0CxXNSIj7Bi1xLNI5yTeu6xhHg3Fpsmit6g+HMY06919OWkye23cJBTxE45VU0sfR8fDfUfirc=
+	t=1775808035; cv=none; b=fJF4MDXW5daxYcXb0JFGRqbd/Izs9mLRLQ0CpVJLtbUeVkIaFEJ+S57KONaff6Wx4XUt4jyC49kbH5qfqXHJMsIfeklHNT8gbxjxT8TAHYCfxWOl0tfsJOXdyXgL04xWB9qZeZTw0egKtDS4Jfjgn4Ekye+VxP9gLrqtgz69IyM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775808032; c=relaxed/simple;
-	bh=pr8QEBbnszis14zfZ5a8IpBKOMihG9vcklfRoGOhBUs=;
+	s=arc-20240116; t=1775808035; c=relaxed/simple;
+	bh=lU3bZHXBTGkw7+BD61qLmq3Q/hsggbp8heSCEgprnFU=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=Fmno5+R+KOyvcSSX8uthfnhHtJYtXHFBqgD5/hd2x6yh30t72NeIh/DGJu9ZyaOAiU7+8gsj7CxNl6JsUGFatffsF6SAxVyvzCuq94pvtxFQLPo/NnPm1+fFkHWaNoqblAIwHIHIhF9LhMt7qc/mTq5EzPs5wshmDrtdt/B/wus=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=tU3MLSQx; arc=none smtp.client-ip=209.85.128.74
+	 To:Cc:Content-Type; b=Ba+ym1BKExPI3QvR7a4VG1sHQgydNGJ1TveS9OvrSoL9SyRlL1iWDOR//VqJ4wIzglUOOAKz0UJzRUwbs1Cbrk0a5OXd0H89mU4ErrxSEX8BVT0c1/0Zna2FkzO6Biaj2Y0VitEXBG9h35+8PafIFX6i4HUtGGYMIfBg6nQ9k5E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=XIlKbKeR; arc=none smtp.client-ip=209.85.221.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="tU3MLSQx"
-Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-4837b6f6b93so14199025e9.3
-        for <linux-efi@vger.kernel.org>; Fri, 10 Apr 2026 01:00:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="XIlKbKeR"
+Received: by mail-wr1-f74.google.com with SMTP id ffacd0b85a97d-43d0de4bfb7so2033278f8f.3
+        for <linux-efi@vger.kernel.org>; Fri, 10 Apr 2026 01:00:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1775808030; x=1776412830; darn=vger.kernel.org;
+        d=google.com; s=20251104; t=1775808031; x=1776412831; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=AuKgU5F4yjz7fCBhFZrw06bTjm0O5cNfeictVRtboxE=;
-        b=tU3MLSQx2BahU9Jauq+YuneFJ6zjiKMChmCmWFy/bDpB0bLa4//NtcrcBpfbhp4rC8
-         ia+FskZYUP1yr2edYLL/Yh+3TXdk9XjrlCCODki73nRVmnLDzaygqRf3fDBYQYYjShdW
-         stOrsHLEpbgAMoxL7FR6sSZkT/UKQH0E0D02sN1ENveSBhS60rSq9mdtl3KLUAnIYtLd
-         hAZp3rfmAyhpkHnBihuqpQVcY2+/vakKnhVDIuz6jdntWUXVDmOJA5bsUBrrdm1AxhjA
-         3w6QAJzbYg8I7dCuo2aKFZ6enmHTd4K11BFdNEL9c+QsBCtUqBHET/EgpNhux6//W8n4
-         AnEA==
+        bh=lyrlB4WzYxChX1lupcLvEn8b3bwfY9ejggIuX50+pQE=;
+        b=XIlKbKeRd03koDGTtbGdoRaoPVaXem24jqxNx4Fw23eRj19wA4gXCqi+oPN/xRCfvO
+         RSsaAtZk5/7Qh6eZEQl6+oPmDBi52ueBxurqj2KOTUjGzflQCnWSba9a4pCcp6se8Lqi
+         ftoKUZ6NUt6kyXurhuBTUnyTMLKMeKm6ITMwIgYJcp+mFFsrHvyNeoV/dvlpJqorGQTk
+         ez4mDfmVyfnNDZdcitzUnlIMpbNJcUQBeFw7B24NmWgYn2LveLudhPADNLCWLl3YOjwo
+         vSTs9806cTzckmX93PE1xiqs+iP4i+qXPQ0riuUTsPAMITNdrFdQM8+iwdq9/7tS0JLR
+         8EpA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1775808030; x=1776412830;
+        d=1e100.net; s=20251104; t=1775808031; x=1776412831;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=AuKgU5F4yjz7fCBhFZrw06bTjm0O5cNfeictVRtboxE=;
-        b=WzefPPJ7YbW2qwX79pWQkRZNzigUWXX4p/Hi36PRUQFFQJoVVHcvu9gb4ZTEIKSGXi
-         3CvLVclV4tmoxxuJPWOTf4glZkx+fci/LxLhGP4EK+8gInkQnN/LnZdC3N4Cr2aKcScB
-         vs6zZZn+dtpKRh8F6MsLdZKwVUX7ZYxrB3DAHR14dF1eQnvKltfwfxW12nWHNyqK/wUI
-         7MzLO0ttCfNFWT3k1gQAMN+lsQmusd4wc+smSQAYj9dNGSMMbOkd7BeNbIRhQHJyDJMA
-         CbJ0B7Rrp6M0YTzboapHWfi9KyBU6LhsgIfydyL5tt2J8ny15SptYHt5+PYFvDkVZNeU
-         RyKA==
-X-Gm-Message-State: AOJu0YzbpK63a4qVYd7PLdCMaKAlpeqlIqsqpZ2lVH4woTvl1cHXcKVr
-	1w9vOTqEJnJSCgQGoY8y0WACx5Naanlxlj+zp9JB8wSqFcturp8bAyiqqnvn5Ay9QYz70xj5/W8
-	Kjxbcs/PnkIHGmWc8/wsNM+GaErB5nbG58JB1N28KxEGxc9eZ6uVM+2W0kxSs3zZipokS7aHYZl
-	ppF3IBq2mBwXbap7020x3sLin0o5fYWw==
-X-Received: from wrse9.prod.google.com ([2002:adf:fc49:0:b0:43b:7a63:37ca])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:a010:b0:488:aa3d:faca
- with SMTP id 5b1f17b1804b1-488d68af250mr25530245e9.18.1775808029523; Fri, 10
- Apr 2026 01:00:29 -0700 (PDT)
-Date: Fri, 10 Apr 2026 09:59:52 +0200
+        bh=lyrlB4WzYxChX1lupcLvEn8b3bwfY9ejggIuX50+pQE=;
+        b=JUW+ge9JXcOYVBAxCjfFLgqWgD3KPmoqzUD7WuwblS7DG188kj3VjdsNQAf9q2WVsf
+         km+EvF6si/AGyGDy4AOWBMnIYMG6ue7sDtvLXZ7qMIF1s1O9xGNZwq9RvplUNPe1JNgK
+         Igouy/rupoQ8G+HE+DStqxOm2rd8ygYPLs46sXI/uvxZaZAWMM3NfdWw6qCXI9qVT4yH
+         Pa0mmHA462bK/ubXXHzt2cRsXiJx+0tIh6asYHqCBmBojmT7/5ogbBTIDrvvVaP63pJ6
+         pXp+sc8qp6QEE738YQfm+4qPRIg68cy1SoBBaiMraaxD1+i1z+TkEy+MFFejnQ/H09qP
+         +Tug==
+X-Gm-Message-State: AOJu0YxWu5ca6XYm+YA29SF2748hInn2agNooYWN+wpbCCqbNTtZ6TQO
+	282jjJg6FKeTNYsMUtOBawiFrzLDN9f5+WRaqSFWmcjnqhFBbGNxe57kediQ6zJsIpef0V8xmMy
+	IMaUnY8qvJCMHIaU+oYasyOpXpQ5jYgSJqSNrMLcIUdANlhrgSLTftD34Egyw1S0YNZXlOsTefr
+	og872z8fKRlO57818g7tWrcW9eSHm3hA==
+X-Received: from wrxp1.prod.google.com ([2002:a05:6000:181:b0:43c:f8f1:8e8])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a5d:5f94:0:b0:439:c62a:6dc2
+ with SMTP id ffacd0b85a97d-43d642b1920mr3246794f8f.41.1775808030771; Fri, 10
+ Apr 2026 01:00:30 -0700 (PDT)
+Date: Fri, 10 Apr 2026 09:59:53 +0200
 In-Reply-To: <20260410075950.1687350-9-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -58,14 +58,14 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20260410075950.1687350-9-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=915; i=ardb@kernel.org;
- h=from:subject; bh=4dG7M9eLw58W6NeWNgCBMOIErdjPUYMAR1EfYEEwfHo=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfPG2l/dG4oWhR5gEZB+wN/sM3NL47vYYGdHA5PYrnUyB
- X/tYh92lLIwiHExyIopsgjM/vtu5+mJUrXOs2Rh5rAygQxh4OIUgIksEGZkWJAb4zZZtzrZ8+Ci
- efPyzsXvfHPJa198549nMqnT7yrL/mdkuCd4ab3Hd6/9y23mrHTznu+xuHbm3nWhizbviS2rMVw jzg0A
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4145; i=ardb@kernel.org;
+ h=from:subject; bh=Agc4UCTg/xwUx4YQxdagTJIbedCrqSRRvBngGubFfFM=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfPG2j/NQd9vF4lKVB/0afPRm8Eg8XWd5MFqXpYUtzlZk
+ /JPM3l3lLIwiHExyIopsgjM/vtu5+mJUrXOs2Rh5rAygQxh4OIUgIk8dGVkWKlcLm4z71i+5mLG
+ HfGBgZdKDZ3dPkrIxkurNP2euEq+neF/wIeckKbk9FXrpYN3a/Fx6FWFH0zzvjaLI2CpSrSR2G0 +AA==
 X-Mailer: git-send-email 2.53.0.1213.gd9a14994de-goog
-Message-ID: <20260410075950.1687350-11-ardb+git@google.com>
-Subject: [PATCH 2/7] x86/efi: Drop redundant EFI_PARAVIRT check
+Message-ID: <20260410075950.1687350-12-ardb+git@google.com>
+Subject: [PATCH 3/7] x86/efi: Only merge EFI memory map entries on 32-bit systems
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, x86@kernel.org, 
@@ -74,33 +74,141 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-efi_memblock_x86_reserve_range() exits early if EFI_PARAVIRT is set, so
-there is no point in checking it a second time further down.
+Commit
+
+  202f9d0a4180 ("x86, efi: Merge contiguous memory regions of the same type and attribute")
+
+introduced a pass over the EFI memory map, ensuring that contiguous
+regions of the same type and attribute are coalesced into a single
+entry. This was needed because relative references may exist between
+those regions, and so the virtual remapping needs to preserve the
+relative placement of these regions. This virtual remapping was based on
+ioremap() at the time, which does not guarantee that adjacent physical
+addresses are mapped adjacently in the virtual space.
+
+Commit
+
+  d2f7cbe7b26a ("x86/efi: Runtime services virtual mapping")
+
+introduced a new strategy for virtually remapping the EFI runtime
+services, which is now the only remaining one, and commit
+
+  a5caa209ba9c ("x86/efi: Fix boot crash by mapping EFI memmap entries bottom-up at runtime, instead of top-down")
+
+tweaked the logic to ensure that the relative offset of adjacent regions
+of any type is preserved on 64-bit systems, by reversing the order in
+which the EFI memory map is traversed when choosing the virtual
+placement.
+
+This means that merging regions is no longer needed on 64-bit, given
+that the relative placement of adjacent regions is guaranteed to be
+preserved in the virtual space. So make this hack 32-bit only.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/platform/efi/efi.c | 8 +++-----
- 1 file changed, 3 insertions(+), 5 deletions(-)
+ arch/x86/include/asm/efi.h     |  6 ++++
+ arch/x86/platform/efi/efi.c    | 31 --------------------
+ arch/x86/platform/efi/efi_32.c | 31 ++++++++++++++++++++
+ 3 files changed, 37 insertions(+), 31 deletions(-)
 
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 51b4cdbea061..e397ea61c9f8 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -143,6 +143,12 @@ extern void efi_unmap_boot_services(void);
+ void arch_efi_call_virt_setup(void);
+ void arch_efi_call_virt_teardown(void);
+ 
++#ifdef CONFIG_X86_32
++void efi_merge_regions(void);
++#else
++static inline void efi_merge_regions(void) {}
++#endif
++
+ extern u64 efi_setup;
+ 
+ #ifdef CONFIG_EFI
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index d84c6020dda1..b60f8454a1ec 100644
+index b60f8454a1ec..2330d028a889 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -211,11 +211,9 @@ int __init efi_memblock_x86_reserve_range(void)
- 	data.desc_size		= e->efi_memdesc_size;
- 	data.desc_version	= e->efi_memdesc_version;
+@@ -502,37 +502,6 @@ void __init efi_init(void)
+ 		efi_print_memmap();
+ }
  
--	if (!efi_enabled(EFI_PARAVIRT)) {
--		rv = efi_memmap_init_early(&data);
--		if (rv)
--			return rv;
+-/* Merge contiguous regions of the same type and attribute */
+-static void __init efi_merge_regions(void)
+-{
+-	efi_memory_desc_t *md, *prev_md = NULL;
+-
+-	for_each_efi_memory_desc(md) {
+-		u64 prev_size;
+-
+-		if (!prev_md) {
+-			prev_md = md;
+-			continue;
+-		}
+-
+-		if (prev_md->type != md->type ||
+-		    prev_md->attribute != md->attribute) {
+-			prev_md = md;
+-			continue;
+-		}
+-
+-		prev_size = prev_md->num_pages << EFI_PAGE_SHIFT;
+-
+-		if (md->phys_addr == (prev_md->phys_addr + prev_size)) {
+-			prev_md->num_pages += md->num_pages;
+-			md->type = EFI_RESERVED_TYPE;
+-			md->attribute = 0;
+-			continue;
+-		}
+-		prev_md = md;
 -	}
-+	rv = efi_memmap_init_early(&data);
-+	if (rv)
-+		return rv;
- 
- 	if (add_efi_memmap || do_efi_soft_reserve())
- 		do_add_efi_memmap();
+-}
+-
+ static void *realloc_pages(void *old_memmap, int old_shift)
+ {
+ 	void *ret;
+diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
+index b2cc7b4552a1..886ede4117b5 100644
+--- a/arch/x86/platform/efi/efi_32.c
++++ b/arch/x86/platform/efi/efi_32.c
+@@ -152,3 +152,34 @@ void arch_efi_call_virt_teardown(void)
+ 	firmware_restrict_branch_speculation_end();
+ 	efi_fpu_end();
+ }
++
++/* Merge contiguous regions of the same type and attribute */
++void __init efi_merge_regions(void)
++{
++	efi_memory_desc_t *md, *prev_md = NULL;
++
++	for_each_efi_memory_desc(md) {
++		u64 prev_size;
++
++		if (!prev_md) {
++			prev_md = md;
++			continue;
++		}
++
++		if (prev_md->type != md->type ||
++		    prev_md->attribute != md->attribute) {
++			prev_md = md;
++			continue;
++		}
++
++		prev_size = prev_md->num_pages << EFI_PAGE_SHIFT;
++
++		if (md->phys_addr == (prev_md->phys_addr + prev_size)) {
++			prev_md->num_pages += md->num_pages;
++			md->type = EFI_RESERVED_TYPE;
++			md->attribute = 0;
++			continue;
++		}
++		prev_md = md;
++	}
++}
 -- 
 2.53.0.1213.gd9a14994de-goog
 
