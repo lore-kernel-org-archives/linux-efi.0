@@ -1,246 +1,337 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.15])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49E278634C
-	for <linux-efi@vger.kernel.org>; Sat, 11 Apr 2026 05:40:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03CFE23D7DC;
+	Sun, 12 Apr 2026 15:46:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775886011; cv=none; b=ujLHef5J/PLH1S7mgEPO+vEumm1oLFoMeO8ggxADuhBqWRPj/XJYgj5X6LgB2I1uHX1FfejTN2geapwReMdcOgTjqv9k99E9CxBC2jp5Z/1TZ6dLbtvs5vD4irrs+9Mxivb9VefPtUgG37HZ5moAwAQdIGCzs5e94gFz0bUVXl0=
+	t=1776008817; cv=none; b=a4ArfOWN1ilczAk4gDwlFNNO86r13fW62AhfmAsGEIWCK9UX3KtvrsaYi6XYxSwg4Qk4CzDVk89ZNWZr7ez/KfzQ8LRcYEE9tHwsJXbvzsQEYe/vk41UOVEFPK3e3fxXIxyShE9nYrW1hFzNGDSK7SGtJioI8WkUG0SVO4uHEB0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775886011; c=relaxed/simple;
-	bh=Ku0u+Oo68kt3zKuXOnrlT69qakJ3lDvqF6Ie6h24xQ4=;
-	h=Date:From:To:Cc:Subject:Message-ID; b=bMUDh2+V9KcWXSvwkctWJ8T8Zp/AyfGPG1P6ugjJHXbG0G2t8PzUChHXek+7WrCPEr6UEP/sJrCJnzQnErBQiQptgdVhCctYc3uFtLkKejCQPPWl/UrfR3fLLpmI+pjeXMJVBBccEn/K9QTvcHpFmzrGVJz3Oft0cjzZxArYzr4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=f7+ChOwV; arc=none smtp.client-ip=192.198.163.15
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1776008817; c=relaxed/simple;
+	bh=23dLLAcM76ajvHwVd9STiwBmiFsqBllnva76VnjCY0A=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=tcX/+1iVzUuR0A/+rwQzWScpt35YjvK7InmjieaApt6mo5dq5xnLe+Td8hcYs4SnooJST76WS5CRwrk+Or2ZNif6XIHPKy84gjUeYtL9L6PPw0WtcStm8HqiHhJHHju7aBY9nZuREeNRbiawU/ma8qaAtTM6WBc9duRuSqiaI9k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XXZn39WK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="f7+ChOwV"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1775886010; x=1807422010;
-  h=date:from:to:cc:subject:message-id;
-  bh=Ku0u+Oo68kt3zKuXOnrlT69qakJ3lDvqF6Ie6h24xQ4=;
-  b=f7+ChOwV2ph6p8BXTf2dfwvEKi+zatQQZtUOVzXsm5VSei0qfM43AWm2
-   TaCr5IwTSZM3ds3GJlT8QooalhKkR2n8cJwAPEyFMhivKtcBDe+UNvH7x
-   RXLmAcKZix2I0OFh/ydq8z8421KLgbOmE8xXk6WgFqZpd7oEUjZnVl85q
-   my8CcyaJLdAofaUFU2s8nc98vtGMcv+SpnKdTZCuiXCQOyF2ecaz9Ix28
-   nWn/aa1BtFv7J3fabPl3f/7R5Hgy9S4zVyvfAJWoK2lI9iRExHiPdGjXT
-   gChhCtza9SppOQ95F/URjuv32+weUqjDLshi7rj9bEqJ1qzgewRQEDEVK
-   A==;
-X-CSE-ConnectionGUID: nuHoaLvBSMKpj8wyj4+N3w==
-X-CSE-MsgGUID: 87oxKOm8SlG9FjlNRFdw2g==
-X-IronPort-AV: E=McAfee;i="6800,10657,11755"; a="77017036"
-X-IronPort-AV: E=Sophos;i="6.23,172,1770624000"; 
-   d="scan'208";a="77017036"
-Received: from orviesa007.jf.intel.com ([10.64.159.147])
-  by fmvoesa109.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Apr 2026 22:40:10 -0700
-X-CSE-ConnectionGUID: hB9uV7PNTxqNfu54FSiQGQ==
-X-CSE-MsgGUID: BlJEKDoJTJWe+rgjra+eXQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,172,1770624000"; 
-   d="scan'208";a="229549765"
-Received: from lkp-server01.sh.intel.com (HELO 3eaaf1a74b89) ([10.239.97.150])
-  by orviesa007.jf.intel.com with ESMTP; 10 Apr 2026 22:40:08 -0700
-Received: from kbuild by 3eaaf1a74b89 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1wBR4f-000000000rR-3vt9;
-	Sat, 11 Apr 2026 05:40:05 +0000
-Date: Sat, 11 Apr 2026 13:39:07 +0800
-From: kernel test robot <lkp@intel.com>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: linux-efi@vger.kernel.org
-Subject: [efi:next] BUILD SUCCESS
- 48a428215782321b56956974f23593e40ce84b7a
-Message-ID: <202604111301.B3J440MY-lkp@intel.com>
-User-Agent: s-nail v14.9.25
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XXZn39WK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1ADBFC19424;
+	Sun, 12 Apr 2026 15:46:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1776008816;
+	bh=23dLLAcM76ajvHwVd9STiwBmiFsqBllnva76VnjCY0A=;
+	h=Date:From:To:Cc:Subject:From;
+	b=XXZn39WKLIgN3EAJkU5ENkWYZAuWvtD3iPiOn2ozgnaDOWxI5dBZ5BQmoFtFm2rE5
+	 8SvYKVh+BiE2QtmOhZabXGgkkUUugDwoDYf8yxsZrEtcOf4wjIPBRyWiXDvNOmXVzB
+	 tikHKggIoVLzkavDBwUeYVxmpCG98H5XVARlwPdNnSzNK1w5LM+Lxeg8tY3hNZAXBD
+	 1UNYY56I3A9zV/+XMHzeoH8MDZhUK2JGiBLj7MVEywl6gQv2Fj6VG9OEJUWTyjAQji
+	 OOXucRVnk+iJt7Nhg9VqjWOE/zvhkal2k4/PrKupY+JrxnbNbTlXSyxpO3xfjV1V4C
+	 hOH6k+cYbW0tg==
+Date: Sun, 12 Apr 2026 17:46:47 +0200
+From: Nicolas Schier <nsc@kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Alexander Coffin <alex@cyberialabs.net>,
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+	Bill Wendling <morbo@google.com>,
+	David Howells <dhowells@redhat.com>,
+	Dodji Seketeli <dodji@seketeli.org>,
+	"H. Peter Anvin" <hpa@zytor.com>, Helge Deller <deller@gmx.de>,
+	John Moon <john@jmoon.dev>, Jonathan Corbet <corbet@lwn.net>,
+	Josh Poimboeuf <jpoimboe@kernel.org>,
+	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
+	Masahiro Yamada <masahiroy@kernel.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+	Shuah Khan <skhan@linuxfoundation.org>, Song Liu <song@kernel.org>,
+	Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
+	Yonghong Song <yonghong.song@linux.dev>, kernel-team@fb.com,
+	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
+	linux-hexagon@vger.kernel.org, linux-kbuild@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-parisc@vger.kernel.org,
+	linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+	llvm@lists.linux.dev, loongarch@lists.linux.dev
+Subject: [GIT PULL] Kbuild and Kconfig changes for v7.1
+Message-ID: <adu-ZyIv47FnsVLI@levanger>
+Mail-Followup-To: Linus Torvalds <torvalds@linux-foundation.org>,
+	Alexander Coffin <alex@cyberialabs.net>,
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+	Bill Wendling <morbo@google.com>,
+	David Howells <dhowells@redhat.com>,
+	Dodji Seketeli <dodji@seketeli.org>,
+	"H. Peter Anvin" <hpa@zytor.com>, Helge Deller <deller@gmx.de>,
+	John Moon <john@jmoon.dev>, Jonathan Corbet <corbet@lwn.net>,
+	Josh Poimboeuf <jpoimboe@kernel.org>,
+	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
+	Masahiro Yamada <masahiroy@kernel.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+	Shuah Khan <skhan@linuxfoundation.org>, Song Liu <song@kernel.org>,
+	Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
+	Yonghong Song <yonghong.song@linux.dev>, kernel-team@fb.com,
+	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
+	linux-hexagon@vger.kernel.org, linux-kbuild@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-parisc@vger.kernel.org,
+	linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+	llvm@lists.linux.dev, loongarch@lists.linux.dev
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="WEAPSl/ZOh7quu+7"
+Content-Disposition: inline
 
-tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
-branch HEAD: 48a428215782321b56956974f23593e40ce84b7a  efi/capsule-loader: fix incorrect sizeof in phys array reallocation
 
-elapsed time: 735m
+--WEAPSl/ZOh7quu+7
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-configs tested: 169
-configs skipped: 2
+Hi Linus,
 
-The following configs have been built successfully.
-More configs may be tested in the coming days.
+please pull these changes to Kbuild and Kconfig for v7.1.  Please let me
+know if anything is incorrect and not matching your standards.
 
-tested configs:
-alpha                             allnoconfig    gcc-15.2.0
-alpha                            allyesconfig    gcc-15.2.0
-alpha                               defconfig    gcc-15.2.0
-arc                              allmodconfig    clang-16
-arc                               allnoconfig    gcc-15.2.0
-arc                              allyesconfig    clang-23
-arc                                 defconfig    gcc-15.2.0
-arc                   randconfig-001-20260411    gcc-12.5.0
-arc                   randconfig-002-20260411    gcc-12.5.0
-arm                               allnoconfig    gcc-15.2.0
-arm                              allyesconfig    clang-16
-arm                                 defconfig    gcc-15.2.0
-arm                   randconfig-001-20260411    gcc-12.5.0
-arm                   randconfig-002-20260411    gcc-12.5.0
-arm                   randconfig-003-20260411    gcc-12.5.0
-arm                   randconfig-004-20260411    gcc-12.5.0
-arm                        shmobile_defconfig    gcc-15.2.0
-arm64                            allmodconfig    clang-23
-arm64                             allnoconfig    gcc-15.2.0
-arm64                               defconfig    gcc-15.2.0
-arm64                 randconfig-001-20260411    clang-23
-arm64                 randconfig-002-20260411    clang-23
-arm64                 randconfig-003-20260411    clang-23
-arm64                 randconfig-004-20260411    clang-23
-csky                             allmodconfig    gcc-15.2.0
-csky                              allnoconfig    gcc-15.2.0
-csky                                defconfig    gcc-15.2.0
-csky                  randconfig-001-20260411    clang-23
-csky                  randconfig-002-20260411    clang-23
-hexagon                          allmodconfig    gcc-15.2.0
-hexagon                           allnoconfig    gcc-15.2.0
-hexagon                             defconfig    gcc-15.2.0
-hexagon               randconfig-001-20260411    gcc-14.3.0
-hexagon               randconfig-002-20260411    gcc-14.3.0
-i386                             allmodconfig    clang-20
-i386                              allnoconfig    gcc-15.2.0
-i386                             allyesconfig    clang-20
-i386        buildonly-randconfig-001-20260411    gcc-14
-i386        buildonly-randconfig-002-20260411    gcc-14
-i386        buildonly-randconfig-003-20260411    gcc-14
-i386        buildonly-randconfig-004-20260411    gcc-14
-i386        buildonly-randconfig-005-20260411    gcc-14
-i386        buildonly-randconfig-006-20260411    gcc-14
-i386                                defconfig    gcc-15.2.0
-i386                  randconfig-001-20260411    clang-20
-i386                  randconfig-002-20260411    clang-20
-i386                  randconfig-003-20260411    clang-20
-i386                  randconfig-004-20260411    clang-20
-i386                  randconfig-005-20260411    clang-20
-i386                  randconfig-006-20260411    clang-20
-i386                  randconfig-007-20260411    clang-20
-i386                  randconfig-011-20260411    clang-20
-i386                  randconfig-012-20260411    clang-20
-i386                  randconfig-013-20260411    clang-20
-i386                  randconfig-014-20260411    clang-20
-i386                  randconfig-015-20260411    clang-20
-i386                  randconfig-016-20260411    clang-20
-i386                  randconfig-017-20260411    clang-20
-loongarch                        allmodconfig    clang-23
-loongarch                         allnoconfig    gcc-15.2.0
-loongarch                           defconfig    clang-19
-loongarch             randconfig-001-20260411    gcc-14.3.0
-loongarch             randconfig-002-20260411    gcc-14.3.0
-m68k                             allmodconfig    gcc-15.2.0
-m68k                              allnoconfig    gcc-15.2.0
-m68k                             allyesconfig    clang-16
-m68k                                defconfig    clang-19
-microblaze                        allnoconfig    gcc-15.2.0
-microblaze                       allyesconfig    gcc-15.2.0
-microblaze                          defconfig    clang-19
-mips                             allmodconfig    gcc-15.2.0
-mips                              allnoconfig    gcc-15.2.0
-mips                             allyesconfig    gcc-15.2.0
-nios2                            allmodconfig    clang-23
-nios2                             allnoconfig    clang-23
-nios2                               defconfig    clang-19
-nios2                 randconfig-001-20260411    gcc-14.3.0
-nios2                 randconfig-002-20260411    gcc-14.3.0
-openrisc                         allmodconfig    clang-23
-openrisc                          allnoconfig    clang-23
-openrisc                            defconfig    gcc-15.2.0
-parisc                           allmodconfig    gcc-15.2.0
-parisc                            allnoconfig    clang-23
-parisc                           allyesconfig    clang-19
-parisc                              defconfig    gcc-15.2.0
-parisc                randconfig-001-20260411    gcc-11.5.0
-parisc                randconfig-002-20260411    gcc-11.5.0
-parisc64                            defconfig    clang-19
-powerpc                          allmodconfig    gcc-15.2.0
-powerpc                           allnoconfig    clang-23
-powerpc               randconfig-001-20260411    gcc-11.5.0
-powerpc               randconfig-002-20260411    gcc-11.5.0
-powerpc64             randconfig-001-20260411    gcc-11.5.0
-powerpc64             randconfig-002-20260411    gcc-11.5.0
-riscv                            allmodconfig    clang-23
-riscv                             allnoconfig    clang-23
-riscv                            allyesconfig    clang-16
-riscv                               defconfig    gcc-15.2.0
-riscv                 randconfig-001-20260411    gcc-10.5.0
-riscv                 randconfig-002-20260411    gcc-10.5.0
-s390                             allmodconfig    clang-19
-s390                              allnoconfig    clang-23
-s390                             allyesconfig    gcc-15.2.0
-s390                                defconfig    gcc-15.2.0
-s390                  randconfig-001-20260411    gcc-10.5.0
-s390                  randconfig-002-20260411    gcc-10.5.0
-sh                               allmodconfig    gcc-15.2.0
-sh                                allnoconfig    clang-23
-sh                               allyesconfig    clang-19
-sh                                  defconfig    gcc-14
-sh                    randconfig-001-20260411    gcc-10.5.0
-sh                    randconfig-002-20260411    gcc-10.5.0
-sparc                             allnoconfig    clang-23
-sparc                               defconfig    gcc-15.2.0
-sparc                 randconfig-001-20260411    gcc-14
-sparc                 randconfig-002-20260411    gcc-14
-sparc64                          allmodconfig    clang-23
-sparc64                             defconfig    gcc-14
-sparc64               randconfig-001-20260411    gcc-14
-sparc64               randconfig-002-20260411    gcc-14
-um                               allmodconfig    clang-19
-um                                allnoconfig    clang-23
-um                               allyesconfig    gcc-15.2.0
-um                                  defconfig    gcc-14
-um                             i386_defconfig    gcc-14
-um                    randconfig-001-20260411    gcc-14
-um                    randconfig-002-20260411    gcc-14
-um                           x86_64_defconfig    gcc-14
-x86_64                           allmodconfig    clang-20
-x86_64                            allnoconfig    clang-23
-x86_64                           allyesconfig    clang-20
-x86_64      buildonly-randconfig-001-20260411    gcc-14
-x86_64      buildonly-randconfig-002-20260411    gcc-14
-x86_64      buildonly-randconfig-003-20260411    gcc-14
-x86_64      buildonly-randconfig-004-20260411    gcc-14
-x86_64      buildonly-randconfig-005-20260411    gcc-14
-x86_64      buildonly-randconfig-006-20260411    gcc-14
-x86_64                              defconfig    gcc-14
-x86_64                                  kexec    clang-20
-x86_64                randconfig-001-20260411    gcc-14
-x86_64                randconfig-002-20260411    gcc-14
-x86_64                randconfig-003-20260411    gcc-14
-x86_64                randconfig-004-20260411    gcc-14
-x86_64                randconfig-005-20260411    gcc-14
-x86_64                randconfig-006-20260411    gcc-14
-x86_64                randconfig-011-20260411    clang-20
-x86_64                randconfig-012-20260411    clang-20
-x86_64                randconfig-013-20260411    clang-20
-x86_64                randconfig-014-20260411    clang-20
-x86_64                randconfig-015-20260411    clang-20
-x86_64                randconfig-016-20260411    clang-20
-x86_64                randconfig-071-20260411    clang-20
-x86_64                randconfig-072-20260411    clang-20
-x86_64                randconfig-073-20260411    clang-20
-x86_64                randconfig-074-20260411    clang-20
-x86_64                randconfig-075-20260411    clang-20
-x86_64                randconfig-076-20260411    clang-20
-x86_64                               rhel-9.4    clang-20
-x86_64                           rhel-9.4-bpf    gcc-14
-x86_64                          rhel-9.4-func    clang-20
-x86_64                    rhel-9.4-kselftests    clang-20
-x86_64                         rhel-9.4-kunit    gcc-14
-x86_64                           rhel-9.4-ltp    gcc-14
-x86_64                          rhel-9.4-rust    clang-20
-xtensa                            allnoconfig    clang-23
-xtensa                           allyesconfig    clang-23
-xtensa                randconfig-001-20260411    gcc-14
-xtensa                randconfig-002-20260411    gcc-14
-xtensa                    smp_lx200_defconfig    gcc-15.2.0
+All changes have been in -next, most for several cycles without reported
+problems.
 
---
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Thanks and kind regards,
+Nicolas
+
+---
+
+The following changes since commit 6de23f81a5e08be8fbf5e8d7e9febc72a5b5f27f:
+
+  Linux 7.0-rc1 (2026-02-22 13:18:59 -0800)
+
+are available in the Git repository at:
+
+  ssh://git@gitolite.kernel.org/pub/scm/linux/kernel/git/kbuild/linux.git t=
+ags/kbuild-7.1-1
+
+for you to fetch changes up to 404927758daac5ec4594071e033c1fa6ee9ca9b6:
+
+  kbuild: expand inlining hints with -fdiagnostics-show-inlining-chain (202=
+6-04-07 21:48:44 +0200)
+
+----------------------------------------------------------------
+Kbuild/Kconfig updates for 7.1
+
+Kbuild changes
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+
+  * tools/build: Reject unexpected values for LLVM=3D
+
+  * kbuild: uapi: remove usage of toolchain headers
+
+  * kbuild: Switch from '-fms-extensions' to '-fms-anonymous-structs'
+    when available (currently: clang >=3D 23.0.0)
+
+  * kbuild: Reduce the number of compiler-generated suffixes for clang
+    thin-lto build
+
+  * kbuild: reduce output spam ("GEN Makefile") when building out of tree
+
+  * check-uapi: improve portability for testing headers
+
+  * uapi: also test UAPI headers against C++ compilers
+
+  * kbuild: vdso_install: drop build ID architecture allow-list
+
+  * checksyscalls: only run when necessary
+
+  * Documentation: kbuild: Update the debug information notes in
+    reproducible-builds.rst
+
+  * kconfig: forbid multiple entries with the same symbol in a choice
+
+  * kbuild: expand inlining hints with -fdiagnostics-show-inlining-chain
+
+
+Kconfig changes
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+
+  * kconfig: Error out on duplicated kconfig inclusion
+
+
+Cc: Alexander Coffin <alex@cyberialabs.net>
+Cc: Ard Biesheuvel <ardb@kernel.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Bill Wendling <morbo@google.com>
+Cc: David Howells <dhowells@redhat.com>
+Cc: Dodji Seketeli <dodji@seketeli.org>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Helge Deller <deller@gmx.de>
+Cc: John Moon <john@jmoon.dev>
+Cc: Jonathan Corbet <corbet@lwn.net>
+Cc: Josh Poimboeuf <jpoimboe@kernel.org>
+Cc: Justin Stitt <justinstitt@google.com>
+Cc: Kees Cook <kees@kernel.org>
+Cc: Masahiro Yamada <masahiroy@kernel.org>
+Cc: Nathan Chancellor <nathan@kernel.org>
+Cc: Nick Desaulniers <nick.desaulniers+lkml@gmail.com>
+Cc: Shuah Khan <skhan@linuxfoundation.org>
+Cc: Song Liu <song@kernel.org>
+Cc: Thomas Wei=DFschuh <linux@weissschuh.net>
+Cc: Yonghong Song <yonghong.song@linux.dev>
+Cc: kernel-team@fb.com
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-efi@vger.kernel.org
+Cc: linux-hexagon@vger.kernel.org
+Cc: linux-kbuild@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Cc: linux-parisc@vger.kernel.org
+Cc: linux-s390@vger.kernel.org
+Cc: linuxppc-dev@lists.ozlabs.org
+Cc: llvm@lists.linux.dev
+Cc: loongarch@lists.linux.dev
+
+----------------------------------------------------------------
+Arnd Bergmann (3):
+      check-uapi: link into shared objects
+      check-uapi: honor ${CROSS_COMPILE} setting
+      check-uapi: use dummy libc includes
+
+Justin Stitt (1):
+      kbuild: expand inlining hints with -fdiagnostics-show-inlining-chain
+
+Masahiro Yamada (1):
+      kconfig: forbid multiple entries with the same symbol in a choice
+
+Nathan Chancellor (3):
+      kbuild: Consolidate C dialect options
+      kbuild: Use '-fms-anonymous-structs' if it is available
+      Documentation: kbuild: Update the debug information notes in reproduc=
+ible-builds.rst
+
+Nicolas Schier (1):
+      kconfig: Error out on duplicated kconfig inclusion
+
+Thomas Wei=DFschuh (25):
+      Documentation/llvm: drop note about LLVM=3D0
+      tools/build: Reject unexpected values for LLVM=3D
+      hexagon: uapi: Fix structure alignment attribute
+      kbuild: uapi: test linux/bpf_perf_event.h on powerpc
+      kbuild: uapi: deduplicate linux/bpf_perf_event.h exclusions
+      kbuild: uapi: completely exclude linux/bpf_perf_event.h on nios2
+      kbuild: uapi: only use dummy-include for headers which use libc
+      kbuild: uapi: provide stub includes for some libc headers
+      kbuild: uapi: use custom stub headers instead of libc ones
+      kbuild: uapi: simplify libc dependency logic
+      kbuild: uapi: remove now unneeded guard headers
+      kbuild: reduce output spam when building out of tree
+      kbuild: uapi: move some compiler arguments out of the command definit=
+ion
+      kbuild: uapi: move all include path flags together
+      kbuild: uapi: handle UML in architecture-specific exclusion lists
+      kbuild: uapi: provide a C++ compatible dummy definition of NULL
+      kbuild: uapi: also test UAPI headers against C++ compilers
+      kbuild: vdso_install: split out the readelf invocation
+      kbuild: vdso_install: hide readelf warnings
+      kbuild: vdso_install: gracefully handle images without build ID
+      kbuild: vdso_install: drop build ID architecture allow-list
+      checksyscalls: move path to reference table to a variable
+      checksyscalls: fail on all intermediate errors
+      checksyscalls: only run when necessary
+      checksyscalls: move instance functionality into generic code
+
+Yonghong Song (1):
+      kbuild: Reduce the number of compiler-generated suffixes for clang th=
+in-lto build
+
+ Documentation/kbuild/llvm.rst                      |  4 --
+ Documentation/kbuild/reproducible-builds.rst       |  7 ++-
+ Kbuild                                             | 14 +++--
+ Makefile                                           | 35 +++++++++---
+ arch/arm64/kernel/vdso32/Makefile                  |  3 +-
+ arch/hexagon/include/uapi/asm/sigcontext.h         |  2 +-
+ arch/loongarch/vdso/Makefile                       |  2 +-
+ arch/mips/Makefile                                 |  6 +-
+ arch/parisc/boot/compressed/Makefile               |  2 +-
+ arch/powerpc/boot/Makefile                         |  3 +-
+ arch/s390/Makefile                                 |  3 +-
+ arch/s390/purgatory/Makefile                       |  3 +-
+ arch/x86/Makefile                                  |  6 +-
+ arch/x86/boot/compressed/Makefile                  |  6 +-
+ drivers/firmware/efi/libstub/Makefile              |  3 +-
+ init/Kconfig                                       |  5 ++
+ scripts/Makefile.vdsoinst                          |  7 ++-
+ scripts/Makefile.warn                              |  5 --
+ scripts/check-uapi.sh                              | 19 ++++---
+ scripts/checksyscalls.sh                           | 11 +++-
+ scripts/kconfig/lexer.l                            |  4 +-
+ scripts/kconfig/lkc.h                              |  3 +-
+ scripts/kconfig/parser.y                           | 15 ++---
+ scripts/kconfig/tests/err_repeated_inc/Kconfig     |  3 +
+ .../kconfig/tests/err_repeated_inc/Kconfig.inc1    |  4 ++
+ .../kconfig/tests/err_repeated_inc/Kconfig.inc2    |  3 +
+ .../kconfig/tests/err_repeated_inc/Kconfig.inc3    |  1 +
+ scripts/kconfig/tests/err_repeated_inc/__init__.py | 10 ++++
+ .../kconfig/tests/err_repeated_inc/expected_stderr |  2 +
+ scripts/kconfig/util.c                             | 31 ++++++++++-
+ tools/scripts/Makefile.include                     |  2 +
+ usr/dummy-include/endian.h                         |  0
+ usr/dummy-include/limits.h                         |  8 +++
+ usr/dummy-include/netinet/if_ether.h               |  0
+ usr/dummy-include/netinet/in.h                     |  0
+ usr/dummy-include/stdbool.h                        |  7 ---
+ usr/dummy-include/stddef.h                         | 13 +++++
+ usr/dummy-include/stdint.h                         | 17 ++++++
+ usr/dummy-include/stdlib.h                         |  7 ---
+ usr/dummy-include/string.h                         | 12 ++++
+ usr/dummy-include/sys/ioctl.h                      |  0
+ usr/dummy-include/sys/socket.h                     | 12 ++++
+ usr/dummy-include/sys/time.h                       |  3 +
+ usr/dummy-include/sys/types.h                      |  0
+ usr/dummy-include/time.h                           |  0
+ usr/dummy-include/unistd.h                         |  0
+ usr/include/Makefile                               | 65 ++++++++++++++----=
+----
+ 47 files changed, 251 insertions(+), 117 deletions(-)
+ create mode 100644 scripts/kconfig/tests/err_repeated_inc/Kconfig
+ create mode 100644 scripts/kconfig/tests/err_repeated_inc/Kconfig.inc1
+ create mode 100644 scripts/kconfig/tests/err_repeated_inc/Kconfig.inc2
+ create mode 100644 scripts/kconfig/tests/err_repeated_inc/Kconfig.inc3
+ create mode 100644 scripts/kconfig/tests/err_repeated_inc/__init__.py
+ create mode 100644 scripts/kconfig/tests/err_repeated_inc/expected_stderr
+ create mode 100644 usr/dummy-include/endian.h
+ create mode 100644 usr/dummy-include/limits.h
+ create mode 100644 usr/dummy-include/netinet/if_ether.h
+ create mode 100644 usr/dummy-include/netinet/in.h
+ delete mode 100644 usr/dummy-include/stdbool.h
+ create mode 100644 usr/dummy-include/stddef.h
+ create mode 100644 usr/dummy-include/stdint.h
+ delete mode 100644 usr/dummy-include/stdlib.h
+ create mode 100644 usr/dummy-include/string.h
+ create mode 100644 usr/dummy-include/sys/ioctl.h
+ create mode 100644 usr/dummy-include/sys/socket.h
+ create mode 100644 usr/dummy-include/sys/time.h
+ create mode 100644 usr/dummy-include/sys/types.h
+ create mode 100644 usr/dummy-include/time.h
+ create mode 100644 usr/dummy-include/unistd.h
+
+--=20
+Nicolas
+
+--WEAPSl/ZOh7quu+7
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEh0E3p4c3JKeBvsLGB1IKcBYmEmkFAmnbvloACgkQB1IKcBYm
+EmnVJBAAlJvaCwNlI1ymaWQKEC+s4udzUKo5DuA14pw/3NgGhLasok1WZaWB0LUb
+2D4NtXMeQLTFybnTE07rbHZwQ/fBpvyWNL0D9aL+bjHfYhkbJHIJIgnrTOJLn3IW
+wJuPJgJDMvgmWKyXGRLjPEevSmKF10Aej8f0QIsXuv8IG8M0ZfpIohRV35Dot9w6
+kRQC6lX0lYTfaBzp7IBMtY634rtzC9rHK+U1gkkvswuE2H26rm5TxeE1lL6Xecmf
+pd16FUspWGCMMB6YFRz3hi4ZRIMhY3MgY6LvvcHNF0RDrdoEoqWFyKLd/l5X5CNq
+HKbIrMJ4l5E4KCSw3rtaW/RzmcZjDtU1RLdXLomAhZU7sszIhyYOuptBVAncdKVC
+Vo+lxm1kLlBRG4eQjCnA51HQZN7VbO54XSvWVmRioEUevu6wSA8UvSq7Kcufzg57
+I9nn9kpwFqJZvQsNGIdDqEgIT5l3muX1Y89E723OqKZ9CoPl2meGrLQU69e4gGFc
+R/nTDktzEFINZHVk72AwAWyjvE/IGx6mmogf1+4Zz7MK2Q5aeXejy6T5aZ0QMwtH
+/290TxOxWlOqi3b57Quo0xJVltkA9WxCi++4hh0Te/x2Yjaqbaovui7fBjqeKvCh
+Oh9AhNVYbTOjIMS2CyL6xQBlr+Vp2MQ163tqds1uSP3IqrS2T+8=
+=WfCJ
+-----END PGP SIGNATURE-----
+
+--WEAPSl/ZOh7quu+7--
