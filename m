@@ -1,206 +1,263 @@
-Received: from OS8PR02CU002.outbound.protection.outlook.com (mail-japanwestazon11022141.outbound.protection.outlook.com [40.107.75.141])
+Received: from forward101b.mail.yandex.net (forward101b.mail.yandex.net [178.154.239.148])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EFEEE3A5442;
-	Mon, 13 Apr 2026 08:22:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.75.141
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776068570; cv=fail; b=NDEvHN/ei71AZx1uNAQ3Kn/fCfOk6ImPi02Ymk786mzSbrhs0eJQTTN/VvB7l11PX+L8SP6udeRpaO1mVgpH7tghU/3dS5S0sLpJOzL5Mwj/4PiaiVsY3/iVUkejEnARo9yWVjFdLBjtLaTGv5wmI8u72kHigDTw1CW8g9jRlpw=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776068570; c=relaxed/simple;
-	bh=Bn+07jouffh68jbKsSPXmXBTbBEakPHdaUHWRVUELf8=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=N7gLdRiV70gjwkj4spQuuXgl5hAVMmYrbrQ2YQwlAHGsJ7PQyhCAmaX27yLzej2C3iI2Nvp+i0Rso3y9ncTcCJltd9gAFAuYqvb5E9OoprGqIC/zWHogubkw2SmXMlJjRpR1/LrM+MWh4kQQA35Gt4+vvnZhzXxYz+3Yt5uS6pI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microsoft.com; spf=pass smtp.mailfrom=microsoft.com; dkim=pass (1024-bit key) header.d=microsoft.com header.i=@microsoft.com header.b=Ic8JAjCP; arc=fail smtp.client-ip=40.107.75.141
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microsoft.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microsoft.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD3433B19C1
+	for <linux-efi@vger.kernel.org>; Mon, 13 Apr 2026 09:22:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.148
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1776072149; cv=none; b=M7r0+ewOyXetmO920gN01hQ8a+krT0nLqUo2P5/wQ+ytGa0rY+Iok0T+Y2h9R+WlHZBwMEabCqK5wYlA1vFg9xzzSg51SahEczaG+h4X/04TlJKyzm17laOMRwiN4BHFIGg2RTkwzBA6SmrZmPqlpv6Z2Eb41qe3W1/LLsbnR4w=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1776072149; c=relaxed/simple;
+	bh=wo+ytzRxdQkJwi+PoVwWui9FG/O/nk5Ocz0VT3eypHQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=NKTMl9GW+hxXQuPyIoW2pI1LrMyvYfDNt4N4+GB3U3hpNmiXbsavf+W6grmYmSi/xScJ/cBM47okxIjeH5MHm7pbmtPr936Z7G2rccXLIWxmbpfTXHp8nRzZRpPFvSXgV4OSnllFW5/RiZpTWU5Ix9TNjwHFkSt9G0Zcvy3y4co=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru; spf=pass smtp.mailfrom=yandex.ru; dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b=SUVjWepz; arc=none smtp.client-ip=178.154.239.148
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=yandex.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=microsoft.com header.i=@microsoft.com header.b="Ic8JAjCP"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=m2IQj7CT4+2Gsr+Wdck155BJQoAMTloVkcwbhkK0yIWaeu7WpbQTIUkRUt4w3SCJjkoJb7XiTe+MyIh24HMewXE5BlZbbBeh1VAfohAMJcbrnvoSgmjXvHTggDrT3UokUTTnv3r5V/9H5ltUkAEZaxMBUJRCG89Q5IuINlfCJ0xd4f3TJxLQqo/X7CsnEIbwaErAXCGf+XvaVKK7FjyAlfJRBJw7BAEv8CVDhl1UX8LvlG0pAAiAA6SYjyz8kwsVaVntlOD9SUvHTUHHljKnF2thy0tg621t+MJt0yq6udgbPvuCpSJG3bLgcTdezTbG3G3UQ0KqCP/GfJiMaTfh2A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=oj3IM4W0nIOuffDuch4Mhpo9XPuJdr9Bhj2brT8H+dw=;
- b=nOZASgSv5pGQ5EUKMMDE4quMoCHTx1DeNVUOA8APheHPnftdN7bcsoiH5uY3/rxnmJ3dQh+ubmwM+iSCUuUeEQlC3Ys8a6wh9aWs9yjc+R6NbxQ/xnw7EKwTRWwrJZyIJyjc6ecgcuSxIUGZucCTvDC6qMM2kOhPSNmArhV4dsg6mQ+fFf3RWptXO15JzbAnvP0gWiTP/3kYaUAWBZ1kQYZ0oqp+zC8RUc75bL06yRjsoTvIIYoGbjMHVSb1+Lgm5tCPkJBOYqHmAd3N+4ml6u27sBx5gfnKnXlOLul+WkEX141nFNiTJMTwewkeItI/R5DnvC8HIya5p8MG+ZTvUQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=microsoft.com; dmarc=pass action=none
- header.from=microsoft.com; dkim=pass header.d=microsoft.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=oj3IM4W0nIOuffDuch4Mhpo9XPuJdr9Bhj2brT8H+dw=;
- b=Ic8JAjCPc6W5FerLFyUaAA5Pqcx757Dp+4xVmAR/luoD+p6mBERHaDZcqEZ+cxhg4NyQp7srxThptXWTr1vnG5OodV8ESNbandSk68slRPfZ18XGYInhfH5HzcjAot1lLgrHsvtFRYKYQmFJEX5qaksS6XREz+J0zJRCB0Puo0g=
-Received: from KUZP153MB1444.APCP153.PROD.OUTLOOK.COM (2603:1096:d10:36::22)
- by OSNP153MB1643.APCP153.PROD.OUTLOOK.COM (2603:1096:604:48b::6) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9818.20; Mon, 13 Apr
- 2026 08:22:39 +0000
-Received: from KUZP153MB1444.APCP153.PROD.OUTLOOK.COM
- ([fe80::c9fa:b931:702:dbac]) by KUZP153MB1444.APCP153.PROD.OUTLOOK.COM
- ([fe80::c9fa:b931:702:dbac%5]) with mapi id 15.20.9818.017; Mon, 13 Apr 2026
- 08:22:39 +0000
-From: Saurabh Singh Sengar <ssengar@microsoft.com>
-To: Thomas Zimmermann <tzimmermann@suse.de>, "javierm@redhat.com"
-	<javierm@redhat.com>, "arnd@arndb.de" <arnd@arndb.de>, "ardb@kernel.org"
-	<ardb@kernel.org>, "ilias.apalodimas@linaro.org"
-	<ilias.apalodimas@linaro.org>, "chenhuacai@kernel.org"
-	<chenhuacai@kernel.org>, "kernel@xen0n.name" <kernel@xen0n.name>,
-	"maarten.lankhorst@linux.intel.com" <maarten.lankhorst@linux.intel.com>,
-	"mripard@kernel.org" <mripard@kernel.org>, "airlied@gmail.com"
-	<airlied@gmail.com>, "simona@ffwll.ch" <simona@ffwll.ch>, KY Srinivasan
-	<kys@microsoft.com>, Haiyang Zhang <haiyangz@microsoft.com>,
-	"wei.liu@kernel.org" <wei.liu@kernel.org>, Dexuan Cui <DECUI@microsoft.com>,
-	Long Li <longli@microsoft.com>, "deller@gmx.de" <deller@gmx.de>
-CC: "linux-arm-kernel@lists.infradead.org"
-	<linux-arm-kernel@lists.infradead.org>, "loongarch@lists.linux.dev"
-	<loongarch@lists.linux.dev>, "linux-efi@vger.kernel.org"
-	<linux-efi@vger.kernel.org>, "linux-riscv@lists.infradead.org"
-	<linux-riscv@lists.infradead.org>, "dri-devel@lists.freedesktop.org"
-	<dri-devel@lists.freedesktop.org>, "linux-hyperv@vger.kernel.org"
-	<linux-hyperv@vger.kernel.org>, "linux-fbdev@vger.kernel.org"
-	<linux-fbdev@vger.kernel.org>, Michael Kelley <mhklinux@outlook.com>, Saurabh
- Sengar <ssengar@linux.microsoft.com>, "stable@vger.kernel.org"
-	<stable@vger.kernel.org>, Wei Liu <wei.liu@kernel.org>
-Subject: RE: [EXTERNAL] Re: [PATCH 1/8] hv: Select CONFIG_SYSFB only for
- CONFIG_HYPERV_VMBUS
-Thread-Topic: [EXTERNAL] Re: [PATCH 1/8] hv: Select CONFIG_SYSFB only for
- CONFIG_HYPERV_VMBUS
-Thread-Index: AQHcwo6UUBvHYaEr8EK6Q8BbiI9wobXcpfeAgAAR2iA=
-Date: Mon, 13 Apr 2026 08:22:39 +0000
-Message-ID:
- <KUZP153MB1444885C302B353C02C2FA2FBE242@KUZP153MB1444.APCP153.PROD.OUTLOOK.COM>
-References: <20260402092305.208728-1-tzimmermann@suse.de>
- <20260402092305.208728-2-tzimmermann@suse.de>
- <KUZP153MB14449BBE44CBAEEA7621A4A0BE51A@KUZP153MB1444.APCP153.PROD.OUTLOOK.COM>
- <2fe8ce91-2dc5-4cf2-b7cf-d495e5cff14b@suse.de>
-In-Reply-To: <2fe8ce91-2dc5-4cf2-b7cf-d495e5cff14b@suse.de>
-Accept-Language: en-IN, en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-msip_labels:
- MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_ActionId=68f474dc-35e8-4341-9b89-6427baf0a9e0;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_ContentBits=0;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_Enabled=true;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_Method=Standard;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_Name=Internal;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_SetDate=2026-04-13T08:21:02Z;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_SiteId=72f988bf-86f1-41af-91ab-2d7cd011db47;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_Tag=10,
- 3, 0, 1;
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=microsoft.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: KUZP153MB1444:EE_|OSNP153MB1643:EE_
-x-ms-office365-filtering-correlation-id: b0e52200-d9d8-4bef-a66f-08de9935d373
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|1800799024|366016|376014|7416014|921020|38070700021|56012099003|18002099003|22082099003;
-x-microsoft-antispam-message-info:
- I3U20ShaxuoG82qDbE9AmG2Fz51hvpKldpGKZWDPoC11L7xxI428h2BC/d/ColrU++0jWQiBJPKW9xHcueYyYCgmmi0obTXp8iyVYI/WSEKb+BfX7RXf8ddQD8f41bac+MK/XsfXbAUNuNqqYpOutLRz9KHHme+qK/qsiKfm5QO9sFPAZjHZtGNioszPxfWEc6TaBvJpYCFA9tu7Ja9s/MFcEWHV97qv3hNQAYD7T4AYot6pYHscASSgIp+jdU9VRlBEWTlnFYtWGouGZ8krLDYe0bUTcV08mqyUn/9paVfXm/POpM1S+gqNqccTaDB2BiCP7tZPAUSnbc/8mX5ajlG+Plgd6j9yJNaUtHXs+ubJtMmkpSainpTBTvb4u2PPbzmBtgieT2OyBQEHXHHR3W8lV3eVq3G76DF10bLZA9SbTG8OK/9C8ioHguZrsC7amM6TcYEHBSo6slkLAxcZ/yzAoyXLu74xWmJLdApAYHw7JnKdXZSEVaOt6vZ71y4zeyAKPtPMe8PINxOO8Mb5EsoCGOALCFu3026Q+Yl27KIn0GfCpME8Dl0wnjyLQwNm6WmgxJNLBlKWT0E93TxzOdQvOPisSVVfpxdhKkGYvZ0uwu2hQaE76620HhV11KK5FKI5431wyvJBWpr+I1apYrc5VI9QJYVk7ezHRNNujbr3sI4Tya0R9/OzzaTn0MrQaDuaxIlTzL1ZH4YcrMtZ/6k9xerzv9P7gMEJ+/aTzRUdIl410zOmly+6A3x1aXM0KVTm7k6qoYf+UTIRMZBnuntNnnMjmr0sFvv2D424rpFoUOah6rllJfnijKe2Uj5e
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:KUZP153MB1444.APCP153.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(7416014)(921020)(38070700021)(56012099003)(18002099003)(22082099003);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?DP/3v7cfq2p/Twep2bhGAfX0psnOHmwg8K0Hnp586FDvZuSuP/MwT78PppU0?=
- =?us-ascii?Q?Vy4h+xLi1L++h/2nGv1qAnmQpDzQSDsDm31PcMEAuYrU46BQYIDItCLuFwwt?=
- =?us-ascii?Q?xOq0xhWsMBnJju6dp5tXWYg2TDYDjhJNCAgdrJcHIW4826vxz+9rRhb/26KN?=
- =?us-ascii?Q?c4u5PKvuFLmpJEVSPOjxjUQdDI7BSqMiYIALW1FWRW1opg6uJ8p7ZqemRSlC?=
- =?us-ascii?Q?aYIpc44fvlHAcb6auh/DSyXsjYMSa2nvB8bKeTPhYX9yRNdeReg2uMc+6fLG?=
- =?us-ascii?Q?T4sU+XiuhsHQgrTapRHfHcgKp+zfxu700hyzhDH5LVzEcaBverpH9tzmNeWM?=
- =?us-ascii?Q?ImH5XRh626oG495JZT2008djZCzNfC2lcrM1xC4LZqhEiQjikR0MGwVU7ODL?=
- =?us-ascii?Q?c50R4KQpOVat6zApNkjOVA4bP5u9ujpAgrndRHUwFf77BaDvMfkMITA6w4EX?=
- =?us-ascii?Q?DWhLFgKvIVr2kcPoTH8arhMFr1mvqw2nVWZFCAgNp7pBefdTfJyWAKDrHFkm?=
- =?us-ascii?Q?XQoDTRMSm7dYmsT0Y/jLcQL9AdYXfV/S2YAD9dZYWSWrKdPLc3Ckl62SpBVf?=
- =?us-ascii?Q?S06mMKwYc+nbMITmjZDYxidYqVklhzNeyZImschtWkKRyVH/nycjsOVkTNqk?=
- =?us-ascii?Q?x/JEnvcMJ+CJ0GTfc0ee+KYHIJZXAw9FZJNBVFBJvPatN5A0vxK6uzffWO1D?=
- =?us-ascii?Q?yOY/tcS5NnlfComt+X61IH/XZ7sKiHN8pLU4plpk10+TT/gHASg4Ukn20F2u?=
- =?us-ascii?Q?Y+Kz3QLQKOfdFid798hKnnELg3M/riSohUEJBA3ksxBf5JwuskODz//5ysJS?=
- =?us-ascii?Q?2VWs8aSDGA5kChFsYGjrOA1lv5DOIU5HIJFO2cpUT9WK+E7vSH06LpcSiD7r?=
- =?us-ascii?Q?gE9K77triBPOPoqX5WXzj5HSFBP3lL9ZERHWkkWfNbqE5MDI3ZhsI+t9Ngf4?=
- =?us-ascii?Q?2DXeiQDctDg03XdbGHF+fAW6Pn619si+UTNXnZIX6INI/mWQdj1YY9KBXSoO?=
- =?us-ascii?Q?JzaabPF2BvHLxWpRNEEvKxwW6prOmMGYc9XZBhd5OD4zCZD+iiGQIKWuQVT+?=
- =?us-ascii?Q?tcDfXC1uTpaIMdF+bK2p+TISGSp40ln8r1YY+2szjsj755c5IS/OX2xLMIVV?=
- =?us-ascii?Q?LkI49RAHEVnzUCYLuItCWFFtVjSJm27snegQzUbZIdVZYOec5+wWGn23ydRd?=
- =?us-ascii?Q?UQw8wSVFD4TCDJ1rypZYQhrNBOD0aRfxPzqdhwl8lzEEr68Y2nFFY3ji/G8u?=
- =?us-ascii?Q?kddfboNoG4frIA/JcxH59ngPl0GhjcQHYsr3uvbu0s//dShLlPSQXKp9JFvr?=
- =?us-ascii?Q?dBd1iIHhdp3JBK1ddwOIn2fAuDZTHwe1n5ttocXB5QJkvRdBx4n1dkJHPZxN?=
- =?us-ascii?Q?os+9tt66JojejU8k0hQ97eGmguchXSG4LMIYEfh5dmQVs5GpjzYOp6mKQSPz?=
- =?us-ascii?Q?0lKTrd8oecs7GTayg+PdEH0RrTUoiHva2co9tuaUWA0asuEtuzg/goTjuQLl?=
- =?us-ascii?Q?7zGUbRbJ84d6AqiHNYW5oCYoPJVobvaOCCG9QxpIIyWBgJOsmM8hR3/hjC0j?=
- =?us-ascii?Q?B5VnZgUNh2s0y2DfHJrt8BovCiZHyLmbOtQbDnurED+TRphRy5RHPnaqoRRx?=
- =?us-ascii?Q?HN75gScwGwa5UHbw3du0OGZPsAn0LSKCgiK07vtEdiLgAklp2Y75bdMuMUv5?=
- =?us-ascii?Q?jW+Akw=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b="SUVjWepz"
+Received: from mail-nwsmtp-smtp-production-main-91.sas.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-91.sas.yp-c.yandex.net [IPv6:2a02:6b8:c24:2409:0:640:85e8:0])
+	by forward101b.mail.yandex.net (Yandex) with ESMTPS id 7058CC00E8;
+	Mon, 13 Apr 2026 12:22:16 +0300 (MSK)
+Received: by mail-nwsmtp-smtp-production-main-91.sas.yp-c.yandex.net (smtp/Yandex) with ESMTPSA id BMGbUY0QrqM0-O6FLWXfu;
+	Mon, 13 Apr 2026 12:22:15 +0300
+X-Yandex-Fwd: 1
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail;
+	t=1776072135; bh=lQUy54wEEEbvgUTVJeg9ba0eY87d/ikZDdwUlnWfE0g=;
+	h=Message-ID:Date:In-Reply-To:Cc:Subject:References:To:From;
+	b=SUVjWepzzolNF+E9xQ/9ev8cugH5KBkY+xQ2LXYhHGhWRcCg0qhCL72Ew/8zp8KIf
+	 sBHRY0LnEjpJHZjU76iMasxM8U1fRCQ2kT9A2sbX0tnPi3BY3WibGU8jkuWeXPcC1L
+	 YeJZ7iDc18GvP2ubdQLgeacJXOd9GlfCMcyX2qXY=
+Authentication-Results: mail-nwsmtp-smtp-production-main-91.sas.yp-c.yandex.net; dkim=pass header.i=@yandex.ru
+From: Dmitry Antipov <dmantipov@yandex.ru>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Andy Shevchenko <andriy.shevchenko@intel.com>,
+	Charlie Jenkins <thecharlesjenkins@gmail.com>,
+	Paul Walmsley <pjw@kernel.org>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	linux-riscv@lists.infradead.org,
+	linux-efi@vger.kernel.org,
+	Dmitry Antipov <dmantipov@yandex.ru>,
+	kernel test robot <lkp@intel.com>
+Subject: [PATCH v3 1/3] riscv: add platform-specific double word shifts for riscv32
+Date: Mon, 13 Apr 2026 12:22:00 +0300
+Message-ID: <20260413092202.174394-2-dmantipov@yandex.ru>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260413092202.174394-1-dmantipov@yandex.ru>
+References: <20260413092202.174394-1-dmantipov@yandex.ru>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: microsoft.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: KUZP153MB1444.APCP153.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: b0e52200-d9d8-4bef-a66f-08de9935d373
-X-MS-Exchange-CrossTenant-originalarrivaltime: 13 Apr 2026 08:22:39.2445
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 72f988bf-86f1-41af-91ab-2d7cd011db47
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: VPiXmaOgRbFAAm2fUll+rjiMXM/SiMs67XoBxn68DK73fbfmApE2gnCIKLho+LmN8PJoeyXtHXRWdY4clBtGdA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSNP153MB1643
+Content-Transfer-Encoding: 8bit
 
-> Hi
->=20
-> Am 02.04.26 um 12:50 schrieb Saurabh Singh Sengar:
-> >> Hyperv's sysfb access only exists in the VMBUS support. Therefore
-> >> only select CONFIG_SYSFB for CONFIG_HYPERV_VMBUS. Avoids sysfb code
-> >> on systems that don't need it.
-> >>
-> >> Signed-off-by: Thomas Zimmermann <tzimmermann@suse.de>
-> >> Fixes: 96959283a58d ("Drivers: hv: Always select CONFIG_SYSFB for
-> >> Hyper-V
-> >> guests")
-> >> Cc: Michael Kelley <mhklinux@outlook.com>
-> >> Cc: Saurabh Sengar <ssengar@linux.microsoft.com>
-> >> Cc: Wei Liu <wei.liu@kernel.org>
-> >> Cc: "K. Y. Srinivasan" <kys@microsoft.com>
-> >> Cc: Haiyang Zhang <haiyangz@microsoft.com>
-> >> Cc: Dexuan Cui <decui@microsoft.com>
-> >> Cc: Long Li <longli@microsoft.com>
-> >> Cc: linux-hyperv@vger.kernel.org
-> >> Cc: <stable@vger.kernel.org> # v6.16+
-> >> ---
-> >>   drivers/hv/Kconfig | 2 +-
-> >>   1 file changed, 1 insertion(+), 1 deletion(-)
-> >>
-> >> diff --git a/drivers/hv/Kconfig b/drivers/hv/Kconfig index
-> >> 7937ac0cbd0f..2d0b3fcb0ff8 100644
-> >> --- a/drivers/hv/Kconfig
-> >> +++ b/drivers/hv/Kconfig
-> >> @@ -9,7 +9,6 @@ config HYPERV
-> >>   	select PARAVIRT
-> >>   	select X86_HV_CALLBACK_VECTOR if X86
-> >>   	select OF_EARLY_FLATTREE if OF
-> >> -	select SYSFB if EFI && !HYPERV_VTL_MODE
-> >>   	select IRQ_MSI_LIB if X86
-> >>   	help
-> >>   	  Select this option to run Linux as a Hyper-V client operating @@
-> >> -62,6
-> >> +61,7 @@ config HYPERV_VMBUS
-> >>   	tristate "Microsoft Hyper-V VMBus driver"
-> >>   	depends on HYPERV
-> >>   	default HYPERV
-> >> +	select SYSFB if EFI && !HYPERV_VTL_MODE
-> >>   	help
-> >>   	  Select this option to enable Hyper-V Vmbus driver.
-> >>
-> >> --
-> >> 2.53.0
-> > Reviewed-by: Saurabh Sengar <ssengar@linux.microsoft.com>
->=20
-> This fix is independent from the rest of the series. Do you want to merge=
- it or
-> can I take it into DRM trees?
+Add riscv32-specific '__ashldi3()', '__ashrdi3()', and '__lshrdi3()'.
+Initially it was intended to fix the following link error observed
+when building EFI-enabled kernel with CONFIG_EFI_STUB=y and
+CONFIG_EFI_GENERIC_STUB=y:
 
-Please feel free to take it via DRM tree.
-CC : Wei Liu
+riscv32-linux-gnu-ld: ./drivers/firmware/efi/libstub/lib-cmdline.stub.o: in function `__efistub_.L49':
+__efistub_cmdline.c:(.init.text+0x1f2): undefined reference to `__efistub___ashldi3'
+riscv32-linux-gnu-ld: __efistub_cmdline.c:(.init.text+0x202): undefined reference to `__efistub___lshrdi3'
 
-- Saurabh
+Reported at [1] trying to build https://patchew.org/linux/20260212164413.889625-1-dmantipov@yandex.ru,
+tested with 'qemu-system-riscv32 -M virt' only.
+
+Reported-by: kernel test robot <lkp@intel.com>
+Closes: https://lore.kernel.org/oe-kbuild-all/202603041925.KLKqpK6N-lkp@intel.com [1]
+Suggested-by: Ard Biesheuvel <ardb@kernel.org>
+Tested-by: Charlie Jenkins <thecharlesjenkins@gmail.com>
+Signed-off-by: Dmitry Antipov <dmantipov@yandex.ru>
+---
+v3: more tests by Charlie Jenkins
+v2: adjust commit message
+---
+ arch/riscv/Kconfig             |  3 ---
+ arch/riscv/kernel/image-vars.h |  7 +++++++
+ arch/riscv/lib/Makefile        |  1 +
+ arch/riscv/lib/ashldi3.S       | 36 +++++++++++++++++++++++++++++++++
+ arch/riscv/lib/ashrdi3.S       | 37 ++++++++++++++++++++++++++++++++++
+ arch/riscv/lib/lshrdi3.S       | 36 +++++++++++++++++++++++++++++++++
+ 6 files changed, 117 insertions(+), 3 deletions(-)
+ create mode 100644 arch/riscv/lib/ashldi3.S
+ create mode 100644 arch/riscv/lib/ashrdi3.S
+ create mode 100644 arch/riscv/lib/lshrdi3.S
+
+diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
+index 90c531e6abf5..515254720da5 100644
+--- a/arch/riscv/Kconfig
++++ b/arch/riscv/Kconfig
+@@ -407,9 +407,6 @@ config ARCH_RV32I
+ 	bool "RV32I"
+ 	depends on NONPORTABLE
+ 	select 32BIT
+-	select GENERIC_LIB_ASHLDI3
+-	select GENERIC_LIB_ASHRDI3
+-	select GENERIC_LIB_LSHRDI3
+ 	select GENERIC_LIB_UCMPDI2
+ 
+ config ARCH_RV64I
+diff --git a/arch/riscv/kernel/image-vars.h b/arch/riscv/kernel/image-vars.h
+index 3bd9d06a8b8f..d66e06daf13e 100644
+--- a/arch/riscv/kernel/image-vars.h
++++ b/arch/riscv/kernel/image-vars.h
+@@ -32,6 +32,13 @@ __efistub___init_text_end	= __init_text_end;
+ __efistub_sysfb_primary_display	= sysfb_primary_display;
+ #endif
+ 
++/*
++ * These double-word integer shifts are used
++ * by the library code and so EFI stub as well.
++ */
++PROVIDE(__efistub___lshrdi3    = __lshrdi3);
++PROVIDE(__efistub___ashldi3    = __ashldi3);
++
+ #endif
+ 
+ #endif /* __RISCV_KERNEL_IMAGE_VARS_H */
+diff --git a/arch/riscv/lib/Makefile b/arch/riscv/lib/Makefile
+index bbc031124974..7cee3da80c68 100644
+--- a/arch/riscv/lib/Makefile
++++ b/arch/riscv/lib/Makefile
+@@ -13,6 +13,7 @@ ifeq ($(CONFIG_MMU), y)
+ lib-$(CONFIG_RISCV_ISA_V)	+= uaccess_vector.o
+ endif
+ lib-$(CONFIG_MMU)	+= uaccess.o
++lib-$(CONFIG_32BIT)	+= ashldi3.o ashrdi3.o lshrdi3.o
+ lib-$(CONFIG_64BIT)	+= tishift.o
+ lib-$(CONFIG_RISCV_ISA_ZICBOZ)	+= clear_page.o
+ obj-$(CONFIG_FUNCTION_ERROR_INJECTION) += error-inject.o
+diff --git a/arch/riscv/lib/ashldi3.S b/arch/riscv/lib/ashldi3.S
+new file mode 100644
+index 000000000000..c3408862e2f6
+--- /dev/null
++++ b/arch/riscv/lib/ashldi3.S
+@@ -0,0 +1,36 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/**
++ * Adopted for the Linux kernel from IPXE project, see
++ * https://github.com/ipxe/ipxe/blob/master/src/arch/riscv32/libgcc/llshift.S
++ */
++
++#include <linux/linkage.h>
++#include <asm/asm.h>
++
++/**
++ * Shift left
++ *
++ * @v a1:a0             Value to shift
++ * @v a2                Shift amount
++ * @ret a1:a0           Shifted value
++ */
++
++SYM_FUNC_START(__ashldi3)
++
++        /* Perform shift by 32 bits, if applicable */
++        li      t0, 32
++        sub     t1, t0, a2
++        bgtz    t1, 1f
++        mv      a1, a0
++        mv      a0, zero
++1:      /* Perform shift by modulo-32 bits, if applicable */
++        andi    a2, a2, 0x1f
++        beqz    a2, 2f
++        srl     t2, a0, t1
++        sll     a0, a0, a2
++        sll     a1, a1, a2
++        or      a1, a1, t2
++2:      ret
++
++SYM_FUNC_END(__ashldi3)
++EXPORT_SYMBOL(__ashldi3)
+diff --git a/arch/riscv/lib/ashrdi3.S b/arch/riscv/lib/ashrdi3.S
+new file mode 100644
+index 000000000000..dd42b3cbb173
+--- /dev/null
++++ b/arch/riscv/lib/ashrdi3.S
+@@ -0,0 +1,37 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/**
++ * Adopted for the Linux kernel from IPXE project, see
++ * https://github.com/ipxe/ipxe/blob/master/src/arch/riscv32/libgcc/llshift.S
++ */
++
++#include <linux/linkage.h>
++#include <asm/asm.h>
++
++/**
++ * Arithmetic shift right
++ *
++ * @v a1:a0             Value to shift
++ * @v a2                Shift amount
++ * @ret a1:a0           Shifted value
++ */
++
++SYM_FUNC_START(__ashrdi3)
++
++        /* Perform shift by 32 bits, if applicable */
++        li      t0, 32
++        sub     t1, t0, a2
++        bgtz    t1, 1f
++        mv      a0, a1
++        srai    a1, a1, 16
++        srai    a1, a1, 16
++1:      /* Perform shift by modulo-32 bits, if applicable */
++        andi    a2, a2, 0x1f
++        beqz    a2, 2f
++        sll     t2, a1, t1
++        sra     a1, a1, a2
++        srl     a0, a0, a2
++        or      a0, a0, t2
++2:      ret
++
++SYM_FUNC_END(__ashrdi3)
++EXPORT_SYMBOL(__ashrdi3)
+diff --git a/arch/riscv/lib/lshrdi3.S b/arch/riscv/lib/lshrdi3.S
+new file mode 100644
+index 000000000000..1af03985ccb7
+--- /dev/null
++++ b/arch/riscv/lib/lshrdi3.S
+@@ -0,0 +1,36 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/**
++ * Adopted for the Linux kernel from IPXE project, see
++ * https://github.com/ipxe/ipxe/blob/master/src/arch/riscv32/libgcc/llshift.S
++ */
++
++#include <linux/linkage.h>
++#include <asm/asm.h>
++
++/**
++ * Logical shift right
++ *
++ * @v a1:a0             Value to shift
++ * @v a2                Shift amount
++ * @ret a1:a0           Shifted value
++ */
++
++SYM_FUNC_START(__lshrdi3)
++
++        /* Perform shift by 32 bits, if applicable */
++        li      t0, 32
++        sub     t1, t0, a2
++        bgtz    t1, 1f
++        mv      a0, a1
++        mv      a1, zero
++1:      /* Perform shift by modulo-32 bits, if applicable */
++        andi    a2, a2, 0x1f
++        beqz    a2, 2f
++        sll     t2, a1, t1
++        srl     a1, a1, a2
++        srl     a0, a0, a2
++        or      a0, a0, t2
++2:      ret
++
++SYM_FUNC_END(__lshrdi3)
++EXPORT_SYMBOL(__lshrdi3)
+-- 
+2.53.0
 
