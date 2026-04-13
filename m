@@ -1,337 +1,233 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03CFE23D7DC;
-	Sun, 12 Apr 2026 15:46:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD9F1317164
+	for <linux-efi@vger.kernel.org>; Mon, 13 Apr 2026 07:17:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776008817; cv=none; b=a4ArfOWN1ilczAk4gDwlFNNO86r13fW62AhfmAsGEIWCK9UX3KtvrsaYi6XYxSwg4Qk4CzDVk89ZNWZr7ez/KfzQ8LRcYEE9tHwsJXbvzsQEYe/vk41UOVEFPK3e3fxXIxyShE9nYrW1hFzNGDSK7SGtJioI8WkUG0SVO4uHEB0=
+	t=1776064635; cv=none; b=ocM2apw1LDC/LJEoNS2ZONyd8FLj1fmoXNHOkYBTVR2w5Oueqa0DTTsVMonU7eQPjnxgu6LjR+k0k3lMAaQ7VGpbnWbY400+S3Xnj9tWS2/NgTGLLl8jw7i5vphTmD6QT1Eq8tNNaK1OHuwUJXKO4AVfy1f+yLVVkSfxEFeuXzI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776008817; c=relaxed/simple;
-	bh=23dLLAcM76ajvHwVd9STiwBmiFsqBllnva76VnjCY0A=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=tcX/+1iVzUuR0A/+rwQzWScpt35YjvK7InmjieaApt6mo5dq5xnLe+Td8hcYs4SnooJST76WS5CRwrk+Or2ZNif6XIHPKy84gjUeYtL9L6PPw0WtcStm8HqiHhJHHju7aBY9nZuREeNRbiawU/ma8qaAtTM6WBc9duRuSqiaI9k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XXZn39WK; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1776064635; c=relaxed/simple;
+	bh=ze4rn4nn/Wo6g0BVi89lHVlN8HQ2KybbuWDeVEPYQ2c=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=JAvNt1zcyyXWSE14zBoEeUEQnZfdGq2T8fyZwOYDlMJy/yQ7kO3eJ1PqdWGCaNQpbwyUJPdorufVhByWCzqzu8RYfIYQU82ZYvuArqdE9/SG9YZOuOMNtSaNfTgK2p36aos0yV1u0ultZWdXY5FiwvILZyYdGDsUd/zRsyJSbf0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=EMPBYo7m; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=ZvsBVw15; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=EMPBYo7m; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=ZvsBVw15; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XXZn39WK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1ADBFC19424;
-	Sun, 12 Apr 2026 15:46:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1776008816;
-	bh=23dLLAcM76ajvHwVd9STiwBmiFsqBllnva76VnjCY0A=;
-	h=Date:From:To:Cc:Subject:From;
-	b=XXZn39WKLIgN3EAJkU5ENkWYZAuWvtD3iPiOn2ozgnaDOWxI5dBZ5BQmoFtFm2rE5
-	 8SvYKVh+BiE2QtmOhZabXGgkkUUugDwoDYf8yxsZrEtcOf4wjIPBRyWiXDvNOmXVzB
-	 tikHKggIoVLzkavDBwUeYVxmpCG98H5XVARlwPdNnSzNK1w5LM+Lxeg8tY3hNZAXBD
-	 1UNYY56I3A9zV/+XMHzeoH8MDZhUK2JGiBLj7MVEywl6gQv2Fj6VG9OEJUWTyjAQji
-	 OOXucRVnk+iJt7Nhg9VqjWOE/zvhkal2k4/PrKupY+JrxnbNbTlXSyxpO3xfjV1V4C
-	 hOH6k+cYbW0tg==
-Date: Sun, 12 Apr 2026 17:46:47 +0200
-From: Nicolas Schier <nsc@kernel.org>
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Alexander Coffin <alex@cyberialabs.net>,
-	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-	Bill Wendling <morbo@google.com>,
-	David Howells <dhowells@redhat.com>,
-	Dodji Seketeli <dodji@seketeli.org>,
-	"H. Peter Anvin" <hpa@zytor.com>, Helge Deller <deller@gmx.de>,
-	John Moon <john@jmoon.dev>, Jonathan Corbet <corbet@lwn.net>,
-	Josh Poimboeuf <jpoimboe@kernel.org>,
-	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
-	Masahiro Yamada <masahiroy@kernel.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Shuah Khan <skhan@linuxfoundation.org>, Song Liu <song@kernel.org>,
-	Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
-	Yonghong Song <yonghong.song@linux.dev>, kernel-team@fb.com,
-	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
-	linux-hexagon@vger.kernel.org, linux-kbuild@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-parisc@vger.kernel.org,
-	linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-	llvm@lists.linux.dev, loongarch@lists.linux.dev
-Subject: [GIT PULL] Kbuild and Kconfig changes for v7.1
-Message-ID: <adu-ZyIv47FnsVLI@levanger>
-Mail-Followup-To: Linus Torvalds <torvalds@linux-foundation.org>,
-	Alexander Coffin <alex@cyberialabs.net>,
-	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-	Bill Wendling <morbo@google.com>,
-	David Howells <dhowells@redhat.com>,
-	Dodji Seketeli <dodji@seketeli.org>,
-	"H. Peter Anvin" <hpa@zytor.com>, Helge Deller <deller@gmx.de>,
-	John Moon <john@jmoon.dev>, Jonathan Corbet <corbet@lwn.net>,
-	Josh Poimboeuf <jpoimboe@kernel.org>,
-	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
-	Masahiro Yamada <masahiroy@kernel.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Shuah Khan <skhan@linuxfoundation.org>, Song Liu <song@kernel.org>,
-	Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
-	Yonghong Song <yonghong.song@linux.dev>, kernel-team@fb.com,
-	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
-	linux-hexagon@vger.kernel.org, linux-kbuild@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-parisc@vger.kernel.org,
-	linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-	llvm@lists.linux.dev, loongarch@lists.linux.dev
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="EMPBYo7m";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="ZvsBVw15";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="EMPBYo7m";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="ZvsBVw15"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 0D7BB6A7CA;
+	Mon, 13 Apr 2026 07:17:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1776064631; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=rW5R3xGds9bg8qA2Ep9wnIOEprJ657jFgsGGoKUBMeQ=;
+	b=EMPBYo7maOolaDclqrmqB7DoCjl8hY7R4nEKa6AIy3rB1y3LfX+HoXBy7v/39LT1OKozid
+	PuG7L6eBwWC+Lp1r7PzZRvDZ4NYYI+DPKy1TUuFlIPTi4EdrW/bHW1Z9cjxBUis2Uw17Sw
+	HoiFtvk2JVm4WKbGYsztTjtOmWmQ+QE=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1776064631;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=rW5R3xGds9bg8qA2Ep9wnIOEprJ657jFgsGGoKUBMeQ=;
+	b=ZvsBVw15CdLOkuECwK4FZfeeJL2S20COYfNUOGcCvtUx5gkYos6MV477z2JoIsUf6YWR/H
+	+S/m0SXjg3jbqcDQ==
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1776064631; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=rW5R3xGds9bg8qA2Ep9wnIOEprJ657jFgsGGoKUBMeQ=;
+	b=EMPBYo7maOolaDclqrmqB7DoCjl8hY7R4nEKa6AIy3rB1y3LfX+HoXBy7v/39LT1OKozid
+	PuG7L6eBwWC+Lp1r7PzZRvDZ4NYYI+DPKy1TUuFlIPTi4EdrW/bHW1Z9cjxBUis2Uw17Sw
+	HoiFtvk2JVm4WKbGYsztTjtOmWmQ+QE=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1776064631;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=rW5R3xGds9bg8qA2Ep9wnIOEprJ657jFgsGGoKUBMeQ=;
+	b=ZvsBVw15CdLOkuECwK4FZfeeJL2S20COYfNUOGcCvtUx5gkYos6MV477z2JoIsUf6YWR/H
+	+S/m0SXjg3jbqcDQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 5E7034AD72;
+	Mon, 13 Apr 2026 07:17:10 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id iMDYFXaY3GkWRQAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Mon, 13 Apr 2026 07:17:10 +0000
+Message-ID: <2fe8ce91-2dc5-4cf2-b7cf-d495e5cff14b@suse.de>
+Date: Mon, 13 Apr 2026 09:17:09 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="WEAPSl/ZOh7quu+7"
-Content-Disposition: inline
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/8] hv: Select CONFIG_SYSFB only for CONFIG_HYPERV_VMBUS
+To: Saurabh Singh Sengar <ssengar@microsoft.com>,
+ "javierm@redhat.com" <javierm@redhat.com>, "arnd@arndb.de" <arnd@arndb.de>,
+ "ardb@kernel.org" <ardb@kernel.org>,
+ "ilias.apalodimas@linaro.org" <ilias.apalodimas@linaro.org>,
+ "chenhuacai@kernel.org" <chenhuacai@kernel.org>,
+ "kernel@xen0n.name" <kernel@xen0n.name>,
+ "maarten.lankhorst@linux.intel.com" <maarten.lankhorst@linux.intel.com>,
+ "mripard@kernel.org" <mripard@kernel.org>,
+ "airlied@gmail.com" <airlied@gmail.com>, "simona@ffwll.ch"
+ <simona@ffwll.ch>, KY Srinivasan <kys@microsoft.com>,
+ Haiyang Zhang <haiyangz@microsoft.com>,
+ "wei.liu@kernel.org" <wei.liu@kernel.org>, Dexuan Cui <DECUI@microsoft.com>,
+ Long Li <longli@microsoft.com>, "deller@gmx.de" <deller@gmx.de>
+Cc: "linux-arm-kernel@lists.infradead.org"
+ <linux-arm-kernel@lists.infradead.org>,
+ "loongarch@lists.linux.dev" <loongarch@lists.linux.dev>,
+ "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
+ "linux-riscv@lists.infradead.org" <linux-riscv@lists.infradead.org>,
+ "dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>,
+ "linux-hyperv@vger.kernel.org" <linux-hyperv@vger.kernel.org>,
+ "linux-fbdev@vger.kernel.org" <linux-fbdev@vger.kernel.org>,
+ Michael Kelley <mhklinux@outlook.com>,
+ Saurabh Sengar <ssengar@linux.microsoft.com>,
+ "stable@vger.kernel.org" <stable@vger.kernel.org>
+References: <20260402092305.208728-1-tzimmermann@suse.de>
+ <20260402092305.208728-2-tzimmermann@suse.de>
+ <KUZP153MB14449BBE44CBAEEA7621A4A0BE51A@KUZP153MB1444.APCP153.PROD.OUTLOOK.COM>
+Content-Language: en-US
+From: Thomas Zimmermann <tzimmermann@suse.de>
+Autocrypt: addr=tzimmermann@suse.de; keydata=
+ xsBNBFs50uABCADEHPidWt974CaxBVbrIBwqcq/WURinJ3+2WlIrKWspiP83vfZKaXhFYsdg
+ XH47fDVbPPj+d6tQrw5lPQCyqjwrCPYnq3WlIBnGPJ4/jreTL6V+qfKRDlGLWFjZcsrPJGE0
+ BeB5BbqP5erN1qylK9i3gPoQjXGhpBpQYwRrEyQyjuvk+Ev0K1Jc5tVDeJAuau3TGNgah4Yc
+ hdHm3bkPjz9EErV85RwvImQ1dptvx6s7xzwXTgGAsaYZsL8WCwDaTuqFa1d1jjlaxg6+tZsB
+ 9GluwvIhSezPgnEmimZDkGnZRRSFiGP8yjqTjjWuf0bSj5rUnTGiyLyRZRNGcXmu6hjlABEB
+ AAHNJ1Rob21hcyBaaW1tZXJtYW5uIDx0emltbWVybWFubkBzdXNlLmRlPsLAjgQTAQgAOAIb
+ AwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftODH
+ AAoJEGgNwR1TC3ojx1wH/0hKGWugiqDgLNXLRD/4TfHBEKmxIrmfu9Z5t7vwUKfwhFL6hqvo
+ lXPJJKQpQ2z8+X2vZm/slsLn7J1yjrOsoJhKABDi+3QWWSGkaGwRJAdPVVyJMfJRNNNIKwVb
+ U6B1BkX2XDKDGffF4TxlOpSQzdtNI/9gleOoUA8+jy8knnDYzjBNOZqLG2FuTdicBXblz0Mf
+ vg41gd9kCwYXDnD91rJU8tzylXv03E75NCaTxTM+FBXPmsAVYQ4GYhhgFt8S2UWMoaaABLDe
+ 7l5FdnLdDEcbmd8uLU2CaG4W2cLrUaI4jz2XbkcPQkqTQ3EB67hYkjiEE6Zy3ggOitiQGcqp
+ j//OwE0EWznS4AEIAMYmP4M/V+T5RY5at/g7rUdNsLhWv1APYrh9RQefODYHrNRHUE9eosYb
+ T6XMryR9hT8XlGOYRwKWwiQBoWSDiTMo/Xi29jUnn4BXfI2px2DTXwc22LKtLAgTRjP+qbU6
+ 3Y0xnQN29UGDbYgyyK51DW3H0If2a3JNsheAAK+Xc9baj0LGIc8T9uiEWHBnCH+RdhgATnWW
+ GKdDegUR5BkDfDg5O/FISymJBHx2Dyoklv5g4BzkgqTqwmaYzsl8UxZKvbaxq0zbehDda8lv
+ hFXodNFMAgTLJlLuDYOGLK2AwbrS3Sp0AEbkpdJBb44qVlGm5bApZouHeJ/+n+7r12+lqdsA
+ EQEAAcLAdgQYAQgAIAIbDBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftOH6AAoJEGgNwR1T
+ C3ojVSkIALpAPkIJPQoURPb1VWjh34l0HlglmYHvZszJWTXYwavHR8+k6Baa6H7ufXNQtThR
+ yIxJrQLW6rV5lm7TjhffEhxVCn37+cg0zZ3j7zIsSS0rx/aMwi6VhFJA5hfn3T0TtrijKP4A
+ SAQO9xD1Zk9/61JWk8OysuIh7MXkl0fxbRKWE93XeQBhIJHQfnc+YBLprdnxR446Sh8Wn/2D
+ Ya8cavuWf2zrB6cZurs048xe0UbSW5AOSo4V9M0jzYI4nZqTmPxYyXbm30Kvmz0rYVRaitYJ
+ 4kyYYMhuULvrJDMjZRvaNe52tkKAvMevcGdt38H4KSVXAylqyQOW5zvPc4/sq9c=
+In-Reply-To: <KUZP153MB14449BBE44CBAEEA7621A4A0BE51A@KUZP153MB1444.APCP153.PROD.OUTLOOK.COM>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Spam-Score: -4.30
+X-Spam-Level: 
+X-Spamd-Result: default: False [-4.30 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	TO_DN_EQ_ADDR_SOME(0.00)[];
+	ARC_NA(0.00)[];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com,gmx.de,outlook.com];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_TLS_ALL(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCPT_COUNT_TWELVE(0.00)[27];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	FREEMAIL_TO(0.00)[microsoft.com,redhat.com,arndb.de,kernel.org,linaro.org,xen0n.name,linux.intel.com,gmail.com,ffwll.ch,gmx.de];
+	MID_RHS_MATCH_FROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	FREEMAIL_CC(0.00)[lists.infradead.org,lists.linux.dev,vger.kernel.org,lists.freedesktop.org,outlook.com,linux.microsoft.com];
+	R_RATELIMIT(0.00)[to_ip_from(RLykjg6e7ifkwtw7jmpw7b9yio)];
+	FROM_EQ_ENVFROM(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:mid,suse.de:email,imap1.dmz-prg2.suse.org:helo,outlook.com:email,suse.com:url]
+X-Spam-Flag: NO
+
+Hi
+
+Am 02.04.26 um 12:50 schrieb Saurabh Singh Sengar:
+>> Hyperv's sysfb access only exists in the VMBUS support. Therefore only select
+>> CONFIG_SYSFB for CONFIG_HYPERV_VMBUS. Avoids sysfb code on systems
+>> that don't need it.
+>>
+>> Signed-off-by: Thomas Zimmermann <tzimmermann@suse.de>
+>> Fixes: 96959283a58d ("Drivers: hv: Always select CONFIG_SYSFB for Hyper-V
+>> guests")
+>> Cc: Michael Kelley <mhklinux@outlook.com>
+>> Cc: Saurabh Sengar <ssengar@linux.microsoft.com>
+>> Cc: Wei Liu <wei.liu@kernel.org>
+>> Cc: "K. Y. Srinivasan" <kys@microsoft.com>
+>> Cc: Haiyang Zhang <haiyangz@microsoft.com>
+>> Cc: Dexuan Cui <decui@microsoft.com>
+>> Cc: Long Li <longli@microsoft.com>
+>> Cc: linux-hyperv@vger.kernel.org
+>> Cc: <stable@vger.kernel.org> # v6.16+
+>> ---
+>>   drivers/hv/Kconfig | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/hv/Kconfig b/drivers/hv/Kconfig index
+>> 7937ac0cbd0f..2d0b3fcb0ff8 100644
+>> --- a/drivers/hv/Kconfig
+>> +++ b/drivers/hv/Kconfig
+>> @@ -9,7 +9,6 @@ config HYPERV
+>>   	select PARAVIRT
+>>   	select X86_HV_CALLBACK_VECTOR if X86
+>>   	select OF_EARLY_FLATTREE if OF
+>> -	select SYSFB if EFI && !HYPERV_VTL_MODE
+>>   	select IRQ_MSI_LIB if X86
+>>   	help
+>>   	  Select this option to run Linux as a Hyper-V client operating @@ -62,6
+>> +61,7 @@ config HYPERV_VMBUS
+>>   	tristate "Microsoft Hyper-V VMBus driver"
+>>   	depends on HYPERV
+>>   	default HYPERV
+>> +	select SYSFB if EFI && !HYPERV_VTL_MODE
+>>   	help
+>>   	  Select this option to enable Hyper-V Vmbus driver.
+>>
+>> --
+>> 2.53.0
+> Reviewed-by: Saurabh Sengar <ssengar@linux.microsoft.com>
+
+This fix is independent from the rest of the series. Do you want to 
+merge it or can I take it into DRM trees?
+
+Best regards
+Thomas
+
+>
+
+-- 
+--
+Thomas Zimmermann
+Graphics Driver Developer
+SUSE Software Solutions Germany GmbH
+Frankenstr. 146, 90461 Nürnberg, Germany, www.suse.com
+GF: Jochen Jaser, Andrew McDonald, Werner Knoblich, (HRB 36809, AG Nürnberg)
 
 
---WEAPSl/ZOh7quu+7
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi Linus,
-
-please pull these changes to Kbuild and Kconfig for v7.1.  Please let me
-know if anything is incorrect and not matching your standards.
-
-All changes have been in -next, most for several cycles without reported
-problems.
-
-Thanks and kind regards,
-Nicolas
-
----
-
-The following changes since commit 6de23f81a5e08be8fbf5e8d7e9febc72a5b5f27f:
-
-  Linux 7.0-rc1 (2026-02-22 13:18:59 -0800)
-
-are available in the Git repository at:
-
-  ssh://git@gitolite.kernel.org/pub/scm/linux/kernel/git/kbuild/linux.git t=
-ags/kbuild-7.1-1
-
-for you to fetch changes up to 404927758daac5ec4594071e033c1fa6ee9ca9b6:
-
-  kbuild: expand inlining hints with -fdiagnostics-show-inlining-chain (202=
-6-04-07 21:48:44 +0200)
-
-----------------------------------------------------------------
-Kbuild/Kconfig updates for 7.1
-
-Kbuild changes
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-
-  * tools/build: Reject unexpected values for LLVM=3D
-
-  * kbuild: uapi: remove usage of toolchain headers
-
-  * kbuild: Switch from '-fms-extensions' to '-fms-anonymous-structs'
-    when available (currently: clang >=3D 23.0.0)
-
-  * kbuild: Reduce the number of compiler-generated suffixes for clang
-    thin-lto build
-
-  * kbuild: reduce output spam ("GEN Makefile") when building out of tree
-
-  * check-uapi: improve portability for testing headers
-
-  * uapi: also test UAPI headers against C++ compilers
-
-  * kbuild: vdso_install: drop build ID architecture allow-list
-
-  * checksyscalls: only run when necessary
-
-  * Documentation: kbuild: Update the debug information notes in
-    reproducible-builds.rst
-
-  * kconfig: forbid multiple entries with the same symbol in a choice
-
-  * kbuild: expand inlining hints with -fdiagnostics-show-inlining-chain
-
-
-Kconfig changes
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-
-  * kconfig: Error out on duplicated kconfig inclusion
-
-
-Cc: Alexander Coffin <alex@cyberialabs.net>
-Cc: Ard Biesheuvel <ardb@kernel.org>
-Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: Bill Wendling <morbo@google.com>
-Cc: David Howells <dhowells@redhat.com>
-Cc: Dodji Seketeli <dodji@seketeli.org>
-Cc: H. Peter Anvin <hpa@zytor.com>
-Cc: Helge Deller <deller@gmx.de>
-Cc: John Moon <john@jmoon.dev>
-Cc: Jonathan Corbet <corbet@lwn.net>
-Cc: Josh Poimboeuf <jpoimboe@kernel.org>
-Cc: Justin Stitt <justinstitt@google.com>
-Cc: Kees Cook <kees@kernel.org>
-Cc: Masahiro Yamada <masahiroy@kernel.org>
-Cc: Nathan Chancellor <nathan@kernel.org>
-Cc: Nick Desaulniers <nick.desaulniers+lkml@gmail.com>
-Cc: Shuah Khan <skhan@linuxfoundation.org>
-Cc: Song Liu <song@kernel.org>
-Cc: Thomas Wei=DFschuh <linux@weissschuh.net>
-Cc: Yonghong Song <yonghong.song@linux.dev>
-Cc: kernel-team@fb.com
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-efi@vger.kernel.org
-Cc: linux-hexagon@vger.kernel.org
-Cc: linux-kbuild@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-Cc: linux-parisc@vger.kernel.org
-Cc: linux-s390@vger.kernel.org
-Cc: linuxppc-dev@lists.ozlabs.org
-Cc: llvm@lists.linux.dev
-Cc: loongarch@lists.linux.dev
-
-----------------------------------------------------------------
-Arnd Bergmann (3):
-      check-uapi: link into shared objects
-      check-uapi: honor ${CROSS_COMPILE} setting
-      check-uapi: use dummy libc includes
-
-Justin Stitt (1):
-      kbuild: expand inlining hints with -fdiagnostics-show-inlining-chain
-
-Masahiro Yamada (1):
-      kconfig: forbid multiple entries with the same symbol in a choice
-
-Nathan Chancellor (3):
-      kbuild: Consolidate C dialect options
-      kbuild: Use '-fms-anonymous-structs' if it is available
-      Documentation: kbuild: Update the debug information notes in reproduc=
-ible-builds.rst
-
-Nicolas Schier (1):
-      kconfig: Error out on duplicated kconfig inclusion
-
-Thomas Wei=DFschuh (25):
-      Documentation/llvm: drop note about LLVM=3D0
-      tools/build: Reject unexpected values for LLVM=3D
-      hexagon: uapi: Fix structure alignment attribute
-      kbuild: uapi: test linux/bpf_perf_event.h on powerpc
-      kbuild: uapi: deduplicate linux/bpf_perf_event.h exclusions
-      kbuild: uapi: completely exclude linux/bpf_perf_event.h on nios2
-      kbuild: uapi: only use dummy-include for headers which use libc
-      kbuild: uapi: provide stub includes for some libc headers
-      kbuild: uapi: use custom stub headers instead of libc ones
-      kbuild: uapi: simplify libc dependency logic
-      kbuild: uapi: remove now unneeded guard headers
-      kbuild: reduce output spam when building out of tree
-      kbuild: uapi: move some compiler arguments out of the command definit=
-ion
-      kbuild: uapi: move all include path flags together
-      kbuild: uapi: handle UML in architecture-specific exclusion lists
-      kbuild: uapi: provide a C++ compatible dummy definition of NULL
-      kbuild: uapi: also test UAPI headers against C++ compilers
-      kbuild: vdso_install: split out the readelf invocation
-      kbuild: vdso_install: hide readelf warnings
-      kbuild: vdso_install: gracefully handle images without build ID
-      kbuild: vdso_install: drop build ID architecture allow-list
-      checksyscalls: move path to reference table to a variable
-      checksyscalls: fail on all intermediate errors
-      checksyscalls: only run when necessary
-      checksyscalls: move instance functionality into generic code
-
-Yonghong Song (1):
-      kbuild: Reduce the number of compiler-generated suffixes for clang th=
-in-lto build
-
- Documentation/kbuild/llvm.rst                      |  4 --
- Documentation/kbuild/reproducible-builds.rst       |  7 ++-
- Kbuild                                             | 14 +++--
- Makefile                                           | 35 +++++++++---
- arch/arm64/kernel/vdso32/Makefile                  |  3 +-
- arch/hexagon/include/uapi/asm/sigcontext.h         |  2 +-
- arch/loongarch/vdso/Makefile                       |  2 +-
- arch/mips/Makefile                                 |  6 +-
- arch/parisc/boot/compressed/Makefile               |  2 +-
- arch/powerpc/boot/Makefile                         |  3 +-
- arch/s390/Makefile                                 |  3 +-
- arch/s390/purgatory/Makefile                       |  3 +-
- arch/x86/Makefile                                  |  6 +-
- arch/x86/boot/compressed/Makefile                  |  6 +-
- drivers/firmware/efi/libstub/Makefile              |  3 +-
- init/Kconfig                                       |  5 ++
- scripts/Makefile.vdsoinst                          |  7 ++-
- scripts/Makefile.warn                              |  5 --
- scripts/check-uapi.sh                              | 19 ++++---
- scripts/checksyscalls.sh                           | 11 +++-
- scripts/kconfig/lexer.l                            |  4 +-
- scripts/kconfig/lkc.h                              |  3 +-
- scripts/kconfig/parser.y                           | 15 ++---
- scripts/kconfig/tests/err_repeated_inc/Kconfig     |  3 +
- .../kconfig/tests/err_repeated_inc/Kconfig.inc1    |  4 ++
- .../kconfig/tests/err_repeated_inc/Kconfig.inc2    |  3 +
- .../kconfig/tests/err_repeated_inc/Kconfig.inc3    |  1 +
- scripts/kconfig/tests/err_repeated_inc/__init__.py | 10 ++++
- .../kconfig/tests/err_repeated_inc/expected_stderr |  2 +
- scripts/kconfig/util.c                             | 31 ++++++++++-
- tools/scripts/Makefile.include                     |  2 +
- usr/dummy-include/endian.h                         |  0
- usr/dummy-include/limits.h                         |  8 +++
- usr/dummy-include/netinet/if_ether.h               |  0
- usr/dummy-include/netinet/in.h                     |  0
- usr/dummy-include/stdbool.h                        |  7 ---
- usr/dummy-include/stddef.h                         | 13 +++++
- usr/dummy-include/stdint.h                         | 17 ++++++
- usr/dummy-include/stdlib.h                         |  7 ---
- usr/dummy-include/string.h                         | 12 ++++
- usr/dummy-include/sys/ioctl.h                      |  0
- usr/dummy-include/sys/socket.h                     | 12 ++++
- usr/dummy-include/sys/time.h                       |  3 +
- usr/dummy-include/sys/types.h                      |  0
- usr/dummy-include/time.h                           |  0
- usr/dummy-include/unistd.h                         |  0
- usr/include/Makefile                               | 65 ++++++++++++++----=
-----
- 47 files changed, 251 insertions(+), 117 deletions(-)
- create mode 100644 scripts/kconfig/tests/err_repeated_inc/Kconfig
- create mode 100644 scripts/kconfig/tests/err_repeated_inc/Kconfig.inc1
- create mode 100644 scripts/kconfig/tests/err_repeated_inc/Kconfig.inc2
- create mode 100644 scripts/kconfig/tests/err_repeated_inc/Kconfig.inc3
- create mode 100644 scripts/kconfig/tests/err_repeated_inc/__init__.py
- create mode 100644 scripts/kconfig/tests/err_repeated_inc/expected_stderr
- create mode 100644 usr/dummy-include/endian.h
- create mode 100644 usr/dummy-include/limits.h
- create mode 100644 usr/dummy-include/netinet/if_ether.h
- create mode 100644 usr/dummy-include/netinet/in.h
- delete mode 100644 usr/dummy-include/stdbool.h
- create mode 100644 usr/dummy-include/stddef.h
- create mode 100644 usr/dummy-include/stdint.h
- delete mode 100644 usr/dummy-include/stdlib.h
- create mode 100644 usr/dummy-include/string.h
- create mode 100644 usr/dummy-include/sys/ioctl.h
- create mode 100644 usr/dummy-include/sys/socket.h
- create mode 100644 usr/dummy-include/sys/time.h
- create mode 100644 usr/dummy-include/sys/types.h
- create mode 100644 usr/dummy-include/time.h
- create mode 100644 usr/dummy-include/unistd.h
-
---=20
-Nicolas
-
---WEAPSl/ZOh7quu+7
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEh0E3p4c3JKeBvsLGB1IKcBYmEmkFAmnbvloACgkQB1IKcBYm
-EmnVJBAAlJvaCwNlI1ymaWQKEC+s4udzUKo5DuA14pw/3NgGhLasok1WZaWB0LUb
-2D4NtXMeQLTFybnTE07rbHZwQ/fBpvyWNL0D9aL+bjHfYhkbJHIJIgnrTOJLn3IW
-wJuPJgJDMvgmWKyXGRLjPEevSmKF10Aej8f0QIsXuv8IG8M0ZfpIohRV35Dot9w6
-kRQC6lX0lYTfaBzp7IBMtY634rtzC9rHK+U1gkkvswuE2H26rm5TxeE1lL6Xecmf
-pd16FUspWGCMMB6YFRz3hi4ZRIMhY3MgY6LvvcHNF0RDrdoEoqWFyKLd/l5X5CNq
-HKbIrMJ4l5E4KCSw3rtaW/RzmcZjDtU1RLdXLomAhZU7sszIhyYOuptBVAncdKVC
-Vo+lxm1kLlBRG4eQjCnA51HQZN7VbO54XSvWVmRioEUevu6wSA8UvSq7Kcufzg57
-I9nn9kpwFqJZvQsNGIdDqEgIT5l3muX1Y89E723OqKZ9CoPl2meGrLQU69e4gGFc
-R/nTDktzEFINZHVk72AwAWyjvE/IGx6mmogf1+4Zz7MK2Q5aeXejy6T5aZ0QMwtH
-/290TxOxWlOqi3b57Quo0xJVltkA9WxCi++4hh0Te/x2Yjaqbaovui7fBjqeKvCh
-Oh9AhNVYbTOjIMS2CyL6xQBlr+Vp2MQ163tqds1uSP3IqrS2T+8=
-=WfCJ
------END PGP SIGNATURE-----
-
---WEAPSl/ZOh7quu+7--
