@@ -1,33 +1,35 @@
-Received: from forward101b.mail.yandex.net (forward101b.mail.yandex.net [178.154.239.148])
+Received: from forward204b.mail.yandex.net (forward204b.mail.yandex.net [178.154.239.153])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85BC33D564B
-	for <linux-efi@vger.kernel.org>; Tue, 14 Apr 2026 10:26:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.148
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12A643D5646
+	for <linux-efi@vger.kernel.org>; Tue, 14 Apr 2026 10:31:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.153
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776162397; cv=none; b=taPT4KH8h6t9FSCetKOmlPVwls17Z7kdNMC/VHJC/ict582ptxOUFBAA/p/fjCcgxr5Zj2q4ae00ExA/MhA7RdEbSHyzQ8QVUVdWfJ2p1YPpWU0ePtu1GipN+Amjl5sJoTbpFKis/vSWCExisErN694A5qHkNz0Y+j7H/W0S2IQ=
+	t=1776162726; cv=none; b=CAhpynjuKwFmYZB3jLaM15bfyZeHkiSpwUcf4gBLVX14ETpwvAJ5vEDQa6Go2qAjcdA+n0xSUvy2YAkglo9iUBDQdCgze4ANhMCf7daIOLtWoAWKttiG6UlR/H6gXugA6qf38NrroFw7AOmIBEPb7TlDsJ0MN/CPzI4wW7rNzck=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776162397; c=relaxed/simple;
-	bh=o7IJYKevoHuwsACRVBy1iHiwEkLBvsn7XUT8fd9Tgwk=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=RXNOzb1q9hmTdKbIVcHoCIIzWoYPX9FVhyTfi7PtczwnCbEVxXtei2eX9TGM/LgUMBkSXRIqPSgmhlDJSz/bdEqxIZg8UkJAoL1SbkPupc5scxGnq4xywqRJLqznDeQiSU7YLZPXhxlcijDXh54EjFtq9HcpP2zU9BmOw7GYGwQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru; spf=pass smtp.mailfrom=yandex.ru; dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b=B459aHMF; arc=none smtp.client-ip=178.154.239.148
+	s=arc-20240116; t=1776162726; c=relaxed/simple;
+	bh=nWLKDMkhhrvx43zgmOaZCL5Aclbva+t+YUgiWU2wXSQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=i92BJo31RUAyctua4BoauyZabfex/Sz+FH0rNkY7K0JTWygrp+8L4egO69y9EtRNHr6JBx5Sq/MpOqgTcRo3ZRspjrq/axQ4ESoBc7Fb+L4uc4gCjz8YDAAkeoeyTun4jKdfuVOHoED5gLZ5rXZ2Nc1aKldm9czA1i67Fr2xlFk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru; spf=pass smtp.mailfrom=yandex.ru; dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b=SdKlovDm; arc=none smtp.client-ip=178.154.239.153
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=yandex.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b="B459aHMF"
+	dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b="SdKlovDm"
+Received: from forward103b.mail.yandex.net (forward103b.mail.yandex.net [IPv6:2a02:6b8:c02:900:1:45:d181:d103])
+	by forward204b.mail.yandex.net (Yandex) with ESMTPS id C1F2180F00
+	for <linux-efi@vger.kernel.org>; Tue, 14 Apr 2026 13:26:23 +0300 (MSK)
 Received: from mail-nwsmtp-smtp-production-main-77.iva.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-77.iva.yp-c.yandex.net [IPv6:2a02:6b8:c0c:3d95:0:640:5c83:0])
-	by forward101b.mail.yandex.net (Yandex) with ESMTPS id EC819C007E;
-	Tue, 14 Apr 2026 13:26:19 +0300 (MSK)
-Received: by mail-nwsmtp-smtp-production-main-77.iva.yp-c.yandex.net (smtp/Yandex) with ESMTPSA id BQI23sTa1uQ0-JVJ8hnRq;
-	Tue, 14 Apr 2026 13:26:19 +0300
+	by forward103b.mail.yandex.net (Yandex) with ESMTPS id D41B3C009D;
+	Tue, 14 Apr 2026 13:26:15 +0300 (MSK)
+Received: by mail-nwsmtp-smtp-production-main-77.iva.yp-c.yandex.net (smtp/Yandex) with ESMTPSA id BQI23sTa1uQ0-YGZ1Ar9n;
+	Tue, 14 Apr 2026 13:26:14 +0300
 X-Yandex-Fwd: 1
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail;
-	t=1776162379; bh=by7gI4ivVLUjkjadIHQ968y39O7n15nk8RwOcZ1UyVI=;
-	h=Message-ID:Date:In-Reply-To:Cc:Subject:References:To:From;
-	b=B459aHMFv3k6/Z8NYgFEFKecrxO22MOglnBpP9okQoaJm8zbfSnzuOz1I1DLUlwF1
-	 8gQxArwc6JLNBx41vOqHU0zyMHNz9Ksbi/b3JbCnmAnE1fkRIorUpHVkPMR15NlTJi
-	 33WJP5kxrWg/eDdvVQpfD9TkmYvxBw7J8OsNhu/8=
+	t=1776162374; bh=Mr1hTPyQNlez2JlQ/uPi299mOYyEk6C+zkloCGhX058=;
+	h=Message-ID:Date:Cc:Subject:To:From;
+	b=SdKlovDmd8CdJfyM7WLceE2/vTm7AeMdEkMj1Doq0KLonHwrOwqw8N0jHAUV0JK/3
+	 diisuT7wYBxmln0P4CUPvpGTMzKiLu/ivGpezSIOt2GEfP/MYNFtnD53S1qd3/WU3b
+	 ytZd4O86S19C74qwnRfgK/FgNKicSN36o083pa4c=
 Authentication-Results: mail-nwsmtp-smtp-production-main-77.iva.yp-c.yandex.net; dkim=pass header.i=@yandex.ru
 From: Dmitry Antipov <dmantipov@yandex.ru>
 To: Andrew Morton <akpm@linux-foundation.org>
@@ -40,12 +42,10 @@ Cc: Andy Shevchenko <andriy.shevchenko@intel.com>,
 	linux-riscv@lists.infradead.org,
 	linux-efi@vger.kernel.org,
 	Dmitry Antipov <dmantipov@yandex.ru>
-Subject: [PATCH v4 3/3] riscv: fix building compressed EFI image
-Date: Tue, 14 Apr 2026 13:26:08 +0300
-Message-ID: <20260414102608.573555-4-dmantipov@yandex.ru>
+Subject: [PATCH v4 0/3] riscv32 library enhancements and build fixes
+Date: Tue, 14 Apr 2026 13:26:05 +0300
+Message-ID: <20260414102608.573555-1-dmantipov@yandex.ru>
 X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260414102608.573555-1-dmantipov@yandex.ru>
-References: <20260414102608.573555-1-dmantipov@yandex.ru>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -54,57 +54,33 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-When building vmlinuz.efi with CONFIG_EFI_ZBOOT enabled,
-'__lshrdi3()' is also needed to fix yet another link error:
+This series should immediately follow v8 of lib and lib/cmdline enhancements,
+see https://patchew.org/linux/20260212164413.889625-1-dmantipov@yandex.ru.
+Started from riscv32 build quirk, now it aims to provide platform-specific
+double-word shifts and corresponding KUnit test (tested on ARM as well).
 
-riscv32-linux-gnu-ld: drivers/firmware/efi/libstub/lib-cmdline.stub.o: in function `__efistub_.L49':
-__efistub_cmdline.c:(.init.text+0x202): undefined reference to `__efistub___lshrdi3'
+Dmitry Antipov (3):
+  riscv: add platform-specific double word shifts for riscv32
+  lib: kunit: add tests for __ashldi3(), __ashrdi3(), and __lshrdi3()
+  riscv: fix building compressed EFI image
 
-And since riscv64 can have CONFIG_EFI_ZBOOT but doesn't need these
-library routines, introduce CONFIG_EFI_ZBOOT_USE_LIBGCC to manage
-linking of lib-ashldi3.o and lib-lshrdi3.o on riscv32 only.
+ arch/riscv/Kconfig                    |   3 -
+ arch/riscv/kernel/image-vars.h        |   7 ++
+ arch/riscv/lib/Makefile               |   1 +
+ arch/riscv/lib/ashldi3.S              |  36 ++++++
+ arch/riscv/lib/ashrdi3.S              |  37 ++++++
+ arch/riscv/lib/lshrdi3.S              |  36 ++++++
+ drivers/firmware/efi/Kconfig          |   4 +
+ drivers/firmware/efi/libstub/Makefile |   3 +-
+ lib/Kconfig.debug                     |  10 ++
+ lib/tests/Makefile                    |   1 +
+ lib/tests/shdi3_kunit.c               | 175 ++++++++++++++++++++++++++
+ 11 files changed, 309 insertions(+), 4 deletions(-)
+ create mode 100644 arch/riscv/lib/ashldi3.S
+ create mode 100644 arch/riscv/lib/ashrdi3.S
+ create mode 100644 arch/riscv/lib/lshrdi3.S
+ create mode 100644 lib/tests/shdi3_kunit.c
 
-Reported-by: Charlie Jenkins <thecharlesjenkins@gmail.com>
-Closes: https://lore.kernel.org/linux-riscv/20260409050018.GA371560@inky.localdomain
-Tested-by: Charlie Jenkins <thecharlesjenkins@gmail.com>
-Signed-off-by: Dmitry Antipov <dmantipov@yandex.ru>
----
-v4: use more meaningful CONFIG_EFI_ZBOOT_USE_LIBGCC and adjust tags (Andy)
-v3: initial version to join the series
----
- drivers/firmware/efi/Kconfig          | 4 ++++
- drivers/firmware/efi/libstub/Makefile | 3 ++-
- 2 files changed, 6 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 29e0729299f5b..e1483e20c69b9 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -85,6 +85,10 @@ config EFI_ZBOOT
- 	  provided that the loader implements the decompression algorithm.
- 	  (The compression algorithm used is described in the zboot header)
- 
-+config EFI_ZBOOT_USE_LIBGCC
-+	bool
-+	default y if RISCV && 32BIT
-+
- config EFI_ARMSTUB_DTB_LOADER
- 	bool "Enable the DTB loader"
- 	depends on EFI_GENERIC_STUB && !RISCV && !LOONGARCH
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index e386ffd009b7e..91cefa80c158f 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -96,7 +96,8 @@ CFLAGS_zboot-decompress-gzip.o	+= -I$(srctree)/lib/zlib_inflate
- zboot-obj-$(CONFIG_KERNEL_ZSTD)	:= zboot-decompress-zstd.o lib-xxhash.o
- CFLAGS_zboot-decompress-zstd.o	+= -I$(srctree)/lib/zstd
- 
--zboot-obj-$(CONFIG_RISCV)	+= lib-clz_ctz.o lib-ashldi3.o
-+zboot-libgcc-obj-$(CONFIG_EFI_ZBOOT_USE_LIBGCC) += lib-ashldi3.o lib-lshrdi3.o
-+zboot-obj-$(CONFIG_RISCV)	+= lib-clz_ctz.o $(zboot-libgcc-obj-y)
- lib-$(CONFIG_EFI_ZBOOT)		+= zboot.o $(zboot-obj-y)
- 
- lib-$(CONFIG_UNACCEPTED_MEMORY) += unaccepted_memory.o bitmap.o find.o
 -- 
 2.53.0
 
