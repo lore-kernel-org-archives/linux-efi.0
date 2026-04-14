@@ -1,86 +1,64 @@
-Received: from forward204b.mail.yandex.net (forward204b.mail.yandex.net [178.154.239.153])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12A643D5646
-	for <linux-efi@vger.kernel.org>; Tue, 14 Apr 2026 10:31:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.153
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32A701E9B3D;
+	Tue, 14 Apr 2026 16:46:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776162726; cv=none; b=CAhpynjuKwFmYZB3jLaM15bfyZeHkiSpwUcf4gBLVX14ETpwvAJ5vEDQa6Go2qAjcdA+n0xSUvy2YAkglo9iUBDQdCgze4ANhMCf7daIOLtWoAWKttiG6UlR/H6gXugA6qf38NrroFw7AOmIBEPb7TlDsJ0MN/CPzI4wW7rNzck=
+	t=1776185217; cv=none; b=pdAgQP00W7aV2qmbGWK04+Z3zCePLB0FWteitwDEtyuNNCrCP6sP9uLEXvje4/U6KXmcZ7SqZf1e7YwQx71bh6bxOTztWyW+5nJib09n7JlHwarLVEWadKzMz9mstKVVrOolEB+7Dc5hQb3aNxQZQDDApn/Vy0x+z8IblB77Xws=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776162726; c=relaxed/simple;
-	bh=nWLKDMkhhrvx43zgmOaZCL5Aclbva+t+YUgiWU2wXSQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=i92BJo31RUAyctua4BoauyZabfex/Sz+FH0rNkY7K0JTWygrp+8L4egO69y9EtRNHr6JBx5Sq/MpOqgTcRo3ZRspjrq/axQ4ESoBc7Fb+L4uc4gCjz8YDAAkeoeyTun4jKdfuVOHoED5gLZ5rXZ2Nc1aKldm9czA1i67Fr2xlFk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru; spf=pass smtp.mailfrom=yandex.ru; dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b=SdKlovDm; arc=none smtp.client-ip=178.154.239.153
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=yandex.ru
+	s=arc-20240116; t=1776185217; c=relaxed/simple;
+	bh=h5CUHLLZGJj1sqfzAOFN24P+lZAUpLgJCzAIP3pIVak=;
+	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=TJhsYDc1LuI96g4Pv3IOMy2YMu/9qwD8xm320Qnk2hMx8UnP6vfyf2YR/hM3ZdNmrz1Nlh7jOycQQlUkIhy2E+9K1x5Od9YMZZYmXTjzi1bL3JRY4Gf+atjw9jAACsb6aA1uIjN0YeK/JJyXPY+rk6Xt/2OPo9OoxKAYH41xD6A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=M3XzHspl; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b="SdKlovDm"
-Received: from forward103b.mail.yandex.net (forward103b.mail.yandex.net [IPv6:2a02:6b8:c02:900:1:45:d181:d103])
-	by forward204b.mail.yandex.net (Yandex) with ESMTPS id C1F2180F00
-	for <linux-efi@vger.kernel.org>; Tue, 14 Apr 2026 13:26:23 +0300 (MSK)
-Received: from mail-nwsmtp-smtp-production-main-77.iva.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-77.iva.yp-c.yandex.net [IPv6:2a02:6b8:c0c:3d95:0:640:5c83:0])
-	by forward103b.mail.yandex.net (Yandex) with ESMTPS id D41B3C009D;
-	Tue, 14 Apr 2026 13:26:15 +0300 (MSK)
-Received: by mail-nwsmtp-smtp-production-main-77.iva.yp-c.yandex.net (smtp/Yandex) with ESMTPSA id BQI23sTa1uQ0-YGZ1Ar9n;
-	Tue, 14 Apr 2026 13:26:14 +0300
-X-Yandex-Fwd: 1
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail;
-	t=1776162374; bh=Mr1hTPyQNlez2JlQ/uPi299mOYyEk6C+zkloCGhX058=;
-	h=Message-ID:Date:Cc:Subject:To:From;
-	b=SdKlovDmd8CdJfyM7WLceE2/vTm7AeMdEkMj1Doq0KLonHwrOwqw8N0jHAUV0JK/3
-	 diisuT7wYBxmln0P4CUPvpGTMzKiLu/ivGpezSIOt2GEfP/MYNFtnD53S1qd3/WU3b
-	 ytZd4O86S19C74qwnRfgK/FgNKicSN36o083pa4c=
-Authentication-Results: mail-nwsmtp-smtp-production-main-77.iva.yp-c.yandex.net; dkim=pass header.i=@yandex.ru
-From: Dmitry Antipov <dmantipov@yandex.ru>
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Andy Shevchenko <andriy.shevchenko@intel.com>,
-	Charlie Jenkins <thecharlesjenkins@gmail.com>,
-	Paul Walmsley <pjw@kernel.org>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	linux-riscv@lists.infradead.org,
-	linux-efi@vger.kernel.org,
-	Dmitry Antipov <dmantipov@yandex.ru>
-Subject: [PATCH v4 0/3] riscv32 library enhancements and build fixes
-Date: Tue, 14 Apr 2026 13:26:05 +0300
-Message-ID: <20260414102608.573555-1-dmantipov@yandex.ru>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="M3XzHspl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0B62CC19425;
+	Tue, 14 Apr 2026 16:46:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1776185217;
+	bh=h5CUHLLZGJj1sqfzAOFN24P+lZAUpLgJCzAIP3pIVak=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+	b=M3XzHspleh86r3vzAE6YUI8iX7fuNondhwJgpVrbrS0Op2mj2wIUHrH6fREXFKsIG
+	 pem7Y2vx+7Y7xwcrJ53ciAxItrD22RLU7qrf8Hp2j1xmoJc8hIvngurUvXyS+qkBub
+	 09nlGhcwM6sBuxJtfeY0yNha/v0y2nM1OpuMFM/Zr94Pf2tTnISy5Y3xt0Ci2EKXuG
+	 vKqkWXd08DrAsFfVL/8q1rNyTPsVxR/M6KO84zqoDqRYb4tOiaVJZBICeda8HWuSed
+	 ECCuMdETCSR6E3e0oPEVWgRNlqQU9u7DIt6JDR+Yv+2AaB+z66VFmF1bo5P7C02lT1
+	 Sx30d41kHGYgg==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id BA1313809A07;
+	Tue, 14 Apr 2026 16:46:28 +0000 (UTC)
+Subject: Re: [GIT PULL] Kbuild and Kconfig changes for v7.1
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <adu-ZyIv47FnsVLI@levanger>
+References: <adu-ZyIv47FnsVLI@levanger>
+X-PR-Tracked-List-Id: <linux-s390.vger.kernel.org>
+X-PR-Tracked-Message-Id: <adu-ZyIv47FnsVLI@levanger>
+X-PR-Tracked-Remote: ssh://git@gitolite.kernel.org/pub/scm/linux/kernel/git/kbuild/linux.git tags/kbuild-7.1-1
+X-PR-Tracked-Commit-Id: 404927758daac5ec4594071e033c1fa6ee9ca9b6
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 5d0d3623303775d750e122a2542d1a26c8573d38
+Message-Id: <177618518744.1376142.6209842916194520385.pr-tracker-bot@kernel.org>
+Date: Tue, 14 Apr 2026 16:46:27 +0000
+To: Nicolas Schier <nsc@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Alexander Coffin <alex@cyberialabs.net>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Bill Wendling <morbo@google.com>, David Howells <dhowells@redhat.com>, Dodji Seketeli <dodji@seketeli.org>, "H. Peter Anvin" <hpa@zytor.com>, Helge Deller <deller@gmx.de>, John Moon <john@jmoon.dev>, Jonathan Corbet <corbet@lwn.net>, Josh Poimboeuf <jpoimboe@kernel.org>, Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>, Masahiro Yamada <masahiroy@kernel.org>, Nathan Chancellor <nathan@kernel.org>, Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, Shuah Khan <skhan@linuxfoundation.org>, Song Liu <song@kernel.org>, Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>, Yonghong Song <yonghong.song@linux.dev>, kernel-team@fb.com, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-parisc@vger.kernel
+ .org, linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, llvm@lists.linux.dev, loongarch@lists.linux.dev
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-This series should immediately follow v8 of lib and lib/cmdline enhancements,
-see https://patchew.org/linux/20260212164413.889625-1-dmantipov@yandex.ru.
-Started from riscv32 build quirk, now it aims to provide platform-specific
-double-word shifts and corresponding KUnit test (tested on ARM as well).
+The pull request you sent on Sun, 12 Apr 2026 17:46:47 +0200:
 
-Dmitry Antipov (3):
-  riscv: add platform-specific double word shifts for riscv32
-  lib: kunit: add tests for __ashldi3(), __ashrdi3(), and __lshrdi3()
-  riscv: fix building compressed EFI image
+> ssh://git@gitolite.kernel.org/pub/scm/linux/kernel/git/kbuild/linux.git tags/kbuild-7.1-1
 
- arch/riscv/Kconfig                    |   3 -
- arch/riscv/kernel/image-vars.h        |   7 ++
- arch/riscv/lib/Makefile               |   1 +
- arch/riscv/lib/ashldi3.S              |  36 ++++++
- arch/riscv/lib/ashrdi3.S              |  37 ++++++
- arch/riscv/lib/lshrdi3.S              |  36 ++++++
- drivers/firmware/efi/Kconfig          |   4 +
- drivers/firmware/efi/libstub/Makefile |   3 +-
- lib/Kconfig.debug                     |  10 ++
- lib/tests/Makefile                    |   1 +
- lib/tests/shdi3_kunit.c               | 175 ++++++++++++++++++++++++++
- 11 files changed, 309 insertions(+), 4 deletions(-)
- create mode 100644 arch/riscv/lib/ashldi3.S
- create mode 100644 arch/riscv/lib/ashrdi3.S
- create mode 100644 arch/riscv/lib/lshrdi3.S
- create mode 100644 lib/tests/shdi3_kunit.c
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/5d0d3623303775d750e122a2542d1a26c8573d38
+
+Thank you!
 
 -- 
-2.53.0
-
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
