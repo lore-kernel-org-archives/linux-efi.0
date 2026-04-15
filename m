@@ -1,64 +1,89 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32A701E9B3D;
-	Tue, 14 Apr 2026 16:46:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA92A340A6A
+	for <linux-efi@vger.kernel.org>; Wed, 15 Apr 2026 09:53:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776185217; cv=none; b=pdAgQP00W7aV2qmbGWK04+Z3zCePLB0FWteitwDEtyuNNCrCP6sP9uLEXvje4/U6KXmcZ7SqZf1e7YwQx71bh6bxOTztWyW+5nJib09n7JlHwarLVEWadKzMz9mstKVVrOolEB+7Dc5hQb3aNxQZQDDApn/Vy0x+z8IblB77Xws=
+	t=1776246783; cv=none; b=Rtnu2Zb7DZE8QvhjiyuxA50aT6PrfnlaE9mElMMygYZBBpPXXQHYap8mauEcGdvnGYgvsCTmyl9Whprx8HtEmFjgVon3VjMy1LF970e2WHhiVPgJ3ZYYUeKTm9WUrbXeEYVaBJzhKKnhcAUes2Dtz4rR/qzAHw5d8tt6QxIQeCE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776185217; c=relaxed/simple;
-	bh=h5CUHLLZGJj1sqfzAOFN24P+lZAUpLgJCzAIP3pIVak=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=TJhsYDc1LuI96g4Pv3IOMy2YMu/9qwD8xm320Qnk2hMx8UnP6vfyf2YR/hM3ZdNmrz1Nlh7jOycQQlUkIhy2E+9K1x5Od9YMZZYmXTjzi1bL3JRY4Gf+atjw9jAACsb6aA1uIjN0YeK/JJyXPY+rk6Xt/2OPo9OoxKAYH41xD6A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=M3XzHspl; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1776246783; c=relaxed/simple;
+	bh=3fk+o8IALEh5DWjkaX/Zs/CY0Fh3YqT3vOmYEv88GKM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=VRxIrpDRMpByldNGZa32Q30Yc/n96KyzIQ/nUDHVzzQZ+Zp/i0igsz65woy52/eViPBgxIn3Q9C/2UHAlPPkxJXhpvkZZfEUO61E07vijARpu4W/CkF1OyYIJ3yEY3EVrPEv5HTZGd3WqbdqG4dqVrFF8n4GvR9pP6GL5yHatR8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=C80BTB5B; arc=none smtp.client-ip=192.198.163.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="M3XzHspl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0B62CC19425;
-	Tue, 14 Apr 2026 16:46:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1776185217;
-	bh=h5CUHLLZGJj1sqfzAOFN24P+lZAUpLgJCzAIP3pIVak=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=M3XzHspleh86r3vzAE6YUI8iX7fuNondhwJgpVrbrS0Op2mj2wIUHrH6fREXFKsIG
-	 pem7Y2vx+7Y7xwcrJ53ciAxItrD22RLU7qrf8Hp2j1xmoJc8hIvngurUvXyS+qkBub
-	 09nlGhcwM6sBuxJtfeY0yNha/v0y2nM1OpuMFM/Zr94Pf2tTnISy5Y3xt0Ci2EKXuG
-	 vKqkWXd08DrAsFfVL/8q1rNyTPsVxR/M6KO84zqoDqRYb4tOiaVJZBICeda8HWuSed
-	 ECCuMdETCSR6E3e0oPEVWgRNlqQU9u7DIt6JDR+Yv+2AaB+z66VFmF1bo5P7C02lT1
-	 Sx30d41kHGYgg==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id BA1313809A07;
-	Tue, 14 Apr 2026 16:46:28 +0000 (UTC)
-Subject: Re: [GIT PULL] Kbuild and Kconfig changes for v7.1
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <adu-ZyIv47FnsVLI@levanger>
-References: <adu-ZyIv47FnsVLI@levanger>
-X-PR-Tracked-List-Id: <linux-s390.vger.kernel.org>
-X-PR-Tracked-Message-Id: <adu-ZyIv47FnsVLI@levanger>
-X-PR-Tracked-Remote: ssh://git@gitolite.kernel.org/pub/scm/linux/kernel/git/kbuild/linux.git tags/kbuild-7.1-1
-X-PR-Tracked-Commit-Id: 404927758daac5ec4594071e033c1fa6ee9ca9b6
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 5d0d3623303775d750e122a2542d1a26c8573d38
-Message-Id: <177618518744.1376142.6209842916194520385.pr-tracker-bot@kernel.org>
-Date: Tue, 14 Apr 2026 16:46:27 +0000
-To: Nicolas Schier <nsc@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Alexander Coffin <alex@cyberialabs.net>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Bill Wendling <morbo@google.com>, David Howells <dhowells@redhat.com>, Dodji Seketeli <dodji@seketeli.org>, "H. Peter Anvin" <hpa@zytor.com>, Helge Deller <deller@gmx.de>, John Moon <john@jmoon.dev>, Jonathan Corbet <corbet@lwn.net>, Josh Poimboeuf <jpoimboe@kernel.org>, Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>, Masahiro Yamada <masahiroy@kernel.org>, Nathan Chancellor <nathan@kernel.org>, Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, Shuah Khan <skhan@linuxfoundation.org>, Song Liu <song@kernel.org>, Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>, Yonghong Song <yonghong.song@linux.dev>, kernel-team@fb.com, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-parisc@vger.kernel
- .org, linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, llvm@lists.linux.dev, loongarch@lists.linux.dev
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="C80BTB5B"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1776246780; x=1807782780;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=3fk+o8IALEh5DWjkaX/Zs/CY0Fh3YqT3vOmYEv88GKM=;
+  b=C80BTB5BZX+9oj4G7EODxhKTSOHZR+5RZzIlNPuu+wXhJWVBIdsqfoRc
+   LFoQhkCxJ91Q1nrZpbUuNfkUOcGf2NZbL7bvXbCEiXyJrmVkY0L/L8FNz
+   qUrCQuOae+1bgJTGN/Cuczm+Yrg4V6fHWLSUoeiLYSh0lBINFnhzoLLyA
+   GkB1bDMtHDL8H7Ck8/bhAAMHpLgC7r2rg0HhNRMlF37S6kfCTM7SbYieK
+   6CW7ZZ8HiumoNexh6cTsetrQjrtTPNpnsoL7QzRPufl9PjTV13XNKnbyT
+   z9G1nVF3DwLrM/FqrSIKd5nEGBidd/AYvmQe2GKqCHazkxQI4cBaa5c24
+   A==;
+X-CSE-ConnectionGUID: h8UaCT7PS7Sh8DJjFfV3CQ==
+X-CSE-MsgGUID: wvZbTRWISTu5of44aCipFA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11759"; a="87922043"
+X-IronPort-AV: E=Sophos;i="6.23,179,1770624000"; 
+   d="scan'208";a="87922043"
+Received: from orviesa008.jf.intel.com ([10.64.159.148])
+  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Apr 2026 02:53:00 -0700
+X-CSE-ConnectionGUID: 2sjnkIYqT9KpS+N/KAee0w==
+X-CSE-MsgGUID: N5TzoYGMTWavfr27vstasA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.23,179,1770624000"; 
+   d="scan'208";a="230295052"
+Received: from rvuia-mobl.ger.corp.intel.com (HELO localhost) ([10.245.244.34])
+  by orviesa008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Apr 2026 02:52:58 -0700
+Date: Wed, 15 Apr 2026 12:52:55 +0300
+From: Andy Shevchenko <andriy.shevchenko@intel.com>
+To: Dmitry Antipov <dmantipov@yandex.ru>
+Cc: Andrew Morton <akpm@linux-foundation.org>,
+	Charlie Jenkins <thecharlesjenkins@gmail.com>,
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Ard Biesheuvel <ardb@kernel.org>,
+	linux-riscv@lists.infradead.org, linux-efi@vger.kernel.org
+Subject: Re: [PATCH v4 3/3] riscv: fix building compressed EFI image
+Message-ID: <ad9f9543RuV17RnH@ashevche-desk.local>
+References: <20260414102608.573555-1-dmantipov@yandex.ru>
+ <20260414102608.573555-4-dmantipov@yandex.ru>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260414102608.573555-4-dmantipov@yandex.ru>
+Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
+ krs, Bertel Jungin Aukio 5, 02600 Espoo
 
-The pull request you sent on Sun, 12 Apr 2026 17:46:47 +0200:
+On Tue, Apr 14, 2026 at 01:26:08PM +0300, Dmitry Antipov wrote:
+> When building vmlinuz.efi with CONFIG_EFI_ZBOOT enabled,
+> '__lshrdi3()' is also needed to fix yet another link error:
+> 
+> riscv32-linux-gnu-ld: drivers/firmware/efi/libstub/lib-cmdline.stub.o: in function `__efistub_.L49':
+> __efistub_cmdline.c:(.init.text+0x202): undefined reference to `__efistub___lshrdi3'
+> 
+> And since riscv64 can have CONFIG_EFI_ZBOOT but doesn't need these
+> library routines, introduce CONFIG_EFI_ZBOOT_USE_LIBGCC to manage
+> linking of lib-ashldi3.o and lib-lshrdi3.o on riscv32 only.
 
-> ssh://git@gitolite.kernel.org/pub/scm/linux/kernel/git/kbuild/linux.git tags/kbuild-7.1-1
+Acked-by: Andy Shevchenko <andriy.shevchenko@intel.com>
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/5d0d3623303775d750e122a2542d1a26c8573d38
-
-Thank you!
+I think you need a tag from Ard on this.
 
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+With Best Regards,
+Andy Shevchenko
+
+
