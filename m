@@ -1,63 +1,64 @@
-Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
+Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCE423845B4
-	for <linux-efi@vger.kernel.org>; Tue, 21 Apr 2026 09:25:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D2923A3834
+	for <linux-efi@vger.kernel.org>; Tue, 21 Apr 2026 09:26:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776763560; cv=none; b=URRhXrsdPkE6pRq6Ht32LK5ggn+A5/UvdEkg6vz89IogaFWtvZHClRlau0H7BnX97an/+3S4089Cl1nSJrT3mZZ8K8JODNN5fS4Djsbj+nF/v9Gb/b9e3PsKq5I09KuLMMrtX9RhZCtKo7rAsUPuGV8cRNGZ3NOXoEzqGgLPLuo=
+	t=1776763568; cv=none; b=S0ARNgqPNtWUOYRjOIUKgK+5B3kerr8D6tXHpJ9UB7z86Qtzgg4ascMhgQ3rq5adY0o2CiHXP1n8uT1Vjr/lytylKlLS8R7DM4tv+hpN0/inqpxYvo1auNLnJoxPNshPe4mwbEmqiq5RTLEUpqhom9DdPaT6rkXjrF7USBweiPU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776763560; c=relaxed/simple;
-	bh=mHZEN9VsRGqjqCssbvNKqiiprdqF3SpE8VAB/Dd5Wtg=;
+	s=arc-20240116; t=1776763568; c=relaxed/simple;
+	bh=6PIN/dG7wFqQzqUa3HZ7Md7FkGfW//HU1jgeoeBIV1E=;
 	h=From:To:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=IYHi02bv31f51VhUjFllPc1/MR5P8OveNZDdoicazg8YnFOkM4dA3EW3no3j4EDT23S24TsFqlqiB5496nRjq4P+DVMIczRfTroPsVGUdiGNWbQocRgi7vHyCkI9vrfQznPbJD/Nwv9I3NTmebd6TJwQ0IFlYAkBqYwrYW8nLCg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com; spf=pass smtp.mailfrom=bytedance.com; dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b=lYThRDqh; arc=none smtp.client-ip=209.85.214.171
+	 MIME-Version; b=q7k2CPxceMV7fUBHbUn65bTie3qzmfHkRpBDJBJCAo6VzCY2oZJbv8vT4Zr0mv3VNuq/Os+T1zGwYW1ldCvfooxyUNm3/LpXpjBet9h1ppbicIzFVzSJ8be/6GUDUt4MkQL8jabBt3LjhS4wuulEnjQhhVE6Nsl2qic4T/hj+XE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com; spf=pass smtp.mailfrom=bytedance.com; dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b=aLgBMTtq; arc=none smtp.client-ip=209.85.216.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bytedance.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b="lYThRDqh"
-Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-2adbfab4501so19507925ad.2
-        for <linux-efi@vger.kernel.org>; Tue, 21 Apr 2026 02:25:57 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b="aLgBMTtq"
+Received: by mail-pj1-f51.google.com with SMTP id 98e67ed59e1d1-354bc7c2c46so2402522a91.0
+        for <linux-efi@vger.kernel.org>; Tue, 21 Apr 2026 02:26:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bytedance.com; s=google; t=1776763557; x=1777368357; darn=vger.kernel.org;
+        d=bytedance.com; s=google; t=1776763566; x=1777368366; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=CqGRaYikd48k8jEHjjdiykQw70hWXJqzRcIUQ0MV2mg=;
-        b=lYThRDqhzeUmWdXf2XYH+8RL82uBbJnDFkstNVFWbtBtaYV9HzuYdqdPM0ufRTjavq
-         06Y4Yiri4ZtQ2GcD/5kHFN5neReyU55H7/GIlZn/SZq8gqMrW8bWKw0i892zGi+Cf9NY
-         xuioPEopBdzdB9X2jmL9XZscgssLU4ZwnTlBHQycJiOgx1nOJOA5i5t1Hri5EIQE2hHR
-         oFy9BLjRynWM3rbal//Q7oSrCYvJjYb8MQWex3qGFGbJcVc/u6IsaD0QNnoshOIoHLHi
-         kD3l2nHp7NsSVSmhTsVcRPG9RHT2MjPyr1112gkLS8zHj60sY3zlQ6UB3WpoD4oVjC+1
-         aySw==
+        bh=FJWvxx2SvBNX2CVsFvwsTk0IK3zSjjAIlJH4BJFUonM=;
+        b=aLgBMTtq5BDkSduB8coXYpoodGKG9tuSocK8BDlmgDOrw8Kqzo+gYzNq0/wtkZubha
+         hjZgW9QOzntpnZDp2LqV4LtUGHX38VDzo4tkVZxUukxYFKvbORQpL4jxUYpklFTCAZJU
+         XVnlqo4Hk0YfY2Fv73Bk8KXyyEhO5ZdBJ61pnldTgG68w2/71TWZm8HFm54AH+x8Y9o3
+         LgLMbfIRHCIyqfkAhh37nUdvqcx3O7HFhlPBIxpq0rGb1nqvrXNE4oQjDdgzcCGqUjYu
+         TqYgmCuEisedUau/et0KIf3OaMaCfY2cCHDXjQiQO1RAnTTu1e5fWpck+8S+bt09L5XV
+         4h/A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776763557; x=1777368357;
+        d=1e100.net; s=20251104; t=1776763566; x=1777368366;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-gg:x-gm-message-state:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=CqGRaYikd48k8jEHjjdiykQw70hWXJqzRcIUQ0MV2mg=;
-        b=M6b2+4N8F5E5mM8yJTidCf5qb6a0Pbs1iHrbr/rROKmnWLeJ1KN7/xxFmDTQctXxhV
-         vNBIn8YceRIKJCYrTflQ60mYb4iegnplT6/fp6xeHxpPENLnX0gPHtz1jwkw5eHDBdaz
-         PJpoFncxx+Pi3XZqmVNZZoW26mbNd/MMiM6S5BULVIXOB0D7zv/Hufh5T/F15dMMixxy
-         WuYYuYGIBUJIIzPdbeqgbGicmBEktkH0XHinSn7xIUfEeeav2od6AmMmr1QYDalKYNak
-         zTRuv121Xwq9F2f2zzoNbYFsvXD9CbnOluzU1A/1V55HKfCeR/XhMno6+Q2JQaAeY/zd
-         Q4bg==
-X-Forwarded-Encrypted: i=1; AFNElJ9KkZvX6ZPk0hSWwGtomXGDhjerbWe+rCrldb7vVvm/hT0s9gAhtKGtY7YptJnTaD8ru/sd19jdUoQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxFUlabJnwakaslvWFThKXLttv4mMVEyW5Y2zDLGBATwf192n3h
-	z2Pd/8t0tDSM9aTcGe/giePgh1xngWGqUlI10gRcglXwb72iX6nM2S0opmip2i1C2cY=
-X-Gm-Gg: AeBDievR1BrEQ1NJRdzXEQCkWUxJQaEu/4VB+YUQwobFirRsHImzM5vnlwGhhPz6eMd
-	YLTtcK8oFTC5zYXbeJiYljTlLUT+vIAT1mIC8+bxhqhp8wFm12E6qZd1fXqvKae+ZD59GH/vdes
-	Dw2e/YsTjgecQ68ppLKQBd1rjI//oVrBlflvn/KWwDd07qUvn27gegdou429yzhTOl1/ViZxv1w
-	zHdTfwkeeIVaNiQqYSie6uWWZO2pbKahVAo4CfBCiu2fs/ndz8DwtuwhRjNgVB4/MBPBZha1PXm
-	puAyr51jDzuVG3dHTAh0wN+f0fKBHJGuirulEl12MfZoHi5Fe8Gdj57F9/gI5USdIjljf69kDnD
-	mz8TP526Fb7RHz9ND/nx8snSchztL2rHpG99NN3M5t59EDppIoIKYXUMBG9NR0oeZC7FWZ443Fo
-	lh7bQAVCt6+wAJ78ekdmqWS5NOnBlxPIERF3co03ohSbAbs0OrE2mgZIO+nHLfWjLdpcfI
-X-Received: by 2002:a17:903:1b30:b0:2b4:586d:2e5c with SMTP id d9443c01a7336-2b5f9ecbaa1mr174163805ad.2.1776763557022;
-        Tue, 21 Apr 2026 02:25:57 -0700 (PDT)
+        bh=FJWvxx2SvBNX2CVsFvwsTk0IK3zSjjAIlJH4BJFUonM=;
+        b=m5NJW5tcwaWfUEv9t154Mz/oNydVFbNaxG7DwLFMh12JQuZcAJg/7I7rtzhzgAHncO
+         RmUD1OnkfuaKR4Zma74zvXBIWu7AFT6IL41TZBscet6ssyPQir7LI/dyI7vzLcX5Vzul
+         UMdLRn7fhUE3ekuHrqPF0kMPyWRbmGDa8qfOSWB23w/IEWc2C+1peJsE9OiYMb5cGma3
+         CyhOO2e3GZY4aRkM2ONZxub/ShD9XV33E5Nmd+Pk7i1rH7Z2iV624WBGYM7laT59bUL3
+         V7hGEKvnQYtw1OcoKvvAXr8MVkOeOuRMxf71XAyun/NF8lXmXOr3LxymX/RENVG//4hx
+         O/lA==
+X-Forwarded-Encrypted: i=1; AFNElJ9LJkSLFksP822yv3sjwT1sA9aW8eqsmPtVP+IxkgydUwcMOI724cPFW4YYLxjQWOohqCaHhNqRydU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YznY6Ezop0jwiosJgUD6wUysCUjUXHNvnelBxzxupzhQoHfvAfZ
+	y7Zft6R1GMrYtrtFadTUE2sCRiXPdXW3y1eCupzd/uu3aRMXfuG00FLpu0LSGAJ15Lc=
+X-Gm-Gg: AeBDiesXIs5gMgbzUgzmUixbeL8HYpFgolhRBzt0dZdvpfY2mdJFap6bOWAQrycQo87
+	aXK7I+ojcVnhBr+O/MHuYWa55MI5/hmeAnW664mQrG/AqThK8fTugtPDc3evcXyBYxVXKdPXHuo
+	DMBO20iM9MuVhY/+KZkP14gL7d1qe8L9F2N6wkmT0XX5NsZBfj0F6+KAUuj3GPjstNxPEMqHMNK
+	WQAXe+rHVoBFOY2YONlh61s0l63Yd1eKSaK6qbRfzNJ4zOYDkXKbtFOpfy5MLUF4vFHF+UthFlL
+	ccRQMyENdtxbiYYG6U5+gSj+wACnjaV2k+50mxb+C+q9aOVKdMDTiytFxKVhQWHB6gelay8HUhq
+	cA/WhROiYdXiTDD1nQMaKV233KP9btYHPcfmsC7jmDRGcz/DHM7SdYhtev/BRbQm6OJbf2vfdiw
+	GKv6sgM5i4r952PiBmfo1MUJSBaTOBK6pQW+nE7VdMvfSC8henEsI2wGEYsmNAhdVwHUAFDxZHF
+	/dZtVg=
+X-Received: by 2002:a17:90b:5865:b0:35d:a557:e41 with SMTP id 98e67ed59e1d1-3614046f978mr18558407a91.14.1776763566317;
+        Tue, 21 Apr 2026 02:26:06 -0700 (PDT)
 Received: from L6YN4KR4K9.bytedance.net ([61.213.176.6])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b5fa9ff39csm131965105ad.4.2026.04.21.02.25.48
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b5fa9ff39csm131965105ad.4.2026.04.21.02.25.57
         (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Tue, 21 Apr 2026 02:25:56 -0700 (PDT)
+        Tue, 21 Apr 2026 02:26:05 -0700 (PDT)
 From: Yunhui Cui <cuiyunhui@bytedance.com>
 To: akpm@linux-foundation.org,
 	alex@ghiti.fr,
@@ -101,9 +102,9 @@ To: akpm@linux-foundation.org,
 	vishal.moola@gmail.com,
 	wangruikang@iscas.ac.cn,
 	zhangchunyan@iscas.ac.cn
-Subject: [PATCH 5/7] riscv: add contiguous PTE range clearing helpers
-Date: Tue, 21 Apr 2026 17:24:55 +0800
-Message-Id: <20260421092457.37649-6-cuiyunhui@bytedance.com>
+Subject: [PATCH 6/7] riscv: batch write-protect contiguous PTE ranges
+Date: Tue, 21 Apr 2026 17:24:56 +0800
+Message-Id: <20260421092457.37649-7-cuiyunhui@bytedance.com>
 X-Mailer: git-send-email 2.39.2 (Apple Git-143)
 In-Reply-To: <20260421092457.37649-1-cuiyunhui@bytedance.com>
 References: <20260421092457.37649-1-cuiyunhui@bytedance.com>
@@ -115,251 +116,156 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add Svnapot-aware implementations of clear_full_ptes() and
-get_and_clear_full_ptes() so full PTE batches can be cleared without
-losing the required unfold semantics for NAPOT mappings.
+Hook wrprotect_ptes() into the Svnapot contpte helpers so write
+protection can preserve fully covered NAPOT blocks and only unfold
+partial ranges at the edges.
 
 Signed-off-by: Yunhui Cui <cuiyunhui@bytedance.com>
 ---
- arch/riscv/include/asm/pgtable.h | 75 ++++++++++++++++++++++++-
- arch/riscv/mm/contpte.c          | 96 ++++++++++++++++++++++++++++++++
- 2 files changed, 170 insertions(+), 1 deletion(-)
+ arch/riscv/include/asm/pgtable.h | 38 +++++++++++++++++++++++++++--
+ arch/riscv/mm/contpte.c          | 42 ++++++++++++++++++++++++++++++++
+ 2 files changed, 78 insertions(+), 2 deletions(-)
 
 diff --git a/arch/riscv/include/asm/pgtable.h b/arch/riscv/include/asm/pgtable.h
-index 722483d4df37f..3e6516b5a4587 100644
+index 3e6516b5a4587..db82253efb218 100644
 --- a/arch/riscv/include/asm/pgtable.h
 +++ b/arch/riscv/include/asm/pgtable.h
-@@ -657,7 +657,6 @@ static inline void __set_pte_at(struct mm_struct *mm, pte_t *ptep, pte_t pteval)
+@@ -813,13 +813,30 @@ __ptep_set_wrprotect(struct mm_struct *mm, unsigned long address, pte_t *ptep)
+ 	 * shadow stack memory is XWR = 010 and thus clearing _PAGE_WRITE will lead to
+ 	 * encoding 000b which is wrong encoding with V = 1. This should lead to page fault
+ 	 * but we dont want this wrong configuration to be set in page tables.
++	 * Keep the entry readable when clearing write permissions so we don't create
++	 * an invalid present encoding.
+ 	 */
+ 	atomic_long_set((atomic_long_t *)ptep,
+-			((pte_val(read_pte) & ~(unsigned long)_PAGE_WRITE) | _PAGE_READ));
++			(pte_val(read_pte) & ~(unsigned long)_PAGE_WRITE) |
++			_PAGE_READ);
  }
  
- #define PFN_PTE_SHIFT		_PAGE_PFN_SHIFT
--
- static inline void __set_ptes(struct mm_struct *mm, unsigned long addr,
- 			      pte_t *ptep, pte_t pteval, unsigned int nr)
- {
-@@ -764,6 +763,47 @@ __ptep_get_and_clear(struct mm_struct *mm, unsigned long address, pte_t *ptep)
+ #define __ptep_set_wrprotect __ptep_set_wrprotect
  
- #define __ptep_get_and_clear __ptep_get_and_clear
- 
-+static inline void __clear_full_ptes(struct mm_struct *mm, unsigned long addr,
-+				     pte_t *ptep, unsigned int nr, int full)
++static inline void __wrprotect_ptes(struct mm_struct *mm,
++				    unsigned long address,
++				    pte_t *ptep, unsigned int nr)
 +{
-+	(void)full;
-+
 +	for (;;) {
-+		__ptep_get_and_clear(mm, addr, ptep);
++		__ptep_set_wrprotect(mm, address, ptep);
 +		if (--nr == 0)
 +			break;
 +		ptep++;
-+		addr += PAGE_SIZE;
++		address += PAGE_SIZE;
 +	}
 +}
 +
-+#define __clear_full_ptes __clear_full_ptes
-+
-+static inline pte_t __get_and_clear_full_ptes(struct mm_struct *mm,
-+					      unsigned long addr,
-+				      pte_t *ptep,
-+				      unsigned int nr,
-+				      int full)
-+{
-+	pte_t pte, tmp_pte;
-+
-+	(void)full;
-+
-+	pte = __ptep_get_and_clear(mm, addr, ptep);
-+	while (--nr) {
-+		ptep++;
-+		addr += PAGE_SIZE;
-+		tmp_pte = __ptep_get_and_clear(mm, addr, ptep);
-+		if (pte_dirty(tmp_pte))
-+			pte = pte_mkdirty(pte);
-+		if (pte_young(tmp_pte))
-+			pte = pte_mkyoung(pte);
-+	}
-+
-+	return pte;
-+}
-+
-+#define __get_and_clear_full_ptes __get_and_clear_full_ptes
- static inline void
- __ptep_set_wrprotect(struct mm_struct *mm, unsigned long address, pte_t *ptep)
- {
-@@ -831,6 +871,11 @@ pte_t napotpte_ptep_get(pte_t *ptep, pte_t orig_pte);
- pte_t napotpte_ptep_get_lockless(pte_t *ptep);
- void napotpte_set_ptes(struct mm_struct *mm, unsigned long addr,
- 		       pte_t *ptep, pte_t pte, unsigned int nr);
-+void napotpte_clear_full_ptes(struct mm_struct *mm, unsigned long addr,
-+			      pte_t *ptep, unsigned int nr, int full);
-+pte_t napotpte_get_and_clear_full_ptes(struct mm_struct *mm,
-+				       unsigned long addr, pte_t *ptep,
-+				       unsigned int nr, int full);
++#define __wrprotect_ptes __wrprotect_ptes
+ static inline pte_t __ptep_clear_flush(struct vm_area_struct *vma,
+ 				       unsigned long address,
+ 				       pte_t *ptep)
+@@ -879,6 +896,8 @@ pte_t napotpte_get_and_clear_full_ptes(struct mm_struct *mm,
  void napotpte_clear_young_dirty_ptes(struct vm_area_struct *vma,
  				     unsigned long addr, pte_t *ptep,
  			     unsigned int nr, cydp_t flags);
-@@ -933,6 +978,32 @@ static inline void clear_young_dirty_ptes(struct vm_area_struct *vma,
- 	napotpte_clear_young_dirty_ptes(vma, addr, ptep, nr, flags);
++void napotpte_wrprotect_ptes(struct mm_struct *mm, unsigned long addr,
++			     pte_t *ptep, unsigned int nr);
+ bool napotpte_ptep_set_access_flags(struct vm_area_struct *vma,
+ 				    unsigned long address, pte_t *ptep,
+ 			    pte_t entry, int dirty);
+@@ -1004,11 +1023,25 @@ static inline pte_t get_and_clear_full_ptes(struct mm_struct *mm,
+ 	return napotpte_get_and_clear_full_ptes(mm, addr, ptep, nr, full);
  }
  
-+#define clear_full_ptes clear_full_ptes
-+static inline void clear_full_ptes(struct mm_struct *mm, unsigned long addr,
-+				   pte_t *ptep, unsigned int nr, int full)
++#define wrprotect_ptes wrprotect_ptes
++static inline void wrprotect_ptes(struct mm_struct *mm,
++				  unsigned long address, pte_t *ptep,
++				  unsigned int nr)
 +{
 +	if (likely(nr == 1)) {
-+		napotpte_try_unfold(mm, addr, ptep, __ptep_get(ptep));
-+		__clear_full_ptes(mm, addr, ptep, nr, full);
++		napotpte_try_unfold(mm, address, ptep, __ptep_get(ptep));
++		__ptep_set_wrprotect(mm, address, ptep);
 +		return;
 +	}
 +
-+	napotpte_clear_full_ptes(mm, addr, ptep, nr, full);
-+}
-+
-+#define get_and_clear_full_ptes get_and_clear_full_ptes
-+static inline pte_t get_and_clear_full_ptes(struct mm_struct *mm,
-+					    unsigned long addr, pte_t *ptep,
-+				    unsigned int nr, int full)
-+{
-+	if (likely(nr == 1)) {
-+		napotpte_try_unfold(mm, addr, ptep, __ptep_get(ptep));
-+		return __get_and_clear_full_ptes(mm, addr, ptep, nr, full);
-+	}
-+
-+	return napotpte_get_and_clear_full_ptes(mm, addr, ptep, nr, full);
++	napotpte_wrprotect_ptes(mm, address, ptep, nr);
 +}
 +
  #define __HAVE_ARCH_PTEP_SET_WRPROTECT
  static inline void ptep_set_wrprotect(struct mm_struct *mm,
  				      unsigned long address, pte_t *ptep)
-@@ -989,6 +1060,8 @@ napotpte_ptep_clear_flush_young(struct vm_area_struct *vma,
- #define ptep_get_lockless			__ptep_get_lockless
- #define ptep_get_and_clear			__ptep_get_and_clear
+ {
+-	__ptep_set_wrprotect(mm, address, ptep);
++	wrprotect_ptes(mm, address, ptep, 1);
+ }
+ 
+ #define __HAVE_ARCH_PTEP_CLEAR_YOUNG_FLUSH
+@@ -1062,6 +1095,7 @@ napotpte_ptep_clear_flush_young(struct vm_area_struct *vma,
  #define clear_young_dirty_ptes			__clear_young_dirty_ptes
-+#define clear_full_ptes				__clear_full_ptes
-+#define get_and_clear_full_ptes			__get_and_clear_full_ptes
+ #define clear_full_ptes				__clear_full_ptes
+ #define get_and_clear_full_ptes			__get_and_clear_full_ptes
++#define wrprotect_ptes				__wrprotect_ptes
  #define __HAVE_ARCH_PTEP_SET_WRPROTECT
  #define ptep_set_wrprotect			__ptep_set_wrprotect
  #define __HAVE_ARCH_PTEP_CLEAR_YOUNG_FLUSH
 diff --git a/arch/riscv/mm/contpte.c b/arch/riscv/mm/contpte.c
-index f73af7d9b099a..77c2a4dbd3dda 100644
+index 77c2a4dbd3dda..077ffa49e89d9 100644
 --- a/arch/riscv/mm/contpte.c
 +++ b/arch/riscv/mm/contpte.c
-@@ -107,6 +107,38 @@ __napot_ptep_get_and_clear(struct mm_struct *mm, unsigned long addr, pte_t *ptep
- 	return pte;
+@@ -261,6 +261,30 @@ static void napotpte_try_unfold_range(struct mm_struct *mm,
+ 	}
  }
  
-+static void __napot_clear_full_ptes(struct mm_struct *mm, unsigned long addr,
-+				    pte_t *ptep, unsigned int nr)
++static void napotpte_try_unfold_partial(struct mm_struct *mm,
++					unsigned long addr, pte_t *ptep,
++					unsigned int nr)
 +{
-+	for (;;) {
-+		__napot_ptep_get_and_clear(mm, addr, ptep);
-+		if (--nr == 0)
-+			break;
-+		ptep++;
-+		addr += PAGE_SIZE;
-+	}
-+}
-+
-+static pte_t __napot_get_and_clear_full_ptes(struct mm_struct *mm,
-+					     unsigned long addr, pte_t *ptep,
-+					     unsigned int nr)
-+{
-+	pte_t pte, tmp_pte;
-+
-+	pte = __napot_ptep_get_and_clear(mm, addr, ptep);
-+	while (--nr) {
-+		ptep++;
-+		addr += PAGE_SIZE;
-+		tmp_pte = __napot_ptep_get_and_clear(mm, addr, ptep);
-+		if (pte_dirty(tmp_pte))
-+			pte = pte_mkdirty(pte);
-+		if (pte_young(tmp_pte))
-+			pte = pte_mkyoung(pte);
-+	}
-+
-+	return pte;
-+}
-+
- static void napotpte_convert(struct mm_struct *mm, unsigned long addr,
- 			     pte_t *ptep, pte_t target)
- {
-@@ -202,6 +234,33 @@ void __napotpte_try_fold(struct mm_struct *mm, unsigned long addr,
- }
- EXPORT_SYMBOL(__napotpte_try_fold);
- 
-+static void napotpte_try_unfold_range(struct mm_struct *mm,
-+				      unsigned long addr, pte_t *ptep,
-+				      unsigned int nr)
-+{
-+	unsigned long next;
 +	pte_t pte;
-+	unsigned int chunk;
 +
-+	while (nr) {
++	if (ptep != napot_align_ptep(ptep) || nr < napotpte_pte_num()) {
 +		pte = READ_ONCE(*ptep);
-+		if (pte_present_napot(pte)) {
++		if (pte_present_napot(pte))
 +			__napotpte_try_unfold(mm, addr, ptep, pte);
-+			next = napot_align_addr(addr) + napotpte_size();
-+			chunk = (next - addr) >> PAGE_SHIFT;
-+		} else {
-+			chunk = 1;
-+		}
++	}
 +
-+		if (chunk > nr)
-+			chunk = nr;
++	if (ptep + nr != napot_align_ptep(ptep + nr)) {
++		unsigned long last_addr;
++		pte_t *last_ptep;
 +
-+		ptep += chunk;
-+		addr += chunk * PAGE_SIZE;
-+		nr -= chunk;
++		last_addr = addr + PAGE_SIZE * (nr - 1);
++		last_ptep = ptep + nr - 1;
++		pte = READ_ONCE(*last_ptep);
++		if (pte_present_napot(pte))
++			__napotpte_try_unfold(mm, last_addr, last_ptep, pte);
 +	}
 +}
 +
  void __napotpte_try_unfold(struct mm_struct *mm, unsigned long addr,
  			   pte_t *ptep, pte_t pte)
  {
-@@ -349,6 +408,43 @@ void napotpte_set_ptes(struct mm_struct *mm, unsigned long addr,
+@@ -485,6 +509,24 @@ void napotpte_clear_young_dirty_ptes(struct vm_area_struct *vma,
  }
- EXPORT_SYMBOL(napotpte_set_ptes);
+ EXPORT_SYMBOL(napotpte_clear_young_dirty_ptes);
  
-+void napotpte_clear_full_ptes(struct mm_struct *mm, unsigned long addr,
-+			      pte_t *ptep, unsigned int nr, int full)
++void napotpte_wrprotect_ptes(struct mm_struct *mm, unsigned long addr,
++			     pte_t *ptep, unsigned int nr)
 +{
-+	(void)full;
++	unsigned int i;
 +
 +	if (!napot_hw_supported() || !mm_is_user(mm)) {
-+		__napot_clear_full_ptes(mm, addr, ptep, nr);
++		for (i = 0; i < nr; i++, ptep++, addr += PAGE_SIZE)
++			__ptep_set_wrprotect(mm, addr, ptep);
 +		return;
 +	}
 +
-+	/*
-+	 * Unlike arm64 contpte, a Svnapot PTE block stores identical
-+	 * napot-encoded entries across the whole block rather than per-page
-+	 * PFNs. Batch zap paths must therefore unfold the whole covered range
-+	 * so the core MM later sees ordinary per-page PTEs for rmap/rss/tlb
-+	 * batching.
-+	 */
-+	napotpte_try_unfold_range(mm, addr, ptep, nr);
-+	__napot_clear_full_ptes(mm, addr, ptep, nr);
++	napotpte_try_unfold_partial(mm, addr, ptep, nr);
++
++	for (i = 0; i < nr; i++, ptep++, addr += PAGE_SIZE)
++		__ptep_set_wrprotect(mm, addr, ptep);
 +}
-+EXPORT_SYMBOL(napotpte_clear_full_ptes);
++EXPORT_SYMBOL(napotpte_wrprotect_ptes);
 +
-+pte_t napotpte_get_and_clear_full_ptes(struct mm_struct *mm,
-+				       unsigned long addr, pte_t *ptep,
-+				       unsigned int nr, int full)
-+{
-+	(void)full;
-+
-+	if (!napot_hw_supported() || !mm_is_user(mm))
-+		return __napot_get_and_clear_full_ptes(mm, addr, ptep, nr);
-+
-+	napotpte_try_unfold_range(mm, addr, ptep, nr);
-+
-+	return __napot_get_and_clear_full_ptes(mm, addr, ptep, nr);
-+}
-+EXPORT_SYMBOL(napotpte_get_and_clear_full_ptes);
-+
- void napotpte_clear_young_dirty_ptes(struct vm_area_struct *vma,
- 				     unsigned long addr, pte_t *ptep,
- 				     unsigned int nr, cydp_t flags)
+ bool napotpte_ptep_set_access_flags(struct vm_area_struct *vma,
+ 				    unsigned long address, pte_t *ptep,
+ 				    pte_t entry, int dirty)
 -- 
 2.39.5
 
