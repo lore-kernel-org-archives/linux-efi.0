@@ -1,53 +1,53 @@
-Received: from mail-wr1-f73.google.com (mail-wr1-f73.google.com [209.85.221.73])
+Received: from mail-wm1-f73.google.com (mail-wm1-f73.google.com [209.85.128.73])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD5E137FF7A
-	for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 15:21:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A6FE2381B01
+	for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 15:21:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776957679; cv=none; b=TujWZqcp+w9wrZ/Mi1gKZBA/AzcfOLLB8Xa2cP4uDnrayoWQnhGfw4fkX7lXCLM7/qrXhDh0n8sY95r6TJOPlbHIcE8reE69OAWtvkNncmvuP4gqwyEC/LQala7QWYPlo/YWGo+dhDM2oU/QpQGDVD3u+wc37V2WSvgwwcwB55s=
+	t=1776957680; cv=none; b=KselCOEHymBF+YY6oDDuX8ha+qy1CVCSlJu9yo6hWlkEli/u8iVItkstyU46RB9QFCk8wID9lhxSYNH1DCZioKAWkyoEKA3kN6zywpFv8nrqhZQSQwRmA7RJFMKFaqCs3HgXzQg2j5zn5oBbCf72TVLScC5twWANOWncUXiDDKg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776957679; c=relaxed/simple;
-	bh=BCHBdFu7uj0WMDlyV3LNlEBXBdnZDeTgsZHS9yOthWw=;
+	s=arc-20240116; t=1776957680; c=relaxed/simple;
+	bh=/FrkEXbR6BKCZAc2NMh4D/rpko7QrXBn+oyA+ZQFggY=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=vCKSLyItaWSZZFV/lrpt93X+ekvSGwXTdKvikDdnGtTpXjXa1/pCIvkjkLxI0WXC2cK3PYMFoHSmzPAkSNmwrco5X6GiBYLqKeIk5ONDScMokpzbzLwukEUlrDmbYVgvHhZz+hQq95G2BuMBUNdHnDmP3Xy+Cp2V0CwkwGzvaS8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=wdXLftys; arc=none smtp.client-ip=209.85.221.73
+	 To:Cc:Content-Type; b=YLKz59l77b2nR6M3CTUr2iun0XNccp3Msrkhx8u88v3ot6J5S2l9WQ+SzdKsPM3KhPKN5ZzXFtptRpfcedBcEPjy+CRTmvAQAfSFkByPzMxJAcpzu7FwCmE4DYOIDqAfQmHtnaPkHrJYtWI5aeSmzR5lJepaTlkEujrE5TkFC2E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=kTkvAk1V; arc=none smtp.client-ip=209.85.128.73
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="wdXLftys"
-Received: by mail-wr1-f73.google.com with SMTP id ffacd0b85a97d-43d1dea12aaso5478863f8f.1
-        for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 08:21:17 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="kTkvAk1V"
+Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-488c2cc0cbaso48834135e9.3
+        for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 08:21:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1776957676; x=1777562476; darn=vger.kernel.org;
+        d=google.com; s=20251104; t=1776957677; x=1777562477; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=fua20tDRknPI0AcOnbhBXrprPjr6FkRST/bHlhqglgk=;
-        b=wdXLftysjiwWCV7cIpnoYuWgFBfCFynyUF5gSciVFlsD24Igmd2KS0j6+NB3Oi5qfm
-         MsJcOKHNaBEsP+A1MPQDEd9Y8uya3cZAVuJBQrBAhF9sTDxChZZHGz+sOFnth5hr/NMu
-         b0HZ3KOy2B6+kg1OeofAn5Hd+YMXaBAW2vvBgD/824PKcZQGP4A3g6azu+B6ff3RlUuB
-         l8osIg0Xwlch2hUYeT2LP6+ppnDWRPJTIM6LMEP3b2uzmKUnP3piFfO5bEITUKVMaVV8
-         e6fqJd/aQyapBHX3ULW2lzc6Rcn4SIMEeJbG0VSEUguDSYHWsqk60H07AzkM4tbJEiKB
-         Nswg==
+        bh=CMx9vXyaaNF/GCKNIFsaZ8/8V2fmYY75CqyB0473Pr8=;
+        b=kTkvAk1V67gtzYIeHBvBbHCj4HO9PwPpelnHtdXhs0eZF2+UQGYBG5R3yJ2bqN+5/b
+         fxFtlSyRi1VWWBFIEPpVDYgzfp7vTJdUfubPZJRE1eNSPsw5re/K6mUdn9SRy7195T95
+         MGm/lnTes4kSF5xmgocDzK9MChEbOhMHHk87x82turmTK/g8cPXwwaKM8fkfmxqZ+OPj
+         bhKqcg0jjSCtWFHCuh+FL6a5AeNrjeOal+uZqOegqWyl8DyF8u+7aReUi2gwXAdi7ZD2
+         e3NWQ10zn1NVGVcGkOerqcIduoc/82px0hpEgFFbDHdAbupCYkTNrn7LQSu6+iqMTNAo
+         M5kA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776957676; x=1777562476;
+        d=1e100.net; s=20251104; t=1776957677; x=1777562477;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=fua20tDRknPI0AcOnbhBXrprPjr6FkRST/bHlhqglgk=;
-        b=I6mqYTvZJkxI4h80rxjAD2tLYPWTMGC3eItX6x2aWZ3xstmz4djJNKH1JGZfisi+z8
-         hHF/Ffy4oi4bIm0iQ8yl/nT29ye6DWT4JvOM1FONKI5GqNrsxa0Z0bqd2omx0LxIf8Tg
-         wF5VrV1rPGDckVcdDta63XT5ia6XDkO7z8FZcepIFhNPpMQjYmGdsN/DatMqTxhcX8vR
-         A+sCyrsUUvcMOGjeZwvAKm0172sIBptrrylQWFHbTxCQH/yZsOgayS4EFFWF6WKQOytO
-         sZ7Jsw2CWXGyzdLpWsOHQF1jfo4EOc+shZNTD1eP/VFlLNjGwfO9wftqhLeub3ri6Lon
-         3Tsw==
-X-Gm-Message-State: AOJu0YwbfsBjYVR5hacu+6jGs/ie7BS2nIodS8db7UufhOmlZIDEoJh2
-	7oBARHtoTs6KEP7iKnpGY+zBCCbWtNl9TIoH3aCadndwjkmD0/MEbsFg0tHHXjbZwXYx1w0FWA=
+        bh=CMx9vXyaaNF/GCKNIFsaZ8/8V2fmYY75CqyB0473Pr8=;
+        b=sWgDlQXX0NQTnNlbZAjt1Cz3Iyjgl3+DFbzuzzNTPDrYWbwC80MQEL9iUbabu26847
+         GeCpsCpggiUZFc2VG7T8u1j+iVXWlGSQOVm9+3kO+Dl9n9CfOhHTZ3V+bgnmPMEhTKgt
+         74/CdtV8H0/qQ9Ubx8zFbE0x3ZLuwihgdWx/haj76J345o90L8EfjTGv8Dsyk/MF6oQg
+         gN5z9tK6pPOqmCMEz+uz6bZcwdUFvvY8XSvjD1N1S/Fs3URHZRqsfVaI14R+kRTwvnAy
+         IiUF3HELWuOeAtKonkutMIEMCthni3b4q+e0wtDw7Sqjj58c0cRIweyIHw2JaKBEhZXW
+         fw7w==
+X-Gm-Message-State: AOJu0Yy4+aSlILiBCW0UpnakhUlQZWkIuzy7bWcejKo4drAkEQZpRy8e
+	tdi8a/dqYWGQKxNcce+aqKsK45S4HTVReU+N3E59sUYZkrM7qc6I7r/btEUdgKCt2G3BDcTr7A=
 	=
-X-Received: from wrsn16.prod.google.com ([2002:a5d:4850:0:b0:43e:ade7:8d95])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:4283:b0:43d:73ff:fd59
- with SMTP id ffacd0b85a97d-43fe3db9bc9mr42465799f8f.10.1776957676034; Thu, 23
- Apr 2026 08:21:16 -0700 (PDT)
-Date: Thu, 23 Apr 2026 17:20:40 +0200
+X-Received: from wrob7.prod.google.com ([2002:adf:ee87:0:b0:43d:7d01:5235])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:8588:b0:489:2005:b36e
+ with SMTP id 5b1f17b1804b1-4892005b4e9mr157083885e9.19.1776957677108; Thu, 23
+ Apr 2026 08:21:17 -0700 (PDT)
+Date: Thu, 23 Apr 2026 17:20:41 +0200
 In-Reply-To: <20260423152024.1098465-19-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -57,15 +57,15 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20260423152024.1098465-19-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3599; i=ardb@kernel.org;
- h=from:subject; bh=7zfXJlzwkp063m58UDmY7Gt1EcrqwR4mQhLXAixBhyI=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfOVxblQU1Uenk3mzE9fpL6b9KO5rile8u3uezPuHsnXq
- Z3B8up4RykLgxgXg6yYIovA7L/vdp6eKFXrPEsWZg4rE8gQBi5OAZjILQ1GhkUz3RZLnHjf72u2
- 3OHjy4tpYqxpM890/mvQEne5I2uyR4eR4cj+Kc8+WmbF65r/kXHc9jG39dLx1K6JsVGfrgWHsNb r8AEA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4160; i=ardb@kernel.org;
+ h=from:subject; bh=5pSlsIgmqgTBkw/HCh3I/VbXVQ1Fg4Uy0UDAtPG9sW0=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfOVxQUmmwn/f0w/cHrWgvfrfkxrrt0TvdbJr7E17cxsA
+ edzDw5LdpSyMIhxMciKKbIIzP77bufpiVK1zrNkYeawMoEMYeDiFICJ7D/ByPDFf2uCulFkR98z
+ Bas9G7a9XTVTaUFCTCDbTMV5x663epUwMlx4cklu8mTGsKxQ5eifK8zPSUttU2CuzGM68muRD+s 1eT4A
 X-Mailer: git-send-email 2.54.0.rc2.544.gc7ae2d5bb8-goog
-Message-ID: <20260423152024.1098465-34-ardb+git@google.com>
-Subject: [PATCH v3 15/17] x86/efi: Merge two traversals of the memory map when
- freeing boot regions
+Message-ID: <20260423152024.1098465-35-ardb+git@google.com>
+Subject: [PATCH v3 16/17] x86/efi: Avoid EFI_MEMORY_RUNTIME for early EFI boot
+ memory reservations
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, x86@kernel.org, 
@@ -76,110 +76,120 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-Combine two traversals of the EFI memory map, one that instantiates
-ranges_to_free array elements, and one that prunes EFI memory map
-entries that do not need to be preserved.
+Currently, memblock reservations of EFI boot services memory made before
+all EFI boot services memory is temporarily reserved are upgraded, by
+being marked with the EFI_MEMORY_RUNTIME bit, and this results in the
+entire region to remain reserved permanently, regardless of the size of
+the original memblock reservation that triggered this.
 
-This will make it easier to determine whether or not a EFI boot services
-region was freed in its entirety, and this informs the decision whether
-an entry needs to be preserved in the EFI runtime map.
+This is a hack, and may be quite inefficient in cases where the firmware
+does a good job of merging memory map entries.
 
-This will allow the distinction between early reservations of EFI boot
-services memory (marked with the EFI_MEMORY_RUNTIME attribute) and late
-ones (marked using the MEMBLOCK_RSRV_KERN attribute) to be dropped in a
-subsequent patch.
+So instead, rely on the MEMBLOCK_RSRV_KERN flag, by marking existing
+memblock reservations with this flag before creating the new, temporary
+ones with the flag cleared. This unifies the treatment of early vs late
+memblock reservations inside EFI boot services memory, and avoids
+clobbering the EFI memory map.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/platform/efi/quirks.c | 58 +++++++++-----------
- 1 file changed, 27 insertions(+), 31 deletions(-)
+ arch/x86/platform/efi/quirks.c | 66 ++++++--------------
+ 1 file changed, 18 insertions(+), 48 deletions(-)
 
 diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 98fdc286eb40..b7c8337d8f88 100644
+index b7c8337d8f88..fc6a15c2ace6 100644
 --- a/arch/x86/platform/efi/quirks.c
 +++ b/arch/x86/platform/efi/quirks.c
-@@ -416,13 +416,23 @@ void __init efi_unmap_boot_services(void)
- 		return;
- 	}
+@@ -273,7 +273,6 @@ void __init efi_reserve_boot_services(void)
+ 		u64 start = max(md->phys_addr, SZ_1M);
+ 		u64 end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT);
+ 		u64 size = end - start;
+-		bool already_reserved;
  
-+	new_md = efi.memmap.map;
- 	for_each_efi_memory_desc(md) {
- 		unsigned long long start = md->phys_addr;
- 		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
- 		bool has_reservations = false;
- 
-+		/*
-+		 * Build a new EFI memmap that excludes any boot services data
-+		 * regions that do not cover any reserved areas, since those
-+		 * regions are being freed.
-+		 */
-+		if (new_md != md)
-+			memcpy(new_md, md, efi.memmap.desc_size);
-+
- 		if (md->type != EFI_BOOT_SERVICES_CODE &&
- 		    md->type != EFI_BOOT_SERVICES_DATA) {
-+			new_md += efi.memmap.desc_size;
+ 		if (end <= start)
  			continue;
- 		}
+@@ -282,37 +281,11 @@ void __init efi_reserve_boot_services(void)
+ 		    md->type != EFI_BOOT_SERVICES_DATA)
+ 			continue;
  
-@@ -433,40 +443,26 @@ void __init efi_unmap_boot_services(void)
- 		 */
- 		efi_unmap_pages(md);
+-		already_reserved = memblock_is_region_reserved(start, size);
++		/* upgrade existing reservations to MEMBLOCK_RSRV_KERN */
++		if (memblock_is_region_reserved(start, size))
++			memblock_reserved_mark_kern(start, size);
  
--		/* Do not free, someone else owns it: */
--		if (md->attribute & EFI_MEMORY_RUNTIME) {
--			continue;
+-		/*
+-		 * Because the following memblock_reserve() is paired
+-		 * with free_reserved_area() for this region in
+-		 * efi_free_boot_services(), we must be extremely
+-		 * careful not to reserve, and subsequently free, critical
+-		 * regions of memory that somebody else has already reserved.
+-		 */
+-		if (!already_reserved) {
+-			memblock_reserve(start, size);
+-
+-			/*
+-			 * If we are the first to reserve the region, no
+-			 * one else cares about it. We own it and can
+-			 * free it later.
+-			 */
+-			if (can_free_region(start, size))
+-				continue;
 -		}
 -
 -		/*
--		 * With CONFIG_DEFERRED_STRUCT_PAGE_INIT parts of the memory
--		 * map are still not initialized and we can't reliably free
--		 * memory here.
--		 * Queue the ranges to free at a later point.
+-		 * We don't own the region. We must not free it.
+-		 *
+-		 * Setting this bit for a boot services region really
+-		 * doesn't make sense as far as the firmware is
+-		 * concerned, but it does provide us with a way to tag
+-		 * those regions that must not be paired with
+-		 * memblock_phys_free().
 -		 */
--		if (efi_add_range_to_free(start, start + size, &has_reservations)) {
--			pr_err("Failed to reallocate storage for freeable EFI regions\n");
--			return;
--		}
--	}
-+		if (!(md->attribute & EFI_MEMORY_RUNTIME)) {
-+			/*
-+			 * With CONFIG_DEFERRED_STRUCT_PAGE_INIT parts of the memory
-+			 * map are still not initialized and we can't reliably free
-+			 * memory here.
-+			 * Queue the ranges to free at a later point.
-+			 */
-+			if (efi_add_range_to_free(start, start + size, &has_reservations)) {
-+				pr_err("Failed to reallocate storage for freeable EFI regions\n");
-+				clear_bit(EFI_MEMMAP, &efi.flags);
-+				return;
-+			}
-+
-+			/* Continue without advancing new_md so this region is omitted */
-+			if (!has_reservations)
-+				continue;
+-		md->attribute |= EFI_MEMORY_RUNTIME;
++		memblock_reserve(start, size);
+ 	}
+ }
  
--	/*
--	 * Build a new EFI memmap that excludes any boot services
--	 * regions that are not tagged EFI_MEMORY_RUNTIME, since those
--	 * regions have now been freed.
--	 */
--	new_md = efi.memmap.map;
--	for_each_efi_memory_desc(md) {
--		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
--		    (md->type == EFI_BOOT_SERVICES_CODE ||
--		     md->type == EFI_BOOT_SERVICES_DATA) &&
--		    can_free_region(md->phys_addr,
--				    md->num_pages << EFI_PAGE_SHIFT)) {
--			continue;
+@@ -443,25 +416,22 @@ void __init efi_unmap_boot_services(void)
+ 		 */
+ 		efi_unmap_pages(md);
+ 
+-		if (!(md->attribute & EFI_MEMORY_RUNTIME)) {
+-			/*
+-			 * With CONFIG_DEFERRED_STRUCT_PAGE_INIT parts of the memory
+-			 * map are still not initialized and we can't reliably free
+-			 * memory here.
+-			 * Queue the ranges to free at a later point.
+-			 */
+-			if (efi_add_range_to_free(start, start + size, &has_reservations)) {
+-				pr_err("Failed to reallocate storage for freeable EFI regions\n");
+-				clear_bit(EFI_MEMMAP, &efi.flags);
+-				return;
+-			}
+-
+-			/* Continue without advancing new_md so this region is omitted */
+-			if (!has_reservations)
+-				continue;
+-
++		/*
++		 * With CONFIG_DEFERRED_STRUCT_PAGE_INIT parts of the memory
++		 * map are still not initialized and we can't reliably free
++		 * memory here.
++		 * Queue the ranges to free at a later point.
++		 */
++		if (efi_add_range_to_free(start, start + size, &has_reservations)) {
++			pr_err("Failed to reallocate storage for freeable EFI regions\n");
++			clear_bit(EFI_MEMMAP, &efi.flags);
++			return;
  		}
  
--		if (new_md != md)
--			memcpy(new_md, md, efi.memmap.desc_size);
-+		/* Advance new_md so this region is preserved in the EFI memory map */
++		/* Continue without advancing new_md so this region is omitted */
++		if (!has_reservations)
++			continue;
++
+ 		/* Advance new_md so this region is preserved in the EFI memory map */
  		new_md += efi.memmap.desc_size;
  	}
- 
 -- 
 2.54.0.rc2.544.gc7ae2d5bb8-goog
 
