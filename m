@@ -1,53 +1,53 @@
 Received: from mail-wm1-f73.google.com (mail-wm1-f73.google.com [209.85.128.73])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F9FA3783B0
-	for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 15:21:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 159D13793B8
+	for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 15:21:13 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776957674; cv=none; b=E+vMOWFN94PaUq5jgviWHG1Kovgc1AT+VtjosxGO3qszN3rVm3lShLXlUot1QSAuB5OZzesWBLJ+11ZKqd1qOBY5zjzRSCwjyL075x0x+TDwGuK4ZMy8B1D3To7LvAgN7n4yTm/zf7xjgrym5BnCXRsr6HnaKBEVzUlWc5GYLTc=
+	t=1776957674; cv=none; b=SYQT8Kqk0UCcWXCuHucfVilcGJLtb7fvbUeDK1FeSgBj7pVRzjSEpvTUbHIyQYPXngfiZ4Ao4gm/EEfoX4372Br3u6OcPJQh8ROM5yO729zgM6JPIm/tpV/OklP2HELK4l55u+rkQhsAMo7x/Ye2WtPj32KCkE359PgdX3w465s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1776957674; c=relaxed/simple;
-	bh=tiRoGkPFrmHA8DhoFA6DaUdZvOus7sOeLm2EdZ9QXNI=;
+	bh=QJhcTCp3YWRk82k5dY7bOrapMMe8ofCD/shtK0L/ecw=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=No0otZRujpg2744/FtCbVfSItwMuNIU/8vZaL3k01bghdvUKq4fJ2RlqeJhw1n2KqDsUPIg7zG8qLn6oiP38wkPs8qhDX75Kvt6d+OpXQ8QT7lUegQHbL/QUHCxYBBzTmi/gceL+xRmClje388WfKk/FnMAeruYGUIs6rPnmf+E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=Wgf22wtM; arc=none smtp.client-ip=209.85.128.73
+	 To:Cc:Content-Type; b=dnzxQQMVvWLD4UYT+QYGAgFYP9Ofnvabxh+hYayUO+eDYT87uvnR+IJXvf2EJHBab77cnnPvK/fqjK/dgHAOnT4QAosa52EyvkCajFX/+1NXIqsOYnkzvcEcsBZJmLixv+wqQqFWKo8HdgGmaIdWHbjKXcha4xQ5cSQohNihwn0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=SEFpaJp5; arc=none smtp.client-ip=209.85.128.73
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Wgf22wtM"
-Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-48a55ecc32cso27341805e9.1
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="SEFpaJp5"
+Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-48a5523fd53so18201445e9.3
         for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 08:21:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1776957671; x=1777562471; darn=vger.kernel.org;
+        d=google.com; s=20251104; t=1776957672; x=1777562472; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=EqIsK2LttDMvDAmHIy33jLO4k6bzz8jvDDP3urmiklw=;
-        b=Wgf22wtM/iCv10rXW35YWxzJjE+RtqZcX7J0Tr+HMzJOQg/VqwcDJn12WXryc56ET4
-         7+bJOdAfXCfzkmXkmaBQ8gQwagyEssu4UkwQSSVtgP1XkF1/ex6s/VyTSCCDpv0777qu
-         PXDsuiTEB1RQlRrqNHp8lAfdUu04yrO7ETVebfleqbhM8tz7eJcH9ZUR6HItB64Sxec5
-         EbMzjhXmwHJ/R1OWTDOUGsTSy/OZASu+qe+Lf/i8XOX9ysNvzTrU3qxcWDALJGVEYhbI
-         3mC6l3ElRySFZUC1fW051nttSJLcTlvBy5fMj+Rb/xpGfywTVCk2JMtzshKN7nBUMRTl
-         jEMA==
+        bh=Rm/hickqQysiSynTiIHCGr3FHLXl71ce3ok8oWE0Hnc=;
+        b=SEFpaJp5cXMYQe26/f7fcQaPmbWKGJ98AdbPqKHOGt1tiddPfdogUw3jBcliCERUhm
+         d8AG/jebqK/qUB36UqGnCzxi968xerE1d2A66Eb73M/fq/t6pavEma90byq6St/YSePC
+         TTxDJ+YekQzH/ycEQo/42GituZJJPam6p0d+0m2YabMSLnC4tVe0OydTQ9xt+1jmY3B9
+         +cZHFG6PvjUf8WHuW3WsqLOBfh0e7uqBs544ST3sHGKs72GEHo1+AwRrGrkog6fkGfOR
+         2rKrXRCZT/jeSpAFsrMXQEQOXSe6X/zs6Q8Tx1kxR4w78tMG08mzlKrxOb+2JNVLbSR1
+         vJcA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776957671; x=1777562471;
+        d=1e100.net; s=20251104; t=1776957672; x=1777562472;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=EqIsK2LttDMvDAmHIy33jLO4k6bzz8jvDDP3urmiklw=;
-        b=TDGCLfUclrXCpS911UU4CPm6PtY9YgF+QZCxxmf1JVSOJhNb22Q/kbwdYECZZgmba4
-         4h4qO3iS6HbT0ujwefByGYJkDW0ZyLsjDGAhvsSAzKNoa9/Q6J1Srl9XA8JRMrlH2z+W
-         zHW9ehazbi4b0YTRZOBEHYu91o8X9EaC9Dy1ZyqRT+s00wAOg1pKl7Kxk67wA+WQyOzX
-         3GLhYk1LNfB18AlEyoCKRMQXoSZyYfJWIsNcZ+HsTgCTXNh6CfZcGJ0IfDL2dp4G0208
-         a6TjZr60M+60PcXRdyue/MF6cDlLyLz3tVkFiV/Of90jgITSVpxapPlrEhO1o2MGTvyH
-         HGww==
-X-Gm-Message-State: AOJu0Yxsp8MBm2q2y3kGyzBMJ0W4F75J9QSZq0eMGiYoYCcXa40vVeO3
-	xnPACOgfunZzwpchpojs9Kee4o7OP75myLyeumXB4OOqd20Qpimw1dN9vLCO6d/vPTJOxxkUbw=
+        bh=Rm/hickqQysiSynTiIHCGr3FHLXl71ce3ok8oWE0Hnc=;
+        b=OfqRg7U3eJN3SdhPO1TGTVw09294grJDpp+0RepiHuEU8B5/j/RsI/7ts39t4lDLNE
+         hVWPAFvbMtzosKAFPnHd/p0qZKxGczi1bneSZ7m+yzu6RqH9zwOm3dArRbDwRhAGABJ2
+         Thd0FBzh7ym6Q2nKCHB58Ue9VrshuHKkg8NZp31UoKCkuy7L+SLEsL8dWHd+EkIn1sJJ
+         Ze71S81zyIR0CLkT/TRHIxPUUooaYrhcDMPO6w7LZGfxun6BfFxHmoTknlkXv7O6f4DQ
+         AnwORqPmWKZrLi3LEqUAIALMRBTAKVJNi3H76PhmWYi+HK0kOXi8u1hVwlImpBcrq/RJ
+         IE4A==
+X-Gm-Message-State: AOJu0YwOqC9lsxx5aVKjBxCDxbp5gBRu2+Oovb2kWNCTBSOti2abNh+d
+	/dK1YisAKlNriP+jgmW3uAnV8AZW7ZA4s+udSibztCQFec2A3gApPZumGZDM0HLmHUmbfrxwOA=
 	=
-X-Received: from wmbz10.prod.google.com ([2002:a05:600c:c08a:b0:488:c1c7:5024])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:3596:b0:48a:563c:c8c5
- with SMTP id 5b1f17b1804b1-48a563cd1b2mr172866315e9.8.1776957670758; Thu, 23
- Apr 2026 08:21:10 -0700 (PDT)
-Date: Thu, 23 Apr 2026 17:20:35 +0200
+X-Received: from wmlu21.prod.google.com ([2002:a05:600c:2115:b0:488:7c5a:b238])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:4707:b0:488:bfc3:efc
+ with SMTP id 5b1f17b1804b1-488fb6e8eb5mr393522635e9.0.1776957671595; Thu, 23
+ Apr 2026 08:21:11 -0700 (PDT)
+Date: Thu, 23 Apr 2026 17:20:36 +0200
 In-Reply-To: <20260423152024.1098465-19-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -57,15 +57,15 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20260423152024.1098465-19-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=10109; i=ardb@kernel.org;
- h=from:subject; bh=dWoVGXM0HSTwZN50WA1NRBKn6uv2bVPhj6xEuCOuz6w=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfOVxXHnK+le10oeHFgvLrjjnsnG3MNPuwT0dTTy/+6/b
- uqcfmhvRykLgxgXg6yYIovA7L/vdp6eKFXrPEsWZg4rE8gQBi5OAZiI2VWGf7Zit/eLMnX++18e
- 59BYVbtaI8+dt/SgfMEeiX+39xr/smZkmDL/gLzP91NHzgdYfp2gNdXlxReJJOafwuZlr+L3zfb UZwQA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=8578; i=ardb@kernel.org;
+ h=from:subject; bh=n4XiAYaFtIBUTDvCKEmsnxORvxDae62lgJVzXOe0/QA=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfOVxckdRn8r9L9LN2ytNX68atpX434fC/3jjoqeX9+sX
+ MD/Lyyuo5SFQYyLQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAEzkqCvDX7nex3fFWyv9H/J/
+ O2eQ1DS3/Gv4z5y0tqvGjz/fytO5YsvwP3Wylanm2tevEv9r7TD5oThvYZelZZZMZ9T+1Tt+MBU 0cgIA
 X-Mailer: git-send-email 2.54.0.rc2.544.gc7ae2d5bb8-goog
-Message-ID: <20260423152024.1098465-29-ardb+git@google.com>
-Subject: [PATCH v3 10/17] x86/efi: Do not rely on EFI_MEMORY_RUNTIME bit and
- avoid entry splitting
+Message-ID: <20260423152024.1098465-30-ardb+git@google.com>
+Subject: [PATCH v3 11/17] efi: Use nr_map not map_end to find the last valid
+ memory map entry
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, x86@kernel.org, 
@@ -76,319 +76,227 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-Now that efi_mem_reserve() has been updated to rely on RSRV_KERN
-memblock reservations, it is no longer needed to mark memblock reserved
-boot services regions as EFI_MEMORY_RUNTIME. This means that it is no
-longer needed to split existing entries in the EFI memory map, removing
-the need to re-allocate/copy/remap the entire EFI memory map on every
-call to efi_mem_reserve().
+Currently, the efi.memmap struct keeps track of the start and the end of
+the EFI memory map in memory, as well as the number of entries.
 
-So drop this functionality - it is no longer needed.
+Let's repaint the nr_map field as the number of *valid* entries, and
+update all the iterators and other memory map traversal routines
+accordingly.
+
+This allows pruning of invalid or unneeded entries by moving the
+remaining entries to the start of the map, without the need for
+freeing/reallocating or unmapping and remapping. Now that entries are
+never added, but only removed, it is possible to retain the same
+allocation throughout the boot process, and free the part that is no
+longer in use afterwards.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/include/asm/efi.h     |   4 -
- arch/x86/platform/efi/memmap.c | 138 --------------------
- arch/x86/platform/efi/quirks.c |  77 +++--------
- 3 files changed, 17 insertions(+), 202 deletions(-)
+ arch/x86/platform/efi/efi.c          | 18 ++++++++++++------
+ arch/x86/platform/efi/memmap.c       |  2 +-
+ arch/x86/platform/efi/quirks.c       |  2 +-
+ arch/x86/platform/efi/runtime-map.c  |  4 ++--
+ drivers/firmware/efi/arm-runtime.c   |  2 +-
+ drivers/firmware/efi/memmap.c        |  8 +++-----
+ drivers/firmware/efi/riscv-runtime.c |  2 +-
+ include/linux/efi.h                  |  8 ++++----
+ 8 files changed, 25 insertions(+), 21 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index f291845b403a..7d8f627805df 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -402,10 +402,6 @@ extern int __init efi_memmap_alloc(unsigned int num_entries,
- 				   struct efi_memory_map_data *data);
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index c0195b5eab21..edbf6efe3947 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -222,7 +222,7 @@ int __init efi_memblock_x86_reserve_range(void)
+ 	     "Unexpected EFI_MEMORY_DESCRIPTOR version %ld",
+ 	     efi.memmap.desc_version);
  
- extern int __init efi_memmap_install(struct efi_memory_map_data *data);
--extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
--					 struct range *range);
--extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
--				     void *buf, struct efi_mem_range *mem);
+-	memblock_reserve(pmap, efi.memmap.nr_map * efi.memmap.desc_size);
++	memblock_reserve(pmap, efi.memmap.num_valid_entries * efi.memmap.desc_size);
+ 	set_bit(EFI_PRESERVE_BS_REGIONS, &efi.flags);
  
- enum efi_secureboot_mode __x86_efi_boot_mode(void);
- 
-diff --git a/arch/x86/platform/efi/memmap.c b/arch/x86/platform/efi/memmap.c
-index 697a9a26a005..da7483a33d68 100644
---- a/arch/x86/platform/efi/memmap.c
-+++ b/arch/x86/platform/efi/memmap.c
-@@ -107,141 +107,3 @@ int __init efi_memmap_install(struct efi_memory_map_data *data)
- 	__efi_memmap_free(phys, size, flags);
  	return 0;
- }
--
--/**
-- * efi_memmap_split_count - Count number of additional EFI memmap entries
-- * @md: EFI memory descriptor to split
-- * @range: Address range (start, end) to split around
-- *
-- * Returns the number of additional EFI memmap entries required to
-- * accommodate @range.
-- */
--int __init efi_memmap_split_count(efi_memory_desc_t *md, struct range *range)
--{
--	u64 m_start, m_end;
--	u64 start, end;
--	int count = 0;
--
--	start = md->phys_addr;
--	end = start + (md->num_pages << EFI_PAGE_SHIFT) - 1;
--
--	/* modifying range */
--	m_start = range->start;
--	m_end = range->end;
--
--	if (m_start <= start) {
--		/* split into 2 parts */
--		if (start < m_end && m_end < end)
--			count++;
--	}
--
--	if (start < m_start && m_start < end) {
--		/* split into 3 parts */
--		if (m_end < end)
--			count += 2;
--		/* split into 2 parts */
--		if (end <= m_end)
--			count++;
--	}
--
--	return count;
--}
--
--/**
-- * efi_memmap_insert - Insert a memory region in an EFI memmap
-- * @old_memmap: The existing EFI memory map structure
-- * @buf: Address of buffer to store new map
-- * @mem: Memory map entry to insert
-- *
-- * It is suggested that you call efi_memmap_split_count() first
-- * to see how large @buf needs to be.
-- */
--void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
--			      struct efi_mem_range *mem)
--{
--	u64 m_start, m_end, m_attr;
--	efi_memory_desc_t *md;
--	u64 start, end;
--	void *old, *new;
--
--	/* modifying range */
--	m_start = mem->range.start;
--	m_end = mem->range.end;
--	m_attr = mem->attribute;
--
--	/*
--	 * The EFI memory map deals with regions in EFI_PAGE_SIZE
--	 * units. Ensure that the region described by 'mem' is aligned
--	 * correctly.
--	 */
--	if (!IS_ALIGNED(m_start, EFI_PAGE_SIZE) ||
--	    !IS_ALIGNED(m_end + 1, EFI_PAGE_SIZE)) {
--		WARN_ON(1);
--		return;
--	}
--
--	for (old = old_memmap->map, new = buf;
--	     old < old_memmap->map_end;
--	     old += old_memmap->desc_size, new += old_memmap->desc_size) {
--
--		/* copy original EFI memory descriptor */
--		memcpy(new, old, old_memmap->desc_size);
--		md = new;
--		start = md->phys_addr;
--		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
--
--		if (m_start <= start && end <= m_end)
--			md->attribute |= m_attr;
--
--		if (m_start <= start &&
--		    (start < m_end && m_end < end)) {
--			/* first part */
--			md->attribute |= m_attr;
--			md->num_pages = (m_end - md->phys_addr + 1) >>
--				EFI_PAGE_SHIFT;
--			/* latter part */
--			new += old_memmap->desc_size;
--			memcpy(new, old, old_memmap->desc_size);
--			md = new;
--			md->phys_addr = m_end + 1;
--			md->num_pages = (end - md->phys_addr + 1) >>
--				EFI_PAGE_SHIFT;
--		}
--
--		if ((start < m_start && m_start < end) && m_end < end) {
--			/* first part */
--			md->num_pages = (m_start - md->phys_addr) >>
--				EFI_PAGE_SHIFT;
--			/* middle part */
--			new += old_memmap->desc_size;
--			memcpy(new, old, old_memmap->desc_size);
--			md = new;
--			md->attribute |= m_attr;
--			md->phys_addr = m_start;
--			md->num_pages = (m_end - m_start + 1) >>
--				EFI_PAGE_SHIFT;
--			/* last part */
--			new += old_memmap->desc_size;
--			memcpy(new, old, old_memmap->desc_size);
--			md = new;
--			md->phys_addr = m_end + 1;
--			md->num_pages = (end - m_end) >>
--				EFI_PAGE_SHIFT;
--		}
--
--		if ((start < m_start && m_start < end) &&
--		    (end <= m_end)) {
--			/* first part */
--			md->num_pages = (m_start - md->phys_addr) >>
--				EFI_PAGE_SHIFT;
--			/* latter part */
--			new += old_memmap->desc_size;
--			memcpy(new, old, old_memmap->desc_size);
--			md = new;
--			md->phys_addr = m_start;
--			md->num_pages = (end - md->phys_addr + 1) >>
--				EFI_PAGE_SHIFT;
--			md->attribute |= m_attr;
--		}
--	}
--}
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index ce06a388fc11..efb828b7e2ab 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -239,63 +239,9 @@ EXPORT_SYMBOL_GPL(efi_query_variable_store);
-  * buggy implementations we reserve boot services region during EFI
-  * init and make sure it stays executable. Then, after
-  * SetVirtualAddressMap(), it is discarded.
-- *
-- * However, some boot services regions contain data that is required
-- * by drivers, so we need to track which memory ranges can never be
-- * freed. This is done by tagging those regions with the
-- * EFI_MEMORY_RUNTIME attribute.
-- *
-- * Any driver that wants to mark a region as reserved must use
-- * efi_mem_reserve() which will insert a new EFI memory descriptor
-- * into efi.memmap (splitting existing regions if necessary) and tag
-- * it with EFI_MEMORY_RUNTIME.
+@@ -289,7 +289,7 @@ static void __init efi_clean_memmap(void)
+ 			.phys_map	= efi.memmap.phys_map,
+ 			.desc_version	= efi.memmap.desc_version,
+ 			.desc_size	= efi.memmap.desc_size,
+-			.size		= efi.memmap.desc_size * (efi.memmap.nr_map - n_removal),
++			.size		= efi.memmap.desc_size * (efi.memmap.num_valid_entries - n_removal),
+ 			.flags		= 0,
+ 		};
+ 
+@@ -533,7 +533,8 @@ static inline void *efi_map_next_entry_reverse(void *entry)
+ {
+ 	/* Initial call */
+ 	if (!entry)
+-		return efi.memmap.map_end - efi.memmap.desc_size;
++		return efi_memdesc_ptr(efi.memmap.map, efi.memmap.desc_size,
++				       efi.memmap.num_valid_entries - 1);
+ 
+ 	entry -= efi.memmap.desc_size;
+ 	if (entry < efi.memmap.map)
+@@ -555,6 +556,9 @@ static inline void *efi_map_next_entry_reverse(void *entry)
   */
- void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+ static void *efi_map_next_entry(void *entry)
  {
--	struct efi_memory_map_data data = { 0 };
--	struct efi_mem_range mr;
--	efi_memory_desc_t md;
--	int num_entries;
--	void *new;
--
--	if (efi_mem_desc_lookup(addr, &md) ||
--	    md.type != EFI_BOOT_SERVICES_DATA) {
--		pr_err("Failed to lookup EFI memory descriptor for %pa\n", &addr);
--		return;
--	}
--
--	if (addr + size > md.phys_addr + (md.num_pages << EFI_PAGE_SHIFT)) {
--		pr_err("Region spans EFI memory descriptors, %pa\n", &addr);
--		return;
--	}
--
--	size += addr % EFI_PAGE_SIZE;
--	size = round_up(size, EFI_PAGE_SIZE);
--	addr = round_down(addr, EFI_PAGE_SIZE);
--
--	mr.range.start = addr;
--	mr.range.end = addr + size - 1;
--	mr.attribute = md.attribute | EFI_MEMORY_RUNTIME;
--
--	num_entries = efi_memmap_split_count(&md, &mr.range);
--	num_entries += efi.memmap.nr_map;
--
--	if (efi_memmap_alloc(num_entries, &data) != 0) {
--		pr_err("Could not allocate boot services memmap\n");
--		return;
--	}
--
--	new = early_memremap_prot(data.phys_map, data.size,
--				  pgprot_val(pgprot_encrypted(FIXMAP_PAGE_NORMAL)));
--	if (!new) {
--		pr_err("Failed to map new boot services memmap\n");
--		return;
--	}
--
--	efi_memmap_insert(&efi.memmap, new, &mr);
--	early_memunmap(new, data.size);
--
--	efi_memmap_install(&data);
- 	e820__range_update(addr, size, E820_TYPE_RAM, E820_TYPE_RESERVED);
- 	e820__update_table(e820_table);
- }
-@@ -404,7 +350,8 @@ struct efi_freeable_range {
- static struct efi_freeable_range *ranges_to_free __initdata;
- static int num_to_free __initdata;
- 
--static int __init efi_add_range_to_free(u64 range_start, u64 range_end)
-+static int __init efi_add_range_to_free(u64 range_start, u64 range_end,
-+					bool *has_reservations)
- {
- 	struct memblock_region *region;
- 	static int idx __initdata;
-@@ -420,15 +367,18 @@ static int __init efi_add_range_to_free(u64 range_start, u64 range_end)
- 		if (region_end < range_start)
- 			continue;
- 
--		if (region->flags & MEMBLOCK_RSRV_KERN)
--			continue;
--
- 		start = PAGE_ALIGN(max(range_start, region->base));
- 		end = PAGE_ALIGN_DOWN(min(range_end, region_end));
- 
- 		if (start >= end)
- 			continue;
- 
-+		if ((region->flags & MEMBLOCK_RSRV_KERN) ||
-+		    !can_free_region(start, end - start)) {
-+			*has_reservations = true;
-+			continue;
-+		}
++	if (!efi.memmap.num_valid_entries)
++		return NULL;
 +
- 		ranges_to_free[idx].start = start;
- 		ranges_to_free[idx].end = end;
+ 	if (efi_enabled(EFI_64BIT)) {
+ 		/*
+ 		 * Starting in UEFI v2.5 the EFI_PROPERTIES_TABLE
+@@ -581,7 +585,9 @@ static void *efi_map_next_entry(void *entry)
+ 		return efi.memmap.map;
  
-@@ -471,6 +421,7 @@ void __init efi_unmap_boot_services(void)
- 	for_each_efi_memory_desc(md) {
- 		unsigned long long start = md->phys_addr;
- 		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
-+		bool has_reservations = false;
+ 	entry += efi.memmap.desc_size;
+-	if (entry >= efi.memmap.map_end)
++	if (entry >= (void *)efi_memdesc_ptr(efi.memmap.map,
++					     efi.memmap.desc_size,
++					     efi.memmap.num_valid_entries))
+ 		return NULL;
  
- 		if (md->type != EFI_BOOT_SERVICES_CODE &&
- 		    md->type != EFI_BOOT_SERVICES_DATA) {
-@@ -497,10 +448,13 @@ void __init efi_unmap_boot_services(void)
- 		 * memory here.
- 		 * Queue the ranges to free at a later point.
- 		 */
--		if (efi_add_range_to_free(start, start + size)) {
-+		if (efi_add_range_to_free(start, start + size, &has_reservations)) {
- 			pr_err("Failed to reallocate storage for freeable EFI regions\n");
- 			return;
- 		}
-+
-+		if (has_reservations)
-+			num_entries++;
+ 	return entry;
+@@ -712,13 +718,13 @@ static void __init kexec_enter_virtual_mode(void)
+ 	efi_memmap_unmap();
+ 
+ 	if (efi_memmap_init_late(efi.memmap.phys_map,
+-				 efi.memmap.desc_size * efi.memmap.nr_map)) {
++				 efi.memmap.desc_size * efi.memmap.num_valid_entries)) {
+ 		pr_err("Failed to remap late EFI memory map\n");
+ 		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 		return;
  	}
  
- 	if (!num_entries)
-@@ -526,8 +480,11 @@ void __init efi_unmap_boot_services(void)
- 	for_each_efi_memory_desc(md) {
- 		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
- 		    (md->type == EFI_BOOT_SERVICES_CODE ||
--		     md->type == EFI_BOOT_SERVICES_DATA))
-+		     md->type == EFI_BOOT_SERVICES_DATA) &&
-+		    can_free_region(md->phys_addr,
-+				    md->num_pages << EFI_PAGE_SHIFT)) {
- 			continue;
-+		}
+-	num_pages = ALIGN(efi.memmap.nr_map * efi.memmap.desc_size, PAGE_SIZE);
++	num_pages = ALIGN(efi.memmap.num_valid_entries * efi.memmap.desc_size, PAGE_SIZE);
+ 	num_pages >>= PAGE_SHIFT;
  
- 		memcpy(new_md, md, efi.memmap.desc_size);
- 		new_md += efi.memmap.desc_size;
+ 	if (efi_setup_page_tables(efi.memmap.phys_map, num_pages)) {
+diff --git a/arch/x86/platform/efi/memmap.c b/arch/x86/platform/efi/memmap.c
+index da7483a33d68..524e9f2ef276 100644
+--- a/arch/x86/platform/efi/memmap.c
++++ b/arch/x86/platform/efi/memmap.c
+@@ -90,7 +90,7 @@ int __init efi_memmap_alloc(unsigned int num_entries,
+  */
+ int __init efi_memmap_install(struct efi_memory_map_data *data)
+ {
+-	unsigned long size = efi.memmap.desc_size * efi.memmap.nr_map;
++	unsigned long size = efi.memmap.map_end - efi.memmap.map;
+ 	unsigned long flags = efi.memmap.flags;
+ 	u64 phys = efi.memmap.phys_map;
+ 	int ret;
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index efb828b7e2ab..eb00130bcb66 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -410,7 +410,7 @@ void __init efi_unmap_boot_services(void)
+ 	if (efi_enabled(EFI_DBG))
+ 		return;
+ 
+-	num_to_free = efi.memmap.nr_map;
++	num_to_free = efi.memmap.num_valid_entries;
+ 	ranges_to_free = kmalloc_array(num_to_free, sizeof(ranges_to_free[0]),
+ 				       GFP_KERNEL);
+ 	if (!ranges_to_free) {
+diff --git a/arch/x86/platform/efi/runtime-map.c b/arch/x86/platform/efi/runtime-map.c
+index 053ff161eb9a..fc8ca1974730 100644
+--- a/arch/x86/platform/efi/runtime-map.c
++++ b/arch/x86/platform/efi/runtime-map.c
+@@ -138,7 +138,7 @@ add_sysfs_runtime_map_entry(struct kobject *kobj, int nr,
+ 
+ int efi_get_runtime_map_size(void)
+ {
+-	return efi.memmap.nr_map * efi.memmap.desc_size;
++	return efi.memmap.num_valid_entries * efi.memmap.desc_size;
+ }
+ 
+ int efi_get_runtime_map_desc_size(void)
+@@ -166,7 +166,7 @@ static int __init efi_runtime_map_init(void)
+ 	if (!efi_enabled(EFI_MEMMAP) || !efi_kobj)
+ 		return 0;
+ 
+-	map_entries = kzalloc_objs(entry, efi.memmap.nr_map);
++	map_entries = kzalloc_objs(entry, efi.memmap.num_valid_entries);
+ 	if (!map_entries) {
+ 		ret = -ENOMEM;
+ 		goto out;
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 3167cab62014..e19997c09175 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -96,7 +96,7 @@ static int __init arm_enable_runtime_services(void)
+ 
+ 	efi_memmap_unmap();
+ 
+-	mapsize = efi.memmap.desc_size * efi.memmap.nr_map;
++	mapsize = efi.memmap.desc_size * efi.memmap.num_valid_entries;
+ 
+ 	if (efi_memmap_init_late(efi.memmap.phys_map, mapsize)) {
+ 		pr_err("Failed to remap EFI memory map\n");
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index f1c04d7cfd71..035089791c93 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -49,7 +49,7 @@ int __init __efi_memmap_init(struct efi_memory_map_data *data)
+ 	}
+ 
+ 	map.phys_map = data->phys_map;
+-	map.nr_map = data->size / data->desc_size;
++	map.num_valid_entries = data->size / data->desc_size;
+ 	map.map_end = map.map + data->size;
+ 
+ 	map.desc_version = data->desc_version;
+@@ -87,10 +87,8 @@ void __init efi_memmap_unmap(void)
+ 		return;
+ 
+ 	if (!(efi.memmap.flags & EFI_MEMMAP_LATE)) {
+-		unsigned long size;
+-
+-		size = efi.memmap.desc_size * efi.memmap.nr_map;
+-		early_memunmap(efi.memmap.map, size);
++		early_memunmap(efi.memmap.map,
++			       efi.memmap.map_end - efi.memmap.map);
+ 	} else {
+ 		memunmap(efi.memmap.map);
+ 	}
+diff --git a/drivers/firmware/efi/riscv-runtime.c b/drivers/firmware/efi/riscv-runtime.c
+index 60cdf7bf141f..087a7f8a74e6 100644
+--- a/drivers/firmware/efi/riscv-runtime.c
++++ b/drivers/firmware/efi/riscv-runtime.c
+@@ -66,7 +66,7 @@ static int __init riscv_enable_runtime_services(void)
+ 
+ 	efi_memmap_unmap();
+ 
+-	mapsize = efi.memmap.desc_size * efi.memmap.nr_map;
++	mapsize = efi.memmap.desc_size * efi.memmap.num_valid_entries;
+ 
+ 	if (efi_memmap_init_late(efi.memmap.phys_map, mapsize)) {
+ 		pr_err("Failed to remap EFI memory map\n");
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 72e76ec54641..a8406ca92332 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -568,7 +568,7 @@ struct efi_memory_map {
+ 	phys_addr_t phys_map;
+ 	void *map;
+ 	void *map_end;
+-	int nr_map;
++	int num_valid_entries;
+ 	unsigned long desc_version;
+ 	unsigned long desc_size;
+ #define EFI_MEMMAP_LATE (1UL << 0)
+@@ -803,9 +803,9 @@ extern int efi_memattr_apply_permissions(struct mm_struct *mm,
+ 
+ /* Iterate through an efi_memory_map */
+ #define for_each_efi_memory_desc_in_map(m, md)				   \
+-	for ((md) = (m)->map;						   \
+-	     (md) && ((void *)(md) + (m)->desc_size) <= (m)->map_end;	   \
+-	     (md) = (void *)(md) + (m)->desc_size)
++	for (int __idx = 0;						   \
++	     (md) = efi_memdesc_ptr((m)->map, (m)->desc_size, __idx),	   \
++	     __idx < (m)->num_valid_entries; ++__idx)
+ 
+ /**
+  * for_each_efi_memory_desc - iterate over descriptors in efi.memmap
 -- 
 2.54.0.rc2.544.gc7ae2d5bb8-goog
 
