@@ -1,112 +1,107 @@
-Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E68BB383C88
-	for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 15:21:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 925C4369204;
+	Thu, 23 Apr 2026 15:42:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776957681; cv=none; b=afGWetpPMTDu2Z2WsGPaU002YRGrYMEzMvLxqR/J0JCG4ks5kgoHLmeOunbGqoJde7+yD9jZGFhtfaklKYVpoikkadbAXdSET7zJgKfEU1XFli2bx4Mqc1jOkFN3/Q2iDRTg4FQioyDuTY/dSKrCbzZ7vyxoTq0HkAxNJtKIj6Y=
+	t=1776958954; cv=none; b=rZrQdm+/XGmJkU0gjq4h4/qvgSDX8pzw1QCQVGKSpom594LfoUJnqZsZbX8D3Htnd7pql9zF2JpbbuRcKPzCZ/fHFxqk/PjawAaLNKLjR0mWOvcw6Btqz6LUlsdCKC6NBRX1A+65jdcFqvN5EoKGyBPsOyJqxbvj5Bfeb/HMUbU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776957681; c=relaxed/simple;
-	bh=kHWXmbw7E3NC74c6976UkwqhW+N95Bw48E7zKD2zH+M=;
-	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=CRBJhij0c9q9Mnz3+znzZk8bXreBib3EbZdzHNWeVkZiLFVA9C+0tIMg0rsj2tDMUoPwKqwOn8D3oeoR8a1txcOaB/v86lDzjTeMKTxgTl6NVVovRqrHvqWcZ/PT0PLxp7+Mtu1tmgBbjlGPxRUAA0XhmwlXPxXCYXvw+njR8n4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=NuJCq6tp; arc=none smtp.client-ip=209.85.128.74
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
+	s=arc-20240116; t=1776958954; c=relaxed/simple;
+	bh=bAo999kxv5pqyr4x2V7DioqTFgZGPHHa0eUWfLX4OT8=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=SkpBZ77GbXaNz6NwYmK+pdEGeiIoFc3RrEMSuliWCAEHdQEyQXemayDTwSe5oGdl1mqK/7C7A1O5soMgY0UHSSx7q0Saof+ktSarIiEfgIVRut6QwV46PVGDjIHAtAOONIiQCxTeAW87U4UyU7fCThuqhPOxoOQThkYAjnpyK34=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LR9V/yFp; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="NuJCq6tp"
-Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-48a5523fd53so18202045e9.3
-        for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 08:21:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1776957678; x=1777562478; darn=vger.kernel.org;
-        h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
-         :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=Ozc/YFu4zY+6dm6Y0MVQ/zDDn7vwY45tnWdyVpLDfCM=;
-        b=NuJCq6tp9e/0m5RtOMDIdyaVhp6iRyuxV8/Lt45Tu8dUTX/n1sxX537XhufzI+tgHA
-         JolX8QL9Y72dw3h6lhWpfD4sMnryVzIcPb+uj5CaUeIzuFkVKmPIasKhitcQRAutjJx4
-         XQ27hdy1ah451RX/lYxoaeHLPLy5/mlCfNNZMalTRjTXt1wQti+AIuppy6muqsCucGSl
-         VfLzqIRg7UkmlUQyqKsI9zcFrLv0fQTX/WWXGk8s7YJF2e7e4KA6dWXOSLlpD5i9iyW2
-         yT34JuY4V5ImF8HbThCArvizEF6WhQW2tbHW9D4ge4YJMkoVhkCmDhFBrQw4xrpYOlP3
-         L5gg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776957678; x=1777562478;
-        h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
-         :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Ozc/YFu4zY+6dm6Y0MVQ/zDDn7vwY45tnWdyVpLDfCM=;
-        b=sANOXnzjnm6JjGvzXnW64qWqmwKNGROyItEKT3+c1ZMf+DQMKmGk44jUKCoP0Wr/sx
-         FO+TKt/bbUNSA1fkjprUKs44SpsDaTtXsJaQz9KRmYH5Oe/WAl7XbrHi1pao7yWyzQIg
-         NnAi9lE7zGjxJk0QFXa9N8708upURGlwdrIfTcf8apWjSBGKhe4+bxr2HwLUWMgM6Dh2
-         QEWJFZFxY/+wc8D4uVdo1z9/hioBGCmRIDkMYufrLE0C/6R61iXtu640Veh5jjp7Q5D3
-         ifrloQQTO1Dd+tvxg9DoM7I2EkkrYs7ATjrA+oUe27z0TlDB5lHjqJ934JWPY1U+goi3
-         PTjw==
-X-Gm-Message-State: AOJu0YwsoU4sRa0XyWAjyvnRG0V6OZd+1tTqWaXHnLCNoPHf5SZ9Rn/k
-	QX/Ev6apJQd2cAmUPS84MvP5fIW9FgrLm9xik+98FpTkpbV6N8GFjqP1FJXibPo/Z62eTrz16Q=
-	=
-X-Received: from wmim14.prod.google.com ([2002:a7b:cb8e:0:b0:485:4f4a:bd84])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:1389:b0:485:9a50:338d
- with SMTP id 5b1f17b1804b1-488fb739d3amr369175715e9.3.1776957678057; Thu, 23
- Apr 2026 08:21:18 -0700 (PDT)
-Date: Thu, 23 Apr 2026 17:20:42 +0200
-In-Reply-To: <20260423152024.1098465-19-ardb+git@google.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LR9V/yFp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F2C4DC2BCAF;
+	Thu, 23 Apr 2026 15:42:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1776958954;
+	bh=bAo999kxv5pqyr4x2V7DioqTFgZGPHHa0eUWfLX4OT8=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
+	b=LR9V/yFpv+xba5bbbsHEHmfTx5QaDXRqZNs0nJZA9bL8dwE24+RO5A94f5Kc31UUs
+	 dFavesLm2vmnTDmXoathj+0Us0luOWfDu9CB06UlUi/CfAqgR9bVwi8he6grFEEb5z
+	 KEPCrIjRYA//9r0c8Bm8dklAA9ZZwGq8uCCDuvi0afSEmCG9XB26DZpm5jBRoNSo7q
+	 RfbeVwygHif8wEFxqg5oR5I/V4RZQU0FsMe1ZoL7Hd7GTxXSr3X69Vl5Ztmqkmj6/7
+	 R/S/Fua4Xcb1RZJ5t8WtKdqOaF9R/g6z4K5DGxESNo2K4MjT8aAsHLW4TxANv0CPIE
+	 Ke+c8jsi2VDuA==
+Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
+	by mailfauth.phl.internal (Postfix) with ESMTP id DE9CFF40068;
+	Thu, 23 Apr 2026 11:42:32 -0400 (EDT)
+Received: from phl-imap-02 ([10.202.2.81])
+  by phl-compute-01.internal (MEProxy); Thu, 23 Apr 2026 11:42:32 -0400
+X-ME-Sender: <xms:6D3qadAnxa6A33hsGxLVtNd3Ay4c4EbGsrD5zmvUBV4_HWAFkfVxzg>
+    <xme:6D3qaWWnBXt2Sp9TIHtYeYnpWY-1Mog97g1tyAX66L4BqOQbWKZw-y1rY7LMbClsT
+    yGXQVuS35KpJGuMSvdYitGyf8-3GzncCdSJ0JZygvHMVhhW1ly1kA>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdeijeehgecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
+    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
+    hrpefoggffhffvvefkjghfufgtgfesthejredtredttdenucfhrhhomhepfdetrhguuceu
+    ihgvshhhvghuvhgvlhdfuceorghruggssehkvghrnhgvlhdrohhrgheqnecuggftrfgrth
+    htvghrnhepvdeuheeitdevtdelkeduudetgffftdelteefteevjeevjeeiheefhfejieej
+    fedunecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
+    hrugdomhgvshhmthhprghuthhhphgvrhhsohhnrghlihhthidqudeijedthedttdejledq
+    feefvdduieegudehqdgrrhgusgeppehkvghrnhgvlhdrohhrghesfihorhhkohhfrghrug
+    drtghomhdpnhgspghrtghpthhtohepgedpmhhouggvpehsmhhtphhouhhtpdhrtghpthht
+    ohepthhhohhrshhtvghnrdgslhhumheslhhinhhugidruggvvhdprhgtphhtthhopehjkh
+    esohiilhgrsghsrdhorhhgpdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhk
+    vghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrd
+    hkvghrnhgvlhdrohhrgh
+X-ME-Proxy: <xmx:6D3qaeqpsCkX4z09-y6S4jmpxXa5k2gWaVWEPPqOJUUTMpOOjw0jUA>
+    <xmx:6D3qaYHiLlcyFuF-ZZex1yZuuUo1L_DYy31ryYQzkjxNTjuDHmCTxw>
+    <xmx:6D3qaWtqTXPnhaN1_sCzbpnz-aePchi69BTdX2qgNVxcf04PFZnJtw>
+    <xmx:6D3qaSVYY6WJmuMdWHIqI8opnIrCCIoVJbKLiRDIabJoCzRcDiguZA>
+    <xmx:6D3qaaFYrKcY8m5PrzBmG4kNKiqoyNcdw_Q0SYebH38F-G9Dm7PZRUHo>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id C10AD700065; Thu, 23 Apr 2026 11:42:32 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-References: <20260423152024.1098465-19-ardb+git@google.com>
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1264; i=ardb@kernel.org;
- h=from:subject; bh=4kXARMQ9wUsH59E3D6X32IJFsIA2YMKbNS4DiGE+Qis=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfOVxcVPMbXVL7m23fAPD/CcxF4m9NNWeiWvb+smlZrJy
- vvvT9PoKGVhEONikBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABMJ9mJk+HGiY/W3dL1nO97J
- S5lHv7ymPdfNeteKX3NmzNtVJco+9xXDf9eLpzY7vQg78qyZQ1ng2C1BjYhpTi+U4ia81Zm9zuL HO2YA
-X-Mailer: git-send-email 2.54.0.rc2.544.gc7ae2d5bb8-goog
-Message-ID: <20260423152024.1098465-36-ardb+git@google.com>
-Subject: [PATCH v3 17/17] x86/efi: Drop kexec quirk for the EFI memory
- attributes table
-From: Ard Biesheuvel <ardb+git@google.com>
-To: linux-kernel@vger.kernel.org
-Cc: linux-efi@vger.kernel.org, x86@kernel.org, 
-	Ard Biesheuvel <ardb@kernel.org>, "Mike Rapoport (Microsoft)" <rppt@kernel.org>, 
-	Benjamin Herrenschmidt <benh@kernel.crashing.org>, Dave Young <ruirui.yang@linux.dev>, 
-	Gregory Price <gourry@gourry.net>
-Content-Type: text/plain; charset="UTF-8"
+MIME-Version: 1.0
+Date: Thu, 23 Apr 2026 17:42:11 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Thorsten Blum" <thorsten.blum@linux.dev>, "Jeremy Kerr" <jk@ozlabs.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Message-Id: <7a5f145c-9094-426b-9fa2-79c853cb04f1@app.fastmail.com>
+In-Reply-To: <20260422122525.99460-3-thorsten.blum@linux.dev>
+References: <20260422122525.99460-3-thorsten.blum@linux.dev>
+Subject: Re: [PATCH] efivarfs: use QSTR() in efivarfs_alloc_dentry
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-From: Ard Biesheuvel <ardb@kernel.org>
+Hi Thorsten,
 
-Now that the EFI memory attributes table is preserved properly, and the
-quirk to detect corrupted tables has been updated not to result in false
-positives when the number of EFI memory map entries is low compared to
-the number of EFI memory attributes table entries, there is no longer a
-need to ignore the latter when doing a kexec boot. So drop the
-workaround.
+On Wed, 22 Apr 2026, at 14:25, Thorsten Blum wrote:
+> Use QSTR() and drop strlen() in efivarfs_alloc_dentry().
+>
+> Signed-off-by: Thorsten Blum <thorsten.blum@linux.dev>
+> ---
+>  fs/efivarfs/super.c | 5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
+>
 
-This reverts commit
+I'll queue this up once -rc1 comes around. Thanks.
 
-  64b45dd46e15 ("x86/efi: skip memattr table on kexec boot")
-
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- arch/x86/platform/efi/quirks.c | 4 ----
- 1 file changed, 4 deletions(-)
-
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index fc6a15c2ace6..92d37f2a5cbe 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -522,10 +522,6 @@ int __init efi_reuse_config(u64 tables, int nr_tables)
- 		if (!efi_guidcmp(guid, SMBIOS_TABLE_GUID))
- 			((efi_config_table_64_t *)p)->table = data->smbios;
- 
--		/* Do not bother to play with mem attr table across kexec */
--		if (!efi_guidcmp(guid, EFI_MEMORY_ATTRIBUTES_TABLE_GUID))
--			((efi_config_table_64_t *)p)->table = EFI_INVALID_TABLE_ADDR;
--
- 		p += sz;
- 	}
- 	early_memunmap(tablep, nr_tables * sz);
--- 
-2.54.0.rc2.544.gc7ae2d5bb8-goog
-
+> diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+> index 1c5224cf183e..95a685f022e6 100644
+> --- a/fs/efivarfs/super.c
+> +++ b/fs/efivarfs/super.c
+> @@ -192,12 +192,9 @@ static const struct dentry_operations efivarfs_d_ops = {
+>  static struct dentry *efivarfs_alloc_dentry(struct dentry *parent, char *name)
+>  {
+>  	struct dentry *d;
+> -	struct qstr q;
+> +	struct qstr q = QSTR(name);
+>  	int err;
+> 
+> -	q.name = name;
+> -	q.len = strlen(name);
+> -
+>  	err = efivarfs_d_hash(parent, &q);
+>  	if (err)
+>  		return ERR_PTR(err);
