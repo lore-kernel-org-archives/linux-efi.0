@@ -1,53 +1,53 @@
-Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
+Received: from mail-wr1-f74.google.com (mail-wr1-f74.google.com [209.85.221.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45DD6363C7A
-	for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 15:21:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5406A33D4E2
+	for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 15:21:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776957666; cv=none; b=qikNmWK75eGM4EAwLdxL3ohg5VFdVvx7mrD5XaPA3ZTjdZuHDDYabKYFaI5oN0dlUsltFqVXwikgLVGvDX0T6RijSeiNz2OjwSdZ8DW9Kh/sDh8YxXFQ5DQymeCvTnij3IbOLLfPJUXyfn/TOq9niCueTm+9Mczrw3BP+TvIYEo=
+	t=1776957668; cv=none; b=sRw+qW6z7fcbvCgRLPNNvnWJCui5B5g/wy3F/wXKHcCG8pnKzvmPpBe8nVNMxl7s+HM495PF7IKrwQPDbrJ4SuVNveQO0dw04rDvyOXiRcoOl9W3Wx14sKV+x+tTqO2z9Q5BUnE0TTaQBWOYmqJ4Cya2h+XsvBXZOx1w5beMo6A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776957666; c=relaxed/simple;
-	bh=/OVhF57WbQigCK5DeTOM6aYd0BdynAOnjWEYScbyD2s=;
+	s=arc-20240116; t=1776957668; c=relaxed/simple;
+	bh=csMz6OTWa744MWvUvvooa2OQVxqluJ1t6vQj1ZvJETY=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=MS0vEJ6y3q7/Mlv1zYw/pO12u3QPjLB7z4/Z0zygT6QLuOM+V7/lPoQ5JdC8D4uMau7OgnzmiK42fP1brAJmgGaRaa4FPRuUfrhUnW+CqMWB4L2mxjvNFTA1EO6QobAlKWyLgFPS8ynKeGnSqrUfroJJ4kpz9coSjvDKP8ZzBA8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=fxq53Qgj; arc=none smtp.client-ip=209.85.128.74
+	 To:Cc:Content-Type; b=AMuJDSrchCHjq5cHfaV1HBVn4QsLZ+JsbeT3uCAEmMmKE+SK68GG2ADFTTvGfaif01BHdwzZAN/IAhLkoZ6QeaVkiT7Oy+mO24ZcwMO6pYfNaTl59lI32NUKm9HjxRYo89Yjl5GI4k6KcE6s1E/ABaKcBJmAps2YVDY4GePi8yE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=uWZGUpcC; arc=none smtp.client-ip=209.85.221.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="fxq53Qgj"
-Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-48a589c7879so17464315e9.1
-        for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 08:21:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="uWZGUpcC"
+Received: by mail-wr1-f74.google.com with SMTP id ffacd0b85a97d-43d721a4858so4714197f8f.1
+        for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2026 08:21:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1776957664; x=1777562464; darn=vger.kernel.org;
+        d=google.com; s=20251104; t=1776957666; x=1777562466; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=5s0+CUEMaJcjjFm/1CcbVMArs93hKlDfpfsoFtL45Lw=;
-        b=fxq53Qgjns/E3D7z0LcC/AipKRVqwH93SSequh03Mliqp8j5OHIKhPl63RHjGZoY94
-         zVG8iB+BBg7z6Epcnp0uMLgp3Tx0bTJF3o+V/wkYLIXj2A6tmLINhUD1AN/AyDdWDflE
-         ktj6MG7B9NdSfIEX4c9SpjnUF3a4zV8gejDS5PSi8X/7xJYk7jJ1nB44sxr23JWqp4y6
-         h3/m8UHnPT/qUKecpDha0m4mCxZxk0SChwmNqek1TxdoU+xe32kc0DdSB0VlzHMG2LeS
-         8FNXb1p8YilYnTgOSN52oijyd4gPm1CQYSS9APVC+en0t3+v8sCphpXfRf76qpBab3h0
-         ZEJg==
+        bh=X1BgsYQQEh+WL/GlE+9+D3uI3VKv2eWJ1o6ED2se/NE=;
+        b=uWZGUpcCxmJwbp6SkGxbhtOljKFS6pfwsDKig0jMTU774Vh6byCBDO0bO51rzNICte
+         vupL3LenytKmTBqW9l+MGp5TEJ/CVvz70ls+mo2cpbXM+kgk0b1iV9BBtevKb/hElySm
+         +Bl2HKnGn8qSVTABua48SPm2hN8+vaJXQdFknQ56KTpPPKRSRiAlEaUAi8COgZsHzQNZ
+         +eRekxhAe+LQA9N2ug5VuDxbge2C7n5Adtvz5HkO9Oqy/RpGP1k1rkFQjVt/5E4u9tMX
+         MW1tRkuA6wFMd5TYL4uWYDxbrvl+xLENKm3+SbgoTp4VFREhG2WNirx3f1yj23eLw8a4
+         5GWw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776957664; x=1777562464;
+        d=1e100.net; s=20251104; t=1776957666; x=1777562466;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=5s0+CUEMaJcjjFm/1CcbVMArs93hKlDfpfsoFtL45Lw=;
-        b=g2Uo2P54dr13IyzcT/Io1HZzpf0PXCc4HGx4ug7VUf0av5nqU2ANy+Jdqq9mz63XbI
-         QEhHGJZjEGXISVCG10/pwVFvcdY0hwiLs74khcIXvR+Y2y/y0SaPnSw5MgihGGCvHkOU
-         3+2RNKxFPDD6J9Oc3NekMb+BysiHZWjzsvYwtDuj6muvbFqxIU7Oz49fihNV5ITfFlw/
-         wNHCaFqXs8bNpniy6IWJYsycxPypTFAt8ajorDTKFiKBW2KUPsQO8VRL3HK1425D2cSt
-         yuZzocWR4jm9ZegCzmYZkSUS7fkdsOkao4zv9DjWAkX5QfRiAGF9RBVmYSWp/oUg1N9j
-         80oA==
-X-Gm-Message-State: AOJu0YxCPcUSra2hczM98SYAACz3X6YYy4xBkdqYhFW6GhR6yW9CmcFJ
-	nU0rk794uNoFEcWcr/7OppeU0+Ji1A7BffUcKGw5JAu/cXHZzzJG3DYLL+nIYV4A5BTQ9M+oiQ=
+        bh=X1BgsYQQEh+WL/GlE+9+D3uI3VKv2eWJ1o6ED2se/NE=;
+        b=PBAXGWz1+UthUo2OUEKL13rPjYEH1KnWtioxD0dQQyu/9zD61ubdrIJ2TAD5q4VY7v
+         iWk3qIqSTi2setA5BfL8NVU+12/iunPF0TpHcjsiH2ty7Dsgy7bXQOvkRHFVSQmOBbpR
+         UMCfuVUSu5+9tmaY29y5X6YQlvQtm4TN4JUn/hUHXJ8xlOztla7WYLKNwqKD3P86bPKx
+         iA41xVr2lKT04KoGpJ3HmY8OS/fzcK2YpW13YEkg7LZ3Y7tI7DgO2xpt2i/SB8UZQMnC
+         nsFzaonsJtBbQOPk7IF8rKP2YQS52J3jdFjz4X7ZeaqeRqmw5JArDZRdJlgabexY8CNF
+         SLSw==
+X-Gm-Message-State: AOJu0YxEkNO4tD0piz5gE1ZoTE9dVBjDmFsBQpoeW5T4iMNNKxPpvuSi
+	/Uy1NSc438dkxCcSbYi1NCD7sprv1W9B3lDSHbueIIGb5mO3HEXBAZ9zQwlU7cNS6mxZcKhB0A=
 	=
-X-Received: from wmim14.prod.google.com ([2002:a7b:cb8e:0:b0:485:4f4a:bd84])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:a410:b0:48a:5821:6006
- with SMTP id 5b1f17b1804b1-48a5821692dmr132219625e9.4.1776957663617; Thu, 23
- Apr 2026 08:21:03 -0700 (PDT)
-Date: Thu, 23 Apr 2026 17:20:29 +0200
+X-Received: from wrrx13.prod.google.com ([2002:a5d:444d:0:b0:43c:f9db:4c36])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:2303:b0:43d:73d4:b34
+ with SMTP id ffacd0b85a97d-43fe3dcb1e9mr43538482f8f.16.1776957665004; Thu, 23
+ Apr 2026 08:21:05 -0700 (PDT)
+Date: Thu, 23 Apr 2026 17:20:30 +0200
 In-Reply-To: <20260423152024.1098465-19-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -57,14 +57,14 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20260423152024.1098465-19-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1907; i=ardb@kernel.org;
- h=from:subject; bh=x0whcXz7bSCxvxkEWlMbHW/Kp62wz+iO//Bp/09SSqE=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfOVxf7IWZ7ndT7IHZ6m1Zrzd9JvkTZxP+3oZ2vPS+hvO
- rhz7yrdjlIWBjEuBlkxRRaB2X/f7Tw9UarWeZYszBxWJpAhDFycAjCR5B5Ghn0HshbqazK+y0hx
- cplcer10bm7q9aooNvtFQcbJX5VEtjL8T2SoLF2ok8PhZeUp0fqJU8whgnVuQBrHZRZHvV6tzLX sAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4315; i=ardb@kernel.org;
+ h=from:subject; bh=mtKZ0aXjRN4p0VVWJRqKtVcFXFyhdtP/RFJ1WrypNIQ=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfOVxYEVbD1Ntl4urAk1+p93f9h9NErl98KPuUmpP1/FT
+ 5nyUWRRRykLgxgXg6yYIovA7L/vdp6eKFXrPEsWZg4rE8gQBi5OAZjIul6Gf9rrYvIDd+343sD1
+ +1fFs22Z515qbD9wf77YibBfxw/+zzjEyPDATtTz/MPUPiXX14dOX/hmxNVwepL6i+p51rLeX1/ vuMMFAA==
 X-Mailer: git-send-email 2.54.0.rc2.544.gc7ae2d5bb8-goog
-Message-ID: <20260423152024.1098465-23-ardb+git@google.com>
-Subject: [PATCH v3 04/17] x86/efi: Defer sub-1M check from unmap to free stage
+Message-ID: <20260423152024.1098465-24-ardb+git@google.com>
+Subject: [PATCH v3 05/17] x86/efi: Simplify real mode trampoline allocation quirk
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, x86@kernel.org, 
@@ -75,65 +75,112 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-As a first step towards moving the free logic to a later stage
-altogether, and only keeping the unmap and the realmode trampoline hack
-during the early stage of freeing the boot service code and data
-regions, move the logic that avoids freeing memory below 1M to the later
-stage.
+To work around a common bug in EFI firmware for x86 systems, Linux
+reserves all EFI boot services code and data regions until after it has
+invoked the SetVirtualAddressMap() EFI runtime service. This is needed
+because those regions may still be accessed by the firmware during that
+call, even though the EFI spec says that they shouldn't.
+
+This includes any boot services data regions below 1M, which might mean
+that by the time the real mode trampoline is being allocated, all memory
+below 1M is already exhausted.
+
+Commit
+
+  5bc653b73182 ("x86/efi: Allocate a trampoline if needed in efi_free_boot_services()")
+
+added a quirk to detect this condition, and to make another attempt at
+allocating the real mode trampoline when freeing those boot services
+regions again. This is a rather crude hack, which gets in the way of
+cleanup work on the EFI/x86 memory map handling code.
+
+Given that
+
+- the real mode trampoline is normally allocated soon after all EFI boot
+  services regions are reserved temporarily,
+- this allocation logic marks all memory below 1M as reserved,
+- the trampoline memory is not actually populated until an early
+  initcall,
+
+there is actually no need to reserve any boot services regions below 1M,
+even if they are mapped into the EFI page tables during the call to
+SetVirtualAddressMap(). So cap the lower bound of the reserved regions
+to 1M, and fix up the size accordingly when making the reservation. This
+allows the additional quirk to be dropped entirely.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/platform/efi/quirks.c | 28 +++++++++-----------
- 1 file changed, 12 insertions(+), 16 deletions(-)
+ arch/x86/platform/efi/quirks.c | 34 ++++----------------
+ 1 file changed, 6 insertions(+), 28 deletions(-)
 
 diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 4d8de7c6ce59..e2e57e9201a9 100644
+index e2e57e9201a9..e79fb94c1bf6 100644
 --- a/arch/x86/platform/efi/quirks.c
 +++ b/arch/x86/platform/efi/quirks.c
-@@ -468,18 +468,6 @@ void __init efi_unmap_boot_services(void)
- 			size -= rm_size;
- 		}
+@@ -324,10 +324,14 @@ void __init efi_reserve_boot_services(void)
+ 		return;
+ 
+ 	for_each_efi_memory_desc(md) {
+-		u64 start = md->phys_addr;
+-		u64 size = md->num_pages << EFI_PAGE_SHIFT;
++		u64 start = max(md->phys_addr, SZ_1M);
++		u64 end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT);
++		u64 size = end - start;
+ 		bool already_reserved;
+ 
++		if (end <= start)
++			continue;
++
+ 		if (md->type != EFI_BOOT_SERVICES_CODE &&
+ 		    md->type != EFI_BOOT_SERVICES_DATA)
+ 			continue;
+@@ -340,11 +344,6 @@ void __init efi_reserve_boot_services(void)
+ 		 * efi_free_boot_services(), we must be extremely
+ 		 * careful not to reserve, and subsequently free, critical
+ 		 * regions of memory that somebody else has already reserved.
+-		 *
+-		 * A good example of a critical region that must not be
+-		 * freed is page zero (first 4Kb of memory), which may
+-		 * contain boot services code/data but is marked
+-		 * E820_TYPE_RESERVED by trim_bios_range().
+ 		 */
+ 		if (!already_reserved) {
+ 			memblock_reserve(start, size);
+@@ -427,7 +426,6 @@ void __init efi_unmap_boot_services(void)
+ 	for_each_efi_memory_desc(md) {
+ 		unsigned long long start = md->phys_addr;
+ 		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
+-		size_t rm_size;
+ 
+ 		if (md->type != EFI_BOOT_SERVICES_CODE &&
+ 		    md->type != EFI_BOOT_SERVICES_DATA) {
+@@ -448,26 +446,6 @@ void __init efi_unmap_boot_services(void)
+ 		 */
+ 		efi_unmap_pages(md);
  
 -		/*
--		 * Don't free memory under 1M for two reasons:
--		 * - BIOS might clobber it
--		 * - Crash kernel needs it to be reserved
+-		 * Nasty quirk: if all sub-1MB memory is used for boot
+-		 * services, we can get here without having allocated the
+-		 * real mode trampoline.  It's too late to hand boot services
+-		 * memory back to the memblock allocator, so instead
+-		 * try to manually allocate the trampoline if needed.
+-		 *
+-		 * I've seen this on a Dell XPS 13 9350 with firmware
+-		 * 1.4.4 with SGX enabled booting Linux via Fedora 24's
+-		 * grub2-efi on a hard disk.  (And no, I don't know why
+-		 * this happened, but Linux should still try to boot rather
+-		 * panicking early.)
 -		 */
--		if (start + size < SZ_1M)
--			continue;
--		if (start < SZ_1M) {
--			size -= (SZ_1M - start);
--			start = SZ_1M;
+-		rm_size = real_mode_size_needed();
+-		if (rm_size && (start + rm_size) < (1<<20) && size >= rm_size) {
+-			set_real_mode_mem(start);
+-			start += rm_size;
+-			size -= rm_size;
 -		}
 -
  		/*
  		 * With CONFIG_DEFERRED_STRUCT_PAGE_INIT parts of the memory
  		 * map are still not initialized and we can't reliably free
-@@ -537,12 +525,20 @@ static int __init efi_free_boot_services(void)
- 	if (!ranges_to_free)
- 		return 0;
- 
--	while (range->start) {
--		void *start = phys_to_virt(range->start);
-+	while (range->start || range->end) {
-+		/*
-+		 * Don't free memory under 1M for two reasons:
-+		 * - BIOS might clobber it
-+		 * - Crash kernel needs it to be reserved
-+		 */
-+		unsigned long s = max(range->start, SZ_1M);
-+		void *start = phys_to_virt(s);
- 		void *end = phys_to_virt(range->end);
- 
--		free_reserved_area(start, end, -1, NULL);
--		freed += (end - start);
-+		if (start < end) {
-+			free_reserved_area(start, end, -1, NULL);
-+			freed += (end - start);
-+		}
- 		range++;
- 	}
- 	kfree(ranges_to_free);
 -- 
 2.54.0.rc2.544.gc7ae2d5bb8-goog
 
