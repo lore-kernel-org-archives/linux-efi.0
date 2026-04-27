@@ -1,150 +1,95 @@
-Received: from mail-yx1-f51.google.com (mail-yx1-f51.google.com [74.125.224.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E4393E3174
-	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 15:31:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.224.51
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777303861; cv=pass; b=cTyORqkmf+VarnTacjvh/2wr+pbpBHJ0831tH3P0Xg+pwJlvZCKXYthlPTRflWJLStYrquSpNSyOeDN61Ct7GnisJS8G38sYMR3dXjN9gDJZq1v1gKEBWy+0hcgEYI1Bjqqv9n2meo3yuIDuRPRMjQTbrAfLraY0CUEa9Oh+Mto=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777303861; c=relaxed/simple;
-	bh=4HiY4AYN/EGxobzB/5kTY8j2JpTsW2nMz6JrZtmNerw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ZhiJrHCQTS6HPBKQoYi+SuSOLgdBHPF5iPoIHPwGIJUOlHfuFwlHAwyr1H0SFdRNSRWwyOLy+VRNsHu55STIgNZDFh+8B4SiUJWQp53mkXGao1BybENBsHiWZM616OBWrtqhbSMFXYFeSGuy/52B/cmYtfyj3SMGB4RfZ20+zuQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=b4ESHNPf; arc=pass smtp.client-ip=74.125.224.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92B8D21CC59
+	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 15:56:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1777305400; cv=none; b=EzkXNxvIEJ6HxjK0oMR6fFeobMZRYtdX5Z0YGzZ+5/Qwkrx4MGSHV2dgRUxyTUcT0ynOO5ZF9fITKU8GMCNp8i/wrXhvq7YE57hZ1freHzIGOs/+rNVgDzZia7Iq6XXIfj9rdVEC7BRfffWqBfU5/pVmyF4gqJXnjhGMcL7ZGBI=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1777305400; c=relaxed/simple;
+	bh=9AZoKn3Mmd7YFHCvD6UJBvrZLBycKGUTenx7s57wVxs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=NN+RRCqEfNKiDU6P7+XYKrVPurhLUvCyHb8cYoPXkPm8PLxNpoW+ozhPYy5wbhEwjWXzAkMBu1pc6kWY/xyn2GO9YDT+dtUL1uWj2Acc/qEYpX4vO7Q5sYhkuauIzpQIdqZz0yFJ6QUyiLwdUEd+VLc+r/k57k3ZIQv3QQzaMVU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JYWY78Px; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="b4ESHNPf"
-Received: by mail-yx1-f51.google.com with SMTP id 956f58d0204a3-6530287803cso9939042d50.1
-        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 08:31:00 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1777303859; cv=none;
-        d=google.com; s=arc-20240605;
-        b=QqbgpD9ahAvVV2exV4VR/qOO0LT8SpDkp5XOmXuL3D58Z11FofFBEjUR3Mxhz4DTQw
-         GVAk8XRwGKJYvrBt6zxz2rmsXZYVgHxaZD4eqUj5n74s69HAR2t+CeAsS+2elYrWk4wv
-         2QsfF8bRQFlrg98WeyyExqWAB6qL67HzOzIkEnhfhk3fh7kQNc0MrQ9wCS4Uc75yWELR
-         FxSa9bxDvGHyjj90XFfpsqLW7vdqpbsyWnFHoMTosV7dl9AGQQqkTA7N9WSUDqqfPsuZ
-         zOMIt9gJWkKUeA8UF/UqOQPhVlRaWUlWwYx7z1T8bECD7o2V30NXk3e+iTT9beFRJc1x
-         A0/Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=tt+/kkN9TN5tQPCLUwGv3Fxj5QDbNx41eb7po+8Opjg=;
-        fh=g/y9o/atsQmYbz2yIGZSq74CykYMIbMZsMs+DOOQedE=;
-        b=L+cab7+z9Qie0i3PA5fYwifcsoSVfP0gs/KQp5lRAFwY2YJyUGp4A9nUp89lmpw1Rs
-         lNkxOXl+rb1Zj59O5BLXve4wXE/qpTTFunfHXqg6bVViphR09lxGlUDosmwrRK+0vj6O
-         nY+F3JdeyW7Rl90EvWdWqRT9Ss/IA25GXfrVnUhub6nZ4ZaVSl5HPsvjokSnKUtVCv7P
-         Fb7F8ry+szL3/cNtpvaZvOvAqdbbif/bdKCJ5ltfcSD0iIKR705TNKVxJMIW3AAhwG8a
-         +Nd2iITtYqyPeK6RaGEBzIoH/UONmw1PoLRk+o4QSD+Et/u72COV7tM6rGveeSlY33dK
-         r6nQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777303859; x=1777908659; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=tt+/kkN9TN5tQPCLUwGv3Fxj5QDbNx41eb7po+8Opjg=;
-        b=b4ESHNPfvqrhDwXa4sJK7bo5T3yoN/5XGg8v6nDEAv6zHIijIn0qrbNTKLnFS7qi7h
-         oSWoPXv9bJ8L5UaJ9s86MwHyz9oSJLzWGdKdc0cI2B9/zMFmubLuWp2bBd0PdGKUBw62
-         +3rDsbtaadoJ7CohtJXGUxlOcU2sSwemEqhZYSWRUr856eF7XPIj4TmrE8KKnvVeUE8s
-         KNhNno+tY5Nkw8mY7F4OIYz+ssLHbeQNUKt44yfPlrqmSjXw13fOj1CX+Va1ds1L+/67
-         7UTzn8LqWWB0iEFkey5e8JG2POJ0nIToqpR6fTnnWyXHMfi4+XnT2ha1lm+Z8CtcwYPI
-         wlLA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777303859; x=1777908659;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=tt+/kkN9TN5tQPCLUwGv3Fxj5QDbNx41eb7po+8Opjg=;
-        b=dlbfbLngzE2NaXtvIqDvwLYLm1Vo31jjl8Xz63vytxWVqeubwhNEoIRRpd0qHMJgfq
-         J7Wouj/FDd6Liyf7I/YgIndwvrgAMACOxwKMWzogbxOVHjkAoY53mgwkILviq+C6c6EN
-         MorkDLU0uNyXK6iE42ZL6lflXji7poXzdN1gpXeeopeZyxzAAeNCJxlvYOj6e5CtYazB
-         PdenSOYypGJUcdPR2TPYVJarXhIhOLIwQGsUaZJ3qf8LARg/++HdzfwfNuHDgfpb+5yP
-         PH5MHQxYxAUfPCrRI7aeqkHzgaH+CtQe33bMj6ivZMOdWzfdokNugDZC3LcvIvKsfQat
-         oJTw==
-X-Forwarded-Encrypted: i=1; AFNElJ/vmGMk+GviBfBsKShDo7bkeaa3YZTHBXOd2IuE8pqgB4GmNw5LzMFnqwajte8csvE2nGxGvTtKxLQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxdztEnGQrF99Zcs4v1mOSIeGxBbQtCotK36uykFhd4JstLjEqt
-	jAzSHRauDcDy8XYltC55ok7s1fFTMX8go12Q5hoVUbuRuSkVRjw+b9tx6NYt9lFyFfFgzNXkKpF
-	vCq5q5hMQdXp1+lsKYK7TW5nvOzLtyZ1R59Jy0L2Tjw==
-X-Gm-Gg: AeBDietkaNLeNiKmVz46KQw/8OkDzx7KMif3KR+TyJfveg3srjCXSZHRMBipO7a9unh
-	rPMj4W7PFMDEhyhK7Jf4cTmmiY5f2dpSBp/r0EKZWa5jsRMIdr5qmhXdu7wsCbLfEZvCsHND2QL
-	zPNUYAhZCF//zfNfkEHS3GoV5NX+TRkdq6DYZd5BT53j4Y/kzPtHANbkiaW0GCGnaI4epizxYyg
-	ifyhjNkVeTojhowUL6JeFgwXL/+25iCh8r+2hNET3e3CtGMYSBMB58Tti8s9+ItoD38IYrau86i
-	gaipXqq6dkVtJvBxf4oLZbzy3rprzvALXkYVRKm7wsBoTMjXs34=
-X-Received: by 2002:a53:ac9b:0:b0:654:c28:551 with SMTP id 956f58d0204a3-6540c282024mr35236448d50.32.1777303859167;
- Mon, 27 Apr 2026 08:30:59 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JYWY78Px"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1777305398;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=DBoGTpnCziaMe4ETleb7tyo0dqz90igD9vfAMDx0ca0=;
+	b=JYWY78PxOF6vLeGY5TKkST3zpqoLQV/IV15axLtZo0o84KY+9wmzKa3qwFBnwuGUx4yeuC
+	+jJ+umg0SP8i2NdLIAwcw9XHvTZqvVZJ2LK3mGYIFXIIcH4RsYyUyR8eaBJTxcgaFaKLcS
+	pHkY4oyfnRq0vSN1BDov2qNVcaZ13Xg=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-321--aX6Vh1DOa-AMEVzXiqxMg-1; Mon,
+ 27 Apr 2026 11:56:37 -0400
+X-MC-Unique: -aX6Vh1DOa-AMEVzXiqxMg-1
+X-Mimecast-MFC-AGG-ID: -aX6Vh1DOa-AMEVzXiqxMg_1777305395
+Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 6AF8619560B4;
+	Mon, 27 Apr 2026 15:56:35 +0000 (UTC)
+Received: from thuth-p1g4.redhat.com (unknown [10.44.48.146])
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 0B3F9195608E;
+	Mon, 27 Apr 2026 15:56:31 +0000 (UTC)
+From: Thomas Huth <thuth@redhat.com>
+To: Kees Cook <kees@kernel.org>,
+	ony Luck <tony.luck@intel.com>,
+	linux-efi@vger.kernel.org
+Cc: "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] efi: pstore: Drop efivar lock when efi_pstore_open() returns with an error
+Date: Mon, 27 Apr 2026 17:56:30 +0200
+Message-ID: <20260427155630.1966791-1-thuth@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260427104721.47724-1-r@hev.cc> <20260427104721.47724-4-r@hev.cc>
- <CAAhV-H7+B6=Uf1ZDy9SLvWkR-ggTi3k9kFU8+B+JefWqPu4Uvw@mail.gmail.com>
-In-Reply-To: <CAAhV-H7+B6=Uf1ZDy9SLvWkR-ggTi3k9kFU8+B+JefWqPu4Uvw@mail.gmail.com>
-From: hev <r@hev.cc>
-Date: Mon, 27 Apr 2026 23:30:47 +0800
-X-Gm-Features: AVHnY4Jsizl5p24DvdxTsPYaW0zh8JaFfxWIPucZNRq4lEI0h18QkC9uiGKG4ls
-Message-ID: <CAHirt9j-PMwKaLUYqR9qCOemBXCw3PfpuB5Ff1EbZozLn8tFqw@mail.gmail.com>
-Subject: Re: [PATCH 3/3] LoongArch: Skip relocation-time KASLR if it has
- already been applied
-To: Huacai Chen <chenhuacai@kernel.org>
-Cc: Ard Biesheuvel <ardb@kernel.org>, WANG Xuerui <kernel@xen0n.name>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, loongarch@lists.linux.dev, 
-	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-Hi Huacai,
+From: Thomas Huth <thuth@redhat.com>
 
-On Mon, Apr 27, 2026 at 9:29=E2=80=AFPM Huacai Chen <chenhuacai@kernel.org>=
- wrote:
->
-> Hi, Rui,
->
-> On Mon, Apr 27, 2026 at 6:47=E2=80=AFPM WANG Rui <r@hev.cc> wrote:
-> >
-> > When the kernel is relocated during early boot, a randomized load
-> > address may already have been selected and applied. In this case,
-> > performing KASLR again in relocate.c is unnecessary.
-> >
-> > Signed-off-by: WANG Rui <r@hev.cc>
-> > ---
-> >  arch/loongarch/kernel/relocate.c | 4 ++++
-> >  1 file changed, 4 insertions(+)
-> >
-> > diff --git a/arch/loongarch/kernel/relocate.c b/arch/loongarch/kernel/r=
-elocate.c
-> > index 16f6a9b39659..c36604a81d08 100644
-> > --- a/arch/loongarch/kernel/relocate.c
-> > +++ b/arch/loongarch/kernel/relocate.c
-> > @@ -139,6 +139,10 @@ static inline __init bool kaslr_disabled(void)
-> >         char *str;
-> >         const char *builtin_cmdline =3D CONFIG_CMDLINE;
-> >
-> > +       /* KASLR is performed during early boot. */
-> > +       if (kaslr_offset())
-> > +               return true;
-> Maybe the "kexec_file" case is also handled by this?
+If kzalloc fails, the function returns -ENOMEM without calling
+efivar_unlock(). Since open() returned  an error, the calling site
+in pstore_get_backend_records() won't call the close() function, so
+the lock is never released. Thus drop the lock in case of errors here.
 
-Yeah, it looks like kexec_file doesn't load the kernel image to
-VMLINUX_LOAD_ADDRESS, so it will disable KASLR here. This aligns with
-our expectation of disabling KASLR for this case.
+Fixes: 859748255b434 ("efi: pstore: Omit efivars caching EFI varstore access layer")
+Assisted-by: Claude:claude-opus-4-6
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+---
+ drivers/firmware/efi/efi-pstore.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Thanks,
-Rui
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index a253b61449459..a5db3534f0a63 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -60,8 +60,10 @@ static int efi_pstore_open(struct pstore_info *psi)
+ 		return err;
+ 
+ 	psi->data = kzalloc(record_size, GFP_KERNEL);
+-	if (!psi->data)
++	if (!psi->data) {
++		efivar_unlock();
+ 		return -ENOMEM;
++	}
+ 
+ 	return 0;
+ }
+-- 
+2.53.0
 
-
->
-> Huacai
->
-> > +
-> >         str =3D strstr(builtin_cmdline, "nokaslr");
-> >         if (str =3D=3D builtin_cmdline || (str > builtin_cmdline && *(s=
-tr - 1) =3D=3D ' ')) {
-> >                 pr_info(KASLR_DISABLED_MESSAGE, "\'nokaslr\'", "built-i=
-n");
-> > --
-> > 2.54.0
-> >
