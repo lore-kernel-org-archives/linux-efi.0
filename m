@@ -1,182 +1,272 @@
-Received: from mail-ej1-f43.google.com (mail-ej1-f43.google.com [209.85.218.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from forward205d.mail.yandex.net (forward205d.mail.yandex.net [178.154.239.216])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EABC12DF12F
-	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 09:05:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.43
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777280717; cv=pass; b=eHMDCjOaZiTUf84tT3WTcnleZx3AKtCf2NHf+vC1ceatWOSHYznPvQlXtxxZguZ0Srb4D1Rt1mZF3eeWpf+bRNbwDE+v0GXWNSIMUD38WIpEbhWTMotIOX1a/WFMtj/tcoElUJZdaymCJtrzC3RmRRYle/CEwRvkdRfm9Zp5kPk=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777280717; c=relaxed/simple;
-	bh=a5WlGur2x+nU1ZXEt1S7Pr3BhzTo07kXxugDtAVEEhI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=tCghcW+JZkorkpoo5elOxmpwwZ0gd6oNpwWdDF1adA+s+phTbmoNRPKmlFGgo+IHtPBXr0VhcEQT5URsWA9m3pw9+RC7MqU2KNazS+FUupTti8S6Vsrfcq9AQH6I04lZBjVEwbq0MAQPdj+07jUMtY6+gaXs+pFRHIWlUesyQwQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FeVsCtH9; arc=pass smtp.client-ip=209.85.218.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 702133AF672;
+	Mon, 27 Apr 2026 09:07:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.216
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1777280845; cv=none; b=NGBqMuI6VOyLNU3/Xwi39j3VCT8rGzCkJLVhQE9Gh/W3BkEsYkmQ9DnK+8NyXukwL9536vTLabxxkTTRdbtQHJi6DUq6z3/cNYcBmOri29PCEr8lWp2zJA7yoNE5s5C8meNgNHdG0/QFRWMlXs0QVjfe0zmbQLj7FoCTWPcMtIM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1777280845; c=relaxed/simple;
+	bh=s7HRcC8pRnTfGNUBuga3UrQ9BMLCjcP+JgeRbvw4KBo=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=sDGjVaUcYMGwQ/vVKAAdgKk+SnsSxp/ifJ7QOJca77gFc51NssSpj39Z4Jh2FwcqPRLM+l1enmEpHr7e7NvLz5oIr9fL69vfmvnIMV0IATx8cCZ6Vq+wF0kvf+IJH5sYesdrZ9xinqDlAv7LtmKTLvArgjZ5ZGrs5m/6S8CCSPA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru; spf=pass smtp.mailfrom=yandex.ru; dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b=bgP1eI8m; arc=none smtp.client-ip=178.154.239.216
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=yandex.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FeVsCtH9"
-Received: by mail-ej1-f43.google.com with SMTP id a640c23a62f3a-ba6838e76f2so988718866b.2
-        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 02:05:15 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1777280714; cv=none;
-        d=google.com; s=arc-20240605;
-        b=R09ENbaCgq3skxOc3gNxujqZkXIyDOe0SZb8z32dXfIcZzkZjyXypZCD/arcyXHt8u
-         McK4fFEqK8+Gy93yoTRK0+Tm8ntKmqfW0IvTAqLxLvoGIqjyHnh7Bcn7vA7Md7Oc6Shi
-         3BHBH08QsEwIMPcKlCiYvDKlwD5kWylEdyVkNKil1iCtSvsHHysxuFbkSp+kHcZ5J1DD
-         4ZOgSdACEjs1zllzmvp8dxYmP8UWA4Q8EIn57NS6y3EMi2ofiV/8Gs7e858xdq96HH6A
-         xXhjWmAk7f+zpvJlk1UAxXP3QS0W27BLcevOirWaRu5bkehrz/YxUZf9Ej0LxMQW41rt
-         G5yw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=BGupVN5az5s8pFT8H0NZ4pHuG9HKT10qjTmw5QNkxIM=;
-        fh=XKmfk9xeG2dLwGzHCd3rg6jmY0Z/UjXIPOKCZYq+pA8=;
-        b=XwDR33kUowieA4RJwFa5QOgVIJ90uoAeG9rOXbUSDLFsYhvN4FxkIhwt4uikrp80jj
-         JNPDbsT5UQxwnNa4Q65vqP8SLh7/hTsmCeXMS2BYo3QVgOafQ8BbsSBwPsWaLPKWmS5f
-         tDV9+C5o9z4JvXNC61a0TKZZWEU2QGyWloCa0y31lblYdvpt5WSvH7F3fQjMvLwyFPDN
-         o/dXSpbmyzrwQ9GoVd68Jfyy36HPTWnM3a5dOlG3Gu1Jbmsj1V4bwESrtsARpBIYy+2+
-         puO9fxgrc52/Nzcso8+1ywihUbdu71orXrxT+/9QnH9lNWSnnVLocUQrMJNKxwxVg2Sg
-         osZw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1777280714; x=1777885514; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=BGupVN5az5s8pFT8H0NZ4pHuG9HKT10qjTmw5QNkxIM=;
-        b=FeVsCtH9PneHPhOEcOJCpacTtqhXnJHPtiJ4+PawigBG+gw6FpulourYIBqe7RbI2E
-         QaBFIqQPJ+GtuyXwafgn8USJGEwOpU5XkKvFghsDHa5FV1PlkvFMesDHwbR4rGJzjVKM
-         UVb/q2WRcAyFA4NShDXS9Qbcsgm4b8L90wheIVFcTIIt7quepxV5GvYIJUTgXM5s7lAf
-         qkKxHJ9RU8YsMvPbFyDpfb6y6x9x6cIcgZ7KSB89hDAbe0ZYluKs/GrQEki46kHwhhNo
-         +/oqHS2wFahQO5WlgIaBujyRMgbEaxxanXNdLDWiPfDqVJewL5TxJgE4hdtw5t8ulwQ2
-         M04Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777280714; x=1777885514;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=BGupVN5az5s8pFT8H0NZ4pHuG9HKT10qjTmw5QNkxIM=;
-        b=qKt1URMioVr2CHFeB5Fvf6y3Yn5sdXRDWW5Nm7admsFye3B+Y/VVL2BdfxMfw4qu5K
-         uVjOQMej9gkWdIDpnRZoFcY6Q1OS9L/Vrvq4NA4S83NcavTnv4O3yt/Rm39c2xlbSW6K
-         tRLxj0CYPtdGaVmc7MQjluutzyL1+KRSuKGTrUh/19JbAmiECVf1iQiLt/rHUk4S+ptr
-         tfv1armb7L8l49DXjEdustl/aZzZUtMqN+05w//kFCop0Sd3VibB0pX8UGsifPqHfDNC
-         H30G8g2Rfoq/mT/YKNFWpJfdknnMh5amT43DzgxtJBiLE1X7eIu7b7/OR3nLNIFcMcob
-         zdMA==
-X-Forwarded-Encrypted: i=1; AFNElJ9jMvgnchXQfNrKzBJqutYLTrp11uyphLlUNfYlR54X/t7EzWoRKhScxNgTTDFELNCKF2QihcBDME8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyY356PcHs9Bga2j49jNYlD3AzVIL9C9DuOzFTDPlQCNuHzCdt3
-	sSmVqG16/Ncmt8hsja43hNg3TuVSu4SrcMbkFR8Umg1FX7S0QsxgMHwk40rPyecqU3w8luEEgkI
-	2gSI0AISJiRPWiNjDWoWTqrW+oBFX25w=
-X-Gm-Gg: AeBDies6fyK5gPrtC3K8r57QDBUy/OFGXLonjWXx1b2EYqI1+6tcBp5e832BF5PqzU1
-	JjHQVSJaJb/AG1Fke84ANVhcFNmlvyfV2t2RM990TAoZHrKZb5jL63cfFQP5dcTCvu+a1pLIStd
-	AOlod0NruF+W6hBN8X+5yb8Hl0y4wQZ0aNt0dbUg6eZrVjbztag+JmFrgWPa2LqvdHfWzo32sM7
-	lQrK8YlIfWSJikQJ8MIGqp/U9V+YhsqLdOue2wlD450tPX5tNA7aO7Ho9dxBTuv4B+ksq8DIAdR
-	VdYRXhuJtvVNk0c9wyx6X3e2mzpikqxwv0BzlZbXESuHuDMLTPuI29iRODK4IXU=
-X-Received: by 2002:a17:907:97cc:b0:bac:75ae:ef3d with SMTP id
- a640c23a62f3a-bac75aefeedmr894007366b.0.1777280713694; Mon, 27 Apr 2026
- 02:05:13 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b="bgP1eI8m"
+Received: from forward101d.mail.yandex.net (forward101d.mail.yandex.net [IPv6:2a02:6b8:c41:1300:1:45:d181:d101])
+	by forward205d.mail.yandex.net (Yandex) with ESMTPS id CF64185031;
+	Mon, 27 Apr 2026 12:01:46 +0300 (MSK)
+Received: from mail-nwsmtp-smtp-production-main-52.klg.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-52.klg.yp-c.yandex.net [IPv6:2a02:6b8:c42:ea2:0:640:ef77:0])
+	by forward101d.mail.yandex.net (Yandex) with ESMTPS id 9212FC0099;
+	Mon, 27 Apr 2026 12:01:38 +0300 (MSK)
+Received: by mail-nwsmtp-smtp-production-main-52.klg.yp-c.yandex.net (smtp) with ESMTPSA id X1UMu7lR5a60-vBBmAnZ1;
+	Mon, 27 Apr 2026 12:01:37 +0300
+X-Yandex-Fwd: 1
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail;
+	t=1777280497; bh=SfPCgNzhDXjDmJVjxPAqvTk7bkZqDRTJfwJQWV27XB8=;
+	h=Message-ID:Date:In-Reply-To:Cc:Subject:References:To:From;
+	b=bgP1eI8mxQi4SZO2v3iPIUFi44crndhzQMrMRMqEVJz0qheKUnoaaEO0h/6D4ZHdc
+	 l0EQ+jXe6yg3+Lv1TafdN//ivnOsVS0tLTMVd/UFFnD88ohXXEigqaXyprVq92Po8M
+	 cSrRDE7OFr2o4ij1HR4r/Vk37c6QDGKlPUlXrJkc=
+Authentication-Results: mail-nwsmtp-smtp-production-main-52.klg.yp-c.yandex.net; dkim=pass header.i=@yandex.ru
+From: Dmitry Antipov <dmantipov@yandex.ru>
+To: Paul Walmsley <pjw@kernel.org>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>
+Cc: Andrew Morton <akpm@linux-foundation.org>,
+	Andy Shevchenko <andriy.shevchenko@intel.com>,
+	Charlie Jenkins <thecharlesjenkins@gmail.com>,
+	Alexandre Ghiti <alex@ghiti.fr>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	linux-riscv@lists.infradead.org,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Dmitry Antipov <dmantipov@yandex.ru>,
+	kernel test robot <lkp@intel.com>
+Subject: [PATCH v7 1/3] riscv: add platform-specific double word shifts for riscv32
+Date: Mon, 27 Apr 2026 12:01:03 +0300
+Message-ID: <20260427090105.705529-2-dmantipov@yandex.ru>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260427090105.705529-1-dmantipov@yandex.ru>
+References: <20260427090105.705529-1-dmantipov@yandex.ru>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260427040517.828226-1-neilb@ownmail.net> <20260427040517.828226-8-neilb@ownmail.net>
- <CAOQ4uxi8rqkbhK4=8N1ncfU1m6bjdHLbinSf=j3k0oVEaSa-wA@mail.gmail.com> <177727962988.1474915.2841674553452335690@noble.neil.brown.name>
-In-Reply-To: <177727962988.1474915.2841674553452335690@noble.neil.brown.name>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 27 Apr 2026 11:05:02 +0200
-X-Gm-Features: AVHnY4KY3DGiJbeLpxnNIOueb0cG8ugd69Mb3NfCiVfs_OCISzp2jPWuCU1oOMA
-Message-ID: <CAOQ4uxiMUKHuGwpSkD=M4Z_QLxHn7Os9vaaWqAWd36HdfDRYuQ@mail.gmail.com>
-Subject: Re: [PATCH v3 07/19] VFS: Add LOOKUP_SHARED flag.
-To: NeilBrown <neil@brown.name>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Alexander Viro <viro@zeniv.linux.org.uk>, 
-	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, Jeff Layton <jlayton@kernel.org>, 
-	Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, 
-	Jeremy Kerr <jk@ozlabs.org>, Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org, 
-	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org, 
-	linux-unionfs@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Mon, Apr 27, 2026 at 10:47=E2=80=AFAM NeilBrown <neilb@ownmail.net> wrot=
-e:
->
-> On Mon, 27 Apr 2026, Amir Goldstein wrote:
-> > On Mon, Apr 27, 2026 at 6:06=E2=80=AFAM NeilBrown <neilb@ownmail.net> w=
-rote:
-> > >
-> > > From: NeilBrown <neil@brown.name>
-> > >
-> > > Some ->lookup handlers will need to drop and retake the parent lock, =
-so
-> > > they can safely use d_alloc_parallel().
-> > >
-> > > ->lookup can be called with the parent lock either exclusive or share=
-d.
-> > >
-> > > A new flag, LOOKUP_SHARED, tells ->lookup how the parent is locked.
-> > >
-> > > This is rather ugly, but will be gone soon after we move
-> > > d_alloc_parallel() out of the directory lock as ->lookup() will *alwa=
-ys*
-> > > called with a shared lock on the parent.
-> >
-> > Neil,
-> >
-> > Forgive me for being skeptical about the *always* part.
->
-> Scepticism should always be encouraged.
->
-> >
-> > How long ago did we add ->iterate_shared()?
-> >
-> > It's true that Linus eventually got rid of ->iterate(), but we did not
-> > get rid of the assumption that iterate_shared() might be upgraded
-> > to exclusive lock.
-> >
-> > The obvious reason is that *someone* needs to do this work for
-> > old filesystems, which are also hard to test and nobody wants to
-> > touch them.
-> >
-> > I have nothing against this patch, but I think it is more realistic
-> > to state that LOOKUP_SHARED is here to stay, so if you think it
-> > is too ugly, maybe there is something to be done about it.
-> > Personally, I do not see the ugliness though.
-> >
-> > Am I misjudging the situation of shared lookup wrt old filesystems?
->
-> Yes.
-> All filesystems must support ->lookup with a shared lock because it is
-> already the case that with a simple lookup only a shared lock is provided=
-.
-> A filesystem *could* examine the lookup_flags and deduce if the lock is
-> actually exclusive (e.g.  if LOOKUP_CREATE is set) and misbehave
-> accordingly, but a vanishing small number of filesystems  (NFS and ....
-> I can't think of any others) ever look at the lookup_flags and I'm
-> certain none do anything so ... creative.
->
-> So I'm certain that it is safe from the filesystem's perspective to alway=
-s
-> call with only a shared lock.  All that is needed is to change the VFS
-> to only ever do that.  That means separating the lock for lookup from
-> the lock for create/remove/move in directory ops, and one way to view
-> the current patch set (the complete one, not just this initial set) is
-> that it does exactly that.
->
+Add riscv32-specific '__ashldi3()', '__ashrdi3()', and '__lshrdi3()'.
+Initially it was intended to fix the following link error observed
+when building EFI-enabled kernel with CONFIG_EFI_STUB=y and
+CONFIG_EFI_GENERIC_STUB=y:
 
-I see.
-I will remain skeptical, because there is always *something* with some
-special filesystems - think fuse servers (not under your control) which
-have grown to rely on the kernel to serialize atomic_open() on the director=
-y -
-but the level of skepticism is lower now ;)
+riscv32-linux-gnu-ld: ./drivers/firmware/efi/libstub/lib-cmdline.stub.o: in function `__efistub_.L49':
+__efistub_cmdline.c:(.init.text+0x1f2): undefined reference to `__efistub___ashldi3'
+riscv32-linux-gnu-ld: __efistub_cmdline.c:(.init.text+0x202): undefined reference to `__efistub___lshrdi3'
 
-I mean it would suck pretty badly if locking order would be fs_type dependa=
-pt,
-but honestly, I do not think we will be able to avoid that, so we need to
-make sure that humans and lockdep are able to understand the different
-scopes of vfs locking at least per filesystem type.
+Reported at [1] trying to build https://patchew.org/linux/20260212164413.889625-1-dmantipov@yandex.ru,
+tested with 'qemu-system-riscv32 -M virt' only.
 
-Thanks,
-Amir.
+Reported-by: kernel test robot <lkp@intel.com>
+Closes: https://lore.kernel.org/oe-kbuild-all/202603041925.KLKqpK6N-lkp@intel.com [1]
+Suggested-by: Ard Biesheuvel <ardb@kernel.org>
+Tested-by: Charlie Jenkins <thecharlesjenkins@gmail.com>
+Assisted-by: gemini/gemini-3.1-pro-preview sashiko
+Signed-off-by: Dmitry Antipov <dmantipov@yandex.ru>
+---
+v7: export for stub and optimize '__ashrdi3()' (Sashiko)
+v4, v5, v6: and upwards: bump version to match the series
+v3: more tests by Charlie Jenkins
+v2: adjust commit message
+---
+ arch/riscv/Kconfig             |  3 ---
+ arch/riscv/kernel/image-vars.h |  9 +++++++++
+ arch/riscv/lib/Makefile        |  1 +
+ arch/riscv/lib/ashldi3.S       | 36 ++++++++++++++++++++++++++++++++++
+ arch/riscv/lib/ashrdi3.S       | 36 ++++++++++++++++++++++++++++++++++
+ arch/riscv/lib/lshrdi3.S       | 36 ++++++++++++++++++++++++++++++++++
+ 6 files changed, 118 insertions(+), 3 deletions(-)
+ create mode 100644 arch/riscv/lib/ashldi3.S
+ create mode 100644 arch/riscv/lib/ashrdi3.S
+ create mode 100644 arch/riscv/lib/lshrdi3.S
+
+diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
+index d235396c4514..b1198b41c486 100644
+--- a/arch/riscv/Kconfig
++++ b/arch/riscv/Kconfig
+@@ -404,9 +404,6 @@ config ARCH_RV32I
+ 	bool "RV32I"
+ 	depends on NONPORTABLE
+ 	select 32BIT
+-	select GENERIC_LIB_ASHLDI3
+-	select GENERIC_LIB_ASHRDI3
+-	select GENERIC_LIB_LSHRDI3
+ 	select GENERIC_LIB_UCMPDI2
+ 
+ config ARCH_RV64I
+diff --git a/arch/riscv/kernel/image-vars.h b/arch/riscv/kernel/image-vars.h
+index 3bd9d06a8b8f..7b44b94f1283 100644
+--- a/arch/riscv/kernel/image-vars.h
++++ b/arch/riscv/kernel/image-vars.h
+@@ -32,6 +32,15 @@ __efistub___init_text_end	= __init_text_end;
+ __efistub_sysfb_primary_display	= sysfb_primary_display;
+ #endif
+ 
++/*
++ * These double-word integer shifts are used by the library code, and
++ * the first two of them are required to link EFI stub. Note __ashrdi3()
++ * is not actually used by the stub but this may change in the future.
++ */
++PROVIDE(__efistub___lshrdi3	= __lshrdi3);
++PROVIDE(__efistub___ashldi3	= __ashldi3);
++PROVIDE(__efistub___ashrdi3	= __ashrdi3);
++
+ #endif
+ 
+ #endif /* __RISCV_KERNEL_IMAGE_VARS_H */
+diff --git a/arch/riscv/lib/Makefile b/arch/riscv/lib/Makefile
+index 6f767b2a349d..f668b98970bd 100644
+--- a/arch/riscv/lib/Makefile
++++ b/arch/riscv/lib/Makefile
+@@ -16,6 +16,7 @@ ifeq ($(CONFIG_MMU), y)
+ lib-$(CONFIG_RISCV_ISA_V)	+= uaccess_vector.o
+ endif
+ lib-$(CONFIG_MMU)	+= uaccess.o
++lib-$(CONFIG_32BIT)	+= ashldi3.o ashrdi3.o lshrdi3.o
+ lib-$(CONFIG_64BIT)	+= tishift.o
+ lib-$(CONFIG_RISCV_ISA_ZICBOZ)	+= clear_page.o
+ obj-$(CONFIG_FUNCTION_ERROR_INJECTION) += error-inject.o
+diff --git a/arch/riscv/lib/ashldi3.S b/arch/riscv/lib/ashldi3.S
+new file mode 100644
+index 000000000000..c3408862e2f6
+--- /dev/null
++++ b/arch/riscv/lib/ashldi3.S
+@@ -0,0 +1,36 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/**
++ * Adopted for the Linux kernel from IPXE project, see
++ * https://github.com/ipxe/ipxe/blob/master/src/arch/riscv32/libgcc/llshift.S
++ */
++
++#include <linux/linkage.h>
++#include <asm/asm.h>
++
++/**
++ * Shift left
++ *
++ * @v a1:a0             Value to shift
++ * @v a2                Shift amount
++ * @ret a1:a0           Shifted value
++ */
++
++SYM_FUNC_START(__ashldi3)
++
++        /* Perform shift by 32 bits, if applicable */
++        li      t0, 32
++        sub     t1, t0, a2
++        bgtz    t1, 1f
++        mv      a1, a0
++        mv      a0, zero
++1:      /* Perform shift by modulo-32 bits, if applicable */
++        andi    a2, a2, 0x1f
++        beqz    a2, 2f
++        srl     t2, a0, t1
++        sll     a0, a0, a2
++        sll     a1, a1, a2
++        or      a1, a1, t2
++2:      ret
++
++SYM_FUNC_END(__ashldi3)
++EXPORT_SYMBOL(__ashldi3)
+diff --git a/arch/riscv/lib/ashrdi3.S b/arch/riscv/lib/ashrdi3.S
+new file mode 100644
+index 000000000000..426de0946606
+--- /dev/null
++++ b/arch/riscv/lib/ashrdi3.S
+@@ -0,0 +1,36 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/**
++ * Adopted for the Linux kernel from IPXE project, see
++ * https://github.com/ipxe/ipxe/blob/master/src/arch/riscv32/libgcc/llshift.S
++ */
++
++#include <linux/linkage.h>
++#include <asm/asm.h>
++
++/**
++ * Arithmetic shift right
++ *
++ * @v a1:a0             Value to shift
++ * @v a2                Shift amount
++ * @ret a1:a0           Shifted value
++ */
++
++SYM_FUNC_START(__ashrdi3)
++
++        /* Perform shift by 32 bits, if applicable */
++        li      t0, 32
++        sub     t1, t0, a2
++        bgtz    t1, 1f
++        mv      a0, a1
++        srai    a1, a1, 31
++1:      /* Perform shift by modulo-32 bits, if applicable */
++        andi    a2, a2, 0x1f
++        beqz    a2, 2f
++        sll     t2, a1, t1
++        sra     a1, a1, a2
++        srl     a0, a0, a2
++        or      a0, a0, t2
++2:      ret
++
++SYM_FUNC_END(__ashrdi3)
++EXPORT_SYMBOL(__ashrdi3)
+diff --git a/arch/riscv/lib/lshrdi3.S b/arch/riscv/lib/lshrdi3.S
+new file mode 100644
+index 000000000000..1af03985ccb7
+--- /dev/null
++++ b/arch/riscv/lib/lshrdi3.S
+@@ -0,0 +1,36 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/**
++ * Adopted for the Linux kernel from IPXE project, see
++ * https://github.com/ipxe/ipxe/blob/master/src/arch/riscv32/libgcc/llshift.S
++ */
++
++#include <linux/linkage.h>
++#include <asm/asm.h>
++
++/**
++ * Logical shift right
++ *
++ * @v a1:a0             Value to shift
++ * @v a2                Shift amount
++ * @ret a1:a0           Shifted value
++ */
++
++SYM_FUNC_START(__lshrdi3)
++
++        /* Perform shift by 32 bits, if applicable */
++        li      t0, 32
++        sub     t1, t0, a2
++        bgtz    t1, 1f
++        mv      a0, a1
++        mv      a1, zero
++1:      /* Perform shift by modulo-32 bits, if applicable */
++        andi    a2, a2, 0x1f
++        beqz    a2, 2f
++        sll     t2, a1, t1
++        srl     a1, a1, a2
++        srl     a0, a0, a2
++        or      a0, a0, t2
++2:      ret
++
++SYM_FUNC_END(__lshrdi3)
++EXPORT_SYMBOL(__lshrdi3)
+-- 
+2.53.0
+
