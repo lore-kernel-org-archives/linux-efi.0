@@ -1,104 +1,75 @@
-Received: from fhigh-a5-smtp.messagingengine.com (fhigh-a5-smtp.messagingengine.com [103.168.172.156])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f178.google.com (mail-pg1-f178.google.com [209.85.215.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C2E335F5F8;
-	Mon, 27 Apr 2026 03:38:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.156
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 516AF1D5174
+	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 03:45:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777261110; cv=none; b=aS1xE70X30czKoKcek2Vxk5gIRLXwvcxZp3PR6T21fd7r6NOt01cCUS8nRLYN3AU1KM/vxAe6823QYCJg0jy8pwxIqZ0habhzFX21Gf270Iokhd8Gme1PEe92H7d3HhFDi2gD8Eo/mLwubdv/3f91cwEtGqwro09ICacHI0QH2s=
+	t=1777261524; cv=none; b=B66KXkESKoHHFgXAhIjDR1b1QqWZlGBSqUT5nhUfR6gu0lCtVww6gNV5VTNpfNPOY9OeR5BFqpZClCKX5+Q/Y/ZCcz5eXmX9pptpIQheD+pE5HBnRqJ1vIgjMJ+x/kLYBx2Of6rQ0NgWr8clq80AFG4o39b49NU8aF1SbKG3yng=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777261110; c=relaxed/simple;
-	bh=OZQWUCnhioPXbHh6CEr0ZrXkezJBRAJa3irRrT0VBn8=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=EO+hQNC0C3UfUkV9TSzPkSk68ePC0RADfOtZdwyi7NsgNiN1HJG6swvZr1ca+QGltgiiU+77zASxi7CNyJejip2GrbLtEmYXsj69MgaKIO1F7mYIhkhtkTmxTYetzzx+221CoFIpoeY9slc4QjTqFHbYdO2aHv96I3qv5ISPhEA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=hijXe/p5; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=eWDh03XU; arc=none smtp.client-ip=103.168.172.156
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
+	s=arc-20240116; t=1777261524; c=relaxed/simple;
+	bh=Z8T81jPhfrem9chwe22i+fePhVQlA7ofKkkJOecRdnQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ltQt+7tVHyLqs6TX3eFxpqS0AlkTmccRbbR1zDPx0omSWyhtw9Em3540mrx1R1uuFijKzCDjoeNZ1WsCK0L0lEVtZ0LNj2JZyPkSitC1bfYIsdz6KG7Ys0yOdAbQzb4J5e6vknAhQlR44kqo8xOkwlzCjJkAVjjSvPPDwqI3MiA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=kKss+8qu; arc=none smtp.client-ip=209.85.215.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="hijXe/p5";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="eWDh03XU"
-Received: from phl-compute-06.internal (phl-compute-06.internal [10.202.2.46])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 9205D14000D4;
-	Sun, 26 Apr 2026 23:38:28 -0400 (EDT)
-Received: from phl-frontend-03 ([10.202.2.162])
-  by phl-compute-06.internal (MEProxy); Sun, 26 Apr 2026 23:38:28 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
-	cc:cc:content-transfer-encoding:content-type:date:date:from:from
-	:in-reply-to:in-reply-to:message-id:mime-version:references
-	:reply-to:reply-to:subject:subject:to:to; s=fm2; t=1777261108;
-	 x=1777347508; bh=d0uUDizqtFn5TUR93S5pcu2hPzZI0J+S0qM13hNSWw4=; b=
-	hijXe/p59lm5VAyWu4/5fOUPxLG5POT3G2UwtwwdHk2CTFvOrQathIVCy8jXGjt1
-	S8zp7cLunv7fYOGqWQ6DKXfpFB65hdktuyCJnUTIlMTyiMWktO28uxZk+GUWqDBo
-	m7l2jBdSL4Ll7YT0lJuMZTt0rm3juh2KvEX+16N1jRp4zx0QX+leMW/VF+LSlhOs
-	wYUwx6TLjPFS/5zm3WjZCuLRyMCqJD0Vu58q4mjLZrxmaj2YvuZKngnhHgRnRZfX
-	SqAIN+qRzSZCD/dT0TchjQRGeP+n8hl+fwFj1ZXzH3Z/k7P5dYqT9DDkDsbNg9wX
-	U2kEe9XauFjWOd2fZ9trfw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:date:date:feedback-id:feedback-id:from:from
-	:in-reply-to:in-reply-to:message-id:mime-version:references
-	:reply-to:reply-to:subject:subject:to:to:x-me-proxy:x-me-sender
-	:x-me-sender:x-sasl-enc; s=fm2; t=1777261108; x=1777347508; bh=d
-	0uUDizqtFn5TUR93S5pcu2hPzZI0J+S0qM13hNSWw4=; b=eWDh03XUzL3d9HgpS
-	OdMc6goLtXJjkBRhdI1Kc8ahZeQuS6lYVjzgyIUuROdYpSxccSFusTSOihV/1Trr
-	6Lyg3G/9snsRaL4KotmkQeb37mefyGuORUbnUZGJvFMm30knu5h8d4+bF9Vdi8md
-	MPpeH3devEjtFeUkOd9cV/RagSLyjNXWPO1PgZCsnqV0SbhsP/eod9bRY+OcRcYC
-	bvBZcwsIq/pWiOdo05KaX+C4mgN0aBARnf8n3lcB8lYuYFV2YULesddovpKFvuAR
-	K4jjIW1CMkLuY+MuKDJLMyYsTjyRmkNT2e2VMGZKNsRIN0BU7FEaPvBRdyFh4DWa
-	ulb8Q==
-X-ME-Sender: <xms:NNruaY5hUPpVa2eRP2w_W2XjQcwJR2djWtX99JHP0xc8Hcm0Lmvvrg>
-    <xme:NNruaUn2bAGiDBELNBKxzVhSAd0iZFN6ZpjBoYI3cQjJmMceIwxj_g7ZOKwdbha1c
-    nqO_FaBS_uesaQ50C7UQS3dlsJqsXllKJhz4pjwPDF-pG8tTQ>
-X-ME-Received: <xmr:NNruaeEltuYUsqUrB7a5a_JYc1ofK0dfHwq0WC8BjJndkig71f_XMQjhVAdjtP8qO8A4z5rHtxg6YxWtiUgi41dT7PzrPRs>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdejjeeivdcutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
-    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
-    hrpefhvfevufffkffojghfrhgggfestdekredtredttdenucfhrhhomheppfgvihhluehr
-    ohifnhcuoehnvghilhgssehofihnmhgrihhlrdhnvghtqeenucggtffrrghtthgvrhhnpe
-    evveekffduueevhfeigefhgfdukedtleekjeeitdejudfgueekvdekffdvfedvudenucev
-    lhhushhtvghrufhiiigvpeefnecurfgrrhgrmhepmhgrihhlfhhrohhmpehnvghilhgsse
-    hofihnmhgrihhlrdhnvghtpdhnsggprhgtphhtthhopedujedpmhhouggvpehsmhhtphho
-    uhhtpdhrtghpthhtohepvhhirhhoseiivghnihhvrdhlihhnuhigrdhorhhgrdhukhdprh
-    gtphhtthhopehlihhnuhigqdhunhhiohhnfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhg
-    pdhrtghpthhtoheplhhinhhugidqnhhfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprh
-    gtphhtthhopehlihhnuhigqdhfshguvghvvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhg
-    pdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnhgvlhdrohhrghdprh
-    gtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdprhgtphht
-    thhopehmihhklhhoshesshiivghrvgguihdrhhhupdhrtghpthhtohepjhgrtghksehsuh
-    hsvgdrtgiipdhrtghpthhtohepjhhksehoiihlrggsshdrohhrgh
-X-ME-Proxy: <xmx:NNruaYHiKoiSDTixFZw8GEbHCtfbk-tCsdOUAgVkjtjMJfkpEnBYAw>
-    <xmx:NNruaW12TXkyVgU9pofOL_5tE69QBDslI8rr3jOMo46UKewlpFpu0A>
-    <xmx:NNruaafx91IQ6eyPz7YtaZvA6CCWRtfI1IMhgztbWpz2vUWUClapOQ>
-    <xmx:NNruaYKtWEqctjCX6JPSEOyGVdtSh3m2iZB3lTjHtPY0aBNboB_FCQ>
-    <xmx:NNruaaPxDpBMjJRzVb561gKoKGEtBzG6G-dFuraG03PR6PrpT7NDwOiw>
-Feedback-ID: i9d664b8f:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Sun,
- 26 Apr 2026 23:38:23 -0400 (EDT)
-From: NeilBrown <neilb@ownmail.net>
-To: Linus Torvalds <torvalds@linux-foundation.org>,
-	Alexander Viro <viro@zeniv.linux.org.uk>,
-	Christian Brauner <brauner@kernel.org>,
-	Jan Kara <jack@suse.cz>,
-	Jeff Layton <jlayton@kernel.org>,
-	Trond Myklebust <trondmy@kernel.org>,
-	Anna Schumaker <anna@kernel.org>,
-	Miklos Szeredi <miklos@szeredi.hu>,
-	Amir Goldstein <amir73il@gmail.com>,
-	Jeremy Kerr <jk@ozlabs.org>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Christoph Hellwig <hch@infradead.org>
-Cc: linux-efi@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org,
-	linux-nfs@vger.kernel.org,
-	linux-unionfs@vger.kernel.org,
-	linux-kernel@vger.kernel
-Subject: [PATCH v2 19/19] nfs: use d_duplicate()
-Date: Mon, 27 Apr 2026 13:29:52 +1000
-Message-ID: <20260427033527.773006-20-neilb@ownmail.net>
-X-Mailer: git-send-email 2.50.0.107.gf914562f5916.dirty
-In-Reply-To: <20260427033527.773006-1-neilb@ownmail.net>
-References: <20260427033527.773006-1-neilb@ownmail.net>
-Reply-To: NeilBrown <neil@brown.name>
+	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="kKss+8qu"
+Received: by mail-pg1-f178.google.com with SMTP id 41be03b00d2f7-c798fc1a28cso2911662a12.3
+        for <linux-efi@vger.kernel.org>; Sun, 26 Apr 2026 20:45:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777261522; x=1777866322; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=olS8oKBz9uJQUERWBS12mc4yNCSnT/djHgFK88Ulfns=;
+        b=kKss+8quHYcKAHcGBMJQCKTso3SIFdGXbPwh2CSHMn5g2P7l2RgpKKrKjzo/Apo+F9
+         TAnjhn3psaYis7MIh/ymXu+UFt2XAYnMBi1NxcUwxV6VziGAYUPnRSvaNKDEVOzX7bP/
+         fAm7KkVYS7ypdgS+KGxb31Dz4RODjJSIInD3VcLjY8bkZApQ85ZCtu6KCDA/ELwigBLS
+         idbhKSJYw5iJqPcwJTnyY5aa0YdOqTZzoKlkJYzLmSt0zTPNwiL1FIWiwKmvKSRBduYu
+         1l6JfM3uu+fEIb7o6yxWdacf4vgcfUJUkU249LOP8oabb7lougfUeTjlwwHSfNI1P60d
+         pr7Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777261522; x=1777866322;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=olS8oKBz9uJQUERWBS12mc4yNCSnT/djHgFK88Ulfns=;
+        b=TlqRT8G79niCxjHVkUUJrR5JH6Z0ElT9FIQUbPfmc4ESjf2nMS0gxnoWkEr914Qa+V
+         7adYChlgHNhP8aF3ULs2YoIYLQisk+ZPx9c2JfzOwvEarc7oWMf67ixruV/pwWmt+W6x
+         +lGhK9t6RhSu1hOvbTteBloWakQFoeLyvNa4VS6XQ/b0IRgkMRGSFNe2iyFyOqnG89wm
+         Tp2NVZqSuB4oKn3tovssPKQfi1MEBUifVYFZWi1sd/S6dM2t00byiBA5YJ7Bnuu+AMtG
+         BCsyx0xwJaWPTN92cKE8GTZf1RUOcBicCIkK1Un/dQaDIVdK8WDIO3U50i8K8XJ0ZN1b
+         6wdQ==
+X-Forwarded-Encrypted: i=1; AFNElJ85P+Nu0G8LskwoClvevEOtLjcuBgPd6eRwlCvZNbMP9L0LsbdgOk9gL18q6hU9VHjNKFOcvcpnjA4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwPsQMJegTBn7GynY8xBwr4LDqD1vhaK5Cr/K3oisovW052iPZt
+	HNfH+oDmWf/AlYOmhfaPCaa/gkR9a4P3HbtyYij6Gca9ODysl6Xfx5PwGJMTtYzeQoD0vKedh5M
+	CVqmC
+X-Gm-Gg: AeBDietrnRlf0QOERBSHygtEkcXkZZGbqhuie4p/Lskr1lA3H2DPxEM3kMfCttzpIO3
+	H1Tfsjbg45rYj6FHMxumy6NqlT3xFCcH8wfStWeGPzuZlevXXWklQgt4tz0tCi51POktH+FKod6
+	3lerTGLPYi7t7iwSuEY8QtWR5x6NMRQQcFE10MPi/vJ8dl2xvO8Iye7KeyfYFGvyPSxIrgfZNnJ
+	+c6pzwKan2Xxd+2R5uD/5SYWZa6/IPVG21SvROyDaMFhpgzpX6hbUGBHiNeNRos97snlOaA0GIs
+	O1y7+5Mooha3GI/Gwmi3dYwztM8NXsc7jSPQvXYuhz5+Y7Z7CZsDbGGHGsc7bwy9pCJ7KfYIk/F
+	RduT78U/NTrlG3hawfx5T6NdsZ33Zrqp7SBJRHyfe21hDyXACeU2rbGfUZr1bUBwNnf/o1P+xKt
+	u+xZTIUxObBPEBKTVtH6E=
+X-Received: by 2002:a17:903:124a:b0:2b2:5515:661c with SMTP id d9443c01a7336-2b5f9f61603mr431091235ad.31.1777261521666;
+        Sun, 26 Apr 2026 20:45:21 -0700 (PDT)
+Received: from localhost ([2400:8902:e002:de3c:3085:4d80:3614:2212])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b5faa3073asm279061375ad.27.2026.04.26.20.45.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 26 Apr 2026 20:45:21 -0700 (PDT)
+From: WANG Rui <r@hev.cc>
+To: Ard Biesheuvel <ardb@kernel.org>,
+	Huacai Chen <chenhuacai@kernel.org>
+Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	WANG Xuerui <kernel@xen0n.name>,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	loongarch@lists.linux.dev,
+	WANG Rui <r@hev.cc>
+Subject: [PATCH 0/2] efi/libstub: Ensure instruction cache coherency after kernel relocation
+Date: Mon, 27 Apr 2026 11:44:49 +0800
+Message-ID: <20260427034451.717817-1-r@hev.cc>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -107,46 +78,23 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: NeilBrown <neil@brown.name>
+The EFI stub relocates the kernel image by copying it to a new memory
+location using memcpy(). On architectures where the instruction and data
+caches are not automatically coherent, the copied instructions may not be
+visible to the instruction fetch unit without explicit cache maintenance.
 
-As preparation for d_alloc_parallel() being allowed without the
-directory locked, use d_duplicate() to duplicate a dentry for silly
-rename.
+This series adds the missing call to efi_cache_sync_image() in the generic
+relocation path, and provides a LoongArch implementation using the ibar
+instruction to ensure instruction fetches observe the updated contents.
 
-Signed-off-by: NeilBrown <neil@brown.name>
----
- fs/nfs/dir.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+WANG Rui (2):
+  efi/loongarch: Implement efi_cache_sync_image
+  efi/libstub: Synchronize instruction cache after kernel relocation
 
-diff --git a/fs/nfs/dir.c b/fs/nfs/dir.c
-index ee4b9b1a484f..dd48dea8bc40 100644
---- a/fs/nfs/dir.c
-+++ b/fs/nfs/dir.c
-@@ -2778,11 +2778,9 @@ int nfs_rename(struct mnt_idmap *idmap, struct inode *old_dir,
- 			spin_unlock(&new_dentry->d_lock);
- 
- 			/* copy the target dentry's name */
--			dentry = d_alloc(new_dentry->d_parent,
--					 &new_dentry->d_name);
-+			dentry = d_duplicate(new_dentry);
- 			if (!dentry)
- 				goto out;
--
- 			/* silly-rename the existing target ... */
- 			err = nfs_sillyrename(new_dir, new_dentry);
- 			if (err)
-@@ -2847,8 +2845,10 @@ int nfs_rename(struct mnt_idmap *idmap, struct inode *old_dir,
- 		nfs_dentry_handle_enoent(old_dentry);
- 
- 	/* new dentry created? */
--	if (dentry)
-+	if (dentry) {
-+		d_lookup_done(dentry);
- 		dput(dentry);
-+	}
- 	return error;
- }
- EXPORT_SYMBOL_GPL(nfs_rename);
+ drivers/firmware/efi/libstub/loongarch.c | 5 +++++
+ drivers/firmware/efi/libstub/relocate.c  | 1 +
+ 2 files changed, 6 insertions(+)
+
 -- 
-2.50.0.107.gf914562f5916.dirty
+2.54.0
 
