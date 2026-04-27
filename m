@@ -1,61 +1,63 @@
-Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
+Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4DDE3A0E80
-	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 08:47:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A43383A1683
+	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 08:47:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777279660; cv=none; b=I6mxR92J804lnFMua5RiSRRWPotZ4WTdQ9M6/veTaZiaQcbROV5VoMDqcOfHQd/kZ5TTtUVzt8LXJDhY1AjijFc2dfvkiDrdecfrkg9iESWVPBAfqQ805FHDJvxlpo7B2GVENKcPKxXX3IrvHf9Vo8YEK4jpebcDlhxZIgmckis=
+	t=1777279663; cv=none; b=bQBrarfIkX1GSHOHXrXWWWcOPfc14ah0APVqhNy1SzkBNv95rYsXIVzCL8b4Tq4RRN6rT3jQ28a4go6DutG1cp74OQRB57k5wUy46pCaxPw+Da0hUMy/bTDxoQQXBF+uxoOIVWKnge7hgegsP0/LxoArZ3827OjB8B43fEra3Ag=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777279660; c=relaxed/simple;
-	bh=ud6229bzqFmsJw1B4jV51SEWrfqqWrMb4pJy+DI1Kls=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=OD9Oo+ghandhgeCsotWZQwwGHM+KKagEkwqjV3lOP3BK0HpfKydQNQAy2wT03Yp61VjvAj4+G0wmEQyYuvGalaZWQcXzrrs2F7lZLVdenbeJQtxhZqZBO4nX8Q2kKZ3JH0DM7tRrDHPAKF3+toM00kpXOSoUKkrU2cm5fcD5Jqs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=pZlDMfKU; arc=none smtp.client-ip=209.85.214.179
+	s=arc-20240116; t=1777279663; c=relaxed/simple;
+	bh=UFnN0s+RsvkTALfr/a8OQyrxAQCThTQXJhV/kjv+G6c=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=McmmBmIOdmTzPaKwTJAPEekIBXO/3pccoDU67x5Qr4rA4fAPPbNIJKU0RmM6CGjrTeyZ05uEHAkdKkgrMJACEE7LR/Ey3ioUGVfJ20Od18Eddko3xfIpmCqZPLtHdB44TGCkGWGeTJj9gapfSA1TaHpOcG76tVl+xh44fFXhZTQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=Xt4Rm6I8; arc=none smtp.client-ip=209.85.214.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="pZlDMfKU"
-Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-2b458ca2296so61150275ad.0
-        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 01:47:39 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="Xt4Rm6I8"
+Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-2b24fede2acso64587695ad.3
+        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 01:47:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777279659; x=1777884459; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=EbS5XqlTtlqCLLkuZnn42EvCeoWF8vUClWjJ8C+Uh3A=;
-        b=pZlDMfKUArZtHIgh21BIn96/QH/2PCguT58eMgjBIZnXxRp74G/CwgYJqko8LMvm6X
-         e90KH4JhCqoEMHjAOcyTlRg+FAVq+3V8Hf2A2llI1jefuG4CBSlVsllFnv5Y0qw0o9/L
-         ogPucZd7pwxOi4n+Nw5IkE4ZsAHvml3yCAtYGkSSbUrDkjeRacE7R7W/Mq6CeEv99n81
-         GRNhsG3JpUGCLqyhZMEcTFPw7knYw/v8fVfMj+LtFSYpwUnhbLaSR79oRRKpDMNTHtrc
-         MynVgMIsx9YyizFixZF7fXyPgeC30Qe6AubUIBN7P9AIqvc8iFemqQmWTpeeGj4WcEv/
-         J5+Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777279659; x=1777884459;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777279662; x=1777884462; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=EbS5XqlTtlqCLLkuZnn42EvCeoWF8vUClWjJ8C+Uh3A=;
-        b=nUbVKsYO+ujTYOONuGZifUTh7U0dpan291m60ahR8RQAjWhUusVPdFbqMn5ihsQScX
-         zLZXdzuvc5zP8rXmIxJhHIaKL3/aDa5zPt0IM4GBPBcR9jmOvMM2kt2n7p605zax79bI
-         iBKMTftf3our4RUFeMwO1AzIbvtaGME4AEZirwhIhBA7PxGu1D6tpEKP/cfaLWmzrq5w
-         QqtFlwGmIx+suPZfTv4U5OQH/y/vY15POsQW2X4FNeZVlYFgVDXx7qJ8BqY/BlxYb83L
-         AthKRX2uu4MD3DRtf+4QdBXe01NXJk7Vv43XWjfwfZrjR7QMwFWqkGvtratHdwjmj0wN
-         wDhA==
-X-Forwarded-Encrypted: i=1; AFNElJ+0Q2sRtyQmByGTJKy1mAVUduYqptcpq7pEePccOPnd1m7TPl7iNb+9Lj4mt9nQYtjGgsu0k7SGJfY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyHBYuVYWNlwbJk6vZtCh5GwYYexUHbMf16f7S7Yxqxec+CfjVN
-	rn+sJAzTEn58OXEvWQp6V2QhiRMaBKJJO265fIeHtS/H+CjQbOQxofCHElWi976iQKQ=
-X-Gm-Gg: AeBDievb4+t65FAc8Qrh8CdnjdJmJNw3AWDm2RLbo89z4NcqWi6BV5ckzf0JvnIrL6J
-	/+tGhur43wLgkao+W0LCUwp2996ei8WOD4byH4GFDUWKAE/qUkjdj88wRoveEzTV3R3g7VWNI1G
-	pTDXVM/2MFoJK+wsNTmdOZYlJVSmhcpIHibetog6VpvZGV+AAD4dagO236joqZvljQAYr9y3UCN
-	4IILj1o4Iiiokfn9L1CNt+oqPExPyhTbXpdbYzhZBBSSj6NaMba8zged4MzBts9EDQBu+xeuePk
-	+4+4ma6O+JiU96XPZL/BaYWJcUAH8tmUSXJXHINpLEXByXeBNqzla9XXlhWBZYcfjosMBgABS6b
-	CufGOw02zLXGdA9zk6HG/EXBoApg6GRIL9OPP4lF80J8up5ZoB3YfZLrS6VcUZIEK1X6D/QvvZ7
-	4uyA5yAP3uJnAih4A3fUsRzg==
-X-Received: by 2002:a17:903:3d47:b0:2b4:5b82:a8e3 with SMTP id d9443c01a7336-2b5f9f51e09mr293896815ad.24.1777279659118;
-        Mon, 27 Apr 2026 01:47:39 -0700 (PDT)
+        bh=oKHydH/fhv4hYoRFTuRlPVbogNTqYgaWcyoMFBpB6F8=;
+        b=Xt4Rm6I8c5zKJ5QOLjGPT9Svkw8JSMaDdfNUG90rL1Bk2F967x5MofKoOUOnMOK9EX
+         hdfvq9a0X//3Ns2JFBehusWLP7R48yTftH5EPqVce0zHfYcxKwbsVYbLozaysfi64u53
+         fNKKOGBhejfaXqfKEhMjgsLLRLPmuchrUHr/bTERkv44Hnwr3i7nHUu6t/Wntv4YRVH8
+         /lK1BbeZ8dv6L6Z4Acpxd3QDK8n/E7nThUVERyvsQlm81nrslqjdlSLN071qoOTXaL/l
+         oXb0GIQQn9prMOXDr13oqhTDnbREFG/9JFfnZkZ0tSGb/Kog1dGpqQ6zjvu8jk97m3KI
+         OqTw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777279662; x=1777884462;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=oKHydH/fhv4hYoRFTuRlPVbogNTqYgaWcyoMFBpB6F8=;
+        b=aFvE9HPUd1FcL0geFsJ25HzpoHCYpx91Fqs7ua3BXoGniIxiBlf10aNBF2IeUklNJk
+         svUkTQ2HyqayTV8Ly3W507wI7mdT3Tb8Tq0Kf/jessTsuo1pi7oyDNGqUBqJ3w62l8Ur
+         y6oyHIT/yu7L/XxVwJaJmqDWL4Vs/RK7VIe5GJ3bHl35Dr2/NYJ86Nz4HcsFCOK14+aJ
+         fT2EJ6VvNvu93bKSZO9co+8PXLBlp7Jl+V+KzQ/Zppr6zHLrDQxp8gvB246e3sykqST/
+         YVORUJ/Eb5JSIHjSUdXu1LkBkNA007vu99eDRBFzqCEGK1BMc3LVpOVkad0RONq+vK6S
+         3ZoA==
+X-Forwarded-Encrypted: i=1; AFNElJ/InMvMyNWbKniKzMCSeZPxXm0LdHNGBhagmOJvo1q3RDJXcj1pJijfCVspLB++UHjr4EZ2rzIx2pc=@vger.kernel.org
+X-Gm-Message-State: AOJu0YysZhc20UFlw2ep+g8lMY2tMaW8TX7Qz2WVtQ4/pUJgL7uC+9AT
+	JOAej6pHScLVSajp39lM+1/x6kC/q3O7G3/BFXLn1mjZTxSj+kSfXL1BbkpA1Om45vM=
+X-Gm-Gg: AeBDieuyugya9JFETToIEDwxx0lMKhGFyl7mJipIoDbKKVv+FW4MBZcjRpuKpQVb7XW
+	Jr7I2D5w17LtNzOuJf7WsRN4E62KBe9AuP5ZtidzJhvS78525WC2c+V1JNw0WwO7u3FgbI8wtkD
+	F1n8XnpHrhtLo2OomQCO+4ULdMIQAZMwBnPncJ+QrXPnjw+aiIW6T4huq7WTbk6xYWW5xXoPMqp
+	toO557VE9aIFnVcer5Q6+6gJ8p7rCHyfIRb+R/fuo+rPzeRniOc+1YH3KAgYicqz3c/5ZUGMcLV
+	8dKm7lWzQF8udmLglRKHOX+SrUrMRPNbCGT85W7ulHzq4EvnXwDVzueM+t0yiwSSyGniT43Qi8t
+	UFYUvGdQQQzJIy+batEv4KQSJVtNWZ7I0+o98Y5k3P9SEkLOGw80FWeI9qFteLJwKz1uweOR4Yi
+	GCvKbHqEZG5FXJ6L9FvX8HZQ==
+X-Received: by 2002:a17:902:cec6:b0:2b0:917c:bc4 with SMTP id d9443c01a7336-2b5f9e8e3c0mr473300875ad.4.1777279662059;
+        Mon, 27 Apr 2026 01:47:42 -0700 (PDT)
 Received: from xpc ([2400:8902:e002:def5:7882:53a7:6a48:4d11])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b5fab3a929sm291703215ad.72.2026.04.27.01.47.36
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b5fab3a929sm291703215ad.72.2026.04.27.01.47.39
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Apr 2026 01:47:38 -0700 (PDT)
+        Mon, 27 Apr 2026 01:47:41 -0700 (PDT)
 From: WANG Rui <r@hev.cc>
 To: Ard Biesheuvel <ardb@kernel.org>,
 	Huacai Chen <chenhuacai@kernel.org>
@@ -64,11 +66,14 @@ Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>,
 	linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	loongarch@lists.linux.dev,
-	WANG Rui <r@hev.cc>
-Subject: [RESEND PATCH v2 0/2] efi/libstub: Ensure instruction cache coherency after kernel relocation
-Date: Mon, 27 Apr 2026 16:47:19 +0800
-Message-ID: <20260427084721.40535-1-r@hev.cc>
+	WANG Rui <r@hev.cc>,
+	Huacai Chen <chenhuacai@loongson.cn>
+Subject: [RESEND PATCH v2 1/2] efi/loongarch: Implement efi_cache_sync_image()
+Date: Mon, 27 Apr 2026 16:47:20 +0800
+Message-ID: <20260427084721.40535-2-r@hev.cc>
 X-Mailer: git-send-email 2.54.0
+In-Reply-To: <20260427084721.40535-1-r@hev.cc>
+References: <20260427084721.40535-1-r@hev.cc>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -77,29 +82,31 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Changes since [v1]:
-  * Move efi_cache_sync_image() after check_platform_features(), matching arm64.
-  * Add "()" after function name in the subject.
+Provide a LoongArch implementation of efi_cache_sync_image() to ensure
+instruction cache coherency after the kernel image is relocated.
 
-The EFI stub relocates the kernel image by copying it to a new memory
-location using memcpy(). On architectures where the instruction and data
-caches are not automatically coherent, the copied instructions may not be
-visible to the instruction fetch unit without explicit cache maintenance.
-
-This series adds the missing call to efi_cache_sync_image() in the generic
-relocation path, and provides a LoongArch implementation using the ibar
-instruction to ensure instruction fetches observe the updated contents.
-
-[v1]: https://lore.kernel.org/loongarch/20260427034451.717817-1-r@hev.cc
-
-WANG Rui (2):
-  efi/loongarch: Implement efi_cache_sync_image
-  efi/libstub: Synchronize instruction cache after kernel relocation
-
+Signed-off-by: WANG Rui <r@hev.cc>
+Reviewed-by: Huacai Chen <chenhuacai@loongson.cn>
+---
  drivers/firmware/efi/libstub/loongarch.c | 5 +++++
- drivers/firmware/efi/libstub/relocate.c  | 1 +
- 2 files changed, 6 insertions(+)
+ 1 file changed, 5 insertions(+)
 
+diff --git a/drivers/firmware/efi/libstub/loongarch.c b/drivers/firmware/efi/libstub/loongarch.c
+index 9825f5218137..f7938d5c196a 100644
+--- a/drivers/firmware/efi/libstub/loongarch.c
++++ b/drivers/firmware/efi/libstub/loongarch.c
+@@ -18,6 +18,11 @@ efi_status_t check_platform_features(void)
+ 	return EFI_SUCCESS;
+ }
+ 
++void efi_cache_sync_image(unsigned long image_base, unsigned long alloc_size)
++{
++	asm volatile ("ibar 0" ::: "memory");
++}
++
+ struct exit_boot_struct {
+ 	efi_memory_desc_t	*runtime_map;
+ 	int			runtime_entry_count;
 -- 
 2.54.0
 
