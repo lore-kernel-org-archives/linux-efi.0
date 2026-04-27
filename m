@@ -1,94 +1,80 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from forward500a.mail.yandex.net (forward500a.mail.yandex.net [178.154.239.80])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58DB5399039
-	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 08:09:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5856D39A804;
+	Mon, 27 Apr 2026 08:17:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.80
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777277353; cv=none; b=BN8cbztwjjejoLeNKZ6Y+0oIgZmms53YlZHDC8fAIPvwQzXbREaDkkvBE1tBvfousAsWFqBFs7F2ZJTtARdMqchAvjLJVM2fkxEOeRXu0iAShuCs07/CvAjq67oRqOiXI5ZknLNoJ/Iaa6hYgCJCSPzMOQB1md/nPwc4P/4bbRI=
+	t=1777277840; cv=none; b=Zo1xQLjEzhBgjI+HO1UW5FTDOQ+jzbQVC9/zmBiwre86BcWq2A21kPBLOG6vl8r7YPUMCT0q2kQKJBZCa114nd+z7I6m9r1XnE76aECDblillwiXzY+K6WtETVW8V01jYGdRamPti+S/gF95CX3g3zNY35N9o7CdLIn/dd4VqKA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777277353; c=relaxed/simple;
-	bh=tlDJUHAv3bs4YHGfPiJQCEtb2tmHcIfreZyo2SAVGJo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=cRCq3VqlH+lJvLij7HHFc6IsaOYApMOWDb+aLrayXAVfRPBgoJP1IcNp5bWsMdgBkjyjJ5gyQo3OgNVBM+05joMuSC2Xtm/SjaNNtaPe/6+CxohtasVlJpjLsl/XiVcR30rRF3JGSFpNgPp4E8SzSOy5dYgk1Lc/AVb5roZhRFU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DlUmEC+M; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1777277840; c=relaxed/simple;
+	bh=bguIh7S91p2DCDtxXX7BhTfTOrelXjmYTi2yJflThDg=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=OgTnWKFSKSBd+w88b2iAq8L8tuMG+omSXkV6KOA1Az2wd5sODTMdApaQfhkVjNguQl1DqE3X5wJPnK9LaJsntQRSVyZy6pBkfdQh3gypPyajZ5ysl+DdVaTNPXbBB6YhHLqrJ1NRMU++5y169LFPIzOYnJJR6qVf+W32Wj5jKg0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru; spf=pass smtp.mailfrom=yandex.ru; dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b=kx74GM6m; arc=none smtp.client-ip=178.154.239.80
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=yandex.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DlUmEC+M"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0B255C2BCF5
-	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 08:09:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1777277353;
-	bh=tlDJUHAv3bs4YHGfPiJQCEtb2tmHcIfreZyo2SAVGJo=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=DlUmEC+MI8XlyPw86HvuPF4QVJj5d3CVEzic4tHTM41mV3JQI4x/vFswwZxKrtpZx
-	 F/aUwIHvvHaFTIbn/0D6bnnG4x25ifsEsQwqekKWIJBnAs5HuhcaLHmmPXyqwF3R9w
-	 WDuaC67ZajYRN541t+n2OOugMxwgw7r/MC1s/HVfPHEACD0a3J1igX3Ziy+clQ3tQx
-	 vjtP+oAzRZ7ubsYj3Nbw1iQWVlnSW1o4SQjp9xdO+4tC8lEDpEifxg9/uKUckgFpr8
-	 AERnbO7NZtqCwBdXKgPSDSRhA/AHx2LIQFnAYp7itoDw7IEI5osUC99KDYVNTEXuCA
-	 bh6bVn8K45rZQ==
-Received: by mail-ed1-f51.google.com with SMTP id 4fb4d7f45d1cf-6763cc8775cso11200480a12.0
-        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 01:09:12 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AFNElJ/YmUt3tZLLzvvY4bqua+oCD8shv6ySLCz7OBl972ljgdj5HwJJ6e+1zb47Xo8Bk3QSjG5C1j5EDlI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxnGjfch+QZVrZ3i5rMhF3Q6MAAZVCeNUujvAF3jVoScQgK5waE
-	unoq0NuzGWFy0DhegDtX+8kHjOsljJh+ng3UD4TGGVPigL9LlAN7BJn0hqA6iFmD98QpiQ7S1Xw
-	n5Vv4EBbQ2FHoMgckwyUD1bDElxtm4lg=
-X-Received: by 2002:a17:907:9495:b0:ba9:30a4:537b with SMTP id
- a640c23a62f3a-ba930a45439mr1289288266b.18.1777277351461; Mon, 27 Apr 2026
- 01:09:11 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b="kx74GM6m"
+Received: from mail-nwsmtp-smtp-production-main-64.vla.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-64.vla.yp-c.yandex.net [IPv6:2a02:6b8:c18:31e:0:640:f144:0])
+	by forward500a.mail.yandex.net (Yandex) with ESMTPS id 81879C0AC0;
+	Mon, 27 Apr 2026 11:13:24 +0300 (MSK)
+Received: by mail-nwsmtp-smtp-production-main-64.vla.yp-c.yandex.net (smtp) with ESMTPSA id KDTCRrjSvuQ0-3CY91MG5;
+	Mon, 27 Apr 2026 11:13:23 +0300
+X-Yandex-Fwd: 1
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail;
+	t=1777277603; bh=bguIh7S91p2DCDtxXX7BhTfTOrelXjmYTi2yJflThDg=;
+	h=References:Date:In-Reply-To:Cc:To:From:Subject:Message-ID;
+	b=kx74GM6mfiZoHCwDnVaCKFWQ3Loq9lMSRWEtNL9JgTJeoy5v1unbGsiybMz5o70Qq
+	 Rh+fvprK3YW7PKcd9vtVX/koi173Jb0B8M95qwj7+2YVdKqlYU2NDSRAt4qIwA8TQz
+	 67tlQ+eHioA0ELqVSI+ZzAgV0hN74yEs2T/o5xGE=
+Authentication-Results: mail-nwsmtp-smtp-production-main-64.vla.yp-c.yandex.net; dkim=pass header.i=@yandex.ru
+Message-ID: <df673a44d292bb3df498b78a8b637f880e28931f.camel@yandex.ru>
+Subject: Re: [PATCH v6 0/3] riscv32 library enhancements and build fixes
+From: Dmitry Antipov <dmantipov@yandex.ru>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+ Albert Ou <aou@eecs.berkeley.edu>, Andy Shevchenko
+ <andriy.shevchenko@intel.com>, Charlie Jenkins	
+ <thecharlesjenkins@gmail.com>, Alexandre Ghiti <alex@ghiti.fr>, Ard
+ Biesheuvel	 <ardb@kernel.org>, linux-riscv@lists.infradead.org,
+ linux-efi@vger.kernel.org, 	linux-kernel@vger.kernel.org
+Date: Mon, 27 Apr 2026 11:13:20 +0300
+In-Reply-To: <20260425143631.e20246946f59925c5eb8dc22@linux-foundation.org>
+References: <20260425185151.477442-1-dmantipov@yandex.ru>
+	 <20260425143631.e20246946f59925c5eb8dc22@linux-foundation.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.58.3 (3.58.3-1.fc43) 
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260427034451.717817-1-r@hev.cc> <20260427034451.717817-3-r@hev.cc>
-In-Reply-To: <20260427034451.717817-3-r@hev.cc>
-From: Huacai Chen <chenhuacai@kernel.org>
-Date: Mon, 27 Apr 2026 16:09:25 +0800
-X-Gmail-Original-Message-ID: <CAAhV-H7zGFjzBTCLMZvE+etd2J9Te1+9Xr9GwtjvBSXgGYfQEw@mail.gmail.com>
-X-Gm-Features: AVHnY4KCB1-pOIIrSQIlFfTO5n7_wXLFN1dkGTAo14tPjpI2E_CYUoJmYTC11UQ
-Message-ID: <CAAhV-H7zGFjzBTCLMZvE+etd2J9Te1+9Xr9GwtjvBSXgGYfQEw@mail.gmail.com>
-Subject: Re: [PATCH 2/2] efi/libstub: Synchronize instruction cache after
- kernel relocation
-To: WANG Rui <r@hev.cc>
-Cc: Ard Biesheuvel <ardb@kernel.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
-	WANG Xuerui <kernel@xen0n.name>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	loongarch@lists.linux.dev
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Mon, Apr 27, 2026 at 11:45=E2=80=AFAM WANG Rui <r@hev.cc> wrote:
->
-> The relocated kernel image is copied to its new location using memcpy().
-> On architectures with separate instruction and data caches, the copied
-> instructions may remain stale in the instruction cache, leading to the
-> execution of outdated contents.
->
-> Call efi_cache_sync_image() after the relocation copy to ensure the
-> instruction cache is synchronized with the updated memory contents before
-> control is transferred to the relocated kernel.
->
-> Signed-off-by: WANG Rui <r@hev.cc>
-Reviewed-by: Huacai Chen <chenhuacai@loongson.cn>
+On Sat, 2026-04-25 at 14:36 -0700, Andrew Morton wrote:
 
-> ---
->  drivers/firmware/efi/libstub/relocate.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/firmware/efi/libstub/relocate.c b/drivers/firmware/e=
-fi/libstub/relocate.c
-> index d4264bfb6dc1..913b425d089d 100644
-> --- a/drivers/firmware/efi/libstub/relocate.c
-> +++ b/drivers/firmware/efi/libstub/relocate.c
-> @@ -158,6 +158,7 @@ efi_status_t efi_relocate_kernel(unsigned long *image=
-_addr,
->          * have been allocated by UEFI, so we can safely use memcpy.
->          */
->         memcpy((void *)new_addr, (void *)cur_image_addr, image_size);
-> +       efi_cache_sync_image(new_addr, image_size);
->
->         /* Return the new address of the relocated image. */
->         *image_addr =3D new_addr;
-> --
-> 2.54.0
->
+> I didn't upstream "lib and lib/cmdline enhancements v9" this cycle.
+
+You don't have to upstream v9. Because v9 is v8 + initial RISC-V build
+fix, which is a part of another series (this one) now. The proper sequence
+is v8 + this series.
+
+> So can we please sort through these things (and the AI review) before
+> adding more?
+
+Not sure about AI but hopefully human should realize that I'm not an
+expert in m68k/sparc32/xtensa/csky/[your favorite arch here]. Enabling
+and running the test on _all_ architectures where it is expected to=20
+work requires obtaining (or even building by myself) a cross-compiler,
+setting up the kernel and QEMU, etc. I've spent a reasonable time with
+RISC-V and ARM and hopefully set up a good starting point for=20
+m68k/sparc32/xtensa/csky/[your favorite arch here] maintainers, who are
+free to incorporate the test into their target architecture.
+
+I'm going to fix everything I consider reasonable, submit v7 and give up -
+because without even a single reply from core RISC-V maintainers, this
+just turns into an endless brain masturbation.
+
+Dmitry
