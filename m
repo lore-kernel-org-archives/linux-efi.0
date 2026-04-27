@@ -1,139 +1,150 @@
-Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
+Received: from mail-yx1-f42.google.com (mail-yx1-f42.google.com [74.125.224.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC5CC37FF56
-	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 07:43:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E68F335B653
+	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 07:49:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.224.42
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777275799; cv=pass; b=ZiG6NnFU1U86IMSkLZSs/DQ1LmEj76XqXoJf0rl93O2VBwnrAyG/txvUU0YV1jzaUOb76d4gQPWwK6JGYDlFZ2uq0u1cBUy7feGIvjSLgM2SQQby7/fVYBlBDJ5YhhVhKAc71OMtQkKA5L4JZ6QVcqtD6KATWHp0oEZSkUx1QIM=
+	t=1777276176; cv=pass; b=XxLnRQ6bFSn0KhmaL2/EZ8FkTqR2i5TsvqncB1/kCxJ5xoUoSvF1wpR8M6d8d6pbG6DKy82ET4NAYBkA/Uyuo2vGcN8F4P+T0hmUg6B5TTSgJFkaXcxUTk2jRZITMtn5FkemJbw1tGsdhPeomyVIz3g/4FWLq9fzlxfvvzfRY9I=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777275799; c=relaxed/simple;
-	bh=WmMNIGbAGBnWZSMlQH2IaOr5hvZoDWPa/zqdW8jKm/U=;
+	s=arc-20240116; t=1777276176; c=relaxed/simple;
+	bh=wkYbww2o5xmCP3bgyEgxz6IUQJUNogIt6RMdvCb7Ykw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=bUz2IkMogKy9kX7qw4T0pjawlgVSYFp742pM7nF4vT7AS0sBrRTexlBv/WBKgWDLxesf7KTfP64SHzh/8ikVHRstZ584IF4g+IWEVcPyuIlZXnexVVmemcnqwaaHRz6uTMYEc7VhC2xnwS3v7Ytytwn13R/TMeGs7rohn5NfHqc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=a/FA44Bb; arc=pass smtp.client-ip=209.85.218.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 To:Cc:Content-Type; b=qvgOJhne1393FxQwow9ha+gaZ/R9VQ2YXFypEaeQ2hYQL+G9aTKiO2F9H7m3fejPwuzb0ai/oEMGRE02yJAQstieLj81e2un/L3wwNVKOsY09SsUbDyoFyA32A9HAwzu1NG2zp+bi7wL8+9cc57E2nwZUYn/ZoROx4fsp6EqwMc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=ek7k4mRe; arc=pass smtp.client-ip=74.125.224.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="a/FA44Bb"
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-b8f9568e074so1634985766b.0
-        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 00:43:17 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1777275796; cv=none;
+	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="ek7k4mRe"
+Received: by mail-yx1-f42.google.com with SMTP id 956f58d0204a3-6501725d888so7908479d50.0
+        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 00:49:34 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1777276174; cv=none;
         d=google.com; s=arc-20240605;
-        b=EkJbW2rNHJR9FNsUPOFbyoE3lR0gftliPRcYGZSBYi2abvzzGdFzjfTVMwPPdaC3rE
-         XBZ9VDpexfC7ua83mtDzoJOwQJSEfDxG0+eDrpZTi0qBaiJ9tR937vruoXWPDAYercAR
-         ARNRU9TYPeFlQyW5wIRna1DbR2DkKwkWeO9mLSfdFZWx5CMa2fhmMYxGoxosSN22W8xE
-         tIDeCgGe5z9MjXKmvFMbm+13tbjSU7+U7imv66ycTrq2z6zly6Jsfcb6B5fPmpXZMdKR
-         RTTMj/cG6SajbdFWx3R/xac0W+PpjzMHAYiasT3pCSw9FetMDF0685521gF3fXjbrJXs
-         K1Tw==
+        b=isaTcMgL4A7xSRYgSS8LY6OTdew458o8AJl4GgA3n9BZJ/AJ433T5o7lROxMzfjkwJ
+         sASDSD0XX/9zA3fGz7+xwarDwr/z9PUv6u9q1wghRKnAnewr/daeR4+RnTJ73hLIqbjd
+         IuvzCm3TeOFAdSeDoKHfq9Q7CIzw7HdZ39QF4J5bSPpzdr0nxxvg4UeT6mhhp8kwaPgn
+         EKzKfaCa4iyJxr/2e4/mr/jkmXoI9PSXVuHGiu0+Hlr/drpXL9f4I5dEzopdGn8ORFBb
+         f0VbEbXNSMy3TvMfvN+Dk+pDgtW9Pj50xpHsmnv3zRMOEwNULOVVUVZ1ewHP0saltjzC
+         Uafg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=WmMNIGbAGBnWZSMlQH2IaOr5hvZoDWPa/zqdW8jKm/U=;
-        fh=mhSOxowBK5i3rFxDce1czB3tkWi7lKA6BZsYtDuHboM=;
-        b=JDcCLv0c93bmuOu4T9CjkSFQu5uN1sUpvkbTjgsvKFqjc22T3hzKT0jd+b1XescNS9
-         pYPQqdZm4BR8P2OksZi3Gm0tMFkbFWP/qTyroQvYLWcn9rELNiTu8f0XUuUX/1n/BMht
-         Y2Pr4jL6+TBbsb1nG1SGQyJ9xafv4Au6/a3zlQ3izIybyZROlfA7CFlKz8p0mk8emzGY
-         CtxcMSd9Uv6jYwzrYfB2Q5lgfSEBbFXBFQNexxFQOUCsZdaMdZorjmghbUFGzNsix8nZ
-         sXkLoIk0ITk8Gvo+NEbi872KlT7QLW8dtpkvu1NnEfdOzed3ZOE7+HneBHPl/vSUVWOg
-         O64w==;
+        bh=ek9ChqVeqeA30OwQ3fqBFJmD6gbZl8V4G3Ph/Tn1DBw=;
+        fh=HEcGAwdruEJRa34aNOQvJ4OdwlRlcijuT//GWXOl5RM=;
+        b=cWLf3xXXrwoyuY4tzXQZXiTbeaO6eelHxAowQ8vNXUoHiXfDBALYR0tYm6e1yQ2w83
+         ZhM+WZNERlUik94B9daAMR0LHgRj10POXbllbn9BXRehXWe+2A7PgvrgAj1ByPDpe9j/
+         MYi/I7qin9/GmrIZzlOAzA57xGolXruKENIJnCERYPrI3pm94nXC1YpaK8BVxH5QcHti
+         LP4kCHylHrBaqxtPg7pK75CH5LTEBEgBvby6bfnD4r4r2D12LaFHllFlBkNcvl0jlJd2
+         ZVTS221LEeMdsJFpW8p5milen3Cwi5U88r/t2wXzGHZWl0gvYOjMfsIhuj5dOjaJdACL
+         twKA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1777275796; x=1777880596; darn=vger.kernel.org;
+        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777276174; x=1777880974; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=WmMNIGbAGBnWZSMlQH2IaOr5hvZoDWPa/zqdW8jKm/U=;
-        b=a/FA44BbzZXxxbedD8kE5+H1vrImlqqwN3YbeQOMdARXbVawR2vWZ5mOHYsA0YlO6v
-         +mNHBShRUXyetKieaB97logJ3fHpKQfperZrl3A1YBRmfKG7kWwRx+OyWr2e4qHevHdI
-         FkSbpfYlqPq1NF1ZGronloT46QL3AE0W1eJi35NbAOuLa93pZfVe2V8dNf/QqjdRZws0
-         ccmYmpcAf4FGllvW8jDeuJuKAoC7AeJJj4aKFMgI4ZGbnMNhE3AXwvuBO7STe9DrOEVz
-         0kGo3j33hKJgLfhPoGH91kHzGdQkBkILo/RhOF74RxQojeHWwmocHhlB52HiIugGKkx1
-         ZoeQ==
+        bh=ek9ChqVeqeA30OwQ3fqBFJmD6gbZl8V4G3Ph/Tn1DBw=;
+        b=ek7k4mReJh2RUTf4BGmy7/x/Q4JKsxcj59Jfy2DevFmtCZvN67/U4Q58JfO4nyjP/2
+         tW0+rX1zFbpEw97gS1maSx4KkRbksIGiD6mv1UzIEfaBxgP/3k5wdEcHXInoeFgv4f70
+         sCutSh7J+ggOOOgpk4B2iX1Ten2kdvKIREoPxDDvejYCWwPqXXier1784v40wL88dN2S
+         FC6Tb1zulrZA/ssOUzID6PPCxT4F8duBj5mcArKoCPcU+VCCkO7VuPsOMm5LHocfL8HR
+         n6JI8sVXR1HwflaQbzpGeIAKl7RTML3IbSgpTxlVvWdeQ1YTrmDPnWXkVNF4EjyNJypb
+         u9bA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777275796; x=1777880596;
+        d=1e100.net; s=20251104; t=1777276174; x=1777880974;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=WmMNIGbAGBnWZSMlQH2IaOr5hvZoDWPa/zqdW8jKm/U=;
-        b=dbTs1UjTYDf6Eb1tRUuKiUgnkhztkCwPufyIyv2E5NP2drzWzxtEQwoJf9TzIlyjBv
-         n2tBmBc0mhnYcfJtbfBYzAOxHNvUjJtsJSvY5i43JVY5FFcmzfUsGIuayHo5CQV1Gkb6
-         eFVAW9U5hma0coe+nWwzLfh2ho/h+qnG0Hxn5G+VGmxjmf6bzJ5qEqVwhUX0Mf9BUFFQ
-         UJZDUeBtGJoa1rqFz6eWq2M5IivTVcj7wwmXWt7OsTqAhC3NmRgK/ASry9HQleYPQwbc
-         c2mhRpdyF4GopAWaB+yUIU7MnnK4TdayY49fAqN3Voj3CnXXHkdfA5S0xmJtV8d6kInl
-         EXvA==
-X-Forwarded-Encrypted: i=1; AFNElJ8q0f6pc4hMrQ89JAkKUzDaGty2zNg/cSFZ+TgwjSOA9MFgfIewcHRKnU3jfF+S+a7yEmol5ENvyh8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzQzITJzHilm2s5l32SX22JGlcBtl2gC5JBfWL456S9rLQ4J8MY
-	ooQuS9sITxP+K+f96a1FyE79HHmJLuQSrZmTLWRltf2uNeS8dQtrNKjQsX0Ye5pRdn82aA5AcgP
-	7rrrHEQNR7TiDr/pz8Shd99V/YmJyo2U=
-X-Gm-Gg: AeBDiesuim9mpf5jm80dgr0CCBWEdn8qJttWJp5StplGNMT4ymbcj68+amjD2QkLwtW
-	4hBnzEMPL5VVJZA0NSZYAKsg+VGr0vs8KnOF4Rm/msW04HOPwbFw4Oz/tIyuux33cMy0xnrZrQq
-	ZARSi3lxgfZ883H9uKC1Bbb/h+H9sTuwaH3o/VG5JsCTkz+8THXDXNQxmT9ZrMJ3m97uOKyCnoy
-	m0ZY8oM/O9RGNd5nfIPetPdDYRaAKeAP9cJYfg7Ecfo7KDXpKO1Kw6wXijoNzBiKItvhS2na82r
-	69H8eHKsRG+xs2fLhrBbcKXWfhCS7DE5GGQe1RoC0v18Q+jMJR9P
-X-Received: by 2002:a17:907:c30f:b0:b9c:bc70:e928 with SMTP id
- a640c23a62f3a-ba41a91d717mr2121879166b.25.1777275795629; Mon, 27 Apr 2026
- 00:43:15 -0700 (PDT)
+        bh=ek9ChqVeqeA30OwQ3fqBFJmD6gbZl8V4G3Ph/Tn1DBw=;
+        b=KmMAz3WtLprzrlyS92V+xI7MEe6b9987bDgqHwXt+yAYihMXJXYSGm5FEpKVc7Lj/h
+         NVxdHIiIG9hw3Gq5SO9lrzknmxBSOtOOXKj/SU6iZ1S5ZfOAlT9yF56iYWRvXJut5MKh
+         3hbvGhFlWOhTQY9vcatOGU63qmAV81mk39Q2fiOKoOT7cCCThnhybSpzU509prfDxrR1
+         8YJIV8IjiQGbRhzWOtAiuBcmNbfZHVc9Y5yeIsHLNtY7mpHBdj6KRnp7iMT5Pt+dytmc
+         QpwARG2Ihg+0jih2yHc0a2YyIi7xThyqJg1MILdMBvXMmHLTCSwckwD/elUcITrzSyon
+         w/tA==
+X-Forwarded-Encrypted: i=1; AFNElJ8C0c4Nh7YjpKtOCV2zCasTjHQxH9gGtARHtgUWxHnoF9lja81o+w0KkT8pFi/1AkVHG0j1V6WBxkg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YypN3/UnaEVhDTsldozzVPglz6uuXz56s2LWK4HQjc5zmIoQvj/
+	/XMR7c+KC50we+Pmx7reEVl+RXdr+VsFW+ITkiJj9+PYhVqKnHpolQyynGoMrVWxsnm3ufdJh4f
+	wXHgDlXj88nko64qdoT5TullAqeVZN14J+j0aLLPfew==
+X-Gm-Gg: AeBDiesX3Coz6NSmwCrm6YVL14kpx0qjebS4dWn8Zk0qsrj7CeYD2haJjkR2zP/b4+M
+	2mqP6oW1OnW4wzc1Np76lwvFZ1NUj4hNqsi//MbgRUc2rAE0KdiuQt/Fs3wqE8JFqHhZgph5CIH
+	0bkeNHd0zpEClicE48Z7GsRm86pQ4USqvDBb4eZ5KgwEUenH+LK/xEDqTe3ki7V2vrapJe7k6QK
+	TE2P5IPE99O3pAVf8Q/U2y+ulSKiep3FBMwNLh2GDGgL5t4DNFnHlqLSkgsXddcA2VrFoo/rWco
+	pxIg+CsZXd021p+pXIQueY6wvgT1ag+2AVqt4Ffvb6Sk6yG01lyy
+X-Received: by 2002:a05:690e:4192:b0:64e:a335:95cd with SMTP id
+ 956f58d0204a3-65310a427edmr30609822d50.41.1777276173956; Mon, 27 Apr 2026
+ 00:49:33 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260427040517.828226-1-neilb@ownmail.net> <20260427040517.828226-8-neilb@ownmail.net>
-In-Reply-To: <20260427040517.828226-8-neilb@ownmail.net>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 27 Apr 2026 09:43:04 +0200
-X-Gm-Features: AVHnY4Li24Tmq3-41JYR95SCf6Z2AFdg2a4cjT7d8-aaRtTKWrSVG2trUoxa1eg
-Message-ID: <CAOQ4uxi8rqkbhK4=8N1ncfU1m6bjdHLbinSf=j3k0oVEaSa-wA@mail.gmail.com>
-Subject: Re: [PATCH v3 07/19] VFS: Add LOOKUP_SHARED flag.
-To: NeilBrown <neil@brown.name>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Alexander Viro <viro@zeniv.linux.org.uk>, 
-	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, Jeff Layton <jlayton@kernel.org>, 
-	Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, 
-	Jeremy Kerr <jk@ozlabs.org>, Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org, 
-	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org, 
-	linux-unionfs@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20260426120231.532644-3-r@hev.cc> <20260427050735.3410-1-lisa@bytefly.space>
+In-Reply-To: <20260427050735.3410-1-lisa@bytefly.space>
+From: hev <r@hev.cc>
+Date: Mon, 27 Apr 2026 15:49:21 +0800
+X-Gm-Features: AVHnY4LBFt0fuBq3TwLhwZHYG4J8y27cuFb-KgWDFe-BpI0G6t-52Sf-oj0Bl4A
+Message-ID: <CAHirt9jfnSFQfRHEANGeNGE2JowTcPV1Tz8L4cX=boJ6vSOa7Q@mail.gmail.com>
+Subject: Re: [RFC PATCH 2/3] efi/loongarch: Randomize kernel preferred address
+ for KASLR
+To: Lisa Robinson <lisa@bytefly.space>
+Cc: ardb@kernel.org, chenhuacai@kernel.org, ilias.apalodimas@linaro.org, 
+	kernel@xen0n.name, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	loongarch@lists.linux.dev
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Apr 27, 2026 at 6:06=E2=80=AFAM NeilBrown <neilb@ownmail.net> wrote=
-:
+Hi Lisa,
+
+On Mon, Apr 27, 2026 at 1:08=E2=80=AFPM Lisa Robinson <lisa@bytefly.space> =
+wrote:
 >
-> From: NeilBrown <neil@brown.name>
+> Hi Rui
 >
-> Some ->lookup handlers will need to drop and retake the parent lock, so
-> they can safely use d_alloc_parallel().
+> > diff --git a/drivers/firmware/efi/libstub/loongarch.c b/drivers/firmwar=
+e/efi/libstub/loongarch.c
+> > index 9825f5218137..80ba7d69e1b3 100644
+> > --- a/drivers/firmware/efi/libstub/loongarch.c
+> > +++ b/drivers/firmware/efi/libstub/loongarch.c
+> > @@ -38,6 +38,21 @@ static efi_status_t exit_boot_func(struct efi_boot_m=
+emmap *map, void *priv)
+> >       return EFI_SUCCESS;
+> >  }
+> >
+> > +unsigned long efi_get_kimg_kaslr_address(void)
+> > +{
+> > +     unsigned int random_offset =3D 0;
+> > +
+> > +#ifdef CONFIG_RANDOMIZE_BASE
+> > +     if (!efi_nokaslr) {
+> > +             efi_get_random_bytes(sizeof(random_offset), (u8 *)&random=
+_offset);
+> > +             random_offset ^=3D (rdtime_l() << 16);
 >
-> ->lookup can be called with the parent lock either exclusive or shared.
->
-> A new flag, LOOKUP_SHARED, tells ->lookup how the parent is locked.
->
-> This is rather ugly, but will be gone soon after we move
-> d_alloc_parallel() out of the directory lock as ->lookup() will *always*
-> called with a shared lock on the parent.
+> random_offset &=3D ~(efi_get_kimg_min_align() - 1);
 
-Neil,
+Thanks for pointing that out.
 
-Forgive me for being skeptical about the *always* part.
-
-How long ago did we add ->iterate_shared()?
-
-It's true that Linus eventually got rid of ->iterate(), but we did not
-get rid of the assumption that iterate_shared() might be upgraded
-to exclusive lock.
-
-The obvious reason is that *someone* needs to do this work for
-old filesystems, which are also hard to test and nobody wants to
-touch them.
-
-I have nothing against this patch, but I think it is more realistic
-to state that LOOKUP_SHARED is here to stay, so if you think it
-is too ugly, maybe there is something to be done about it.
-Personally, I do not see the ugliness though.
-
-Am I misjudging the situation of shared lookup wrt old filesystems?
+Aligning to 64K here seems preferable. Otherwise, it reduces the entropy.
 
 Thanks,
-Amir.
+Rui
+
+
+>
+> > +             random_offset &=3D (CONFIG_RANDOMIZE_BASE_MAX_OFFSET - 1)=
+;
+> > +     }
+> > +#endif
+> > +
+> > +     return PHYSADDR(VMLINUX_LOAD_ADDRESS) + random_offset;
+> > +}
+> > +
+> >  unsigned long __weak kernel_entry_address(unsigned long kernel_addr,
+> >               efi_loaded_image_t *image)
+> >  {
+>
+> --
+> Lisa
