@@ -1,63 +1,63 @@
 Received: from mail-pj1-f50.google.com (mail-pj1-f50.google.com [209.85.216.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C1793B52FF
-	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 10:47:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF1F03B5832
+	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 10:47:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777286864; cv=none; b=MTP280IBTQNGtES0kSIkMnkABOvrEzRpfz/48wsQkHo00utvXbPnX8DDF4wBnAhWePT6x5y+RbejUCnPcVi16D5/r58LCypjZUiUq+lEtaR6OBV1ioZCzKTeFXhrRWn1cBYcrvhl3XvoD+LwQLQ4BPJut/8b1EtvbGjtpx/TkZ4=
+	t=1777286865; cv=none; b=XIuO+GmZ2Nmpfl0YCNC0bArlZu4HGp5mJQpoU7WUy6Ag2ODn8P8VG1zjpMXGdgIbt7Aqxt0cckKRMcX7luZzXSnrK8c4jf9FMAtYRUW7zwfPmsGM6sEtFY8OZRzcRhJ3NZb102oC0PyJqUbQ6hNGXd6NGz+FX7FcvEvu3lT5J6M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777286864; c=relaxed/simple;
-	bh=gZg1LZJ8U8You+Wkevxwu5gYhMLfjULVKE+O5oAK3N8=;
+	s=arc-20240116; t=1777286865; c=relaxed/simple;
+	bh=MK9MxhznQ/DE9fRBF+ryEug0t7fwbSkm35OOxaXAc7o=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=QsLLB6KGCAM2iY7y/dnZ5sAEExXaLpDvQhDXr9Usm55qly86EZ+7q9NIDrnYkSzpXnDBebQNFgn4R9KMMYTTojgkuGbgJLKN81z9Pef+iXCEEp+ejy0TLeoQsUVfEE0eXGOF2yjHSlflk6Wm2GhXxua6aU6TRmq4XW71xr6P1SQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=gKNVwLmb; arc=none smtp.client-ip=209.85.216.50
+	 MIME-Version; b=f0AkSH4uSgjxpTRMTOve4OmxZgIte5mMHERS3FGUzPQ3VlRwmr8j2g9fSHGc10eWdOCDJCyZ/WIz6mc7p7jl4cNutGTHZtwO3T8HGxN0ILmr6umGanT+DfN3KufQx5MSAjrqOSsLY180cyqU6Yr+mykadCAtu7i9IjWSWPl3qfA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=gAMnEAAX; arc=none smtp.client-ip=209.85.216.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="gKNVwLmb"
-Received: by mail-pj1-f50.google.com with SMTP id 98e67ed59e1d1-3614826eca4so8834352a91.1
-        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 03:47:41 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="gAMnEAAX"
+Received: by mail-pj1-f50.google.com with SMTP id 98e67ed59e1d1-362e30526f8so1531291a91.3
+        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 03:47:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777286861; x=1777891661; darn=vger.kernel.org;
+        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777286863; x=1777891663; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=UhTH8c+vBFpvSOX6DMmifWKJbw9Gz0Bb3dH6yZMz4Qs=;
-        b=gKNVwLmbkRXj3azfIqkXDR958PrnmAq7LrAkbOiOfJq9cuqFsB1d26Tlk035hO6xGt
-         3o8JEuTOiSF9qwH/VuXeNf31TJfgMxCt2a1+XVvQlUeCCIuxdku2muAML+BhbH2JTLiJ
-         /c05+hHhFh0zYwen3y6MOVXam5uOyrfZvMXCcn62quqTb7TP4AfYCP36iozFs/1WiqJA
-         pIDzkMJiD2MazrRYzDnHpLGaFCzv7lyhG5OUAXbpLj1stPzKbnL/LBhGlIds+TnAzb16
-         VFM72J0yjU9gr39AiD82k1lwPe4lw5LO14EFpmaMfKzEU5EamH3py3wZMKhkG934K46s
-         jkpQ==
+        bh=PIBge1O7GywppeH3FxYzvTz5haKfwUyb1lL4zzJi9B4=;
+        b=gAMnEAAX1OdDdpm68rbgotfb5OYSp8JbVpK+mHThmGyCYfq4OalfZiDkzOK6w9vP4h
+         15qgyOaVXOiEOg7y6zOyc+9t9kLWZm9PfUDKGXqIHm+Z1cbci7rQuCQUzsZTlYcV76xK
+         qtobmJA1IcwYKO+KUwsk95dW6OwAsAJCPKdh+xx8leBYFGaKnLix2numQgYPFRk7aUWP
+         M1Qhtb/gLY0irbkS0/UrrLrYuS8NwfRaivATWLdqBC2obDZdmtnEMdM1aICmcLjyiLn2
+         OvWx1U7BOVpNyqPIgX7i2DJdx366bGemExOZbhlc+uUB/SD369/EsDfYkgkyUD9ix/AB
+         50Hg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777286861; x=1777891661;
+        d=1e100.net; s=20251104; t=1777286863; x=1777891663;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=UhTH8c+vBFpvSOX6DMmifWKJbw9Gz0Bb3dH6yZMz4Qs=;
-        b=oiLABhPT7/A9jGS9QPvsOF5Mmvy1LN2yT4txVh0TEP5s+Dh6WF6IIBXeqCwuLwtl/3
-         gc2kiuxjnHubiQY0Z//AzPDHIPwbFmj2LNrPngV3kE0VhKc6mAiIZCbAakvPpvO6UeNr
-         BuQTAvS7j5Dsz9p8b5Nk45X3gUfc9wP1z1Bmm7oHyQhFivsj22jAziJddlxA6dODHvSO
-         jx89FgO21gA5dMkBpfoQ0lLAA8S62lK3dpXM05oXKsljI36ZhG5AwG1hEc0agWnHIUNJ
-         aclkrxRh99nkHj2MnOQ+qIHfDF+XH/KRE20bMWJ5GHo4v3/rb2p//ho8JTKxrzWn0g7q
-         S90Q==
-X-Forwarded-Encrypted: i=1; AFNElJ/AYulWsB0kOySElJOsYvra4WFP7WiFVoRPv/diUYI4P/n6paiG4KbFRzVXKetoU0nfI4P/5eiiKlc=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx4qGC4zwwGEVwK7gaW3G54ZrlVc6JFWS3GbM0D4nvAgW7pc4ov
-	dXTmn5yzqq8OzYj2DcwVRDB+DBL9WgI0RF6qfL80Fw6JZZJUKmmiw6lI07z7UXwoAvc=
-X-Gm-Gg: AeBDiesKizsPN7h6zS/l8CRsDXcpDCdoPTFYLY15PzhEqodFjdr83+zhDUhV3rKRUXu
-	O+480QkM48q/UE+hnoJfoKte2DZrJugmx21mZB4RIkciML/d+kA99AB5t38GmJY1ADZZpn63Gwt
-	0tTxZRZePJy0j8xt/9YzG4bERLHyirmDwD9vsZMzSsP7Y0izT4J4eWac0gzXUl+AU46HoHwGeAt
-	qyU8DDWNe62LiZQNbUavEdWuneI1pDOGnLLxqcGQHmbKM6XswFKEjE8vG6VKpZ0rhkv1emJkPO8
-	eFezOvh9/BGBoloDNEHul3XVWsZL0wSE+2v1k2/kWbUM1N9ASvFVSNCtlsT1ckXMwbZ2haN8gOK
-	iwZwzbiGx9nRT/MuJXg4YgY76SkhOq71oroKipEJOsFFkjIFeuGf3aUeh4z7Mj9hvKr7UKmlRL2
-	EwGeJWjNxDv2U=
-X-Received: by 2002:a17:90b:562b:b0:35b:929f:7e95 with SMTP id 98e67ed59e1d1-361403bdcfcmr43713580a91.4.1777286860831;
-        Mon, 27 Apr 2026 03:47:40 -0700 (PDT)
+        bh=PIBge1O7GywppeH3FxYzvTz5haKfwUyb1lL4zzJi9B4=;
+        b=O4LR9D6fZ/62Cl0WCYM2NM/xiBq25ej4I48d+kBov6LuLiHVghL/LiPgczrHYFWekt
+         lQCVTrOoVTcFQHHDKG74jx7UvmnfQh2BZC87EIEBjwZm6cnTDcx8b66VkTDq3h99Fxo1
+         KLQDqZpfz9bFCaQRQ3UgkGRsjNOoKupaUvOuw6ejxWBY9Rg79GqTURPKAhd35Ax5MSPG
+         3j+IO7NSfurExzJIMNdoNcSf6HZyOnesj6S41m1NVD5wzt0ISPgtn+qWRocmUFovP1UW
+         jzcN81iDN5GyGltHeC3yG9DcYmx3GH9fW4Ej0iUBQ6cBhlAhoMT9Zmc3TdyfzjIglbhW
+         pXSA==
+X-Forwarded-Encrypted: i=1; AFNElJ8T4w0qthdqyc16dxR4DoCJRQ91NOqLFEtlswfwyM73P+3VOLOtD+4i5meKuu4ujojLtRAU/txyu7Q=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxWTebLQ4vdQFOZEdIkesbxJ2l1iJTTeHq7KC1S8JWVig+oOdZc
+	KD9joaTVDSHZZLDcLr/ZzWJ3zM3sHmzHWLfdjR4aZ24M8PE7FZHhq7xUzRldHiGDb58=
+X-Gm-Gg: AeBDievWtg0x1mb0A+tbPcnpdu2qKJ7aQi/R8QZIZqeAnkkwh5S5rJ4e+UQQA0T3yEe
+	QziEC285kpk0HqqUnqUM+lNeZpzHaRd9e0HZhHXXf1f4hTnlQYfRbYx299w0aSJkf+aAyI5LZL5
+	VDuzWGvNmS+G/Gh2zmWi7vY/qWYS0/lt7erdm08uZxLqMbL7Y5yC/eD7GcgHXuFdXeu2mIaNckJ
+	TfMyNatPG/fPjW23jh3rLs8AvQ0Ei17k+vh/ToJxHUAsL1Ue2n4NLYMfdsLbSGeMyxAO9p23zkc
+	eOHycX2OWgDBe8Xy4euZwO5+7zUgY7RBg1UCi7CGe8C4G+qeroUMxPP7F3iAfgPx8ci9PGZR/Fc
+	EWjXP2KN9qF5BacGQOv6awtXnUdV0y3sTAkkqB5WGbea7EmsSuGdnHnOYUMHHgwduTsgYPeuYE4
+	XOCtzJFNNGHZQ=
+X-Received: by 2002:a17:90b:2e46:b0:359:8dfd:64c8 with SMTP id 98e67ed59e1d1-361404a81e0mr41584514a91.24.1777286863074;
+        Mon, 27 Apr 2026 03:47:43 -0700 (PDT)
 Received: from xpc ([2400:8902:e002:def5:7882:53a7:6a48:4d11])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-362dde4ccbfsm16227029a91.1.2026.04.27.03.47.38
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-362dde4ccbfsm16227029a91.1.2026.04.27.03.47.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Apr 2026 03:47:40 -0700 (PDT)
+        Mon, 27 Apr 2026 03:47:42 -0700 (PDT)
 From: WANG Rui <r@hev.cc>
 To: Huacai Chen <chenhuacai@kernel.org>,
 	Ard Biesheuvel <ardb@kernel.org>
@@ -67,9 +67,9 @@ Cc: WANG Xuerui <kernel@xen0n.name>,
 	linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	WANG Rui <r@hev.cc>
-Subject: [PATCH 1/3] LoongArch: Allow rdtime_h() and rdtime_l() in 64-bit builds
-Date: Mon, 27 Apr 2026 18:47:19 +0800
-Message-ID: <20260427104721.47724-2-r@hev.cc>
+Subject: [PATCH 2/3] efi/loongarch: Randomize kernel preferred address for KASLR
+Date: Mon, 27 Apr 2026 18:47:20 +0800
+Message-ID: <20260427104721.47724-3-r@hev.cc>
 X-Mailer: git-send-email 2.54.0
 In-Reply-To: <20260427104721.47724-1-r@hev.cc>
 References: <20260427104721.47724-1-r@hev.cc>
@@ -81,45 +81,78 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Remove the CONFIG_32BIT guard around rdtime_h() and rdtime_l()
-so they can also be used in 64-bit builds.
+Introduce efi_get_kimg_kaslr_address() to compute the preferred
+kernel image address dynamically when CONFIG_RANDOMIZE_BASE is
+enabled. The function derives a random offset using EFI-provided
+randomness combined with the timer value, and constrains it within
+CONFIG_RANDOMIZE_BASE_MAX_OFFSET.
+
+Update EFI_KIMG_PREFERRED_ADDRESS to call this helper so that the
+EFI stub can select a randomized load address when KASLR is active,
+while preserving the original base address behavior when KASLR is
+disabled or nokaslr is specified.
 
 Signed-off-by: WANG Rui <r@hev.cc>
 ---
- arch/loongarch/include/asm/loongarch.h | 6 ------
- 1 file changed, 6 deletions(-)
+ arch/loongarch/Kconfig                   |  2 +-
+ arch/loongarch/include/asm/efi.h         |  4 +++-
+ drivers/firmware/efi/libstub/loongarch.c | 16 ++++++++++++++++
+ 3 files changed, 20 insertions(+), 2 deletions(-)
 
-diff --git a/arch/loongarch/include/asm/loongarch.h b/arch/loongarch/include/asm/loongarch.h
-index 2a6bc99177d8..bb2da9c58411 100644
---- a/arch/loongarch/include/asm/loongarch.h
-+++ b/arch/loongarch/include/asm/loongarch.h
-@@ -1248,8 +1248,6 @@
- 
- #ifndef __ASSEMBLER__
- 
--#ifdef CONFIG_32BIT
--
- static __always_inline u32 rdtime_h(void)
- {
- 	u32 val = 0;
-@@ -1274,8 +1272,6 @@ static __always_inline u32 rdtime_l(void)
- 	return val;
+diff --git a/arch/loongarch/Kconfig b/arch/loongarch/Kconfig
+index 3b042dbb2c41..a5afb70f73d9 100644
+--- a/arch/loongarch/Kconfig
++++ b/arch/loongarch/Kconfig
+@@ -730,7 +730,7 @@ config RANDOMIZE_BASE
+ config RANDOMIZE_BASE_MAX_OFFSET
+ 	hex "Maximum KASLR offset" if EXPERT
+ 	depends on RANDOMIZE_BASE
+-	range 0x0 0x10000000
++	range 0x20000 0x10000000
+ 	default "0x01000000"
+ 	help
+ 	  When KASLR is active, this provides the maximum offset that will
+diff --git a/arch/loongarch/include/asm/efi.h b/arch/loongarch/include/asm/efi.h
+index eddc8e79b3fa..f831320efd41 100644
+--- a/arch/loongarch/include/asm/efi.h
++++ b/arch/loongarch/include/asm/efi.h
+@@ -30,6 +30,8 @@ static inline unsigned long efi_get_kimg_min_align(void)
+ 	return SZ_2M;
  }
  
--#else
--
- static __always_inline u64 rdtime_d(void)
- {
- 	u64 val = 0;
-@@ -1288,8 +1284,6 @@ static __always_inline u64 rdtime_d(void)
- 	return val;
+-#define EFI_KIMG_PREFERRED_ADDRESS	PHYSADDR(VMLINUX_LOAD_ADDRESS)
++unsigned long efi_get_kimg_kaslr_address(void);
++
++#define EFI_KIMG_PREFERRED_ADDRESS	efi_get_kimg_kaslr_address()
+ 
+ #endif /* _ASM_LOONGARCH_EFI_H */
+diff --git a/drivers/firmware/efi/libstub/loongarch.c b/drivers/firmware/efi/libstub/loongarch.c
+index 9825f5218137..df67ef8c68ab 100644
+--- a/drivers/firmware/efi/libstub/loongarch.c
++++ b/drivers/firmware/efi/libstub/loongarch.c
+@@ -38,6 +38,22 @@ static efi_status_t exit_boot_func(struct efi_boot_memmap *map, void *priv)
+ 	return EFI_SUCCESS;
  }
  
--#endif
--
- static inline unsigned int get_csr_cpuid(void)
++unsigned long efi_get_kimg_kaslr_address(void)
++{
++	unsigned int random_offset = 0;
++
++#ifdef CONFIG_RANDOMIZE_BASE
++	if (!efi_nokaslr) {
++		efi_get_random_bytes(sizeof(random_offset), (u8 *)&random_offset);
++		random_offset ^= (rdtime_l() << 16);
++		random_offset &= (CONFIG_RANDOMIZE_BASE_MAX_OFFSET - SZ_64K - 1);
++		random_offset = ALIGN(random_offset, SZ_64K) + SZ_64K;
++	}
++#endif
++
++	return PHYSADDR(VMLINUX_LOAD_ADDRESS) + random_offset;
++}
++
+ unsigned long __weak kernel_entry_address(unsigned long kernel_addr,
+ 		efi_loaded_image_t *image)
  {
- 	return csr_read32(LOONGARCH_CSR_CPUID);
 -- 
 2.54.0
 
