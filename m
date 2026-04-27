@@ -1,109 +1,105 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f41.google.com (mail-pj1-f41.google.com [209.85.216.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 42FCA39C658;
-	Mon, 27 Apr 2026 08:25:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 10B2539B497
+	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 08:39:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777278335; cv=none; b=lq9v7HqlCvDo3y/tIWCiui5fovszQg9BSpcgB+GxuKz/RjFqdWGHOogRx8WoQkEyeJabULDqpT74N/Fw9MAvY/l80zEmt0L3tj6GeI112shLlINugJSd+lxa6By0r+QC63uHqqGhEOLOgFJqRsPZvWx0XTTMAqZTIQ5L2LTofWE=
+	t=1777279193; cv=none; b=s+Vr/nhT6sf0NGNLusi3Z9rb5h6RVDkI/uw/Pb+YsCgFJlq6mECRYvv790K5UB7aRilXumQzRHbz00SDHxip2gEnplqOTxwKVzwY7HnoPb6uhRR76fnxzxBiKDsISxqgw4M0ayRFYnDwwkc/IS4EqFfPXLguDCPaWCiuM9C1rws=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777278335; c=relaxed/simple;
-	bh=trwJAd2yBWHkILnEXCJ4c6+mvrmlRaN5OpdL393pF10=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Mlo5zOaHvOR+6OBVm+zxr9cvoPJYDLsaGPLYXChh01Djxf+SzDGr64dmPJdXc9xHQNLGSOK+pUJb2HfGXCx4w3k0Wd/9Vp5UWAAbXX4zj0wqWRgMAa9a42f1ruHtim51QMw1CAo5aVY2YXT1gpWUF45zz5jv463DryxmplC2rPc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ASYGCAmG; arc=none smtp.client-ip=192.198.163.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1777279193; c=relaxed/simple;
+	bh=8VkYf4oej+1NJIsr42kCIdqMEirKvkfOijKLfIgkJYE=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=i2lEzal4jmvGaawhE1/lLKrBVzC2b2xmvVkxD4i9FkwWEh7t8/zeSfJ9TGLQObSl8DgLrJGdLR4PuwvNlarqy8+abtXttPRjH0mZpZ39jGE0VTzG3nMBfdqU0/O9oomRvpbHqeGD7Szu67U0Qy2oeLIHgDq6F92TgQGrP1LHJPA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=TA2HuvVD; arc=none smtp.client-ip=209.85.216.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ASYGCAmG"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1777278334; x=1808814334;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=trwJAd2yBWHkILnEXCJ4c6+mvrmlRaN5OpdL393pF10=;
-  b=ASYGCAmGlTy49T3Fmp0qEeJsdBShZ9+KOE+ZIJ7mJ9LQl+cVYX9dVO8U
-   7Mb8DSYvCxaIUvZ2iaFWzcfifsg/jVMAN/Jpb3Jl3uWU1f8HAmVL6pDgw
-   Vtr9N/SvZAyYg3Pj/vZfXyXQIbyqh3fD68tM30+mMg5801Im5aPehjUgX
-   Dm4WiCjdPWLiI/YF7y5uZNu1e6CgpGU4NkPwE5bzWpcM3EwZt/6hB9vDl
-   cAco0FlsZm8uqm0wHYH3Rtc7ZKsTbbnIH6DfSH6TY3owQUIl4xhfhjRAn
-   Rdkajt60B7B5eW0JE40B/P5cZxtGIgODbJnTWr99/jc2xd6+hab6DKWdm
-   g==;
-X-CSE-ConnectionGUID: JCblTeh+TKKMGnz4v0PHUg==
-X-CSE-MsgGUID: fxjLYJe2SgqRWdxq2KevIQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11768"; a="65692782"
-X-IronPort-AV: E=Sophos;i="6.23,201,1770624000"; 
-   d="scan'208";a="65692782"
-Received: from orviesa003.jf.intel.com ([10.64.159.143])
-  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Apr 2026 01:25:33 -0700
-X-CSE-ConnectionGUID: Rt43cVzzR7CL+Yw1ftCHMA==
-X-CSE-MsgGUID: z3CqV+k1RiqvXrq9MZ8tsA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,201,1770624000"; 
-   d="scan'208";a="237533351"
-Received: from fpallare-mobl4.ger.corp.intel.com (HELO localhost) ([10.245.244.2])
-  by ORVIESA003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Apr 2026 01:25:31 -0700
-Date: Mon, 27 Apr 2026 11:25:28 +0300
-From: Andy Shevchenko <andriy.shevchenko@intel.com>
-To: Dmitry Antipov <dmantipov@yandex.ru>
-Cc: Andrew Morton <akpm@linux-foundation.org>,
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>,
-	Charlie Jenkins <thecharlesjenkins@gmail.com>,
-	Alexandre Ghiti <alex@ghiti.fr>, Ard Biesheuvel <ardb@kernel.org>,
-	linux-riscv@lists.infradead.org, linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v6 0/3] riscv32 library enhancements and build fixes
-Message-ID: <ae8deOQyKa_j0Jb8@ashevche-desk.local>
-References: <20260425185151.477442-1-dmantipov@yandex.ru>
- <20260425143631.e20246946f59925c5eb8dc22@linux-foundation.org>
- <df673a44d292bb3df498b78a8b637f880e28931f.camel@yandex.ru>
- <ae8dGrM77NuCe4S0@ashevche-desk.local>
+	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="TA2HuvVD"
+Received: by mail-pj1-f41.google.com with SMTP id 98e67ed59e1d1-35d9f68d011so6504141a91.2
+        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 01:39:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777279191; x=1777883991; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=l2khddAE4U1nIPfkSKNCb9MwtuVNtnWHE+Vf+vbXZFk=;
+        b=TA2HuvVDRrTqqVVTJKkfhGfaQUO+D1SHd/IimW7YT84WR38XiSx6aH2ER+y4fbesna
+         QZ2Oqng59H57izRZqNdkHun/y9DioBHLWERzt1Ksp/MqNQvPNddopqItQmTBuxhSn0ZD
+         wzSS9tqQYyqo5lgkmj7vUkz5gRlS0IuxvOZoSTsn3rbNy3aM9fqHW9cQaC+xgqdA2sGJ
+         Pgu8NHV9zS61mlJuuJ0eVgFRyXsECD8gC4Zz2Ln+j4mAtmTN0wlLybgNpFzVPtbgMKeH
+         aFbyqRR9BzHNMWQfd4mfJZhclvkaefhGyUTTyunQT/cl2uGPtN+H+wsR7sVBFvqb6bJR
+         ZJfg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777279191; x=1777883991;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=l2khddAE4U1nIPfkSKNCb9MwtuVNtnWHE+Vf+vbXZFk=;
+        b=a34GpprEvHMWgEeCVbeQcj/h6GPYJ7k4Sjok30fnSGj32qk2cQd+6Weegw8uwA3CLS
+         /F0EyGjpwXs2aVAMnKVSb4vzdZxvwESd81ISUaPOytuQAH2VrxdxPkxAPq1FC011uS9j
+         6VzUj6Hf2W0UNb0O1IBAJLa2tJBtpj2rk8sqOuW4Mi3JH3IKVMar/U6TyM3HlppWtvQJ
+         vRPjl6nRgc7tdTG4+kMmJWV7WQIagpPFxbCs8BoqJXstc/GmV1h/3giy1vXJays5J9xQ
+         PdIZaEeBJe3+bB6iV/uOuwmzngQIMVJoYxqvYdWP3hB8zGaE0/uOioiQY0L2LV6MKaCh
+         xRvg==
+X-Forwarded-Encrypted: i=1; AFNElJ9qAq6bMaEAqFKL2RntcU6dXIQi4eRyfR0pXL0uccRd6V5Qp175QEcLNCvfJ+pFmotaY2tsKxzDThU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzN8jx/wUOLFdPgdiLxVrrS60yVVvZ9TVgNo63FXT+QW++zPWoV
+	aJX3EXl17mJLtxCpQAexVjGjH7n9HHYYuCD+ynD2rwT/YVuzTDhWkkB5xmBT3Hyj4PuuwTRT2eX
+	IX9/N
+X-Gm-Gg: AeBDieuuvN/5LIILRnLOdTrMU/wCsaXj35zigXXh0sE385Li/8Vw+sUc+BDmne4Ow6z
+	bEN7pTM1/9bsVGkhCxeJoNbgnsbztX2WhomVGlNkN7MP51u2z7PfYVj8tjktvW8OeEzfKYP+dE6
+	L1RijGml7b6esrorN6HP+dn7sOgOOdyZiSgQBasu+CvfDw5Orj5zajqL4SbG7W/sH5OKJKbQYWT
+	SSYVLnss/mkEmsWpYGxmzWMqAU3OVFOijLOoqP1PEKRvgkMIS7WBtMsrlJZ9YsVFX2JsSvCBK4T
+	EYwa/i8FYKF6q5JXqnzqIl5mKbCGVYp6akfkERFMZTY2Y8N+/uwoUqMSBqmOFktOA5i+IyyObnb
+	b4Nj4EXHTjpq5TWfkFWe9AJESyPaVzZwRl5gH7/lfLasjTMaphlkupAOhEr90SyT2b7nRuRRrUD
+	3iQeR8uaeg0gc=
+X-Received: by 2002:a17:90b:350f:b0:359:8e5e:43de with SMTP id 98e67ed59e1d1-3614049358emr44701147a91.22.1777279191383;
+        Mon, 27 Apr 2026 01:39:51 -0700 (PDT)
+Received: from xpc ([2400:8902:e002:def5:7882:53a7:6a48:4d11])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b5fab4049bsm276063105ad.77.2026.04.27.01.39.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 Apr 2026 01:39:51 -0700 (PDT)
+From: WANG Rui <r@hev.cc>
+To: Ard Biesheuvel <ardb@kernel.org>,
+	Huacai Chen <chenhuacai@kernel.org>
+Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	WANG Xuerui <kernel@xen0n.name>,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	loongarch@lists.linux.dev,
+	WANG Rui <r@hev.cc>
+Subject: [PATCH v2 0/2] efi/libstub: Ensure instruction cache coherency after kernel relocation
+Date: Mon, 27 Apr 2026 16:39:28 +0800
+Message-ID: <20260427083930.36324-1-r@hev.cc>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ae8dGrM77NuCe4S0@ashevche-desk.local>
-Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
- krs, Bertel Jungin Aukio 5, 02600 Espoo
+Content-Transfer-Encoding: 8bit
 
-On Mon, Apr 27, 2026 at 11:23:59AM +0300, Andy Shevchenko wrote:
-> On Mon, Apr 27, 2026 at 11:13:20AM +0300, Dmitry Antipov wrote:
-> > On Sat, 2026-04-25 at 14:36 -0700, Andrew Morton wrote:
-> > 
-> > > I didn't upstream "lib and lib/cmdline enhancements v9" this cycle.
-> > 
-> > You don't have to upstream v9. Because v9 is v8 + initial RISC-V build
-> > fix, which is a part of another series (this one) now. The proper sequence
-> > is v8 + this series.
-> > 
-> > > So can we please sort through these things (and the AI review) before
-> > > adding more?
-> > 
-> > Not sure about AI but hopefully human should realize that I'm not an
-> > expert in m68k/sparc32/xtensa/csky/[your favorite arch here]. Enabling
-> > and running the test on _all_ architectures where it is expected to 
-> > work requires obtaining (or even building by myself) a cross-compiler,
-> > setting up the kernel and QEMU, etc. I've spent a reasonable time with
-> > RISC-V and ARM and hopefully set up a good starting point for 
-> > m68k/sparc32/xtensa/csky/[your favorite arch here] maintainers, who are
-> > free to incorporate the test into their target architecture.
-> > 
-> > I'm going to fix everything I consider reasonable, submit v7 and give up -
-> > because without even a single reply from core RISC-V maintainers, this
-> > just turns into an endless brain masturbation.
-> 
-> I believe it's better to issue v10 of that series + v7 of this in one go.
+Changes since [v1]:
+  * Move efi_cache_sync_image() after check_platform_features(), matching arm64.
 
-(I meant v8 of that as you said + v7 of this one as v10 of that one, and sorry
- for any confusion I added in the previous reply.)
+The EFI stub relocates the kernel image by copying it to a new memory
+location using memcpy(). On architectures where the instruction and data
+caches are not automatically coherent, the copied instructions may not be
+visible to the instruction fetch unit without explicit cache maintenance.
+
+This series adds the missing call to efi_cache_sync_image() in the generic
+relocation path, and provides a LoongArch implementation using the ibar
+instruction to ensure instruction fetches observe the updated contents.
+
+[v1]: https://lore.kernel.org/loongarch/20260427034451.717817-1-r@hev.cc
+
+WANG Rui (2):
+  efi/loongarch: Implement efi_cache_sync_image
+  efi/libstub: Synchronize instruction cache after kernel relocation
+
+ drivers/firmware/efi/libstub/loongarch.c | 5 +++++
+ drivers/firmware/efi/libstub/relocate.c  | 1 +
+ 2 files changed, 6 insertions(+)
 
 -- 
-With Best Regards,
-Andy Shevchenko
-
+2.54.0
 
