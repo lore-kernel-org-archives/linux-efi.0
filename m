@@ -1,61 +1,63 @@
-Received: from mail-pj1-f43.google.com (mail-pj1-f43.google.com [209.85.216.43])
+Received: from mail-pj1-f50.google.com (mail-pj1-f50.google.com [209.85.216.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA6D21C862F
-	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 10:47:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C1793B52FF
+	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 10:47:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777286861; cv=none; b=e06KtJwwG8pTp5hZs3tQzai1uFB+1ynkrzDPS+xRPzoTqdciPqDxgYid25gbqyJB8miKRDS+4Ho/HdqZ6OTGSP6ODQDSmG1EMT2aZj5zB4VokvgX1sPd9HWHaYD9zcWHywq5QYPQP+JTHpGN1Lf+AvBCoQ4r0t98NGS5jmv3EzY=
+	t=1777286864; cv=none; b=MTP280IBTQNGtES0kSIkMnkABOvrEzRpfz/48wsQkHo00utvXbPnX8DDF4wBnAhWePT6x5y+RbejUCnPcVi16D5/r58LCypjZUiUq+lEtaR6OBV1ioZCzKTeFXhrRWn1cBYcrvhl3XvoD+LwQLQ4BPJut/8b1EtvbGjtpx/TkZ4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777286861; c=relaxed/simple;
-	bh=kcLRKUt6VV+0E3c3aZ/Ze6zUJANaEPNPvyoBX7yqlW8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Pdjq9O4LBNQRGLhUs8vd2MU+TEgIABN4zTIcEP3t1gW/dgBUx++3aaZ/IgO9EaNtbG310xEJ/qu7T6J7i3epoRTqxsY2E3AB9f89hgd/BsRYDvEu+R0L7jGYTqW5bHycz/o2ZKC7fJrAP5zh8S5O5ZfiO2z+K0lPRBryLjJgHHY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=stCYQSV9; arc=none smtp.client-ip=209.85.216.43
+	s=arc-20240116; t=1777286864; c=relaxed/simple;
+	bh=gZg1LZJ8U8You+Wkevxwu5gYhMLfjULVKE+O5oAK3N8=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=QsLLB6KGCAM2iY7y/dnZ5sAEExXaLpDvQhDXr9Usm55qly86EZ+7q9NIDrnYkSzpXnDBebQNFgn4R9KMMYTTojgkuGbgJLKN81z9Pef+iXCEEp+ejy0TLeoQsUVfEE0eXGOF2yjHSlflk6Wm2GhXxua6aU6TRmq4XW71xr6P1SQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=gKNVwLmb; arc=none smtp.client-ip=209.85.216.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="stCYQSV9"
-Received: by mail-pj1-f43.google.com with SMTP id 98e67ed59e1d1-35da8d037a5so4704219a91.0
-        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 03:47:38 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="gKNVwLmb"
+Received: by mail-pj1-f50.google.com with SMTP id 98e67ed59e1d1-3614826eca4so8834352a91.1
+        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 03:47:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777286858; x=1777891658; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=qBaDcbNtNJIr+4BqFmEontn2SIWukKG96vRmR4j4yIo=;
-        b=stCYQSV9hkPxQhI+Myt4TEvFWF3v49NkFTjBnBn1L8k3TqQ1i2uWAc2H8b3p29hC00
-         YAYbSqG39Bl2xDICdcRH8QeOcxRQZodHfiB+ZQMAyhuzM/IFHPs5HUMhahKG6WYZ4QfS
-         EssjP2qgwdGmg2VHJ9DW6do6J8uMbLDlnFSGaeveeDn6rMRIQZq1yafuORhkceOqAfto
-         0zrfTbYxbNuZnho3sXxjRL0+C19F4snygWKmwLlvMdVN1YR23sXHTJG9dexaHf0F004y
-         eDrv5sRZOfgZ153IerG1o3WXLHct4t5jJW4PjdGDqu6ph8Tu2VJgoPGRQCZPu9PkXTge
-         3byw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777286858; x=1777891658;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777286861; x=1777891661; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=qBaDcbNtNJIr+4BqFmEontn2SIWukKG96vRmR4j4yIo=;
-        b=hPY6PQCES1rAJ2y8RT6pw4t2N8/acSe/C7O+IWz2iqCubD+tcieaB1ItBMNiLcTv5j
-         2+iS9PiOZSrgBJTC21K824cAo+8jq0sT1mBYGg8+C2O9h/OZh8pkk76JMLms6nBYr6NX
-         JzAYLtzOcmNitwXqXBdZGxsCdCK7JDFnvi8Jg8uNzt1xSWF5fwHt921naM90ADVnj1P9
-         EE+7qLEfCeICetob24oz7vpcvT/vQUKkdlyZ6QDRJ+ntWo+gI3qgX//NHBX0dIKbTXh+
-         xwHl9gF6YUaOj9a8JBn0QEh8TBmJ0LyO/7JuFMinv+1qFuQgzn5OHftDDrZnfk8R3MLn
-         Z9Bg==
-X-Forwarded-Encrypted: i=1; AFNElJ+YDK5vhdVMjhAmn/lqDQNn1im3WFBsr068ceug+Md2dOjzgOgW4m7qWCMUlmhQG67o3iwttmNe6q8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwQxIiCXtAt0LbzCCf2vvn4neo6omVZ6xa9xb4wIL+oDKDUiCGW
-	3jsLXNRei/d058lmVufgvtaco0DQ6HLLo9JsPHCYLNgiOPRpuEAYduFICF1xYKxT2os=
-X-Gm-Gg: AeBDievLkrPzEhPkqHPVlYVbJ5AL2C7+qCLLYspE98FoKJsUrtTnBztyjZJfDYKhzu6
-	bNQ5RNN6dHdM3mkKhM6Ax8DCqk6hdeLhWT81XfWvq6ICoFA8Hj+omFgpEEe93s/sUbi5B9QFjlt
-	ER+pGsTIQGrJHj5R2fDmSJRmU17M3IrpiPeKt5Eiuog6Y0AP649OXKolw5VIF9nqoxftrH2kQ7t
-	uMbvO8Hg336cb4nW6E86Ktbe2iVv2gEMVqFdNqwLdeLJfaAm9j4lp1zIQ+eLFHwh8xziKEPxTzA
-	Eksqt8hY/O0HQD80okrdnHUwvwNcX/o51REPz1cNWFNBUScYdWIjiRqB6mcU85Csh4+B35J4lRW
-	kTypT0uG39ATPMYsds4TL3kc9XX19G/RM1ACYN6dqPSBpSpilq/GYVosJW7TImgukkX29q3PUha
-	5gJnW9gWKlKSA=
-X-Received: by 2002:a17:90b:1846:b0:35f:c796:ca5f with SMTP id 98e67ed59e1d1-3614047a264mr45414490a91.19.1777286858194;
-        Mon, 27 Apr 2026 03:47:38 -0700 (PDT)
+        bh=UhTH8c+vBFpvSOX6DMmifWKJbw9Gz0Bb3dH6yZMz4Qs=;
+        b=gKNVwLmbkRXj3azfIqkXDR958PrnmAq7LrAkbOiOfJq9cuqFsB1d26Tlk035hO6xGt
+         3o8JEuTOiSF9qwH/VuXeNf31TJfgMxCt2a1+XVvQlUeCCIuxdku2muAML+BhbH2JTLiJ
+         /c05+hHhFh0zYwen3y6MOVXam5uOyrfZvMXCcn62quqTb7TP4AfYCP36iozFs/1WiqJA
+         pIDzkMJiD2MazrRYzDnHpLGaFCzv7lyhG5OUAXbpLj1stPzKbnL/LBhGlIds+TnAzb16
+         VFM72J0yjU9gr39AiD82k1lwPe4lw5LO14EFpmaMfKzEU5EamH3py3wZMKhkG934K46s
+         jkpQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777286861; x=1777891661;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=UhTH8c+vBFpvSOX6DMmifWKJbw9Gz0Bb3dH6yZMz4Qs=;
+        b=oiLABhPT7/A9jGS9QPvsOF5Mmvy1LN2yT4txVh0TEP5s+Dh6WF6IIBXeqCwuLwtl/3
+         gc2kiuxjnHubiQY0Z//AzPDHIPwbFmj2LNrPngV3kE0VhKc6mAiIZCbAakvPpvO6UeNr
+         BuQTAvS7j5Dsz9p8b5Nk45X3gUfc9wP1z1Bmm7oHyQhFivsj22jAziJddlxA6dODHvSO
+         jx89FgO21gA5dMkBpfoQ0lLAA8S62lK3dpXM05oXKsljI36ZhG5AwG1hEc0agWnHIUNJ
+         aclkrxRh99nkHj2MnOQ+qIHfDF+XH/KRE20bMWJ5GHo4v3/rb2p//ho8JTKxrzWn0g7q
+         S90Q==
+X-Forwarded-Encrypted: i=1; AFNElJ/AYulWsB0kOySElJOsYvra4WFP7WiFVoRPv/diUYI4P/n6paiG4KbFRzVXKetoU0nfI4P/5eiiKlc=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx4qGC4zwwGEVwK7gaW3G54ZrlVc6JFWS3GbM0D4nvAgW7pc4ov
+	dXTmn5yzqq8OzYj2DcwVRDB+DBL9WgI0RF6qfL80Fw6JZZJUKmmiw6lI07z7UXwoAvc=
+X-Gm-Gg: AeBDiesKizsPN7h6zS/l8CRsDXcpDCdoPTFYLY15PzhEqodFjdr83+zhDUhV3rKRUXu
+	O+480QkM48q/UE+hnoJfoKte2DZrJugmx21mZB4RIkciML/d+kA99AB5t38GmJY1ADZZpn63Gwt
+	0tTxZRZePJy0j8xt/9YzG4bERLHyirmDwD9vsZMzSsP7Y0izT4J4eWac0gzXUl+AU46HoHwGeAt
+	qyU8DDWNe62LiZQNbUavEdWuneI1pDOGnLLxqcGQHmbKM6XswFKEjE8vG6VKpZ0rhkv1emJkPO8
+	eFezOvh9/BGBoloDNEHul3XVWsZL0wSE+2v1k2/kWbUM1N9ASvFVSNCtlsT1ckXMwbZ2haN8gOK
+	iwZwzbiGx9nRT/MuJXg4YgY76SkhOq71oroKipEJOsFFkjIFeuGf3aUeh4z7Mj9hvKr7UKmlRL2
+	EwGeJWjNxDv2U=
+X-Received: by 2002:a17:90b:562b:b0:35b:929f:7e95 with SMTP id 98e67ed59e1d1-361403bdcfcmr43713580a91.4.1777286860831;
+        Mon, 27 Apr 2026 03:47:40 -0700 (PDT)
 Received: from xpc ([2400:8902:e002:def5:7882:53a7:6a48:4d11])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-362dde4ccbfsm16227029a91.1.2026.04.27.03.47.35
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-362dde4ccbfsm16227029a91.1.2026.04.27.03.47.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Apr 2026 03:47:37 -0700 (PDT)
+        Mon, 27 Apr 2026 03:47:40 -0700 (PDT)
 From: WANG Rui <r@hev.cc>
 To: Huacai Chen <chenhuacai@kernel.org>,
 	Ard Biesheuvel <ardb@kernel.org>
@@ -65,10 +67,12 @@ Cc: WANG Xuerui <kernel@xen0n.name>,
 	linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	WANG Rui <r@hev.cc>
-Subject: [PATCH 0/3] LoongArch: Move KASLR to EFI stub to avoid initrd overlap
-Date: Mon, 27 Apr 2026 18:47:18 +0800
-Message-ID: <20260427104721.47724-1-r@hev.cc>
+Subject: [PATCH 1/3] LoongArch: Allow rdtime_h() and rdtime_l() in 64-bit builds
+Date: Mon, 27 Apr 2026 18:47:19 +0800
+Message-ID: <20260427104721.47724-2-r@hev.cc>
 X-Mailer: git-send-email 2.54.0
+In-Reply-To: <20260427104721.47724-1-r@hev.cc>
+References: <20260427104721.47724-1-r@hev.cc>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -77,41 +81,45 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This series addresses a potential overlap issue between the kernel
-image and the initrd when KASLR is enabled.
+Remove the CONFIG_32BIT guard around rdtime_h() and rdtime_l()
+so they can also be used in 64-bit builds.
 
-In the normal boot flow, the bootloader is responsible for loading
-both vmlinux and the initrd, and it can guarantee that the two do
-not overlap in memory. However, this assumption only holds as long
-as neither image changes its location afterwards.
+Signed-off-by: WANG Rui <r@hev.cc>
+---
+ arch/loongarch/include/asm/loongarch.h | 6 ------
+ 1 file changed, 6 deletions(-)
 
-The in-kernel KASLR implementation breaks that assumption. When the
-initrd is placed close to the kernel image, randomizing the kernel
-location at runtime may move it into the initrd region, leading to
-memory corruption early during boot.
-
-To fix this, this series moves the KASLR logic out of the kernel
-proper and into the EFI stub. With this change, the final placement
-of both the kernel image and the initrd is determined by the EFI
-memory allocator. This ensures that the two allocations are
-coordinated and cannot overlap.
-
-Functionally, the kernel still supports KASLR as before, but the
-randomization now happens before the kernel is entered, rather than
-during early kernel relocation.
-
-WANG Rui (3):
-  LoongArch: Allow rdtime_h() and rdtime_l() in 64-bit builds
-  efi/loongarch: Randomize kernel preferred address for KASLR
-  LoongArch: Skip relocation-time KASLR if it has already been applied
-
- arch/loongarch/Kconfig                   |  2 +-
- arch/loongarch/include/asm/efi.h         |  4 +++-
- arch/loongarch/include/asm/loongarch.h   |  6 ------
- arch/loongarch/kernel/relocate.c         |  4 ++++
- drivers/firmware/efi/libstub/loongarch.c | 16 ++++++++++++++++
- 5 files changed, 24 insertions(+), 8 deletions(-)
-
+diff --git a/arch/loongarch/include/asm/loongarch.h b/arch/loongarch/include/asm/loongarch.h
+index 2a6bc99177d8..bb2da9c58411 100644
+--- a/arch/loongarch/include/asm/loongarch.h
++++ b/arch/loongarch/include/asm/loongarch.h
+@@ -1248,8 +1248,6 @@
+ 
+ #ifndef __ASSEMBLER__
+ 
+-#ifdef CONFIG_32BIT
+-
+ static __always_inline u32 rdtime_h(void)
+ {
+ 	u32 val = 0;
+@@ -1274,8 +1272,6 @@ static __always_inline u32 rdtime_l(void)
+ 	return val;
+ }
+ 
+-#else
+-
+ static __always_inline u64 rdtime_d(void)
+ {
+ 	u64 val = 0;
+@@ -1288,8 +1284,6 @@ static __always_inline u64 rdtime_d(void)
+ 	return val;
+ }
+ 
+-#endif
+-
+ static inline unsigned int get_csr_cpuid(void)
+ {
+ 	return csr_read32(LOONGARCH_CSR_CPUID);
 -- 
 2.54.0
 
