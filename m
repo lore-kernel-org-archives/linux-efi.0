@@ -1,136 +1,341 @@
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 90EC72F25F0
-	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 09:29:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777282168; cv=none; b=mX5m5Kh6TJkV8UQFpzizc5y4WH3EH53peXSxEPf8VJ5zBN1kwkowzngz8P/VVvVhFDvXQr+A8tjRt4c2MY9H67q79sHSx1ycacTfufKyAMZQfRqkirKwSfarowGUV3MUZmp/puCckuK8CCmUX4oLeoQ1D9xJVRdT9ikwQDWsYdE=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777282168; c=relaxed/simple;
-	bh=ZOsDGx6yoV0gkgm1H7hTV3PaKBw7ScWEW+1RhAs5+Eo=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=pj7BNstNM2AfwpgdM4sZSHspaa4rSorwHp9Ftc/Nk5b2W68Oh2SBmxX33dsqoHhInVgP5N+3l497fS8kXWru7QIJV5M3tBC3Nqk90nS8QjnDwbiIr5T7BUks0lVgmokpuEw5Lx6o/A93/HHcY+Bhcn1FfCZU/BHPsTadPJHHnEI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=QX00PRVc; arc=none smtp.client-ip=209.85.128.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D61D03B27F3
+	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 09:40:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.44
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1777282824; cv=pass; b=Apueg/adeKHoMlYZgFCgB/PzMZEMSf63M1jOB160fGCZNwTfU2CnknlLi0Zdhqr+qqML4HeoKeuX9J+wWS3kPxnOtsl/I3CZLSK6PwA6rbNgAGPVJsoHh9lvErbd7hfDkfjd1HzFxgUaxGzm0u7pbilGTW3pfuGL3jLHCib7lXE=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1777282824; c=relaxed/simple;
+	bh=QxjxYdcjttugdX8q9bsC/IDcAbQVs1MJeJaBjC5gmvI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=aq/LB5rGdiVEDjrh/KqWhr1yvUJKnszFUun1lLadAhgnU+UIA7+utVCb7CGnNK89l0fi1Gy0mbb4kw7BvtfRJuKMdJD2zMC8w5gFpdKc8+W0gRmaT11gLoSq6sGJxqbOa/78wzxkdoHEpP/D9gJs3oQcAAIKKf0eL414NpiQoCM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=qR7926+g; arc=pass smtp.client-ip=209.85.208.44
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QX00PRVc"
-Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-4891c0620bcso67484995e9.1
-        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 02:29:26 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qR7926+g"
+Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-678adefbd26so4389184a12.3
+        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 02:40:22 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1777282821; cv=none;
+        d=google.com; s=arc-20240605;
+        b=FkSsN2YKj0i3LrDqkteOmt9or2T3xEHJoZkFweQoHJSzKtgPffT9UAzKm9B4lEHGgS
+         5jPmucu5+1x2jzqC5mmwNbUbIx2RXwBOMOuuFhRcJpPrWXXq1Dg92w/c27mzdv503J8h
+         6mGhc+Y2/qJxNKfYaMT68BNrjxiN+9h0aaeY3VdRadcr4My/h8qZ19/q9LXjvrU//EDr
+         mwfDICDkjO2hEQIyPTWetCWEA42LyfjV2S0cRCNc7iMpvQiojvwtYtAoYQvf1HDI9P6t
+         Y2c9ROVs/A/T836ljtPsJ6KrBjd53PTwQZfhCfSSbawduVlAZkg+AwGIQaX/9lv7TCy5
+         b8WQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=eJPntPFRD6O40TV+kw1mFLfFz9WnpFXdrxU/541rVbo=;
+        fh=/QEAlrNblu3lc5Dhre5iVmum++NtcStNCiBbzvpll/c=;
+        b=PTDx5J/cPAb0104cfnUkX76VqTzydqD/R8A2/SMF9s9u5+UyTEOdYlFLYWz6sWwEzZ
+         MGzpCSeoY0rW0OTEEXgHx6Jbv8S1fL7mTbTA/mtON5QQAyeow11ZrhwMUeYugMul9ygC
+         EkgSjtDZhhWfKNqLZrW7TH0GSOlYoXA0qLjcYQsZvfsq5ZZLDqeIDlVFYbAZWWs93+tB
+         Tdl/4NLhsr9Q8iyZeHUqRpKfcwxOLHLo4C9jZGXQ2phklBY9NVs8OtcYR7QVVVah8XWf
+         dW06ejMi5Vx65+hmFxO06nlxLlQOqzpHd9rCJfeG4sZ1Z4cOtGY4JmLAoxrCPhY8op9M
+         K+JA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1777282165; x=1777886965; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
+        d=gmail.com; s=20251104; t=1777282821; x=1777887621; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=qhBsUsRnxGxteXWit32fczP20HqInrjs7pD4raLih9A=;
-        b=QX00PRVcrvL4RniLDn0smz2QwrBAv2SiGwmg8tR39QhPrPnCIIk11pF76K+MbkiNHF
-         O3fasHkmTdNEXFR73W9tFk0Cj1flUycP0l7ymr/SttW4mhLcaaRsv9RGXsUbqHFu2nrl
-         lPekFGZIU5iCuCh2JvqNCwqPFzYmlXi/SaArH2KLA7WMGtJJXh47UXNrAqpYvr+f6K4h
-         oJ9H8qghj2izMbmsKQi5fJnADJok2lB3u25Tcb/+XC2lL0yrB69orMsMyFNcGWhlJiTH
-         aNdmbnllj0XqstKWjsSqKrfCWi4Y+wFLYnJSicFU22OEuI1VRjX/0PGuDp6/ogcUaTL7
-         RWQQ==
+        bh=eJPntPFRD6O40TV+kw1mFLfFz9WnpFXdrxU/541rVbo=;
+        b=qR7926+gI5Rjc3lstYAMzrMjqGywpZ3iiFQbJLJV7dAmZe1DujXErD9OxX7uW/So+8
+         rC2iIBoSUvCuij+eDq7H/oC+lkn4irs3U2K1facE3XR/kU+zhANhJ/nJkqAs4wc7Y4EX
+         Sgc7pdtLUoMsZrRFyc073idnYPJhXupV5uF3mMp7xROI/MYeJxLePoF0BE/pmdOf/40y
+         HbqBxcKIWGLHVlW4LXMSRJw2ik6wMvpd+iDAXnxYN3+GxtxVWS5FTIVm+k64VjxOBHDd
+         WsY8F859X/+oEfi0VNnn8+vNxVL8z4MsEom/vpT64M5hLGa/rOwAR9Gvp5x+Lz03DRq4
+         IeDA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777282165; x=1777886965;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from
+        d=1e100.net; s=20251104; t=1777282821; x=1777887621;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=qhBsUsRnxGxteXWit32fczP20HqInrjs7pD4raLih9A=;
-        b=bkTv8rfQk4NAiqBACZSg4X85hDPLD2WhbuDzXYNDe6WuPb62yb5//B2UmQKV77Vq4Q
-         AyluEgxtRVM+NauW2oi/L/HPRvAZ24+2dhg9oJQNsDVR7QLbvLYr3H0JSXssF8jAe/zf
-         xClZpnlNUynEx96vEFCYOoVB+llYFIUp7ZQIKB98qJbVxzKAtpqrLt8qiBZXFKxxIauX
-         wFmGUZT+JTtEYsmZVRF80UD0gQiG9E743qgkvG0OF9HBYvrG5mOv4ZkRJ+/KrAGIqdNM
-         E8AZdNozI2UuF7opugQizZwU+CDE4SjzpaxZr0uw5HD3LoJOff70YBeMeoL+hZUHN0Zt
-         UuPA==
-X-Forwarded-Encrypted: i=1; AFNElJ+hVdu131nd9J8ApFVFgRJxQunxVkblZlOcAwCrzcvtUKInj6hGGbixeAbDYDUeVEQXZimZMitS7PE=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz7g/m+17R616hPAUSIekUfkRtnFWlXPlmeAFmBBg6spHcBrr0u
-	7fusu1c/UuMQ2h0RvSkUGS7Di0EaUfksYWx0W/MDaDRNicBVl6Rk/lyr
-X-Gm-Gg: AeBDieuq/LFfliLUak6xmsKE5HAMuDMUH8syyoMOEZ4gLH088QWUNZkQ7rwlCHz9CNv
-	cqQbSIcIqly70no4HMKss8aJJzVe4TprfeZhHl4qEu0jWvj69vwVXprFbdxiHUuiUmr5ijMzzgQ
-	5N1faQ0d5AItsuiCEnymixrO9YxyoOg+gPpmrsVUZ6kvB4btuGYmzvamTUUfZ8OtV0SYroMuNej
-	VtGjSVbSXymNM2fzXCuuoWllcYyTID/24VHp20pCl9caeXxUNtBTnthzR4GoJoYMNBcUeaObzpk
-	DUSsRZMf7S2+cXdf29J/Xb+hMxYMNHMDZeBJMQjps+NML/Pzx8IXYtoWlNlp/3kZoyfea2P0DQh
-	cdYuLXcwOtDz4dy8gyuGEsmLUOuZJDkJBnqcV1eHU0SgtHo3MDZdpEnn+C7okCvowvBtYTXV/Sg
-	vSa6ginDzJkyg7hZqi+Ugu6+cIZ5dXnu1tephQ6ia21H7xOvyvoe3/vdxmOY6SzbAXmAP7VIclN
-	0s=
-X-Received: by 2002:a05:600c:c177:b0:486:fb0b:ad79 with SMTP id 5b1f17b1804b1-488fb78129emr534667615e9.20.1777282164670;
-        Mon, 27 Apr 2026 02:29:24 -0700 (PDT)
-Received: from pumpkin (82-69-66-36.dsl.in-addr.zen.co.uk. [82.69.66.36])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-488fb7ac6aasm249078295e9.25.2026.04.27.02.29.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Apr 2026 02:29:24 -0700 (PDT)
-Date: Mon, 27 Apr 2026 10:29:22 +0100
-From: David Laight <david.laight.linux@gmail.com>
-To: Dmitry Antipov <dmantipov@yandex.ru>
-Cc: Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
- Albert Ou <aou@eecs.berkeley.edu>, Andrew Morton
- <akpm@linux-foundation.org>, Andy Shevchenko <andriy.shevchenko@intel.com>,
- Charlie Jenkins <thecharlesjenkins@gmail.com>, Alexandre Ghiti
- <alex@ghiti.fr>, Ard Biesheuvel <ardb@kernel.org>,
- linux-riscv@lists.infradead.org, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v6 3/3] riscv: fix building compressed EFI image
-Message-ID: <20260427102922.08d0bcda@pumpkin>
-In-Reply-To: <20260425185151.477442-4-dmantipov@yandex.ru>
-References: <20260425185151.477442-1-dmantipov@yandex.ru>
-	<20260425185151.477442-4-dmantipov@yandex.ru>
-X-Mailer: Claws Mail 4.1.1 (GTK 3.24.38; arm-unknown-linux-gnueabihf)
+        bh=eJPntPFRD6O40TV+kw1mFLfFz9WnpFXdrxU/541rVbo=;
+        b=T4S9dmAGRJxFdtmSXiZRt/j4xAEYMEtdVhdJgtzAuH/ef3YZrYk1BFsqA3jBzxSUXZ
+         +6sv0/75870TyThjLtS6X916wmaL2MVrSqRaTogWB164MJTEYcu9KQY/YYblZxsVtgx0
+         TKFHrb9XqPHxJQifpqclW8mprx9SkqQIZm3CBlcpvZtHNfKFz5TlaslPQImKfqJe+c5L
+         W6vvQaAoPxN2asSnBGHOnczWxpICbhnFjWDUTe076SOGxjnY7RGiPzCnyW0+pQHncOi/
+         nlINfrPkGEOMA0gUGV1Jx2n0tjDSbfFo9zEC2TIMA7npXq0nkbaxpbEqrUfGEr1yp30a
+         /rSg==
+X-Forwarded-Encrypted: i=1; AFNElJ9IchDH988a5XfO7gzlEThVBOFuPqxV8rszAoxUYQZvUPLKYo8kriQG6Hc22BUYe6AEt9LTfuvxoHo=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy99U0a4k4HAkm21dGuqyqmAcTdWkEMAL5uVg7zjuGvB0PZvtt5
+	B9GAFJk6WDjGFZ7WSjNBOtE6GB5UX83n6pWz+49krg3nCekH1XhNgK4SmjRk0aDnQgcaq1+HMQw
+	q3ARwEamN4B3Rbad031poQuR1VMTSrIs=
+X-Gm-Gg: AeBDieuAzkc19c3ho057mtXgwQhHBUH0b1vvn8SWk54D3Fq2x9lm9sRRoCCeW9iZdVV
+	CNXe/tyQtcLCiVynWZ0KtlgguvD2aYNQ+yvDZCqO2ezF5B8DpufPgZc32LzsQOCm6Sd05i+F4Qo
+	MdDsTA4M87DEIkASOpbAMB5tnerhcXBe9uljLijKzH3etOAuW7oIz7bhmfq5aCDW5kBqE4Th0Su
+	ywUWcB89YoDDyTJ1XJHJuyBPGiPrXQHNFs0QuktVvvJQDKZPgQ4QPvat3lvDMEyOkVsTTME0zof
+	YbZyeSJ9kjEh6jMb+FlJDIcmUMb766zp0dLu3sTKHljmtMzBqp9b
+X-Received: by 2002:a17:906:794a:b0:bae:642a:8712 with SMTP id
+ a640c23a62f3a-bae642a8acamr610964266b.26.1777282820632; Mon, 27 Apr 2026
+ 02:40:20 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+References: <20260427040517.828226-1-neilb@ownmail.net> <20260427040517.828226-11-neilb@ownmail.net>
+In-Reply-To: <20260427040517.828226-11-neilb@ownmail.net>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Mon, 27 Apr 2026 11:40:09 +0200
+X-Gm-Features: AVHnY4J3KNER9PTYdOScy1O62XxZbu1ceyhpVX-P8SPS4H3ApKZi7SEKX41AuMQ
+Message-ID: <CAOQ4uxiZF0_dGtHY0x7T0oh=3jhDC7-THH_ANt-Ha5kfdRe4QQ@mail.gmail.com>
+Subject: Re: [PATCH v3 10/19] VFS/ovl: add d_alloc_noblock_return()
+To: NeilBrown <neil@brown.name>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Alexander Viro <viro@zeniv.linux.org.uk>, 
+	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, Jeff Layton <jlayton@kernel.org>, 
+	Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, 
+	Jeremy Kerr <jk@ozlabs.org>, Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org, 
+	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org, 
+	linux-unionfs@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Sat, 25 Apr 2026 21:51:50 +0300
-Dmitry Antipov <dmantipov@yandex.ru> wrote:
+On Mon, Apr 27, 2026 at 6:07=E2=80=AFAM NeilBrown <neilb@ownmail.net> wrote=
+:
+>
+> From: NeilBrown <neil@brown.name>
+>
+> ovl_lookup currently needs to check if a dentry with the same name has
+> already been added to the dcache as readdir might need to do.  This
+> is an unnecessary performance cost to manage a rare race.
+>
+> If ovl could know which in-lookup dentries raced with readdir, it could
+> limit the extra lookup to just those.
+>
+> So add d_alloc_noblock_return() which provides the in-lookup dentry when
+> it returns -EWOULDBLOCK.
+>
+> ovl_readdir() can use this this and flag the dentry such that
+> ovl_lookup() and easily check if a repeat lookup is needed.
+>
+> Signed-off-by: NeilBrown <neil@brown.name>
 
-> When building vmlinuz.efi with CONFIG_EFI_ZBOOT enabled,
-> '__lshrdi3()' is also needed to fix yet another link error:
-> 
-> riscv32-linux-gnu-ld: drivers/firmware/efi/libstub/lib-cmdline.stub.o: in function `__efistub_.L49':
-> __efistub_cmdline.c:(.init.text+0x202): undefined reference to `__efistub___lshrdi3'
-> 
-> And since riscv64 can have CONFIG_EFI_ZBOOT but doesn't need
-> these library routines, rely on CONFIG_32BIT to manage linking
-> of lib-ashldi3.o and lib-lshrdi3.o on riscv32 only.
-> 
-> Reported-by: Charlie Jenkins <thecharlesjenkins@gmail.com>
-> Closes: https://lore.kernel.org/linux-riscv/20260409050018.GA371560@inky.localdomain
-> Tested-by: Charlie Jenkins <thecharlesjenkins@gmail.com>
-> Suggested-by: Ard Biesheuvel <ardb@kernel.org>
-> Signed-off-by: Dmitry Antipov <dmantipov@yandex.ru>
+Very nice!
+
+One nit about the API
+
 > ---
-> v6: adjust to match recent upstream changes
-> v5: rely on CONFIG_32BIT rather than dedicated Kconfig symbol (Ard)
-> v4: use more meaningful CONFIG_EFI_ZBOOT_USE_LIBGCC and adjust tags (Andy)
-> v3: initial version to join the series
-> ---
->  drivers/firmware/efi/libstub/Makefile | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-> index 983a438e35f3..e1c11d02a5cb 100644
-> --- a/drivers/firmware/efi/libstub/Makefile
-> +++ b/drivers/firmware/efi/libstub/Makefile
-> @@ -95,7 +95,9 @@ CFLAGS_zboot-decompress-gzip.o	+= -I$(srctree)/lib/zlib_inflate
->  zboot-obj-$(CONFIG_KERNEL_ZSTD)	:= zboot-decompress-zstd.o lib-xxhash.o
->  CFLAGS_zboot-decompress-zstd.o	+= -I$(srctree)/lib/zstd
->  
-> -zboot-obj-$(CONFIG_RISCV)	+= lib-clz_ctz.o lib-ashldi3.o
-> +zboot-obj-$(CONFIG_RISCV)	+= lib-clz_ctz.o
-> +zboot-riscv-obj-$(CONFIG_32BIT)	+= lib-ashldi3.o lib-lshrdi3.o
-> +zboot-obj-$(CONFIG_RISCV)	+= lib-clz_ctz.o $(zboot-riscv-obj-y)
+>  fs/dcache.c              | 50 ++++++++++++++++++++++++++++++++++++----
+>  fs/overlayfs/namei.c     | 23 ++++++++++--------
+>  fs/overlayfs/overlayfs.h |  2 ++
+>  fs/overlayfs/readdir.c   |  7 ++++--
+>  include/linux/dcache.h   |  2 ++
+>  5 files changed, 68 insertions(+), 16 deletions(-)
+>
+> diff --git a/fs/dcache.c b/fs/dcache.c
+> index a2ddfe811df3..2f11257b725b 100644
+> --- a/fs/dcache.c
+> +++ b/fs/dcache.c
+> @@ -2749,7 +2749,8 @@ enum alloc_para {
+>  static inline
+>  struct dentry *__d_alloc_parallel(struct dentry *parent,
+>                                   const struct qstr *name,
+> -                                 enum alloc_para how)
+> +                                 enum alloc_para how,
+> +                                 struct dentry **dentryp)
+>  {
+>         unsigned int hash =3D name->hash;
+>         struct hlist_bl_head *b =3D in_lookup_hash(parent, hash);
+> @@ -2836,7 +2837,10 @@ struct dentry *__d_alloc_parallel(struct dentry *p=
+arent,
+>                         case ALLOC_PARA_FAIL:
+>                                 spin_unlock(&dentry->d_lock);
+>                                 dput(new);
+> -                               dput(dentry);
+> +                               if (dentryp)
+> +                                       *dentryp =3D dentry;
+> +                               else
+> +                                       dput(dentry);
+>                                 return ERR_PTR(-EWOULDBLOCK);
+>                         case ALLOC_PARA_WAIT:
+>                                 wait_var_event_spinlock(&dentry->d_flags,
+> @@ -2899,7 +2903,7 @@ struct dentry *__d_alloc_parallel(struct dentry *pa=
+rent,
+>  struct dentry *d_alloc_parallel(struct dentry *parent,
+>                                 const struct qstr *name)
+>  {
+> -       return __d_alloc_parallel(parent, name, ALLOC_PARA_WAIT);
+> +       return __d_alloc_parallel(parent, name, ALLOC_PARA_WAIT, NULL);
+>  }
+>  EXPORT_SYMBOL(d_alloc_parallel);
+>
+> @@ -2931,11 +2935,49 @@ struct dentry *d_alloc_noblock(struct dentry *par=
+ent,
+>
+>         de =3D try_lookup_noperm(name, parent);
+>         if (!de)
+> -               de =3D __d_alloc_parallel(parent, name, ALLOC_PARA_FAIL);
+> +               de =3D __d_alloc_parallel(parent, name, ALLOC_PARA_FAIL, =
+NULL);
+>         return de;
+>  }
+>  EXPORT_SYMBOL(d_alloc_noblock);
+>
+> +/**
+> + * d_alloc_noblock_return() - find or allocate a new dentry
+> + * @parent - dentry of the parent
+> + * @name   - name of the dentry within that parent.
+> + * @dentryp - place to store the blocking dentry
+> + *
+> + * A new dentry is allocated and, providing it is unique, added to the
+> + * relevant index.
+> + * If an existing dentry is found with the same parent/name that is
+> + * not d_in_lookup() then that is returned instead.
+> + * If the existing dentry is d_in_lookup(), d_alloc_noblock()
+> + * returns with error %-EWOULDBLOCK and the blocking dentry is passed
+> + * in @dentryp.  The dentry must be dput() by the caller.
 
-Doesn't that specify lib-clz_ctz.o twice ?
-I think you could also use:
-zboot-obj-$(CONFIG_RISCV)	+= lib-clz_ctz.o $(if $(CONFIG_32BIT),lib-ashldi3.o lib-lshrdi3.o)
+This contract is a bit subtle.
+We have plenty of contracts where the caller must dput() in case of success
+or in case of error, but must dput in case of a specific error that
+sounds fragile.
 
-	David
+How about:
+* If the existing dentry is d_in_lookup(), d_alloc_noblock()
+ * returns with error %-EWOULDBLOCK and the blocking dentry is passed
+ * in @dentryp. Regardless of the returned error, if @dentryp is set by thi=
+s
+ * function, the returned dentry must be dput() by the caller.
 
->  zboot-obj-$(CONFIG_LOONGARCH)	+= lib-clz_ctz.o lib-ashldi3.o
->  lib-$(CONFIG_EFI_ZBOOT)		+= zboot.o $(zboot-obj-y)
->  
+Thanks,
+Amir.
 
+> + *
+> + * Thus if the returned dentry is d_in_lookup() then the caller has
+> + * exclusive access until it completes the lookup.
+> + * If the returned dentry is not d_in_lookup() then a lookup has
+> + * already completed.
+> + *
+> + * The @name need not already have ->hash set.
+> + *
+> + * Returns: the dentry, whether found or allocated, or an error
+> + *    %-ENOMEM, %-EWOULDBLOCK, and anything returned by ->d_hash().
+> + */
+> +struct dentry *d_alloc_noblock_return(struct dentry *parent,
+> +                                     struct qstr *name,
+> +                                     struct dentry **dentryp)
+> +{
+> +       struct dentry *de;
+> +
+> +       de =3D try_lookup_noperm(name, parent);
+> +       if (!de)
+> +               de =3D __d_alloc_parallel(parent, name, ALLOC_PARA_FAIL,
+> +                                       dentryp);
+> +       return de;
+> +}
+> +EXPORT_SYMBOL(d_alloc_noblock_return);
+> +
+>  /*
+>   * - Unhash the dentry
+>   * - Retrieve and clear the waitqueue head in dentry
+> diff --git a/fs/overlayfs/namei.c b/fs/overlayfs/namei.c
+> index 69032eb2b1e2..524e661c3c8d 100644
+> --- a/fs/overlayfs/namei.c
+> +++ b/fs/overlayfs/namei.c
+> @@ -1400,16 +1400,19 @@ struct dentry *ovl_lookup(struct inode *dir, stru=
+ct dentry *dentry,
+>         if (dentry->d_name.len > ofs->namelen)
+>                 return ERR_PTR(-ENAMETOOLONG);
+>
+> -       /*
+> -        * The existance of this in-lookup dentry might have forced
+> -        * readdir to do the lookup with a new dentry.  If so we must
+> -        * return that one.
+> -        */
+> -       alias =3D try_lookup_noperm(&QSTR_LEN(dentry->d_name.name,
+> -                                           dentry->d_name.len),
+> -                                 dentry->d_parent);
+> -       if (alias && !IS_ERR(alias))
+> -               return alias;
+> +       if (ovl_dentry_test_flag(OVL_E_RACED_READDIR, dentry)) {
+> +               ovl_dentry_clear_flag(OVL_E_RACED_READDIR, dentry);
+> +               /*
+> +                * The existance of this in-lookup dentry might have
+> +                * forced readdir to do the lookup with a new dentry.
+> +                * If so we must return that one.
+> +                */
+> +               alias =3D try_lookup_noperm(&QSTR_LEN(dentry->d_name.name=
+,
+> +                                                   dentry->d_name.len),
+> +                                         dentry->d_parent);
+> +               if (alias && !IS_ERR(alias))
+> +                       return alias;
+> +       }
+>
+>         with_ovl_creds(dentry->d_sb)
+>                 err =3D ovl_lookup_layers(&ctx, &d);
+> diff --git a/fs/overlayfs/overlayfs.h b/fs/overlayfs/overlayfs.h
+> index b75df37f70ac..bd6f1a25aca1 100644
+> --- a/fs/overlayfs/overlayfs.h
+> +++ b/fs/overlayfs/overlayfs.h
+> @@ -71,6 +71,8 @@ enum ovl_entry_flag {
+>         OVL_E_CONNECTED,
+>         /* Lower stack may contain xwhiteout entries */
+>         OVL_E_XWHITEOUTS,
+> +       /* dentry was found in-lookup during readdir */
+> +       OVL_E_RACED_READDIR,
+>  };
+>
+>  enum {
+> diff --git a/fs/overlayfs/readdir.c b/fs/overlayfs/readdir.c
+> index e03b32491941..e483bd939a8c 100644
+> --- a/fs/overlayfs/readdir.c
+> +++ b/fs/overlayfs/readdir.c
+> @@ -553,7 +553,7 @@ static int ovl_cache_update(const struct path *path, =
+struct ovl_cache_entry *p,
+>  {
+>         struct dentry *dir =3D path->dentry;
+>         struct ovl_fs *ofs =3D OVL_FS(dir->d_sb);
+> -       struct dentry *this =3D NULL;
+> +       struct dentry *this =3D NULL, *in_lookup;
+>         enum ovl_path_type type;
+>         u64 ino =3D p->real_ino;
+>         int xinobits =3D ovl_xino_bits(ofs);
+> @@ -574,7 +574,8 @@ static int ovl_cache_update(const struct path *path, =
+struct ovl_cache_entry *p,
+>                 }
+>         }
+>         /* This checks also for xwhiteouts */
+> -       this =3D d_alloc_noblock(dir, &QSTR_LEN(p->name, p->len));
+> +       this =3D d_alloc_noblock_return(dir, &QSTR_LEN(p->name, p->len),
+> +                                     &in_lookup);
+>         if (this =3D=3D ERR_PTR(-EWOULDBLOCK)) {
+>                 /*
+>                  * Some other thead is looking up this name and will
+> @@ -583,6 +584,8 @@ static int ovl_cache_update(const struct path *path, =
+struct ovl_cache_entry *p,
+>                  * lookup gets a turn it will find and return this
+>                  * dentry.
+>                  */
+> +               ovl_dentry_set_flag(OVL_E_RACED_READDIR, in_lookup);
+> +               dput(in_lookup);
+>                 this =3D d_alloc_name(dir, p->name);
+>         }
+>         if (!IS_ERR(this) && !d_unhashed(this)) {
+> diff --git a/include/linux/dcache.h b/include/linux/dcache.h
+> index 662b98185337..db7cdcbac775 100644
+> --- a/include/linux/dcache.h
+> +++ b/include/linux/dcache.h
+> @@ -258,6 +258,8 @@ extern struct dentry * d_alloc(struct dentry *, const=
+ struct qstr *);
+>  extern struct dentry * d_alloc_anon(struct super_block *);
+>  extern struct dentry * d_alloc_parallel(struct dentry *, const struct qs=
+tr *);
+>  extern struct dentry * d_alloc_noblock(struct dentry *, struct qstr *);
+> +extern struct dentry * d_alloc_noblock_return(struct dentry *, struct qs=
+tr *,
+> +                                             struct dentry **);
+>  extern struct dentry * d_splice_alias(struct inode *, struct dentry *);
+>  struct dentry *d_duplicate(struct dentry *dentry);
+>  /* weird procfs mess; *NOT* exported */
+> --
+> 2.50.0.107.gf914562f5916.dirty
+>
