@@ -1,112 +1,128 @@
-Received: from mail-pj1-f52.google.com (mail-pj1-f52.google.com [209.85.216.52])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B603E363090
-	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 03:45:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29753361DBA;
+	Mon, 27 Apr 2026 03:46:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777261528; cv=none; b=CPwaHGua6st9a54kceMrHxvsQyqBjrgRNlgt8B79SCRpg5vtpKAEj6Ps0BGWWq4gKkcDZWh72Mymm+mfWLlDLPzd+aBGGJv7vTppq3VszWUH4DrH1jsCoDcbIK6If9vzyj0R8RTKe9/ZjD9VW3o7KNWH+J4W/VrbgQRSWGkcn0w=
+	t=1777261623; cv=none; b=DjnrwLiswADVIYmN62FhuKC8agR0NqF6BeuaDHHF1L5J4s0GHnaxc0HOzQmG5Nz2182y4d9iOTmJhhwWWVS0T+UDGT31urd6Ufts3L6EQPYty7SoXmajpTXOlb9lGWQvM7UTrT+AxjfzREn/I6L63oJduKMag3XXy2gIIZuojDM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777261528; c=relaxed/simple;
-	bh=GQxbjViAq937qxPVb6aK5SarlLun1y1QS/zeWJMo7J0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=L3YIefn/kw1P9E0LemCnJ6WefiD8wMRIxCcU9xKWpran1PkzxKLm0x66DnEDoeunvAxMLEvhuy/zM/RLmfnLDT1EGeBzeKxAb1U5vLplLTsQ+uVvdDf3+QMlq8FpJDMN09N+8GN1yywaWEiBiA/UcFehOjhQBJ4jZkVVXH3+3v0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=GPX4GEVF; arc=none smtp.client-ip=209.85.216.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
+	s=arc-20240116; t=1777261623; c=relaxed/simple;
+	bh=PXtHrkpeoeEZCNni7njwoZ/gPRQg81Uvu64iZ5CXssk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=rHBNOOrnPgW12zezDFmfdmH79fXvN2yMPA/DRmxCkoepoY0u8w0XykAutti8KLPhrbvfUeFQRtFc7LUFdbhp93OodRO3uiHMU/zQOn3TmcgS6KBYlxJ9ZRiWM+Ir5tqZoBSbtt9K3OruWwnNP0XbHUcw0YWphs+qPqjiZ4N6Ey4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=qaYZ7R1B; arc=none smtp.client-ip=62.89.141.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="GPX4GEVF"
-Received: by mail-pj1-f52.google.com with SMTP id 98e67ed59e1d1-35fc258aaa4so5954869a91.2
-        for <linux-efi@vger.kernel.org>; Sun, 26 Apr 2026 20:45:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777261527; x=1777866327; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yj2Ks0SGF50ciVTp9OSJTi2f/jET1S92yU/1nIOqmmo=;
-        b=GPX4GEVFiL9r8/4T/ByYSi38ykhm3O6A4s1Rkwd7NwFXLnvUj3XU/yIegVGgGE13tq
-         Sb/j/OItZ/3kLF1u1qqgpp32+DiVeO/8geJx98rs8QWzNP47JLp1lbXR2N4ynokwPzWi
-         0OzYovd+WH5QxL3QBxvB2ub4NbEaSU5QMXIw3Y9PQD6+er7o0BCZms7yefe+/XxBtyuI
-         m2gva+aHlVoMquWt0NR1l/8nOzk+dWLXRlNTjHE0tU+IvsLAa18C5viDqToNvW1SOqr+
-         XJRA+eYF+A0yN8tn6UsO2IhgvHTK4YnxLMEkOqKRBGUCLkOobbgD5WNqt/jq6aEXKQ8Q
-         nO/w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777261527; x=1777866327;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=yj2Ks0SGF50ciVTp9OSJTi2f/jET1S92yU/1nIOqmmo=;
-        b=pRSwGLefajo6ygGIARFZsjpL8Es+mfHrpsYwyWl8JGDf+s3Fhx0B/Ye5mfB0W6gZsn
-         Zvr/LbSPB9oiyWdoKPnL9dSt1QQ32PHsUXvHw05Xdu+gX5R7w/gB5pDySgN8n2DmPxWh
-         JQEYYLQy0MnTjsl8C1AQ9Yqz9AwaXGxN63VRVANb1cF36pgyiT/v3B+UZtXcIZxnEza9
-         BGFgN4RvgBMHarhhWMQpHZxBxf09p0ufbq9AvXYXPvBqz5RCkkndO8DuxODEsnYG27mc
-         E6QxBLGe8nZA8IQn6tmhG3XDFINB8Uv1Q9AuGuoMitaWkKBjXvBSy9Hx+cfenLv362nW
-         lN4A==
-X-Forwarded-Encrypted: i=1; AFNElJ+zSr8AhTy1tNTnPMkOCD+iwjANogN1uyhppK0gMRfzdLsoyddNxqeIfJl2VUX74DfdITEW38kmR+E=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw7kWMt49QFCZa2/R+Ku/dXh9ooJVMiMMiJY2FRz376J+SnJR4Y
-	8TNBDpbQN5R2zc0/kxzNPGQoNk2Ya+NJ49cxG2tqh2+1saPJ2uTnRmdbtkNsHhYBhhY=
-X-Gm-Gg: AeBDiesqNc1lj/4s+vTOrePQJ9UHyIGfzgN+g5MxInsJuoDlZhL3CawCBCp2cQGnv+j
-	JXXe+3VlZmK+D8S962BwTFlxDe0Sukh4j5md9tjasSWTUMrdzCEh3pT00Pw9Gvqhu7jJHMQSS88
-	hHbiTrkjou4oFAdqgSNv0m6nurnSH+HW9hz4ZX0CIf+JAVGZkKB53AkJqYqhI9Xzc49HupVyqg4
-	BO7RUhyQZgYtfm9GD19SSHs+09zYnjwX71hATpzWHE8tElZpXAhzHolmWoAgJ/5UA0czZXAbexW
-	uVQIpMvMJe31fzY97qrxG8CqQiCU97X3wWxqwDX9ZX1HVooZ7oUkypQnWSYuhdJUV/ca5dwk6Ph
-	K6jNqlBo0CeM6P+Li3fpwubX8BV6VdvRmftHh0Iz5Vn9W/yNKl8EXtJNOtQgYz+TDjDEcLXmyhL
-	d5zegwdbM+X27JVuDsWDk=
-X-Received: by 2002:a17:90a:74f:b0:361:4720:af84 with SMTP id 98e67ed59e1d1-3614720b0e4mr27755933a91.20.1777261527135;
-        Sun, 26 Apr 2026 20:45:27 -0700 (PDT)
-Received: from localhost ([2400:8902:e002:de3c:3085:4d80:3614:2212])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b5faa3073asm279061375ad.27.2026.04.26.20.45.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 26 Apr 2026 20:45:26 -0700 (PDT)
-From: WANG Rui <r@hev.cc>
-To: Ard Biesheuvel <ardb@kernel.org>,
-	Huacai Chen <chenhuacai@kernel.org>
-Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	WANG Xuerui <kernel@xen0n.name>,
-	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	loongarch@lists.linux.dev,
-	WANG Rui <r@hev.cc>
-Subject: [PATCH 2/2] efi/libstub: Synchronize instruction cache after kernel relocation
-Date: Mon, 27 Apr 2026 11:44:51 +0800
-Message-ID: <20260427034451.717817-3-r@hev.cc>
-X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20260427034451.717817-1-r@hev.cc>
-References: <20260427034451.717817-1-r@hev.cc>
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="qaYZ7R1B"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=linux.org.uk; s=zeniv-20220401; h=Sender:In-Reply-To:Content-Type:
+	MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=yX5gniV3PFQjBtZAVsjCI1d+uQEPy+M6yDq46UbG8R4=; b=qaYZ7R1BSz12zM7uf2Pg+BOLEI
+	TaUVYBVdwxpOrDqPxJv+1tXBM6U+0fQ46t7C9VKfseuSBd25/FUIp0dBj4H9guVawLFF16xug3tc8
+	RXCDk17YKOxrTaGYw0X/yAaxwYUNTeF0VFyo/m0aplUX2MmEDzvwNZ/dJgt10idP3FmL866Xx+IkE
+	D3o9g5gealOy2ZNy+yWUKVmBdQIwXXpVIFeQGOUcW2VgO6G2vN9IND4zEYziIXmsENC4bHcNqyiOZ
+	YsakHfH5mFn/YYhM6B8Djcu7A5+F/8NDSkTSuvnPjQ3qzbjU/xBgUxv3n/j8cNW42jszBirn8XKGi
+	qM+jQ0zw==;
+Received: from viro by zeniv.linux.org.uk with local (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1wHCw1-0000000Avps-1Ify;
+	Mon, 27 Apr 2026 03:47:01 +0000
+Date: Mon, 27 Apr 2026 04:47:01 +0100
+From: Al Viro <viro@zeniv.linux.org.uk>
+To: NeilBrown <neil@brown.name>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>,
+	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>,
+	Jeff Layton <jlayton@kernel.org>,
+	Trond Myklebust <trondmy@kernel.org>,
+	Anna Schumaker <anna@kernel.org>,
+	Miklos Szeredi <miklos@szeredi.hu>,
+	Amir Goldstein <amir73il@gmail.com>, Jeremy Kerr <jk@ozlabs.org>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Christoph Hellwig <hch@infradead.org>, linux-efi@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
+	linux-unionfs@vger.kernel.org, linux-kernel@vger.kernel
+Subject: Re: [PATCH v2 00/19] Prepare to lift lookup out of exclusive lock
+ for directory ops
+Message-ID: <20260427034701.GS3518998@ZenIV>
+References: <20260427033527.773006-1-neilb@ownmail.net>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260427033527.773006-1-neilb@ownmail.net>
+Sender: Al Viro <viro@ftp.linux.org.uk>
 
-The relocated kernel image is copied to its new location using memcpy().
-On architectures with separate instruction and data caches, the copied
-instructions may remain stale in the instruction cache, leading to the
-execution of outdated contents.
+On Mon, Apr 27, 2026 at 01:29:33PM +1000, NeilBrown wrote:
+> This patch set progresses my effort to improve concurrency of
+> directory operations and specifically to allow concurrent updates
+> in a given directory.
+> 
+> It is a selection of patches from the 53-patch set I posted in March
+> which got relatively little response.  Maybe a shorter set will be more
+> approachable.
 
-Call efi_cache_sync_image() after the relocation copy to ensure the
-instruction cache is synchronized with the updated memory contents before
-control is transferred to the relocated kernel.
+Got it, will post a review tomorrow.
 
-Signed-off-by: WANG Rui <r@hev.cc>
----
- drivers/firmware/efi/libstub/relocate.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/firmware/efi/libstub/relocate.c b/drivers/firmware/efi/libstub/relocate.c
-index d4264bfb6dc1..913b425d089d 100644
---- a/drivers/firmware/efi/libstub/relocate.c
-+++ b/drivers/firmware/efi/libstub/relocate.c
-@@ -158,6 +158,7 @@ efi_status_t efi_relocate_kernel(unsigned long *image_addr,
- 	 * have been allocated by UEFI, so we can safely use memcpy.
- 	 */
- 	memcpy((void *)new_addr, (void *)cur_image_addr, image_size);
-+	efi_cache_sync_image(new_addr, image_size);
- 
- 	/* Return the new address of the relocated image. */
- 	*image_addr = new_addr;
--- 
-2.54.0
-
+> This set:
+>  - prepares the VFS in various ways
+>  - make use of these preparations in ovl and NFS (the most challenging
+>    filesystems for lookup as they do the most interesting things)
+>  - make use in efivars and shmem which for different reasons need a small 
+>    change that seemed worth including here.
+> 
+> The goal that these patch work towards is moving lookup out of i_rwsem
+> on the directory - except for the actual ->lookup call.  This is itself
+> a step towards allowing broad concurrency of operations in a given
+> directory.
+> 
+> There are two particular requirements before lookup can move outside the lock:
+> 1/ d_drop() mustn't be used before an operation completes: the dentry being present
+>    in the dcache becomes part of the locking protocol.  This in turn requires
+>    d_splice_alias() to work with hashed negative dentries.
+> 2/ d_alloc_parallel() mustn't be called while i_rw_sem is held, as this would
+>    result in a lock inversion.  So d_alloc_noblock and others are introduced
+>    to handle the various cases.
+>    In a few cases we need to drop and re-take i_rw_sem inside ->lookup.
+>    As lookup might be called with a shared or exclusive lock this requires
+>    a new LOOKUP_SHARED flag which is ugly but can be removed after the
+>    lookup is moved out of the lock (then ->lookup will only ever be called
+>    with a shared lock).
+> 
+> The full set of patches including these 19 and the rest to complete the
+> lifting of lookup out of the exclusive lock can be found at
+>    github/neilbrown/linux in branch pdirops
+> 
+> Significant changes since last time are:
+>  - use wait_var_event for d_alloc_parallel() rather than effectively
+>    duplicating that infrastructure - as suggested by Christop
+>  - changes to ovl_readdir handling as discussed with Amir.
+> 
+> Thanks,
+> NeilBrown
+> 
+> 
+>  [PATCH v2 01/19] VFS: fix various typos in documentation for
+>  [PATCH v2 02/19] VFS: enhance d_splice_alias() to handle in-lookup
+>  [PATCH v2 03/19] VFS: allow d_alloc_name() to be used with ->d_hash
+>  [PATCH v2 04/19] VFS: use wait_var_event for waiting in
+>  [PATCH v2 05/19] VFS: introduce d_alloc_noblock()
+>  [PATCH v2 06/19] VFS: add d_duplicate()
+>  [PATCH v2 07/19] VFS: Add LOOKUP_SHARED flag.
+>  [PATCH v2 08/19] VFS/xfs/ntfs: drop parent lock across
+>  [PATCH v2 09/19] ovl: stop using lookup_one() in iterate_shared()
+>  [PATCH v2 10/19] VFS/ovl: add d_alloc_noblock_return()
+>  [PATCH v2 11/19] efivarfs: use d_alloc_name()
+>  [PATCH v2 12/19] shmem: use d_duplicate()
+>  [PATCH v2 13/19] nfs: remove d_drop()/d_alloc_parallel() from
+>  [PATCH v2 14/19] nfs: use d_splice_alias() in nfs_link()
+>  [PATCH v2 15/19] nfs: don't d_drop() before d_splice_alias()
+>  [PATCH v2 16/19] nfs: don't d_drop() before d_splice_alias() in
+>  [PATCH v2 17/19] nfs: Use d_alloc_noblock() in nfs_prime_dcache()
+>  [PATCH v2 18/19] nfs: use d_alloc_noblock() in silly-rename
+>  [PATCH v2 19/19] nfs: use d_duplicate()
