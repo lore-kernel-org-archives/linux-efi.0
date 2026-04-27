@@ -1,163 +1,105 @@
-Received: from fhigh-a3-smtp.messagingengine.com (fhigh-a3-smtp.messagingengine.com [103.168.172.154])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE50C386C36;
-	Mon, 27 Apr 2026 08:47:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.154
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4DDE3A0E80
+	for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 08:47:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777279642; cv=none; b=Z6vvuXw4/+Zcfe9rKHMOtWcp2dAye0U5y0HtuBrewj8upouim/ql1bjiblsr5pXj9JDYb2I77sjwpnDDH/takNZXliFCGM3WBajv9jH0ZSJu9z7xHqHFtZxRqgwF9FSBuwJoU7M7a72umUEyaDMWxd7kZNSc5x/3GaZHTsfLeS4=
+	t=1777279660; cv=none; b=I6mxR92J804lnFMua5RiSRRWPotZ4WTdQ9M6/veTaZiaQcbROV5VoMDqcOfHQd/kZ5TTtUVzt8LXJDhY1AjijFc2dfvkiDrdecfrkg9iESWVPBAfqQ805FHDJvxlpo7B2GVENKcPKxXX3IrvHf9Vo8YEK4jpebcDlhxZIgmckis=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777279642; c=relaxed/simple;
-	bh=x8IrAdNm5gcWTQot940bqU3wZaKyRnKqN8OS30gF8nQ=;
-	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
-	 References:Date:Message-id; b=c6+a4soZsHUfuowsVbnLoYO9YZbzkbS14Ew5K0Q6hbrz6nMlHIQauiPXKmBxLOhl+ENtukrYjCmR2BzjvA7BIhZfV50oSn5EE4yRBMaEoA0LFTUIOJRbcK5K0Q2dibOYK9zDjooNe12pYLlwSZPHRibTGlYJ36oJMWUk65pBBg0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=pWZFz2u8; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=tOWDNHbS; arc=none smtp.client-ip=103.168.172.154
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
+	s=arc-20240116; t=1777279660; c=relaxed/simple;
+	bh=ud6229bzqFmsJw1B4jV51SEWrfqqWrMb4pJy+DI1Kls=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=OD9Oo+ghandhgeCsotWZQwwGHM+KKagEkwqjV3lOP3BK0HpfKydQNQAy2wT03Yp61VjvAj4+G0wmEQyYuvGalaZWQcXzrrs2F7lZLVdenbeJQtxhZqZBO4nX8Q2kKZ3JH0DM7tRrDHPAKF3+toM00kpXOSoUKkrU2cm5fcD5Jqs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=pZlDMfKU; arc=none smtp.client-ip=209.85.214.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="pWZFz2u8";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="tOWDNHbS"
-Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 15549140008D;
-	Mon, 27 Apr 2026 04:47:19 -0400 (EDT)
-Received: from phl-frontend-03 ([10.202.2.162])
-  by phl-compute-05.internal (MEProxy); Mon, 27 Apr 2026 04:47:19 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:reply-to:subject:subject:to:to; s=fm2; t=
-	1777279639; x=1777366039; bh=FBe5VpX1Rb6JIbH61KWWGONSQrlIgrVejqe
-	2hcQO24M=; b=pWZFz2u8Fi8E1zPc03GUEFGqhlEBk9CTxZzSrCesHIOaTC2ZIsh
-	AJVLwijLlFyk3tFVJESVR78VyNeBazeShdZ17nY4qJpPddZ0SCvTtTCOSVTDdFa6
-	jIOG0I1AZFg3R+ZyoLLhtRzisafmzeGw28AGvxq1gJn9QyjUS/0WWXObwYkdDR6y
-	JnPV3HLKT4fMQbcYFB+N7Q39k12oXY8kFdD2SWs9maiTYl3v4sfJwVpkKMnExW0l
-	FiuOfCCVwc0iDa3GOoPdgIzmy4sYzG2NoOZrwFJsdXYLBW7wBY6yi4/K2cVTGEaV
-	/lUwa0k/Qqu1AQK7FvXkeq1SLUznxyI5NtA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1777279639; x=
-	1777366039; bh=FBe5VpX1Rb6JIbH61KWWGONSQrlIgrVejqe2hcQO24M=; b=t
-	OWDNHbSm/93XXRairGV9SECSrLbmf5SXrERHMcyLH+pVTRu/ZHBGps9ued2U3px4
-	8+rqLROtG/M8gAYDLABe6xBuzsTMGeqhAVsX5Ck5Ejf8yyDAU2rmScXwVn8GMUkz
-	5cuuCvEMOrWpJgTjI26FPaGLMWIhYTHaYfJ++eYH4bL7XTpiNClGISuPKxGTP+qA
-	t1GgUga/wGr/FdD/TOrL0WMQBBGyQhSGb48T8selrQCciZe2g7hqdoZaP5sahQny
-	YzHa6tvRTjXXtWkaBHMoxX6DDQOPxv6AjtCcut89O/HYjbPTRNiRdOZqJa98oUMX
-	9Kmri04W3Q2aK3rZElBNQ==
-X-ME-Sender: <xms:liLvaZi-OJsKb664ygMOxLUOWEmbrnAL57tdZET8dWGPvbe6dF0SxQ>
-    <xme:liLvaSJZe1BsfkPxdB6kEkYCaJav7CIkrWqi0fHREbp_XzeGeY2SdPEBY0IwnKtil
-    BbfBwjPizzjP-tklRFHWrEoCzc6Zt5kxhjPcaDOPcTo2cDt>
-X-ME-Received: <xmr:liLvaWE-NgffTLzEX2bSKrDJxswo-4GoKEP9E1eEJB_i5JEnJwRsFBdaB3uvYIlVNzhr-NfmmJSZx_vyIEB1LnVAT2oZwJ4>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdejkedvhecutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
-    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
-    hrpegtgfgghffvvefujghffffkrhesthekredttddtjeenucfhrhhomheppfgvihhluehr
-    ohifnhcuoehnvghilhgssehofihnmhgrihhlrdhnvghtqeenucggtffrrghtthgvrhhnpe
-    dvhffgheekkeeitdelfeehhfekvedvgeffhffgudffieevleffheelhfefheevteenucev
-    lhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehnvghilhgsse
-    hofihnmhgrihhlrdhnvghtpdhnsggprhgtphhtthhopeduiedpmhhouggvpehsmhhtphho
-    uhhtpdhrtghpthhtohepvhhirhhoseiivghnihhvrdhlihhnuhigrdhorhhgrdhukhdprh
-    gtphhtthhopehlihhnuhigqdhunhhiohhnfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhg
-    pdhrtghpthhtoheplhhinhhugidqnhhfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprh
-    gtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdp
-    rhgtphhtthhopehlihhnuhigqdhfshguvghvvghlsehvghgvrhdrkhgvrhhnvghlrdhorh
-    hgpdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnhgvlhdrohhrghdp
-    rhgtphhtthhopehmihhklhhoshesshiivghrvgguihdrhhhupdhrtghpthhtohepjhgrtg
-    hksehsuhhsvgdrtgiipdhrtghpthhtohepjhhksehoiihlrggsshdrohhrgh
-X-ME-Proxy: <xmx:liLvaY1RcTDBvi3inM8xJOaa6xTyjklJIfc-lYI1Vid3Wwpw73SInQ>
-    <xmx:liLvadw_JgbWHmW2jyTqOOjfMAO8HmoL92T2TFjXi0ZHH946fBjSbg>
-    <xmx:liLvaXiLOK9vjxucnUsirBowIKcsugmzpF1sDAh8MSCMoAUH3O_m0Q>
-    <xmx:liLvaczNKagXB9cd_K_HlbHErkc2IrErq1hQpTejBz86ftut6M2Raw>
-    <xmx:lyLvaUV8XAw_tvaj0TowmBxdPGZxaOQbVqZrfSPjc3kg-10JaezqrEQh>
-Feedback-ID: i9d664b8f:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
- 27 Apr 2026 04:47:13 -0400 (EDT)
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="pZlDMfKU"
+Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-2b458ca2296so61150275ad.0
+        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 01:47:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777279659; x=1777884459; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=EbS5XqlTtlqCLLkuZnn42EvCeoWF8vUClWjJ8C+Uh3A=;
+        b=pZlDMfKUArZtHIgh21BIn96/QH/2PCguT58eMgjBIZnXxRp74G/CwgYJqko8LMvm6X
+         e90KH4JhCqoEMHjAOcyTlRg+FAVq+3V8Hf2A2llI1jefuG4CBSlVsllFnv5Y0qw0o9/L
+         ogPucZd7pwxOi4n+Nw5IkE4ZsAHvml3yCAtYGkSSbUrDkjeRacE7R7W/Mq6CeEv99n81
+         GRNhsG3JpUGCLqyhZMEcTFPw7knYw/v8fVfMj+LtFSYpwUnhbLaSR79oRRKpDMNTHtrc
+         MynVgMIsx9YyizFixZF7fXyPgeC30Qe6AubUIBN7P9AIqvc8iFemqQmWTpeeGj4WcEv/
+         J5+Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777279659; x=1777884459;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=EbS5XqlTtlqCLLkuZnn42EvCeoWF8vUClWjJ8C+Uh3A=;
+        b=nUbVKsYO+ujTYOONuGZifUTh7U0dpan291m60ahR8RQAjWhUusVPdFbqMn5ihsQScX
+         zLZXdzuvc5zP8rXmIxJhHIaKL3/aDa5zPt0IM4GBPBcR9jmOvMM2kt2n7p605zax79bI
+         iBKMTftf3our4RUFeMwO1AzIbvtaGME4AEZirwhIhBA7PxGu1D6tpEKP/cfaLWmzrq5w
+         QqtFlwGmIx+suPZfTv4U5OQH/y/vY15POsQW2X4FNeZVlYFgVDXx7qJ8BqY/BlxYb83L
+         AthKRX2uu4MD3DRtf+4QdBXe01NXJk7Vv43XWjfwfZrjR7QMwFWqkGvtratHdwjmj0wN
+         wDhA==
+X-Forwarded-Encrypted: i=1; AFNElJ+0Q2sRtyQmByGTJKy1mAVUduYqptcpq7pEePccOPnd1m7TPl7iNb+9Lj4mt9nQYtjGgsu0k7SGJfY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyHBYuVYWNlwbJk6vZtCh5GwYYexUHbMf16f7S7Yxqxec+CfjVN
+	rn+sJAzTEn58OXEvWQp6V2QhiRMaBKJJO265fIeHtS/H+CjQbOQxofCHElWi976iQKQ=
+X-Gm-Gg: AeBDievb4+t65FAc8Qrh8CdnjdJmJNw3AWDm2RLbo89z4NcqWi6BV5ckzf0JvnIrL6J
+	/+tGhur43wLgkao+W0LCUwp2996ei8WOD4byH4GFDUWKAE/qUkjdj88wRoveEzTV3R3g7VWNI1G
+	pTDXVM/2MFoJK+wsNTmdOZYlJVSmhcpIHibetog6VpvZGV+AAD4dagO236joqZvljQAYr9y3UCN
+	4IILj1o4Iiiokfn9L1CNt+oqPExPyhTbXpdbYzhZBBSSj6NaMba8zged4MzBts9EDQBu+xeuePk
+	+4+4ma6O+JiU96XPZL/BaYWJcUAH8tmUSXJXHINpLEXByXeBNqzla9XXlhWBZYcfjosMBgABS6b
+	CufGOw02zLXGdA9zk6HG/EXBoApg6GRIL9OPP4lF80J8up5ZoB3YfZLrS6VcUZIEK1X6D/QvvZ7
+	4uyA5yAP3uJnAih4A3fUsRzg==
+X-Received: by 2002:a17:903:3d47:b0:2b4:5b82:a8e3 with SMTP id d9443c01a7336-2b5f9f51e09mr293896815ad.24.1777279659118;
+        Mon, 27 Apr 2026 01:47:39 -0700 (PDT)
+Received: from xpc ([2400:8902:e002:def5:7882:53a7:6a48:4d11])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b5fab3a929sm291703215ad.72.2026.04.27.01.47.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 Apr 2026 01:47:38 -0700 (PDT)
+From: WANG Rui <r@hev.cc>
+To: Ard Biesheuvel <ardb@kernel.org>,
+	Huacai Chen <chenhuacai@kernel.org>
+Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	WANG Xuerui <kernel@xen0n.name>,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	loongarch@lists.linux.dev,
+	WANG Rui <r@hev.cc>
+Subject: [RESEND PATCH v2 0/2] efi/libstub: Ensure instruction cache coherency after kernel relocation
+Date: Mon, 27 Apr 2026 16:47:19 +0800
+Message-ID: <20260427084721.40535-1-r@hev.cc>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: NeilBrown <neilb@ownmail.net>
-To: "Amir Goldstein" <amir73il@gmail.com>
-Cc: "Linus Torvalds" <torvalds@linux-foundation.org>,
- "Alexander Viro" <viro@zeniv.linux.org.uk>,
- "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.cz>,
- "Jeff Layton" <jlayton@kernel.org>, "Trond Myklebust" <trondmy@kernel.org>,
- "Anna Schumaker" <anna@kernel.org>, "Miklos Szeredi" <miklos@szeredi.hu>,
- "Jeremy Kerr" <jk@ozlabs.org>, "Ard Biesheuvel" <ardb@kernel.org>,
- linux-efi@vger.kernel.org, linux-fsdevel@vger.kernel.org,
- linux-nfs@vger.kernel.org, linux-unionfs@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3 07/19] VFS: Add LOOKUP_SHARED flag.
-In-reply-to:
- <CAOQ4uxi8rqkbhK4=8N1ncfU1m6bjdHLbinSf=j3k0oVEaSa-wA@mail.gmail.com>
-References: <20260427040517.828226-1-neilb@ownmail.net>
-  <20260427040517.828226-8-neilb@ownmail.net>
-  <CAOQ4uxi8rqkbhK4=8N1ncfU1m6bjdHLbinSf=j3k0oVEaSa-wA@mail.gmail.com>
-Date: Mon, 27 Apr 2026 18:47:09 +1000
-Message-id: <177727962988.1474915.2841674553452335690@noble.neil.brown.name>
-Reply-To: NeilBrown <neil@brown.name>
+Content-Transfer-Encoding: 8bit
 
-On Mon, 27 Apr 2026, Amir Goldstein wrote:
-> On Mon, Apr 27, 2026 at 6:06 AM NeilBrown <neilb@ownmail.net> wrote:
-> >
-> > From: NeilBrown <neil@brown.name>
-> >
-> > Some ->lookup handlers will need to drop and retake the parent lock, so
-> > they can safely use d_alloc_parallel().
-> >
-> > ->lookup can be called with the parent lock either exclusive or shared.
-> >
-> > A new flag, LOOKUP_SHARED, tells ->lookup how the parent is locked.
-> >
-> > This is rather ugly, but will be gone soon after we move
-> > d_alloc_parallel() out of the directory lock as ->lookup() will *always*
-> > called with a shared lock on the parent.
-> 
-> Neil,
-> 
-> Forgive me for being skeptical about the *always* part.
+Changes since [v1]:
+  * Move efi_cache_sync_image() after check_platform_features(), matching arm64.
+  * Add "()" after function name in the subject.
 
-Scepticism should always be encouraged.
+The EFI stub relocates the kernel image by copying it to a new memory
+location using memcpy(). On architectures where the instruction and data
+caches are not automatically coherent, the copied instructions may not be
+visible to the instruction fetch unit without explicit cache maintenance.
 
-> 
-> How long ago did we add ->iterate_shared()?
-> 
-> It's true that Linus eventually got rid of ->iterate(), but we did not
-> get rid of the assumption that iterate_shared() might be upgraded
-> to exclusive lock.
-> 
-> The obvious reason is that *someone* needs to do this work for
-> old filesystems, which are also hard to test and nobody wants to
-> touch them.
-> 
-> I have nothing against this patch, but I think it is more realistic
-> to state that LOOKUP_SHARED is here to stay, so if you think it
-> is too ugly, maybe there is something to be done about it.
-> Personally, I do not see the ugliness though.
-> 
-> Am I misjudging the situation of shared lookup wrt old filesystems?
+This series adds the missing call to efi_cache_sync_image() in the generic
+relocation path, and provides a LoongArch implementation using the ibar
+instruction to ensure instruction fetches observe the updated contents.
 
-Yes.
-All filesystems must support ->lookup with a shared lock because it is
-already the case that with a simple lookup only a shared lock is provided.
-A filesystem *could* examine the lookup_flags and deduce if the lock is
-actually exclusive (e.g.  if LOOKUP_CREATE is set) and misbehave
-accordingly, but a vanishing small number of filesystems  (NFS and ....
-I can't think of any others) ever look at the lookup_flags and I'm
-certain none do anything so ... creative.
+[v1]: https://lore.kernel.org/loongarch/20260427034451.717817-1-r@hev.cc
 
-So I'm certain that it is safe from the filesystem's perspective to always
-call with only a shared lock.  All that is needed is to change the VFS
-to only ever do that.  That means separating the lock for lookup from
-the lock for create/remove/move in directory ops, and one way to view
-the current patch set (the complete one, not just this initial set) is
-that it does exactly that.
+WANG Rui (2):
+  efi/loongarch: Implement efi_cache_sync_image
+  efi/libstub: Synchronize instruction cache after kernel relocation
 
-Thanks for the review,
-NeilBrown
+ drivers/firmware/efi/libstub/loongarch.c | 5 +++++
+ drivers/firmware/efi/libstub/relocate.c  | 1 +
+ 2 files changed, 6 insertions(+)
+
+-- 
+2.54.0
+
