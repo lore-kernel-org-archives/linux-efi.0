@@ -1,144 +1,122 @@
-Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F22031F98D;
-	Tue, 28 Apr 2026 03:37:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D10C25A2A2
+	for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 04:02:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777347458; cv=none; b=GU+kTLnsh+at7eQV5zHXtokIbLYMsfS4QbaCZq8RWWcMSZvvqp+5UDSP/7sJeRh2a6AfyIwakMfwXhjTrUu5Xvh46aOxnB/IXzH4OPWDYWMuMrZfOCdN1KaHYT1Aq83F0sb5c7gs2ohehY5DwtQHsDd1pxLiTAq2kqT2DLfM8rs=
+	t=1777348950; cv=none; b=qZ45wB5omB2/nKtbmGgezh177WuXUCI0ryz3laSba1Ly7/7O8dX9TIEFkKegB/6mGclWEqwk/T572O61OZM9gmwFDD9TVs2sxF7cw7qnQ13DhjGLMkK3HFIoafbkqqw9oQC3NNi47Ku0oHkZYAKQbuRVxYybwu8YjmS4Rl0Ok3c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777347458; c=relaxed/simple;
-	bh=jRZUhaw6I6JKjtSbmXkgMFwHVUmUhcQq+J3lvty82Bc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ef0PyIhY7gJT7pIofXk3x4W0GQwfpmF5i8Aelz5q7mw6KmwH7AKenAjr/yEUkfN9dRDpH6XlUFUL9aROE9tRGo+TzVjcO7Av3H3E+Otue95uDzXku/GglDefV00q9TjD2ESXF/rSs7SiCnDRksVj2HwAqRHeEhdElHQZCu1AVeI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=pNJkmPDM; arc=none smtp.client-ip=62.89.141.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
+	s=arc-20240116; t=1777348950; c=relaxed/simple;
+	bh=Hhiz7YXIt0m1DU+IaREY7k8p2d/aCJr7MC1uza7rXvo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Z13SQNNFR4zwzoZAxLXdsodEFC6xNf5rDxEfYvNEnuX5RfmE7JO+vAhClkpzExFYaEIcHymbw7ggA0gB/2Zr5hVfFt616hOi/84Jis87Yu3Ee6kCjwjyFDa2Qjt45Fa0Xj+Hw/OhSPk6MJY0RZZOxvY6qbrrlI7y+m9UQfeP9D8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=TD4ak5lx; arc=none smtp.client-ip=209.85.214.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="pNJkmPDM"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=linux.org.uk; s=zeniv-20220401; h=Sender:In-Reply-To:Content-Type:
-	MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=nbdvP6Vp/f9SvqO0OehGGDrf6DYlJHxQbEKPQveBRSk=; b=pNJkmPDME6sL6Pq/UqtEz3kn1s
-	808HcB7Qb9udSSzfx6CwlyQrWlcwL87/iyq2GuBZm2D8Uvpy4i/AbKlBCa4NjsbwO6TGdczFo0V5j
-	T+D5FecpsVCMwo/d53MwDYtNCbCqFzrI6SOM0kbeMXvZ+qYejnJvWiF3S43E59kVJOl106Ry7vfoI
-	4lw+c4lAR4fsYht8rJthGQdxFgWVaV2CB/Lh7Zb/yQoxabj0Rxy8tpRhDCmk/brcrviSQuJtBEftO
-	N5mHv2fBc6DbqgbBwKn3b3CHqo143XlGnlsPKVCVSO4/5xGuXZluK1l3Lp0hRxX8jaF2itA8NMqBH
-	M4hOEy9w==;
-Received: from viro by zeniv.linux.org.uk with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wHZGU-0000000GEnv-0FCz;
-	Tue, 28 Apr 2026 03:37:38 +0000
-Date: Tue, 28 Apr 2026 04:37:38 +0100
-From: Al Viro <viro@zeniv.linux.org.uk>
-To: NeilBrown <neil@brown.name>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
-	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>,
-	Jeff Layton <jlayton@kernel.org>,
-	Trond Myklebust <trondmy@kernel.org>,
-	Anna Schumaker <anna@kernel.org>,
-	Miklos Szeredi <miklos@szeredi.hu>,
-	Amir Goldstein <amir73il@gmail.com>, Jeremy Kerr <jk@ozlabs.org>,
-	Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
-	linux-unionfs@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3 04/19] VFS: use wait_var_event for waiting in
- d_alloc_parallel()
-Message-ID: <20260428033738.GV3518998@ZenIV>
-References: <20260427040517.828226-1-neilb@ownmail.net>
- <20260427040517.828226-5-neilb@ownmail.net>
+	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="TD4ak5lx"
+Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-2ab46931cf1so81249815ad.0
+        for <linux-efi@vger.kernel.org>; Mon, 27 Apr 2026 21:02:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777348947; x=1777953747; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=bd1hgbTBVVdcDcX9ve5H/qCUgL6eJ7XhwuWBwZRmwfQ=;
+        b=TD4ak5lxfxPdg+ktqkjeZCCmgE4LqBjqyWG5hV+L+WzTNeZ2PrbsCg6m/upZZf6DkH
+         0itwVBPXc7VMLPfk9fP3JbpQK5NhR4fS45fvj4C3FVQ25kByPbdx8cfT49ao51ctEDZ1
+         DJtZMtCI6yxp3nH4f90yb7hw6sfljVMexb+QecREziVSmB145KzD+1WQjoefGbX/YybJ
+         jN4Poc9IhvWn9rG7+f5KOs3o3YU6ytXnP/IoQPIdVPBH/Ub27NbP6/qe/DwsjpW9b5Yw
+         qL27/tOSW8byqMMvmEfJ6w/SyeMUmjmZlvohRgAdoNs9Uvbur1V6p/aDmVnzENxNu8bv
+         i4fQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777348947; x=1777953747;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=bd1hgbTBVVdcDcX9ve5H/qCUgL6eJ7XhwuWBwZRmwfQ=;
+        b=fLfhMx3cRIGNyoQ0Qqk8vvuESO/gKfrkChf34D6OE1ip2mKJb3Ma05dClt+2Zz3Dx3
+         46W+aRQfLw82aVtVY2gmJEWHdPGnYyOJODp17mJa4E4uxQRbi0KcqCe7v9K8Nh/sK+pu
+         7ZL+pxYNyOfRWKmXSSd9zJSnxtLtstv4+1UC+KqMzefTZN6WUwufHcPUrQuVwDqNTGWE
+         QigkBMxrCAn+zoZyOPGLCTQsnHvutVprjmEygYWXqUWMBJ/2qzYHew+W9+pMEu46cTXy
+         I2NMEoNXECkTfrzu2UZRfjLWd1wPMOV/DTvDP07pLd8wFxtYQ0iTGDyfZ7UtmJfrQgFK
+         x6cg==
+X-Forwarded-Encrypted: i=1; AFNElJ/SAhfsoF43RTB7/4bdwBXOMXf8/HcDrT97q4nIbHWfBjnPWPGB9Qz5ESPRnndgppJGM2WWvqSozuo=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyL4Ic+0yju/NwFF//Zzesm7EoKzQyvIYx81fSi6K22QoCqPWNL
+	cOojpotEX9ZSUpdPIJrRJ2Qkk7XbeQni7GT11HCBG9qp51BFXXWPbJl9ACxmEtz2Qmc=
+X-Gm-Gg: AeBDieuUJOyJBeOARVtYPaGztpMWbIglfFBlBQ78FuzYXbv2ta+PrliZsLwmxgc6R8/
+	VVJpeDI3bNYraGN5thvGcHdbl9yQeOQX+MGb3KYLDQ+4WXZ7oYX/QHgOvQp2jBY19RxCjYhdCe/
+	M6yo/eHUp+T7qzRvjMmQNcpcCBQV6tusFzDdjONTRDpr0HcJmeMO5GeCl7kencD4a2yXKM1i/Dx
+	4JvpD2MPrn0JF2ve2JxDDXxTBJWqla6zItsCX6dYtq/UBOCFMGlevpqa6V2+uX/0YPMoArd4uM0
+	mdQ+sKyuBVX80odLeF0QuXcb8+O2M4w9pXhDsePlDLXzfnedX9Nw96NCJlSxf7LJQyNBGgRr+EH
+	rhG9HnlWhRF+xTcxPxdR1n+LFz7In7eh9hIOS/E9meAm/oFjkcBaKnCkE+reDn0exi6wWRqvV8X
+	6nmxmiIgDSEc3aThk3lI5fVxrHuqLL
+X-Received: by 2002:a17:902:f542:b0:2b2:53f5:461f with SMTP id d9443c01a7336-2b97be3deeemr12458925ad.25.1777348947328;
+        Mon, 27 Apr 2026 21:02:27 -0700 (PDT)
+Received: from localhost ([2400:8902:e002:de33:3dbd:69cf:4a22:309])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b97ac8cd29sm10131365ad.61.2026.04.27.21.02.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 Apr 2026 21:02:26 -0700 (PDT)
+From: WANG Rui <r@hev.cc>
+To: Huacai Chen <chenhuacai@kernel.org>,
+	Ard Biesheuvel <ardb@kernel.org>
+Cc: WANG Xuerui <kernel@xen0n.name>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Lisa Robinson <lisa@bytefly.space>,
+	loongarch@lists.linux.dev,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	WANG Rui <r@hev.cc>
+Subject: [PATCH v2 0/2] LoongArch: Move KASLR to EFI stub to avoid initrd overlap
+Date: Tue, 28 Apr 2026 12:01:57 +0800
+Message-ID: <20260428040159.1065822-1-r@hev.cc>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260427040517.828226-5-neilb@ownmail.net>
-Sender: Al Viro <viro@ftp.linux.org.uk>
+Content-Transfer-Encoding: 8bit
 
-On Mon, Apr 27, 2026 at 02:01:22PM +1000, NeilBrown wrote:
-> From: NeilBrown <neil@brown.name>
-> 
-> d_alloc_parallel() currently requires a wait_queue_head to be passed in.
-> This must have a life time which extends until the lookup is completed.
-> 
-> This makes it awkward to use and particularly make it hard to use in
-> lookup_one_qstr_excl() which I hope to do in the future.
-> 
-> This patch changes d_alloc_parallel() to use wake_up_var_locked() to
-> wake up waiters, and wait_var_event_spinlock() to wait.  dentry->d_lock
-> is used for synchronisation as it is already held and the relevant
-> times.
-> 
-> In most cases there will be no waiters so the wake_up_var_locked()
-> call is a complete waste.  To optimise this a new ->d_flags flag is
-> added: DCACHE_LOCK_WAITERS.  This is set whenever any thread prepares to
-> wait for the dentry, and if it isn't set when DCACHE_PAR_LOOKUP is
-> cleared, no wakeup is sent.
-> (The name is deliberately generic as I plan to replace DCACHE_PAR_LOOKUP
-> with more generic per-dentry locking in the future).
-> 
-> __d_lookup_unhash() now returns a bool rather than a wq.  This is true
-> if DCACHE_LOCK_WAITERS was sent and is used to decide to send the wake
-> up.  It would be easier to send the wakeup immediately when clearing
-> DCACHE_LOCK_WAITERS, but then the waiter could wake a bit earlier and
-> then spend time spinning on ->d_lock.  I don't know if that cost is
-> interesting.
+Changes since [v1]:
+  * Drop the patch "LoongArch: Allow rdtime_h() and rdtime_l() in 64-bit builds".
+  * Use random_get_entropy() instead of rdtime_l().
 
-I definitely like the calling conventions change, so much that I'd be glad
-to pick that one Right Fucking Now.  I'd probably make the store in
-d_must_wait() conditional, though - ->d_flags and ->d_lock are in different
-cachelines and there's no need to dirty both every time we are called.
-IOW, have d_must_wait() do this:
-	if (!d_in_lookup(dentry))
-		return false;
-	if (!(dentry->d_flags & DCACHE_LOCK_WAITER))
-		dentry->d_flags |= DCACHE_LOCK_WAITER;
-	return true;
-Not sure if it would flow better with return values inverted (and
-negation removed from wait_var_event_spinlock(), that is)...
+This series addresses a potential overlap issue between the kernel
+image and the initrd when KASLR is enabled.
 
->  static inline void end_dir_add(struct inode *dir, unsigned int n,
-> -			       wait_queue_head_t *d_wait)
-> +			       bool do_wake, struct dentry *de)
->  {
->  	smp_store_release(&dir->i_dir_seq, n + 2);
->  	preempt_enable_nested();
-> -	if (wq_has_sleeper(d_wait))
-> -		wake_up_all(d_wait);
-> +	if (do_wake)
-> +		wake_up_var_locked(&de->d_flags, &de->d_lock);
->  }
+In the normal boot flow, the bootloader is responsible for loading
+both vmlinux and the initrd, and it can guarantee that the two do
+not overlap in memory. However, this assumption only holds as long
+as neither image changes its location afterwards.
 
-This calling conventions change, OTOH, I don't like at all.  I mean,
-(dir, n, false, unused) vs. (dir, n, true, never_NULL) is seriously
-asking to be reduced to (dir, n, NULL) vs. (dir, n, never_NULL).
+The in-kernel KASLR implementation breaks that assumption. When the
+initrd is placed close to the kernel image, randomizing the kernel
+location at runtime may move it into the initrd region, leading to
+memory corruption early during boot.
 
-> @@ -2800,29 +2793,29 @@ EXPORT_SYMBOL(d_alloc_parallel);
->   * - Retrieve and clear the waitqueue head in dentry
->   * - Return the waitqueue head
+To fix this, this series moves the KASLR logic out of the kernel
+proper and into the EFI stub. With this change, the final placement
+of both the kernel image and the initrd is determined by the EFI
+memory allocator. This ensures that the two allocations are
+coordinated and cannot overlap.
 
-... not anymore.  The entire comment needs replacement, TBH - 2 lines of
-3 are stale with that patch and remaining one is... ambiguous, since
-there are *two* hashes around and "Unhash the dentry" usually refers to
-the other one.
+Functionally, the kernel still supports KASLR as before, but the
+randomization now happens before the kernel is entered, rather than
+during early kernel relocation.
 
-Something like
+[v1]: https://lore.kernel.org/loongarch/20260427104721.47724-1-r@hev.cc
 
-/*
- * Move dentry from in-lookup state to busy-negative one.
- *
- * From now on d_in_lookup(dentry) will return false and dentry is gone from
- * in-lookup hash.
- *
- * Anyone who had been waiting on it in d_alloc_parallel() is free to
- * proceed after that.  Note that waking such waiters up is left to
- * the callers; we might be called in write-side critical area for ->i_dir_seq,
- * and PREEMPT_RT kernels can't have that wakeup done in those.
- *
- * Returns whether there are waiters to be woken up.
- */
+WANG Rui (2):
+  efi/loongarch: Randomize kernel preferred address for KASLR
+  LoongArch: Skip relocation-time KASLR if it has already been applied
 
-perhaps?
+ arch/loongarch/Kconfig                   |  2 +-
+ arch/loongarch/include/asm/efi.h         |  4 +++-
+ arch/loongarch/kernel/relocate.c         |  4 ++++
+ drivers/firmware/efi/libstub/loongarch.c | 16 ++++++++++++++++
+ 4 files changed, 24 insertions(+), 2 deletions(-)
+
+-- 
+2.54.0
+
