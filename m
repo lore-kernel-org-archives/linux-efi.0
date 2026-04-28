@@ -1,104 +1,114 @@
-Received: from mail-wr1-f41.google.com (mail-wr1-f41.google.com [209.85.221.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30CC937BE70
-	for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 10:47:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCD393ACA5B;
+	Tue, 28 Apr 2026 11:07:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777373253; cv=none; b=j4+L5V2AXZtDQSel9ZOndsrvVIhKG7fFmx9uGO/qzgPVh84KaCWCQRgBuOxnBaCS6gUe3NgEUJeRK1x8TDDcM7o0YSptzeWt/q+g9si5Ax/zyjcJVjJoIamlh6gYO35GhzvnhRZ+iioQ9RWyl8uapDpbMVSv4zMMW1RKaZYtoCM=
+	t=1777374451; cv=none; b=edx2/TcCCZ2qXtMiT1a23jp/l7bH+kwkSzgY1/VoZPL8EEca1CtvaalevywBX+orgQ/oHKdM82hXHnfMuNi5qdQkLyjuHGbQ/vBbFrI3wVt+My2F3zg3l+Nc5t3/YS54rYN3NcgNpstkYV5cWwYcrYfU7i7x2ormDeAdlRXlq+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777373253; c=relaxed/simple;
-	bh=R29TYibaNrPxbtXzoGqyKBqqz762YHGAFVY4QzIkEo8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GRcRpGh0+EoLaEYaiGUQSED12ytRvBLwqqU1pwpgidDiKJpbLw0ee44TQM638oHVCmyJrG2xSpnyGIhjd3dccaKcO81yXPY764UUA82k9hwL5OKwWKKzJ9iWpVTxBg/i4nOSROs3Knf/zMhV6/LWS6Tgw082U1cc1/4yW+Er6zI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net; spf=pass smtp.mailfrom=gourry.net; dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b=ITCPGhQV; arc=none smtp.client-ip=209.85.221.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gourry.net
+	s=arc-20240116; t=1777374451; c=relaxed/simple;
+	bh=0812KctsMNtN9wpQc9Cj6/ewH0R7OaJycPWHucN+MCw=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=TMrsQIUftsz4kRnNrco3dBzfTq/B3sN9GbryY5rjGkQtRaU2pxxU8aWxhR2Brf6FnGt/PvmzwzFsjTPG+HTKMVYLWtUb3FmjlLVtg3lUZbNXXE1NRsmMnsct90mZ+axI4CpCC6woLqZYm8qdOuQrEd04ADBLg4qw+SPMKqmL3L0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Lwhv+DyZ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b="ITCPGhQV"
-Received: by mail-wr1-f41.google.com with SMTP id ffacd0b85a97d-43cfce3a195so6404176f8f.2
-        for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 03:47:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gourry.net; s=google; t=1777373250; x=1777978050; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=VBl4vrHqsWi74zANNfXZD9NFSvoyl74waXulnZdsouQ=;
-        b=ITCPGhQVJz0DugFPzB/dpnP3t7YYuQmtnKBrMb4IZ9iPCjz73FTMt8pWwEiBF7YfVQ
-         cj6v2WconPX+ImPXWgWFYInQ0SKUDVtdY2SGZmIqMNKd4uuNozNccBS5eH8uafWmvRbD
-         NEAmIB3EUL6ZRsTMo4WiBVgU1BzYxicPBCzoXMyUurv+RHmGlMICJLOBnW36HZFKz7Ff
-         BkimZ5Q/bOs765X4NI/t8OzTae+QKlDmmXSCDzqqiXB4ElehE+IGVtBMvYv/Q5sab9eX
-         Vz4yDyn5RKCpEAeI8MUwL+SLxASxFJuGDpScQa90PKhusacK5S1uW/yATQ8eyze8ms+V
-         3UIw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777373250; x=1777978050;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=VBl4vrHqsWi74zANNfXZD9NFSvoyl74waXulnZdsouQ=;
-        b=XMe/8Us0w9Yz4aoTqK3VWdHa1fvx6zxbtttp7DQKGBK9/YVurcgWsgnDhfEUwegy7j
-         WMAqKrt4RUDqISGK1YYW8Daz/oFYx6P9DwqPpq66yRnX+f90Ns2W+Zrs94Ok2d0OYOOa
-         qiisIfefBkxQpqGWvlCxpLvqtnk1/xGKlzpyytrENPkeGFZI+pnBR0/uyyvYOvilq1P9
-         xfP+vWhz9uumVZ4+/I8A9d5PLzpuU8tUBr+zlEFRv8uYMVUBjkAM/V+UAib2VtdBAtpL
-         I897et9ILU4tHfe8R1sL5uKSw7Q9y3jmPD7VN6e0xslzvVRLC+PUL1Ms14zkDDt/iraA
-         G//w==
-X-Forwarded-Encrypted: i=1; AFNElJ+y82VOjOFOSyr1JZou1TUIV387MpzMer3QYV3uCordphE+csRn40HRJQIuvkc2bd8FMMyQU57PR3k=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwcBPOumdGoumCmWIrU/kzdWByNeVcxAKDfb1NCwQDWl6csTNmW
-	QiIWbzCySY4YYX260DrHgLWqxVL0Yr4yMptTdVhZnctABKP+ZKa9RG+a7ZzjmcLBPaTzPbYAkMj
-	Du5SzhmY=
-X-Gm-Gg: AeBDieu2cxWbqY+KUzSWwEHKWuSKWRuBxsagTxtJqNvn/FwIId0knAh42QAbola2pDc
-	U3jhPNA1MtOD6JWSZ//+K07+v7QfhSrZh7R4GTX40c/sqdNVmX3jUc2+twOS12XZxb1wvhjEtgM
-	zwGwQ2wugiqfiIAnDCSiG0ELWwcAgd2CJ3lXIJroHUQhatdK7+ofs207iR48g03uKs8wrc7N52p
-	L9d3vTsUPnCTcq9vx3YvLrJmxlMKCP2sA2WrXNCqBLWEawIIqnsUjkyoDYbM6/EYdpTBC2QZo0l
-	9lloQahoz3OYDbxUrbXI8K8YpSrwXEJ8esxyz7PZe9W2UBB4dC1Vuy2SL5/6EbCpPIoZez/04VD
-	wWzpUoX9zi+ohxQLFaHsv1Cx+3rfC9r5Rs8a4JVzI6Sls6laNcjP+v73hd17y+IMUT16Ysn3dnL
-	k6eepqXvKburJ7aGln5KJoEacqFaSh7UiQ9rHc92EwaWoJ7g==
-X-Received: by 2002:a05:6000:438a:b0:43c:f52b:8003 with SMTP id ffacd0b85a97d-44649ba199dmr4772896f8f.36.1777373249636;
-        Tue, 28 Apr 2026 03:47:29 -0700 (PDT)
-Received: from gourry-fedora-PF4VCD3F ([185.194.184.52])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4463fa89140sm5346060f8f.27.2026.04.28.03.47.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 28 Apr 2026 03:47:29 -0700 (PDT)
-Date: Tue, 28 Apr 2026 11:47:26 +0100
-From: Gregory Price <gourry@gourry.net>
-To: Ard Biesheuvel <ardb+git@google.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org,
-	Ard Biesheuvel <ardb@kernel.org>,
-	"Mike Rapoport (Microsoft)" <rppt@kernel.org>,
-	Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-	Dave Young <ruirui.yang@linux.dev>
-Subject: Re: [PATCH v3 03/17] x86/efi: Only merge EFI memory map entries on
- 32-bit systems
-Message-ID: <afCQPpQfOfn3J0Lc@gourry-fedora-PF4VCD3F>
-References: <20260423152024.1098465-19-ardb+git@google.com>
- <20260423152024.1098465-22-ardb+git@google.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Lwhv+DyZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B0B7FC2BCB8;
+	Tue, 28 Apr 2026 11:07:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1777374450;
+	bh=0812KctsMNtN9wpQc9Cj6/ewH0R7OaJycPWHucN+MCw=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
+	b=Lwhv+DyZreRfj6LM+z1TrMmVm2BsQ4AY/dTfl2XEfk0h9pkgDxlLElxS87rZHME7L
+	 ob3r08gHM6nCjYgJEnylNbcI+WRT7R873XC5SmDT3Xj7DNGURnS+yfgSXT9L6F9TYJ
+	 l1KuOAVahMjj268E1emxJW/R55ac0wOXGIMDoI1bI18u5cmKdqwF+eIi+fePhkMV8I
+	 2Ibq2XcxjcGei3Tn9Y/aChM22cN/czRUN3AvxZcNOz9fI5AYSoJawUqVLgdVi6RMUt
+	 OG0xq21CbfzEzMdwUx/AUQ8EjBou3cYy39LP4c5duE18oaCiV2arNZwp4VDPjAjIKm
+	 gPxVMfKujrV2g==
+Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
+	by mailfauth.phl.internal (Postfix) with ESMTP id 9ED10F4006F;
+	Tue, 28 Apr 2026 07:07:28 -0400 (EDT)
+Received: from phl-imap-02 ([10.202.2.81])
+  by phl-compute-01.internal (MEProxy); Tue, 28 Apr 2026 07:07:28 -0400
+X-ME-Sender: <xms:8JTwaSwH2vJinZbjX63b369yr5vu7XNHc_-wRAdNEfvzC6vy7fNU-g>
+    <xme:8JTwaZFpZekq5KD7b9-WdlVat9kTysFaMGJ9JyQGeTPwijKO0q080fwXi7M7lUZRi
+    -zfLJH3RIAYc_ObNfYSbI6XVf0jSmj_fz1GZj8lHMLTJA2OLizEvv8>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdekudegtdcutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
+    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
+    hrpefoggffhffvvefkjghfufgtgfesthejredtredttdenucfhrhhomhepfdetrhguuceu
+    ihgvshhhvghuvhgvlhdfuceorghruggssehkvghrnhgvlhdrohhrgheqnecuggftrfgrth
+    htvghrnhepkedvffekhffggeevkeeftdeifffhleegteeivdeifffhkeefieekteeugeet
+    teetnecuffhomhgrihhnpehkvghrnhgvlhdrohhrghenucevlhhushhtvghrufhiiigvpe
+    dtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrhguodhmvghsmhhtphgruhhthhhpvghr
+    shhonhgrlhhithihqdduieejtdehtddtjeelqdeffedvudeigeduhedqrghruggspeepkh
+    gvrhhnvghlrdhorhhgseifohhrkhhofhgrrhgurdgtohhmpdhnsggprhgtphhtthhopeej
+    pdhmohguvgepshhmthhpohhuthdprhgtphhtthhopehrsehhvghvrdgttgdprhgtphhtth
+    hopegthhgvnhhhuhgrtggriheskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepihhlihgr
+    shdrrghprghlohguihhmrghssehlihhnrghrohdrohhrghdprhgtphhtthhopehlohhonh
+    hgrghrtghhsehlihhsthhsrdhlihhnuhigrdguvghvpdhrtghpthhtoheplhhinhhugidq
+    vghfihesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdhkvg
+    hrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehkvghrnhgvlhes
+    gigvnhdtnhdrnhgrmhgv
+X-ME-Proxy: <xmx:8JTwaS3vmETeW2d89FduGFy7LIOBrAU1_SGe_NQ85SNo__tz2A2usQ>
+    <xmx:8JTwaUI_5a2Sw3mFmvExIy_89OKC8SEYbqpYM1eK76WT7ubSvsTgRw>
+    <xmx:8JTwaRH51SFbmYFjscMLfGOp2AxmQZL3Ekz6gh5DPpKEuxih4PFIPQ>
+    <xmx:8JTwaQVwdXRmpVs2HEEYR5dlYjQu6EloC2c4EtBAorBgX7LEl139mg>
+    <xmx:8JTwaZy-f9vTxSPAWNOdkLSjTlirBHY2uFjljyLkzqLRqhbVno2nEnRQ>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id 7FB29700065; Tue, 28 Apr 2026 07:07:28 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260423152024.1098465-22-ardb+git@google.com>
+Date: Tue, 28 Apr 2026 13:07:08 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "WANG Rui" <r@hev.cc>, "Huacai Chen" <chenhuacai@kernel.org>
+Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "WANG Xuerui" <kernel@xen0n.name>, linux-efi@vger.kernel.org,
+ linux-kernel@vger.kernel.org, loongarch@lists.linux.dev
+Message-Id: <e631d1e5-3f05-42ab-885d-4bd660612d63@app.fastmail.com>
+In-Reply-To: <d7197b01-9b7e-4f0a-bcd2-9d6d894e8cd9@app.fastmail.com>
+References: <20260427084721.40535-1-r@hev.cc>
+ <d7197b01-9b7e-4f0a-bcd2-9d6d894e8cd9@app.fastmail.com>
+Subject: Re: [RESEND PATCH v2 0/2] efi/libstub: Ensure instruction cache coherency
+ after kernel relocation
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Thu, Apr 23, 2026 at 05:20:28PM +0200, Ard Biesheuvel wrote:
-> From: Ard Biesheuvel <ardb@kernel.org>
+
+
+On Mon, 27 Apr 2026, at 18:11, Ard Biesheuvel wrote:
+> On Mon, 27 Apr 2026, at 10:47, WANG Rui wrote:
+>> Changes since [v1]:
+>>   * Move efi_cache_sync_image() after check_platform_features(), matching arm64.
+>>   * Add "()" after function name in the subject.
+>>
+>> The EFI stub relocates the kernel image by copying it to a new memory
+>> location using memcpy(). On architectures where the instruction and data
+>> caches are not automatically coherent, the copied instructions may not be
+>> visible to the instruction fetch unit without explicit cache maintenance.
+>>
+>> This series adds the missing call to efi_cache_sync_image() in the generic
+>> relocation path, and provides a LoongArch implementation using the ibar
+>> instruction to ensure instruction fetches observe the updated contents.
+>>
+>> [v1]: https://lore.kernel.org/loongarch/20260427034451.717817-1-r@hev.cc
+>>
+>> WANG Rui (2):
+>>   efi/loongarch: Implement efi_cache_sync_image
+>>   efi/libstub: Synchronize instruction cache after kernel relocation
+>>
 >
-... snip ...
-> 
-> This means that merging regions is no longer needed on 64-bit, given
-> that the relative placement of adjacent regions is guaranteed to be
-> preserved in the virtual space. So make this hack 32-bit only.
-> 
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> Queued up in efi/urgent - thanks.
+>
 
-Will try to set some time aside to test this, but this may actually
-resolve some numa/efi quirks i've observed in some KVM/QEMU configs
-when trying out different memory layouts - so thank you for this.
+This breaks the ARM build.
 
-In the meantime, diff seems reasonable as-is, will try to come by with a
-test tag.
+Since LoongArch is the only remaining user of efi_relocate_kernel(), I'll move it into drivers/firmware/efi/libstub/loongarch-stub.c first, and fix up these patches accordingly afterwards (no need to resend anything)
 
-Reviewed-by: Gregory Price <gourry@gourry.net>
-
-~Gregory
