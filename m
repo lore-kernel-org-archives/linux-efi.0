@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B8FF3101C8;
-	Tue, 28 Apr 2026 08:32:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3AF38235358;
+	Tue, 28 Apr 2026 08:38:48 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777365177; cv=none; b=fPYlxlU98YPbknSMmC2mclOyuI3tEHqggEc8m/Lr7iImMwZKsh7zs5In496PhjCTo+dhfwMhB+ReRqFv3/1yJYjPx5t0CZ2q85M3RH+JZsxWodqVzPyMi181ACN+3dCAqbAIPd7SZ0UQT7IboQF/r762l5p5CedVpdlYGNRd92Y=
+	t=1777365529; cv=none; b=WCkxDU6yV9MKRyi2VOxy7JPzHQ9dfKz4oZHuImdwYMqnDIXgZQwmtd+eIuGSzKLPYuMZ5D3W31+fe86tsAlj7KZhGHBR+Urfdec6kRMvCRKGXEfs06hOGfJOcVjA5BiEDYCFJN9wOGmzZlm5iq6UELJ5kX5fVV1S7oWL+9xYDPM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777365177; c=relaxed/simple;
-	bh=DJo9DLWnPxdlYFpATvmZ2FFDFe+/9T9dqT6ef8Owsqs=;
+	s=arc-20240116; t=1777365529; c=relaxed/simple;
+	bh=X5eMF31oadZAWte1lSQ1P2nca5U2gXu9zv+E7ukQozc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=svsF4DsJZiP2kJfoHR9wkk7DvpLcwQxPn6XMn6+KR88AUyhOCnHgy98ARyqsvSiJMR+S6a4r5yI09ui8b8meDVC3LuTxInmaShHXahonUsgvZVbMEmBC16bMN5T3CVFBdLm6gjQnN8Yxnqn9DxISL83h4y60YuXlCVATpmIqpAQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SMnR5ZLu; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=Bv0tvxe3R/HC6oYYGHLUDq6DQXEYOxJHd/8Mu0btqdyvXswCPlZJDbcdVJPRxGa82xFtCnUbQrzOsTtHn8zDpyZ0NXu8HFG/RJ3uPG4UNSMYO3G5prWqX4fLzdVXUTPONi3nv4sq+G2toCinnxE6VX3o0ftiuO8DU7Fg92LsDQE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=byhatB1o; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SMnR5ZLu"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A9DE6C2BCB5;
-	Tue, 28 Apr 2026 08:32:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="byhatB1o"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6FE46C2BCAF;
+	Tue, 28 Apr 2026 08:38:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1777365176;
-	bh=DJo9DLWnPxdlYFpATvmZ2FFDFe+/9T9dqT6ef8Owsqs=;
+	s=k20201202; t=1777365528;
+	bh=X5eMF31oadZAWte1lSQ1P2nca5U2gXu9zv+E7ukQozc=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=SMnR5ZLuPF2X6YxMYc2hVGwGWIBHWsy5LkX1y7zmrlWeBlFYsPC9Mh8LufQYG0Lmp
-	 ft1DMguAJk+u7492BXIzccdfB5V/oD7aoLy68JQov9jxHQwWj9qWArKwel5HIHkybb
-	 uZ288wyh7OfCJjHxHFkbo6osjUr/vDUXONxXSQCBVZXSBTYWUdCxKyhFAVNgyOisSj
-	 yNu62H0ut2ZmmD5rx7bxNPcCrtbRBNV8H93RQ6VIXSsg7ZIGfnoFSOvpEeq8bW+Eg+
-	 +AXZzMV9brfNbNX+uedZ53+rnX4SGejGUNLRwkkRnaNODm/RbaPVjEQTuJz/PBf6iE
-	 1hKIGgBRgEb8Q==
-Date: Tue, 28 Apr 2026 10:32:51 +0200
+	b=byhatB1o3vl4KeJ+Ey1qbjkPl1ZKfjxJkTA7Rsqf/exRpm3LTcpn5wZ9noTpt6IoN
+	 GjzPqPQKms75c1cCXZ4rx3sRUFd0CJmZVgclOhZpFxYmObziag9Z3CGS7gZYKbHm+D
+	 0KxVDGgXzbfx2cc7KVvC363/hx68yAai+x8bMtpRnnaq7zdvLdKaQe1Vuip63TkMiG
+	 IGMwV56kviDfTrRQMO032NJ17oQKs5Np9FgYooWolBCSz5jqW6BnREIKNCY3mpOKVB
+	 nF3e8UUfpvCdITdyVOAg+PL6Em0Q7MGoINz9YpRERv4dByz9T6N9xN+e4yUnD7PAlx
+	 4WRvD0KZQ3wTQ==
+Date: Tue, 28 Apr 2026 10:38:41 +0200
 From: Mike Rapoport <rppt@kernel.org>
 To: Ard Biesheuvel <ardb+git@google.com>
 Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org,
@@ -34,11 +34,11 @@ Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org,
 	Benjamin Herrenschmidt <benh@kernel.crashing.org>,
 	Dave Young <ruirui.yang@linux.dev>,
 	Gregory Price <gourry@gourry.net>
-Subject: Re: [PATCH v3 05/17] x86/efi: Simplify real mode trampoline
- allocation quirk
-Message-ID: <afBws32wHp4Cgrgj@kernel.org>
+Subject: Re: [PATCH v3 08/17] x86/efi: Allow ranges_to_free array to grow
+ beyond initial size
+Message-ID: <afByEd6D1FusY7bW@kernel.org>
 References: <20260423152024.1098465-19-ardb+git@google.com>
- <20260423152024.1098465-24-ardb+git@google.com>
+ <20260423152024.1098465-27-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -47,76 +47,38 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260423152024.1098465-24-ardb+git@google.com>
+In-Reply-To: <20260423152024.1098465-27-ardb+git@google.com>
 
-On Thu, Apr 23, 2026 at 05:20:30PM +0200, Ard Biesheuvel wrote:
+On Thu, Apr 23, 2026 at 05:20:33PM +0200, Ard Biesheuvel wrote:
 > From: Ard Biesheuvel <ardb@kernel.org>
 > 
-> To work around a common bug in EFI firmware for x86 systems, Linux
-> reserves all EFI boot services code and data regions until after it has
-> invoked the SetVirtualAddressMap() EFI runtime service. This is needed
-> because those regions may still be accessed by the firmware during that
-> call, even though the EFI spec says that they shouldn't.
+> In order to avoid the need to mangle the EFI memory map, which is being
+> done to keep track of which boot services data regions are really reallyo
+
+                                                       typo: really reallyo
+
+> reserved, and which ones are only reserved temporarily, this information
+> needs to be recorded in a different manner.
 > 
-> This includes any boot services data regions below 1M, which might mean
-> that by the time the real mode trampoline is being allocated, all memory
-> below 1M is already exhausted.
+> The temporary ranges_to_free array is a suitable candidate, as it is
+> specifically intended to capture which boot services data regions should
+> be handed back to the page allocator once deferred struct page
+> initialization is done.
 > 
-> Commit
+> This requires that boot services data regions are intersected with the
+> memblock reserved list, and this may result in more ranges_to_free
+> elements than the current upper bound of the number of EFI memory map
+> entries.
 > 
->   5bc653b73182 ("x86/efi: Allocate a trampoline if needed in efi_free_boot_services()")
-> 
-> added a quirk to detect this condition, and to make another attempt at
-> allocating the real mode trampoline when freeing those boot services
-> regions again. This is a rather crude hack, which gets in the way of
-> cleanup work on the EFI/x86 memory map handling code.
-> 
-> Given that
-> 
-> - the real mode trampoline is normally allocated soon after all EFI boot
->   services regions are reserved temporarily,
-> - this allocation logic marks all memory below 1M as reserved,
-> - the trampoline memory is not actually populated until an early
->   initcall,
-> 
-> there is actually no need to reserve any boot services regions below 1M,
-> even if they are mapped into the EFI page tables during the call to
-> SetVirtualAddressMap(). So cap the lower bound of the reserved regions
-> to 1M, and fix up the size accordingly when making the reservation. This
-> allows the additional quirk to be dropped entirely.
+> So reallocate the array when running out of slots.
 > 
 > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+
+Reviewed-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
+
 > ---
->  arch/x86/platform/efi/quirks.c | 34 ++++----------------
->  1 file changed, 6 insertions(+), 28 deletions(-)
-> 
-> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> index e2e57e9201a9..e79fb94c1bf6 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -324,10 +324,14 @@ void __init efi_reserve_boot_services(void)
->  		return;
->  
->  	for_each_efi_memory_desc(md) {
-> -		u64 start = md->phys_addr;
-> -		u64 size = md->num_pages << EFI_PAGE_SHIFT;
-> +		u64 start = max(md->phys_addr, SZ_1M);
-
-A comment that says that we don't reserve regions below 1M because they are
-reserved elsewhere would be nice here. Other that that
-
-Acked-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
-
-> +		u64 end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT);
-> +		u64 size = end - start;
->  		bool already_reserved;
->  
-> +		if (end <= start)
-> +			continue;
-> +
->  		if (md->type != EFI_BOOT_SERVICES_CODE &&
->  		    md->type != EFI_BOOT_SERVICES_DATA)
->  			continue;
+>  arch/x86/platform/efi/quirks.c | 40 ++++++++++++++++----
+>  1 file changed, 32 insertions(+), 8 deletions(-)
 
 -- 
 Sincerely yours,
