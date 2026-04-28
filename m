@@ -1,63 +1,64 @@
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+Received: from mail-wr1-f41.google.com (mail-wr1-f41.google.com [209.85.221.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6D6F3F54B2
-	for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 10:42:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30CC937BE70
+	for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 10:47:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777372952; cv=none; b=u3WBjBCWTCsLOx+FatvuWrF6V+cxkHtM6N7cwKzuAP0tAclQWqA98iBnaV2uaVvssFpg8+w4APeWZI5U5mjFqj8BX4mlV80jrk+25woEM8MEnI7UUKBHYYlcv442Y450kjp1pnZedDDeOrzaiomApt1Vl+St0j9PTn3cBNg2Y68=
+	t=1777373253; cv=none; b=j4+L5V2AXZtDQSel9ZOndsrvVIhKG7fFmx9uGO/qzgPVh84KaCWCQRgBuOxnBaCS6gUe3NgEUJeRK1x8TDDcM7o0YSptzeWt/q+g9si5Ax/zyjcJVjJoIamlh6gYO35GhzvnhRZ+iioQ9RWyl8uapDpbMVSv4zMMW1RKaZYtoCM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777372952; c=relaxed/simple;
-	bh=o3tKSq+sRHGDLqJnKIUYGbF7/3kP6BVfs4l6sBjhjUY=;
+	s=arc-20240116; t=1777373253; c=relaxed/simple;
+	bh=R29TYibaNrPxbtXzoGqyKBqqz762YHGAFVY4QzIkEo8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=XBs8FwNPuCXcn9gpHYxoRR8nkRqW8E2tCunPxtDDXlHdn8J5P7h8ks6IvGtAuonGUhQnWv+RUlc5XJULaL+s3MaURAtCcwGrrwr9Jdb87GgQofuVgQlMGRYFi0zth1n/lNAXR1aHzGnc5I/hJlHbf8rkTaSnBGjvgkQ5esQyJNU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net; spf=pass smtp.mailfrom=gourry.net; dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b=jcDyqtGg; arc=none smtp.client-ip=209.85.128.52
+	 Content-Type:Content-Disposition:In-Reply-To; b=GRcRpGh0+EoLaEYaiGUQSED12ytRvBLwqqU1pwpgidDiKJpbLw0ee44TQM638oHVCmyJrG2xSpnyGIhjd3dccaKcO81yXPY764UUA82k9hwL5OKwWKKzJ9iWpVTxBg/i4nOSROs3Knf/zMhV6/LWS6Tgw082U1cc1/4yW+Er6zI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net; spf=pass smtp.mailfrom=gourry.net; dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b=ITCPGhQV; arc=none smtp.client-ip=209.85.221.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gourry.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b="jcDyqtGg"
-Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-488b0e1b870so192030675e9.2
-        for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 03:42:30 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b="ITCPGhQV"
+Received: by mail-wr1-f41.google.com with SMTP id ffacd0b85a97d-43cfce3a195so6404176f8f.2
+        for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 03:47:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gourry.net; s=google; t=1777372949; x=1777977749; darn=vger.kernel.org;
+        d=gourry.net; s=google; t=1777373250; x=1777978050; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZsbHvXqwusfplEoszztZBXz8B7efcTJ/84frjlGa8Pk=;
-        b=jcDyqtGgrHqBIAoOTgixEOZZqscW3Yc7ccspQI3/mLLMLZEf3N1XYIlkZC4FHx/GDM
-         +w4mJfYsPJyHWVf6KsonV1vsq1hv52lULeHY24UB0XDayh17zmZzgtr06qF14cSwhHj1
-         WiqiuEbfM9acTQ3xa0JpaxE7k1Pk/Ya8kbMkt1g+LC3xljdCxqsVZxkwwpGtEOFobP0Y
-         GN8z/A0M0wL87ZJbeCcGzbffQBchoK/1Y1psnVkUiQpqWbLBhaHtRiVN22VbLRX8InSt
-         A4ax/YuhlGAY4fijkgmGnYGW9Hs/yKJpDFZ9HLFzU7V8000lPvcjeu/vKDgoordOFJ6+
-         3+qg==
+        bh=VBl4vrHqsWi74zANNfXZD9NFSvoyl74waXulnZdsouQ=;
+        b=ITCPGhQVJz0DugFPzB/dpnP3t7YYuQmtnKBrMb4IZ9iPCjz73FTMt8pWwEiBF7YfVQ
+         cj6v2WconPX+ImPXWgWFYInQ0SKUDVtdY2SGZmIqMNKd4uuNozNccBS5eH8uafWmvRbD
+         NEAmIB3EUL6ZRsTMo4WiBVgU1BzYxicPBCzoXMyUurv+RHmGlMICJLOBnW36HZFKz7Ff
+         BkimZ5Q/bOs765X4NI/t8OzTae+QKlDmmXSCDzqqiXB4ElehE+IGVtBMvYv/Q5sab9eX
+         Vz4yDyn5RKCpEAeI8MUwL+SLxASxFJuGDpScQa90PKhusacK5S1uW/yATQ8eyze8ms+V
+         3UIw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777372949; x=1777977749;
+        d=1e100.net; s=20251104; t=1777373250; x=1777978050;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=ZsbHvXqwusfplEoszztZBXz8B7efcTJ/84frjlGa8Pk=;
-        b=fiaXKfaOFDxud/mxGYZsyydsZxxz44SW9VtJfRJm4xYUV9rlYlPj0/TjGZqAgLHqWO
-         wAXocDk++riqRdBJI6KIMMHBZXSb48lqTFluTmuL2257Xv/OxWzztjHjemlRXQhSntPS
-         DQiFMuQfuQVkA9LJ8Np1nIYz51zNmhawfalNFNgUHoTlqRoryldo9d0bKku+wWU9PuSn
-         rR611pykrPgdihttDzKgd+7TUTYBdZqY0oTMTOVr72F9Co/mk9ywcUE0NRTUqADQFwG4
-         d2SzqiVP0WpXXskKytv6am0UDlO0CZ8ToUjoCtVfb7/+d0rl6vh79FgTVB4BRuB47RtS
-         Bm+Q==
-X-Forwarded-Encrypted: i=1; AFNElJ+N6ZpolXCl3/6DZEN5F/PfBJByrXT54CM36zExMwkwTmT2N+FboMgtR3QHPTdDL16THEdTujY3AN4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzE/X/Z94Tnx2osecGbKgxxBca1leT05NpRThuYLd0bkqqQBoEu
-	1UvCIR+70A6BdUQxUW0yz/qMSJM3BHR6T5STudLs97h3AI9xJsgxcxMRNW/u1O0+ayQ=
-X-Gm-Gg: AeBDieuPXhRTxUJveOqlQ+tI8i+1xLAtboGIAYgdeKxoqoKSz8bNrfGmH6gvjHOXLBr
-	txJTWEj2GP4xrqqQjmh6MN7B1YpByaas606BTfy4iZ3YhaNW8kokkVNAPHmfubSSJo/WiJsJ35S
-	ePQqOl59qTqCqj2M1qP4GugxuxWoy8y5cs+jkd06BKa0CP/Q2IpYQY16V9DWRY331UOi6PA9jru
-	xw0Zh6xKeAEpkqQ628kq7Qx29Lx+jvM+GQpMhh9BAv+3xO5XRojk6eXE22F7wR1WcGyDlfjfdOo
-	7/Hvq8fbWfinek/zjMH4AG7kjL7+2vkxx5u7iuWNZ6TD0fzWf3sxQMRAeqLMyv012ynxYRkmsgH
-	xiDI3JdDW75q2hXYMZGcWzIcKGpZX8vMKCalP6HCu8i7a3beyNpECXZlfzxz9t0X2IJb75AF8bK
-	+/uJVmGpQR4VwY63mx9Kw8bfwuOHTyv0+5rAUyk7M6LeN+8w==
-X-Received: by 2002:a05:600c:b93:b0:488:a2ac:a34c with SMTP id 5b1f17b1804b1-48a77af5e11mr39400725e9.12.1777372948759;
-        Tue, 28 Apr 2026 03:42:28 -0700 (PDT)
+        bh=VBl4vrHqsWi74zANNfXZD9NFSvoyl74waXulnZdsouQ=;
+        b=XMe/8Us0w9Yz4aoTqK3VWdHa1fvx6zxbtttp7DQKGBK9/YVurcgWsgnDhfEUwegy7j
+         WMAqKrt4RUDqISGK1YYW8Daz/oFYx6P9DwqPpq66yRnX+f90Ns2W+Zrs94Ok2d0OYOOa
+         qiisIfefBkxQpqGWvlCxpLvqtnk1/xGKlzpyytrENPkeGFZI+pnBR0/uyyvYOvilq1P9
+         xfP+vWhz9uumVZ4+/I8A9d5PLzpuU8tUBr+zlEFRv8uYMVUBjkAM/V+UAib2VtdBAtpL
+         I897et9ILU4tHfe8R1sL5uKSw7Q9y3jmPD7VN6e0xslzvVRLC+PUL1Ms14zkDDt/iraA
+         G//w==
+X-Forwarded-Encrypted: i=1; AFNElJ+y82VOjOFOSyr1JZou1TUIV387MpzMer3QYV3uCordphE+csRn40HRJQIuvkc2bd8FMMyQU57PR3k=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwcBPOumdGoumCmWIrU/kzdWByNeVcxAKDfb1NCwQDWl6csTNmW
+	QiIWbzCySY4YYX260DrHgLWqxVL0Yr4yMptTdVhZnctABKP+ZKa9RG+a7ZzjmcLBPaTzPbYAkMj
+	Du5SzhmY=
+X-Gm-Gg: AeBDieu2cxWbqY+KUzSWwEHKWuSKWRuBxsagTxtJqNvn/FwIId0knAh42QAbola2pDc
+	U3jhPNA1MtOD6JWSZ//+K07+v7QfhSrZh7R4GTX40c/sqdNVmX3jUc2+twOS12XZxb1wvhjEtgM
+	zwGwQ2wugiqfiIAnDCSiG0ELWwcAgd2CJ3lXIJroHUQhatdK7+ofs207iR48g03uKs8wrc7N52p
+	L9d3vTsUPnCTcq9vx3YvLrJmxlMKCP2sA2WrXNCqBLWEawIIqnsUjkyoDYbM6/EYdpTBC2QZo0l
+	9lloQahoz3OYDbxUrbXI8K8YpSrwXEJ8esxyz7PZe9W2UBB4dC1Vuy2SL5/6EbCpPIoZez/04VD
+	wWzpUoX9zi+ohxQLFaHsv1Cx+3rfC9r5Rs8a4JVzI6Sls6laNcjP+v73hd17y+IMUT16Ysn3dnL
+	k6eepqXvKburJ7aGln5KJoEacqFaSh7UiQ9rHc92EwaWoJ7g==
+X-Received: by 2002:a05:6000:438a:b0:43c:f52b:8003 with SMTP id ffacd0b85a97d-44649ba199dmr4772896f8f.36.1777373249636;
+        Tue, 28 Apr 2026 03:47:29 -0700 (PDT)
 Received: from gourry-fedora-PF4VCD3F ([185.194.184.52])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4463fb7e39fsm4992767f8f.29.2026.04.28.03.42.27
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4463fa89140sm5346060f8f.27.2026.04.28.03.47.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 28 Apr 2026 03:42:28 -0700 (PDT)
-Date: Tue, 28 Apr 2026 11:42:25 +0100
+        Tue, 28 Apr 2026 03:47:29 -0700 (PDT)
+Date: Tue, 28 Apr 2026 11:47:26 +0100
 From: Gregory Price <gourry@gourry.net>
 To: Ard Biesheuvel <ardb+git@google.com>
 Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org,
@@ -65,10 +66,11 @@ Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org,
 	"Mike Rapoport (Microsoft)" <rppt@kernel.org>,
 	Benjamin Herrenschmidt <benh@kernel.crashing.org>,
 	Dave Young <ruirui.yang@linux.dev>
-Subject: Re: [PATCH v3 02/17] x86/efi: Drop redundant EFI_PARAVIRT check
-Message-ID: <afCPEUv1KQmQJ4UM@gourry-fedora-PF4VCD3F>
+Subject: Re: [PATCH v3 03/17] x86/efi: Only merge EFI memory map entries on
+ 32-bit systems
+Message-ID: <afCQPpQfOfn3J0Lc@gourry-fedora-PF4VCD3F>
 References: <20260423152024.1098465-19-ardb+git@google.com>
- <20260423152024.1098465-21-ardb+git@google.com>
+ <20260423152024.1098465-22-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -77,15 +79,26 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260423152024.1098465-21-ardb+git@google.com>
+In-Reply-To: <20260423152024.1098465-22-ardb+git@google.com>
 
-On Thu, Apr 23, 2026 at 05:20:27PM +0200, Ard Biesheuvel wrote:
+On Thu, Apr 23, 2026 at 05:20:28PM +0200, Ard Biesheuvel wrote:
 > From: Ard Biesheuvel <ardb@kernel.org>
+>
+... snip ...
 > 
-> efi_memblock_x86_reserve_range() exits early if EFI_PARAVIRT is set, so
-> there is no point in checking it a second time further down.
+> This means that merging regions is no longer needed on 64-bit, given
+> that the relative placement of adjacent regions is guaranteed to be
+> preserved in the virtual space. So make this hack 32-bit only.
 > 
 > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 
+Will try to set some time aside to test this, but this may actually
+resolve some numa/efi quirks i've observed in some KVM/QEMU configs
+when trying out different memory layouts - so thank you for this.
+
+In the meantime, diff seems reasonable as-is, will try to come by with a
+test tag.
+
 Reviewed-by: Gregory Price <gourry@gourry.net>
 
+~Gregory
