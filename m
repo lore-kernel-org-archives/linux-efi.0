@@ -1,90 +1,213 @@
-Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f178.google.com (mail-qt1-f178.google.com [209.85.160.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1DB8D3D5227;
-	Tue, 28 Apr 2026 14:22:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777386147; cv=none; b=nWirvew7GheVj9XoKjVX9pVDmdE1wG7E4STvUFXRsVUdpb9OFgNPMgmf2X+q2UTu9RsTJbccaZcYPcIbqngNZQZVWE0HeqVizT7hJzc2JiYDhMu+GrpNQqW14Rnqu96v/i8fvo3BDww+KrdY8SXh5IfUZ4fw1/q+NHjkAMkwX50=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777386147; c=relaxed/simple;
-	bh=sl1fqLImGDcEEKCBCo2L/+ljN9uGeACIGU4eqA8valA=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ap74bTGjQsdg8Xe3g1V/JqBv/gKYb4yjtlVB10JWVnImhhTJWvTVshrXlTWxZzgdwG5BKGztYizRTcA87+HRFf+BCDlYa2BvIrhkLn/MzPXafJU8/xCp/C2Hu4un2L1QD4NkhKMEbb1/vODQ+kAVFQwKQqW+X9zcPciZHgBOUPU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=mSJdFBE9; arc=none smtp.client-ip=62.89.141.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E857737EFFC
+	for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 14:34:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.160.178
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1777386895; cv=pass; b=r6L8zK4byIWBfiFpzTp0gfJe1oPnlSpD+BXCb7QDBbxPFNBjrlmkfSuTVewZIO2IzmUuD1GhFH4/HBp4+gf+JHwy3UqHEOlwY6CFxGAZfQivXDjx1Dt9ce8fNiqFPiE7V0S/NZRNb3Z0/ZF/WLykNEeeZpiD0EibBaKVHxbu4RY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1777386895; c=relaxed/simple;
+	bh=oU/anFW3DRsUUuv4TQDDZBBUVZjUxz1D3ikMUAAufu8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=WK71ClqP/4zW5gtosxCxjQqjs31sxSnxHdGnqrbGHaPB3cc+fSugnwwPGELp5YWbhrsXmYO/AqMuHSbu7Niz412x3oW9uqvreWVukB1gq3EdrVRjC/e3lyKHBvIv7eWt5iwIIUrl//Ur7ZPcsVTtTglpw6wbP5KIJn3lYWz0G1I=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=nJtWqoL4; arc=pass smtp.client-ip=209.85.160.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="mSJdFBE9"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=linux.org.uk; s=zeniv-20220401; h=Sender:In-Reply-To:Content-Type:
-	MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=r9Hup9E3/oT6Fka4DsUaI6wjWjOX8izftWYyjO/QbNY=; b=mSJdFBE9ahFIrl6ZrqyL0VQTJt
-	+HNrR+hnMC33kG0BDUrznpRNac4VLuKJ4jBHg2SWoV9cChvQQl5dmfCyFqK9qtSzedBDKT4jEQlWi
-	Pf/+80uv80xoyV2dE/1vYukGEoqB9DB3AqC2ei2nZGmQy3exf4KpbFfDjeAWjHS85acg/PkNuMWoP
-	uNfpusC6O6ynrKoCsGE1Z/Ic2pARN5i0Kej0bgHBaaYAWRro38zzoLmh0ql9x+ffpAYW111RKEZZ4
-	RTdyWhnPEfIuHZV79U8goabOKFh/l4OeYbTWJieXjFbf/S2ahgR4l7OZpfeZM8vMX/uKNOh3k/emv
-	ihXe8tFA==;
-Received: from viro by zeniv.linux.org.uk with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wHjKT-000000011sv-3ldP;
-	Tue, 28 Apr 2026 14:22:27 +0000
-Date: Tue, 28 Apr 2026 15:22:25 +0100
-From: Al Viro <viro@zeniv.linux.org.uk>
-To: NeilBrown <neil@brown.name>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
-	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>,
-	Jeff Layton <jlayton@kernel.org>,
-	Trond Myklebust <trondmy@kernel.org>,
-	Anna Schumaker <anna@kernel.org>,
-	Miklos Szeredi <miklos@szeredi.hu>,
-	Amir Goldstein <amir73il@gmail.com>, Jeremy Kerr <jk@ozlabs.org>,
-	Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
-	linux-unionfs@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3 04/19] VFS: use wait_var_event for waiting in
- d_alloc_parallel()
-Message-ID: <20260428142225.GX3518998@ZenIV>
-References: <20260427040517.828226-1-neilb@ownmail.net>
- <20260427040517.828226-5-neilb@ownmail.net>
- <20260428033738.GV3518998@ZenIV>
- <177737511992.1474915.1952404144121931523@noble.neil.brown.name>
+	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="nJtWqoL4"
+Received: by mail-qt1-f178.google.com with SMTP id d75a77b69052e-50e594413c2so66296871cf.0
+        for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 07:34:53 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1777386893; cv=none;
+        d=google.com; s=arc-20240605;
+        b=TVJ6dczaWBoqq0G4TM7Wcz8NMZlzw1oCnOy7OQ+k+sqAUystjNI41VjbHtlhK8KJ1m
+         egufY0o1MqD4b85GOU9kKnKJBFdEw56Yaa50SnKn3PM5dJgYn5QOwxsn+2KMfFMPZgDY
+         I6XCkZSpG/FoW+I4BrpMP4xdo6lpvqEdjSRGpBLGkENOO252NgkEb/X15vqDWdjzainu
+         CGrPr9iaFqEW7s7lvlTFdTP94A1a7jDFPvDGdfTXzXhMWeUK0SyjVUwG7+uqZg1/1EeT
+         QgyXMsR7R0d5S+v1gHFFhh7h1WK7G+Rcmmc1O2nraePpzuA31mRusolaUzac5ij05mqw
+         Qmxw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=eQhFVJ4+LPBUTwWR+M90TmweYjwMt7L56NJXWho9jGA=;
+        fh=65e6A1V7PY3fMZ6h/GaTorrUDIW7n+fSYe18uGTnbRA=;
+        b=iB29hGwFqYdwZcg3LcxBM0Kkg/TjaWXhvO5uPsCtrj7gMR+X9DuTUHfmpT16YRGN9i
+         0EFTHAQapPNFz8MWWvcIs2skzPHYax1lCor69EVz97bDGm00NPujBQh4ot55M6Gtny5f
+         4Ym0/RY0O9R5im3v/jCKDiZKZ0qK+MwhEQa5zCX9jYNga6e2/YGIzQOp873UxFpaxClf
+         CrzS6Fq/SKpQ2kgCDtNRqYRP+C7BbWp4wxU/tXQCt47Z7QR7Y4UB2+ga6OqODMtJBgVK
+         tt4jEosi8zlFnz9gpVZGna3fTg+CxZKTCiaGNIQuKEYo+5ZP2R3CiUuX6az0vw7Y2eXO
+         dk0Q==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777386893; x=1777991693; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=eQhFVJ4+LPBUTwWR+M90TmweYjwMt7L56NJXWho9jGA=;
+        b=nJtWqoL43RyR9O4BWHokabmLMyvxrjPZ8hAz8R+mtdaQlvzMHrtFze10is5v16iTo+
+         BMpUarMltfspULBkdcjVpNY8d6zy/x6c55bHsAAJRVrRKv1AvP8expP3heyxQzcNMRun
+         NPvJ5aIJa60KUPL74NlJ/aHizuWX8AUkdMMcaY1PlkI+qF8AG+sXDeWezKsAchuPk6+Q
+         asETDohZR1rIzrWW8MMM6NPNbt+QIaCxlujZ5KbA+UQFcodCYrV6sPhaVJ/RpyzNrUQ6
+         cctyvyrGbubkulaLAlsHAIsozSKkJiW62oHvHrZIaZDsggza5KdIan+7TAtkmv02nJk/
+         NP9A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777386893; x=1777991693;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=eQhFVJ4+LPBUTwWR+M90TmweYjwMt7L56NJXWho9jGA=;
+        b=ZJW4tKaiM4o31Yf4mfVImF7f5f5RuRggYiMGFEx1qn9mKtx27Zh/oNmtmDW3HVyeF6
+         V+ttMqvOOhil0uGUaGDAthLHmHqd6jsH6NNd53VSbVupGfnk45WIYJaxC/R0COKUMgSL
+         C00pm1Aa23xqPGwcQvsFYpShr22ZLbJNjTTtpM6KZuL8s378Pv8Zr0z85a8MlrhkJKTP
+         MccURYDDuEc5mtO8Y9rw2GkR21X1g71DWM96L/nv5lm/a/Z5gI3VyiyN+fYogSQKYv6F
+         qqhMTYHvO9pW0GwW36doTYKYKd7HOzBrAq07Mf9+dWfvVTNe3OIWdBCTuSQD38+NOtmU
+         YdKw==
+X-Forwarded-Encrypted: i=1; AFNElJ+Zm6vPg+CKuLmhQXAHcXcQDXajoQ/UNfC/OTLNyXSa6mRujn422I+wYziSbKUVFrKNV0L/Iu8eV9M=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxyFqJcJxI7Tckw3Vdtuc0tEBDGtWThth0Jw/h5pXjgcBnYV7o8
+	u1MowqGqhWUYnIgi4W/jYtHXhIoewt4JLs2W/+s2dljG6FHWKYt/LFIJCT3IdeJuLDfeuH+fYY0
+	4CbQ2mut8dY3zyYKKGFpYwNpRDHVFo+FCyPl9ULoomQ==
+X-Gm-Gg: AeBDiet1vs2z/AexF0xxU3UEnMZALltvA6/KxYyCNAQatoHovjzZ1Q4FqGPgg5bozCy
+	58aQHRko/tI7vWZ0pNdsz727bdlswjr04LkIaNxpDsOf4SM4dHyFQG/W7tPjdqoeyomWJPQhrhg
+	gadH/WXooRnR1qnOnENR89Ysnm9SvCz103nB3rn1VpE190wIDB9NXZ+vQHe6cvnUsYogExUQJye
+	/4+7CutEMB4goQCJ5uapu00Wc5ekr54unV4SCDh/TbmMKlChWkdgqRnoSoXMg5sEZvEndml8F69
+	sZav1HX6J2rem7ij55gZNRMJPOaAPLhGFnCF9B7McSnsRQ2GoHk=
+X-Received: by 2002:a05:622a:454:b0:50f:cba1:18c4 with SMTP id
+ d75a77b69052e-5100da50fadmr42348541cf.26.1777386892467; Tue, 28 Apr 2026
+ 07:34:52 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <177737511992.1474915.1952404144121931523@noble.neil.brown.name>
-Sender: Al Viro <viro@ftp.linux.org.uk>
+References: <20260428040159.1065822-1-r@hev.cc> <20260428040159.1065822-2-r@hev.cc>
+ <CAAhV-H4dTKEwb6u5X08dX2UFxophvr_GsfB-FFt_UHbVqJJi8Q@mail.gmail.com>
+In-Reply-To: <CAAhV-H4dTKEwb6u5X08dX2UFxophvr_GsfB-FFt_UHbVqJJi8Q@mail.gmail.com>
+From: WANG Rui <r@hev.cc>
+Date: Tue, 28 Apr 2026 22:34:41 +0800
+X-Gm-Features: AVHnY4LkuMhCsyaFT_KaCu939taxa_kYyGlqpqAbl_pOc6YGwiBPcLmlHdowgFU
+Message-ID: <CAHirt9hvsGLsDEo3qdWtC5BqiJsrCSv8UJYTZfqte8op7c8etw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] efi/loongarch: Randomize kernel preferred address
+ for KASLR
+To: Huacai Chen <chenhuacai@kernel.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>, WANG Xuerui <kernel@xen0n.name>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Lisa Robinson <lisa@bytefly.space>, 
+	loongarch@lists.linux.dev, linux-efi@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, Apr 28, 2026 at 09:18:39PM +1000, NeilBrown wrote:
-> > d_must_wait() conditional, though - ->d_flags and ->d_lock are in different
-> > cachelines and there's no need to dirty both every time we are called.
-> > IOW, have d_must_wait() do this:
-> > 	if (!d_in_lookup(dentry))
-> > 		return false;
-> > 	if (!(dentry->d_flags & DCACHE_LOCK_WAITER))
-> > 		dentry->d_flags |= DCACHE_LOCK_WAITER;
-> > 	return true;
-> 
-> The only time that DCACHE_LOCK_WAITER will already be set is when there
-> are two (or more) waiters as well as the thread they are waiting on.
-> That means three (or more) threads all accessing the same name at the
-> same time.  How often does that happen?  Is the micro-optimisation worth
-> the small increase in code size?
+Hi Huacai,
 
-Depends upon the load, obviously - a bunch of threads hitting the same
-pathname at the same time... not impossible.
+On Tue, Apr 28, 2026 at 1:01=E2=80=AFPM Huacai Chen <chenhuacai@kernel.org>=
+ wrote:
+>
+> Hi, Rui,
+>
+> On Tue, Apr 28, 2026 at 12:02=E2=80=AFPM WANG Rui <r@hev.cc> wrote:
+> >
+> > Introduce efi_get_kimg_kaslr_address() to compute the preferred
+> > kernel image address dynamically when CONFIG_RANDOMIZE_BASE is
+> > enabled. The function derives a random offset using EFI-provided
+> > randomness combined with the timer value, and constrains it within
+> > CONFIG_RANDOMIZE_BASE_MAX_OFFSET.
+> >
+> > Update EFI_KIMG_PREFERRED_ADDRESS to call this helper so that the
+> > EFI stub can select a randomized load address when KASLR is active,
+> > while preserving the original base address behavior when KASLR is
+> > disabled or nokaslr is specified.
+> >
+> > Signed-off-by: WANG Rui <r@hev.cc>
+> > ---
+> >  arch/loongarch/Kconfig                   |  2 +-
+> >  arch/loongarch/include/asm/efi.h         |  4 +++-
+> >  drivers/firmware/efi/libstub/loongarch.c | 16 ++++++++++++++++
+> >  3 files changed, 20 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/arch/loongarch/Kconfig b/arch/loongarch/Kconfig
+> > index 3b042dbb2c41..a5afb70f73d9 100644
+> > --- a/arch/loongarch/Kconfig
+> > +++ b/arch/loongarch/Kconfig
+> > @@ -730,7 +730,7 @@ config RANDOMIZE_BASE
+> >  config RANDOMIZE_BASE_MAX_OFFSET
+> >         hex "Maximum KASLR offset" if EXPERT
+> >         depends on RANDOMIZE_BASE
+> > -       range 0x0 0x10000000
+> > +       range 0x20000 0x10000000
+> >         default "0x01000000"
+> >         help
+> >           When KASLR is active, this provides the maximum offset that w=
+ill
+> > diff --git a/arch/loongarch/include/asm/efi.h b/arch/loongarch/include/=
+asm/efi.h
+> > index eddc8e79b3fa..f831320efd41 100644
+> > --- a/arch/loongarch/include/asm/efi.h
+> > +++ b/arch/loongarch/include/asm/efi.h
+> > @@ -30,6 +30,8 @@ static inline unsigned long efi_get_kimg_min_align(vo=
+id)
+> >         return SZ_2M;
+> >  }
+> >
+> > -#define EFI_KIMG_PREFERRED_ADDRESS     PHYSADDR(VMLINUX_LOAD_ADDRESS)
+> > +unsigned long efi_get_kimg_kaslr_address(void);
+> > +
+> > +#define EFI_KIMG_PREFERRED_ADDRESS     efi_get_kimg_kaslr_address()
+> >
+> >  #endif /* _ASM_LOONGARCH_EFI_H */
+> > diff --git a/drivers/firmware/efi/libstub/loongarch.c b/drivers/firmwar=
+e/efi/libstub/loongarch.c
+> > index 9825f5218137..c44be5d3dc04 100644
+> > --- a/drivers/firmware/efi/libstub/loongarch.c
+> > +++ b/drivers/firmware/efi/libstub/loongarch.c
+> > @@ -38,6 +38,22 @@ static efi_status_t exit_boot_func(struct efi_boot_m=
+emmap *map, void *priv)
+> >         return EFI_SUCCESS;
+> >  }
+> >
+> > +unsigned long efi_get_kimg_kaslr_address(void)
+> Move it into arch/loongarch/include/asm/efi.h?
 
-More to the point, why not set DCACHE_LOCK_WAITER as soon as we grab ->d_lock
-there?  Then waiting becomes simply "wait until !d_in_lookup()".  Sure, we
-might end up setting DCACHE_LOCK_WAITER on a dentry that has just dropped
-DCACHE_PAR_LOOKUP - who cares?
+In that case, we'd need to declare efi_nokaslr and
+efi_get_random_bytes() in efi.h. Since including efistub.h in efi.h
+doesn't work, putting them here keeps things pretty clean.
 
-While we are at it, do we need to drop it when we clear PAR_LOOKUP?  Because
-if we do not, the whole "what do we return from __d_lookup_unhash()" thing
-disappears - we simply pass the dentry to end_dir_add() and have it check
-->d_flags & DCACHE_LOCK_WAITER to decide whether to bother with wakeup.
+Thanks,
+Rui
+
+>
+> > +{
+> > +       unsigned int random_offset =3D 0;
+> > +
+> > +#ifdef CONFIG_RANDOMIZE_BASE
+> > +       if (!efi_nokaslr) {
+> > +               efi_get_random_bytes(sizeof(random_offset), (u8 *)&rand=
+om_offset);
+> > +               random_offset ^=3D (random_get_entropy() << 16);
+> > +               random_offset &=3D (CONFIG_RANDOMIZE_BASE_MAX_OFFSET - =
+SZ_64K - 1);
+> I still don't want to modify the range of RANDOMIZE_BASE_MAX_OFFSET, so u=
+se
+>      random_offset &=3D (CONFIG_RANDOMIZE_BASE_MAX_OFFSET - 1)
+> here?
+>
+> > +               random_offset =3D ALIGN(random_offset, SZ_64K) + SZ_64K=
+;
+> It seems "random_offset =3D ALIGN(random_offset + SZ64K, SZ_64K)" is bett=
+er.
+>
+> Huacai
+>
+> > +       }
+> > +#endif
+> > +
+> > +       return PHYSADDR(VMLINUX_LOAD_ADDRESS) + random_offset;
+> > +}
+> > +
+> >  unsigned long __weak kernel_entry_address(unsigned long kernel_addr,
+> >                 efi_loaded_image_t *image)
+> >  {
+> > --
+> > 2.54.0
+> >
+>
