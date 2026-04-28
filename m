@@ -1,91 +1,158 @@
-Received: from gate.crashing.org (gate.crashing.org [63.228.1.57])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id E0EAF3914E8;
-	Tue, 28 Apr 2026 11:34:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=63.228.1.57
+Received: from fhigh-b4-smtp.messagingengine.com (fhigh-b4-smtp.messagingengine.com [202.12.124.155])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 393FE3B2FD6;
+	Tue, 28 Apr 2026 11:44:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.155
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777376082; cv=none; b=gFEykjUwBqBHr8Ht2WmfT1dJJrIY8qYeBOCIzrPJU6rncOpGCdZS1EWdzY8VTJbpi67Gu7Dh36rz5sy6fgV8ZNatQeMjUh3ON7gl490+Jv12QAXQFv8qS6eyMMxYgKsA0WNnZYKKtQTJ1ml/NIm86ZUi9IwOm/G3PkE/OkLUwJM=
+	t=1777376653; cv=none; b=im4VPJuMd7Zayv6LUTj8qotxSgUQ7MrmlyZ8i0HExtbOwlclXVXygItgCEcbwytLAs1yxHWdo0h8i+MUwO+skFnNh3oKyJW2KPubFCqPGYOlWyCApPBJq0pkH2c4XHrNr9GeuPr6/M6PoU9SJpXNEgtrTuVTM9PczRjZ1P0gl4M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777376082; c=relaxed/simple;
-	bh=hyfrXCz4cakoGqEZMfZnxEs8TTQzFbHPgNHVJxhRWN4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jnn94cM/o0HiOSruXStCQtUYg2jtlOmYJTM+tMLMcDXRMCG+lK2UjENZt0PgtAWSKkxIjSc56uYeacZaWuX69xh+JCg0ohPoDxo3fIKM21CBEpXwkQ7xjGlH9Sbtp57SQZhwuO6NpnD08s9unbu/usyuuOlnKbT+Bhy2gAKyZgY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.crashing.org; spf=pass smtp.mailfrom=kernel.crashing.org; arc=none smtp.client-ip=63.228.1.57
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.crashing.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.crashing.org
-Received: from gate.crashing.org (localhost [127.0.0.1])
-	by gate.crashing.org (8.18.1/8.18.1/Debian-2) with ESMTP id 63SBY0U31059939;
-	Tue, 28 Apr 2026 06:34:00 -0500
-Received: (from segher@localhost)
-	by gate.crashing.org (8.18.1/8.18.1/Submit) id 63SBY0B51059937;
-	Tue, 28 Apr 2026 06:34:00 -0500
-X-Authentication-Warning: gate.crashing.org: segher set sender to segher@kernel.crashing.org using -f
-Date: Tue, 28 Apr 2026 06:34:00 -0500
-From: Segher Boessenkool <segher@kernel.crashing.org>
-To: Andrew Cooper <andrew.cooper3@citrix.com>
-Cc: Yury Norov <ynorov@nvidia.com>,
-        "Christophe Leroy (CS GROUP)" <chleroy@kernel.org>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        David Laight <david.laight.linux@gmail.com>,
-        Thomas Gleixner <tglx@linutronix.de>, linux-alpha@vger.kernel.org,
-        Yury Norov <yury.norov@gmail.com>, linux-kernel@vger.kernel.org,
-        linux-snps-arc@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org, linux-mips@vger.kernel.org,
-        linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org,
-        linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
-        sparclinux@vger.kernel.org, linux-um@lists.infradead.org,
-        dmaengine@vger.kernel.org, linux-efi@vger.kernel.org,
-        linux-fsi@lists.ozlabs.org, amd-gfx@lists.freedesktop.org,
-        dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
-        linux-wpan@vger.kernel.org, netdev@vger.kernel.org,
-        linux-wireless@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-staging@lists.linux.dev,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        xen-devel@lists.xenproject.org, linux-fsdevel@vger.kernel.org,
-        ocfs2-devel@lists.linux.dev, bpf@vger.kernel.org,
-        kasan-dev@googlegroups.com, linux-mm@kvack.org,
-        linux-x25@vger.kernel.org, rust-for-linux@vger.kernel.org,
-        linux-sound@vger.kernel.org, sound-open-firmware@alsa-project.org,
-        linux-csky@vger.kernel.org, linux-hexagon@vger.kernel.org,
-        loongarch@lists.linux.dev, linux-m68k@vger.kernel.org,
-        linux-openrisc@vger.kernel.org, linux-parisc@vger.kernel.org,
-        linux-sh@vger.kernel.org, linux-arch@vger.kernel.org
-Subject: Re: [RFC PATCH v1 2/9] uaccess: Convert INLINE_COPY_{TO/FROM}_USER
- to kconfig and reduce ifdefery
-Message-ID: <afCbKJg_Cq7yNO9j@gate>
-References: <cover.1777306795.git.chleroy@kernel.org>
- <9fe875d2f55af59c12708336c571a46038528678.1777306795.git.chleroy@kernel.org>
- <ae-tVFVfx72oCC_i@yury>
- <f54c3c2b-33da-42a0-80b7-0f6615d930ce@citrix.com>
+	s=arc-20240116; t=1777376653; c=relaxed/simple;
+	bh=PL8UHmWrQoXJLGqqAY6Lc/MVZPItciZEYbR4i6YeEDc=;
+	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
+	 References:Date:Message-id; b=b/a5opyKGZ0htwC/AP5Qg3/Z4If3tzjhZIQ0recfng+qoSJmTb3Gx3jV3Q3sLs57RfPROy2xppn7EiN9rFJx0GlOBHVIFgQsHL9SUoAbONax3ff5HnoUHZ9cQZOAsxg4F2k0aZI8d0dmBOulPCjkD8L076T8h8Q6AdLNQJoQffI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=dzHWJGYN; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=L7Ua+u9s; arc=none smtp.client-ip=202.12.124.155
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="dzHWJGYN";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="L7Ua+u9s"
+Received: from phl-compute-03.internal (phl-compute-03.internal [10.202.2.43])
+	by mailfhigh.stl.internal (Postfix) with ESMTP id 8437F7A01A6;
+	Tue, 28 Apr 2026 07:44:08 -0400 (EDT)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-03.internal (MEProxy); Tue, 28 Apr 2026 07:44:09 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to; s=fm2; t=
+	1777376648; x=1777463048; bh=hNvCDZbxO3ENbBCMR1/00f1PQ5HW0ZeSNyw
+	OZeKHXEs=; b=dzHWJGYNLjXo+VhYfMC3Hshlt89PskdbIzlnO57mFwI+nU0fiGT
+	AJVZcH5TerOJOEYHm2K2lBd9FA4eHYOT3nBLqpUeDIyhfR8bfieITfOC+KTc9c5K
+	pqrlk7BWmlVEVtKKWzGVdAnM8vrW+zWGh+VDgREZj28bqDs9g9YWBEh4iYq2IFHV
+	cs0KCBWP4Mnn5ASFiim3WGsTDpvwRXqIRaMGuMk99unTDdYkdWm7dMLRA/HQa7Od
+	JldcDkxPxbQZhXxb0zfJliivhyFirSczSL/GXp467CRwef71SfDmOwG3t1k9TJcy
+	9VObzDdkLAnTbJ8uOu3v0fhyZtXMNDuvEfA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1777376648; x=
+	1777463048; bh=hNvCDZbxO3ENbBCMR1/00f1PQ5HW0ZeSNywOZeKHXEs=; b=L
+	7Ua+u9sU3TUD7Im/Y87/e1Z3bINkQHulNDLlHJgdSN9jfnAi6PBPkgwsk5XNJjwI
+	+40RHke2SBUljCNJTXv3sJQOUQx6nCnmG0ISuVDfTSVbTB2dItYFb/xjO+5f4Qbf
+	EXqtt9wSBSKIR4ZZurverHL3gVOrIRCUxzVMIVoytDmFRpiTT2lzOPoWBXW+dWiF
+	Bjr38evKxEH92unUChrxro28jqYihp8COrBhfiXAVYA4l1e+Z83FpghC7zby1EMI
+	lOQJaA8VfVnALgiKnoqy+lqutGZ3i5blan+Ag1NNrn0PHbQq/Vbx68FKW7q+OxLw
+	FVTrosr4AMLnMc2C6pnzw==
+X-ME-Sender: <xms:h53wacUnQmJWDuqzPo89pKGPBH9mqgcUEVdzK2iY8HNxNyUt_7W_aA>
+    <xme:h53wac62A3M8vpxS_JlsevvAVE_EXVZgk4ZGay_zBC3OzLkxo_7Ytqugw66TJYryX
+    LCgjHF5HzniwoKsTGFPkWeOmxZwQeBVezVzFkhgRJYYXA1xfA>
+X-ME-Received: <xmr:h53waSCMrzJ7UBSXDspxHYdocoMj75rx6livtAC7XWZ4wseuaESGkhzaI60IQPql8u6LISLJHym6hmUHP-mFKX8nI0Ao0uQ>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdekudegjecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
+    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
+    hrpegtgfgghffvvefujghffffkrhesthhqredttddtjeenucfhrhhomheppfgvihhluehr
+    ohifnhcuoehnvghilhgssehofihnmhgrihhlrdhnvghtqeenucggtffrrghtthgvrhhnpe
+    eljedtfeegueekieetudevheduveefffevudetgfetudfhgedvgfdtieeguedujeenucev
+    lhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehnvghilhgsse
+    hofihnmhgrihhlrdhnvghtpdhnsggprhgtphhtthhopeduiedpmhhouggvpehsmhhtphho
+    uhhtpdhrtghpthhtohepvhhirhhoseiivghnihhvrdhlihhnuhigrdhorhhgrdhukhdprh
+    gtphhtthhopehlihhnuhigqdhunhhiohhnfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhg
+    pdhrtghpthhtoheplhhinhhugidqnhhfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprh
+    gtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdp
+    rhgtphhtthhopehlihhnuhigqdhfshguvghvvghlsehvghgvrhdrkhgvrhhnvghlrdhorh
+    hgpdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnhgvlhdrohhrghdp
+    rhgtphhtthhopehmihhklhhoshesshiivghrvgguihdrhhhupdhrtghpthhtohepjhgrtg
+    hksehsuhhsvgdrtgiipdhrtghpthhtohepjhhksehoiihlrggsshdrohhrgh
+X-ME-Proxy: <xmx:h53waYcoaIP7cbrdzBGwmC6q3tTWo1DFf9m6ibsaFIIKh_JkRqlPaw>
+    <xmx:h53wabsnGLnldwuylEfVZWJTkIF3LS_W4Gj1DJo9bmBMOtbmazoRsQ>
+    <xmx:h53waXLFBHC1zKRWwuE1GQR5RHFDpDxc5MhUL1w-A9OFtDU0mviLtw>
+    <xmx:h53waVYwROlDIaxs6VgmAfOHbhCXY5Hwvxmjr-v7XJXZBe53YTfv1g>
+    <xmx:iJ3waXEeVraZ0UHqrOiAo7gf9N96YlzcgsspYUCSGUNW8Lh2PyES3QKB>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
+ 28 Apr 2026 07:44:03 -0400 (EDT)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <f54c3c2b-33da-42a0-80b7-0f6615d930ce@citrix.com>
+From: NeilBrown <neilb@ownmail.net>
+To: "Al Viro" <viro@zeniv.linux.org.uk>
+Cc: "Amir Goldstein" <amir73il@gmail.com>,
+ "Linus Torvalds" <torvalds@linux-foundation.org>,
+ "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.cz>,
+ "Jeff Layton" <jlayton@kernel.org>, "Trond Myklebust" <trondmy@kernel.org>,
+ "Anna Schumaker" <anna@kernel.org>, "Miklos Szeredi" <miklos@szeredi.hu>,
+ "Jeremy Kerr" <jk@ozlabs.org>, "Ard Biesheuvel" <ardb@kernel.org>,
+ linux-efi@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+ linux-nfs@vger.kernel.org, linux-unionfs@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3 10/19] VFS/ovl: add d_alloc_noblock_return()
+In-reply-to: <20260428043511.GW3518998@ZenIV>
+References: <20260427040517.828226-1-neilb@ownmail.net>
+  <20260427040517.828226-11-neilb@ownmail.net>
+  <CAOQ4uxiZF0_dGtHY0x7T0oh=3jhDC7-THH_ANt-Ha5kfdRe4QQ@mail.gmail.com>
+  <177733649056.1474915.2313612194633470905@noble.neil.brown.name>
+  <20260428043511.GW3518998@ZenIV>
+Date: Tue, 28 Apr 2026 21:44:01 +1000
+Message-id: <177737664116.1474915.2913290838767301303@noble.neil.brown.name>
+Reply-To: NeilBrown <neil@brown.name>
 
-On Mon, Apr 27, 2026 at 09:39:33PM +0100, Andrew Cooper wrote:
-> On 27/04/2026 7:39 pm, Yury Norov wrote:
-> > On Mon, Apr 27, 2026 at 07:13:43PM +0200, Christophe Leroy (CS GROUP) wrote:
-> >> Among the 21 architectures supported by the kernel, 16 define both
-> >> INLINE_COPY_TO_USER and INLINE_COPY_FROM_USER while the 5 other ones
-> >> don't define any of the two.
-> >>
-> >> To simplify and reduce risk of mistakes, convert them to a single
-> >> kconfig item named CONFIG_ARCH_WANTS_NOINLINE_COPY which will be
-> > We've got a special word for it: outline. Can you name it
-> > CONFIG_OUTLINE_USERCOPY, or similar?
-> 
-> You can't swap the "in" for "out" like this.  "out of line" is the
-> opposite of "inline" in this context, while "outline" means something
-> different and unrelated.
+On Tue, 28 Apr 2026, Al Viro wrote:
+> On Tue, Apr 28, 2026 at 10:34:50AM +1000, NeilBrown wrote:
+>=20
+> > > This contract is a bit subtle.
+> > > We have plenty of contracts where the caller must dput() in case of suc=
+cess
+> > > or in case of error, but must dput in case of a specific error that
+> > > sounds fragile.
+> > >=20
+> > > How about:
+> > > * If the existing dentry is d_in_lookup(), d_alloc_noblock()
+> > >  * returns with error %-EWOULDBLOCK and the blocking dentry is passed
+> > >  * in @dentryp. Regardless of the returned error, if @dentryp is set by=
+ this
+> > >  * function, the returned dentry must be dput() by the caller.
+> >=20
+> > That is sensible, though I've used slightly different words.
+>=20
+> I would add "dentry reference stored in *dentryp may be in any state -
+> the only thing promised is that the reference is counting one;
+> do *NOT* expect it to be in-lookup or in the same directory or
+> hashed at any point or anything whatsoever, really.  Users beware."
+>=20
+> In case it's not obvious from the above, I don't think it's a safe API to h=
+ave -
+> there's very little you can do to that dentry other than dput() it and it d=
+oes
+> change things in a fairly subtle way: right now in-lookup dentry is *not*
+> visible to any thread other than caller of d_alloc_parallel() that has crea=
+ted
+> it.  In particular, d_in_lookup(dentry) can only change due to actions of t=
+he
+> same thread.  With this primitive added this is no longer obviously true.
+>=20
 
-Yeah.  Technically much more correct for it is inline vs. functional.
-Not that that term won't be misunderstood as well :-)
+Maybe we could require the caller to hold an exclusive lock on the parent
+inode (which the only proposed use case does).  Then we can promise that
+the dentry will remain in-lookup as the owner will not proceed with the
+lookup until it can get a shared lock.
 
+ * The caller MUST hold an exclusive lock on the parent inode and can
+ * be certain that if a dentry is provided in @dentryp, then it is
+ * in-lookup and will remain in-lookup while the lock is held.
 
-Segher
+I don't have the patches to prove it yet but I expect this to be a
+short-lived interface.  Once ovl has full control of the locking context
+it should be able to allow lookup to always proceed while readdir is
+active, so readdir will be able to use a regular d_alloc_parallel()
+call.
+
+Thanks,
+NeilBrown
