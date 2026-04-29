@@ -1,133 +1,161 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from out-180.mta1.migadu.com (out-180.mta1.migadu.com [95.215.58.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4564425A357
-	for <linux-efi@vger.kernel.org>; Wed, 29 Apr 2026 09:16:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BFBB3BADAA;
+	Wed, 29 Apr 2026 10:25:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777454183; cv=none; b=cC+CWbonP8lw3tV8jcPFw9dkneb2wFAlBAALQsB1eYKJvZ6lJ89dMoCPkp4B1EcDhRF7QcL5bwyKryHbF/XV2t4pktGkPW9jUSYcmMw1EWq8lW2mf18mGTkVjBoTBWGmuHh5zdxeZqX2ARYMIWYG4KtGUW1bGX6P3gZKG1Q7Vh8=
+	t=1777458338; cv=none; b=jREEAkfb1wn8jB7gkB9KKU6jJxNqbRoSW+4/tZbnYrQzkkK2Y1PkIayigqq2K/lRmAkwSO6KiDWoCoiD9jHHFZEMTXJCLs0Gxdf14hK5XpYPq9kg8AywV7VWsoA+v83S8D4BDtFeFRrQ9X+fWrpVrf6cYNwaSzX5eW/8Oki2K6Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777454183; c=relaxed/simple;
-	bh=57VidyFDMnUkKTf1XSAs7qNB3v/LFxwT6C+kurTc+NM=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=tNO4skgSg6hCfVlxd3kfA0Vt5Qwk8+19q8VoFCXYp+WGORRTaeLZXH6ESk2WiCYwDpeXQpnn2i1IgDmmw0r7leDydPd6qHysWLxtXcG2hwTG22gGz3vOVGAeCUbiL1Bok+6CgoWmzPae++6cimaGt6TkYzz29WjM77amfrH8J2o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gG9dJ83G; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1777458338; c=relaxed/simple;
+	bh=uKx2BLK4SWtORQ3Y1X9QU+u3JmhryAfpmr007sf8OrM=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=fgnPxhGfxGx0yj6ZrG/OE8VZdB3dqkRGI4DHgLXOoK8r7qy/GlGoIpraH3Msuj4OUSpsf9dfipUfJ5Ved7Zrsi+TTzyFhHFMVpWkccRElMKQHPsp2v+Tsf38kbZuQDiD6VGjkxomhuyG1J8rkGbS1kAZts/FT+3xiaGe5kuIYnI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=syDuJ2eb; arc=none smtp.client-ip=95.215.58.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gG9dJ83G"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D461DC2BCB3;
-	Wed, 29 Apr 2026 09:16:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1777454183;
-	bh=57VidyFDMnUkKTf1XSAs7qNB3v/LFxwT6C+kurTc+NM=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=gG9dJ83GtCuhV8OZwi5JUsk7dfUVtDHMjMUglni1NwUsf+2rcLbpENc7MIJs8yWAW
-	 lF4h6wj75fenFmn/1wrCrqQOBVllugUOdGu+GrnfeNnKb8W03eqy+W5RsUm3kjbmrY
-	 ysq/TT51jThNMIoMfhue/dN4i/YSN2M3mx5A7dQNaeYaMqiALx/bY0NprWCoUOMstH
-	 XENE4C9nbIJZQGFbkwHkKO/yWzw2MQOsJM0V8GvN4aM7qjfAqo9vpswkaTHTDQ+rrv
-	 tE+tqAo3ojNLHny3k80y8inu5vn+o66SxjRKgvcw+zEEJjMByh+4GiY/F+hYxURNGT
-	 ph/Jej2sa6Teg==
-Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id E53EFF40068;
-	Wed, 29 Apr 2026 05:16:21 -0400 (EDT)
-Received: from phl-imap-02 ([10.202.2.81])
-  by phl-compute-01.internal (MEProxy); Wed, 29 Apr 2026 05:16:21 -0400
-X-ME-Sender: <xms:Zczxae60Z2_Xu7xlUnQKmgbezT2-TbBWW0F5hA-HMW6rFegvqq_D4g>
-    <xme:ZczxaSuxrKbOBgWObIGYpYLOOYnREThqjQpi68gzJdcSIjAN3bPjNozo6_hpnnIqT
-    KmOP_916gCJUkaEiPEl27dLYuA-1WpCR9X1t51_vOu5_NotdpiVXkA>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdekgedthecutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
-    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
-    hrpefoggffhffvvefkjghfufgtgfesthejredtredttdenucfhrhhomhepfdetrhguuceu
-    ihgvshhhvghuvhgvlhdfuceorghruggssehkvghrnhgvlhdrohhrgheqnecuggftrfgrth
-    htvghrnhepkedvffekhffggeevkeeftdeifffhleegteeivdeifffhkeefieekteeugeet
-    teetnecuffhomhgrihhnpehkvghrnhgvlhdrohhrghenucevlhhushhtvghrufhiiigvpe
-    dtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrhguodhmvghsmhhtphgruhhthhhpvghr
-    shhonhgrlhhithihqdduieejtdehtddtjeelqdeffedvudeigeduhedqrghruggspeepkh
-    gvrhhnvghlrdhorhhgseifohhrkhhofhgrrhgurdgtohhmpdhnsggprhgtphhtthhopeel
-    pdhmohguvgepshhmthhpohhuthdprhgtphhtthhopehlihhsrgessgihthgvfhhlhidrsh
-    hprggtvgdprhgtphhtthhopehrsehhvghvrdgttgdprhgtphhtthhopegthhgvnhhhuhgr
-    tggriheskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepihhlihgrshdrrghprghlohguih
-    hmrghssehlihhnrghrohdrohhrghdprhgtphhtthhopehlohhonhhgrghrtghhsehlihhs
-    thhsrdhlihhnuhigrdguvghvpdhrtghpthhtohepshhunhhhrghihihonhhgsehlohhonh
-    hgshhonhdrtghnpdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnhgv
-    lhdrohhrghdprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnh
-    gvlhdrohhrghdprhgtphhtthhopehkvghrnhgvlhesgigvnhdtnhdrnhgrmhgv
-X-ME-Proxy: <xmx:ZczxaTaJO3DKW_8WlSE0bKoFag6z-Qq8cy7r3Slya_bxTJRZe6d1Bw>
-    <xmx:Zczxae_WMxDnt8oZdI3pPkZq8C8ToYqmlLXh9RUlCA-NiTfM1kKTLg>
-    <xmx:ZczxaaZ2J1MmHegRq_8Iv96GAJoSx2UMIWPeYdk7D8OuMG8n8P_tAg>
-    <xmx:ZczxaQeq42E-e5a1SnelKzHi07znBMVbaUcKvXVvdsUwL9Pw7OAwBQ>
-    <xmx:ZczxafmGQ2UDLYqxdbM2t47Iswo3IhycUPSRg4qCkx_YmaI0SaFTx8eG>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id C80B8700065; Wed, 29 Apr 2026 05:16:21 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="syDuJ2eb"
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+	t=1777458333;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=0ubnPqyEuUH+bb9tWP9+TOUp+n6C5onOR58LCuBDEiw=;
+	b=syDuJ2ebh9z2sjffREH58o0aT6Ajjew8W5I8ReEUtvp2EQkdghmYv8iT9JcU1iX87oMIbX
+	D+xmbMoFNHgWVKDoL6XEe6kPFjJgAeA5FQrv1tK/6uUbSyjmFqItMdxDS/n3eJA5ihtrWC
+	pDy1LXDxeyfrSgRVjezaD0bM6Fa+Scc=
+From: Usama Arif <usama.arif@linux.dev>
+To: "Christophe Leroy (CS GROUP)" <chleroy@kernel.org>
+Cc: Usama Arif <usama.arif@linux.dev>,
+	Yury Norov <ynorov@nvidia.com>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	Linus Torvalds <torvalds@linux-foundation.org>,
+	David Laight <david.laight.linux@gmail.com>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	linux-alpha@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-snps-arc@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-mips@vger.kernel.org,
+	linuxppc-dev@lists.ozlabs.org,
+	kvm@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	linux-s390@vger.kernel.org,
+	sparclinux@vger.kernel.org,
+	linux-um@lists.infradead.org,
+	dmaengine@vger.kernel.org,
+	linux-efi@vger.kernel.org,
+	linux-fsi@lists.ozlabs.org,
+	amd-gfx@lists.freedesktop.org,
+	dri-devel@lists.freedesktop.org,
+	intel-gfx@lists.freedesktop.org,
+	linux-wpan@vger.kernel.org,
+	netdev@vger.kernel.org,
+	linux-wireless@vger.kernel.org,
+	linux-spi@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	linux-serial@vger.kernel.org,
+	linux-usb@vger.kernel.org,
+	xen-devel@lists.xenproject.org,
+	linux-fsdevel@vger.kernel.org,
+	ocfs2-devel@lists.linux.dev,
+	bpf@vger.kernel.org,
+	kasan-dev@googlegroups.com,
+	linux-mm@kvack.org,
+	linux-x25@vger.kernel.org,
+	rust-for-linux@vger.kernel.org,
+	linux-sound@vger.kernel.org,
+	sound-open-firmware@alsa-project.org,
+	linux-csky@vger.kernel.org,
+	linux-hexagon@vger.kernel.org,
+	loongarch@lists.linux.dev,
+	linux-m68k@lists.linux-m68k.org,
+	linux-openrisc@vger.kernel.org,
+	linux-parisc@vger.kernel.org,
+	linux-sh@vger.kernel.org,
+	linux-arch@vger.kernel.org
+Subject: Re: [RFC PATCH v1 7/9] x86: Add unsafe_copy_from_user()
+Date: Wed, 29 Apr 2026 03:25:19 -0700
+Message-ID: <20260429102520.1617327-1-usama.arif@linux.dev>
+In-Reply-To: <0ee46bb228d97163fbdc14f2a7c52b93d8bc34ce.1777306795.git.chleroy@kernel.org>
+References: 
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Wed, 29 Apr 2026 11:16:01 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "WANG Rui" <r@hev.cc>, "Huacai Chen" <chenhuacai@kernel.org>
-Cc: "WANG Xuerui" <kernel@xen0n.name>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- "Haiyong Sun" <sunhaiyong@loongson.cn>, "Lisa Robinson" <lisa@bytefly.space>,
- loongarch@lists.linux.dev, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Message-Id: <7efff830-06c6-44d8-a613-f230253c014e@app.fastmail.com>
-In-Reply-To: <20260429051318.1581350-1-r@hev.cc>
-References: <20260429051318.1581350-1-r@hev.cc>
-Subject: Re: [PATCH v3 0/3] LoongArch: Move KASLR to EFI stub to avoid initrd overlap
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-Migadu-Flow: FLOW_OUT
 
+On Mon, 27 Apr 2026 19:13:48 +0200 "Christophe Leroy (CS GROUP)" <chleroy@kernel.org> wrote:
 
+> At the time being, x86 and arm64 are missing unsafe_copy_from_user().
+> 
+> Add it.
+> 
+> Signed-off-by: Christophe Leroy (CS GROUP) <chleroy@kernel.org>
+> ---
+>  arch/x86/include/asm/uaccess.h | 29 ++++++++++++++++++++++++-----
+>  1 file changed, 24 insertions(+), 5 deletions(-)
+> 
+> diff --git a/arch/x86/include/asm/uaccess.h b/arch/x86/include/asm/uaccess.h
+> index 3a0dd3c2b233..10c458ffa399 100644
+> --- a/arch/x86/include/asm/uaccess.h
+> +++ b/arch/x86/include/asm/uaccess.h
+> @@ -598,7 +598,7 @@ _label:									\
+>   * We want the unsafe accessors to always be inlined and use
+>   * the error labels - thus the macro games.
+>   */
+> -#define unsafe_copy_loop(dst, src, len, type, label)				\
+> +#define unsafe_put_loop(dst, src, len, type, label)				\
+>  	while (len >= sizeof(type)) {						\
+>  		unsafe_put_user(*(type *)(src),(type __user *)(dst),label);	\
+>  		dst += sizeof(type);						\
+> @@ -611,10 +611,29 @@ do {									\
+>  	char __user *__ucu_dst = (_dst);				\
+>  	const char *__ucu_src = (_src);					\
+>  	size_t __ucu_len = (_len);					\
+> -	unsafe_copy_loop(__ucu_dst, __ucu_src, __ucu_len, u64, label);	\
+> -	unsafe_copy_loop(__ucu_dst, __ucu_src, __ucu_len, u32, label);	\
+> -	unsafe_copy_loop(__ucu_dst, __ucu_src, __ucu_len, u16, label);	\
+> -	unsafe_copy_loop(__ucu_dst, __ucu_src, __ucu_len, u8, label);	\
+> +	unsafe_put_loop(__ucu_dst, __ucu_src, __ucu_len, u64, label);	\
+> +	unsafe_put_loop(__ucu_dst, __ucu_src, __ucu_len, u32, label);	\
+> +	unsafe_put_loop(__ucu_dst, __ucu_src, __ucu_len, u16, label);	\
+> +	unsafe_put_loop(__ucu_dst, __ucu_src, __ucu_len, u8, label);	\
+> +} while (0)
+> +
+> +#define unsafe_get_loop(dst, src, len, type, label)				\
+> +	while (len >= sizeof(type)) {						\
+> +		unsafe_get_user(*(type __user *)(src),(type *)(dst),label);	\
 
-On Wed, 29 Apr 2026, at 07:13, WANG Rui wrote:
-> Changes since [v2]:
->   * Add a new patch to prevent initrd overlap during relocation.
->   * Revert changes to the CONFIG_RANDOMIZE_BASE_MAX_OFFSET range.
->
-> Changes since [v1]:
->   * Drop the patch "LoongArch: Allow rdtime_h() and rdtime_l() in 
-> 64-bit builds".
->   * Use random_get_entropy() instead of rdtime_l().
->
-> This series addresses a potential overlap issue between the kernel
-> image and the initrd when KASLR is enabled.
->
-> In the normal boot flow, the bootloader is responsible for loading
-> both vmlinux and the initrd, and it can guarantee that the two do
-> not overlap in memory. However, this assumption only holds as long
-> as neither image changes its location afterwards.
->
-> The in-kernel KASLR implementation breaks that assumption. When the
-> initrd is placed close to the kernel image, randomizing the kernel
-> location at runtime may move it into the initrd region, leading to
-> memory corruption early during boot.
->
-> To fix this, this series moves the KASLR logic out of the kernel
-> proper and into the EFI stub. With this change, the final placement
-> of both the kernel image and the initrd is determined by the EFI
-> memory allocator. This ensures that the two allocations are
-> coordinated and cannot overlap.
->
-> Functionally, the kernel still supports KASLR as before, but the
-> randomization now happens before the kernel is entered, rather than
-> during early kernel relocation.
->
-> [v2]: https://lore.kernel.org/loongarch/20260428040159.1065822-1-r@hev.cc
-> [v1]: https://lore.kernel.org/loongarch/20260427104721.47724-1-r@hev.cc
->
-> WANG Rui (3):
->   efi/loongarch: Randomize kernel preferred address for KASLR
->   LoongArch: Skip relocation-time KASLR if it has already been applied
->   LoongArch: Avoid initrd overlap during kernel relocation
->
+Hi,
 
-For the series,
+Just wanted to check if src and dst need to be swapped? Same for arm64 patch.
 
-Acked-by: Ard Biesheuvel <ardb@kernel.org>
-
-Feel free to take the EFI changes via the LoongArch tree.
+> +		dst += sizeof(type);						\
+> +		src += sizeof(type);						\
+> +		len -= sizeof(type);						\
+> +	}
+> +
+> +#define unsafe_copy_from_user(_dst,_src,_len,label)			\
+> +do {									\
+> +	char *__ucu_dst = (_dst);					\
+> +	const char __user *__ucu_src = (_src);				\
+> +	size_t __ucu_len = (_len);					\
+> +	unsafe_get_loop(__ucu_dst, __ucu_src, __ucu_len, u64, label);	\
+> +	unsafe_get_loop(__ucu_dst, __ucu_src, __ucu_len, u32, label);	\
+> +	unsafe_get_loop(__ucu_dst, __ucu_src, __ucu_len, u16, label);	\
+> +	unsafe_get_loop(__ucu_dst, __ucu_src, __ucu_len, u8, label);	\
+>  } while (0)
+>  
+>  #ifdef CONFIG_CC_HAS_ASM_GOTO_OUTPUT
+> -- 
+> 2.49.0
+> 
+> 
