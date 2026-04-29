@@ -1,64 +1,64 @@
-Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
+Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 272A838B140
-	for <linux-efi@vger.kernel.org>; Wed, 29 Apr 2026 05:14:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AAC1E3822BE
+	for <linux-efi@vger.kernel.org>; Wed, 29 Apr 2026 05:14:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777439646; cv=none; b=BVnHarsBON9De/Ybn5m5pm7GmfiwkQHoVbzN3xxw1QaNwWq+iaW9qgaSITqoyg4yy9GmAW152AFTiJcpyJg8T8VII9ksWD+3pW1+TrkV6ZYtb4iVZPq4iPF81Rp9gLxKIYFApb5iKxTZuQdG5ne5kN2uuDl+VpGlb2/ai71GRVM=
+	t=1777439649; cv=none; b=r2/KNhA1V84UO40nY+OlscNx8pR/bekGsfa7lD5Es1I3pNXMnocSQ52EyUE6JeYTb2sTPv1gcGAKpWb+pQvUSalI5O1qan6eL3Gc6VeVp1W/QbYPx0v9bEhd/J1tHwMMnnruMeLLTdxhGY8Kpbm0LkG5xbGij+1s+j+4krNWGaA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777439646; c=relaxed/simple;
-	bh=AFxDVPfqDD1fX+0U3m7t2OJUKJfWgyTTwFDtosrykxU=;
+	s=arc-20240116; t=1777439649; c=relaxed/simple;
+	bh=dItIsPbk/j3Cl3D6WqOm0NerVIalkv5nzvBY3Zn3xvQ=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=KWLo2BJRa8Cs4PtpBuFBoHBE1rhlmwHLAjiaP8qNSWcBEg6h2wbPu1z4FFm9WX/KX3MtWybZhystJHjxqpDwwn+k/BvMpRK4+DK6z9KF+oJX6EyaME06JiJpra4yugezTX7v5RONRPjajA0C/+mpOPCGvhmgeC5iV3Y7Gs7bkTE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=WVKtCJ/j; arc=none smtp.client-ip=209.85.214.172
+	 MIME-Version; b=HteBbV8KgBjAcA+Q1tb9SOYwycs1q7DhR2Y3aVXkshpnT2lIsdfhS5bbSM/s0+O/KgUopfqjWj/Atg0bRFThYvzx/+IpTK8oJaCActn8+DyhEvdfAY1Whd7QCFQSbfv7NTIDAEdTPHEuaZ8aJznQeI88yXnzdx6vdL+oU5bA438=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc; spf=pass smtp.mailfrom=hev.cc; dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b=RaP71bfk; arc=none smtp.client-ip=209.85.214.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hev.cc
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hev.cc
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="WVKtCJ/j"
-Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-2b7adb38d65so58260755ad.2
-        for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 22:14:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=hev-cc.20251104.gappssmtp.com header.i=@hev-cc.20251104.gappssmtp.com header.b="RaP71bfk"
+Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-2ab077e3f32so53103265ad.3
+        for <linux-efi@vger.kernel.org>; Tue, 28 Apr 2026 22:14:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777439644; x=1778044444; darn=vger.kernel.org;
+        d=hev-cc.20251104.gappssmtp.com; s=20251104; t=1777439647; x=1778044447; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=s1M23bGh5Hxam/8XaoRaHHo8c9kozCZBAlQpB9hznRA=;
-        b=WVKtCJ/jXip4lCFUgLcr8SGqOY2Hd4vjk5C+fjAvRy28GR9slBnqcnbtMiwuz3d1NB
-         u5mvu8RkzEDyP78Ui9Pt5TIs1SqD8eCQA0EizLzV4eou0qfj+HxxqeZsPqD8G8m2pldg
-         QDW+kGtzQpC6FEw73dXFmbckNYmigqyzGrRXWQAkMqh7oLKvj1dd+16EmBoEK4CrADhY
-         07lHupqY/f1ye2Lx+RIsdqx/aBW+QUmGtgP1NHiSHrPi6zVoDycTZOgDr5UwC5ExwbGv
-         uZTyuEEeBEWq3WdHEWvn8hZwv0pte4gM12Ng6/1k5AiGbIi/KaUQ+nOgO1B09DeTv7ir
-         XPug==
+        bh=99tLjWOK/mLpAv9uxA8Gv2R+vi67znNvjWmjayf7030=;
+        b=RaP71bfkiykOFpSz7etZdREtpyULq/YII+YILILuAhshL2M6GOcXWXdrogLgFm1JFL
+         K1uP0Al4udjorWRiAVLOi82M4d0LzqM2Gy1BAw2D+3qq1p8bzddRdC7hyZkn5wLUUNRm
+         16ccIEYshP15EJg7b29StaAAOuCA95z8pkcqwKKUgRmWRvTno9nKLDEl8Na77tdhzCLY
+         YYYOi7osZb74FB0sjxCebDD1UyiJBuN9ObGCuQaefoRywJG/QTKY3qsVROrJNi/vokRo
+         5LGxP1KQatZeVvJBCS+O7VXKbQWYhOnHinnwn9fmAL0NeXxAAsLMmrOxsdKMTDBhXXz9
+         EqJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777439644; x=1778044444;
+        d=1e100.net; s=20251104; t=1777439647; x=1778044447;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=s1M23bGh5Hxam/8XaoRaHHo8c9kozCZBAlQpB9hznRA=;
-        b=MeXjP66YREwcolDMmURrxTLiQJDN5lh94oGxXzlQeK8OHtBOaWS7yvvI/EDqJXViKi
-         YBqyEP0TiFzaMMmUX3/hWsaBolWsD8o/hRKZuJX0GjJwTcYq6stRQ8TrxKsvn5PFsxwt
-         h6MRRHqcEr4wruX0PiJcBtpCKykOWi1yFQCYVZpVTrVNwIW12p42NXofpzxhHb7PjhLP
-         ZP8E/TTOYeeXNmQqwzk7/IZDr4oDRg3LnHuJgdMHCUvINOe1Ns84KU+u+HDeynGkAHmv
-         f7h4g760n8+gFeQUu6VlO2Lvjw8lX4gvthS2uK/RhbHss8KsGhJdsku6pQhD7Eo3/5El
-         Bt2A==
-X-Forwarded-Encrypted: i=1; AFNElJ854hdw0Ig2a6/HMy5MPN3eSR6DlL7uUAFhQ5ZvChqJPKn8uJlxB6meO/Kx1/mw9y1imKNa7wZmSzQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwKORabEroYsLZDD0YZJ+n6SFm1LfzwAUq3gejJN39/I8DOinho
-	Ejz4cFMmM3hACnui9C//62jPuXkD6HFhmXD4XJoZkQKz3nT2d04Fsc4nuF9d7F3S+QZpjELacvd
-	+PjhIZ7g=
-X-Gm-Gg: AeBDiesQWfEFsgleNeHi2opCzhMiL2IwyH/biFVPddyvUTu4GG7yT4VqlCwIHvUee6U
-	nbIlBiAoUTjoLZloAyKeRrqemDAcAamwqZtBr0th/wwGzrDfPS0p3pn9WzYOr49Rhg+IBZ9DKcD
-	cqmXn7Oj8Q/+CbfEmHQTyqLacBNYutYIriEoAziTefYbezXUAzc4XgP+0revnUKhUJ4m+k9ClAj
-	cCLayDZZVhEeQrPuYNdfjSJipDLJ2BSEkSxtfrjvTqcuCev4+9ytpoj+TrDDJ4DdK/lKj2Cs4+k
-	gg/4qRUQrTxjbyh/5jsbWbWwOX84AYZx358E+D3eCMCETrH9UdjO7vaQ/YbPB5er4Dt3c6+2Fcp
-	9KGsp7t0VIwMT3E6aIns7y8KMTCdEFPVaJ9sgGllZQceXjnmZxI8o6Mw1kVE9hELi67rZ9AQfaq
-	et4ai5Y+Q95azFHkLDntUDxXy3qdUL
-X-Received: by 2002:a17:903:2acc:b0:2b2:4cd2:e162 with SMTP id d9443c01a7336-2b97c48d869mr58904515ad.34.1777439644464;
-        Tue, 28 Apr 2026 22:14:04 -0700 (PDT)
+        bh=99tLjWOK/mLpAv9uxA8Gv2R+vi67znNvjWmjayf7030=;
+        b=Zj3K1KhDFEgb6LZHkqR2Jftl52dnFPVTyRQxFA/e306Yl5agS2SMQft6jKygDw2r1w
+         JtyRygDGdlQFhB0zq5Wyb9mVMbNjQD+QZNeppQnGWXD+PW7pLFgGNn9hVuw280uVjmJZ
+         pDq2zdX7YLVuSYpues2WG10iAL3DGZikHy3aAB1ZK+s6jJBzbXN52eN/TogfkUkgwGez
+         bsBt4KTUV/uQIoq0UVj+IqUEct9ikHoLi6DD3vJygYQ2LfgW3iudGwdrTAjB3j3eNoEh
+         wK1r6dirdAq6OtSgIrC+qST6XNeK2OWU8brteMlzooQ5OXZW/SedIp5aagSXfIckiqQH
+         WM9A==
+X-Forwarded-Encrypted: i=1; AFNElJ+6BakBLLNkScTqJC5BMMkQ5/Kk3DjUBieqakIEFn+J+7IMxGgmdBC74buE8oXDoUp5U9XyU9HkzHg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxTrhiHqUi4lACI3gnDuTymXCfS2Gnocu31nq3YwS9LRl8WgTYZ
+	FwIRvd5SDA9DLIoL/BeeGD9BRbt4UTGbpBXh/KX2np98aZeV+rnf+vf6D6eAqbVWAsQzOaVsnr4
+	JWYe6Jyc=
+X-Gm-Gg: AeBDieuSRqJKxYuZQdmZAG7toOB6tCyQVN6tNUFKl6jACgPEbF/LN1Bg/DbOUEzZbYR
+	BH0VAem7SFDMgYtLvAyx9PcAoBOoxn7GTMNUSqkhqug//p5CZgwHXlNG0zxgA3fEukmCWwncTAU
+	qEZw+ktMLvZMxoxU9mFN5y6+QLjN9Z1EKjryDsilFHWNjP+XO7s2QL7rHGSxm9Hg6BVpkbXals3
+	ulnnobAHvRzo+3jMJfVX6pNFv+3WiiTHjDkAuJaT3m0kP3k0Z7Tru6KgXHtcQjhU5kPc6Ccz2Bp
+	VNLonUinBQGLN0Yg6Zibe711gTA652aeBENPus+9fDaaOlJS/eAj7eeYvws/AVTbQJxk8XwoCFd
+	yjJHQBGSr/wm5AwTxCzTXsBercRIzYrSEZqQV8QhWl/E24YRCKikeeeWUPIvWLvpvAC8OnicB0d
+	0xTZmMCKFbnSBhPpEQZJy97jYTL3xV
+X-Received: by 2002:a17:902:f907:b0:2b2:42b1:adac with SMTP id d9443c01a7336-2b97c412257mr40027755ad.3.1777439647157;
+        Tue, 28 Apr 2026 22:14:07 -0700 (PDT)
 Received: from localhost ([2400:8902:e002:de33:3dbd:69cf:4a22:309])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b988787360sm8846935ad.20.2026.04.28.22.14.02
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b988787360sm8846935ad.20.2026.04.28.22.14.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 28 Apr 2026 22:14:04 -0700 (PDT)
+        Tue, 28 Apr 2026 22:14:06 -0700 (PDT)
 From: WANG Rui <r@hev.cc>
 To: Huacai Chen <chenhuacai@kernel.org>,
 	Ard Biesheuvel <ardb@kernel.org>
@@ -70,9 +70,9 @@ Cc: WANG Xuerui <kernel@xen0n.name>,
 	linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	WANG Rui <r@hev.cc>
-Subject: [PATCH v3 2/3] LoongArch: Skip relocation-time KASLR if it has already been applied
-Date: Wed, 29 Apr 2026 13:13:17 +0800
-Message-ID: <20260429051318.1581350-3-r@hev.cc>
+Subject: [PATCH v3 3/3] LoongArch: Avoid initrd overlap during kernel relocation
+Date: Wed, 29 Apr 2026 13:13:18 +0800
+Message-ID: <20260429051318.1581350-4-r@hev.cc>
 X-Mailer: git-send-email 2.54.0
 In-Reply-To: <20260429051318.1581350-1-r@hev.cc>
 References: <20260429051318.1581350-1-r@hev.cc>
@@ -84,30 +84,80 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-When the kernel is relocated during early boot, a randomized load
-address may already have been selected and applied. In this case,
-performing KASLR again in relocate.c is unnecessary.
+Validate the relocation address against the initrd region specified
+via "initrd=" or "initrdmem=" on the command line. Reject relocation
+targets that overlap the initrd to prevent memory corruption during
+early boot.
 
 Signed-off-by: WANG Rui <r@hev.cc>
 ---
- arch/loongarch/kernel/relocate.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ arch/loongarch/kernel/relocate.c | 45 ++++++++++++++++++++++++++++++++
+ 1 file changed, 45 insertions(+)
 
 diff --git a/arch/loongarch/kernel/relocate.c b/arch/loongarch/kernel/relocate.c
-index 16f6a9b39659..c36604a81d08 100644
+index c36604a81d08..c303c0be8f06 100644
 --- a/arch/loongarch/kernel/relocate.c
 +++ b/arch/loongarch/kernel/relocate.c
-@@ -139,6 +139,10 @@ static inline __init bool kaslr_disabled(void)
- 	char *str;
- 	const char *builtin_cmdline = CONFIG_CMDLINE;
+@@ -214,14 +214,59 @@ static inline void __init *determine_relocation_address(void)
+ 	return RELOCATED_KASLR(destination);
+ }
  
-+	/* KASLR is performed during early boot. */
-+	if (kaslr_offset())
-+		return true;
++static unsigned long __init try_get_initrd(unsigned long *size)
++{
++	unsigned long start = 0;
++	unsigned int key_length;
++	const char *key;
++	char *p;
 +
- 	str = strstr(builtin_cmdline, "nokaslr");
- 	if (str == builtin_cmdline || (str > builtin_cmdline && *(str - 1) == ' ')) {
- 		pr_info(KASLR_DISABLED_MESSAGE, "\'nokaslr\'", "built-in");
++	key = "initrd=";
++	key_length = strlen(key);
++	p = strstr(boot_command_line, key);
++
++	if (!p) {
++		key = "initrdmem=";
++		key_length = strlen(key);
++		p = strstr(boot_command_line, key);
++	}
++
++	if (p == boot_command_line || (p > boot_command_line && *(p - 1) == ' ')) {
++		char *endp;
++
++		p += key_length;
++		start = memparse(p, &endp);
++		if (*endp == ',')
++			*size = memparse(endp + 1, NULL);
++	}
++
++	return start;
++}
++
+ static inline int __init relocation_addr_valid(void *location_new)
+ {
++	unsigned long initrd_start;
++	unsigned long initrd_size = 0;
++
+ 	if ((unsigned long)location_new & 0x00000ffff)
+ 		return 0; /* Inappropriately aligned new location */
+ 
+ 	if ((unsigned long)location_new < (unsigned long)_end)
+ 		return 0; /* New location overlaps original kernel */
+ 
++	initrd_start = try_get_initrd(&initrd_size);
++	if (initrd_start && initrd_size) {
++		unsigned long kernel_start;
++		unsigned long kernel_size;
++
++		kernel_start = PHYSADDR(location_new);
++		kernel_size = (unsigned long)_end - (unsigned long)_text;
++
++		if (kernel_start < (initrd_start + initrd_size) &&
++			initrd_start < (kernel_start + kernel_size))
++			return 0; /* Initrd overlaps kernel */
++	}
++
+ 	return 1;
+ }
+ #endif
 -- 
 2.54.0
 
