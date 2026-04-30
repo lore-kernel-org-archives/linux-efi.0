@@ -1,208 +1,146 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC76A1E8320
-	for <linux-efi@vger.kernel.org>; Thu, 30 Apr 2026 06:35:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECF343D75D1
+	for <linux-efi@vger.kernel.org>; Thu, 30 Apr 2026 07:41:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.125.188.122
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777530926; cv=none; b=l96XL6uTnDLgO8/+FANr/1c2yRnvvS2zJbVTVt061m1uh4xvCb9gTKIZHvMv08YoOzYNbfVFyGF2FgdooKF7FMX9LSuP4mYvazgM9nDgN3Z9t4zomMpjNqkCMmeRzx7sc38GtThQdiMEOjtfTBAHbB9sYhKCO0lNr8G8Cjs7FMU=
+	t=1777534884; cv=none; b=E3XVu0HvlcEBi1C7hcNcMPVWpWq90T4V/0DDoTaHZopB6bvgLKszm3vAnCUJ25NE7zBgClIjywNi7wAQ7mtJT3/rOPtwrwU/iZnAMDvfbHkNYcCCqmzmrE8Nbwnzhoaw6odmbKsxYtP7UWSgksPbFgThphaMmrf9ZosapswKHz0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777530926; c=relaxed/simple;
-	bh=q0IdfS84XFBqKC7wln01aji8PKQdtX9bmCrIlNxiQoQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=jrzeF1K9lQf6Xi+QEZPnIrrFOY4qE/dnVZzUVdLY3ArjjyBMa/qHQAIzSZQHpRoa7nq8Bz7AjgvnR6KHNntJaEhFtoAsxECNxTYVUg3QK2UurML30ORV6RokmMAbnZ0ihgMTFNoVLnGKvmbwafWWJ7fBLY2YWDYbnWU+oR8Wv9c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=KQ61o7p4; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=cZn5CA9f; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=rNprQVbr; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=kmexgdeq; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1777534884; c=relaxed/simple;
+	bh=sszepgGox8yNjq+U78WVIYY/O3P/3k6fk57CLmDvdFM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Li2NUFM1NshNTxGxXPWlEmpWq9pyx1TdMWXDvl0PgydhcFAHG9nSb+csWQDk1yudpB9143YtpdsJiPgLUU3e54kvA5o1tYpEk6FA8+nPLLLBAP0c0CBxOCKFeCIP1QgmiODb7afJJgwdN4RSgJxW8OCGHLGnWUQzPmich9nulLw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=canonical.com; spf=pass smtp.mailfrom=canonical.com; dkim=pass (4096-bit key) header.d=canonical.com header.i=@canonical.com header.b=Jkcvv+45; arc=none smtp.client-ip=185.125.188.122
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=canonical.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=canonical.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="KQ61o7p4";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="cZn5CA9f";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="rNprQVbr";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="kmexgdeq"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	dkim=pass (4096-bit key) header.d=canonical.com header.i=@canonical.com header.b="Jkcvv+45"
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com [209.85.214.197])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 88D5F5BD6E;
-	Thu, 30 Apr 2026 06:35:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1777530923; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=a0LF9opS/4b9B5ZY/UhjqVoZf/jyWF4njFUo2Jwl3Jg=;
-	b=KQ61o7p4Lud8fy8AuyJ5fPImBAR44t1XUReUywn47MtP+OkBWooU6zMWYg2a05H5x0y3NC
-	6fY5Tn8gBiUR1/lNx1u0PZlXoTtva2b+f+7s3VOcpya9eEgI4hZtOTi7jX06z9gO7k7ir2
-	WwYgcnuWLl1f2yAwhRltkbP2DN/aZLY=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1777530923;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=a0LF9opS/4b9B5ZY/UhjqVoZf/jyWF4njFUo2Jwl3Jg=;
-	b=cZn5CA9fBiY9CgVLbVPBwOShViQOhEx7epHbKyV+WHvfSb3BQ8InkrR6ksK5FnBy1JzhkS
-	1KQGwrECYhXZUCBA==
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1777530922; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=a0LF9opS/4b9B5ZY/UhjqVoZf/jyWF4njFUo2Jwl3Jg=;
-	b=rNprQVbr58snlf0nWjdC8xT6swp9DU4zo9KAyEO5LBExhaa69LfzB9hC84Nm1zrXVcuYRy
-	LGPzuNsQNnJawTf4y0r3zQbdvz7SE5YrSP1CBEBfn7BWMZ1jmreBEic6kSxYqz7xnGI+/c
-	rOo92tNFNGal0oDaVdyKQywbgxVDFzo=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1777530922;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=a0LF9opS/4b9B5ZY/UhjqVoZf/jyWF4njFUo2Jwl3Jg=;
-	b=kmexgdeqeFSnoq8f26oKl38iMGX2IFk04AQ84o2Xy0n/o14JzuiefpBblXbVyyHDJ+AAvt
-	eH/vEWwpLDqvV3BQ==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E564F593B0;
-	Thu, 30 Apr 2026 06:35:21 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id v3YtNin48mlKFAAAD6G6ig
-	(envelope-from <tzimmermann@suse.de>); Thu, 30 Apr 2026 06:35:21 +0000
-Message-ID: <fb6e2aa8-3636-407f-a3fc-846a80e34d7b@suse.de>
-Date: Thu, 30 Apr 2026 08:35:21 +0200
+	by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id CC81A3FE99
+	for <linux-efi@vger.kernel.org>; Thu, 30 Apr 2026 07:41:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+	s=20251003; t=1777534871;
+	bh=ODQqFWQ+Nyy1EoDDiIJY4t1vvTxH4z/U+/Jg6s6lDMA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version;
+	b=Jkcvv+45Xi3slANXxH5umNKTmHbMrB1Hl5GvLpKEzRPeFjQXDdaN/yqYBFhs5gRkh
+	 xZ59F/F7UVUxgXXsoaDgyesDQXjWaTgaFr44n5gVkLlCildykJbN9E/r+iogLJIwKW
+	 viSqZ5w75xI/zOF5X775lCMFlRcrc1lTgRLbDuwmM5EW1AwUTk+Gd04pEz99YqPTZQ
+	 KsoR55GXAfGRTtLYTNa45lmqjUeBt7hmui/VdScQTc27EYbBAgP2ajMmOXP/oV9Opu
+	 I/NpXhen0JzBepKlI7q+GUpB3QaOZgZfPNyRhhLuSTxhBkUtEpJuJgu2Y14GYLkiK+
+	 pb6vkXZ2rksaODxZm4dnrIPJBoCfuW1QZQ9lXf3Ac1X7yMhjGJOTf21Y6m63TfQx3x
+	 cbSRP1KTpUsrP7xj5fWzObbCyZ0+LeBwh4uh3P3He0WCpph7DyEDwbzVZ/5X3Zi7c3
+	 5PtaXrSeyANhb0fAIJuihEL8d10bIEtChXzPlTG/zeB+RBPg4Ci6bIyMfBtSGa3yhd
+	 HDuRgLSg0XmcRuyLRHpAg/0eoxqXS0Kv9fOk77Bil7kojE1qsFgdlI2ugmu1N6ZK5d
+	 QDHTJNhk0CQWo38FkSVNTHfstoU2tJOqVdkqogKgfhER4hs533uZSjajxB/hw8VYTn
+	 kEJVqyNDUTnWXrQjJCF4IwUA=
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2b24cd2e2b3so6189375ad.0
+        for <linux-efi@vger.kernel.org>; Thu, 30 Apr 2026 00:41:11 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777534870; x=1778139670;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ODQqFWQ+Nyy1EoDDiIJY4t1vvTxH4z/U+/Jg6s6lDMA=;
+        b=DFzCoY7nWBKAoluTOBdy23VhYfZBbTdhHomZQ3ucOW5e2mOBtpB4eElt/Q5RTuo2x5
+         MKoXTX9uyDhwVLEk2Ecb6DbB72UoqV/0QWKYN1VPaJq9APgIUPDPPZQa7Ni5hGm/As4V
+         1frnh3e+W0JBQ2Qxla61SR2EUGxh2hhxISBXi9yT4tANN4QXUjGRgU0pKjvFSIo839b6
+         Pu0ra14K3OzNOm/HAiptAWNAD5dfIwzHNGsxgUfvz2OQbwrFmk2JeHGusXNmTRP1dDWE
+         gGpxlC26foUX47LAp5C/N7a5nVwUdLrJlnzpn8V35rUKsYuSET9Sc5DrqiaTDNKtPlfD
+         t4mQ==
+X-Forwarded-Encrypted: i=1; AFNElJ/BXkPFit5GlawaWyEyfmC6bUkBJDoj1Oo5LF6FGWNePG/0dJ1HWXhsQzxdj8WpeDlNRpV27BRfBfg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyiJCNkflFqC2HyKXu8ZHeR2fMmTMgj2PZ/fe8vKqiaaJCAcewG
+	C1RNPVHK+CcS70eTnVZx7QsZYSrz324/zJy7qaq/c9WDuXbQa7LNRiKjYm4Lr2LAKCZTvvHl6r6
+	J1C5FErEnxpOs88Th/Q5QvD4vmNIsyZOh+IqDk/A0ME/a38v8OzdFwxUCGez8T4OXTEUfr7KXhI
+	C8HA==
+X-Gm-Gg: AeBDievhme05cW4gxVkDUhC6WH3c1Ltk0F1bWEebYjHwCAYL7HSrUK0AqYrBD3PZHpw
+	SuHgZKtEajrWnXZzjMM3j0UgSigUVH0nBYLLvyAPcgJ5bHgkTPPlS648ut4mIf/loXmPpWeFMfS
+	MsCYkYLhegFV+AMbZr8hFg3WETB2ononlTQUJwGgZYAg5WxKgZwS1eHdBafZrT+/P+0LokHct72
+	kpiVZILO8XV8/OgLQXlHeETKT0ZLC+cTJ2yBHv0uCOOzbb7o7l3I5+IxkRIMIM+vwdi4ffo1jrO
+	0YqJXTKjQMX+kK3So74DdxMenA63tLpZbiN2F/WAMeMsdNNZsddMCuhLhfH+uEhMRh2YnvAfzWv
+	7a06Yh8XKIgDqeK5zjt6E1PKOwbfT3v/pajlL40uQ5hHSvrTqVeCz6Rg6B/wfBBLtFgEW13gCdw
+	==
+X-Received: by 2002:a17:903:908:b0:2b9:59ea:7eba with SMTP id d9443c01a7336-2b9a2341a18mr17569565ad.13.1777534869937;
+        Thu, 30 Apr 2026 00:41:09 -0700 (PDT)
+X-Received: by 2002:a17:903:908:b0:2b9:59ea:7eba with SMTP id d9443c01a7336-2b9a2341a18mr17569355ad.13.1777534869574;
+        Thu, 30 Apr 2026 00:41:09 -0700 (PDT)
+Received: from canonical.com (118-163-61-247.hinet-ip.hinet.net. [118.163.61.247])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b98893fbbbsm43706285ad.41.2026.04.30.00.41.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 30 Apr 2026 00:41:09 -0700 (PDT)
+From: Ivan Hu <ivan.hu@canonical.com>
+To: ardb@kernel.org,
+	ilias.apalodimas@linaro.org,
+	tglx@kernel.org,
+	mingo@redhat.com,
+	bp@alien8.de,
+	dave.hansen@linux.intel.com,
+	hpa@zytor.com,
+	ebiggers@google.com
+Cc: x86@kernel.org,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] x86/efi: Fix graceful fault handling after FPU softirq changes
+Date: Thu, 30 Apr 2026 15:41:07 +0800
+Message-ID: <20260430074107.27051-1-ivan.hu@canonical.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/8] firmware: sysfb: Consolidate config/code wrt.
- sysfb_primary_screen
-To: patchwork-bot+linux-riscv@kernel.org
-Cc: linux-riscv@lists.infradead.org, javierm@redhat.com, arnd@arndb.de,
- ardb@kernel.org, ilias.apalodimas@linaro.org, chenhuacai@kernel.org,
- kernel@xen0n.name, maarten.lankhorst@linux.intel.com, mripard@kernel.org,
- airlied@gmail.com, simona@ffwll.ch, kys@microsoft.com,
- haiyangz@microsoft.com, wei.liu@kernel.org, decui@microsoft.com,
- longli@microsoft.com, deller@gmx.de, linux-arm-kernel@lists.infradead.org,
- loongarch@lists.linux.dev, linux-efi@vger.kernel.org,
- dri-devel@lists.freedesktop.org, linux-hyperv@vger.kernel.org,
- linux-fbdev@vger.kernel.org
-References: <20260402092305.208728-1-tzimmermann@suse.de>
- <177751955329.2274119.12779807302343885295.git-patchwork-notify@kernel.org>
-Content-Language: en-US
-From: Thomas Zimmermann <tzimmermann@suse.de>
-Autocrypt: addr=tzimmermann@suse.de; keydata=
- xsBNBFs50uABCADEHPidWt974CaxBVbrIBwqcq/WURinJ3+2WlIrKWspiP83vfZKaXhFYsdg
- XH47fDVbPPj+d6tQrw5lPQCyqjwrCPYnq3WlIBnGPJ4/jreTL6V+qfKRDlGLWFjZcsrPJGE0
- BeB5BbqP5erN1qylK9i3gPoQjXGhpBpQYwRrEyQyjuvk+Ev0K1Jc5tVDeJAuau3TGNgah4Yc
- hdHm3bkPjz9EErV85RwvImQ1dptvx6s7xzwXTgGAsaYZsL8WCwDaTuqFa1d1jjlaxg6+tZsB
- 9GluwvIhSezPgnEmimZDkGnZRRSFiGP8yjqTjjWuf0bSj5rUnTGiyLyRZRNGcXmu6hjlABEB
- AAHNJ1Rob21hcyBaaW1tZXJtYW5uIDx0emltbWVybWFubkBzdXNlLmRlPsLAjgQTAQgAOAIb
- AwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftODH
- AAoJEGgNwR1TC3ojx1wH/0hKGWugiqDgLNXLRD/4TfHBEKmxIrmfu9Z5t7vwUKfwhFL6hqvo
- lXPJJKQpQ2z8+X2vZm/slsLn7J1yjrOsoJhKABDi+3QWWSGkaGwRJAdPVVyJMfJRNNNIKwVb
- U6B1BkX2XDKDGffF4TxlOpSQzdtNI/9gleOoUA8+jy8knnDYzjBNOZqLG2FuTdicBXblz0Mf
- vg41gd9kCwYXDnD91rJU8tzylXv03E75NCaTxTM+FBXPmsAVYQ4GYhhgFt8S2UWMoaaABLDe
- 7l5FdnLdDEcbmd8uLU2CaG4W2cLrUaI4jz2XbkcPQkqTQ3EB67hYkjiEE6Zy3ggOitiQGcqp
- j//OwE0EWznS4AEIAMYmP4M/V+T5RY5at/g7rUdNsLhWv1APYrh9RQefODYHrNRHUE9eosYb
- T6XMryR9hT8XlGOYRwKWwiQBoWSDiTMo/Xi29jUnn4BXfI2px2DTXwc22LKtLAgTRjP+qbU6
- 3Y0xnQN29UGDbYgyyK51DW3H0If2a3JNsheAAK+Xc9baj0LGIc8T9uiEWHBnCH+RdhgATnWW
- GKdDegUR5BkDfDg5O/FISymJBHx2Dyoklv5g4BzkgqTqwmaYzsl8UxZKvbaxq0zbehDda8lv
- hFXodNFMAgTLJlLuDYOGLK2AwbrS3Sp0AEbkpdJBb44qVlGm5bApZouHeJ/+n+7r12+lqdsA
- EQEAAcLAdgQYAQgAIAIbDBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftOH6AAoJEGgNwR1T
- C3ojVSkIALpAPkIJPQoURPb1VWjh34l0HlglmYHvZszJWTXYwavHR8+k6Baa6H7ufXNQtThR
- yIxJrQLW6rV5lm7TjhffEhxVCn37+cg0zZ3j7zIsSS0rx/aMwi6VhFJA5hfn3T0TtrijKP4A
- SAQO9xD1Zk9/61JWk8OysuIh7MXkl0fxbRKWE93XeQBhIJHQfnc+YBLprdnxR446Sh8Wn/2D
- Ya8cavuWf2zrB6cZurs048xe0UbSW5AOSo4V9M0jzYI4nZqTmPxYyXbm30Kvmz0rYVRaitYJ
- 4kyYYMhuULvrJDMjZRvaNe52tkKAvMevcGdt38H4KSVXAylqyQOW5zvPc4/sq9c=
-In-Reply-To: <177751955329.2274119.12779807302343885295.git-patchwork-notify@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	SUSPICIOUS_RECIPS(1.50)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	RCVD_COUNT_TWO(0.00)[2];
-	TAGGED_RCPT(0.00)[linux-riscv];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	MIME_TRACE(0.00)[0:+];
-	MID_RHS_MATCH_FROM(0.00)[];
-	FREEMAIL_ENVRCPT(0.00)[gmail.com,gmx.de];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	FROM_EQ_ENVFROM(0.00)[];
-	FREEMAIL_CC(0.00)[lists.infradead.org,redhat.com,arndb.de,kernel.org,linaro.org,xen0n.name,linux.intel.com,gmail.com,ffwll.ch,microsoft.com,gmx.de,lists.linux.dev,vger.kernel.org,lists.freedesktop.org];
-	RCPT_COUNT_TWELVE(0.00)[24];
-	RCVD_TLS_ALL(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:mid,suse.com:url,imap1.dmz-prg2.suse.org:helo]
-X-Spam-Flag: NO
-X-Spam-Score: -2.80
-X-Spam-Level: 
 
-Hi
+Since commit d02198550423 ("x86/fpu: Improve crypto performance by
+making kernel-mode FPU reliably usable in softirqs"), kernel_fpu_begin()
+calls fpregs_lock() which uses local_bh_disable() instead of the
+previous preempt_disable(). This sets SOFTIRQ_OFFSET in preempt_count
+during the entire EFI runtime service call, causing in_interrupt() to
+return true in normal task context.
 
-Am 30.04.26 um 05:25 schrieb patchwork-bot+linux-riscv@kernel.org:
-> Hello:
->
-> This series was applied to riscv/linux.git (fixes)
-> by Ard Biesheuvel <ardb@kernel.org>:
+The graceful page fault handler efi_crash_gracefully_on_page_fault()
+uses in_interrupt() to bail out for faults in real interrupt context.
+With SOFTIRQ_OFFSET now set, the handler always bails out, leaving EFI
+firmware page faults unhandled. This escalates to die() which also sees
+in_interrupt() as true and calls panic("Fatal exception in interrupt"),
+resulting in a hard system freeze. On systems with buggy firmware that
+triggers page faults during EFI runtime calls (e.g., accessing unmapped
+memory in GetTime()), this causes an unrecoverable hang instead of the
+expected graceful EFI_ABORTED recovery.
 
-Patch 3 was fairly controversial.
+Fix by replacing in_interrupt() with in_hardirq() || in_nmi(). This
+preserves the original intent of bailing for genuine hardware interrupt
+or NMI faults, while no longer falsely triggering from the FPU code
+path's local_bh_disable(). This is safe because softirqs cannot run
+during EFI calls (they are explicitly blocked by fpregs_lock()), so
+they can never be the source of a page fault in this context.
 
-Best regards
-Thomas
+Fixes: d02198550423 ("x86/fpu: Improve crypto performance by making kernel-mode FPU reliably usable in softirqs")
+Signed-off-by: Ivan Hu <ivan.hu@canonical.com>
+---
+ arch/x86/platform/efi/quirks.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
->
-> On Thu,  2 Apr 2026 11:09:14 +0200 you wrote:
->> The global state sysfb_primary_screen holds information about the
->> framebuffer provided by EFI/BIOS systems. It is part of the sysfb
->> module, but used in several places without direct connection to
->> sysfb. Fix this by making users of sysfb_primary_screen depend on
->> CONFIG_SYSFB. Fix a few issues in the process.
->>
->> Patches 1 and 2 fix general errors in the Kconfig rules. In any case,
->> these patches should be considered even without the rest of the series.
->>
->> [...]
-> Here is the summary with links:
->    - [1/8] hv: Select CONFIG_SYSFB only for CONFIG_HYPERV_VMBUS
->      https://git.kernel.org/riscv/c/d33db956c961
->    - [2/8] firmware: efi: Never declare sysfb_primary_display on x86
->      https://git.kernel.org/riscv/c/5241c2ca33bb
->    - [3/8] firmware: sysfb: Make CONFIG_SYSFB a user-selectable option
->      (no matching commit)
->    - [4/8] firmware: sysfb: Split sysfb.c into sysfb_primary.c and sysfb_pci.c
->      (no matching commit)
->    - [5/8] firmware: sysfb: Implement screen_info relocation for primary display
->      (no matching commit)
->    - [6/8] firmware: sysfb: Avoid forward-declaring sysfb_parent_dev()
->      (no matching commit)
->    - [7/8] firmware: efi: Make CONFIG_EFI_EARLYCON depend on CONFIG_SYSFB; clean up
->      (no matching commit)
->    - [8/8] firmware: sysfb: Move CONFIG_FIRMWARE_EDID to firmware options
->      (no matching commit)
->
-> You are awesome, thank you!
-
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index df24ffc6105d..7475405119ce 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -767,10 +767,10 @@ void efi_crash_gracefully_on_page_fault(unsigned long phys_addr)
+ 		return;
+ 
+ 	/*
+-	 * If we get an interrupt/NMI while processing an EFI runtime service
++	 * If we get a hard IRQ or NMI while processing an EFI runtime service
+ 	 * then this is a regular OOPS, not an EFI failure.
+ 	 */
+-	if (in_interrupt())
++	if (in_hardirq() || in_nmi())
+ 		return;
+ 
+ 	/*
 -- 
---
-Thomas Zimmermann
-Graphics Driver Developer
-SUSE Software Solutions Germany GmbH
-Frankenstr. 146, 90461 Nürnberg, Germany, www.suse.com
-GF: Jochen Jaser, Andrew McDonald, Werner Knoblich, (HRB 36809, AG Nürnberg)
-
+2.43.0
 
