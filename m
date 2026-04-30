@@ -1,101 +1,99 @@
-Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9575C3A8757
-	for <linux-efi@vger.kernel.org>; Wed, 29 Apr 2026 21:09:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5DAC3939C9;
+	Thu, 30 Apr 2026 03:26:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777497000; cv=none; b=f1cKXyL8RypahWvoVi7BmWTWor/qPY7x+91v00v6MFpz9vzAm1svuE+AhSS40wj7DjOjQ8YCnVkDvyMU0h5FpKo39pRRD8mrPR4kinpe4YhIrM9JuibFMdlIRDfqx89hhoyIKyFhp8EQ2kAm223a9zkDyz1cm84B/ZG9YHn4/6w=
+	t=1777519598; cv=none; b=sAq3dsw2ONxWvsR/vsb+Fq16CVhmrcbRlaJJTht4oevy/91xXQP+jSq7HOPOY/NAglTfe37VYOAifC3Q3H279XeCpHVUJR2GXFrXLX0xALuDghLzKKLvEjZDrgZtL3pWVHzz+AfWkgXKLfrgvQbD2fRUOjfg9iCln9lNkCQWHQ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777497000; c=relaxed/simple;
-	bh=tKD1kZoqphx/1IqZo+FxuGf68uivswEb8Ml+8Wv6abw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=LWfS1vuq1SZk/LgVpNCaM4KiqnOqjSV8r17zZ1jbKI8bWQEVkNOmfMM0DRrUwgFWX9KnJPvlQU1vBEv5wsr/JVEhBvq6mKseK5w5bP6X07+KwO1YYe65fALD8lGTQfIx5q8JMpx9x7myNAjsotX1mzaTwKmWSieGzzYweIO9Etk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=GamSdEN1; arc=none smtp.client-ip=209.85.218.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+	s=arc-20240116; t=1777519598; c=relaxed/simple;
+	bh=l9exXaykMZZr58ApvA3wgjdBqbjJXmcg2LD51E1L2d8=;
+	h=Content-Type:MIME-Version:Subject:From:Message-Id:Date:References:
+	 In-Reply-To:To:Cc; b=fHRh6fOO7W95GgKPTjcVjtirDJIml6iMBeUMVNOGZj5zvcj07ltbJpuXMmQrHHUYOpU5+oVHS1EdvrrCDrrhR9I4tPgRVo48z3oYhJj+9TrZEVJ5NVXJGYeljLkjw4YqrdRquQsSOc9Z7wixpouDQGRwmJO2gbnrMqLtI1PlIfw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VQ5fUnGV; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="GamSdEN1"
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-ba8472c1613so34334766b.0
-        for <linux-efi@vger.kernel.org>; Wed, 29 Apr 2026 14:09:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1777496996; x=1778101796; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=HnqVnLYxhZQkXEJ+qyCw2Y174F/Hy99oiICnSXcEeRc=;
-        b=GamSdEN14xHCNK9pd4PyrGGnYd/BnswBKUZuJC4/GwxxeuBPgFg2dzIaXBJGmLGpea
-         mVm4Iwz92J2Xxy6doZTWzjmdJTjHQU8XPP8V9f++LHWaAcSbqARGiGRPP/cNikf18IyX
-         KO9Pa3Gf2yFoUKALQN8gjYoRFUro/ptX1FHxU=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777496996; x=1778101796;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=HnqVnLYxhZQkXEJ+qyCw2Y174F/Hy99oiICnSXcEeRc=;
-        b=pQGOGW7OAan12dqVGO6yem12gG8nKXQqVLP0u+RVfRJjmPWmG9l8Zv3P4Q+mSxed/s
-         TXLBvL0MitpPhsl4NXvI2mvOy8gPSQrzg/7i3rKCeZjD6pF6t1UxfhOg1rtPTulUJtaQ
-         VoePdMkwwWV1YpEYfQ6NH18WlkOvM4qWxWjZraQvx2s2s6/7WemA18TOTm3ejA5MylFJ
-         x6UAGZ8MAw0bylBrT15I4HqtgXCs2DS8MIersfy0nYG1f9JdffJiJ8xpbnIr3woX2khF
-         1F/v3iWJY/nDXFQLBeASWF7ssddxj5kQdbMUG/WgtHSiOh4MqZ+Q11LcR6Nn6q0xwIRW
-         DxLw==
-X-Forwarded-Encrypted: i=1; AFNElJ/dB3aUFRNQefBJi5OxRFU0dcZE3xms8y5JwaiOa/MguD/YU91qVgE+EOro+Iev4OOFKHxQ4yawTIM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwW52Q8gc7Yrbv9ld2J+YPi3upGR0MoG4xK3tPU+GChOuvp08Y3
-	1AdsFbjMEGDyxH3onD80H9BojZtDpIQ9bEAr/M5MZzIAFKwmc5NxFg/qP6i2vOxLi9vGo/fy2ET
-	f7YGfbAI=
-X-Gm-Gg: AeBDiesK9wHeqUtwMgYqlSCzxtfwnC3/tadkG32NX6QMxnIkfp/1L+K4eizyb1trdll
-	tvtvDuFqLKZiLOCYMwWufDn/4aiEo46gXz8iEzhCWkyNhvStcK6MiHVzoif9GNhJl+ChhRKBjE9
-	KaCzQrY+2uYNXXApze1fgQlHYZsd0IHAV6RZJ2nMRtPmEESec1dYTtzCPdNHTLoRbqtdaDRSKUN
-	yxmua0OsoRpwbsNGYE6YJIcWgt2/ivYEiv5G2U95CVFh+s6js/ev7FeAQhVU0PZ3sH0eObK5NZh
-	BdzfygrV+6JjhUW7Mpj0A19rbz1k0zj5e8/lS3rtAQwdo1g0khx/QEAa3KL1ktMj3+bGTgHMrLd
-	k0rL+Yf7SJhEVhJ6aaGKt2kvAajg7K7nL+/eQs4NiIHKN5pNd865I2rCJc3/qqVGN4KeGK0cBLy
-	5/u5Q1iQV3fVUQFW/FK2K7nKuBct46atMaH90UoNxoLBBFIG3faODgZTkxO5uUQ6V5a5HSRgBVv
-	mkAWEJcyxw=
-X-Received: by 2002:a17:907:788:b0:ba5:4bb3:38f9 with SMTP id a640c23a62f3a-bbac65abd6emr21904166b.27.1777496995418;
-        Wed, 29 Apr 2026 14:09:55 -0700 (PDT)
-Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com. [209.85.218.44])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-67b22177d15sm1052939a12.26.2026.04.29.14.09.55
-        for <linux-efi@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 29 Apr 2026 14:09:55 -0700 (PDT)
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-ba8472c1613so34329666b.0
-        for <linux-efi@vger.kernel.org>; Wed, 29 Apr 2026 14:09:55 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AFNElJ/HeBQfeaqURLnBVRAJMv9vCQ5wgrz153c2D1ftB0PhS3XOvVizy5Awd73bm9+HK11jZqVCarbleh8=@vger.kernel.org
-X-Received: by 2002:a17:907:5cb:b0:bad:dfe1:6a56 with SMTP id
- a640c23a62f3a-bbac6ac310emr20951866b.30.1777496634502; Wed, 29 Apr 2026
- 14:03:54 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VQ5fUnGV"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6A3B0C2BCC6;
+	Thu, 30 Apr 2026 03:26:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1777519598;
+	bh=l9exXaykMZZr58ApvA3wgjdBqbjJXmcg2LD51E1L2d8=;
+	h=Subject:From:Date:References:In-Reply-To:To:Cc:From;
+	b=VQ5fUnGVnOy9olGba/PpFhmIOWwrvE63bg7wf8QD1oVMBU1BxMtz5Q5sq/JwQ9xtx
+	 FBCndWX7NJpcwHQS2uh8ZRD+UwKJS8Nf/xOjB7kKUPQy858zCbkge2oAV6lxAQf625
+	 gG1qodBE+N3L2UtwgzEs5J0HoMAeFALuJQm6hAGuvkiAJgkXb28kjlalsRs3n3a2TF
+	 29IamRcKDsnYhlWjglq3Ko8zPoEuXsWpPSgFQW5Uw0WEZ3PhmG1Et2p+yJY2KivWmR
+	 Vv+BDgeCmlfDBpvBGUWuK6vk0BLhwJE3vHWgs2Tf1Bq4zcCUvorNfflKfJA4kV/UO2
+	 SQxIDV5JK1LdQ==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id B9F3C3809A07;
+	Thu, 30 Apr 2026 03:25:54 +0000 (UTC)
+Content-Type: text/plain; charset="utf-8"
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260427040517.828226-1-neilb@ownmail.net> <20260427040517.828226-5-neilb@ownmail.net>
- <20260428033738.GV3518998@ZenIV> <177737511992.1474915.1952404144121931523@noble.neil.brown.name>
- <20260428142225.GX3518998@ZenIV> <177741881482.1474915.12527082398060370192@noble.neil.brown.name>
- <20260429052626.GY3518998@ZenIV> <20260429170731.GZ3518998@ZenIV>
-In-Reply-To: <20260429170731.GZ3518998@ZenIV>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Wed, 29 Apr 2026 14:03:36 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wgs8yAfaQYmeKWab7KES0jU46TvdBfQ3Q9+6+=E=vrx=w@mail.gmail.com>
-X-Gm-Features: AVHnY4JtG_9GDiz56QzrtD5BrZqKcsiFlr8t2n0kWXJmeuX800NGv4Qx6DLxhBo
-Message-ID: <CAHk-=wgs8yAfaQYmeKWab7KES0jU46TvdBfQ3Q9+6+=E=vrx=w@mail.gmail.com>
-Subject: Re: [PATCH v3 04/19] VFS: use wait_var_event for waiting in d_alloc_parallel()
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: NeilBrown <neil@brown.name>, Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, 
-	Jeff Layton <jlayton@kernel.org>, Trond Myklebust <trondmy@kernel.org>, 
-	Anna Schumaker <anna@kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>, 
-	Jeremy Kerr <jk@ozlabs.org>, Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org, 
-	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org, 
-	linux-unionfs@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Subject: Re: [PATCH 0/8] firmware: sysfb: Consolidate config/code wrt.
+ sysfb_primary_screen
+From: patchwork-bot+linux-riscv@kernel.org
+Message-Id: 
+ <177751955329.2274119.12779807302343885295.git-patchwork-notify@kernel.org>
+Date: Thu, 30 Apr 2026 03:25:53 +0000
+References: <20260402092305.208728-1-tzimmermann@suse.de>
+In-Reply-To: <20260402092305.208728-1-tzimmermann@suse.de>
+To: Thomas Zimmermann <tzimmermann@suse.de>
+Cc: linux-riscv@lists.infradead.org, javierm@redhat.com, arnd@arndb.de,
+ ardb@kernel.org, ilias.apalodimas@linaro.org, chenhuacai@kernel.org,
+ kernel@xen0n.name, maarten.lankhorst@linux.intel.com, mripard@kernel.org,
+ airlied@gmail.com, simona@ffwll.ch, kys@microsoft.com,
+ haiyangz@microsoft.com, wei.liu@kernel.org, decui@microsoft.com,
+ longli@microsoft.com, deller@gmx.de, linux-arm-kernel@lists.infradead.org,
+ loongarch@lists.linux.dev, linux-efi@vger.kernel.org,
+ dri-devel@lists.freedesktop.org, linux-hyperv@vger.kernel.org,
+ linux-fbdev@vger.kernel.org
 
-On Wed, 29 Apr 2026 at 10:07, Al Viro <viro@zeniv.linux.org.uk> wrote:
->
-> Something like patch below (on top of -rc1, completely untested).
+Hello:
 
-This looks like a clear improvement to me.
+This series was applied to riscv/linux.git (fixes)
+by Ard Biesheuvel <ardb@kernel.org>:
 
-... but I obviously didn't test it either. But just looking at the
-patch I went "Make it so".
+On Thu,  2 Apr 2026 11:09:14 +0200 you wrote:
+> The global state sysfb_primary_screen holds information about the
+> framebuffer provided by EFI/BIOS systems. It is part of the sysfb
+> module, but used in several places without direct connection to
+> sysfb. Fix this by making users of sysfb_primary_screen depend on
+> CONFIG_SYSFB. Fix a few issues in the process.
+> 
+> Patches 1 and 2 fix general errors in the Kconfig rules. In any case,
+> these patches should be considered even without the rest of the series.
+> 
+> [...]
 
-             Linus
+Here is the summary with links:
+  - [1/8] hv: Select CONFIG_SYSFB only for CONFIG_HYPERV_VMBUS
+    https://git.kernel.org/riscv/c/d33db956c961
+  - [2/8] firmware: efi: Never declare sysfb_primary_display on x86
+    https://git.kernel.org/riscv/c/5241c2ca33bb
+  - [3/8] firmware: sysfb: Make CONFIG_SYSFB a user-selectable option
+    (no matching commit)
+  - [4/8] firmware: sysfb: Split sysfb.c into sysfb_primary.c and sysfb_pci.c
+    (no matching commit)
+  - [5/8] firmware: sysfb: Implement screen_info relocation for primary display
+    (no matching commit)
+  - [6/8] firmware: sysfb: Avoid forward-declaring sysfb_parent_dev()
+    (no matching commit)
+  - [7/8] firmware: efi: Make CONFIG_EFI_EARLYCON depend on CONFIG_SYSFB; clean up
+    (no matching commit)
+  - [8/8] firmware: sysfb: Move CONFIG_FIRMWARE_EDID to firmware options
+    (no matching commit)
+
+You are awesome, thank you!
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/patchwork/pwbot.html
+
+
