@@ -1,293 +1,208 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id C7DB9344DAE;
-	Thu, 30 Apr 2026 03:49:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC76A1E8320
+	for <linux-efi@vger.kernel.org>; Thu, 30 Apr 2026 06:35:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777520984; cv=none; b=MEofspUUAEsQDJSFGk5Zi5KiYrCf2CkHcAD7ibmVBBGFlqRZ5Hb++DJ8bA4SINcqxrLfnkYWl3Y0BJAq6wwz50lBRWmTK+Vmw3jRxHhQ2unva2bJecUw6lE6V6nSJOJN/seuNzdtee83Dm2Pf8dfAmJomS5uXXPt7zoZEQKn/n8=
+	t=1777530926; cv=none; b=l96XL6uTnDLgO8/+FANr/1c2yRnvvS2zJbVTVt061m1uh4xvCb9gTKIZHvMv08YoOzYNbfVFyGF2FgdooKF7FMX9LSuP4mYvazgM9nDgN3Z9t4zomMpjNqkCMmeRzx7sc38GtThQdiMEOjtfTBAHbB9sYhKCO0lNr8G8Cjs7FMU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777520984; c=relaxed/simple;
-	bh=zfhZ2KqdUCRvQf3GQfUOIuGNLqo8qxkZHAbF2RhlsN8=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=nkRHFyn/Vj7POQDxUYySO8gjYqsJUltxcFo8wcaqCIx9Mm6MyKVrwQSMygKl7gNXoPTBzQtrATGgXBvyPT1q3P5Nxh1nx+Kc2z/1qcQdMGIZtV/V/w2LwJNtt+Z7wA2vohf5JDlTlm+nvKDVXkdS3bIdmKxw8rSPzqljyWNSRj4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=t32V3S+4; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+	s=arc-20240116; t=1777530926; c=relaxed/simple;
+	bh=q0IdfS84XFBqKC7wln01aji8PKQdtX9bmCrIlNxiQoQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=jrzeF1K9lQf6Xi+QEZPnIrrFOY4qE/dnVZzUVdLY3ArjjyBMa/qHQAIzSZQHpRoa7nq8Bz7AjgvnR6KHNntJaEhFtoAsxECNxTYVUg3QK2UurML30ORV6RokmMAbnZ0ihgMTFNoVLnGKvmbwafWWJ7fBLY2YWDYbnWU+oR8Wv9c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=KQ61o7p4; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=cZn5CA9f; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=rNprQVbr; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=kmexgdeq; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="t32V3S+4"
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 4EEF31A9A;
-	Wed, 29 Apr 2026 20:49:35 -0700 (PDT)
-Received: from ergosum.cambridge.arm.com (ergosum.cambridge.arm.com [10.1.196.45])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPA id 4158D3F7B4;
-	Wed, 29 Apr 2026 20:49:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1777520980; bh=zfhZ2KqdUCRvQf3GQfUOIuGNLqo8qxkZHAbF2RhlsN8=;
-	h=From:To:Cc:Subject:Date:From;
-	b=t32V3S+4YcnT4TGwDOmXXTACjsbWnJkakGUNLnVj0ACP+1c254em2woHTzUWAHQMB
-	 GgZM2hkxGgoZM0NK/ZZWARy0PYcKtfrNNN8bICjyFJcpj6yI88wn4OCVDMlLbu84bR
-	 5fRu1F04HIwVj8jqPQacY93KP2aRFNrDs4hXq3Gw=
-From: Anshuman Khandual <anshuman.khandual@arm.com>
-To: linux-arm-kernel@lists.infradead.org
-Cc: Anshuman Khandual <anshuman.khandual@arm.com>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Will Deacon <will@kernel.org>,
-	David Hildenbrand <david@kernel.org>,
-	Mike Rapoport <rppt@kernel.org>,
-	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] arm64/mm: Rename ptdesc_t
-Date: Thu, 30 Apr 2026 04:49:33 +0100
-Message-Id: <20260430034933.541634-1-anshuman.khandual@arm.com>
-X-Mailer: git-send-email 2.30.2
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="KQ61o7p4";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="cZn5CA9f";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="rNprQVbr";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="kmexgdeq"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 88D5F5BD6E;
+	Thu, 30 Apr 2026 06:35:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1777530923; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=a0LF9opS/4b9B5ZY/UhjqVoZf/jyWF4njFUo2Jwl3Jg=;
+	b=KQ61o7p4Lud8fy8AuyJ5fPImBAR44t1XUReUywn47MtP+OkBWooU6zMWYg2a05H5x0y3NC
+	6fY5Tn8gBiUR1/lNx1u0PZlXoTtva2b+f+7s3VOcpya9eEgI4hZtOTi7jX06z9gO7k7ir2
+	WwYgcnuWLl1f2yAwhRltkbP2DN/aZLY=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1777530923;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=a0LF9opS/4b9B5ZY/UhjqVoZf/jyWF4njFUo2Jwl3Jg=;
+	b=cZn5CA9fBiY9CgVLbVPBwOShViQOhEx7epHbKyV+WHvfSb3BQ8InkrR6ksK5FnBy1JzhkS
+	1KQGwrECYhXZUCBA==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1777530922; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=a0LF9opS/4b9B5ZY/UhjqVoZf/jyWF4njFUo2Jwl3Jg=;
+	b=rNprQVbr58snlf0nWjdC8xT6swp9DU4zo9KAyEO5LBExhaa69LfzB9hC84Nm1zrXVcuYRy
+	LGPzuNsQNnJawTf4y0r3zQbdvz7SE5YrSP1CBEBfn7BWMZ1jmreBEic6kSxYqz7xnGI+/c
+	rOo92tNFNGal0oDaVdyKQywbgxVDFzo=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1777530922;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=a0LF9opS/4b9B5ZY/UhjqVoZf/jyWF4njFUo2Jwl3Jg=;
+	b=kmexgdeqeFSnoq8f26oKl38iMGX2IFk04AQ84o2Xy0n/o14JzuiefpBblXbVyyHDJ+AAvt
+	eH/vEWwpLDqvV3BQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E564F593B0;
+	Thu, 30 Apr 2026 06:35:21 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id v3YtNin48mlKFAAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Thu, 30 Apr 2026 06:35:21 +0000
+Message-ID: <fb6e2aa8-3636-407f-a3fc-846a80e34d7b@suse.de>
+Date: Thu, 30 Apr 2026 08:35:21 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 0/8] firmware: sysfb: Consolidate config/code wrt.
+ sysfb_primary_screen
+To: patchwork-bot+linux-riscv@kernel.org
+Cc: linux-riscv@lists.infradead.org, javierm@redhat.com, arnd@arndb.de,
+ ardb@kernel.org, ilias.apalodimas@linaro.org, chenhuacai@kernel.org,
+ kernel@xen0n.name, maarten.lankhorst@linux.intel.com, mripard@kernel.org,
+ airlied@gmail.com, simona@ffwll.ch, kys@microsoft.com,
+ haiyangz@microsoft.com, wei.liu@kernel.org, decui@microsoft.com,
+ longli@microsoft.com, deller@gmx.de, linux-arm-kernel@lists.infradead.org,
+ loongarch@lists.linux.dev, linux-efi@vger.kernel.org,
+ dri-devel@lists.freedesktop.org, linux-hyperv@vger.kernel.org,
+ linux-fbdev@vger.kernel.org
+References: <20260402092305.208728-1-tzimmermann@suse.de>
+ <177751955329.2274119.12779807302343885295.git-patchwork-notify@kernel.org>
+Content-Language: en-US
+From: Thomas Zimmermann <tzimmermann@suse.de>
+Autocrypt: addr=tzimmermann@suse.de; keydata=
+ xsBNBFs50uABCADEHPidWt974CaxBVbrIBwqcq/WURinJ3+2WlIrKWspiP83vfZKaXhFYsdg
+ XH47fDVbPPj+d6tQrw5lPQCyqjwrCPYnq3WlIBnGPJ4/jreTL6V+qfKRDlGLWFjZcsrPJGE0
+ BeB5BbqP5erN1qylK9i3gPoQjXGhpBpQYwRrEyQyjuvk+Ev0K1Jc5tVDeJAuau3TGNgah4Yc
+ hdHm3bkPjz9EErV85RwvImQ1dptvx6s7xzwXTgGAsaYZsL8WCwDaTuqFa1d1jjlaxg6+tZsB
+ 9GluwvIhSezPgnEmimZDkGnZRRSFiGP8yjqTjjWuf0bSj5rUnTGiyLyRZRNGcXmu6hjlABEB
+ AAHNJ1Rob21hcyBaaW1tZXJtYW5uIDx0emltbWVybWFubkBzdXNlLmRlPsLAjgQTAQgAOAIb
+ AwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftODH
+ AAoJEGgNwR1TC3ojx1wH/0hKGWugiqDgLNXLRD/4TfHBEKmxIrmfu9Z5t7vwUKfwhFL6hqvo
+ lXPJJKQpQ2z8+X2vZm/slsLn7J1yjrOsoJhKABDi+3QWWSGkaGwRJAdPVVyJMfJRNNNIKwVb
+ U6B1BkX2XDKDGffF4TxlOpSQzdtNI/9gleOoUA8+jy8knnDYzjBNOZqLG2FuTdicBXblz0Mf
+ vg41gd9kCwYXDnD91rJU8tzylXv03E75NCaTxTM+FBXPmsAVYQ4GYhhgFt8S2UWMoaaABLDe
+ 7l5FdnLdDEcbmd8uLU2CaG4W2cLrUaI4jz2XbkcPQkqTQ3EB67hYkjiEE6Zy3ggOitiQGcqp
+ j//OwE0EWznS4AEIAMYmP4M/V+T5RY5at/g7rUdNsLhWv1APYrh9RQefODYHrNRHUE9eosYb
+ T6XMryR9hT8XlGOYRwKWwiQBoWSDiTMo/Xi29jUnn4BXfI2px2DTXwc22LKtLAgTRjP+qbU6
+ 3Y0xnQN29UGDbYgyyK51DW3H0If2a3JNsheAAK+Xc9baj0LGIc8T9uiEWHBnCH+RdhgATnWW
+ GKdDegUR5BkDfDg5O/FISymJBHx2Dyoklv5g4BzkgqTqwmaYzsl8UxZKvbaxq0zbehDda8lv
+ hFXodNFMAgTLJlLuDYOGLK2AwbrS3Sp0AEbkpdJBb44qVlGm5bApZouHeJ/+n+7r12+lqdsA
+ EQEAAcLAdgQYAQgAIAIbDBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftOH6AAoJEGgNwR1T
+ C3ojVSkIALpAPkIJPQoURPb1VWjh34l0HlglmYHvZszJWTXYwavHR8+k6Baa6H7ufXNQtThR
+ yIxJrQLW6rV5lm7TjhffEhxVCn37+cg0zZ3j7zIsSS0rx/aMwi6VhFJA5hfn3T0TtrijKP4A
+ SAQO9xD1Zk9/61JWk8OysuIh7MXkl0fxbRKWE93XeQBhIJHQfnc+YBLprdnxR446Sh8Wn/2D
+ Ya8cavuWf2zrB6cZurs048xe0UbSW5AOSo4V9M0jzYI4nZqTmPxYyXbm30Kvmz0rYVRaitYJ
+ 4kyYYMhuULvrJDMjZRvaNe52tkKAvMevcGdt38H4KSVXAylqyQOW5zvPc4/sq9c=
+In-Reply-To: <177751955329.2274119.12779807302343885295.git-patchwork-notify@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	SUSPICIOUS_RECIPS(1.50)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_COUNT_TWO(0.00)[2];
+	TAGGED_RCPT(0.00)[linux-riscv];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	ARC_NA(0.00)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	MIME_TRACE(0.00)[0:+];
+	MID_RHS_MATCH_FROM(0.00)[];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com,gmx.de];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	FROM_EQ_ENVFROM(0.00)[];
+	FREEMAIL_CC(0.00)[lists.infradead.org,redhat.com,arndb.de,kernel.org,linaro.org,xen0n.name,linux.intel.com,gmail.com,ffwll.ch,microsoft.com,gmx.de,lists.linux.dev,vger.kernel.org,lists.freedesktop.org];
+	RCPT_COUNT_TWELVE(0.00)[24];
+	RCVD_TLS_ALL(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:mid,suse.com:url,imap1.dmz-prg2.suse.org:helo]
+X-Spam-Flag: NO
+X-Spam-Score: -2.80
+X-Spam-Level: 
 
-ptdesc_t sounds very similar to the core MM struct ptdesc which is actually
-the memory descriptor for page table allocations. Hence rename this typedef
-element as pxxval_t instead for better clarity and separation.
+Hi
 
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Will Deacon <will@kernel.org>
-Cc: David Hildenbrand <david@kernel.org>
-Cc: Mike Rapoport <rppt@kernel.org>
-Cc: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Acked-by: David Hildenbrand (Arm) <david@kernel.org>
-Suggested-by: David Hildenbrand (Arm) <david@kernel.org>
-Signed-off-by: Anshuman Khandual <anshuman.khandual@arm.com>
----
-This patch applies on v7.1-rc1
+Am 30.04.26 um 05:25 schrieb patchwork-bot+linux-riscv@kernel.org:
+> Hello:
+>
+> This series was applied to riscv/linux.git (fixes)
+> by Ard Biesheuvel <ardb@kernel.org>:
 
-Took the liberty in including David's tag from an internal discussion.
+Patch 3 was fairly controversial.
 
- arch/arm64/include/asm/io.h            |  2 +-
- arch/arm64/include/asm/pgtable-types.h | 14 +++++++-------
- arch/arm64/include/asm/ptdump.h        |  8 ++++----
- arch/arm64/include/asm/tlbflush.h      |  4 ++--
- arch/arm64/kernel/efi.c                |  4 ++--
- arch/arm64/kernel/pi/map_kernel.c      |  2 +-
- arch/arm64/kernel/pi/map_range.c       |  4 ++--
- arch/arm64/kernel/pi/pi.h              |  2 +-
- arch/arm64/mm/mmap.c                   |  4 ++--
- arch/arm64/mm/pageattr.c               |  2 +-
- arch/arm64/mm/ptdump.c                 |  2 +-
- 11 files changed, 24 insertions(+), 24 deletions(-)
+Best regards
+Thomas
 
-diff --git a/arch/arm64/include/asm/io.h b/arch/arm64/include/asm/io.h
-index 8cbd1e96fd50..dd548a93342d 100644
---- a/arch/arm64/include/asm/io.h
-+++ b/arch/arm64/include/asm/io.h
-@@ -270,7 +270,7 @@ static inline void __iomem *ioremap_prot(phys_addr_t phys, size_t size,
- 					 pgprot_t user_prot)
- {
- 	pgprot_t prot;
--	ptdesc_t user_prot_val = pgprot_val(user_prot);
-+	pxxval_t user_prot_val = pgprot_val(user_prot);
- 
- 	if (WARN_ON_ONCE(!(user_prot_val & PTE_USER)))
- 		return NULL;
-diff --git a/arch/arm64/include/asm/pgtable-types.h b/arch/arm64/include/asm/pgtable-types.h
-index 265e8301d7ba..53b5ada823ee 100644
---- a/arch/arm64/include/asm/pgtable-types.h
-+++ b/arch/arm64/include/asm/pgtable-types.h
-@@ -17,13 +17,13 @@
-  * Generic page table descriptor format from which
-  * all level specific descriptors can be derived.
-  */
--typedef u64 ptdesc_t;
-+typedef u64 pxxval_t;
- 
--typedef ptdesc_t pteval_t;
--typedef ptdesc_t pmdval_t;
--typedef ptdesc_t pudval_t;
--typedef ptdesc_t p4dval_t;
--typedef ptdesc_t pgdval_t;
-+typedef pxxval_t pteval_t;
-+typedef pxxval_t pmdval_t;
-+typedef pxxval_t pudval_t;
-+typedef pxxval_t p4dval_t;
-+typedef pxxval_t pgdval_t;
- 
- /*
-  * These are used to make use of C type-checking..
-@@ -54,7 +54,7 @@ typedef struct { pgdval_t pgd; } pgd_t;
- #define pgd_val(x)	((x).pgd)
- #define __pgd(x)	((pgd_t) { (x) } )
- 
--typedef struct { ptdesc_t pgprot; } pgprot_t;
-+typedef struct { pxxval_t pgprot; } pgprot_t;
- #define pgprot_val(x)	((x).pgprot)
- #define __pgprot(x)	((pgprot_t) { (x) } )
- 
-diff --git a/arch/arm64/include/asm/ptdump.h b/arch/arm64/include/asm/ptdump.h
-index baff24004459..f4113b7c881c 100644
---- a/arch/arm64/include/asm/ptdump.h
-+++ b/arch/arm64/include/asm/ptdump.h
-@@ -26,8 +26,8 @@ struct ptdump_info {
- };
- 
- struct ptdump_prot_bits {
--	ptdesc_t	mask;
--	ptdesc_t	val;
-+	pxxval_t	mask;
-+	pxxval_t	val;
- 	const char	*set;
- 	const char	*clear;
- };
-@@ -36,7 +36,7 @@ struct ptdump_pg_level {
- 	const struct ptdump_prot_bits *bits;
- 	char name[4];
- 	int num;
--	ptdesc_t mask;
-+	pxxval_t mask;
- };
- 
- /*
-@@ -53,7 +53,7 @@ struct ptdump_pg_state {
- 	const struct mm_struct *mm;
- 	unsigned long start_address;
- 	int level;
--	ptdesc_t current_prot;
-+	pxxval_t current_prot;
- 	bool check_wx;
- 	unsigned long wx_pages;
- 	unsigned long uxn_pages;
-diff --git a/arch/arm64/include/asm/tlbflush.h b/arch/arm64/include/asm/tlbflush.h
-index c0bf5b398041..968a78d0c69e 100644
---- a/arch/arm64/include/asm/tlbflush.h
-+++ b/arch/arm64/include/asm/tlbflush.h
-@@ -725,9 +725,9 @@ static inline void arch_tlbbatch_add_pending(struct arch_tlbflush_unmap_batch *b
- 	sme_dvmsync_add_pending(batch, mm);
- }
- 
--static inline bool __pte_flags_need_flush(ptdesc_t oldval, ptdesc_t newval)
-+static inline bool __pte_flags_need_flush(pxxval_t oldval, pxxval_t newval)
- {
--	ptdesc_t diff = oldval ^ newval;
-+	pxxval_t diff = oldval ^ newval;
- 
- 	/* invalid to valid transition requires no flush */
- 	if (!(oldval & PTE_VALID))
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index a81cb4aa4738..3d322252b4bf 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -31,7 +31,7 @@ static bool region_is_misaligned(const efi_memory_desc_t *md)
-  * executable, everything else can be mapped with the XN bits
-  * set. Also take the new (optional) RO/XP bits into account.
-  */
--static __init ptdesc_t create_mapping_protection(efi_memory_desc_t *md)
-+static __init pxxval_t create_mapping_protection(efi_memory_desc_t *md)
- {
- 	u64 attr = md->attribute;
- 	u32 type = md->type;
-@@ -85,7 +85,7 @@ static __init ptdesc_t create_mapping_protection(efi_memory_desc_t *md)
- 
- int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
- {
--	ptdesc_t prot_val = create_mapping_protection(md);
-+	pxxval_t prot_val = create_mapping_protection(md);
- 	bool page_mappings_only = (md->type == EFI_RUNTIME_SERVICES_CODE ||
- 				   md->type == EFI_RUNTIME_SERVICES_DATA);
- 
-diff --git a/arch/arm64/kernel/pi/map_kernel.c b/arch/arm64/kernel/pi/map_kernel.c
-index a852264958c3..168858e75f75 100644
---- a/arch/arm64/kernel/pi/map_kernel.c
-+++ b/arch/arm64/kernel/pi/map_kernel.c
-@@ -165,7 +165,7 @@ static void noinline __section(".idmap.text") set_ttbr0_for_lpa2(phys_addr_t ttb
- static void __init remap_idmap_for_lpa2(void)
- {
- 	/* clear the bits that change meaning once LPA2 is turned on */
--	ptdesc_t mask = PTE_SHARED;
-+	pxxval_t mask = PTE_SHARED;
- 
- 	/*
- 	 * We have to clear bits [9:8] in all block or page descriptors in the
-diff --git a/arch/arm64/kernel/pi/map_range.c b/arch/arm64/kernel/pi/map_range.c
-index de52cd85c691..f7cbad6e3bbc 100644
---- a/arch/arm64/kernel/pi/map_range.c
-+++ b/arch/arm64/kernel/pi/map_range.c
-@@ -31,7 +31,7 @@ void __init map_range(phys_addr_t *pte, u64 start, u64 end, phys_addr_t pa,
- 		      u64 va_offset)
- {
- 	u64 cmask = (level == 3) ? CONT_PTE_SIZE - 1 : U64_MAX;
--	ptdesc_t protval = pgprot_val(prot) & ~PTE_TYPE_MASK;
-+	pxxval_t protval = pgprot_val(prot) & ~PTE_TYPE_MASK;
- 	int lshift = (3 - level) * PTDESC_TABLE_SHIFT;
- 	u64 lmask = (PAGE_SIZE << lshift) - 1;
- 
-@@ -88,7 +88,7 @@ void __init map_range(phys_addr_t *pte, u64 start, u64 end, phys_addr_t pa,
- 	}
- }
- 
--asmlinkage phys_addr_t __init create_init_idmap(pgd_t *pg_dir, ptdesc_t clrmask)
-+asmlinkage phys_addr_t __init create_init_idmap(pgd_t *pg_dir, pxxval_t clrmask)
- {
- 	phys_addr_t ptep = (phys_addr_t)pg_dir + PAGE_SIZE; /* MMU is off */
- 	pgprot_t text_prot = PAGE_KERNEL_ROX;
-diff --git a/arch/arm64/kernel/pi/pi.h b/arch/arm64/kernel/pi/pi.h
-index aec3172d4003..2eb24a4205f6 100644
---- a/arch/arm64/kernel/pi/pi.h
-+++ b/arch/arm64/kernel/pi/pi.h
-@@ -35,4 +35,4 @@ void map_range(phys_addr_t *pte, u64 start, u64 end, phys_addr_t pa,
- 
- asmlinkage void early_map_kernel(u64 boot_status, phys_addr_t fdt);
- 
--asmlinkage phys_addr_t create_init_idmap(pgd_t *pgd, ptdesc_t clrmask);
-+asmlinkage phys_addr_t create_init_idmap(pgd_t *pgd, pxxval_t clrmask);
-diff --git a/arch/arm64/mm/mmap.c b/arch/arm64/mm/mmap.c
-index 92b2f5097a96..bc3fef91a8ce 100644
---- a/arch/arm64/mm/mmap.c
-+++ b/arch/arm64/mm/mmap.c
-@@ -34,7 +34,7 @@ static pgprot_t protection_map[16] __ro_after_init = {
- 	[VM_SHARED | VM_EXEC | VM_WRITE | VM_READ]	= PAGE_SHARED_EXEC
- };
- 
--static ptdesc_t gcs_page_prot __ro_after_init = _PAGE_GCS_RO;
-+static pxxval_t gcs_page_prot __ro_after_init = _PAGE_GCS_RO;
- 
- /*
-  * You really shouldn't be using read() or write() on /dev/mem.  This might go
-@@ -87,7 +87,7 @@ arch_initcall(adjust_protection_map);
- 
- pgprot_t vm_get_page_prot(vm_flags_t vm_flags)
- {
--	ptdesc_t prot;
-+	pxxval_t prot;
- 
- 	/* Short circuit GCS to avoid bloating the table. */
- 	if (system_supports_gcs() && (vm_flags & VM_SHADOW_STACK)) {
-diff --git a/arch/arm64/mm/pageattr.c b/arch/arm64/mm/pageattr.c
-index ce035e1b4eaf..e691e258b0e4 100644
---- a/arch/arm64/mm/pageattr.c
-+++ b/arch/arm64/mm/pageattr.c
-@@ -21,7 +21,7 @@ struct page_change_data {
- 	pgprot_t clear_mask;
- };
- 
--static ptdesc_t set_pageattr_masks(ptdesc_t val, struct mm_walk *walk)
-+static pxxval_t set_pageattr_masks(pxxval_t val, struct mm_walk *walk)
- {
- 	struct page_change_data *masks = walk->private;
- 
-diff --git a/arch/arm64/mm/ptdump.c b/arch/arm64/mm/ptdump.c
-index ab9899ca1e5f..235e5d6a3d76 100644
---- a/arch/arm64/mm/ptdump.c
-+++ b/arch/arm64/mm/ptdump.c
-@@ -194,7 +194,7 @@ void note_page(struct ptdump_state *pt_st, unsigned long addr, int level,
- 	struct ptdump_pg_state *st = container_of(pt_st, struct ptdump_pg_state, ptdump);
- 	struct ptdump_pg_level *pg_level = st->pg_level;
- 	static const char units[] = "KMGTPE";
--	ptdesc_t prot = 0;
-+	pxxval_t prot = 0;
- 
- 	/* check if the current level has been folded dynamically */
- 	if (st->mm && ((level == 1 && mm_p4d_folded(st->mm)) ||
+>
+> On Thu,  2 Apr 2026 11:09:14 +0200 you wrote:
+>> The global state sysfb_primary_screen holds information about the
+>> framebuffer provided by EFI/BIOS systems. It is part of the sysfb
+>> module, but used in several places without direct connection to
+>> sysfb. Fix this by making users of sysfb_primary_screen depend on
+>> CONFIG_SYSFB. Fix a few issues in the process.
+>>
+>> Patches 1 and 2 fix general errors in the Kconfig rules. In any case,
+>> these patches should be considered even without the rest of the series.
+>>
+>> [...]
+> Here is the summary with links:
+>    - [1/8] hv: Select CONFIG_SYSFB only for CONFIG_HYPERV_VMBUS
+>      https://git.kernel.org/riscv/c/d33db956c961
+>    - [2/8] firmware: efi: Never declare sysfb_primary_display on x86
+>      https://git.kernel.org/riscv/c/5241c2ca33bb
+>    - [3/8] firmware: sysfb: Make CONFIG_SYSFB a user-selectable option
+>      (no matching commit)
+>    - [4/8] firmware: sysfb: Split sysfb.c into sysfb_primary.c and sysfb_pci.c
+>      (no matching commit)
+>    - [5/8] firmware: sysfb: Implement screen_info relocation for primary display
+>      (no matching commit)
+>    - [6/8] firmware: sysfb: Avoid forward-declaring sysfb_parent_dev()
+>      (no matching commit)
+>    - [7/8] firmware: efi: Make CONFIG_EFI_EARLYCON depend on CONFIG_SYSFB; clean up
+>      (no matching commit)
+>    - [8/8] firmware: sysfb: Move CONFIG_FIRMWARE_EDID to firmware options
+>      (no matching commit)
+>
+> You are awesome, thank you!
+
 -- 
-2.30.2
+--
+Thomas Zimmermann
+Graphics Driver Developer
+SUSE Software Solutions Germany GmbH
+Frankenstr. 146, 90461 Nürnberg, Germany, www.suse.com
+GF: Jochen Jaser, Andrew McDonald, Werner Knoblich, (HRB 36809, AG Nürnberg)
+
 
