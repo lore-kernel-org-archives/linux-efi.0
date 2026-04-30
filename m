@@ -1,122 +1,153 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from fhigh-a6-smtp.messagingengine.com (fhigh-a6-smtp.messagingengine.com [103.168.172.157])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AAA93A1682;
-	Thu, 30 Apr 2026 08:31:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 306BD3D904E;
+	Thu, 30 Apr 2026 23:51:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.157
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777537877; cv=none; b=rSDLoaqH86MqSXoumnjvaHWrm0PBYrSRy3xB50Tb3eb0/0fTHXi84QTZ5T1nOoso/SYtJTJNQ6Xf+33jbi7taE4wuAO3ODPy5sEIu0iHdJ1H8h/qK/VP1DuKh/vSQcshscEZdnWNbCMNmk2vUKYjNTbRyYVwQRWnKIrUfTKrLWY=
+	t=1777593101; cv=none; b=jjBJUzJUdmNY1MitSVH+a60If6dTcabygig/6nvU8WBil/10iiqrolqgIFG5xHSi6Fv+rfVySHz7y2F3ooz0+tlxLriCH35CadtGAmRcbX90SDdLFDxN6gbJwxJXY1k51GY2ixZwKahjoF056AsCWbTGB9BTTmWpKtrrJTC594w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777537877; c=relaxed/simple;
-	bh=/5VDn9x3IrvP+1kxl5YY6zg3ZXtH4wCPjCJnOMJodyM=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=GIC4p2OKN+0h8mDG1IJzSz9R3krAbO8H8Lp6ULuwwqtrV9Za7OIXbDJImEIrOH0C8pkCuWZ/GKg14UZEwtoNKbHGWi6sH8614bKvTVkaCfo63dv+eQHRAVl3ydGTnsEDwO/ltZUtOmI+fvSlA9DK/xpltw9hlCpF3SC2MA1uW4E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MKNFKzoJ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1777593101; c=relaxed/simple;
+	bh=aO6LLC8o1CRIM0rP3dZEQagY+ByLjZzuWf3NiqNRKN4=;
+	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
+	 References:Date:Message-id; b=IScjOwmJ7uiMgPJIJAgKAA5TSPRmmI9bUDBmynukULPGfUrYxVd4B3GD42r/7y2AFMrwgqLbEsCmor2a9f5bwdXEY/X5ANAWrHK9bjjDRfQSyHhTqdCSCP2ohgRyrC25UcYeVhPeGUjSpKHKDXWt9t/bE6SSrGjxGqKUiiFlHs8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=M08qftXn; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=cHS/FKj/; arc=none smtp.client-ip=103.168.172.157
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MKNFKzoJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 82FFDC4AF0B;
-	Thu, 30 Apr 2026 08:31:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1777537877;
-	bh=/5VDn9x3IrvP+1kxl5YY6zg3ZXtH4wCPjCJnOMJodyM=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=MKNFKzoJRMGx6AUmzt6v5XrwW4Vp0pwog4q4m0+mz1WNh9vTYW1Q1kFSk1U7xjM2S
-	 VTufDjdM7P0UsuOVQT1JgF3cJFLBnjQOghnLF+Qd4/LaHop4RF1jb8BvXpXZwteDlg
-	 QsgGhL0ZvKe7IiSOj9U0jzEokcx638Pi8WIC8kDZMhz1YUaqDyhK1N1+DADx48ms8z
-	 MNSx0IcZ6fS//kKB+sGioE4Hrb07qCg10gwFXqpH/LZlRSFnAEC9nehdohJ36bPzGh
-	 V2td0l58DCk9O6jUsG+6FpnWs4QRbKyQAuoAmXjITq9AgFBTMLDpjRGEfAuMrViRtO
-	 GWtBWbT62XbGQ==
-Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id 931B6F40068;
-	Thu, 30 Apr 2026 04:31:15 -0400 (EDT)
-Received: from phl-imap-02 ([10.202.2.81])
-  by phl-compute-01.internal (MEProxy); Thu, 30 Apr 2026 04:31:15 -0400
-X-ME-Sender: <xms:UxPzabWpob4qOM-DXOIVHifopIfrKplhZwo3PEENDKMTHyoNhFAzvQ>
-    <xme:UxPzaeazuK15f72U971UIwQGxV1e42V1ItV2uWZlTrOAsYrYLBZR93Vi7HMOOnk8c
-    sFYUBrlgyx96jjpIJv8ZCb0SePypkCeGVv0OFBaDgEzKFliZT6AWw>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdekieekgecutefuodetggdotefrod
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="M08qftXn";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="cHS/FKj/"
+Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
+	by mailfhigh.phl.internal (Postfix) with ESMTP id DF5961400159;
+	Thu, 30 Apr 2026 19:51:36 -0400 (EDT)
+Received: from phl-frontend-03 ([10.202.2.162])
+  by phl-compute-05.internal (MEProxy); Thu, 30 Apr 2026 19:51:36 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to; s=fm2; t=
+	1777593096; x=1777679496; bh=SoFsYwQGnMtWMKIme69DRpXKTM5BZO5qLvs
+	+ZUwxrZY=; b=M08qftXnutctKSp/G5u74axo0GjWhCsfpUK8OR0I5JoXIsK02md
+	GiF94elNIV5izQfaImQyXcjJxMiQ5vH10wEuiUhx5QfvlDUEkY8uA5EeaGGu6y+2
+	gAjCQGBuCojrG1LOeN4uZh5uYzxmFIbqQYUeiFg7Tf8RyNqSm6NL9G7jAQxKyPNW
+	QNtGsB+dRpcNI7j63tpUoLKAGBhqC76/DSv3np4Qh8AE4fgYsoGILHCgczB91qWR
+	wLQAwSutU9pAP3Eai2KCtbD8daSepCOWLivGXIgVpx+5hXxsBTFavos+o2klHjb6
+	BYf73Bf2AJg9SdSkJ15uwrTYFD1ZhSzb6ZA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1777593096; x=
+	1777679496; bh=SoFsYwQGnMtWMKIme69DRpXKTM5BZO5qLvs+ZUwxrZY=; b=c
+	HS/FKj/qUnZDVmrRSZbqMiCoXRSyjiFOeEI4XuYSkzhzd5WQfAoHStf/4yQbOddR
+	OGiZN9PPpf2Fm6wguVKI0qK1Ky25cvSEzKXt4yXnkt7ZT4H50TXSh+HDKCnw0O+b
+	nmAPB1NqfWxedDuXNN3uQYpOmJ5HUau3NvrNMuVLTD5Z8DmyInuF4KjTnGsGr8sv
+	UzHwj+JjGomgMM4PMSlh6z31YlobHPTyEfozbctDIQqWdhe4D1BVDJiSy57PDlIm
+	S+c5VTFJmit6DKsnMRRT3yyws4pwDHl85nXgFbVO2gpDnO4PM1sP+zofVE4Fi2YW
+	Y3bCTA4J0f7C/bEK4ytdw==
+X-ME-Sender: <xms:COvzacsHaUgvHpBxoA1OhSFr9Wf26BmVYRIe39YqVxdglpLEboWRHA>
+    <xme:COvzadlV0iQN0V0jQClf8pQZEkSyB7NoMiMv0L1_i-7pfy1nyq358ORdA3zM1Psx4
+    Vb0CnX53nGLWxdsLxuQTERe_fTxvwZItCWtt98lqNdLMd8nFuo>
+X-ME-Received: <xmr:COvzaUxCAEL5Mf3NKO22kS1vBdTAOPgi6QASYkmmHRdfFUeau8oQal_PKpu5c_SgIyKmKfgTw1NRTk4Wdtvr_O5PWU2nM84>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdekkeeilecutefuodetggdotefrod
     ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
     ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
-    hrpefoggffhffvvefkjghfufgtgfesthejredtredttdenucfhrhhomhepfdetrhguuceu
-    ihgvshhhvghuvhgvlhdfuceorghruggssehkvghrnhgvlhdrohhrgheqnecuggftrfgrth
-    htvghrnhepvdeuheeitdevtdelkeduudetgffftdelteefteevjeevjeeiheefhfejieej
-    fedunecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
-    hrugdomhgvshhmthhprghuthhhphgvrhhsohhnrghlihhthidqudeijedthedttdejledq
-    feefvdduieegudehqdgrrhgusgeppehkvghrnhgvlhdrohhrghesfihorhhkohhfrghrug
-    drtghomhdpnhgspghrtghpthhtohepuddupdhmohguvgepshhmthhpohhuthdprhgtphht
-    thhopegsphesrghlihgvnhekrdguvgdprhgtphhtthhopehivhgrnhdrhhhusegtrghnoh
-    hnihgtrghlrdgtohhmpdhrtghpthhtohepvggsihhgghgvrhhssehgohhoghhlvgdrtgho
-    mhdprhgtphhtthhopehtghhlgieskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepgiekie
-    eskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepihhlihgrshdrrghprghlohguihhmrghs
-    sehlihhnrghrohdrohhrghdprhgtphhtthhopegurghvvgdrhhgrnhhsvghnsehlihhnuh
-    igrdhinhhtvghlrdgtohhmpdhrtghpthhtohepmhhinhhgohesrhgvughhrghtrdgtohhm
-    pdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnhgvlhdrohhrgh
-X-ME-Proxy: <xmx:UxPzaedWRdbsgwnQJVhJUZ6SCg-EI4V3Bh5NbThzpZwbzST7UPJ73Q>
-    <xmx:UxPzaUD1vrPOLf0dhnvUcp2etK2jGs8f0xfRtmhbdPRQReeWCY9HdA>
-    <xmx:UxPzaa4l93dca9j2Hx84nSOmwuVbVTVdGkGUEGxnydELPlce20yQkw>
-    <xmx:UxPzaVecK_N3mdUpblVIeGbM--7RRjQIB3QHuGq2EZXG07FA-6IvMg>
-    <xmx:UxPzaYtRxpDpDi4TJwHPd_RcuZYeRHfCBnjzj-wVCnmuBOZDcwb7i9Tq>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 649BA700065; Thu, 30 Apr 2026 04:31:15 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+    hrpegtgfgghffvvefujghffffkrhesthhqredttddtjeenucfhrhhomheppfgvihhluehr
+    ohifnhcuoehnvghilhgssehofihnmhgrihhlrdhnvghtqeenucggtffrrghtthgvrhhnpe
+    eljedtfeegueekieetudevheduveefffevudetgfetudfhgedvgfdtieeguedujeenucev
+    lhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehnvghilhgsse
+    hofihnmhgrihhlrdhnvghtpdhnsggprhgtphhtthhopeduiedpmhhouggvpehsmhhtphho
+    uhhtpdhrtghpthhtohepvhhirhhoseiivghnihhvrdhlihhnuhigrdhorhhgrdhukhdprh
+    gtphhtthhopehlihhnuhigqdhunhhiohhnfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhg
+    pdhrtghpthhtoheplhhinhhugidqnhhfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprh
+    gtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdp
+    rhgtphhtthhopehlihhnuhigqdhfshguvghvvghlsehvghgvrhdrkhgvrhhnvghlrdhorh
+    hgpdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnhgvlhdrohhrghdp
+    rhgtphhtthhopehmihhklhhoshesshiivghrvgguihdrhhhupdhrtghpthhtohepjhgrtg
+    hksehsuhhsvgdrtgiipdhrtghpthhtohepjhhksehoiihlrggsshdrohhrgh
+X-ME-Proxy: <xmx:COvzaZwenh6wP_KcPPyALOYQqiRbbfuVFESj5E3gfsRmrtnQc9m6sA>
+    <xmx:COvzaT8JSbuduUt2JjHnZ1w6jWVjQNYd82tMcte0ktZ7u89KAHEqwQ>
+    <xmx:COvzaZ88O5H2atcHOVuYrCZtgYPAT3cAUQ_adXn18y9gOBiVIXddkg>
+    <xmx:COvzaWdFbHBD4NPLaBYmJBw0-FR20uOY0RW0LZ_1ugTgsY9Et525hw>
+    <xmx:COvzaeCsiVKPAdC-rXvJ_YY_N5ldgTPvgJQPXf2mA48_juqBMN-zwSdy>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 30 Apr 2026 19:51:31 -0400 (EDT)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Thu, 30 Apr 2026 10:30:54 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Ivan Hu" <ivan.hu@canonical.com>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- "Thomas Gleixner" <tglx@kernel.org>, "Ingo Molnar" <mingo@redhat.com>,
- "Borislav Petkov" <bp@alien8.de>, dave.hansen@linux.intel.com,
- "H . Peter Anvin" <hpa@zytor.com>, ebiggers@google.com
-Cc: x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Message-Id: <6793bc4e-fa30-42f5-adea-98250b51f1ff@app.fastmail.com>
-In-Reply-To: <20260430074107.27051-1-ivan.hu@canonical.com>
-References: <20260430074107.27051-1-ivan.hu@canonical.com>
-Subject: Re: [PATCH] x86/efi: Fix graceful fault handling after FPU softirq changes
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+From: NeilBrown <neilb@ownmail.net>
+To: "Al Viro" <viro@zeniv.linux.org.uk>
+Cc: "Linus Torvalds" <torvalds@linux-foundation.org>,
+ "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.cz>,
+ "Jeff Layton" <jlayton@kernel.org>, "Trond Myklebust" <trondmy@kernel.org>,
+ "Anna Schumaker" <anna@kernel.org>, "Miklos Szeredi" <miklos@szeredi.hu>,
+ "Amir Goldstein" <amir73il@gmail.com>, "Jeremy Kerr" <jk@ozlabs.org>,
+ "Ard Biesheuvel" <ardb@kernel.org>, linux-efi@vger.kernel.org,
+ linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
+ linux-unionfs@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3 04/19] VFS: use wait_var_event for waiting in
+ d_alloc_parallel()
+In-reply-to: <20260429170731.GZ3518998@ZenIV>
+References: <20260427040517.828226-1-neilb@ownmail.net>
+  <20260427040517.828226-5-neilb@ownmail.net>
+  <20260428033738.GV3518998@ZenIV>
+  <177737511992.1474915.1952404144121931523@noble.neil.brown.name>
+  <20260428142225.GX3518998@ZenIV>
+  <177741881482.1474915.12527082398060370192@noble.neil.brown.name>
+  <20260429052626.GY3518998@ZenIV>  <20260429170731.GZ3518998@ZenIV>
+Date: Fri, 01 May 2026 09:51:28 +1000
+Message-id: <177759308866.1474915.9708613530229799376@noble.neil.brown.name>
+Reply-To: NeilBrown <neil@brown.name>
 
+On Thu, 30 Apr 2026, Al Viro wrote:
+> On Wed, Apr 29, 2026 at 06:26:26AM +0100, Al Viro wrote:
+>=20
+> > with obvious adjustments in end_dir_add().  That's it.  Outside of fs/dca=
+che.c,
+> > same as in the patch you've posted, modulo renaming you've suggested for =
+new flag.
+>=20
+> Something like patch below (on top of -rc1, completely untested).  I've lif=
+ted
+> the wakeup part out of end_dir_add() into its callers - less confusing that=
+ way.
+> Note that in __d_move() the dentry you've ended up passing to end_dir_add()=
+ was
+> *NOT* the one added - it was the one replaced with existing one spliced in =
+its place.
 
+I saw this comment the first time I read this email, but I didn't
+process it properly.  That code is wrong.  It only makes sense to=20
+__d_wake_in_lookup_waiters() a dentry that we know was in-lookup, and in
+d_move, that is target.
+This can only happen (I think) in nfs where nfs_lookup() skips the lookup
+for LOOKUP_RENAME_TARGET and leaves the dentry in-lookup.  Other threads
+looking up that name will then block.
+After the rename completes that in-lookup dentry will now be unhashed
+but we need to wake it up so other threads can continue (and repeat the
+lookup).=20
 
-On Thu, 30 Apr 2026, at 09:41, Ivan Hu wrote:
-> Since commit d02198550423 ("x86/fpu: Improve crypto performance by
-> making kernel-mode FPU reliably usable in softirqs"), kernel_fpu_begin()
-> calls fpregs_lock() which uses local_bh_disable() instead of the
-> previous preempt_disable(). This sets SOFTIRQ_OFFSET in preempt_count
-> during the entire EFI runtime service call, causing in_interrupt() to
-> return true in normal task context.
->
-> The graceful page fault handler efi_crash_gracefully_on_page_fault()
-> uses in_interrupt() to bail out for faults in real interrupt context.
-> With SOFTIRQ_OFFSET now set, the handler always bails out, leaving EFI
-> firmware page faults unhandled. This escalates to die() which also sees
-> in_interrupt() as true and calls panic("Fatal exception in interrupt"),
-> resulting in a hard system freeze. On systems with buggy firmware that
-> triggers page faults during EFI runtime calls (e.g., accessing unmapped
-> memory in GetTime()), this causes an unrecoverable hang instead of the
-> expected graceful EFI_ABORTED recovery.
->
-> Fix by replacing in_interrupt() with in_hardirq() || in_nmi(). This
-> preserves the original intent of bailing for genuine hardware interrupt
-> or NMI faults, while no longer falsely triggering from the FPU code
-> path's local_bh_disable(). This is safe because softirqs cannot run
-> during EFI calls (they are explicitly blocked by fpregs_lock()), so
-> they can never be the source of a page fault in this context.
->
-> Fixes: d02198550423 ("x86/fpu: Improve crypto performance by making 
-> kernel-mode FPU reliably usable in softirqs")
-> Signed-off-by: Ivan Hu <ivan.hu@canonical.com>
-> ---
->  arch/x86/platform/efi/quirks.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
+So we need
 
-Acked-by: Ard Biesheuvel <ardb@kernel.org>
+		__d_wake_in_lookup_waiters(target);
 
-I'll take this via the EFI tree unless -tip prefers to take it.
+in d_move.  target, not dentry.
 
+Thanks for flagging this,
+
+Also my testing has hit a problem with some sort of deadlock in the nfs
+server (so accessing and XFS filesystem).  They are tring to unlink a
+file and are waiting in d_alloc_parallel() under reconnect_path.
+This is running generic/467.
+
+So better hold off this patchset until I have that understood.
+
+Thanks,
+NeilBrown
