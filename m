@@ -1,169 +1,223 @@
-Received: from mail-wm1-f73.google.com (mail-wm1-f73.google.com [209.85.128.73])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from fout-b5-smtp.messagingengine.com (fout-b5-smtp.messagingengine.com [202.12.124.148])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFCA53612F4
-	for <linux-efi@vger.kernel.org>; Fri,  1 May 2026 09:03:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C36A4192590;
+	Fri,  1 May 2026 10:46:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.148
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777626208; cv=none; b=JbdaVrh+aXl4kKhe2+Ef2st62Ga19IvbCd/Z7jjQA4nqM3Io2+sBvMNOdKiNWb2wzmFgVJnYEPyQ5lV1sNWQNmk1murycD1HtXWg2MoMwJrKS1XQ23uFKGrP/vV6zaQfAwOrLoa01qq/VmRW7ANRDoJeWvsjjwD+oY7QBMHASSs=
+	t=1777632393; cv=none; b=QKYghovPwmgBobjQtNhOvHjs+PT2di+m3pJFBQJy7xVsuIZ2JD9nSRj5KY142PmET7Ps5Sjj+DT5n9DtQjJ/JKNammiXanJ+McsfWhK/95seu+fA0RfZRM7P44cpbzta/HHpptJWth5Qx7D6FS8q2+4dbpXzaaViJuFlq7AG0T4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777626208; c=relaxed/simple;
-	bh=UTxTNlPvMQAxuIQfM8ucjW02c4NzPC0nduST+ic46Tw=;
-	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=i1SEC4VZzhlJM6SvEKn1jQCv12Xf31W5cQA4LNQKjE9i4XXg7rGPC3HMY6O9lrDP28uU3lEyGf01t+9VIXohQzmeSj190j3Zoa+Ch//jRCn2wdhSj6LEI17v+QuwXVRYeo+wTRv3X4eJaE667Wgpe9h1W0zR8sQ5mKF6XGpWVts=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=BPRmIehP; arc=none smtp.client-ip=209.85.128.73
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
+	s=arc-20240116; t=1777632393; c=relaxed/simple;
+	bh=prCaRoSYmj64MXpiId8tjYxP/D+Dyae/L+g+QGh/VWY=;
+	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
+	 References:Date:Message-id; b=RyTYMry1tOI4X5IUMr36ckSCAxTcX4DGV9y7hyT5WFS3Ko0DLPhtzzOkPHBfWApJItVbN4yKvtHBCx3VPi6T0ynyzHF0sPLcwY491SW8hbkANk/Nwm4/Zl5sJdE6ugYwHdTi25LkDu2J7iubj4fgs+hrlv05FArBuhj1ymMJ1b0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=Mg3A221i; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=fiXPo2Xi; arc=none smtp.client-ip=202.12.124.148
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="BPRmIehP"
-Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-4836abfc742so13630775e9.0
-        for <linux-efi@vger.kernel.org>; Fri, 01 May 2026 02:03:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1777626205; x=1778231005; darn=vger.kernel.org;
-        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=tio/gNpGkd5IolmHkaATgFk8sZ/Tf3HaTeyPGhlgp0I=;
-        b=BPRmIehP63XwoG1TYrJ6ct00ws8zAnohWUDAIHb6c+9guTKUx3O+xoIioLQXXHqBPL
-         D+OnDr++ba4eVw34oe4VQjC/kD5OyrePYZRHn46mEsC9IaV18ccJlwzTFzm32MpxtGvd
-         RGLRbgqaNa6SRbIYWuTPyMOyeFOa5dXmBrUbwFxIXOPe8UkNPCQdSNKW5EHazSSEiLco
-         MTtrcZDY6+m/q649/sdeKwD7002HZVXfe0a5EHVTH44oRwv05aJjs7NpbjgetmYiyvRo
-         xgukW1iaakCScpiFyVpH0Cl4y9l+Z9ID9hHnxWddKLW/64AfHtwlUuOTkBPeZbd0Tqna
-         hBXg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777626205; x=1778231005;
-        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=tio/gNpGkd5IolmHkaATgFk8sZ/Tf3HaTeyPGhlgp0I=;
-        b=VhjfGM5a7f/QXWKPF8RTxQWtBbtMasmo1r2TM8Bm2gZTbyHBWRRG1KQ6OG5Kkr1BEY
-         a1MkXlu/fHouhxwZu14BULWmDkJskq9dDZj6Z1Ji/3s1SWgmQOe5dGUQWcKkogCDSYoc
-         XSpIWXAfVxWSuNef0b3bKP6ydXJW7xUnynnQvuP2x6NaMoTbId8BM/ak1P3Hccq1SA1K
-         2oHd4pZZ81GIIfQnFjVzAKFPMK2N4acLKRduYsl+lhA0/GUTsM2inGY5fx8CGyvoAmRB
-         YDrX8zmBzb7ebSP/XbQRSVlo2EM1NUUkSMo2B2cvuIxYuWk33GIX7FddBO3rYlMRJCnJ
-         MMww==
-X-Gm-Message-State: AOJu0YxTOmNRqeUr452/hHjRLM6GBaJbs2oOSZnmWfhC1UrgQ3VeV0A2
-	k2iBkORitMs3MPzjRZCqycoWbTFz3c+TMNhBI3K0Hq3HE03tYo1R4RhoCw8y81TeqvBQ2U1ha9z
-	WKzWkXr3K7YpAVMTfnXm1GCgR1hB8Gi4cxupJ2bqkzEpufC60wZ4RVtQNG8fPCyzodmPfu0lf/3
-	pb8sPmfpqNa9JtpcEUwJfxp/GJLHazwA==
-X-Received: from wmpd19.prod.google.com ([2002:a05:600c:4c13:b0:48a:5970:2007])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:8710:b0:48a:581c:ead
- with SMTP id 5b1f17b1804b1-48a844448f9mr109857905e9.10.1777626205147; Fri, 01
- May 2026 02:03:25 -0700 (PDT)
-Date: Fri,  1 May 2026 11:03:12 +0200
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="Mg3A221i";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="fiXPo2Xi"
+Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
+	by mailfout.stl.internal (Postfix) with ESMTP id 8CC551D00129;
+	Fri,  1 May 2026 06:46:29 -0400 (EDT)
+Received: from phl-frontend-03 ([10.202.2.162])
+  by phl-compute-05.internal (MEProxy); Fri, 01 May 2026 06:46:30 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to; s=fm3; t=
+	1777632389; x=1777718789; bh=ik5a7MC4PBdLeM/Fa2W8c64dptvpYcrqCSM
+	lKFZOCU8=; b=Mg3A221izmR6XpCipCPeEw92O+KB92I18eGJnfauHSC9QNiODu2
+	MnXYfhW8uYi8cdAlSCjawrEiW2DwApqG9cgWQuduZDrYfXc18MRhXE94zJ4gzKVG
+	Xdi/092djiTVH2sfNQ5QiOR9hU+KWyhZ7S6AjflsVO0IZm1qeOXVVOX7F6aF9b6K
+	tsM+zGJHyGq8I2Q3T2b68vJd6NYkR2hzAjjIwIz6tX4hoUYiM9OKCHEdI7hD6bEe
+	3RRgb95nF7/PhVBFW7XLHWFa/G0NyqTzfFes9VbqpKM9hQJXNl/gaLPDK79+hIzp
+	JmppLM/tYEsqX/v4cyISzAGASIy+m3Coctg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1777632389; x=
+	1777718789; bh=ik5a7MC4PBdLeM/Fa2W8c64dptvpYcrqCSMlKFZOCU8=; b=f
+	iXPo2XiZZUG98T73ELuqH7RyJUHVpBovynnjsAY7fSQKSE+xNM5oiMWhtyq9LHNO
+	uGANhrZheYanmy78SrB+9pbsuIx03zKHI3DYmIcuRKs2NaQ3K/s3THEdSFVeTJfV
+	Q1TZkrgrTtt3dnQZ/awLmNBuwzlAnuLNBTia9l651hnfKoUiB2ncKBc//SBCF9ng
+	W7ABFPdNS1hQtsEZu8sGjvObpJyPsVGMzIpldvYnPfVkn4IFdeq2yTtHdX4GW8eo
+	gyI4HW3+7nHJ4y5/sL5VWJMeIgS7jutO39wJwW39/utTcf2XP0lnsjHC2G7tfvaz
+	X7F9NXIJ9oXzRRGvb1zVg==
+X-ME-Sender: <xms:hIT0aZ7phXdO1JK38gb9wAgGto3QBwFVcFs1GNYocP2epzN7vsygoQ>
+    <xme:hIT0aTM2EkONopqck_hESu7BAyHAx8lo6IScQr5cGKCL-Pzup9aYZXJ8EnfxWOQJc
+    CLUvdTwpmkPiLspXDtB_p6A6JzE6fdKb2AL8VC59qB9KntsvsQ>
+X-ME-Received: <xmr:hIT0aSGIbNbSvADXnt6EDLL-VieUdHnC4JICehp0zl32fVFb_ctzRYgWdxMnMGh8amP1BA4Az6So71MX5fFRSl-z59YrcL8>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgdeltddttdcutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
+    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
+    hrpegtgfgghffvvefujghffffkrhesthhqredttddtjeenucfhrhhomheppfgvihhluehr
+    ohifnhcuoehnvghilhgssehofihnmhgrihhlrdhnvghtqeenucggtffrrghtthgvrhhnpe
+    ffveejleejheeujeegheelleeuveduheejkeegveeuffetvefhfeevtdeuuefgjeenucff
+    ohhmrghinhepghhithhhuhgsrdgtohhmpdhkvghrnhgvlhdrohhrghenucevlhhushhtvg
+    hrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehnvghilhgssehofihnmhgr
+    ihhlrdhnvghtpdhnsggprhgtphhtthhopeduiedpmhhouggvpehsmhhtphhouhhtpdhrtg
+    hpthhtohepvhhirhhoseiivghnihhvrdhlihhnuhigrdhorhhgrdhukhdprhgtphhtthho
+    pehlihhnuhigqdhunhhiohhnfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpth
+    htoheplhhinhhugidqnhhfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthho
+    pehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtth
+    hopehlihhnuhigqdhfshguvghvvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghp
+    thhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtth
+    hopehmihhklhhoshesshiivghrvgguihdrhhhupdhrtghpthhtohepjhgrtghksehsuhhs
+    vgdrtgiipdhrtghpthhtohepjhhksehoiihlrggsshdrohhrgh
+X-ME-Proxy: <xmx:hIT0afRaNDT70brM-V7_HHfAGsqViYZMQpCwm_6ik3ZHpjj6ZY0-xQ>
+    <xmx:hIT0aSSO03eU9OjjPmXDUiRS0D8FVkfJrAej62GBTzJiHcWxi0iUng>
+    <xmx:hIT0aSe2nXpIyFptkoNQjWH3NYjqgpe63vHxb7tCeYuMoWJBy9-ytA>
+    <xmx:hIT0aWdLgbEJLs1L-NzYWpLxwXstwGzqnKqGenc0KreoSEPEmJ8TPA>
+    <xmx:hYT0aYIkXlxHehQK3w3ouyX9BTgop2r3PZBy6DkyKL0AOoYIzqErcVHf>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
+ 1 May 2026 06:46:24 -0400 (EDT)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4168; i=ardb@kernel.org;
- h=from:subject; bh=Y7NZlpIwmYsLcYL4hyqTcDON27lg9AznNGlzwjvPhX8=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIfNLjr9yxmYZ7T31rgmyvgm/m8NvzNsze+lM8V15XmwPn
- h+s703tKGVhEONikBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABO5kcrIsCVTW7HpzqkvK4Iv
- Wm7d+PX7avWHWw7muQT9ncj1fGLNFhtGhqMbJa58Ov3C3e3rvw1ulWd0pqwU8r1iway5wdlnat3 rTYwA
-X-Mailer: git-send-email 2.54.0.545.g6539524ca2-goog
-Message-ID: <20260501090311.2483809-2-ardb+git@google.com>
-Subject: [PATCH] x86/efi: Restore IRQ state in EFI page fault handler
-From: Ard Biesheuvel <ardb+git@google.com>
-To: linux-efi@vger.kernel.org
-Cc: x86@kernel.org, Ard Biesheuvel <ardb@kernel.org>, Eric Biggers <ebiggers@kernel.org>, 
-	Ivan Hu <ivan.hu@canonical.com>
-Content-Type: text/plain; charset="UTF-8"
+MIME-Version: 1.0
+From: NeilBrown <neilb@ownmail.net>
+To: "Al Viro" <viro@zeniv.linux.org.uk>
+Cc: "Linus Torvalds" <torvalds@linux-foundation.org>,
+ "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.cz>,
+ "Jeff Layton" <jlayton@kernel.org>, "Trond Myklebust" <trondmy@kernel.org>,
+ "Anna Schumaker" <anna@kernel.org>, "Miklos Szeredi" <miklos@szeredi.hu>,
+ "Amir Goldstein" <amir73il@gmail.com>, "Jeremy Kerr" <jk@ozlabs.org>,
+ "Ard Biesheuvel" <ardb@kernel.org>, linux-efi@vger.kernel.org,
+ linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
+ linux-unionfs@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3 04/19] VFS: use wait_var_event for waiting in
+ d_alloc_parallel()
+In-reply-to: <20260501033715.GB3518998@ZenIV>
+References: <20260427040517.828226-5-neilb@ownmail.net>
+  <20260428033738.GV3518998@ZenIV>
+  <177737511992.1474915.1952404144121931523@noble.neil.brown.name>
+  <20260428142225.GX3518998@ZenIV>
+  <177741881482.1474915.12527082398060370192@noble.neil.brown.name>
+  <20260429052626.GY3518998@ZenIV>  <20260429170731.GZ3518998@ZenIV>
+  <177759308866.1474915.9708613530229799376@noble.neil.brown.name>
+  <20260501011132.GA3518998@ZenIV>
+  <177759959922.1474915.14496442965390503813@noble.neil.brown.name>
+  <20260501033715.GB3518998@ZenIV>
+Date: Fri, 01 May 2026 20:46:21 +1000
+Message-id: <177763238102.1474915.1506201584306941315@noble.neil.brown.name>
+Reply-To: NeilBrown <neil@brown.name>
 
-From: Ard Biesheuvel <ardb@kernel.org>
+On Fri, 01 May 2026, Al Viro wrote:
+> On Fri, May 01, 2026 at 11:39:59AM +1000, NeilBrown wrote:
+>=20
+> > I dislike them too.  I doubt I can find solutions that either of us
+> > like, but they should be relatively short-lived.  Once we push the
+> > locking down in the the inode_operations the filesystem will be in a
+> > position to hold the lock only when it actually needs it (if at all).
+>=20
+> ... or we'll end up with hard-to-formulate constraints on what a filesystem
+> may do with its internal locking to use the APIs provided by fs/{dcache,nam=
+ei}.c
+> safely.
+>=20
+> Note that e.g. "->iterate_shared() wants to know the synthetic inumbers
+> a concurrent stat(2) would inject into dcache" (which is the original
+> reason for dcache preseeding in that thing) is not uncommon.  In procfs
+> you are lucky to have no mkdir() and friends; the same is not true in
+> general and we'd better have a sane answer to "what could a filesystem
+> like that do with its internal locking".  Or that thing will get blindly
+> copied, with predictable results.
 
-The kernel's softirq API does not permit re-enabling softirqs while IRQs
-are disabled. The reason for this is that local_bh_enable() will not
-only re-enable delivery of softirqs over the back of IRQs, it will also
-handle any pending softirqs immediately, regardless of whether IRQs are
-enabled at that point.
+You say "not uncommon" but I can only find it in procfs and overlayfs.
 
-For this reason, commit
+You only need this if there is a backing store that doesn't provide
+anything usable as inode numbers.
+If there is no backing store, then you'll populate with
+d_make_persistent() and provide inode numbers at that time.
+If the backing store provides inode numbers - you use them.
 
-  d02198550423 ("x86/fpu: Improve crypto performance by making kernel-mode FPU reliably usable in softirqs")
+For procfs the backing store is various kernel data structures (e.g. the
+process table).  For overlayfs the backing store is a blend of 2 or more
+other filesystems.
 
-disables softirqs only when IRQs are enabled, as it is not permitted
-otherwise, but also unnecessary, given that asynchronous softirq
-delivery never happens to begin with while IRQs are disabled.
+In either case, the backing store has its own locking protocol to manage
+create/remove/iterate, so the filesystem likely doesn't need to provide
+one.=20
 
-However, this does mean that entering a kernel mode FPU section with
-IRQs enabled and leaving it with IRQs disabled leads to problems, as
-identified by Sashiko [0]: the EFI page fault handler is called from
-page_fault_oops() with IRQs disabled, and thus ends the kernel mode FPU
-section with IRQs disabled as well, regardless of whether IRQs were
-enabled when it was started. This may result in schedule() being called
-with a non-zero preempt_count, causing a BUG().
+For procfs I imagine that once we push parent parent-locking down in to
+the filesystem, we'll simply remove it all from procfs.  Then there will
+be no problem calling d_alloc_parallel() in iterate_shared as the thread
+which owns the in-lookup dentry will never try to lock the parent.
 
-So take care to re-enable IRQs when handling any EFI page faults if they
-were taken with IRQs enabled.
+For overlayfs I *think* there is no need for parent locking in ->lookup
+so it is possible the same approach will work, though more careful
+analysis will be needed.
 
-[0] https://sashiko.dev/#/patchset/20260430074107.27051-1-ivan.hu%40canonical.com
+The current code to drop and retake the lock is only transitional code
+to get from here to there is manageable steps.
 
-Cc: Eric Biggers <ebiggers@kernel.org>
-Cc: Ivan Hu <ivan.hu@canonical.com>
-Fixes: d02198550423 ("x86/fpu: Improve crypto performance by making kernel-mode FPU reliably usable in softirqs")
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- arch/x86/include/asm/efi.h     |  3 ++-
- arch/x86/mm/fault.c            |  2 +-
- arch/x86/platform/efi/quirks.c | 11 ++++++++++-
- 3 files changed, 13 insertions(+), 3 deletions(-)
+>=20
+> > I'm confident that dropping the lock is safe.  If there was some way to
+> > tell the VFS that the lock has already been dropped, then we wouldn't
+> > need to reclaim it, but I cannot see a clean way to do that.
+>=20
+> FWIW, I'm more concerned about ->iterate_shared() - d_add_ci() is garbage
+> that isn't used on a sanely configured kernel; ls -lR is not going away,
+> no matter what, and exclusion requirements are going to be a lot more
+> interesting for that one anyway.  It might be worth teaching iterate_dir()
+> that in such-and-such conditions it ought to save position, drop the lock,
+> do a lookup on name stashed in dir_context, retake the lock and call back i=
+nto
+> ->iterate_shared() from saved position.  With helper callable by ->iterate_=
+shared()
+> instances if they run into failing d_alloc_trylock() in a situation where t=
+hey
+> can't just shrug and move on...  Not sure.
+>=20
+> What kind of exclusion do you have in mind for foo_iterate_shared() in the
+> long run?  Assuming that filesystem has directory-modifying operations, as
+> well as lookups, and its inumbers are synthetic.
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index dc8fe1361c18..be58b7f5c806 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -137,7 +137,8 @@ extern void __init efi_dump_pagetable(void);
- extern void __init efi_apply_memmap_quirks(void);
- extern int __init efi_reuse_config(u64 tables, int nr_tables);
- extern void efi_delete_dummy_variable(void);
--extern void efi_crash_gracefully_on_page_fault(unsigned long phys_addr);
-+extern void efi_crash_gracefully_on_page_fault(unsigned long phys_addr,
-+					       const struct pt_regs *regs);
- extern void efi_unmap_boot_services(void);
- 
- void arch_efi_call_virt_setup(void);
-diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
-index f0e77e084482..63de8e8684f2 100644
---- a/arch/x86/mm/fault.c
-+++ b/arch/x86/mm/fault.c
-@@ -686,7 +686,7 @@ page_fault_oops(struct pt_regs *regs, unsigned long error_code,
- 	 * avoid hanging the system.
- 	 */
- 	if (IS_ENABLED(CONFIG_EFI))
--		efi_crash_gracefully_on_page_fault(address);
-+		efi_crash_gracefully_on_page_fault(address, regs);
- 
- 	/* Only not-present faults should be handled by KFENCE. */
- 	if (!(error_code & X86_PF_PROT) &&
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 7475405119ce..425552e4ec36 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -761,7 +761,8 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
-  * @return: Returns, if the page fault is not handled. This function
-  * will never return if the page fault is handled successfully.
-  */
--void efi_crash_gracefully_on_page_fault(unsigned long phys_addr)
-+void efi_crash_gracefully_on_page_fault(unsigned long phys_addr,
-+					const struct pt_regs *regs)
- {
- 	if (!IS_ENABLED(CONFIG_X86_64))
- 		return;
-@@ -810,6 +811,14 @@ void efi_crash_gracefully_on_page_fault(unsigned long phys_addr)
- 		return;
- 	}
- 
-+	/*
-+	 * The API does not permit entering a kernel mode FPU section with
-+	 * interrupts enabled and leaving it with interrupts disabled.  So
-+	 * re-enable interrupts now if they were enabled when the page fault
-+	 * occurred.
-+	 */
-+	local_irq_restore(regs->flags);
-+
- 	/*
- 	 * Before calling EFI Runtime Service, the kernel has switched the
- 	 * calling process to efi_mm. Hence, switch back to task_mm.
--- 
-2.54.0.545.g6539524ca2-goog
+I think the VFS will still be taking a shared lock on the parent when
+calling ->iterate_shared.  This is the easiest way to block rmdir while
+a readdir is happening.
 
+>=20
+> BTW, do you have AFS and CIFS counterparts of your stuff from back in 2022
+> that killed d_rehash() uses in fs/nfs?  I would love to kill d_rehash();
+> exfat use is an easily removable junk, but fs/afs and fs/smb/client ones
+> are trickier and the reasons why it needed to be killed in fs/nfs apply
+> to those as well.
+>=20
+
+For fs/afs:
+
+  https://github.com/neilbrown/linux/commit/7d074238b7674245308bb482d29f8b2eb=
+10a6598
+  https://github.com/neilbrown/linux/commit/a1ab4d991e1cbf02b7ae493798067db75=
+d88ef48
+
+or on lore.kernel.org
+  20260312214330.3885211-20-neilb@ownmail.net
+  20260312214330.3885211-21-neilb@ownmail.net
+
+
+for fs/smb/client
+
+  https://github.com/neilbrown/linux/commit/1df67fbccd424aaaf03a4dfeda07cd8f9=
+e3bc682
+  https://github.com/neilbrown/linux/commit/3c4f603881db16984b0b44e38a634d951=
+7b9be84
+
+or
+  20260312214330.3885211-26-neilb@ownmail.net
+  20260312214330.3885211-27-neilb@ownmail.net
+
+I don't suppose you have any memory of
+   Commit: a00be0e ("cifs: don't use ->d_time")
+from 10 years ago.  Maybe you didn't even see it.
+
+NeilBrown
