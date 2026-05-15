@@ -1,63 +1,63 @@
-Received: from mail-dl1-f43.google.com (mail-dl1-f43.google.com [74.125.82.43])
+Received: from mail-dy1-f172.google.com (mail-dy1-f172.google.com [74.125.82.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCD6A3F6C5F
-	for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 21:14:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3AF103F8EDC
+	for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 21:15:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778879701; cv=none; b=pp8PUdL8wLb7ZEgNTM33VJG7qyzfPFYu5wU3cNTAws2AcLzSK4aG7oMDIKNOcmFx75fgsJDGyWvZFI0HZl+J0KUFM1IhsjlmUUvtz+x4NZxPLrkwoCPLXhAq+kQaEqCmrGopSX78czX/CG7gzeJ4BO+1Yf6+CG3SxvXsdZNPyGM=
+	t=1778879704; cv=none; b=dZOOtmaxb8x8XHLcefhgvLte6LDC+7D1vRViUC+cu8gLh60acv0qI1CpGO/WCrDOQCiVe6Ei6INmRg3xWiHfcmwQ9+rN1AWh+QxNsr3l+J/azmJazStmT3y90Mr8sTZ6R4e9P7A09ZLK0KHkMvIqfdhJLqBR+J1brSx1fbi2jN4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778879701; c=relaxed/simple;
-	bh=9YS4BuHjnfo+1IReQ3Kb+NmIPLFdp9Qh7Ox7isDv3NQ=;
+	s=arc-20240116; t=1778879704; c=relaxed/simple;
+	bh=xWoPwNVeSnywWpOcGvmELTRW5jlGxq+dKcjO5PNtRQM=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=cbnPdLpC6jk2O2XXX8SpXiGKYfT0HUNG/prRrN+Em0Faq1/czbGJm2au+1hyTIdOFzX7pREeQj+VmHoFY8JjzHIcYQWcDXZLQ4iL1VJ0gxF4qkSt93M6sHvZblM/I9sndVgA+0woqzBl1YSqMYY/NKoV52mHF5utZnvxuLs4lcg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=qCrdw4Ik; arc=none smtp.client-ip=74.125.82.43
+	 MIME-Version; b=OgKI9gKc5ZaAb4Uk9pSA0F4nNKyTim6ZF8Ndaz3V8DPBG6gRqmxpMiikDZU/cdEjWkPPwzly2B4qn+lItocM1sxECotvOnsRAk+XAE7ua2hk7+DyDxk04zIWhCkJXtccVB0Q2XtMmCQV1OKu3B+rqjX8yFluQgWc3HqlMj410iM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TML1/Alw; arc=none smtp.client-ip=74.125.82.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qCrdw4Ik"
-Received: by mail-dl1-f43.google.com with SMTP id a92af1059eb24-12c88e5f4aeso129675c88.0
-        for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 14:14:56 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TML1/Alw"
+Received: by mail-dy1-f172.google.com with SMTP id 5a478bee46e88-2f00a567cfaso833148eec.0
+        for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 14:15:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778879696; x=1779484496; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1778879701; x=1779484501; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=yYV487dim1u7McKHcszztZC/VNez+ruEau/ZSoQzK6U=;
-        b=qCrdw4IkzM+j5ub2ZAZRhtcI5ZeBerH/N3TylpfGqhdbGlvZSp/9i1BoGDwUulwzo9
-         ih/aJUNsCDMS6I+Q7FeWj6PxXeX4IvoICuH44XRwqTRZlnv175fpVOcQsPHELZ1J/TPA
-         xGhllREnLYSEjsHuTXm9/loijMK3zFRrFxkKc87as44299Fkzfm7SJvFBznYMdUehXPd
-         svCpwIkr40vc9bhvSwLk5GbbZ3xWupFtjA6HGqwoU1XkeATVDX3AFNx1so1Vkcuv7PyU
-         4jgw9BxWdIWwX8st9gJM5b1CaIlqwwkW3IlY+i/O7Zhtqc5JY5QNsHue9JR4N3xcJkWV
-         PfrQ==
+        bh=7H5BBOQhcOIL9Ie2ph8fKyZbD41fSwoTWiLEU5gST9s=;
+        b=TML1/Alwf1J56nZnmLFnC6Z6dFQkcWs7FNQt/kRXfq+GMkjZIzhDPeefJNOyk30PoW
+         cPck8KvGhJhoXhg9Enm/bD4+2l7LVKHTEUULH2y5HuBl60luRGlQjfwzodYujzjbCZ85
+         kgunYYQ0YcAC8j3iiERH2Ph5cpRst++49kNCmwq0kqFuSxCWfc7EERACLpo+hGMVxIoq
+         lQ60lbyGss/jKaGWpOQEq83fgcF5abfULfrofm5AboQ0qSc2VtTviw5d8HDaTU3SVzNq
+         KE9j4qUnU/VmduXBPIZo9x7f2P4E89g/HvB3s3l0xySd/aUJ+fK+LIJBraYJ0mDxVo02
+         /G3w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778879696; x=1779484496;
+        d=1e100.net; s=20251104; t=1778879701; x=1779484501;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=yYV487dim1u7McKHcszztZC/VNez+ruEau/ZSoQzK6U=;
-        b=ctHsxlPDwcg0mQAhIjJGBDbEAt2eQGSOdO5jNdSbPnVcmpmIkV8J03QB2Xzx78dMFn
-         0zX7Wt5Cq6YG+xoirXvJwZro0DGbbbHsEs3OzzR66HVxrZ7flEKNcX2l1eCYJRDrAMql
-         37OjVJsykP+FWJQ2ER/L+Z7IeL+IBBDUPuy8aQqlWD7m2UD4DMI2Zz2UF7ZmLeNFQdGt
-         sB+ww7IrMFVk8wdyS8RSLUH454J9qA/bb+u+aJM0XN3qV5cj9lDibkkvH7Iw5x5FoBWh
-         L/V3z9Yy7G7o4bg1jE89rMd5nik/S3Qldbb8lIlKsu0w4ev2q/rx7a7Cynsl1fO6PIFK
-         Hk8w==
-X-Forwarded-Encrypted: i=1; AFNElJ+3Sv6UkI9TeYOO8Ff66hsnTp7vsnlWvxbp0aUDFjzQaXNPce/SFJtePvOPE0pRCJF0Ls0pflt8C+U=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxSyMty1HoL8MlvXu9GOcrgnVZgr0GXSy39A4TqogRmMyXiqLxE
-	x8O0sRPXr0ZtjRwM6HbBlDpuRONmAACG6IEIe4wm6X1JmtClydqiH0RlEsIdHo5e
-X-Gm-Gg: Acq92OGX9rRx7frQW5zPYnFymJpiIZL1GSlQtIurfoeYy6uO6rvjxkv22ZQDIlc6M0w
-	sVRjSmcGEe/GQ3dUZjnMTz27QoJDkk2VA2UvBlz2gN6JxrtVoOgCxEcKU0sxUQqwgiq0s5gMLDl
-	byS6BdbQEEtwvuTXhgHZ7E74tBWyAdCyEaCspBVNUKMcnZBDxqbo1V+gAm6V8gD89lSzyJbZWJC
-	48zj/o/e+6aLRnI71ZFsitpT7pTuz5/cjll2E3Xm1+uhyXMwY8zucYEFbv5ltM7kGoiOnBVqHJa
-	acvVrtmgLZyat43DaEboiODHh+wsnVFgsKwc0wUHFYlJ3v8bose286XQVlEPU8hFyGKJ0tcuUjC
-	bxIogRrObk9e6jrXc9HXrWLP3JpV61mmathloUCdTkkGuM4sEqvUbD6GRUM9wqL3iYyrWrCjCKp
-	5GClCbvYVUtCNIBOi+yeS8S7kyVkFSV50=
-X-Received: by 2002:a05:7022:301:b0:12a:6d05:3938 with SMTP id a92af1059eb24-134ffc6a83fmr2842716c88.7.1778879695574;
-        Fri, 15 May 2026 14:14:55 -0700 (PDT)
+        bh=7H5BBOQhcOIL9Ie2ph8fKyZbD41fSwoTWiLEU5gST9s=;
+        b=kgEpYsf5uYmE625sQAC/gKbolSmT48H63vFS/V9pnqN3gwfFJzaU3JSbliXR3vRK3I
+         o4Drt8YFaeIrl5PUBvcKVDQ69BZwgAbC5Z2FUzWxEB6pBq8IBKjH0jGrrla93ujH9zEb
+         rUeaHeKD6xLbPYEI9vlIX71lWAZ0wk4hcagnRc6HdSXzE6uWpNMNYQKCej9SIxIJ5imz
+         vDYs74BpWVicSw7Ki/vYo0HLQQsTS+QSQGllPzjiW+nvPdorAfQPXe1uLdnPVaTmyFmP
+         jYCzO6/xqRg0ZQmqF8bBjepU/U2NRY6fx87wWO0ndtjgVu3Su9bIuGyL7gyLbOXxfRtk
+         BmxQ==
+X-Forwarded-Encrypted: i=1; AFNElJ9Y3ivbexAwbFBs+qto9OOeOsuSsTzyX6EPMB/QtUGi71rp6tcBrOCqG3AQfng8hHVMPXhyuYCBz9o=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxetrwqh3rBs6Xat9qmym9NF0bAyb8nl9nWrgt7qir5mVRjHBQW
+	IZ65re+ahgrV3bl79AZuv8aURPB+S0aPtWpNFxGjKLZLk9cgyfVEb+i+
+X-Gm-Gg: Acq92OFLAbCQltSr1FZnryzkeiwdtBN+QfrHKoiDETMvmcyTpN6yQXw/+bS1PRuW5oJ
+	k/yfmTnmHBN4HRvvV7Gcpo+BkXpszxhuoGm8X2lfwOf2ukwEJP/hxotgjGhJSGvegUu9Bn/VkZk
+	KngcSb48wdWn9mv+3fGUoXOfrXFOqxIR+QDKo8nWzIEaoZMhE+AozN/f3GwlPvgwyjISRzVHmHx
+	B1lcqlpvXSmXElSSWlF+ra5nuT32GIJd2ZUgBPyq2PKQfWgoQ94oEu6fY8FkgdZYFlh46oAUuQt
+	NaQjW2Gxg2e314gVRhkXaP568V2cCcx/fafiu+QxgmUC6BOmiqUSBegNWgAzhIKxxXtL8QtDkJE
+	iHajOV2MFDeKfSD8u/RWvXND/r1uGRCfIegszsWzg5Rxd8Gdv+y9UXC8EExiY0l0oEuR+Pohl0Z
+	d+ZeLx4UGeF80M0jea2pRcYqgzeKmo4jia3L3x8Atlsw==
+X-Received: by 2002:a05:7301:644b:b0:2d9:db50:c6ce with SMTP id 5a478bee46e88-3039785c4f8mr2519307eec.3.1778879701272;
+        Fri, 15 May 2026 14:15:01 -0700 (PDT)
 Received: from mimas.lan ([2603:8000:df01:38f7:a6bb:6dff:fecf:e71a])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-134cb5b3c20sm11525407c88.0.2026.05.15.14.14.54
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-302978b1a79sm8049096eec.28.2026.05.15.14.15.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 May 2026 14:14:55 -0700 (PDT)
+        Fri, 15 May 2026 14:15:00 -0700 (PDT)
 From: Ross Philipson <ross.philipson@gmail.com>
 To: linux-kernel@vger.kernel.org,
 	x86@kernel.org,
@@ -92,9 +92,9 @@ Cc: ross.philipson@gmail.com,
 	daniel.kiper@oracle.com,
 	andrew.cooper3@citrix.com,
 	trenchboot-devel@googlegroups.com
-Subject: [PATCH v16 15/38] Documentation/security: Secure Launch kernel documentation
-Date: Fri, 15 May 2026 14:13:47 -0700
-Message-ID: <20260515211410.31440-16-ross.philipson@gmail.com>
+Subject: [PATCH v16 17/38] x86: Secure Launch Resource Table header file
+Date: Fri, 15 May 2026 14:13:49 -0700
+Message-ID: <20260515211410.31440-18-ross.philipson@gmail.com>
 X-Mailer: git-send-email 2.47.3
 In-Reply-To: <20260515211410.31440-1-ross.philipson@gmail.com>
 References: <20260515211410.31440-1-ross.philipson@gmail.com>
@@ -106,752 +106,367 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: "Daniel P. Smith" <dpsmith@apertussolutions.com>
+The Secure Launch Specification is an architecture agnostic,
+software neutral API/ABI maintained by the TrenchBoot project.
+Its function is to allow any compliant boot loader to communicate
+the pre-launch configuration to any compliant post-launch kernel.
+The Secure Launch Resource Table, defined in the specification,
+presents the programmatic interface for this API/ABI.
 
-Introduce documentation for the Linux Secure Launch feature.
+The specification can be found here:
+https://github.com/TrenchBoot/documentation/blob/master/specifications/secure-launch-specification.rst
 
-Co-developed-by: Ross Philipson <ross.philipson@gmail.com>
-Signed-off-by: Daniel P. Smith <dpsmith@apertussolutions.com>
 Signed-off-by: Ross Philipson <ross.philipson@gmail.com>
 ---
- Documentation/arch/x86/boot.rst               |   8 +
- Documentation/security/index.rst              |   1 +
- .../security/launch-integrity/index.rst       |   9 +
- .../launch-integrity/secure_launch.rst        | 681 ++++++++++++++++++
- 4 files changed, 699 insertions(+)
- create mode 100644 Documentation/security/launch-integrity/index.rst
- create mode 100644 Documentation/security/launch-integrity/secure_launch.rst
+ include/linux/slr_table.h | 339 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 339 insertions(+)
+ create mode 100644 include/linux/slr_table.h
 
-diff --git a/Documentation/arch/x86/boot.rst b/Documentation/arch/x86/boot.rst
-index dca3875a2435..eb53da9dcbbf 100644
---- a/Documentation/arch/x86/boot.rst
-+++ b/Documentation/arch/x86/boot.rst
-@@ -482,6 +482,14 @@ Protocol:	2.00+
- 	    - If 1, KASLR enabled.
- 	    - If 0, KASLR disabled.
- 
-+  Bit 2 (kernel internal): SLAUNCH_FLAG
-+
-+	- Used internally by the setup kernel to communicate
-+	  Secure Launch status to the kernel proper.
-+
-+	    - If 1, Secure Launch enabled.
-+	    - If 0, Secure Launch disabled.
-+
-   Bit 5 (write): QUIET_FLAG
- 
- 	- If 0, print early messages.
-diff --git a/Documentation/security/index.rst b/Documentation/security/index.rst
-index 3e0a7114a862..f89741271ed0 100644
---- a/Documentation/security/index.rst
-+++ b/Documentation/security/index.rst
-@@ -20,3 +20,4 @@ Security Documentation
-    landlock
-    secrets/index
-    ipe
-+   launch-integrity/index
-diff --git a/Documentation/security/launch-integrity/index.rst b/Documentation/security/launch-integrity/index.rst
+diff --git a/include/linux/slr_table.h b/include/linux/slr_table.h
 new file mode 100644
-index 000000000000..fb9f63f01056
+index 000000000000..2cc542121414
 --- /dev/null
-+++ b/Documentation/security/launch-integrity/index.rst
-@@ -0,0 +1,9 @@
-+=====================================
-+System Launch Integrity documentation
-+=====================================
-+
-+.. toctree::
-+   :maxdepth: 3
-+
-+   secure_launch
-+
-diff --git a/Documentation/security/launch-integrity/secure_launch.rst b/Documentation/security/launch-integrity/secure_launch.rst
-new file mode 100644
-index 000000000000..b4c61fdceaf0
---- /dev/null
-+++ b/Documentation/security/launch-integrity/secure_launch.rst
-@@ -0,0 +1,681 @@
-+.. SPDX-License-Identifier: GPL-2.0
-+.. Copyright (c) 2019-2026 Daniel P. Smith <dpsmith@apertussolutions.com>
-+
-+======================
-+Secure Launch Overview
-+======================
-+
-+:Author: Daniel P. Smith
-+:Date: February 2026
-+
-+Overview
-+========
-+
-+The TrenchBoot project initiated development of the Secure Launch kernel
-+feature to establish a generalized framework for dynamic root-of-trust
-+measurement (DRTM). The effort addresses two core objectives: (1) exposing the
-+platform-specific launch protocols (e.g., Intel TXT, AMD SKINIT, Arm DRTM, and
-+potentially OpenPOWER) directly to the Linux kernel, and (2) enabling the
-+kernel to act as the dynamic launch initiator. This design provides the
-+necessary foundation for the Linux kernel to support a broad range of dynamic
-+launch use cases without platform-specific user-space intermediaries.
-+
-+.. note::
-+    A quick note on terminology. The larger open source project itself is
-+    called TrenchBoot, which is hosted on GitHub (links below). The kernel
-+    feature enabling the use of the x86 technology is referred to as "Secure
-+    Launch" within the kernel code.
-+
-+Goals
-+=====
-+
-+The primary use case initially targeted by the TrenchBoot project is the
-+ability for the Linux kernel to be launched via a dynamic launch during the
-+early boot sequence. In this scenario, the dynamic launch is initiated by a
-+bootloader that has been extended with Secure Launch support. The first
-+bootloader targeted was GRUB2.
-+
-+An essential part of establishing measurement-based launch integrity is
-+ensuring that all components intended for execution (kernel image, initrd,
-+etc.) and all configuration data that will affect kernel execution (command
-+line, boot parameters, etc.) are measured prior to execution. These
-+measurements are then stored securely using the Trusted Platform Module (TPM).
-+
-+Both Intel TXT and AMD dynamic launch implementations use the TPM for this
-+purpose. The architecture is designed so that a dynamic launch unlocks a
-+specific set of Platform Configuration Registers (PCRs) reserved for DRTM
-+(Dynamic Root of Trust for Measurement) measurements. These registers are known
-+as the **DRTM PCRs** (PCRs 17-22).
-+
-+Further details on the hardware mechanisms are documented in Intel's Trusted
-+Execution Technology specification for the ``GETSEC`` instruction and AMD's
-+documentation for the ``SKINIT`` instruction. See the `Resources` section for
-+references.
-+
-+.. note::
-+    Currently, only Intel TXT is supported in this first release of the Secure
-+    Launch feature. AMD/Hygon SKINIT and Arm support will be added in a
-+    subsequent release.
-+
-+To enable the Linux kernel to be launched via the Intel ``GETSEC`` instruction,
-+a Secure Launch entry point is built into the mainline kernel. This entry point
-+is responsible for handling the specific processor state that the dynamic
-+launch process leaves the Bootstrap Processor (BSP) in.
-+
-+The Secure Launch entry point performs the earliest possible measurements of
-+all components and data that the kernel will consume (kernel image, initrd,
-+command line, boot parameters, etc.). Both this entry point code and subsequent
-+kernel initialization code must also correctly handle the specific state that
-+the dynamic launch leaves the Application Processors (APs) in.
-+
-+Design Decisions
-+================
-+
-+Several design decisions were made during the development of the Secure Launch
-+feature. The primary guiding principle was to minimize the modifications to the
-+existing boot path of the kernel as little as possible.
-+
-+The following illustrate how the implementation followed these principle:
-+
-+ - All the entry point code necessary to properly configure the system post
-+   launch is found in sl_stub.S in the kernel image. This code
-+   validates the state of the system, restores necessary system operating
-+   configurations and properly handles post launch CPU states.
-+ - Support is introduced in the SMP boot code to properly wake the APs. This
-+   is required due to the unique state the dynamic launch leaves the APs in
-+   (i.e. they cannot be woken with the standard INIT-SIPI sequence).
-+ - Final setup for the Secure Launch kernel is done in a separate Secure Launch
-+   module that is loaded via a late initcall. This code is responsible for
-+   setting up the securityfs interface to allow access to the TPM event log and
-+   public TXT registers.
-+ - On the reboot and kexec paths, calls are made to a function to finalize the
-+   state of the Secure Launch kernel.
-+
-+Basic Boot Flow
-+===============
-+
-+Outlined here is a summary of the boot flow for Secure Launch. A more detailed
-+review of the Secure Launch process can be found in the Secure Launch
-+Specification (a link is in the `Resources`_ section).
-+
-+Pre-launch: *Phase where the environment is prepared and configured to initiate
-+the secure launch by the boot chain.*
-+
-+ - The SLRT is initialized, and dl_stub is placed in memory.
-+ - Load the kernel, initrd and ACM [4]_ into memory.
-+ - Set up the TXT heap and page tables describing the MLE [1]_ per the
-+   specification.
-+ - If non-UEFI platform, SLRT is registered in boot params and dl_stub is
-+   called from the legacy setup kernel.
-+ - If UEFI platform, SLRT registered with UEFI and kernel efi-stub support calls
-+   dl_stub after executing EBS.
-+ - The dl_stub will prepare the CPU and the TPM for the launch.
-+ - The secure launch is then initiated with the GETSET[SENTER] instruction.
-+
-+Post-launch: *Phase where control is passed from the ACM to the MLE and the secure
-+kernel begins execution.*
-+
-+ - Entry from the dynamic launch jumps to the SL stub.
-+ - SL stub fixes up the world on the BSP.
-+ - For TXT,
-+    - SL stub wakes the APs, fixes up their worlds.
-+    - APs are left in an optimized (MONITOR/MWAIT) wait state.
-+ - SL main does validation of buffers and memory locations. It sets
-+   the boot parameter loadflag value SLAUNCH_FLAG to inform the main
-+   kernel that a Secure Launch was done.
-+ - SL main locates the TPM event log and writes the measurements of
-+   configuration and module information into it.
-+ - The SMP bring up code is modified to wake the waiting APs via the monitor
-+   address.
-+ - SL platform module is registered as a late initcall module.
-+ - SL platform module initializes the securityfs interface to allow
-+   access to the TPM event log and TXT public registers.
-+ - Kernel boot finishes booting normally.
-+ - SEXIT support to leave SMX mode is present on the kexec path and
-+   the various reboot paths (poweroff, reset, halt).
-+
-+PCR Usage
-+=========
-+
-+The TCG DRTM architecture defines three PCRs for dynamic root of trust
-+measurement:
-+
-+- PCR.Details (PCR 17)
-+- PCR.Authorities (PCR 18)
-+- PCR.DLME_Authority (PCR 19)
-+
-+Further details on the semantics of the Details and Authorities PCRs are
-+available in the TCG DRTM Architecture specification.
-+
-+The Linux kernel's Secure Launch implementation adheres to the TrenchBoot
-+Secure Launch Specification. It utilizes a measurement policy stored in the
-+`Secure Launch Resource Table` (``SLRT``) to determine both what to measure and
-+into which PCR each measurement should be extended.
-+
-+This policy makes it possible for the kernel to store its own DRTM measurements
-+(such as an external initrd image) into **PCR.DLME_Detail** (PCR 20). When
-+combined with storing user authority information into **PCR.DLME_Authority**
-+(PCR 19), it enables sealing and attestation across different combinations of
-+platform and user details/authorities.
-+
-+An example of this approach was presented in the FOSDEM 2021 talk titled
-+"Secure Upgrades with DRTM".
-+
-+Configuration
-+=============
-+
-+The settings to enable Secure Launch using Kconfig are under::
-+
-+  "Processor type and features" --> "Secure Launch support"
-+
-+A kernel with this option enabled can still be booted using other supported
-+methods.
-+
-+To reduce the Trusted Computing Base (TCB) of the MLE [1]_, the build
-+configuration should be pared down as narrowly as one's use case allows.
-+Fewer drivers (less active hardware) and features reduce the attack surface.
-+As an example in the extreme, the MLE could only have local disk access with no
-+other hardware supports except optional network access for remote attestation.
-+
-+It is also desirable, if possible, to embed the initrd used with the MLE kernel
-+image to reduce complexity.
-+
-+The following are important configuration necessities to always consider:
-+
-+IOMMU Configuration
-+-------------------
-+
-+When doing a Secure Launch, the IOMMU should always be enabled and the drivers
-+loaded. However, IOMMU passthrough mode should never be used. This leaves the
-+MLE completely exposed to DMA after the PMRs [2]_ are disabled. The current
-+default mode is to use IOMMU in lazy translated mode, but strict translated
-+mode, is the preferred IOMMU mode and this should be selected in the build
-+configuration::
-+
-+  "Device Drivers" -->
-+      "IOMMU Hardware Support" -->
-+          "IOMMU default domain type" -->
-+              "(X) Translated - Strict"
-+
-+In addition, the Intel IOMMU should be on by default. The following sets this as the
-+default in the build configuration::
-+
-+  "Device Drivers" -->
-+      "IOMMU Hardware Support" -->
-+          "Support for Intel IOMMU using DMA Remapping Devices [*]"
-+
-+and::
-+
-+  "Device Drivers" -->
-+      "IOMMU Hardware Support" -->
-+          "Support for Intel IOMMU using DMA Remapping Devices [*]" -->
-+              "Enable Intel DMA Remapping Devices by default  [*]"
-+
-+It is recommended that no other command line options should be set to override
-+the defaults above. If there is a desire to run an alternate configuration,
-+then that configuration should be evaluated for what benefits might
-+be gained against the risks for DMA attacks to which the kernel is likely
-+going to be exposed.
-+
-+Secure Launch Resource Table
-+============================
-+
-+The Secure Launch Resource Table (SLRT) is a platform-agnostic, standard format
-+for providing information for the pre-launch environment and to pass
-+information to the post-launch environment. The table is populated by one or
-+more bootloaders in the boot chain and used by Secure Launch on how to set up
-+the environment during post-launch. The details for the SLRT are documented
-+in the TrenchBoot Secure Launch Specification [3]_.
-+
-+Intel TXT Interface
-+===================
-+
-+The primary interfaces between the various components in TXT are the TXT MMIO
-+registers and the TXT heap. The MMIO register banks are described in Appendix B
-+of the TXT MLE [1]_ Development Guide.
-+
-+The TXT heap is described in Appendix C of the TXT MLE [1]_ Development
-+Guide. Most of the TXT heap is predefined in the specification. The heap is
-+initialized by firmware and the pre-launch environment and is subsequently used
-+by the SINIT ACM. One section, called the OS to MLE Data Table, is reserved for
-+software to define. This table is set up per the recommendation detailed in
-+Appendix B of the TrenchBoot Secure Launch Specification::
-+
-+        /*
-+         * Secure Launch defined OS/MLE TXT Heap table
-+         */
-+        struct txt_os_mle_data {
-+                u32 version;
-+                u32 reserved;
-+                u64 slrt;
-+                u64 txt_info;
-+                u32 ap_wake_block;
-+                u32 ap_wake_block_size;
-+                u8 mle_scratch[64];
-+        } __packed;
-+
-+Description of structure:
-+
-+=====================  ========================================================================
-+Field                  Use
-+=====================  ========================================================================
-+version                Structure version, current value 1
-+slrt                   Physical address of the Secure Launch Resource Table
-+txt_info               Pointer into the SLRT for easily locating TXT specific table
-+ap_wake_block          Physical address of the block of memory for parking APs after a launch
-+ap_wake_block_size     Size of the AP wake block
-+mle_scratch            Scratch area used post-launch by the MLE kernel. Fields:
-+ 
-+                        - SL_SCRATCH_AP_EBX area to share %ebx base pointer among CPUs
-+                        - SL_SCRATCH_AP_JMP_OFFSET offset to abs. ljmp fixup location for APs
-+                        - SL_SCRATCH_AP_STACKS_OFFSET offset to AP startup stacks in wake block
-+=====================  ========================================================================
-+
-+Error Codes
-+===========
-+
-+The TXT specification defines the layout for TXT 32 bit error code values.
-+The bit encodings indicate where the error originated (e.g. with the CPU,
-+in the SINIT ACM, in software). The error is written to a sticky TXT
-+register that persists across resets called TXT.ERRORCODE (see the TXT
-+MLE Development Guide). The errors defined by the Secure Launch feature are
-+those generated in the MLE software. They have the format::
-+
-+  0xc0008XXX
-+
-+The low 12 bits are free for defining the following Secure Launch specific
-+error codes.
-+
-+0xc0008001: SL_ERROR_GENERIC
-+----------------------------
-+
-+Description:
-+
-+Generic catch all error. Currently unused.
-+
-+0xc0008002: SL_ERROR_TPM_INIT
-+-----------------------------
-+
-+Description:
-+
-+The Secure Launch code failed to get access to the TPM hardware interface.
-+This is most likely due to misconfigured hardware or kernel. Ensure the TPM
-+chip is enabled, and the kernel TPM support is built in (it should not be built
-+as a module).
-+
-+0xc0008003: SL_ERROR_TPM_INVALID_LOG20
-+--------------------------------------
-+
-+Description:
-+
-+Either the Secure Launch code failed to find a valid event log descriptor for a
-+version 2.0 TPM, or the event log descriptor is malformed. Usually this
-+indicates incompatible versions of the pre-launch environment and the
-+MLE kernel. The pre-launch environment and the kernel share a structure in the
-+TXT heap and if this structure (the OS-MLE table) is mismatched, this error is
-+common. This TXT heap area is set up by the pre-launch environment, so the
-+issue may originate there. It could also be the sign of an attempted attack.
-+
-+0xc0008004: SL_ERROR_TPM_LOGGING_FAILED
-+---------------------------------------
-+
-+Description:
-+
-+There was a failed attempt to write a TPM event to the event log early in the
-+Secure Launch process. This is likely the result of a malformed TPM event log
-+buffer. Formatting of the event log buffer information is done by the
-+pre-launch environment, so the issue most likely originates there.
-+
-+0xc0008005: SL_ERROR_REGION_STRADDLE_4GB
-+----------------------------------------
-+
-+Description:
-+
-+During early validation, a buffer or region was found to straddle the 4Gb
-+boundary. Because of the way TXT provides DMA memory protection, this is an unsafe
-+configuration and is flagged as an error. This is most likely a configuration
-+issue in the pre-launch environment. It could also be the sign of an attempted
-+attack.
-+
-+0xc0008006: SL_ERROR_TPM_EXTEND
-+-------------------------------
-+
-+Description:
-+
-+There was a failed attempt to extend a TPM PCR in the Secure Launch platform
-+module. This is most likely to due to misconfigured hardware or kernel. Ensure
-+the TPM chip is enabled, and the kernel TPM support is built in (it should not
-+be built as a module).
-+
-+0xc0008007: SL_ERROR_MTRR_INV_VCNT
-+----------------------------------
-+
-+Description:
-+
-+During early Secure Launch validation, an invalid variable MTRR count was
-+found. The pre-launch environment passes several MSR values to the MLE to
-+restore including the MTRRs. The values are restored by the Secure Launch early
-+entry point code. After measuring the values supplied by the pre-launch
-+environment, a discrepancy was found, validating the values. It could be the
-+sign of an attempted attack.
-+
-+0xc0008008: SL_ERROR_MTRR_INV_DEF_TYPE
-+--------------------------------------
-+
-+Description:
-+
-+During early Secure Launch validation, an invalid default MTRR type was found.
-+See SL_ERROR_MTRR_INV_VCNT for more details.
-+
-+0xc0008009: SL_ERROR_MTRR_INV_BASE
-+----------------------------------
-+
-+Description:
-+
-+During early Secure Launch validation, an invalid variable MTRR base value was
-+found. See SL_ERROR_MTRR_INV_VCNT for more details.
-+
-+0xc000800a: SL_ERROR_MTRR_INV_MASK
-+----------------------------------
-+
-+Description:
-+
-+During early Secure Launch validation, an invalid variable MTRR mask value was
-+found. See SL_ERROR_MTRR_INV_VCNT for more details.
-+
-+0xc000800b: SL_ERROR_MSR_INV_MISC_EN
-+------------------------------------
-+
-+Description:
-+
-+During early Secure Launch validation, an invalid miscellaneous enable MSR
-+value was found. See SL_ERROR_MTRR_INV_VCNT for more details.
-+
-+0xc000800c: SL_ERROR_INV_AP_INTERRUPT
-+-------------------------------------
-+
-+Description:
-+
-+The application processors (APs) wait to be woken up by the SMP initialization
-+code. The only interrupt that they expect is an NMI; all other interrupts
-+should be masked. If an AP gets an interrupt other than an NMI, it will
-+cause this error. This error is very unlikely to occur.
-+
-+0xc000800d: SL_ERROR_INTEGER_OVERFLOW
-+-------------------------------------
-+
-+Description:
-+
-+A buffer base and size passed to the MLE caused an integer overflow when
-+added together. This is most likely a configuration issue in the pre-launch
-+environment. It could also be the sign of an attempted attack.
-+
-+0xc000800e: SL_ERROR_HEAP_WALK
-+------------------------------
-+
-+Description:
-+
-+An error occurred in TXT heap walking code. The underlying issue is a failure to
-+early_memremap() portions of the heap, most likely due to a resource shortage.
-+
-+0xc000800f: SL_ERROR_HEAP_MAP
-+-----------------------------
-+
-+Description:
-+
-+This error is essentially the same as SL_ERROR_HEAP_WALK, but occurred during the
-+actual early_memremap() operation.
-+
-+0xc0008010: SL_ERROR_REGION_ABOVE_4GB
-+-------------------------------------
-+
-+Description:
-+
-+A memory region used by the MLE is above 4Gb. In general, this is not a problem
-+because memory > 4Gb can be protected from DMA. There are certain buffers that
-+should never be above 4Gb, and one of these caused the violation. This is most
-+likely a configuration issue in the pre-launch environment. It could also be
-+the sign of an attempted attack.
-+
-+0xc0008011: SL_ERROR_HEAP_INVALID_DMAR
-+--------------------------------------
-+
-+Description:
-+
-+The backup copy of the ACPI DMAR table, which is expected to be in the
-+TXT heap, could not be found. This is due to a bug in the platform's ACM module
-+or in firmware.
-+
-+0xc0008012: SL_ERROR_HEAP_DMAR_SIZE
-+-----------------------------------
-+
-+Description:
-+
-+The backup copy of the ACPI DMAR table in the TXT heap is too large to be stored
-+for later usage. This error is very unlikely to occur since the area reserved
-+for the copy is far larger than the DMAR should be.
-+
-+0xc0008013: SL_ERROR_HEAP_DMAR_MAP
-+----------------------------------
-+
-+Description:
-+
-+The backup copy of the ACPI DMAR table in the TXT heap could not be mapped. The
-+underlying issue is a failure to early_memremap() the DMAR table, most likely
-+due to a resource shortage.
-+
-+0xc0008014: SL_ERROR_HI_PMR_BASE
-+--------------------------------
-+
-+Description:
-+
-+On a system with more than 4Gb of RAM, the high PMR [2]_ base address should be
-+set to 4Gb. This error is due to that not being the case. This PMR value is set
-+by the pre-launch environment, so the issue most likely originates there. It
-+could also be the sign of an attempted attack.
-+
-+0xc0008015: SL_ERROR_HI_PMR_SIZE
-+--------------------------------
-+
-+Description:
-+
-+On a system with more than 4Gb of RAM, the high PMR [2]_ size should be set to
-+cover all RAM > 4Gb. This error is due to that not being the case. This PMR
-+value is set by the pre-launch environment, so the issue most likely originates
-+there. It could also be the sign of an attempted attack.
-+
-+0xc0008016: SL_ERROR_LO_PMR_BASE
-+--------------------------------
-+
-+Description:
-+
-+The low PMR [2]_ base should always be set to address zero. This error is due
-+to that not being the case. This PMR value is set by the pre-launch environment
-+so the issue most likely originates there. It could also be the sign of an
-+attempted attack.
-+
-+0xc0008017: SL_ERROR_LO_PMR_MLE
-+-------------------------------
-+
-+Description:
-+
-+This error indicates the MLE image is not covered by the low PMR [2]_ range.
-+The PMR values are set by the pre-launch environment, so the issue most likely
-+originates there. It could also be the sign of an attempted attack.
-+
-+0xc0008018: SL_ERROR_INITRD_TOO_BIG
-+-----------------------------------
-+
-+Description:
-+
-+The external initrd provided is larger than 4Gb. This is not a valid
-+configuration for Secure Launch due to managing DMA protection.
-+
-+0xc0008019: SL_ERROR_HEAP_ZERO_OFFSET
-+-------------------------------------
-+
-+Description:
-+
-+During a TXT heap walk, an invalid/zero next table offset value was found. This
-+indicates the TXT heap is malformed. The TXT heap is initialized by the
-+pre-launch environment, so the issue most likely originates there. It could
-+also be a sign of an attempted attack. In addition, ACM is also responsible for
-+manipulating parts of the TXT heap, so the issue could be due to a bug in the
-+platform's ACM module.
-+
-+0xc000801a: SL_ERROR_WAKE_BLOCK_TOO_SMALL
-+-----------------------------------------
-+
-+Description:
-+
-+The AP wake block buffer passed to the MLE via the OS-MLE TXT heap table is not
-+large enough. This value is set by the pre-launch environment, so the issue
-+most likely originates there. It also could be the sign of an attempted attack.
-+
-+0xc000801b: SL_ERROR_MLE_BUFFER_OVERLAP
-+---------------------------------------
-+
-+Description:
-+
-+One of the buffers passed to the MLE via the OS-MLE TXT heap table overlaps
-+with the MLE image in memory. This value is set by the pre-launch environment
-+so the issue most likely originates there. It could also be the sign of an
-+attempted attack.
-+
-+0xc000801c: SL_ERROR_BUFFER_BEYOND_PMR
-+--------------------------------------
-+
-+Description:
-+
-+One of the buffers passed to the MLE via the OS-MLE TXT heap table is not
-+protected by a PMR. This value is set by the pre-launch environment, so the
-+issue most likely originates there. It could also be the sign of an attempted
-+attack.
-+
-+0xc000801d: SL_ERROR_OS_SINIT_BAD_VERSION
-+-----------------------------------------
-+
-+Description:
-+
-+The version of the OS-SINIT TXT heap table is bad. It must be 6 or greater.
-+This value is set by the pre-launch environment, so the issue most likely
-+originates there. It could also be the sign of an attempted attack. It is also
-+possible though very unlikely that the platform is so old that the ACM being
-+used requires an unsupported version.
-+
-+0xc000801e: SL_ERROR_EVENTLOG_MAP
-+---------------------------------
-+
-+Description:
-+
-+An error occurred in the Secure Launch module while mapping the TPM event log.
-+The underlying issue is memremap() failure, most likely due to a resource
-+shortage.
-+
-+0xc000801f: SL_ERROR_TPM_INVALID_ALGS
-+-------------------------------------
-+
-+Description:
-+
-+The TPM 2.0 event log reports either no hashing algorithms, invalid algorithm ID
-+or an algorithm size larger than the max size recognized by the TPM support code.
-+
-+0xc0008020: SL_ERROR_TPM_EVENT_COUNT
-+------------------------------------
-+
-+Description:
-+
-+The TPM 2.0 event log contains an event with a digest count that is not equal
-+to the algorithm count of the overall log. This is an invalid configuration
-+that could indicate either a bug or a possible attack.
-+
-+0xc0008021: SL_ERROR_TPM_INVALID_EVENT
-+--------------------------------------
-+
-+Description:
-+
-+An invalid/malformed event was found in the TPM event log while reading it.
-+Since only trusted entities are supposed to be writing the event log, this
-+would indicate either a bug or a possible attack.
-+
-+0xc0008022: SL_ERROR_INVALID_SLRT
-+---------------------------------
-+
-+Description:
-+
-+The Secure Launch Resource Table is invalid or malformed and is unusable. This
-+implies the pre-launch code did not properly set up the SLRT.
-+
-+0xc0008023: SL_ERROR_SLRT_MISSING_ENTRY
-+---------------------------------------
-+
-+Description:
-+
-+The Secure Launch Resource Table is missing a required entry within it. This
-+implies the pre-launch code did not properly set up the SLRT.
-+
-+0xc0008024: SL_ERROR_SLRT_MAP
-+-----------------------------
-+
-+Description:
-+
-+An error occurred in the Secure Launch module while mapping the Secure Launch
-+Resource table. The underlying issue is memremap() failure, most likely due to
-+a resource shortage.
-+
-+
-+Resources
-+=========
-+
-+The TrenchBoot project:
-+
-+https://trenchboot.org
-+
-+Secure Launch Specification:
-+
-+https://trenchboot.org/specifications/Secure_Launch/
-+
-+Trusted Computing Group's D-RTM Architecture:
-+
-+https://trustedcomputinggroup.org/wp-content/uploads/TCG_D-RTM_Architecture_v1-0_Published_06172013.pdf
-+
-+TXT documentation in the Intel TXT MLE Development Guide:
-+
-+https://www.intel.com/content/dam/www/public/us/en/documents/guides/intel-txt-software-development-guide.pdf
-+
-+TXT instructions documentation in the Intel SDM Instruction Set volume:
-+
-+https://software.intel.com/en-us/articles/intel-sdm
-+
-+AMD SKINIT documentation in the System Programming manual:
-+
-+https://www.amd.com/system/files/TechDocs/24593.pdf
-+
-+GRUB Secure Launch support:
-+
-+https://github.com/TrenchBoot/grub/tree/grub-sl-fc-38-dlstub
-+
-+FOSDEM 2021: Secure Upgrades with DRTM
-+
-+https://archive.fosdem.org/2021/schedule/event/firmware_suwd/
-+
-+.. [1]
-+    MLE: Measured Launch Environment is the binary runtime that is measured and
-+    then run by the TXT SINIT ACM. The TXT MLE Development Guide describes the
-+    requirements for the MLE in detail.
-+
-+.. [2]
-+    PMR: Intel VTd has a feature in the IOMMU called Protected Memory Registers.
-+    There are two of these registers and they allow all DMA to be blocked
-+    to large areas of memory. The low PMR can cover all memory below 4Gb on 2Mb
-+    boundaries. The high PMR can cover all RAM on the system, again on 2Mb
-+    boundaries. This feature is used during a Secure Launch by TXT.
-+
-+.. [3]
-+    Secure Launch Specification: https://trenchboot.org/specifications/Secure_Launch/
-+
-+.. [4]
-+    ACM: Intel's Authenticated Code Module. This is the 32b bit binary blob that
-+    is run securely by the GETSEC[SENTER] during a measured launch. It is described
-+    in the Intel documentation on TXT and versions for various chipsets are
-+    signed and distributed by Intel.
++++ b/include/linux/slr_table.h
+@@ -0,0 +1,339 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * TrenchBoot Secure Launch Resource Table
++ *
++ * The Secure Launch Resource Table (SLRT) is a TrenchBoot project defined
++ * specification to provide a cross-platform interface/ABI between
++ * the Secure Launch components. While most of the table is platform
++ * agnostic, platform or architecture specific entries can be added.
++ *
++ * See TrenchBoot Secure Launch kernel documentation for details.
++ *
++ * Copyright (c) 2026 Apertus Solutions, LLC
++ * Copyright (c) 2026, Oracle and/or its affiliates.
++ */
++
++#ifndef _LINUX_SLR_TABLE_H
++#define _LINUX_SLR_TABLE_H
++
++/* SLR table header values */
++#define SLR_TABLE_MAGIC		0x4452544d
++#define SLR_TABLE_REVISION	1
++
++/* Current revisions for the policy and UEFI config */
++#define SLR_POLICY_REVISION		1
++#define SLR_UEFI_CONFIG_REVISION	1
++
++/* SLR defined architectures */
++#define SLR_INTEL_TXT		1
++#define SLR_AMD_SKINIT		2
++
++/* SLR defined bootloaders */
++#define SLR_BOOTLOADER_INVALID	0
++#define SLR_BOOTLOADER_GRUB	1
++
++/* Log formats */
++#define SLR_DRTM_TPM12_LOG	1
++#define SLR_DRTM_TPM20_LOG	2
++
++/* DRTM Policy Entry Flags */
++#define SLR_POLICY_FLAG_MEASURED	0x1
++#define SLR_POLICY_IMPLICIT_SIZE	0x2
++
++/* Array Lengths */
++#define TPM_EVENT_INFO_LENGTH		32
++#define TXT_VARIABLE_MTRRS_LENGTH	32
++
++/* Tags */
++#define SLR_ENTRY_INVALID	0x0000
++#define SLR_ENTRY_DL_INFO	0x0001
++#define SLR_ENTRY_LOG_INFO	0x0002
++#define SLR_ENTRY_ENTRY_POLICY	0x0003
++#define SLR_ENTRY_INTEL_INFO	0x0004
++#define SLR_ENTRY_AMD_INFO	0x0005
++#define SLR_ENTRY_ARM_INFO	0x0006
++#define SLR_ENTRY_UEFI_INFO	0x0007
++#define SLR_ENTRY_UEFI_CONFIG	0x0008
++#define SLR_ENTRY_END		0xffff
++
++/* Entity Types */
++#define SLR_ET_UNSPECIFIED	0x0000
++#define SLR_ET_SLRT		0x0001
++#define SLR_ET_BOOT_PARAMS	0x0002
++#define SLR_ET_SETUP_DATA	0x0003
++#define SLR_ET_CMDLINE		0x0004
++#define SLR_ET_UEFI_MEMMAP	0x0005
++#define SLR_ET_RAMDISK		0x0006
++#define SLR_ET_TXT_OS2MLE	0x0010
++#define SLR_ET_UNUSED		0xffff
++
++#ifndef __ASSEMBLER__
++
++/*
++ * Standard Secure Launch DLME header.
++ *
++ * All capable DRTM kernels must have an instance of this header.
++ * This header was derived from the Intel TXT Measured Launch
++ * Environment header and uses the predefined UUID:
++ *
++ * {5aac8290-6f47-a774-0f5c-55a2cb51b642}
++ */
++struct slr_dlme_header {
++	u32 uuid0; /* 9082AC5A */
++	u32 uuid1; /* 74A7476F */
++	u32 uuid2; /* A2555C0F */
++	u32 uuid3; /* 42B651CB */
++	u32 header_len;
++	u32 version;
++	u32 entry_point;
++	u32 first_valid_page;
++	u32 start;
++	u32 end;
++	u32 capabilities;
++	u32 cmdline_start;
++	u32 cmdline_end;
++} __packed;
++
++/*
++ * Primary Secure Launch Resource Table header
++ */
++struct slr_table {
++	u32 magic;
++	u16 revision;
++	u16 architecture;
++	u32 size;
++	u32 max_size;
++	/* table entries */
++} __packed;
++
++/*
++ * Common SLRT entry header
++ */
++struct slr_entry_hdr {
++	u32 tag;
++	u32 size;
++} __packed;
++
++/*
++ * Boot loader context and DLME setup
++ */
++struct slr_bl_context {
++	u16 bootloader;
++	u16 reserved[3];
++	u64 context;
++} __packed;
++
++struct slr_setup_dlme {
++	u64 dlme_base;
++	u64 dlme_header_offset;
++	u64 dlme_table;
++} __packed;
++
++/*
++ * Dynamic Launch Callback Function
++ */
++typedef void (*dl_launch_func)(struct slr_bl_context *bl_context,
++			       struct slr_setup_dlme *setup_dlme);
++
++/*
++ * DRTM Dynamic Launch Configuration
++ */
++struct slr_entry_dl_info {
++	struct slr_entry_hdr hdr;
++	u64 dce_size;
++	u64 dce_base;
++	u64 dlme_size;
++	u64 dlme_base;
++	u64 dlme_entry;
++	u64 dlme_header_offset;
++	u64 dlme_config_table;
++	struct slr_bl_context bl_context;
++	u64 dl_launch;
++} __packed;
++
++/*
++ * TPM Log Information
++ */
++struct slr_entry_log_info {
++	struct slr_entry_hdr hdr;
++	u16 format;
++	u16 reserved;
++	u32 size;
++	u64 addr;
++} __packed;
++
++/*
++ * DRTM Measurement Entry
++ */
++struct slr_policy_entry {
++	u16 pcr;
++	u16 entity_type;
++	u16 flags;
++	u16 reserved;
++	u64 size;
++	u64 entity;
++	char evt_info[TPM_EVENT_INFO_LENGTH];
++} __packed;
++
++/*
++ * DRTM Measurement Policy
++ */
++struct slr_entry_policy {
++	struct slr_entry_hdr hdr;
++	u16 reserved[2];
++	u16 revision;
++	u16 nr_entries;
++	struct slr_policy_entry policy_entries[];
++} __packed;
++
++/*
++ * Secure Launch defined MTRR saving structures
++ */
++struct slr_txt_mtrr_pair {
++	u64 mtrr_physbase;
++	u64 mtrr_physmask;
++} __packed;
++
++struct slr_txt_mtrr_state {
++	u64 default_mem_type;
++	u64 mtrr_vcnt;
++	struct slr_txt_mtrr_pair mtrr_pair[TXT_VARIABLE_MTRRS_LENGTH];
++} __packed;
++
++/*
++ * Intel TXT Info table
++ */
++struct slr_entry_intel_info {
++	struct slr_entry_hdr hdr;
++	u64 boot_params_addr;
++	u64 txt_heap;
++	u64 saved_misc_enable_msr;
++	struct slr_txt_mtrr_state saved_bsp_mtrrs;
++} __packed;
++
++/*
++ * UEFI config measurement entry
++ */
++struct slr_uefi_cfg_entry {
++	u16 pcr;
++	u16 reserved;
++	u32 size;
++	u64 cfg; /* address or value */
++	char evt_info[TPM_EVENT_INFO_LENGTH];
++} __packed;
++
++/*
++ * UEFI config measurements
++ */
++struct slr_entry_uefi_config {
++	struct slr_entry_hdr hdr;
++	u16 reserved[2];
++	u16 revision;
++	u16 nr_entries;
++	struct slr_uefi_cfg_entry uefi_cfg_entries[];
++} __packed;
++
++/*
++ * The SLRT is laid out as a Tag-Length-Value (TLV) data structure
++ * allowing a flexible number of entries in the table. An instance
++ * of the slr_table structure is present as a header at the beginning.
++ *
++ * The following functions help to manipulate the SLRT structure
++ * and contents.
++ */
++
++/*
++ * Return the address of the end of the SLRT past the final entry.
++ */
++static inline void *slr_end_of_entries(struct slr_table *table)
++{
++	return (void *)table + table->size;
++}
++
++/*
++ * Return the next entry in the SLRT given the current entry passed
++ * to the function. NULL is returned if there are no entries to return.
++ */
++static inline void *
++slr_next_entry(struct slr_table *table,
++	       struct slr_entry_hdr *curr)
++{
++	struct slr_entry_hdr *next = (struct slr_entry_hdr *)((u8 *)curr + curr->size);
++
++	if ((void *)next >= slr_end_of_entries(table))
++		return NULL;
++	if (next->tag == SLR_ENTRY_END)
++		return NULL;
++
++	return next;
++}
++
++/*
++ * Return the next entry with the given tag in the SLRT starting at the
++ * current entry. If entry is NULL, the search begins at the beginning of
++ * table.
++ */
++static inline void *
++slr_next_entry_by_tag(struct slr_table *table,
++		      struct slr_entry_hdr *entry,
++		      u16 tag)
++{
++	if (!entry) /* Start from the beginning */
++		entry = (struct slr_entry_hdr *)(((u8 *)table) + sizeof(*table));
++
++	for ( ; ; ) {
++		if (entry->tag == tag)
++			return entry;
++
++		entry = slr_next_entry(table, entry);
++		if (!entry)
++			return NULL;
++	}
++
++	return NULL;
++}
++
++/*
++ * Add an entry to the SLRT. Entries are placed at the end.
++ */
++static inline int
++slr_add_entry(struct slr_table *table,
++	      struct slr_entry_hdr *entry)
++{
++	struct slr_entry_hdr *end;
++
++	if ((table->size + entry->size) > table->max_size)
++		return -1;
++
++	memcpy((u8 *)table + table->size - sizeof(*end), entry, entry->size);
++	table->size += entry->size;
++
++	end = (struct slr_entry_hdr *)((u8 *)table + table->size - sizeof(*end));
++	end->tag = SLR_ENTRY_END;
++	end->size = sizeof(*end);
++
++	return 0;
++}
++
++/*
++ * Initialize the SLRT for use. This prepares the meta-data in the SLRT
++ * header section of the table and table end entry.
++ */
++static inline void
++slr_init_table(struct slr_table *slrt, u16 architecture, u32 max_size)
++{
++	struct slr_entry_hdr *end;
++
++	slrt->magic = SLR_TABLE_MAGIC;
++	slrt->revision = SLR_TABLE_REVISION;
++	slrt->architecture = architecture;
++	slrt->size = sizeof(*slrt) + sizeof(*end);
++	slrt->max_size = max_size;
++	end = (struct slr_entry_hdr *)((u8 *)slrt + sizeof(*slrt));
++	end->tag = SLR_ENTRY_END;
++	end->size = sizeof(*end);
++}
++
++#endif /* !__ASSEMBLER__ */
++
++#endif /* _LINUX_SLR_TABLE_H */
 -- 
 2.47.3
 
