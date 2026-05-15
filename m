@@ -1,106 +1,128 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f46.google.com (mail-ed1-f46.google.com [209.85.208.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF4853AFB19
-	for <linux-efi@vger.kernel.org>; Wed, 13 May 2026 19:26:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778700370; cv=none; b=as1gJ8Q61wtAlN8hVHTjvoa6+bmOY2eJF6xsYV7hu0uwz2YRl0kd+cV2/BMG7Ms0o/9crugwQgr+mMUhUiFRA0yaYdQAyVrnf0ymcJnmTIpsIkRNoDfRH6na5amXsWh2W5kbsJm2J54FOpmQFzAlpFEhhCLQZSplxXG6wHOxAdY=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778700370; c=relaxed/simple;
-	bh=jkUkWktFpdEdF2Lcj4EAj+e+wcRxBaXPi67I/QnY5NQ=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 249DA3C13FD
+	for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 06:54:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.46
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1778828060; cv=pass; b=Kq2o+4fqFLOXoMRQtYX+ZlIcMSKntO5hgPUx+Gw2+wEfFgtgo/L6fsde+Z9i8annu+P3yHGx+DUUa3tSvsc54kqgunYcbT2ebiboq3NlCpCknPmF7AjB6daSs5ey52nA21ChDLPTR+ZS5TcXbHqpLkHYHID78sTIeFOmw7uLXEg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1778828060; c=relaxed/simple;
+	bh=+zDO4k/9Tgy4q0LSQYpj77MT3b6n3APYAMy8uyw53OI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BNYmMGnNz/zw5U2p6WNxGksNcTDR6slMFXUu5Hrx3AcVCSu5S5gAH3OnrRmQKgf6qrQjFEVWOihvkrcCMUing2ch6g3/OeOIpa4KVEIZ7nF0ORsXoxqIRAaViGgz47kw16iPSOn9Z3HgzAF+TmzZcYvjD7y6TIMiNiYk4SO56m0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cYGlfSj2; arc=none smtp.client-ip=10.30.226.201
+	 To:Cc:Content-Type; b=F49w3WOsUpvKL17GqVx8GgZ9VODUXNw77zJSqsnuHOg94SEiSEQq9KQgEw4CdOScbs/ch3dawO98ZF+Vn6Qp2XGXxUD460aPv6R3D6PQ3RLyrUWKlE0PxiWFc4q/OtZl53lFvInIKZEMVo0u+dFayc8J07WUKcdJTgFSo5M6rXg=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=it-loops.com; spf=pass smtp.mailfrom=it-loops.com; dkim=fail (0-bit key) header.d=it-loops.com header.i=@it-loops.com header.b=kMDDxkIv reason="key not found in DNS"; arc=pass smtp.client-ip=209.85.208.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=it-loops.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=it-loops.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cYGlfSj2"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 67D37C2BCF5
-	for <linux-efi@vger.kernel.org>; Wed, 13 May 2026 19:26:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778700370;
-	bh=jkUkWktFpdEdF2Lcj4EAj+e+wcRxBaXPi67I/QnY5NQ=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=cYGlfSj2/CHzKzyv9me2Zk/HspGP9sjtk4Engs8yoqb2zW9iTZpuRoru+aQDg8KcV
-	 CEivNN1d8In9wMQitua9OBf7lWz7JGVU2BXwSMqwhsjDrgaw9VroxtmQhiVPWihWfx
-	 IozQQUTd3LoCBCP9tlsnzBJWhc5SrgtBEEXIps7vxbey6TVUvgg6W3P+IunX3Lt6kL
-	 5lsFlql/jIyJ5Mi8TcUHdEoBcdsJliEGZoacbbNpWwvqBquVFzVBija05KoWnslRv4
-	 O3QXNx5fZDPvRLLqI9Tk+1kTQPbvK1d4jjK7Kkbz9sEpPCHoijuPNVMzLhU0VhCnqs
-	 sPx4/a+0DCMDA==
-Received: by mail-lj1-f177.google.com with SMTP id 38308e7fff4ca-38e8292423fso49439751fa.0
-        for <linux-efi@vger.kernel.org>; Wed, 13 May 2026 12:26:10 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AFNElJ8IzQRgOtfAhZkdMZScIAQfuICh1VW6Fn7oHpDyzGRb0tpcnRyMBW05ggc47YXCPJ+rXIerGX9V+zE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyqXqwri5KppQFat2uBzOclezRkK0emUwpgAZ5c0IUemHoWFPAD
-	6DFDqcOhccijW5/2beNpZvPbDBR2XYS1ogr8bCI6MWYMbzBrYu1feQzcC3uVSWY92IMio80c5Sz
-	eDyHAUcQ3qUdtTe5nxxfTOtgWq6Z6m8U=
-X-Received: by 2002:a05:6512:684:b0:5a3:cc81:eff3 with SMTP id
- 2adb3069b0e04-5a8ef97ca57mr1632659e87.26.1778700368753; Wed, 13 May 2026
- 12:26:08 -0700 (PDT)
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=it-loops.com header.i=@it-loops.com header.b="kMDDxkIv"
+Received: by mail-ed1-f46.google.com with SMTP id 4fb4d7f45d1cf-67c2b4809baso17354974a12.3
+        for <linux-efi@vger.kernel.org>; Thu, 14 May 2026 23:54:18 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778828057; cv=none;
+        d=google.com; s=arc-20240605;
+        b=NCfl6gVMWJVOkpeeXIpkybz1RGUHzdB21PQEis0T6CMabGkYC6QiUon575+i9wcpih
+         ZrIqqxj/FnH7RI6C00e4m6qTV4XNvPo/mnozv9K22ECpCeJlA6LSFAayDFury4XBxp0/
+         3kI69p8zsY0PR6duM7c/iJFZlrpwsLCKZL14R4mMeWbW2CMIcOspWEsY9lhGmSE0L1bZ
+         LUe4YSRDNp8WkNMtCrUU1pvaJ/6mg1ltl9rJIrCbqFneBfrbc03utb5meWFlyOFLuwDC
+         OgSx9F89eBnIeEI4reDuzJPG2kjhygEs+oYjvYTPZdVM71BmlqxvrCjHpWte2cK2E6nt
+         TPDg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=+zDO4k/9Tgy4q0LSQYpj77MT3b6n3APYAMy8uyw53OI=;
+        fh=WTf6DA68sbOooBrvmHZKqqnLOKYbgA3oanvgRajIBmg=;
+        b=TjrvXvWClmNBnqFkQOewkRBe+TczIIpGi6TUpNTSbpOCvxN28KaxYITBUNVgEqzC8I
+         /Q8zPmhuV59+J2c6pY74T9cnl6G0cHKfe9E3kW377Oi6v6gomDdTAJ4UCKRnqKsqvPxI
+         KuoXSzYJf24dbl7K+G4BCY5xyjzCGavVJatusa/RMsKoudUv9c8sNMACPglP+d7GlyVy
+         opKzTNUnJjkl5KW2qRtRALUi3PedTlyDQT0MfmsUYrAJExp9ArYM0RPpKBFaVfNRZFId
+         PB0tsiBF7FoVGTexvVx9r+/JzwfKGqzqYg5IPI7+CAhPNF34IREdi1e+9maP91zV6nzS
+         JMxw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=it-loops.com; s=google; t=1778828057; x=1779432857; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+zDO4k/9Tgy4q0LSQYpj77MT3b6n3APYAMy8uyw53OI=;
+        b=kMDDxkIvj5Uw7X4ikmX2iNaMj9CKp96+/CmV44U/RnSJBQRCMeJ0X1e2IFedR0Gfk4
+         WPZKpZStCRiBfQNDKmMq4yS+Vu6Il/+wp+yJRQvHBgadk95VBqlVTVvFSMovIwlX1c21
+         aEr41kOC+0EUHw+6ojC3E3fl9l8IM7SCnYvhg=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1778828057; x=1779432857;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=+zDO4k/9Tgy4q0LSQYpj77MT3b6n3APYAMy8uyw53OI=;
+        b=jpPimkgyNgk9bYFzkYUzfgKxL+U0ETWbjd9R635cMZcYK1dpSj8IpqQ5LV0bWCwGS4
+         /qfv371E7+dqVZr7LIjeOn1Mppb/uHiMR/QFDYlokUuEIxfPo3s+fbhaxu8ml0B6pMuN
+         n4CtyYJcVkoZUN++9mjP0KQ/MXOpF5lQqGeGIPUBk3YJFVF+fOy5g5XCF+acUXcSwoyn
+         sYUPGIQPXISCJFg9V6TIFmHS51YYgxbFQGid96eMI/gIMi4NOA6xNYSDPh70CgyIG2X4
+         TQ10RbJ5A9XGiVS173dFsCKU1opMaSWs8Y3VBg+W/XjAyoTAsbxJjukrA/5WscnTNJsk
+         iqFw==
+X-Forwarded-Encrypted: i=1; AFNElJ88ZqW4aiotUWtpB3yMqFOanKGJi7K7LdwOOhA7HgBKGPJbaEkHFcGV5cvRQE8GTCdxaHsD4zT9cQU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxFHgp92rUFTN0oe+d+TSlL6IhZcWcT1F2wcU6m9ZcMlUji1jyw
+	WzoM7WfUa49JwcZ6IMcNSPXksuwXQXTbTlxW2IBsDXJI78HNFtn2ChgYaSFKSqitXWvFo/+K9Nn
+	2Wf3GJ0fBg1Uk8+KsEvC0tVTLJ2TsdHTPXo1R6ei7oiqnF1a2HQsh3Zc=
+X-Gm-Gg: Acq92OFtSeIv/WRUzkgWJaYfMzhIxdCKvLG2jenf/rF1mYWAWxCpF41tNRXJcTn+zvp
+	9OFQh2mL1V/7dj6qIHPMT7umfDfQRA91utFrpe8imPtUl102eRumpK2nLSgLv9J3wVVKm+WPU4c
+	ZKh7Oyvp8zmmKwic6gM9CP1OLVPu5EAakx+itGrGlkCjYyHWNSolDp/PPc7W0TjbaFeLVNZ/TMk
+	WfzLXk6bQxmDfCxJkaX+8r7yN/SApXA+4vyGwLMSHJJugM5N1J6WCjXgWAHMjIobHKr/nDTJ+1y
+	bOdeUiP6
+X-Received: by 2002:a17:907:9801:b0:bd0:8e74:85a3 with SMTP id
+ a640c23a62f3a-bd5178f9146mr136045766b.26.1778828057421; Thu, 14 May 2026
+ 23:54:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260513084325.2176952-1-himanshu.chauhan@oss.qualcomm.com> <20260513084325.2176952-4-himanshu.chauhan@oss.qualcomm.com>
-In-Reply-To: <20260513084325.2176952-4-himanshu.chauhan@oss.qualcomm.com>
-From: "Rafael J. Wysocki" <rafael@kernel.org>
-Date: Wed, 13 May 2026 21:25:56 +0200
-X-Gmail-Original-Message-ID: <CAJZ5v0g2kjfAvcTzp8898A8HdMymU1SQ-rHW_DFhZP49c9=s5Q@mail.gmail.com>
-X-Gm-Features: AVHnY4I62r5FzdLCp8o0gBy8GA7EdJU8GhHm1Xiv_xt-CcqS2_Q5U7R1FjYttsM
-Message-ID: <CAJZ5v0g2kjfAvcTzp8898A8HdMymU1SQ-rHW_DFhZP49c9=s5Q@mail.gmail.com>
-Subject: Re: [PATCH v4 03/10] acpi: Introduce SSE in HEST notification types
-To: Himanshu Chauhan <himanshu.chauhan@oss.qualcomm.com>
-Cc: linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org, 
-	linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, 
-	acpica-devel@lists.linux.dev, paul.walmsley@sifive.com, palmer@dabbelt.com, 
-	lenb@kernel.org, james.morse@arm.com, tony.luck@intel.com, ardb@kernel.org, 
-	conor@kernel.org, cleger@rivosinc.com, robert.moore@intel.com, 
-	sunilvl@oss.qualcomm.com, anup.patel@oss.qualcomm.com
+References: <CALG0vJuaU_5REU55Hg170LipPLj7Tt0V3icn7XzxLY-8+jsx-A@mail.gmail.com>
+ <20251120055748.GM2912318@black.igk.intel.com> <aSGTghJyX-u-leL6@wunner.de>
+ <6e7aa10e-9938-4ab1-af14-b3d2906c211a@panix.com> <CALG0vJv7ZA8byAF25pKqh9fEBpfgbXk+cAE6s9K1N6ZvVRroUw@mail.gmail.com>
+ <628342c2-15c5-4890-84ae-dc29df2c5f16@panix.com> <CALG0vJt9x5Oh3DvAvFJR88u2oD063aRyhcufOXHNwv6YKCU44g@mail.gmail.com>
+In-Reply-To: <CALG0vJt9x5Oh3DvAvFJR88u2oD063aRyhcufOXHNwv6YKCU44g@mail.gmail.com>
+From: Michael Guntsche <michael.guntsche@it-loops.com>
+Date: Fri, 15 May 2026 08:54:04 +0200
+X-Gm-Features: AVHnY4K5JlpDA8yXuZAkRPwOV4pj8GaTUwmlTBUE0m65VZymA16RPDRQKhluGxA
+Message-ID: <CALG0vJuoF92whbgkzb-a01m4X+=3L2CZDvyVu4gpB7tAFFKACw@mail.gmail.com>
+Subject: Re: Oops when returning from hibernation with changed thunderbolt status
+To: Kenneth Crudup <kenny@panix.com>
+Cc: Lukas Wunner <lukas@wunner.de>, Mika Westerberg <mika.westerberg@linux.intel.com>, 
+	"rafael.j.wysocki@intel.com" <rafael.j.wysocki@intel.com>, linux-pm@vger.kernel.org, 
+	linux-efi@vger.kernel.org, maarten.lankhorst@linux.intel.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, May 13, 2026 at 10:44=E2=80=AFAM Himanshu Chauhan
-<himanshu.chauhan@oss.qualcomm.com> wrote:
->
-> Introduce a new HEST notification type for RISC-V SSE events.
-> The GHES entry's notification structure contains the notification
-> to be used for a given error source. For error sources delivering
-> events over SSE, it should contain the new SSE notification type.
->
-> Signed-off-by: Himanshu Chauhan <himanshu.chauhan@oss.qualcomm.com>
-> Reviewed-by: Cl=C3=A9ment L=C3=A9ger <cleger@rivosinc.com>
-> ---
->  include/acpi/actbl1.h | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/include/acpi/actbl1.h b/include/acpi/actbl1.h
-> index f72e00517eb3..2a8167979458 100644
-> --- a/include/acpi/actbl1.h
-> +++ b/include/acpi/actbl1.h
+On Mon, May 11, 2026 at 10:05=E2=80=AFPM Michael Guntsche
+<michael.guntsche@it-loops.com> wrote:
+> Since this was still happening to me with 7.0.6 I went back to 6.14 on
+> a whim to see if I can see anything specific there. After coming back
+> from hibernation (which worked) I noticed that there were no efi
+> variables at all. The kernel log showed the following
+<snip>
 
-This is an ACPICA change, so it should go through the upstream ACPICA
-project on GitHub.  See
-
-Documentation/driver-api/acpi/linuxized-acpica.rst
-
-for more information.
-
-If there is already an upstream ACPICA commit making this change,
-please add a Link: tag pointing to that commit to the $subject patch.
-
-> @@ -1798,7 +1798,8 @@ enum acpi_hest_notify_types {
->         ACPI_HEST_NOTIFY_SEI =3D 9,       /* ACPI 6.1 */
->         ACPI_HEST_NOTIFY_GSIV =3D 10,     /* ACPI 6.1 */
->         ACPI_HEST_NOTIFY_SOFTWARE_DELEGATED =3D 11,       /* ACPI 6.2 */
-> -       ACPI_HEST_NOTIFY_RESERVED =3D 12  /* 12 and greater are reserved =
-*/
-> +       ACPI_HEST_NOTIFY_SSE =3D 12, /* RISCV SSE */
-> +       ACPI_HEST_NOTIFY_RESERVED =3D 13  /* 13 and greater are reserved =
-*/
->  };
+> So it looks like that I ALWAYS had this issue with my notebook but up
+> to 6.14 this resulted in a warning and starting with 6.15 it became a
+> panic and lock. What I do not understand at all though is why I am
+> apparently the only one that can trigger it repeatedly and others are
+> not seeing this issue.
 >
->  /* Values for config_write_enable bitfield above */
-> --
-> 2.43.0
->
->
+So I looked at the dmesg output with a connected and unconnected dock
+and the memory layout is different. What I am wondering now is how
+this is working in the hibernate case.
+
+* Machine goes into hibernation with the dock connected
+* During hibernation the dock is unplugged
+* On resume the firmware is doing a full init (sans the dock) and
+hands-it-over to the boot kernel which continues with this new mapping
+* The hibernation image is being loaded with a different memory layout
+* Once this image resumes it tries to access efivars which are now
+somewhere else apparently and panics.
+
+Is the hibernation resume code accounting for this change in memory
+layout in any way?
+
+Kind regards,
+Michael Guntsche
