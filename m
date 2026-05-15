@@ -1,129 +1,304 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dl1-f53.google.com (mail-dl1-f53.google.com [74.125.82.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F4363DA5C1
-	for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 17:29:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 578643EBF3A
+	for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 21:14:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778866165; cv=none; b=rQGsVE2oGKgJQJAmGBJH2LMAb0mTy00iO0xN2wqwWuLzxsQh1SkKUN9OWHArM1wq5uKeQbLV7Z/TBJkVVp/vX/hrJo0nK7UBpH1j7mtM3nTlcmjlEIIT4Low+J23AN78VctkCITFCkZoPy9nGC3eG0mdd8x9aJoxFVsq3svDzFw=
+	t=1778879654; cv=none; b=qbce03NZ2+O9RZJlgO/mKiJCjTYfGvgBcCBu0V0ZASsfJlblbikBXcx780AHh+0GoDdIg/pzc/66hzujam6UhfwTXfUQRsl7GPdv7/1qbkbxL9yjuPcgpbqWP+muqWl1U2M1qJnJKiabnJF5XBMk+zeIjIxhHXBF7jGKtbA2/zg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778866165; c=relaxed/simple;
-	bh=lKC5h4eMZE8zS4EswFs2r1WoAMZiz5c0odheNCP9aWY=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=D2Y4vSCb4cgBVCMYvvsfQLesr40vQa23LGaRYMk/Titx21jhvxR0IwRxSxWfAjOL1Cwana51adU84vXrAQJq0XiMblKMRKhohzho93YjVUIUl8Gz6GM2yu4PcWD+vSyqAZunt6Bt92NfoXfpzl6FHAITRyLmnpdKSwj1tnSOPKg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=j6IS9k7b; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1778879654; c=relaxed/simple;
+	bh=rFYaUaAT16Cmq71pIwaII1M5sgICxN3WJjU+oZD6zvs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=iEV7ULdIctQXmpOimsgRsrmn/Tsvb7WoQx6AlzfL/k7OF6XiJMkXCatK5+gPb1yTTh3YYzZoUfxCC9IbP+m7cvahzeW1Nc8ICXCSotZUFpU5ahtOf/KHYLXU3Z3kXayvCFnq8NIdyhpY4WxZCWyBTmvhcTmmVFc4dV0Vyhc32fw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Eh7qIjCV; arc=none smtp.client-ip=74.125.82.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="j6IS9k7b"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9A74EC2BCB3;
-	Fri, 15 May 2026 17:29:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778866164;
-	bh=lKC5h4eMZE8zS4EswFs2r1WoAMZiz5c0odheNCP9aWY=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=j6IS9k7bDCuFyIxVhxgNMHDp+M/FXcWoDBOQQz1x9G/i/aW1fp+Jj/F0R7Eh5hI+b
-	 4s9ETJqzTp2sUe37mo4q8y/+AuQ+nyyp5uLUd5T8r4eDgtrgfO3uq0wgO2TLzH/B0e
-	 Qn6Iwh56roFVRvMIiiuUhEoxruNW0QCL3R/cJpFX9ALFmbCuQGivHisiyoetlMUv9i
-	 px0tXMr7Q1Mbr5c1Xv+E70ziQX6pE+dH8amEMcTGS+eOVKM4Q8Fqf3INFKf4a0m3x9
-	 eUPdJHfoRhTge6mx1eluXl+4SC41rAsreBIn07Ml3mUdxBsfKHb4Scynr6piTnnMOh
-	 uCSL6aRHwzNuA==
-Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id A9965F40084;
-	Fri, 15 May 2026 13:29:23 -0400 (EDT)
-Received: from phl-imap-14 ([10.202.2.87])
-  by phl-compute-01.internal (MEProxy); Fri, 15 May 2026 13:29:23 -0400
-X-ME-Sender: <xms:81cHauLRxHJyNMJCqQPqSErhRbZ28F_TNEWProNrLjKSUGyU0k1jXw>
-    <xme:81cHag89RQZo2sg-LlgUYo6mmE_MxBOKYgJFFpEV_g_WJxPJpLE5XphpV4xqiRlF2
-    JWXLDrV916WzaTi9J8ZWphNWS7F6sCBDAJwiuqQhQrY7noNBl4vAq4>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgddufedutddtucetufdoteggodetrf
-    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
-    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
-    gurhepofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrugcu
-    uehivghshhgvuhhvvghlfdcuoegrrhgusgeskhgvrhhnvghlrdhorhhgqeenucggtffrrg
-    htthgvrhhnpedvueehiedtvedtleekuddutefgffdtleetfeetveejveejieehfefhjeei
-    jeefudenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
-    grrhguodhmvghsmhhtphgruhhthhhpvghrshhonhgrlhhithihqdduieejtdehtddtjeel
-    qdeffedvudeigeduhedqrghruggspeepkhgvrhhnvghlrdhorhhgseifohhrkhhofhgrrh
-    gurdgtohhmpdhnsggprhgtphhtthhopeehpdhmohguvgepshhmthhpohhuthdprhgtphht
-    thhopehrrghfrggvlheskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepihhlihgrshdrrg
-    hprghlohguihhmrghssehlihhnrghrohdrohhrghdprhgtphhtthhopehlihhnuhigqdgr
-    tghpihesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdgvfh
-    hisehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqkhgvrhhn
-    vghlsehvghgvrhdrkhgvrhhnvghlrdhorhhg
-X-ME-Proxy: <xmx:81cHau--QIqNDE1kNGGWlmqtJPQBaqWaiQIwGfsukJiRjJIwg1x-EA>
-    <xmx:81cHaiZH4UatCS7VXbkjUloo5Ot7Cmwb02k_jsrJKVEU3i5oFumZZw>
-    <xmx:81cHat3JomfCr645dh1QYzEaBYGzB1srrVctE77bSXojAi5o6SLfdQ>
-    <xmx:81cHatbwVQPH6iwHnpttgURDusllT6XBA-79FPEkOSL3s8-hzrJNPg>
-    <xmx:81cHalKetaH2io7Qz13G4TZYdqyZotvfDPOhjgwJEWzn1S7kcVXCTbKk>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 8B0B3C4006E; Fri, 15 May 2026 13:29:23 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Eh7qIjCV"
+Received: by mail-dl1-f53.google.com with SMTP id a92af1059eb24-12ddbe104ccso178042c88.0
+        for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 14:14:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1778879652; x=1779484452; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=mZWDYSQL0KY9ESsVCDJnFdENr1SKqKscOsf4LFzsjVs=;
+        b=Eh7qIjCVEsaKhcH/uTf8ZTh1yNmAdX4amJcXFgk5WpPvfyincAYECewqjQHDXk47Yj
+         DtMzo7AP3wKhjTRcQ62aSFvaRoBNJKlfQV21wO6lNJQ0/5sU9M4DpaSC5grOo7TEHxQ6
+         fEMLYX+Ea6Juv+TO7vzSTW95oTuDmFumWkqjH8QyISYaJTz5mOwRDh3xx6SwVQEh0suH
+         fvdHqrNnkYdfs3Y9YTOtrTj6U+FO+rudKMghwdwhmznPK3MFQvVRSMMSzYO/SNkIpqCL
+         0iiPnMIqxLQaDUpm7g8X8gd3uZCEzF4xSHzOZjVsQSFPE1s8pr6Df5Gs5ntr9ytUbCqq
+         XGlA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1778879652; x=1779484452;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=mZWDYSQL0KY9ESsVCDJnFdENr1SKqKscOsf4LFzsjVs=;
+        b=s6EHnzeH5rz/pLzpO7OwdvCY+8fcMxidh5pjB/NPl0V1R5gCVYyhp2u5e/CoeYmkDL
+         usqqpa6S27jGwAlE4nFAgxHoIn5gVbBt+doQsIkFYUvRj4oHkevRinNO5notdlJH9srw
+         QgSaJ1UOKAf1WdlbiTTbTwaHXIbAwTL68NfLkhubJz60gZ+y4Zf240lUamAAp4O7iQ2q
+         xHTjwiK5w8LuwCW5hStNVw7w7JqJpVtLpPxk7tInHdc99bqrUAJIYGsvYM0N0I/nhYd1
+         h4ZaWcgXUll1OE0j4pENxfxECVkYy4CeMvvdwdlwfCS2sHIbdEttdY7i47DOehBcsica
+         4QKQ==
+X-Forwarded-Encrypted: i=1; AFNElJ+HdGenDCAhW75UnOWznzGGZTJtkXLHW20Tlv+VVOBEqgB3PwwA5SN0QEWWb+E3ol7UrF60xe9zt5U=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxTdViImMMIv2YhMh+Dy9KeB1rX9uyLOFHqwDq8GsZdg+jDqHlM
+	u3JjlGizxWWTvH8CBz2fjeBKPjIGRcy4xkxArJ7k+y+2KnrRvGtavZtW
+X-Gm-Gg: Acq92OGlBQXl50DBw8tJjKp/QAWUMNTdVSvap65JrQsf1vYn26M9H8kDlRYkTiMMZLY
+	+TXyK6x+jpsugcK160JWoisXRwfFlIH05oQCPoGKBn0s/V3huugpuVMNOA5VYskCI7QkxzpQOE0
+	wcvWCkew74nicVBC+R/eOyCRlFENQIavn4TDSfntcGJcpR2yxwU3ia58Qhf7nhRrmUwFw+ODqVY
+	SKbTOFv31DnXQZ/ihlX7+uvNBD4fxFJzdvuGccbtbZDPqq2HwPPgdLaSau3qXLaVbX8ND7Vc6fd
+	k4Qn+QDxGY3zuXpu+L1xR5BCnym8vq9cu4XeUfMdw1T3wZyBGcXPVE7FPI6KE/TJwzpdY/By5AN
+	o3/NmDJBBOvNWVrtLrvgEVNSH2SyiPASPikYalbMYvXwFTxF7cgTjKfLfxdvLFwcBZaEKe9dTMH
+	BWsFhXCiJ8KCgFVboxc66q6sJOcgpbxKs=
+X-Received: by 2002:a05:7022:b8f:b0:130:6978:c96 with SMTP id a92af1059eb24-13504738d6cmr2812237c88.19.1778879652253;
+        Fri, 15 May 2026 14:14:12 -0700 (PDT)
+Received: from mimas.lan ([2603:8000:df01:38f7:a6bb:6dff:fecf:e71a])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-134cbdcf140sm11362043c88.5.2026.05.15.14.14.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 15 May 2026 14:14:11 -0700 (PDT)
+From: Ross Philipson <ross.philipson@gmail.com>
+To: linux-kernel@vger.kernel.org,
+	x86@kernel.org,
+	linux-integrity@vger.kernel.org,
+	linux-doc@vger.kernel.org,
+	linux-crypto@vger.kernel.org,
+	kexec@lists.infradead.org,
+	linux-efi@vger.kernel.org,
+	iommu@lists.linux.dev
+Cc: ross.philipson@gmail.com,
+	dpsmith@apertussolutions.com,
+	tglx@linutronix.de,
+	mingo@redhat.com,
+	bp@alien8.de,
+	hpa@zytor.com,
+	dave.hansen@linux.intel.com,
+	ardb@kernel.org,
+	mjg59@srcf.ucam.org,
+	James.Bottomley@hansenpartnership.com,
+	peterhuewe@gmx.de,
+	jarkko@kernel.org,
+	jgg@ziepe.ca,
+	luto@amacapital.net,
+	nivedita@alum.mit.edu,
+	herbert@gondor.apana.org.au,
+	davem@davemloft.net,
+	corbet@lwn.net,
+	ebiederm@xmission.com,
+	dwmw2@infradead.org,
+	baolu.lu@linux.intel.com,
+	kanth.ghatraju@oracle.com,
+	daniel.kiper@oracle.com,
+	andrew.cooper3@citrix.com,
+	trenchboot-devel@googlegroups.com
+Subject: [PATCH v16 00/38] x86: Secure Launch support for Intel TXT
+Date: Fri, 15 May 2026 14:13:32 -0700
+Message-ID: <20260515211410.31440-1-ross.philipson@gmail.com>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Fri, 15 May 2026 19:29:03 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Rafael J . Wysocki" <rafael@kernel.org>
-Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- linux-efi@vger.kernel.org, "Linux ACPI" <linux-acpi@vger.kernel.org>,
- LKML <linux-kernel@vger.kernel.org>
-Message-Id: <0572b4b0-d67c-46de-aecb-d11a4336c202@app.fastmail.com>
-In-Reply-To: <2415513.ElGaqSPkdT@rafael.j.wysocki>
-References: <2415513.ElGaqSPkdT@rafael.j.wysocki>
-Subject: Re: [PATCH v1] efi/runtime-wrappers: Avoid crashing on early PRM code
- invocations
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-Hi Rafael,
+Secure Launch is a vendor-neutral approach to implementing TGC Dynamic
+Root of Trust (DRTM) support in the kernel. This is complementary to
+better known Static Root of Trust (SRTM) schemes such as UEFI
+SecureBoot.
 
-On Fri, 15 May 2026, at 19:10, Rafael J. Wysocki wrote:
-> From: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
->
-> There is a dependency between EFI and ACPI PRM that the latter cannot
-> run until the former is ready and PRM can be invoked from AML early
-> through acpi_platformrt_space_handler().  If that happens before
-> initializing efi_rts_wq, it leads to a NULL pointer dereference.
->
-> Avoid that by adding an efi_rts_wq check against NULL to
-> efi_call_acpi_prm_handler().
->
-> Fixes: 5894cf571e14 ("acpi/prmt: Use EFI runtime sandbox to invoke PRM 
-> handlers")
-> Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
-> Cc: 6.6+ <stable@vger.kernel.org> # 6.6+
-> ---
->
-> An alternative would be to somehow ensure that efisubsys_init() will always
-> run before acpi_init(), but moving any of them to another initcall level is
-> not an option AFAICS.
->
+This series provides the common infrastructure along with Intel TXT
+support, without needing the tboot exokernel. Support for AMD SKINIT is
+pending the common infrastructure getting nailed down, and ARM are
+looking to build on it too.
 
-Given that they both run as subsys_initcall() currently, changing acpi_init()
-to subsys_initcall_sync() is probably fine (famous last words :-))
+Originally, tboot were approached to see if they'd take support for
+other vendors, but they elected not to. Hence this approach instead.
 
-But if the PRM code can deal with EFI_NOT_READY than this is also fine,
-modulo the comment below.
+Work is being coordinated by the Trenchboot project,
+https://trenchboot.org/, organising Secure Launch support for upstream
+open source projects including Grub, iPXE and Xen. The goal of the
+Trenchboot project is to make DTRM easy to use, e.g. GRUB adds "slaunch"
+as a command in the boot stanza. See
+https://trenchboot.org/user-docs/QUICKSTART/#linux-quick-start-guide for
+more details
 
+Patch set based on commit:
+torvalds/master/028ef9c96e96197026887c0f092424679298aae8
+(tag: v7.0) Linux 7.0
 
-> ---
->  drivers/firmware/efi/runtime-wrappers.c |    2 ++
->  1 file changed, 2 insertions(+)
->
-> --- a/drivers/firmware/efi/runtime-wrappers.c
-> +++ b/drivers/firmware/efi/runtime-wrappers.c
-> @@ -590,6 +590,8 @@ efi_call_acpi_prm_handler(efi_status_t (
-> 
->  	if (down_interruptible(&efi_runtime_lock))
->  		return EFI_ABORTED;
-> +	if (!efi_rts_wq)
-> +		return EFI_NOT_READY;
+Finally we would like to thank everyone for their input and
+assistance. It has all been very helpful in improving the quality of
+our solution and in reviewing/strengthening our security posture.
 
-This should occur before taking the semaphore
+Thanks
+Ross Philipson and Daniel P. Smith
 
->  	status = efi_queue_work(ACPI_PRM_HANDLER, handler_addr,
->  				param_buffer_addr, context);
->  	up(&efi_runtime_lock);
+Changes in v16:
+
+ - Moved Secure Launch entry point out of the x86 setup kernel into the
+   mainline kernel.
+ - Add EFI protocol support for DL stub callback.
+ - Add SHA 384/512 PCR extend support.
+ - Rewrote Secure Launch kernel documentation.
+ - Updated the reorganization of TPM header and buffer related files.
+ - TXT early heap parsing support.
+ - Corrected commit messages and tag lists per review feedback.
+ - Fix code formatting and typos.
+
+Changes in v15:
+
+ - Rewriting and reformatting of the cover letter, commit message and
+   code comments per requests from maintainers.
+ - Introduction of a early TPM driver in the x86 setup kernel to allow
+   TPM extend command very early in the boot.
+ - Remove previous TPM extending architecture that attempted to update
+   the TPM PCRs later in the boot process.
+ - Include set of split up TPM header files to allow TPM driver reuse
+   in other environments (e.g. early kernel, x86).
+ - Split slaunch.h into 2 files, with a new txt.h. The former contains
+   platform agnostic definitions for the SL feature. The new txt.h file
+   contains Intel TXT definitions from the public specs.
+ - Split TPM headers up following the specifications where the
+   technologies are defined.
+ - Fix code formatting and typos.
+
+Alec Brown (1):
+  tpm: Remove main TPM header from TPM event log header
+
+Ard Biesheuvel (3):
+  x86/boot: Slight refactor of the 5 level paging logic
+  x86/efistub: EFI stub DRTM support for Secure Launch
+  x86/boot: Legacy boot DRTM support for Secure Launch
+
+Daniel P. Smith (9):
+  tpm/tpm_tis: Close all localities
+  tpm/tpm_tis: Address positive localities in tpm_tis_request_locality()
+  tpm/tpm_tis: Allow locality to be set to a different value
+  tpm/sysfs: Show locality used by kernel
+  Documentation/security: Secure Launch kernel documentation
+  x86: Add early SHA-1 support for Secure Launch early measurements
+  x86: Add early SHA-256 support for Secure Launch early measurements
+  x86: Add early SHA-384/512 support for Secure Launch early
+    measurements
+  x86/slaunch: Secure Launch late initcall platform module
+
+Jarkko Sakkinen (3):
+  tpm-buf: Merge TPM_BUF_BOUNDARY_ERROR and TPM_BUF_OVERFLOW
+  tpm-buf: Remove chip parameter from tpm_buf_append_handle()
+  tpm-buf: Implement managed allocations
+
+Ross Philipson (22):
+  tpm: Initial step to reorganize TPM public headers
+  tpm: Move TPM1 specific definitions to the command header
+  tpm: Move TPM2 specific definitions to the command header
+  tpm: Move TPM common base definitions to the command header
+  tpm: Move platform specific definitions to the new PTP header
+  tpm-buf: Add TPM buffer support header for standalone reuse
+  x86: Secure Launch Kconfig
+  x86: Secure Launch Resource Table header file
+  x86/efi: Secure Launch Resource Table EFI definitions header file
+  x86: Secure Launch main header file
+  x86/txt: Intel Trusted eXecution Technology (TXT) definitions
+  lib/crypto: Add SHA1 support for pre-boot environments
+  lib/crypto: Add SHA512 support for pre-boot environments
+  x86: Allow WARN_trap() macro to be included in pre-boot environments
+  x86/msr: Add variable MTRR base/mask and x2apic ID registers
+  x86/tpm: Early startup TPM PCR extending driver
+  x86/slaunch: Add MLE header and Secure Launch entrypoint to the core
+    kernel
+  x86/slaunch: Secure Launch kernel early boot initialization
+  x86/slaunch: Secure Launch kernel late boot initialization
+  x86/slaunch: Secure Launch SMP bringup support
+  kexec/slaunch: Secure Launch kexec SEXIT support
+  reboot/slaunch: Secure Launch SEXIT support on reboot paths
+
+ Documentation/arch/x86/boot.rst               |   8 +
+ Documentation/arch/x86/zero-page.rst          |   1 +
+ Documentation/security/index.rst              |   1 +
+ .../security/launch-integrity/index.rst       |   9 +
+ .../launch-integrity/secure_launch.rst        | 681 ++++++++++++++
+ arch/x86/Kconfig                              |  15 +
+ arch/x86/boot/compressed/Makefile             |   2 +-
+ arch/x86/boot/compressed/misc.c               |  55 +-
+ arch/x86/boot/compressed/pgtable_64.c         |  18 +-
+ arch/x86/boot/startup/Makefile                |   8 +
+ arch/x86/boot/startup/exports.h               |   7 +
+ arch/x86/boot/startup/lib-sha1.c              |   6 +
+ arch/x86/boot/startup/lib-sha256.c            |   6 +
+ arch/x86/boot/startup/lib-sha512.c            |   6 +
+ arch/x86/boot/startup/sl_main.c               | 638 +++++++++++++
+ arch/x86/boot/startup/tpm.h                   |  47 +
+ arch/x86/boot/startup/tpm_drv.c               | 567 ++++++++++++
+ arch/x86/include/asm/boot.h                   |   4 +
+ arch/x86/include/asm/bug.h                    |   8 +-
+ arch/x86/include/asm/msr-index.h              |   5 +
+ arch/x86/include/asm/realmode.h               |   3 +
+ arch/x86/include/asm/txt.h                    | 281 ++++++
+ arch/x86/include/uapi/asm/bootparam.h         |   3 +-
+ arch/x86/kernel/Makefile                      |   3 +
+ arch/x86/kernel/asm-offsets.c                 |  22 +
+ arch/x86/kernel/reboot.c                      |  14 +
+ arch/x86/kernel/setup.c                       |   3 +
+ arch/x86/kernel/sl_stub.S                     | 847 ++++++++++++++++++
+ arch/x86/kernel/slaunch.c                     | 619 +++++++++++++
+ arch/x86/kernel/slmodule.c                    | 353 ++++++++
+ arch/x86/kernel/smpboot.c                     |  47 +-
+ arch/x86/kernel/vmlinux.lds.S                 |   5 +
+ arch/x86/realmode/init.c                      |   8 +
+ arch/x86/realmode/rm/header.S                 |   3 +
+ arch/x86/realmode/rm/trampoline_64.S          |  32 +
+ arch/x86/tools/relocs.c                       |   1 +
+ drivers/char/tpm/tpm-buf.c                    | 148 +--
+ drivers/char/tpm/tpm-chip.c                   |  35 +-
+ drivers/char/tpm/tpm-sysfs.c                  |  31 +-
+ drivers/char/tpm/tpm.h                        | 180 ----
+ drivers/char/tpm/tpm1-cmd.c                   | 193 ++--
+ drivers/char/tpm/tpm2-cmd.c                   | 338 +++----
+ drivers/char/tpm/tpm2-sessions.c              | 144 ++-
+ drivers/char/tpm/tpm2-space.c                 |  57 +-
+ drivers/char/tpm/tpm_tis_core.c               |  24 +-
+ drivers/char/tpm/tpm_tis_core.h               |  64 +-
+ drivers/char/tpm/tpm_vtpm_proxy.c             |  30 +-
+ drivers/firmware/efi/libstub/Makefile         |   1 +
+ drivers/firmware/efi/libstub/efistub.h        |  24 +
+ drivers/firmware/efi/libstub/x86-slaunch.c    |  38 +
+ drivers/firmware/efi/libstub/x86-stub.c       |  27 +-
+ drivers/iommu/intel/dmar.c                    |   4 +
+ include/keys/trusted_tpm.h                    |   1 -
+ include/linux/slaunch.h                       | 262 ++++++
+ include/linux/slr_efi.h                       |  40 +
+ include/linux/slr_table.h                     | 339 +++++++
+ include/linux/tpm.h                           | 234 +----
+ include/linux/tpm_buf.h                       |  57 ++
+ include/linux/tpm_command.h                   | 516 ++++++++++-
+ include/linux/tpm_eventlog.h                  |   4 +-
+ include/linux/tpm_ptp.h                       | 151 ++++
+ kernel/kexec_core.c                           |   8 +
+ lib/crypto/sha1.c                             |  10 +-
+ lib/crypto/sha512.c                           |  10 +-
+ security/keys/trusted-keys/trusted_tpm1.c     |  37 +-
+ security/keys/trusted-keys/trusted_tpm2.c     | 171 ++--
+ 66 files changed, 6385 insertions(+), 1129 deletions(-)
+ create mode 100644 Documentation/security/launch-integrity/index.rst
+ create mode 100644 Documentation/security/launch-integrity/secure_launch.rst
+ create mode 100644 arch/x86/boot/startup/lib-sha1.c
+ create mode 100644 arch/x86/boot/startup/lib-sha256.c
+ create mode 100644 arch/x86/boot/startup/lib-sha512.c
+ create mode 100644 arch/x86/boot/startup/sl_main.c
+ create mode 100644 arch/x86/boot/startup/tpm.h
+ create mode 100644 arch/x86/boot/startup/tpm_drv.c
+ create mode 100644 arch/x86/include/asm/txt.h
+ create mode 100644 arch/x86/kernel/sl_stub.S
+ create mode 100644 arch/x86/kernel/slaunch.c
+ create mode 100644 arch/x86/kernel/slmodule.c
+ create mode 100644 drivers/firmware/efi/libstub/x86-slaunch.c
+ create mode 100644 include/linux/slaunch.h
+ create mode 100644 include/linux/slr_efi.h
+ create mode 100644 include/linux/slr_table.h
+ create mode 100644 include/linux/tpm_buf.h
+ create mode 100644 include/linux/tpm_ptp.h
+
+-- 
+2.47.3
+
