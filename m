@@ -1,63 +1,63 @@
-Received: from mail-dl1-f41.google.com (mail-dl1-f41.google.com [74.125.82.41])
+Received: from mail-dy1-f181.google.com (mail-dy1-f181.google.com [74.125.82.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AC223ECBFC
-	for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 21:14:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FD803ECBE4
+	for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 21:14:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778879678; cv=none; b=Tizs59sxM0L3DkaSPCiYgxPF6opC67lvEN8h4gJdeeJp/qxbMQy8KxMPDlpngVSVB1RF21oc3/fkGp04atejv2nxs0ifIILA9HBkCkHrNALhGQ6neVCHM04AFgVfDHsYLBvUimKzUHKqYvcjccuGys+1RbU/nrs22tYD55LQ5JU=
+	t=1778879679; cv=none; b=Pm8KbYRZX4Kj3W3FzfMDWX3YnsQEJdKDMI2BCCGb+rOPLzdOo+rvIaDyvaXioqequaKF0bcnMRHtdmjK/sxG+fdTpbARrR1OKd56cdfqky1gAM8KZ34sABiPDIku4La81LtN3TQbXbaNICrpUuWN6H+ZDG0mSZgl6TEcgs1dPy4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778879678; c=relaxed/simple;
-	bh=53lrliy0YE81pqMpILWMlkkyv1qPCSWN//0gQcdAdOI=;
+	s=arc-20240116; t=1778879679; c=relaxed/simple;
+	bh=WimTnPb5ErtUQ91diuLvqjTS3pHvP1bJ9GtZuSv1Bf4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Bqn8wYsXwOn0FuE+BG3DWWNEYcSN2aQhmAgiYXnzuK90QwfzxyomDL/ham4JFsqj/pg8EfaDlQ5/qb9xSqovmNVsF4Fv0LiRnzNpDm+cOEFntb+vF5Jv9Lcyma+xymvXMvc00Q1QvIKDihzPLi5vXksmaOoDFNrW8/39GksFBVY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=coZxNLUV; arc=none smtp.client-ip=74.125.82.41
+	 MIME-Version; b=O4EiY1DLeE23QMh+hOLWgO64HEy/HDWP2ACEfbAwNt1XPLLA+Rxgtn0u+vCf9P3E/lCbPH5yzDVJOv/+DRwyxkhjCAYWmv98sGX9rBWfgPc3xF7EtIDlRcvkRyv3TzWmxafnryEBb/rwxFGjxpL1NLOu5iWmInn9k3qq0d4JgwM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=E2hoNZqg; arc=none smtp.client-ip=74.125.82.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="coZxNLUV"
-Received: by mail-dl1-f41.google.com with SMTP id a92af1059eb24-1354403c610so388936c88.0
-        for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 14:14:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="E2hoNZqg"
+Received: by mail-dy1-f181.google.com with SMTP id 5a478bee46e88-2f33ae12f97so1053346eec.1
+        for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 14:14:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778879676; x=1779484476; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1778879673; x=1779484473; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=zaLNJCVWymRzHzAosL0l4Cb63oV8tVc7xKx597eZEkQ=;
-        b=coZxNLUVyrcW4+qDpIm9h5KsdOEZWCz2mv/nyyNz6xPun9i04yI7IEbuqeCcEA0Qvo
-         CgivbygcWx0y7mhjfCmX18Xhzn5RGGCZG5QjQIefM2kR6VCGk53vZyK+JaK0zwk7Gx1d
-         chHzp7T1pf3t+s/JLVCigdlmd1eGo8/R3hfUzaSHyYJZRe2droz6Mi23YqCkEtxhCJfQ
-         PINrqjyV0NTayQbZmjsA83XgxsDWW8qAyI3BP3aBYfb6/nnQnY4uOxlSs9Nllt9hD8tF
-         d65Lj6T5vP8vOXD9/vzC8mh30K9mShaK4LbuVvMpojiNuar0rgHSi7GT1nIGWUpwBUDM
-         jK8A==
+        bh=q5U2oXqABMo/EXd3140iU8ar3y05m7m/a9rRtZzhgJM=;
+        b=E2hoNZqgN5GeQniAK6QAmAIDiaAQH2EJOxOHeRaH/grCpZD4lI/gu2odWffRqbYJYZ
+         1sIxrkPPh+Cnfhx872TUjUmDUxpUkhomW9fyAJ+UJyA+RpKuTXPGEpjA2zSiaF5LExjM
+         L9QD5ZvK2t9AykShyNDdayeKU0x/q0ZFgcQJLXjs9nR5IfMq2ZOa6LRR3MmqlG9zoNQy
+         1yMhV+f07d+NBwC/0L76ic4bVZ5dMiSgJzi5V6opIBYUhZtKmd0UaMvsOBA3yjyljZp8
+         WAixMF0vVZZIOtan39WrvH2P2hKysqizEDojDDAWydGq1X2yeBI2f71KMD8Xsbl1X7tw
+         ijuw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778879676; x=1779484476;
+        d=1e100.net; s=20251104; t=1778879673; x=1779484473;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=zaLNJCVWymRzHzAosL0l4Cb63oV8tVc7xKx597eZEkQ=;
-        b=mjlbcsRicfqK0/Y6sODPGHiNleGfyp8j3q5WRTl28DrhL/KCSHAncxtRbbjqYcS5M6
-         YxZB2D04wDrEhpwqNjQTpOWvrqR9/Ii1myInwPIcT5cptFz4DeMTs9hYrKmUDicZhry8
-         W8E1yJE8F21rbl4tPEH31YD8A4rObOo65A+DXJtKTx6vUuYQZ5nHbrfNF64FIpZNDtEF
-         xVp2H7938H5lqbaM64/H1uQXpEe6fWWn1utvGSoPf7kX2+fyQMCyVqzqW4dJzIaOvVpI
-         aCxYwT/oS7hIWfAMUP3ZOwgZUfETyP57vtJonksoMHPErOYKMMALCx4mhNZcGuOgrfX9
-         QT5Q==
-X-Forwarded-Encrypted: i=1; AFNElJ/qi2jvgjuZE9ezgB6ghzZBVzVrGC/oDv9vnqHoJgQWkC4Rh5LpFThtvE0yu3MUbEi7TF/lj0KO9DI=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy51vR6Jr2u6RwlT1EyQzt/8f8Lj+OO2/TJrVmatNZm3XbuThkr
-	SJgUxIGFz1jGe3VCxz3saFdxg/4ba24FGZxGe0/JlhEeptzpbjktrVCP
-X-Gm-Gg: Acq92OEaaGTI/oGed8DIRFtxK8j2w7izrS4CxqZ0VKeA76yqWqbTIlIwib3y+Nm6TE/
-	6IJpO7f0s0tZRhnD9yCbKvGjjh75OwlaWlZdJvUuhzqAAzrDLikyITS+SU+cHfckw8YXDbS/21y
-	JJEacABZTkrQMxMcskAhj7XWpHjRWHoFO6NCGaBw3SvaFBrTAdHZvqm3gfnk1NCbx8Qwvq/GCib
-	41eoVt7iF6iciA5pwY8aohwi1mgAYmBsLeN7whBRLAyGwDoN+DqKUqsLVHvoK4O6b4QK/H7KmYm
-	DLpXL5QhG3vFyjn6EDsRDGVGHDNSXwr9QjPOeLfVHYOSrHA+UrNT8pHUEseXedDFP4Q/WJSU65H
-	Wh6h6MPK20eFctI0n/+It+95AcnSAeHIJDYngsYK4diXp1ArlC5T9qrL22And6OiymlcKVBi41c
-	yKetvpMf9MpabqY5pVdKpDQQ7Rhi9Z6Co=
-X-Received: by 2002:a05:7022:6b9a:b0:12d:de3e:86aa with SMTP id a92af1059eb24-13505642857mr2505039c88.40.1778879675567;
-        Fri, 15 May 2026 14:14:35 -0700 (PDT)
+        bh=q5U2oXqABMo/EXd3140iU8ar3y05m7m/a9rRtZzhgJM=;
+        b=SsTW9GUtXMZCd2pIjye7giIL91U5FQJa6FTiQ7SAiUrqUCFSpMH6DNdv8b3GNXp/cM
+         1X8ZcuO/SEZekeNp1jWX0Nboj74Cpc0u6KpIK2VEa11ECYdsQ2CAiO+uYSeObr+mdwBf
+         yq1BdBMTQwgw5gtTPne21UqO7miLD1jN7cQjKReHc9aUfuaxnCWK/AgylqgTGol3VBrF
+         mvHr3ve3VD/fGii3BqeWgqCmdV9ezmDawWrhyrEHEd8WcXLN71iiIXegOxFBIYo1j6J0
+         Vo3n0e//CSgasooJNgNtHpTi/UOJPPB+63v03IO3leWREEp+vMxsPluxZMZAcon1EGH/
+         s4vQ==
+X-Forwarded-Encrypted: i=1; AFNElJ9mIovjhTZttiXgAh5ttdtPgJx2qkQq24oi18o0nhadpslp7K3fAWV7v/Dx8PN8ORS0FaBIe2MiY74=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwMbltV7cffk7YL1Uo/XgC1RLQIsbk1m9PIx++/Lmi+1+nuNJvE
+	g4c7Rgl9f/8i2zyEwyYycVdA6s53XYhDxsttnHvPEh/Ec8gBPacUWN58
+X-Gm-Gg: Acq92OEGCWEisVP1R9RszwUGPvjd2keZ4eNiAKCCGt7TXHaoLSfIGmhAnMFba9kh5NC
+	LajVKcAaLuDGeXJyD1xpkJYJxQg9p3Zv/LZJWSvuwPAyMt0UaduwXShITWidts7smqix8aCyUed
+	UtqJnjLn3tOmPhSCyiTL5omsRQhQNdR7yo8q3dls9W2EAlHbJpnLOq9b1lp+Na8ohPbqmPq/ygA
+	iMfZSHtouv98LcZYuvo4RTex9l4JF9a1yCDRJLVgmLm4vAM/OOIp+SrdD6hawU5yj0f5KocVJAH
+	XA8Ntkw5wlNZ4TIbisQWOS3vFzrL8LdKfCsmHsxgd342F1TWH3Rd+5solgPej/4SsGkdexkLqk+
+	gzOe7bzEtTpu5WCgRWEeXO+z7TNQvnnfePGsCW/9r9OixnA8aIZxpcUZsAWRBycmjxrRGzQ1OO/
+	n+U0N5ljXVYDwxeGgY2UKVkLUnyZ3dZtY=
+X-Received: by 2002:a05:7300:b913:b0:2f4:3a9c:8193 with SMTP id 5a478bee46e88-3039862655amr2733579eec.16.1778879672589;
+        Fri, 15 May 2026 14:14:32 -0700 (PDT)
 Received: from mimas.lan ([2603:8000:df01:38f7:a6bb:6dff:fecf:e71a])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-134cc33a618sm11242540c88.12.2026.05.15.14.14.34
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-302973bc8ddsm7829907eec.21.2026.05.15.14.14.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 May 2026 14:14:35 -0700 (PDT)
+        Fri, 15 May 2026 14:14:32 -0700 (PDT)
 From: Ross Philipson <ross.philipson@gmail.com>
 To: linux-kernel@vger.kernel.org,
 	x86@kernel.org,
@@ -92,9 +92,9 @@ Cc: ross.philipson@gmail.com,
 	daniel.kiper@oracle.com,
 	andrew.cooper3@citrix.com,
 	trenchboot-devel@googlegroups.com
-Subject: [PATCH v16 08/38] tpm-buf: Remove chip parameter from tpm_buf_append_handle()
-Date: Fri, 15 May 2026 14:13:40 -0700
-Message-ID: <20260515211410.31440-9-ross.philipson@gmail.com>
+Subject: [PATCH v16 07/38] tpm-buf: Merge TPM_BUF_BOUNDARY_ERROR and TPM_BUF_OVERFLOW
+Date: Fri, 15 May 2026 14:13:39 -0700
+Message-ID: <20260515211410.31440-8-ross.philipson@gmail.com>
 X-Mailer: git-send-email 2.47.3
 In-Reply-To: <20260515211410.31440-1-ross.philipson@gmail.com>
 References: <20260515211410.31440-1-ross.philipson@gmail.com>
@@ -108,87 +108,111 @@ Content-Transfer-Encoding: 8bit
 
 From: Jarkko Sakkinen <jarkko.sakkinen@opinsys.com>
 
-Remove the TPM driver chip parameter from the function
-tpm_buf_append_handle(). The chip parameter is only for error logging
-which can be done with other facilities like WARN().
+Merge TPM_BUF_BOUNDARY_ERROR and TPM_BUF_OVERFLOW into TPM_BUF_INVALID,
+given that they are identical (the only difference being the associated
+log messages).
+
+In addition, add a missing TPM_BUF_INVALID check to tpm_buf_append_handle()
+following the pattern from other functions in tpm-buf.c.
 
 Message-ID: <20260125192526.782202-11-jarkko@kernel.org>
 Signed-off-by: Jarkko Sakkinen <jarkko.sakkinen@opinsys.com>
+Reviewed-by: Jonathan McDowell <noodles@meta.com>
 Signed-off-by: Ross Philipson <ross.philipson@gmail.com>
 ---
- drivers/char/tpm/tpm-buf.c       | 9 ++++++---
- drivers/char/tpm/tpm2-cmd.c      | 2 +-
- drivers/char/tpm/tpm2-sessions.c | 2 +-
- include/linux/tpm.h              | 2 +-
- 4 files changed, 9 insertions(+), 6 deletions(-)
+ drivers/char/tpm/tpm-buf.c                | 10 ++++------
+ include/linux/tpm.h                       |  8 +++-----
+ security/keys/trusted-keys/trusted_tpm2.c |  6 +++---
+ 3 files changed, 10 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/char/tpm/tpm-buf.c b/drivers/char/tpm/tpm-buf.c
-index 61833b4d81f0..99811809a72a 100644
+index 4c4f450630df..61833b4d81f0 100644
 --- a/drivers/char/tpm/tpm-buf.c
 +++ b/drivers/char/tpm/tpm-buf.c
-@@ -146,17 +146,20 @@ EXPORT_SYMBOL_GPL(tpm_buf_append_u32);
- 
- /**
-  * tpm_buf_append_handle() - Add a handle
-- * @chip:	&tpm_chip instance
-  * @buf:	&tpm_buf instance
-  * @handle:	a TPM object handle
-  *
-  * Add a handle to the buffer, and increase the count tracking the number of
-  * handles in the command buffer. Works only for command buffers.
+@@ -103,13 +103,12 @@ EXPORT_SYMBOL_GPL(tpm_buf_length);
   */
--void tpm_buf_append_handle(struct tpm_chip *chip, struct tpm_buf *buf, u32 handle)
-+void tpm_buf_append_handle(struct tpm_buf *buf, u32 handle)
+ void tpm_buf_append(struct tpm_buf *buf, const u8 *new_data, u16 new_length)
  {
+-	/* Return silently if overflow has already happened. */
+-	if (buf->flags & TPM_BUF_OVERFLOW)
 +	if (buf->flags & TPM_BUF_INVALID)
-+		return;
-+
- 	if (buf->flags & TPM_BUF_TPM2B) {
--		dev_err(&chip->dev, "Invalid buffer type (TPM2B)\n");
-+		WARN(1, "tpm-buf: invalid type: TPM2B\n");
+ 		return;
+ 
+ 	if ((buf->length + new_length) > PAGE_SIZE) {
+ 		WARN(1, "tpm_buf: write overflow\n");
+-		buf->flags |= TPM_BUF_OVERFLOW;
 +		buf->flags |= TPM_BUF_INVALID;
  		return;
  	}
  
-diff --git a/drivers/char/tpm/tpm2-cmd.c b/drivers/char/tpm/tpm2-cmd.c
-index 1fa3e8a43c79..c9dc35b57687 100644
---- a/drivers/char/tpm/tpm2-cmd.c
-+++ b/drivers/char/tpm/tpm2-cmd.c
-@@ -198,7 +198,7 @@ int tpm2_pcr_extend(struct tpm_chip *chip, u32 pcr_idx,
- 		}
- 		tpm_buf_append_hmac_session(chip, &buf, 0, NULL, 0);
- 	} else {
--		tpm_buf_append_handle(chip, &buf, pcr_idx);
-+		tpm_buf_append_handle(&buf, pcr_idx);
- 		tpm_buf_append_auth(chip, &buf, NULL, 0);
- 	}
+@@ -176,14 +175,13 @@ static void tpm_buf_read(struct tpm_buf *buf, off_t *offset, size_t count, void
+ {
+ 	off_t next_offset;
  
-diff --git a/drivers/char/tpm/tpm2-sessions.c b/drivers/char/tpm/tpm2-sessions.c
-index 3b1cf1ca0420..eb67ae14ad73 100644
---- a/drivers/char/tpm/tpm2-sessions.c
-+++ b/drivers/char/tpm/tpm2-sessions.c
-@@ -257,7 +257,7 @@ int tpm_buf_append_name(struct tpm_chip *chip, struct tpm_buf *buf,
- #endif
+-	/* Return silently if overflow has already happened. */
+-	if (buf->flags & TPM_BUF_BOUNDARY_ERROR)
++	if (buf->flags & TPM_BUF_INVALID)
+ 		return;
  
- 	if (!tpm2_chip_auth(chip)) {
--		tpm_buf_append_handle(chip, buf, handle);
-+		tpm_buf_append_handle(buf, handle);
- 		return 0;
+ 	next_offset = *offset + count;
+ 	if (next_offset > buf->length) {
+ 		WARN(1, "tpm_buf: read out of boundary\n");
+-		buf->flags |= TPM_BUF_BOUNDARY_ERROR;
++		buf->flags |= TPM_BUF_INVALID;
+ 		return;
  	}
  
 diff --git a/include/linux/tpm.h b/include/linux/tpm.h
-index 3c6a5bcc138a..b357f8971d03 100644
+index 3630b2ea6aef..3c6a5bcc138a 100644
 --- a/include/linux/tpm.h
 +++ b/include/linux/tpm.h
-@@ -235,7 +235,7 @@ void tpm_buf_append_u32(struct tpm_buf *buf, const u32 value);
- u8 tpm_buf_read_u8(struct tpm_buf *buf, off_t *offset);
- u16 tpm_buf_read_u16(struct tpm_buf *buf, off_t *offset);
- u32 tpm_buf_read_u32(struct tpm_buf *buf, off_t *offset);
--void tpm_buf_append_handle(struct tpm_chip *chip, struct tpm_buf *buf, u32 handle);
-+void tpm_buf_append_handle(struct tpm_buf *buf, u32 handle);
+@@ -201,12 +201,10 @@ enum tpm_chip_flags {
+ #define to_tpm_chip(d) container_of(d, struct tpm_chip, dev)
+ 
+ enum tpm_buf_flags {
+-	/* the capacity exceeded: */
+-	TPM_BUF_OVERFLOW	= BIT(0),
+ 	/* TPM2B format: */
+-	TPM_BUF_TPM2B		= BIT(1),
+-	/* read out of boundary: */
+-	TPM_BUF_BOUNDARY_ERROR	= BIT(2),
++	TPM_BUF_TPM2B		= BIT(0),
++	/* The buffer is in invalid and unusable state: */
++	TPM_BUF_INVALID		= BIT(1),
+ };
  
  /*
-  * Check if TPM device is in the firmware upgrade mode.
+diff --git a/security/keys/trusted-keys/trusted_tpm2.c b/security/keys/trusted-keys/trusted_tpm2.c
+index 29d79c05ed6b..779a2e66ac20 100644
+--- a/security/keys/trusted-keys/trusted_tpm2.c
++++ b/security/keys/trusted-keys/trusted_tpm2.c
+@@ -312,7 +312,7 @@ int tpm2_seal_trusted(struct tpm_chip *chip,
+ 	/* creation PCR */
+ 	tpm_buf_append_u32(&buf, 0);
+ 
+-	if (buf.flags & TPM_BUF_OVERFLOW) {
++	if (buf.flags & TPM_BUF_INVALID) {
+ 		rc = -E2BIG;
+ 		tpm2_end_auth_session(chip);
+ 		goto out;
+@@ -328,7 +328,7 @@ int tpm2_seal_trusted(struct tpm_chip *chip,
+ 		goto out;
+ 
+ 	blob_len = tpm_buf_read_u32(&buf, &offset);
+-	if (blob_len > MAX_BLOB_SIZE || buf.flags & TPM_BUF_BOUNDARY_ERROR) {
++	if (blob_len > MAX_BLOB_SIZE || buf.flags & TPM_BUF_INVALID) {
+ 		rc = -E2BIG;
+ 		goto out;
+ 	}
+@@ -441,7 +441,7 @@ static int tpm2_load_cmd(struct tpm_chip *chip,
+ 
+ 	tpm_buf_append(&buf, blob, blob_len);
+ 
+-	if (buf.flags & TPM_BUF_OVERFLOW) {
++	if (buf.flags & TPM_BUF_INVALID) {
+ 		rc = -E2BIG;
+ 		tpm2_end_auth_session(chip);
+ 		goto out;
 -- 
 2.47.3
 
