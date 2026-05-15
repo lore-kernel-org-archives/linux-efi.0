@@ -1,63 +1,63 @@
-Received: from mail-dy1-f170.google.com (mail-dy1-f170.google.com [74.125.82.170])
+Received: from mail-dy1-f172.google.com (mail-dy1-f172.google.com [74.125.82.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A2753F5BC1
-	for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 21:15:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C68A3F5BE6
+	for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 21:15:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778879722; cv=none; b=u8QPytvBpatCYvR16rzIBE8GkDuXLOMQxGwgWZGElMyrbIcjBEdF1r8DZ5UVo/GWhc3+Doui90cI8Q3KjPAWX51AHFAYnYhb7x9z3NDOeuC4qhH/xBetXl73LMAzZrFhR4LzecV2fOkCBWnhSujdAuBcY8a80IGj2txc0n5mm+o=
+	t=1778879725; cv=none; b=f4K96x8xTWSYKLZo5Ly603cIdoLNAetS3xZ7aVU5w43IHMq5B1y0dv2Mk1KA7qiSA0nn8wyE+jWZqF0bjZ9H8w2eMwJtsgvGBDemXt6SDy1YudVLOp9NBoHqyL4JzLG6HCnOmVtDnbGjdLP1NwWlc7/kdxO7ui7lIlWtbXcf+6E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778879722; c=relaxed/simple;
-	bh=EYoiytDPHAwrp//ZCSS8x2mbpMMq39lmGS1yWEcEk0Q=;
+	s=arc-20240116; t=1778879725; c=relaxed/simple;
+	bh=DULLarGA3N2WbmTOoIAH6Z6cAJNNwTwfc+oSbMTDbH8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=a4ZteSkf4XrWP+zGTS0wLWYs5vs/ZKi2RhN6PkD9WFJ5mYvCSKtCfInULxWhMRBdk5O0x5AreH5/1p7i2mnIljvO/2VDlt0rPzRR6NDbiQ4RtmsNuhidzfVobdPwrgoCGSQARfmx7RGKdrX/OUei2C7mPRsRycKlXcxBqIJD1pw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=F1qUkByA; arc=none smtp.client-ip=74.125.82.170
+	 MIME-Version; b=jFtxEZh3TxKIQ8bbIUYAa7acc/IjDaoKMFdmXRVvvycKFZ0p+l+P631QW6upSYnsR7Kw/bJvwhPTyyXSIeG/YNWBihIWLM2q80nIJqxHKo6dCuUdOQIaguPEMEEwWzQH8AG+N4FPMx576Nhsr62TO8n+xnsrKCjO7S2/DfKSuKY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GfxRkan2; arc=none smtp.client-ip=74.125.82.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="F1qUkByA"
-Received: by mail-dy1-f170.google.com with SMTP id 5a478bee46e88-2ef8d6ba48bso106494eec.1
-        for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 14:15:21 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GfxRkan2"
+Received: by mail-dy1-f172.google.com with SMTP id 5a478bee46e88-30246cfd41aso1513771eec.1
+        for <linux-efi@vger.kernel.org>; Fri, 15 May 2026 14:15:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778879721; x=1779484521; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1778879723; x=1779484523; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=bjgxy9jrMUn+tA5MZsUkk9qLfIPrTHgv6m9jj+0YWR4=;
-        b=F1qUkByArkNhkX8Vb784ExX/rl6QJS4DBW18WWjmqir3frGenB8qERsSXnGvklGLAv
-         P95lUGWZ/GjM5Y8NDhtwk+h7BAZdVVuhvyz3q5hRMQNdOwOddJhcvGUoFa/vXVClvFKe
-         wqjcw/pK5nDmkWn+eoT576g/DS1UOQF6lw1/oFI5+Mv5RZ6s3bdSJPul7HgcuiSoNehY
-         aqCyhEYdbq1d7DY9fGbSDrwyFgxPSFLNb2nXjUjBvJQ/+WY7nO+CLHiKS8na6SFKYbbN
-         kICn8lsE/ST/LYMxnVpC+KaX+OIkFBQXRIJmARETvIikWBupy+rK2Nc8yIpJ4zTTneK/
-         i97Q==
+        bh=ER4IWQsMKw/HNZSo0sHiz6UgahZlpRSMvCUCrr/URAk=;
+        b=GfxRkan2jXb/hDtBDF0b2sCZ9HhiKP1Jj/yCjehZ+FkCiZlTYroSSQI6ZCBGNx/FBH
+         nB/APZdgfAjcUw2LfZ3ELWjaOwm/EVaIrw6+uWbd46OCgIH2/r/rsmi8lFGVmYlCYmz5
+         iihILkrwP8lqd2Dn4bjCqFt+vijLcekhje43yv4KJ8blEx7Jga1xd2AM5HfyT9v3Etfa
+         aBW7LDioHVaE1M7oNwRvB5TxwC+2TRLlsekBab0tgxFWaCbgvF+FxIoX0AAFL6kw9CJV
+         rm/gWOxfdEdyOeJakpFiJ9XLMAElhxeMRQzo54xa/6YGBaLUk0AH3FHDfgIQiVMNwZMb
+         i+RA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778879721; x=1779484521;
+        d=1e100.net; s=20251104; t=1778879723; x=1779484523;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=bjgxy9jrMUn+tA5MZsUkk9qLfIPrTHgv6m9jj+0YWR4=;
-        b=aspxJ3NOvfe6+OmEyHZlscctVgfSZLTbnD2fyYEOTwTgLDIYR7BUqBrdxGCA3t4420
-         qPOp/0Lnhj5QrSXfixGJTg4OEg3/at/+/NSPwbEWfkc1wM+5bDaLYUjWrRPdAEp6WFlc
-         vs1iqkpbIHC03Sa78YT1YwRbCRdfmYyU7cMxytKeq6MJxlvrvAswoazPT0ukKk2LqDRz
-         nUk5jMjrqTxxNi4qS+S+KV1P8vGCYqjH9eiz4Lh05+cxygrqRd0BrNOBiYFugd5WefIy
-         UIRf8cSEhB8DkHQ7btw/HRc9OYj/d+/hycd20ahv8RItyBPL4Mo2nHtzd98JhM6N0rOH
-         JS1w==
-X-Forwarded-Encrypted: i=1; AFNElJ9oa7UplWZidrl+kGt6EzyTgD9bxsC8eGMkgDrlASirvNHhIquM5ejgAGwWdOKr9+PiYixVXxcS43c=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzL5gM256KD613myO+FmPVDL027U3tCVWACkqIpWf3+ieT3j6wY
-	AYRuKxola5F/QyV/mLmST2vuLXa7MCN3Pgp/lUP2xaw7h6R80Kq4m9wg
-X-Gm-Gg: Acq92OFW1g3DKqFDgQtlmKWrdO0LHn4By5RnuGKOZ8N4POk88XtjT0HFRt3MzFm6u6X
-	6Li2aHH1xqhw78i/LsGJQeKhuDqMnqTLI5VGxiyhjD5wMzqidSKkicR8Sjx9hs9e4AhRFfsSUsA
-	kREqP4BnO9eTC6dP+vf8SNSPs6dpmzhtDGds4Yp8dNE9OkR32hNsTwbcqIOfYPASXrnNFJiGa0a
-	9ir6IAYMwErhquX1SZnuLqB33Fg8DWUPhSOpJeVRjLiT6Z8M4eFEmtFWwdg/NsIumQp9enEQaid
-	FWH9iObdurgg3eHb06A7idY9OXVVVFK4PcRBCIWkf4uXpR7GwcE7WXx9Qvyh+x3f9xoRmNWXzKP
-	wbiLl1BKCsmtP0bYqZdzmzs8x1aFoSUaxeaJoyCdI87zSIJPv5OXo+fq9Sj1x6gyjowDU4kIkhu
-	moTEd/TGvxY6A6KA3M4d/7HC/eT32rNKI=
-X-Received: by 2002:a05:7300:2316:b0:2f3:5d44:eeba with SMTP id 5a478bee46e88-3025fa54325mr4525827eec.6.1778879720563;
-        Fri, 15 May 2026 14:15:20 -0700 (PDT)
+        bh=ER4IWQsMKw/HNZSo0sHiz6UgahZlpRSMvCUCrr/URAk=;
+        b=ciCkEWwejqe2BNS2xX1RBKT2GCTmafKgAi7+3paxJ9g7Or6ygPHiqaMGwA9KDfjpZL
+         zlh1bNAV3QTYTJ01ZhkVrjL280xHCn/U/odUNqJwAeJWYo/gzL3COz+jhp2genePn6/s
+         62qbQRW5lUhJ4feq9gAiKf7589wglEJyUdGGY952dEnpKAACkWlxneL/kFouGpeRHzWW
+         A7IBX1Anc0PIYhvInzLpgirL33NeIr+NjPQpaXEzITtDv+9jovYyyPyLohEGKGsipeQj
+         kpJIDlIXMAFS6aJyIQp2GhM3YSirQV1TKf84qdbxAg5K74z5lwLacFIEz5LP8DokJ9am
+         1qVA==
+X-Forwarded-Encrypted: i=1; AFNElJ8WEsSwbNHztkrVfGyaQZevYtluvdNo9bvCy42sRqum0hKcDj98+pReR/WWlxsg8+FrD0k8DLrYOQA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxDtqjW0xOx0S4CKKjd9PHpWWPkRE1cJDDjJCtiS7zeQZ/8Vnry
+	R+2U7eLmjQz/W1j2JTN0zmCsBFpCgyU2strL2gUR0gdU4RdgAHkS9Vzg
+X-Gm-Gg: Acq92OFv45NlnyahbgO6zx87GzuxIvuXrqiYVWNjbDzL5y2aUqx5r6ioF1iHoMlPOu1
+	rV28VW4Ar1LrvTyQN0e5k5R9XNltLNiFQwbY2b9uGKWmCFKSXnoyQISyIUPMYxoOmCb1ppiDKEy
+	DfuiSQMMtQoSjR7A+9sCQuBGIQJDGzKjc5udkTYNEmrzQDcb/xoBiP1RiwKAPPmV+NAfjUlNP09
+	YSBfwNmWZhnVSlUNc/2mc51elDZ8xP9xbDn7ZqYNRHWPVwRIsQuET9y2WVB0MrZ61V/ME1UFbzm
+	TalHRojT7ZmbrA3OK8JDkOAcD+ia5zu6Q6WQXR7saqBL6tLnp6KIuitpfgW4J29bl/x6u8LEQ5E
+	jm6iCzeebw/OuUbLV1nGpD0yR6OX/7S+ih3h+3geZEy02jyKTLlNSAnlrm74FcoSS/jQMMhvx4X
+	kcWGllOT2TCwq/wFH1uekoH0/GwIrNoa/mFnCdfFv1UQ==
+X-Received: by 2002:a05:7301:4184:b0:2f4:3a9c:818c with SMTP id 5a478bee46e88-303986b1521mr2959973eec.29.1778879723496;
+        Fri, 15 May 2026 14:15:23 -0700 (PDT)
 Received: from mimas.lan ([2603:8000:df01:38f7:a6bb:6dff:fecf:e71a])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-30293e2e3c0sm9975127eec.3.2026.05.15.14.15.19
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-134cbcb9ef5sm10736508c88.2.2026.05.15.14.15.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 May 2026 14:15:20 -0700 (PDT)
+        Fri, 15 May 2026 14:15:23 -0700 (PDT)
 From: Ross Philipson <ross.philipson@gmail.com>
 To: linux-kernel@vger.kernel.org,
 	x86@kernel.org,
@@ -92,9 +92,9 @@ Cc: ross.philipson@gmail.com,
 	daniel.kiper@oracle.com,
 	andrew.cooper3@citrix.com,
 	trenchboot-devel@googlegroups.com
-Subject: [PATCH v16 24/38] x86/msr: Add variable MTRR base/mask and x2apic ID registers
-Date: Fri, 15 May 2026 14:13:56 -0700
-Message-ID: <20260515211410.31440-25-ross.philipson@gmail.com>
+Subject: [PATCH v16 25/38] x86/boot: Slight refactor of the 5 level paging logic
+Date: Fri, 15 May 2026 14:13:57 -0700
+Message-ID: <20260515211410.31440-26-ross.philipson@gmail.com>
 X-Mailer: git-send-email 2.47.3
 In-Reply-To: <20260515211410.31440-1-ross.philipson@gmail.com>
 References: <20260515211410.31440-1-ross.philipson@gmail.com>
@@ -106,38 +106,57 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add the MSR values required by Secure Launch to locate particular CPU cores
-during application processor (AP) startup, and restore the MTRR state after
-an Intel TXT launch.
+From: Ard Biesheuvel <ardb@kernel.org>
 
+In preparation for adding Secure Launch support, which will require that
+the number of paging levels remains untouched, tweak the logic slightly
+so that the slaunch check can be inserted easily.
+
+No functional change intended.
+
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 Signed-off-by: Ross Philipson <ross.philipson@gmail.com>
 ---
- arch/x86/include/asm/msr-index.h | 5 +++++
- 1 file changed, 5 insertions(+)
+ arch/x86/boot/compressed/pgtable_64.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
 
-diff --git a/arch/x86/include/asm/msr-index.h b/arch/x86/include/asm/msr-index.h
-index 6673601246b3..2a95e3389622 100644
---- a/arch/x86/include/asm/msr-index.h
-+++ b/arch/x86/include/asm/msr-index.h
-@@ -408,6 +408,9 @@
- #define MSR_IA32_RTIT_OUTPUT_BASE	0x00000560
- #define MSR_IA32_RTIT_OUTPUT_MASK	0x00000561
+diff --git a/arch/x86/boot/compressed/pgtable_64.c b/arch/x86/boot/compressed/pgtable_64.c
+index 0e89e197e112..3e9d651da73e 100644
+--- a/arch/x86/boot/compressed/pgtable_64.c
++++ b/arch/x86/boot/compressed/pgtable_64.c
+@@ -102,6 +102,7 @@ static unsigned long find_trampoline_placement(void)
  
-+#define MSR_MTRRphysBase0		0x00000200
-+#define MSR_MTRRphysMask0		0x00000201
+ asmlinkage void configure_5level_paging(struct boot_params *bp, void *pgtable)
+ {
++	bool l5_enabled = native_read_cr4() & X86_CR4_LA57;
+ 	void (*toggle_la57)(void *cr3);
+ 	bool l5_required = false;
+ 
+@@ -118,10 +119,12 @@ asmlinkage void configure_5level_paging(struct boot_params *bp, void *pgtable)
+ 	 *     + CPUID leaf 7 is supported
+ 	 *     + the leaf has the feature bit set
+ 	 */
+-	if (!cmdline_find_option_bool("no5lvl") &&
+-	    native_cpuid_eax(0) >= 7 && (native_cpuid_ecx(7) & BIT(16))) {
+-		l5_required = true;
++	if (native_cpuid_eax(0) < 7 || !(native_cpuid_ecx(7) & BIT(16)))
++		return;
 +
- #define MSR_MTRRfix64K_00000		0x00000250
- #define MSR_MTRRfix16K_80000		0x00000258
- #define MSR_MTRRfix16K_A0000		0x00000259
-@@ -960,6 +963,8 @@
- #define MSR_IA32_APICBASE_ENABLE	(1<<11)
- #define MSR_IA32_APICBASE_BASE		(0xfffff<<12)
++	l5_required = !cmdline_find_option_bool("no5lvl");
  
-+#define MSR_IA32_X2APIC_APICID		0x00000802
-+
- #define MSR_IA32_UCODE_WRITE		0x00000079
++	if (l5_required) {
+ 		/* Initialize variables for 5-level paging */
+ 		__pgtable_l5_enabled = 1;
+ 		pgdir_shift = 48;
+@@ -132,7 +135,7 @@ asmlinkage void configure_5level_paging(struct boot_params *bp, void *pgtable)
+ 	 * The trampoline will not be used if the paging mode is already set to
+ 	 * the desired one.
+ 	 */
+-	if (l5_required == !!(native_read_cr4() & X86_CR4_LA57))
++	if (l5_required == l5_enabled)
+ 		return;
  
- #define MSR_IA32_MCU_ENUMERATION	0x0000007b
+ 	trampoline_32bit = (unsigned long *)find_trampoline_placement();
 -- 
 2.47.3
 
