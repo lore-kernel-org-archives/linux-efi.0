@@ -1,89 +1,76 @@
-Received: from out203-205-221-210.mail.qq.com (out203-205-221-210.mail.qq.com [203.205.221.210])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5711340855;
-	Mon, 18 May 2026 07:02:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.205.221.210
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45A472C187
+	for <linux-efi@vger.kernel.org>; Mon, 18 May 2026 18:35:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779087755; cv=none; b=aqlEsmhltC7mbl8HbakNN/2Ob+sqeSsYGx4xLYGOrguTKJ2KsW0n+OAh+Vvh0yvaBMV2GrK3wI3WOOK6Jb1878Wu2sAwXxgJUS35GRyeTOxvxrv5SXwfJx6pRtOgpwaiOXSmpSlijBygVv4JzcNTT7Ly3g9YQfoCnxN0+S90Wwg=
+	t=1779129304; cv=none; b=ABYSryp7L1y8KIZ26aXH81I6zkm+mrODj1J6AYCzJ9s9nj+aQFJ5NXsNpyqD51zlESlA5LUZRUay7RAlIaGekTit6Ru5MwpWQthAtN+Y2ycUM5nYohb0XhvoRl6ZDhHkrjHJxGRyGdZlV0klAEcqaeib+QCNgazVKNsFgWEU5tg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779087755; c=relaxed/simple;
-	bh=+KMO1sA3pMW/EElsjNhraa+tU4RqOJMs6BaPkXfMvGo=;
-	h=Message-ID:From:To:Cc:Subject:Date:MIME-Version; b=fsADxO7H+InZDYU8yEStuT2w4eGLgM9ffRzZhCchiZyjAOCLxE0foFrwuhmOY7vT7L+0j697sjWV/z6rn7LrucXUcTSk+UNYZxzCF43skP/hJYlsx05MLwHe0g9rKr08FYvE1sOu/YNICW9VBRJ8j/o7RLL+T7VlazOvWgsVhns=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=foxmail.com; spf=pass smtp.mailfrom=foxmail.com; dkim=pass (1024-bit key) header.d=foxmail.com header.i=@foxmail.com header.b=jIHOF79i; arc=none smtp.client-ip=203.205.221.210
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=foxmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=foxmail.com
+	s=arc-20240116; t=1779129304; c=relaxed/simple;
+	bh=BBgdSEmquIQtG+Vd4wr31W7UJ/hyuPfdXKhRmNVBIjQ=;
+	h=Date:From:To:Cc:Subject:Message-Id:In-Reply-To:References:
+	 Mime-Version:Content-Type; b=DhwI6bGfkO6gAtVqlC2LRa7fot2CW09oDUY1xJnEwSYVPxlYq9JeGmg5SJkFh3adbRmuWpJ2aD4skzK0CiQhPXaGORSRQpVo72jQNNuVioCJptmN9WTE+1PM0CBiPC1qIJZQhJqkKca/CLU5ewBl1u021r0xwtDFxymu0jDpebA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=QkgeDcvY; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=foxmail.com header.i=@foxmail.com header.b="jIHOF79i"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foxmail.com;
-	s=s201512; t=1779087741;
-	bh=OGseklYBHMignp5Du1Fid7Y3Tj3Py9np2qy08x2NInI=;
-	h=From:To:Cc:Subject:Date;
-	b=jIHOF79iXNKO7lW9QlW+WASVCn6dMf453a0t4yj7kdtW3vbQ/R8MeuMaZNzg9Da3V
-	 iK5nMZoPi02F3g13NRwdmFsFGCppE25W4eBKMP/yc1qP3dBGv0Ck5zFpmOpAniFUf0
-	 65dy7XjaeKLMQvuWLoAEBgh7qcENcqoSMUwMoVwA=
-Received: from NUC10 ([39.156.73.10])
-	by newxmesmtplogicsvrsza63-0.qq.com (NewEsmtp) with SMTP
-	id 92BC068; Mon, 18 May 2026 15:02:18 +0800
-X-QQ-mid: xmsmtpt1779087738thbmrmk29
-Message-ID: <tencent_270AE22BC7E81D6281019A105796C8E5AE06@qq.com>
-X-QQ-XMAILINFO: Od8VqZhFMB3NauYW+4DxYZzS148YTEKk8PgWCUirDRargu7hcvAUp75tA63ao/
-	 DuSu3fUjqF7wHkyUVQ4svBOFCUav80fwwh0ChcG4uonn2biNnTIJ8B3fJHP096mdIMWFWf46q2go
-	 vWfdQxxSaWYUwsk02izPumJ/RuGgCLDi+ouZqe6cnyAVlsvcepFAFTYxK0CsPXMiJvOijPUDtUSc
-	 1asbdn7Rp2LN6Qky7ShCKAemfjPHhFOTH/ooIqN6ip5WgZ34jCEZixbR3mk9209x1rlx25B3LZCO
-	 ME0XjY+l039dahHu0m1bxYTfgUNyHdq1m7x74PaEn58eJ8zwEmS2nAhK8NXZiZPK+7V1M4CxDKSy
-	 fkSM7plAAl6gDw8syVtqdw6zBYahYvjqOSMxyYO0Zk1MkR8Q0feKbWC+0gwH+xf8Z0a6WZ7QvS5K
-	 0q10EGaYk72nhPonI6vau1AspWVBM4xM3vWMcekxs/9wU/hv6B+Ik+04lDAlw05FJvwm2kcOzm8p
-	 cjVFebP+JRA+JIu+LKkFogYv5B3OHbW8AKfsSAtZbpoRI0Xn5TsjyNEO7BUvOoaAXiZPFh3OJcn1
-	 wBp3/uieH+XF3PvYD/O8L+2B8r+oe2JEf5AmIxZU9KlfEZP7yxouTIq8G29ppBs7PJW175TozGQB
-	 aWuoK2tvvT8NRDGjG2+5FM85EYOcRpBBRBX9yc2cBDsX4459NE6DplLY1gx4x1F1xGvOVuezDdma
-	 0P3IT3lWlwszsxHtGN84IluwPS8qDLgAMGo+N4263uUNxo+R56DyRzZ0TOingGui5o7nGnzQhDgY
-	 j9hOsOf6gsBlu8tqziDSuJH+1nrdh9YjEqa1EEWmoXh9drp24VyF4nEWHdzGtW9eTUr0V4OF99qc
-	 jEQ4Twn2FzPP5qhCEei/Uebrgz3w6RUOpJ1gP7PV398rKedtcJ6iSfheujxsBzsM7SeIqMALABnN
-	 RtKWAjrQpkSznwdnAhX6bLPmVkgEkAdOdlZVLq22fz9piY3Eo7Ut9voPehnR30OtWHy4ucyz0+Go
-	 ZAAUPuGcPHRno+MnyHVnpOY6zZdlYzl6KpjyLo4A==
-X-QQ-XMRINFO: OWPUhxQsoeAVwkVaQIEGSKwwgKCxK/fD5g==
-From: Rong Tao <rtoax@foxmail.com>
-To: Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	linux-efi@vger.kernel.org (open list:EXTENSIBLE FIRMWARE INTERFACE (EFI)),
-	linux-kernel@vger.kernel.org (open list)
-Cc: rongtao@cestc.cn,
-	rtoax@foxmail.com
-Subject: [PATCH] efi: efi.h: Remove extra semicolon
-Date: Mon, 18 May 2026 15:02:08 +0800
-X-OQ-MSGID: <20260518070209.445733-1-rtoax@foxmail.com>
-X-Mailer: git-send-email 2.54.0
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="QkgeDcvY"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 77D9AC2BCB7;
+	Mon, 18 May 2026 18:35:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linux-foundation.org;
+	s=korg; t=1779129303;
+	bh=BBgdSEmquIQtG+Vd4wr31W7UJ/hyuPfdXKhRmNVBIjQ=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+	b=QkgeDcvYx/sBQZg0QJXxqsoGkJ/P/vbR4j0IO1OkYDDt7xuWVngrwN1HfDrrWcAlK
+	 mQ1W/DHxp9TMTTHoxBA+9exvTLN4SMYGwAaCA8FD044WZl7IafDyg01QOye9i2iunN
+	 VIqN+TIBMnXkesp51AJU7oKDIcS697b6GM0eRCqk=
+Date: Mon, 18 May 2026 11:35:02 -0700
+From: Andrew Morton <akpm@linux-foundation.org>
+To: Dmitry Antipov <dmantipov@yandex.ru>
+Cc: Andy Shevchenko <andriy.shevchenko@intel.com>, Charlie Jenkins
+ <thecharlesjenkins@gmail.com>, Paul Walmsley <pjw@kernel.org>, Palmer
+ Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, Alexandre
+ Ghiti <alex@ghiti.fr>, Ard Biesheuvel <ardb@kernel.org>,
+ linux-riscv@lists.infradead.org, linux-efi@vger.kernel.org
+Subject: Re: [PATCH v10 0/8] lib and lib/cmdline enhancements
+Message-Id: <20260518113502.11a2f420d48f79bb7de31c67@linux-foundation.org>
+In-Reply-To: <20260513134407.884033-1-dmantipov@yandex.ru>
+References: <20260513134407.884033-1-dmantipov@yandex.ru>
+X-Mailer: Sylpheed 3.8.0beta1 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 
-From: Rong Tao <rongtao@cestc.cn>
+On Wed, 13 May 2026 16:43:59 +0300 Dmitry Antipov <dmantipov@yandex.ru> wrote:
 
-Remove extra semicolons from comments.
+> This series is a merge of the recently posted [1] and [2]. The first
+> one is intended to adjust '_parse_integer_limit()' and 'memparse()' to
+> not ignore overflows, extend string to 64-bit integer conversion tests,
+> add KUnit-based test for 'memparse()' and fix kernel-doc glitches found
+> in lib/cmdline.c. The second one was originated from RISCV-specific
+> build fixes needed to integrate the former and now aims to provide
+> platform-specific double-word shifts and corresponding KUnit test.
+> 
+> This series was briefly tested on X86, RISCV32, ARM, and MIPS using QEMU.
+> 
+> Getting feedback from RISC-V core maintainers would be very helpful.
+> 
+> Special thanks to Andy Shevchenko, Charlie Jenkins, and Andrew Morton.
 
-Signed-off-by: Rong Tao <rongtao@cestc.cn>
----
- include/linux/efi.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Thanks, I've added this to mm.git's mm-nonmm-unstable (and hence to
+linux-next) for testing.
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 72e76ec54641..ccbc35479684 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -61,7 +61,7 @@ typedef void *efi_handle_t;
- 
- /*
-  * The UEFI spec and EDK2 reference implementation both define EFI_GUID as
-- * struct { u32 a; u16; b; u16 c; u8 d[8]; }; and so the implied alignment
-+ * struct { u32 a; u16 b; u16 c; u8 d[8]; }; and so the implied alignment
-  * is 32 bits not 8 bits like our guid_t. In some cases (i.e., on 32-bit ARM),
-  * this means that firmware services invoked by the kernel may assume that
-  * efi_guid_t* arguments are 32-bit aligned, and use memory accessors that
--- 
-2.54.0
+AI review asked a few questions - please check these out and decide if
+any updates are desirable.
+
+	https://sashiko.dev/#/patchset/20260513134407.884033-1-dmantipov@yandex.ru
+
+Also, please cc linux-kernel on patchsets?  I'm not subscribed to
+linux-riscv or linux-efi so my "check lkml archive to see if I missed
+any emails" trick doesn't work.  linux-kernel's main purpose nowadays
+seems to be "the place to archive patchsets".
 
