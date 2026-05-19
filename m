@@ -1,36 +1,35 @@
-Received: from forward201a.mail.yandex.net (forward201a.mail.yandex.net [178.154.239.92])
+Received: from forward205a.mail.yandex.net (forward205a.mail.yandex.net [178.154.239.88])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D54B226056C;
-	Tue, 19 May 2026 17:28:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.92
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A0763DB306;
+	Tue, 19 May 2026 17:30:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.88
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779211733; cv=none; b=F5M0XjpylFcKyVOXuGeVcNM/tE2zFVOlKfG16+Bi0GaqP+v7+9tJifnzXSCmFmxrAaU2waUr9FhKVVnNWBvMeIHw7R7HlVTjwhDu7RFGpo3B2qmTxfn5m547DBZDmSgZZ12J+R4sIMCCJhDB3yeoX1Fl5oQ+RYCOreYMdzk6pRs=
+	t=1779211852; cv=none; b=l+V2F5pm0nps93aUvKNbfKiFr7CJasRVR0AvJPgG8sJcRV21KENC/u5P+SEF5iExfDusuwcsOVBtNxBhLVMk64SN18hqcqTFuA6YnS6aMVTCw2z7NuWFEAOcJH93YESPIyWbsMLt2P1hJXGj23i+BDVr1wvWo63Xi0i/rA3AVbc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779211733; c=relaxed/simple;
-	bh=5unapVmx2VbqB5nn/Gbx4ZyoZw7Grw7YupbOT+ZcRTE=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=gq0Rj+0wD+qaE6TcV4VTIfM8/vRrs0YkP+NGd6HFXQhf/y/OGXwUEVptlcuDQ5lZlNGLY5w8KoCnbbZYcbnDdVJRUF1fA558OQNJHXf94IyisGYRt8rtxlWwssnBgENIKlRseoswe1bXk9gRNYnJm7pw13m7/tUVXOCVVZxr2FE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru; spf=pass smtp.mailfrom=yandex.ru; dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b=dUTNcOH1; arc=none smtp.client-ip=178.154.239.92
+	s=arc-20240116; t=1779211852; c=relaxed/simple;
+	bh=ChjV+RX21wsTHhXk41HxPe1AgJy7mUy5Sua/9oHCIB8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=CHROjZScnFWP22sanfj4VCXAUS11wpq78IEvp+p/zplYrKFWPM9tL1m2mYoHNSDt7i28J/iYVkmh7uLRIDtDmW1DP21+8rkvx1M4yXz21Ih1UT+kL4RiGTAiVrDzLM8kzr+9wzMT0tqUv2RLjlPpxemvdWSDb6ghZCEW96JGz38=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru; spf=pass smtp.mailfrom=yandex.ru; dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b=Eb1W3Qdo; arc=none smtp.client-ip=178.154.239.88
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=yandex.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b="dUTNcOH1"
-Received: from forward101a.mail.yandex.net (forward101a.mail.yandex.net [IPv6:2a02:6b8:c0e:500:1:45:d181:d101])
-	by forward201a.mail.yandex.net (Yandex) with ESMTPS id CEC58838C7;
-	Tue, 19 May 2026 20:23:14 +0300 (MSK)
+	dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b="Eb1W3Qdo"
+Received: from forward100a.mail.yandex.net (forward100a.mail.yandex.net [IPv6:2a02:6b8:c0e:500:1:45:d181:d100])
+	by forward205a.mail.yandex.net (Yandex) with ESMTPS id 09CE4C507D;
+	Tue, 19 May 2026 20:23:13 +0300 (MSK)
 Received: from mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net [IPv6:2a02:6b8:c0c:190d:0:640:bab5:0])
-	by forward101a.mail.yandex.net (Yandex) with ESMTPS id B238E80C08;
-	Tue, 19 May 2026 20:23:06 +0300 (MSK)
-Received: by mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net (smtp) with ESMTPSA id 0NVul40SU0U0-O5TK05PT;
-	Tue, 19 May 2026 20:23:05 +0300
+	by forward100a.mail.yandex.net (Yandex) with ESMTPS id AEC44C0169;
+	Tue, 19 May 2026 20:23:04 +0300 (MSK)
+Received: by mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net (smtp) with ESMTPSA id 0NVul40SU0U0-fzsC5bFj;
+	Tue, 19 May 2026 20:23:03 +0300
 X-Yandex-Fwd: 1
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail;
-	t=1779211385; bh=TBxNdS4HSxmdP1AXz5UGyX20Ie/mR2EERiHh7P+Kz6A=;
-	h=Message-ID:Date:In-Reply-To:Cc:Subject:References:To:From;
-	b=dUTNcOH1uMISJWvdP8WrZXM0GUPpIDaj0dDk6sINUnI6xIUmkCKSzMRtiSCChtyE+
-	 1YUplqdvxbK/69WsRNiwTMeq0muVSL7YWuI8rUc2ty94GCU78F1T99eA8PPpffxGJd
-	 K0QgDYJtKkZOWZ/Ygy+xtnGD8YkrON6LSeAAFZ4g=
+	t=1779211383; bh=7c+9bkOD0NfFHWVEjJO5bWET/2NkPh9vtXTbM/GJVa0=;
+	h=Message-ID:Date:Cc:Subject:To:From;
+	b=Eb1W3Qdo5DuQUgcIIMYkjGapyo9UIgOGw6gYQY4cQm0/1krvxkzC8K2Qx3gJNaN2g
+	 thGnc3BY7nmen/bFnS2hs71Y+X6fdCjc7MYyVVs6wXbedziBrL2ysQSJ5o8QpBzA0b
+	 374teJ9aYYojzcLf/R/w/0wbRMeB6iFB3mtDhDlA=
 Authentication-Results: mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net; dkim=pass header.i=@yandex.ru
 From: Dmitry Antipov <dmantipov@yandex.ru>
 To: Andrew Morton <akpm@linux-foundation.org>
@@ -45,12 +44,10 @@ Cc: Andy Shevchenko <andriy.shevchenko@intel.com>,
 	linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	Dmitry Antipov <dmantipov@yandex.ru>
-Subject: [PATCH v11 1/8] lib: fix _parse_integer_limit() to handle overflow
-Date: Tue, 19 May 2026 20:22:52 +0300
-Message-ID: <20260519172259.908980-2-dmantipov@yandex.ru>
+Subject: [PATCH v11 0/8] lib and lib/cmdline enhancements
+Date: Tue, 19 May 2026 20:22:51 +0300
+Message-ID: <20260519172259.908980-1-dmantipov@yandex.ru>
 X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20260519172259.908980-1-dmantipov@yandex.ru>
-References: <20260519172259.908980-1-dmantipov@yandex.ru>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -59,99 +56,55 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-In '_parse_integer_limit()', adjust native integer arithmetic
-with near-to-overflow branch where 'check_mul_overflow()' and
-'check_add_overflow()' are used to check whether an intermediate
-result goes out of range, and denote such a case with ULLONG_MAX,
-thus making the function more similar to standard C library's
-'strtoull()'. Adjust comment to kernel-doc style as well.
+This series is a merge of the recently posted [1] and [2]. The first
+one is intended to adjust '_parse_integer_limit()' and 'memparse()' to
+not ignore overflows, extend string to 64-bit integer conversion tests,
+add KUnit-based test for 'memparse()' and fix kernel-doc glitches found
+in lib/cmdline.c. The second one was originated from RISCV-specific
+build fixes needed to integrate the former and now aims to provide
+platform-specific double-word shifts and corresponding KUnit test.
 
-Reviewed-by: Andy Shevchenko <andriy.shevchenko@intel.com>
-Signed-off-by: Dmitry Antipov <dmantipov@yandex.ru>
----
-v9 and upwards: bump version to match the series
-v8: do not use explicit temporary in check_xxx_overflow()
-    calls and handle overflow flag using separate variable
-v7: drop redundant check against ULLONG_MAX and restore
-    original comment
-v6: more compact for-loop and minor style adjustments again
-v5: minor brace style adjustment
-v4: restore plain integer arithmetic and use check_xxx_overflow()
-    on near-to-overflow branch only
-v3: adjust commit message and comments as suggested by Andy
-v2: initial version to join the series
----
- lib/kstrtox.c | 37 ++++++++++++++++++++++---------------
- 1 file changed, 22 insertions(+), 15 deletions(-)
+This series was briefly tested on X86, RISCV32, ARM, and MIPS using QEMU,
+and compile-tested for LoongArch32 as well.
 
-diff --git a/lib/kstrtox.c b/lib/kstrtox.c
-index 97be2a39f537..edc4eb7c1bca 100644
---- a/lib/kstrtox.c
-+++ b/lib/kstrtox.c
-@@ -39,25 +39,30 @@ const char *_parse_integer_fixup_radix(const char *s, unsigned int *base)
- 	return s;
- }
- 
--/*
-- * Convert non-negative integer string representation in explicitly given radix
-- * to an integer. A maximum of max_chars characters will be converted.
-+/**
-+ * _parse_integer_limit - Convert integer string representation to an integer
-+ * @s: Integer string representation
-+ * @base: Radix
-+ * @p: Where to store result
-+ * @max_chars: Maximum amount of characters to convert
-+ *
-+ * Convert non-negative integer string representation in explicitly given
-+ * radix to an integer. If overflow occurs, value at @p is set to ULLONG_MAX.
-  *
-- * Return number of characters consumed maybe or-ed with overflow bit.
-- * If overflow occurs, result integer (incorrect) is still returned.
-+ * This function is the workhorse of other string conversion functions and it
-+ * is discouraged to use it explicitly. Consider kstrto*() family instead.
-  *
-- * Don't you dare use this function.
-+ * Return: Number of characters consumed, maybe ORed with overflow bit
-  */
- noinline
- unsigned int _parse_integer_limit(const char *s, unsigned int base, unsigned long long *p,
- 				  size_t max_chars)
- {
-+	unsigned int rv, overflow = 0;
- 	unsigned long long res;
--	unsigned int rv;
- 
- 	res = 0;
--	rv = 0;
--	while (max_chars--) {
-+	for (rv = 0; rv < max_chars; rv++, s++) {
- 		unsigned int c = *s;
- 		unsigned int lc = _tolower(c);
- 		unsigned int val;
-@@ -76,15 +81,17 @@ unsigned int _parse_integer_limit(const char *s, unsigned int base, unsigned lon
- 		 * it in the max base we support (16)
- 		 */
- 		if (unlikely(res & (~0ull << 60))) {
--			if (res > div_u64(ULLONG_MAX - val, base))
--				rv |= KSTRTOX_OVERFLOW;
-+			if (check_mul_overflow(res, base, &res) ||
-+			    check_add_overflow(res, val, &res)) {
-+				res = ULLONG_MAX;
-+				overflow = KSTRTOX_OVERFLOW;
-+			}
-+		} else {
-+			res = res * base + val;
- 		}
--		res = res * base + val;
--		rv++;
--		s++;
- 	}
- 	*p = res;
--	return rv;
-+	return rv | overflow;
- }
- 
- noinline
+Getting feedback from RISCV core maintainers would be very helpful.
+
+Special thanks to Andy Shevchenko, Charlie Jenkins, and Andrew Morton.
+
+[1] https://lore.kernel.org/linux-riscv/20260403103338.1122415-1-dmantipov@yandex.ru
+[2] https://lore.kernel.org/linux-riscv/20260427090105.705529-1-dmantipov@yandex.ru
+
+Dmitry Antipov (8):
+  lib: fix _parse_integer_limit() to handle overflow
+  lib: fix memparse() to handle overflow
+  lib: add more string to 64-bit integer conversion overflow tests
+  lib/cmdline_kunit: add test case for memparse()
+  lib/cmdline: adjust a few comments to fix kernel-doc -Wreturn warnings
+  riscv: add platform-specific double word shifts for riscv32
+  lib: kunit: add tests for __ashldi3(), __ashrdi3(), and __lshrdi3()
+  riscv: fix building compressed EFI image
+
+ arch/riscv/Kconfig                      |   3 -
+ arch/riscv/include/asm/asm-prototypes.h |   4 +
+ arch/riscv/kernel/image-vars.h          |   9 ++
+ arch/riscv/lib/Makefile                 |   1 +
+ arch/riscv/lib/ashldi3.S                |  36 +++++
+ arch/riscv/lib/ashrdi3.S                |  36 +++++
+ arch/riscv/lib/lshrdi3.S                |  36 +++++
+ drivers/firmware/efi/libstub/Makefile   |   3 +-
+ lib/Kconfig.debug                       |  10 ++
+ lib/cmdline.c                           |  30 ++--
+ lib/kstrtox.c                           |  37 +++--
+ lib/test-kstrtox.c                      |   6 +
+ lib/tests/Makefile                      |   1 +
+ lib/tests/cmdline_kunit.c               |  56 ++++++++
+ lib/tests/shdi3_kunit.c                 | 175 ++++++++++++++++++++++++
+ 15 files changed, 414 insertions(+), 29 deletions(-)
+ create mode 100644 arch/riscv/lib/ashldi3.S
+ create mode 100644 arch/riscv/lib/ashrdi3.S
+ create mode 100644 arch/riscv/lib/lshrdi3.S
+ create mode 100644 lib/tests/shdi3_kunit.c
+
 -- 
 2.54.0
 
