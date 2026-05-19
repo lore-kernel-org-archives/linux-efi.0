@@ -1,62 +1,62 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DB6A3EA970
-	for <linux-efi@vger.kernel.org>; Tue, 19 May 2026 15:22:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A5D19408006;
+	Tue, 19 May 2026 15:24:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779204143; cv=none; b=P/pQqUrasEXPAlr2kcD5KASMXJVf6QTC36Sxmx6ATrC+C7FDNsBsRCUSRT6dzauQGGzxpq2qgusgkV8dvLvNlThqubqLTLsmtecNIF2sJ51rXAf5/KyRQ5HuwUhzaaXQg4w1LvQferBmY83/kgg1XfbZdR/UhwqoLcBnukSspUc=
+	t=1779204292; cv=none; b=pqjLMDpJ5FmZyzbfTWRS/BJlqe5+e7ASu94RbLQr8EqRzk2wPVZGs0GK0OrQAFngTcEvqRy5IN624U/xA7W4o+llsd7tVf860hFywqDqscGSh8mGJ9PO2AgY4TrmQcSlQ9NXD7NXj6hoZZUX+KVgrr5qslaWq2Rm+XhM0ogJzRU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779204143; c=relaxed/simple;
-	bh=5VrOl2Y2oUsSYv+vFwkchuFKwthFO7I3gF2dpNwFzy8=;
+	s=arc-20240116; t=1779204292; c=relaxed/simple;
+	bh=YnvezWKZHJHKS2rlvWwaBf9roZI+rdXbINTjbGmL624=;
 	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=Hco9WrB6dWUZCNQ+vwifXXpqYHQQtHF63/FzYoWVItRo9PT7m9zEiF5P7phNlyTs/E6h48ggvLJAS5g4pGyyrWkDzRDkynRIQEf9qiRHZEUOh9X3DtSmabRcbzXci5N0AkGbvQ6fVjpfRXPf4gtg54fFGh3eUmM4YQ69CYw5RQ0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=StC8dFRU; arc=none smtp.client-ip=10.30.226.201
+	 Subject:Content-Type; b=nUp2zIh6XTbnGkiaxzpCovKnoi5smGyB/r9zxlvizm4OzJfad0Rp4JUhp5GqfU+Zg+3ZXGw6Vx3o1pfg28ofAobyl2J6lohe6BBHv8HXySyXQAIFi7XRA47jZjmiW2k9JwE+LMMSGZvtoxurzY0blX7roCySs7c2Mz7EZXxW/kQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Bafaitpp; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="StC8dFRU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0D4D4C2BCC6;
-	Tue, 19 May 2026 15:22:22 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Bafaitpp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4E062C2BCC6;
+	Tue, 19 May 2026 15:24:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1779204143;
-	bh=5VrOl2Y2oUsSYv+vFwkchuFKwthFO7I3gF2dpNwFzy8=;
+	s=k20201202; t=1779204292;
+	bh=YnvezWKZHJHKS2rlvWwaBf9roZI+rdXbINTjbGmL624=;
 	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=StC8dFRUzzXpNOavSawNy/OyAuX6qdJQfA6PI1LeZdFDgom9FhAfUasU04Aropq8u
-	 x1bY+/zwCkdkErcDZ35sn/XIVZBBMiGI5Md7cMA4r1AuXIEEUWOnaEdzt3vcOYzjO/
-	 XPwtAJxI0ClJJQIzvXYittRgnR8Af3ahCd016aKJzRAvJCtfId43qiW1/1xokJDhHc
-	 A/Me0yWGUnoGy25ZWBX+aSGy18BqJGpqDzH7vibviTKdBHepy5lcput+60xbT0rp89
-	 XaEEcLmLRgTUUyAVE/41kBze1hi+wLm9eyHQAdSOFcC73G3rf4kS3Me5Cr01L8OTPd
-	 STqw9LzG0jrIw==
+	b=Bafaitppo61aMU9XTXBjibM7oYBdi+30S8e+3898gDTzrm8upxuSKbcA7zfGSK5fl
+	 2lZ5mUVRRyf7u0B1x+23nBoUce15MxjVMSq4fhKqGx4mZi7Qz0bv7HWT0Ju01tzudd
+	 NEQ2rxfRTGsv72KNaSma6fKoIpyT3xpgHfFrV60cTPdiJ4iH2YhFcvtA2bUy5KYz6A
+	 J/oVKe1vQ852LspNIqL5I4Oqbzh1xzSWhIS0VyRddkt/097wPEeAMSWTfEOna08xCU
+	 iqPMDo1fksau3hm4bSRrEvWmyhHpNP0QPM/tYpQg0UQYRd8fGuAzmfMka41ei4Bh0o
+	 m3nLBaGnZR7pQ==
 Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id 3EA6AF4007C;
-	Tue, 19 May 2026 11:22:22 -0400 (EDT)
+	by mailfauth.phl.internal (Postfix) with ESMTP id 8413AF4007C;
+	Tue, 19 May 2026 11:24:51 -0400 (EDT)
 Received: from phl-imap-05 ([10.202.2.95])
-  by phl-compute-01.internal (MEProxy); Tue, 19 May 2026 11:22:22 -0400
-X-ME-Sender: <xms:LoAMag38IDV-vBLzPZg-M2ChW8_zkunqK_xZ_bEPiFvQRf-Dobuj4w>
-    <xme:LoAMal7TCb-B8f2LNnzHCiMy72WdEEf7SMT6Nh49pNIjuBfoPCYSdt0zRLVTl1S2y
-    tPBoQv77PJlM1eZyPua14Tt1M8QWOGP2JGqtBwje7t2pqA6cmwRFdM>
+  by phl-compute-01.internal (MEProxy); Tue, 19 May 2026 11:24:51 -0400
+X-ME-Sender: <xms:w4AMapeBAZJE9xSNN0_ikLhMKJis6GoeVaB8tYu_oZ0pdtVzMrizkg>
+    <xme:w4AMaiCr1Ml_5y4wnkZ8pnI8pRBg9AF3irBEI5BfpRFZcCY9y0eCMaQ7TUrF-xx_E
+    OqmAJi6D8vP7sLZlaj_ilZt19GGtUWwL7eTf4qC-7CKgsC4_skzkw>
 X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgddugedvuddtucetufdoteggodetrf
     dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
     rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
-    gurhepofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrugcu
+    gurhepofggfffhvfevkfgjfhfutgfgsehtqhertdertdejnecuhfhrohhmpedftehrugcu
     uehivghshhgvuhhvvghlfdcuoegrrhgusgeskhgvrhhnvghlrdhorhhgqeenucggtffrrg
-    htthgvrhhnpedvueehiedtvedtleekuddutefgffdtleetfeetveejveejieehfefhjeei
-    jeefudenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    htthgvrhhnpeeuteeiudeigeekjedvheduieehteetgfdtuefghfejgffhfedtleehvdeh
+    fffhvdenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
     grrhguodhmvghsmhhtphgruhhthhhpvghrshhonhgrlhhithihqdduieejtdehtddtjeel
     qdeffedvudeigeduhedqrghruggspeepkhgvrhhnvghlrdhorhhgseifohhrkhhofhgrrh
     gurdgtohhmpdhnsggprhgtphhtthhopeehpdhmohguvgepshhmthhpohhuthdprhgtphht
-    thhopegrrhgusgdoghhithesghhoohhglhgvrdgtohhmpdhrtghpthhtohepvggsihhggh
-    gvrhhssehkvghrnhgvlhdrohhrghdprhgtphhtthhopehkvggvsheskhgvrhhnvghlrdho
-    rhhgpdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnhgvlhdrohhrgh
-    dprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhr
-    gh
-X-ME-Proxy: <xmx:LoAMatAjDBRjxYCnEjN2HTP0H-3RTcGhttAPMfwmPo-s0Jk8oXIC7Q>
-    <xmx:LoAMakd5FNmfWjkYm61oeGBKuESDQOvx4krhJ8QCzQrkBATstfQDTA>
-    <xmx:LoAMakK1WoiOrlUbVjpN_NswdGvFtonWUE6GH2ThyPtFlqkQeuvlHg>
-    <xmx:LoAMan26wdkynmhokNg6IdX-A753STHKjISeIL8mBeTQJsIadOcl-w>
-    <xmx:LoAMaugPCF_yqLqx4OdbtwgC_arlx8SboZBOGtpWOiTcnPoTrn0StTPS>
+    thhopegrrhgusgdoghhithesghhoohhglhgvrdgtohhmpdhrtghpthhtoheprhgrfhgrvg
+    hlrdhjrdifhihsohgtkhhisehinhhtvghlrdgtohhmpdhrtghpthhtoheprhgrfhgrvghl
+    sehkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdgrtghpihesvhhgvghrrd
+    hkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdgvfhhisehvghgvrhdrkhgv
+    rhhnvghlrdhorhhg
+X-ME-Proxy: <xmx:w4AMavqUOj4SO2B9H6Jb4JcEaH92x4XDWLuQyOtUkdnRQhlYw65XUw>
+    <xmx:w4AMailkPkcf9vCiarLZADkZAGo64SpgjyrqK64N4A0sHjjbnBJVEw>
+    <xmx:w4AManzDkp2VrdO0gSF6WktGUU9Sn9OYujo3omRtzJaAVhT7J90y2g>
+    <xmx:w4AMai_l36gPLI8hAmI_42I9ahKKSFb8qMDrvKyo_-TDorMqTGXSpQ>
+    <xmx:w4AMarIpVGFo9dp-QephAgUMyobyyyq9X1_1xj78L2GqoyyfICjrLgBC>
 Feedback-ID: ice86485a:Fastmail
 Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 19FEC182007A; Tue, 19 May 2026 11:22:21 -0400 (EDT)
+	id 69C67182007A; Tue, 19 May 2026 11:24:51 -0400 (EDT)
 X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -64,87 +64,61 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Tue, 19 May 2026 17:22:01 +0200
+Date: Tue, 19 May 2026 17:24:31 +0200
 From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Ard Biesheuvel" <ardb+git@google.com>, linux-kernel@vger.kernel.org
-Cc: linux-efi@vger.kernel.org, "Kees Cook" <kees@kernel.org>,
- "Eric Biggers" <ebiggers@kernel.org>
-Message-Id: <6467020e-db1e-415b-9fc2-25f13760c875@app.fastmail.com>
-In-Reply-To: <20260501170156.2833364-2-ardb+git@google.com>
-References: <20260501170156.2833364-2-ardb+git@google.com>
-Subject: Re: [PATCH] lkdtm: Add case to provoke a crash in EFI runtime services
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+To: "Rafael J . Wysocki" <rafael@kernel.org>,
+ "Ard Biesheuvel" <ardb+git@google.com>
+Cc: linux-efi@vger.kernel.org, "Linux ACPI" <linux-acpi@vger.kernel.org>,
+ "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
+Message-Id: <8a5e09e2-7df3-4c5f-92be-309628dfdba7@app.fastmail.com>
+In-Reply-To: 
+ <CAJZ5v0h5NvLK3Fs9Fw+GoKCs82SXP1_oRggiG_aH3wiuMkdnJA@mail.gmail.com>
+References: <20260519082316.1959158-2-ardb+git@google.com>
+ <CAJZ5v0h5NvLK3Fs9Fw+GoKCs82SXP1_oRggiG_aH3wiuMkdnJA@mail.gmail.com>
+Subject: Re: [PATCH] efi: Allocate runtime workqueue before ACPI init
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 1 May 2026, at 19:01, Ard Biesheuvel wrote:
-> From: Ard Biesheuvel <ardb@kernel.org>
+
+
+On Tue, 19 May 2026, at 16:12, Rafael J. Wysocki wrote:
+> On Tue, May 19, 2026 at 10:23=E2=80=AFAM Ard Biesheuvel <ardb+git@goog=
+le.com> wrote:
+>>
+>> From: Ard Biesheuvel <ardb@kernel.org>
+>>
+>> Since commit
+>>
+>>   5894cf571e14 ("acpi/prmt: Use EFI runtime sandbox to invoke PRM han=
+dlers")
+>>
+>> ACPI PRM calls are delegated to a workqueue which runs in a kernel
+>> thread, making it easier to detect and mitigate faulting memory acces=
+ses
+>> performed by the firmware.
+>>
+>> Rafael reports that such PRM accesses may occur before efisubsys_init=
+()
+>> executes, which is where the workqueue is allocated, leading to NULL
+>> pointer dereferences. Since acpi_init() [which triggers the early PRM
+>> accesses] executes as a subsys_initcall() as well, and has its own
+>> dependencies that may be sensitive to initcall ordering, deferring
+>> acpi_init() is not an option.
+>>
+>> So instead, split off the workqueue allocation into its own postcore
+>> initcall, as this is the only missing piece to allow EFI runtime calls
+>> to be made. This ensures that EFI runtime call (including PRM calls) =
+are
+>> accessible to all code running at subsys_initcall() level.
+>>
+>> Fixes: 5894cf571e14 ("acpi/prmt: Use EFI runtime sandbox to invoke PR=
+M handlers")
+>> Reported-by: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
+>> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 >
-> Add a lkdtm test case that triggers a fault during the execution of a
-> EFI runtime service by passing a read-only variable as a by-ref argument
-> that the firmware is supposed to update.
+> This should work AFAICS, so
 >
-> This is useful for testing the graceful handling of faults/exception in
-> EFI platform firmware, which is implemented on x86 and arm64.
->
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-> ---
->  drivers/misc/lkdtm/bugs.c | 27 +++++++++++++++++++++++++++
->  1 file changed, 27 insertions(+)
+> Reviewed-by: Rafael J. Wysocki (Intel) <rafael@kernel.org>
 >
 
-Ping?
-
-> diff --git a/drivers/misc/lkdtm/bugs.c b/drivers/misc/lkdtm/bugs.c
-> index e0098f314570..3eca2ef64aff 100644
-> --- a/drivers/misc/lkdtm/bugs.c
-> +++ b/drivers/misc/lkdtm/bugs.c
-> @@ -7,6 +7,7 @@
->   */
->  #include "lkdtm.h"
->  #include <linux/cpu.h>
-> +#include <linux/efi.h>
->  #include <linux/list.h>
->  #include <linux/hrtimer.h>
->  #include <linux/sched.h>
-> @@ -817,6 +818,29 @@ static noinline void lkdtm_CORRUPT_PAC(void)
->  #endif
->  }
-> 
-> +static void __maybe_unused lkdtm_EFI_RUNTIME_CRASH(void)
-> +{
-> +	static unsigned long size __ro_after_init = sizeof(efi_char16_t);
-> +	efi_status_t status;
-> +
-> +	if (!efi.get_next_variable ||
-> +	    !efi_enabled(EFI_RUNTIME_SERVICES) ||
-> +	    !efi_rt_services_supported(EFI_RT_SUPPORTED_GET_NEXT_VARIABLE_NAME)) {
-> +		pr_err("FAIL: EFI GetNextVariableName() is not available\n");
-> +		return;
-> +	}
-> +
-> +	/*
-> +	 * Provoke a fault by asking the firmware to write to a read-only
-> +	 * variable.
-> +	 */
-> +	status = efi.get_next_variable(&size, L"", &(efi_guid_t){});
-> +
-> +	if (status != EFI_ABORTED || efi_enabled(EFI_RUNTIME_SERVICES))
-> +		pr_err("FAIL: EFI GetNextVariable() did not abort (%#lx)\n",
-> +		       status);
-> +}
-> +
->  static struct crashtype crashtypes[] = {
->  	CRASHTYPE(PANIC),
->  	CRASHTYPE(PANIC_STOP_IRQOFF),
-> @@ -850,6 +874,9 @@ static struct crashtype crashtypes[] = {
->  	CRASHTYPE(UNSET_SMEP),
->  	CRASHTYPE(DOUBLE_FAULT),
->  	CRASHTYPE(CORRUPT_PAC),
-> +#ifdef CONFIG_EFI
-> +	CRASHTYPE(EFI_RUNTIME_CRASH),
-> +#endif
->  };
-> 
->  struct crashtype_category bugs_crashtypes = {
-> -- 
-> 2.54.0.545.g6539524ca2-goog
+OK, I'll queue this up.
