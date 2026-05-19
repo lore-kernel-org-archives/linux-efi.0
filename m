@@ -1,36 +1,36 @@
-Received: from forward203d.mail.yandex.net (forward203d.mail.yandex.net [178.154.239.218])
+Received: from forward201a.mail.yandex.net (forward201a.mail.yandex.net [178.154.239.92])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54181408008;
-	Tue, 19 May 2026 17:23:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.218
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D54B226056C;
+	Tue, 19 May 2026 17:28:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.92
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779211413; cv=none; b=LsVPE/CO1Oj8+WRUq+FI6NN97IYYzKyiU5AzelNd5Mg1n7V6XzC0aMWKv7vo6bGhLRhF3/8aKhaQB5WxnHTbqeKQKrk3pigFjA9BavaPTEsuXQS5mJFzDfqucGD0Li8k5YQb0EEJtPsXlNIAuJQ0nwzzAxlxIcStPLDWWZnQTD0=
+	t=1779211733; cv=none; b=F5M0XjpylFcKyVOXuGeVcNM/tE2zFVOlKfG16+Bi0GaqP+v7+9tJifnzXSCmFmxrAaU2waUr9FhKVVnNWBvMeIHw7R7HlVTjwhDu7RFGpo3B2qmTxfn5m547DBZDmSgZZ12J+R4sIMCCJhDB3yeoX1Fl5oQ+RYCOreYMdzk6pRs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779211413; c=relaxed/simple;
-	bh=oFBnyIxrDyT0KKeVfzBdBq8Ns789hhv/2FdHmuqflJU=;
+	s=arc-20240116; t=1779211733; c=relaxed/simple;
+	bh=5unapVmx2VbqB5nn/Gbx4ZyoZw7Grw7YupbOT+ZcRTE=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=loTI4lcHGQl1Ok8kBFdVGoT5cCZazKiyJyB5Jbou9o2oL8hvER5DZc+NtPkmy/uDYliF0ddR0xslzpSTyQM8rWNveHYYlyGpuXJ+XwD8S2jwUY6Sy5GJilMXikiI1o0MOJmc77NaxnDnNPPGwaSN5H562+Ts/MFZ896exYwE944=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru; spf=pass smtp.mailfrom=yandex.ru; dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b=OXQq27gJ; arc=none smtp.client-ip=178.154.239.218
+	 MIME-Version; b=gq0Rj+0wD+qaE6TcV4VTIfM8/vRrs0YkP+NGd6HFXQhf/y/OGXwUEVptlcuDQ5lZlNGLY5w8KoCnbbZYcbnDdVJRUF1fA558OQNJHXf94IyisGYRt8rtxlWwssnBgENIKlRseoswe1bXk9gRNYnJm7pw13m7/tUVXOCVVZxr2FE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru; spf=pass smtp.mailfrom=yandex.ru; dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b=dUTNcOH1; arc=none smtp.client-ip=178.154.239.92
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex.ru
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=yandex.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b="OXQq27gJ"
-Received: from forward103d.mail.yandex.net (forward103d.mail.yandex.net [IPv6:2a02:6b8:c41:1300:1:45:d181:d103])
-	by forward203d.mail.yandex.net (Yandex) with ESMTPS id 5BAAC846CA;
-	Tue, 19 May 2026 20:23:23 +0300 (MSK)
-Received: from mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net [IPv6:2a02:6b8:c0c:190d:0:640:bab5:0])
-	by forward103d.mail.yandex.net (Yandex) with ESMTPS id C4C96C006C;
+	dkim=pass (1024-bit key) header.d=yandex.ru header.i=@yandex.ru header.b="dUTNcOH1"
+Received: from forward101a.mail.yandex.net (forward101a.mail.yandex.net [IPv6:2a02:6b8:c0e:500:1:45:d181:d101])
+	by forward201a.mail.yandex.net (Yandex) with ESMTPS id CEC58838C7;
 	Tue, 19 May 2026 20:23:14 +0300 (MSK)
-Received: by mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net (smtp) with ESMTPSA id 0NVul40SU0U0-VgL9yf6V;
-	Tue, 19 May 2026 20:23:13 +0300
+Received: from mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net [IPv6:2a02:6b8:c0c:190d:0:640:bab5:0])
+	by forward101a.mail.yandex.net (Yandex) with ESMTPS id B238E80C08;
+	Tue, 19 May 2026 20:23:06 +0300 (MSK)
+Received: by mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net (smtp) with ESMTPSA id 0NVul40SU0U0-O5TK05PT;
+	Tue, 19 May 2026 20:23:05 +0300
 X-Yandex-Fwd: 1
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail;
-	t=1779211394; bh=xzG4XWRWYOhW+VDKKOYbDyFIDHXX/FS9o4Tjn79fogA=;
+	t=1779211385; bh=TBxNdS4HSxmdP1AXz5UGyX20Ie/mR2EERiHh7P+Kz6A=;
 	h=Message-ID:Date:In-Reply-To:Cc:Subject:References:To:From;
-	b=OXQq27gJ8UHBNAaXysC+DXwjIAc8+m6o3nLIUj7YpGKCSO1L/lZY++ZYhjtVHS5vf
-	 oRmrKhgLJbl4WwD6uuKjMuAP2uurxAaZE9SH5LwK9EGbLWPpMl+v5Xx2RBFo7yboZE
-	 /d+pDTXRsGfWRSZsb++7VsiouP4ItZGuF+UlLZ+Q=
+	b=dUTNcOH1uMISJWvdP8WrZXM0GUPpIDaj0dDk6sINUnI6xIUmkCKSzMRtiSCChtyE+
+	 1YUplqdvxbK/69WsRNiwTMeq0muVSL7YWuI8rUc2ty94GCU78F1T99eA8PPpffxGJd
+	 K0QgDYJtKkZOWZ/Ygy+xtnGD8YkrON6LSeAAFZ4g=
 Authentication-Results: mail-nwsmtp-smtp-production-main-92.iva.yp-c.yandex.net; dkim=pass header.i=@yandex.ru
 From: Dmitry Antipov <dmantipov@yandex.ru>
 To: Andrew Morton <akpm@linux-foundation.org>
@@ -45,9 +45,9 @@ Cc: Andy Shevchenko <andriy.shevchenko@intel.com>,
 	linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	Dmitry Antipov <dmantipov@yandex.ru>
-Subject: [PATCH v11 7/8] lib: kunit: add tests for __ashldi3(), __ashrdi3(), and __lshrdi3()
-Date: Tue, 19 May 2026 20:22:58 +0300
-Message-ID: <20260519172259.908980-8-dmantipov@yandex.ru>
+Subject: [PATCH v11 1/8] lib: fix _parse_integer_limit() to handle overflow
+Date: Tue, 19 May 2026 20:22:52 +0300
+Message-ID: <20260519172259.908980-2-dmantipov@yandex.ru>
 X-Mailer: git-send-email 2.54.0
 In-Reply-To: <20260519172259.908980-1-dmantipov@yandex.ru>
 References: <20260519172259.908980-1-dmantipov@yandex.ru>
@@ -59,243 +59,99 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add KUnit tests for '__ashldi3()', '__ashrdi3()', and '__lshrdi3()'
-helper functions used to implement 64-bit arithmetic shift left,
-arithmetic shift right and logical shift right, respectively,
-on a 32-bit CPUs.
-
-Tested with 'qemu-system-riscv32 -M virt' and 'qemu-system-arm -M virt'.
+In '_parse_integer_limit()', adjust native integer arithmetic
+with near-to-overflow branch where 'check_mul_overflow()' and
+'check_add_overflow()' are used to check whether an intermediate
+result goes out of range, and denote such a case with ULLONG_MAX,
+thus making the function more similar to standard C library's
+'strtoull()'. Adjust comment to kernel-doc style as well.
 
 Reviewed-by: Andy Shevchenko <andriy.shevchenko@intel.com>
-Tested-by: Charlie Jenkins <thecharlesjenkins@gmail.com>
-Assisted-by: Gemini:gemini-3.1-pro-preview sashiko
 Signed-off-by: Dmitry Antipov <dmantipov@yandex.ru>
 ---
-v11: explicitly depends on arm/xtensa/microblaze or 32-bit riscv/sparc (Sashiko)
-v4-v10: bump version to match the series
-v3: more tests by Charlie Jenkins
-v2: include test-specific headers rather than generic linux/kernel.h
+v9 and upwards: bump version to match the series
+v8: do not use explicit temporary in check_xxx_overflow()
+    calls and handle overflow flag using separate variable
+v7: drop redundant check against ULLONG_MAX and restore
+    original comment
+v6: more compact for-loop and minor style adjustments again
+v5: minor brace style adjustment
+v4: restore plain integer arithmetic and use check_xxx_overflow()
+    on near-to-overflow branch only
+v3: adjust commit message and comments as suggested by Andy
+v2: initial version to join the series
 ---
- lib/Kconfig.debug       |  10 +++
- lib/tests/Makefile      |   1 +
- lib/tests/shdi3_kunit.c | 175 ++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 186 insertions(+)
- create mode 100644 lib/tests/shdi3_kunit.c
+ lib/kstrtox.c | 37 ++++++++++++++++++++++---------------
+ 1 file changed, 22 insertions(+), 15 deletions(-)
 
-diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
-index 8ff5adcfe1e0..7ca468c7d81d 100644
---- a/lib/Kconfig.debug
-+++ b/lib/Kconfig.debug
-@@ -2971,6 +2971,16 @@ config BITS_TEST
+diff --git a/lib/kstrtox.c b/lib/kstrtox.c
+index 97be2a39f537..edc4eb7c1bca 100644
+--- a/lib/kstrtox.c
++++ b/lib/kstrtox.c
+@@ -39,25 +39,30 @@ const char *_parse_integer_fixup_radix(const char *s, unsigned int *base)
+ 	return s;
+ }
  
- 	  If unsure, say N.
+-/*
+- * Convert non-negative integer string representation in explicitly given radix
+- * to an integer. A maximum of max_chars characters will be converted.
++/**
++ * _parse_integer_limit - Convert integer string representation to an integer
++ * @s: Integer string representation
++ * @base: Radix
++ * @p: Where to store result
++ * @max_chars: Maximum amount of characters to convert
++ *
++ * Convert non-negative integer string representation in explicitly given
++ * radix to an integer. If overflow occurs, value at @p is set to ULLONG_MAX.
+  *
+- * Return number of characters consumed maybe or-ed with overflow bit.
+- * If overflow occurs, result integer (incorrect) is still returned.
++ * This function is the workhorse of other string conversion functions and it
++ * is discouraged to use it explicitly. Consider kstrto*() family instead.
+  *
+- * Don't you dare use this function.
++ * Return: Number of characters consumed, maybe ORed with overflow bit
+  */
+ noinline
+ unsigned int _parse_integer_limit(const char *s, unsigned int base, unsigned long long *p,
+ 				  size_t max_chars)
+ {
++	unsigned int rv, overflow = 0;
+ 	unsigned long long res;
+-	unsigned int rv;
  
-+config SHDI3_KUNIT_TEST
-+	tristate "KUnit test for __ashldi3(), __ashrdi3(), and __lshrdi3()"
-+	depends on KUNIT
-+	depends on ARM || XTENSA || MICROBLAZE || ((RISCV || SPARC) && !64BIT)
-+	help
-+	  This builds the unit test for __ashldi3(), __ashrdi3(), and
-+	  __lshrdi3() helper functions used to implement 64-bit arithmetic
-+	  shift left, arithmetic shift right and logical shift right,
-+	  respectively, on a 32-bit CPUs.
-+
- config SLUB_KUNIT_TEST
- 	tristate "KUnit test for SLUB cache error detection" if !KUNIT_ALL_TESTS
- 	depends on SLUB_DEBUG && KUNIT
-diff --git a/lib/tests/Makefile b/lib/tests/Makefile
-index 7e9c2fa52e35..4ead57602eac 100644
---- a/lib/tests/Makefile
-+++ b/lib/tests/Makefile
-@@ -8,6 +8,7 @@ obj-$(CONFIG_BASE64_KUNIT) += base64_kunit.o
- obj-$(CONFIG_BITOPS_KUNIT) += bitops_kunit.o
- obj-$(CONFIG_BITFIELD_KUNIT) += bitfield_kunit.o
- obj-$(CONFIG_BITS_TEST) += test_bits.o
-+obj-$(CONFIG_SHDI3_KUNIT_TEST) += shdi3_kunit.o
- obj-$(CONFIG_BLACKHOLE_DEV_KUNIT_TEST) += blackhole_dev_kunit.o
- obj-$(CONFIG_CHECKSUM_KUNIT) += checksum_kunit.o
- obj-$(CONFIG_CMDLINE_KUNIT_TEST) += cmdline_kunit.o
-diff --git a/lib/tests/shdi3_kunit.c b/lib/tests/shdi3_kunit.c
-new file mode 100644
-index 000000000000..44f65e66512b
---- /dev/null
-+++ b/lib/tests/shdi3_kunit.c
-@@ -0,0 +1,175 @@
-+// SPDX-License-Identifier: GPL-2.0-or-later OR Apache-2.0
-+/*
-+ * Test cases for __ashldi3(), __ashrdi3(), and __lshrdi3().
-+ */
-+
-+#include <linux/array_size.h>
-+#include <linux/module.h>
-+#include <linux/libgcc.h>
-+#include <kunit/test.h>
-+
-+struct shdi3_test_entry {
-+	long long input;
-+	int shift;
-+	long long result;
-+};
-+
-+static const struct shdi3_test_entry ashldi3_testdata[] = {
-+	/* https://github.com/llvm/llvm-project/compiler-rt/test/builtins/Unit/ashldi3_test.c */
-+	{ 0x0123456789ABCDEFLL, 0, 0x123456789ABCDEFLL },
-+	{ 0x0123456789ABCDEFLL, 1, 0x2468ACF13579BDELL },
-+	{ 0x0123456789ABCDEFLL, 2, 0x48D159E26AF37BCLL },
-+	{ 0x0123456789ABCDEFLL, 3, 0x91A2B3C4D5E6F78LL },
-+	{ 0x0123456789ABCDEFLL, 4, 0x123456789ABCDEF0LL },
-+	{ 0x0123456789ABCDEFLL, 28, 0x789ABCDEF0000000LL },
-+	{ 0x0123456789ABCDEFLL, 29, 0xF13579BDE0000000LL },
-+	{ 0x0123456789ABCDEFLL, 30, 0xE26AF37BC0000000LL },
-+	{ 0x0123456789ABCDEFLL, 31, 0xC4D5E6F780000000LL },
-+	{ 0x0123456789ABCDEFLL, 32, 0x89ABCDEF00000000LL },
-+	{ 0x0123456789ABCDEFLL, 33, 0x13579BDE00000000LL },
-+	{ 0x0123456789ABCDEFLL, 34, 0x26AF37BC00000000LL },
-+	{ 0x0123456789ABCDEFLL, 35, 0x4D5E6F7800000000LL },
-+	{ 0x0123456789ABCDEFLL, 36, 0x9ABCDEF000000000LL },
-+	{ 0x0123456789ABCDEFLL, 60, 0xF000000000000000LL },
-+	{ 0x0123456789ABCDEFLL, 61, 0xE000000000000000LL },
-+	{ 0x0123456789ABCDEFLL, 62, 0xC000000000000000LL },
-+	{ 0x0123456789ABCDEFLL, 63, 0x8000000000000000LL },
-+};
-+
-+static void shdi3_test_ashldi3(struct kunit *test)
-+{
-+	const struct shdi3_test_entry *e;
-+	long long ret;
-+
-+	for (e = ashldi3_testdata;
-+	     e < ashldi3_testdata + ARRAY_SIZE(ashldi3_testdata); e++) {
-+		ret = __ashldi3(e->input, e->shift);
-+		KUNIT_EXPECT_EQ_MSG(test, ret, e->result,
-+				    "    when evaluating __ashldi3(%lld, %d)",
-+				    e->input, e->shift);
-+	}
-+}
-+
-+static const struct shdi3_test_entry ashrdi3_testdata[] = {
-+	/* https://github.com/llvm/llvm-project/compiler-rt/test/builtins/Unit/ashrdi3_test.c */
-+	{ 0x0123456789ABCDEFLL, 0, 0x123456789ABCDEFLL },
-+	{ 0x0123456789ABCDEFLL, 1, 0x91A2B3C4D5E6F7LL },
-+	{ 0x0123456789ABCDEFLL, 2, 0x48D159E26AF37BLL },
-+	{ 0x0123456789ABCDEFLL, 3, 0x2468ACF13579BDLL },
-+	{ 0x0123456789ABCDEFLL, 4, 0x123456789ABCDELL },
-+	{ 0x0123456789ABCDEFLL, 28, 0x12345678LL },
-+	{ 0x0123456789ABCDEFLL, 29, 0x91A2B3CLL },
-+	{ 0x0123456789ABCDEFLL, 30, 0x48D159ELL },
-+	{ 0x0123456789ABCDEFLL, 31, 0x2468ACFLL },
-+	{ 0x0123456789ABCDEFLL, 32, 0x1234567LL },
-+	{ 0x0123456789ABCDEFLL, 33, 0x91A2B3LL },
-+	{ 0x0123456789ABCDEFLL, 34, 0x48D159LL },
-+	{ 0x0123456789ABCDEFLL, 35, 0x2468ACLL },
-+	{ 0x0123456789ABCDEFLL, 36, 0x123456LL },
-+	{ 0x0123456789ABCDEFLL, 60, 0 },
-+	{ 0x0123456789ABCDEFLL, 61, 0 },
-+	{ 0x0123456789ABCDEFLL, 62, 0 },
-+	{ 0x0123456789ABCDEFLL, 63, 0 },
-+	{ 0xFEDCBA9876543210LL, 0, 0xFEDCBA9876543210LL },
-+	{ 0xFEDCBA9876543210LL, 1, 0xFF6E5D4C3B2A1908LL },
-+	{ 0xFEDCBA9876543210LL, 2, 0xFFB72EA61D950C84LL },
-+	{ 0xFEDCBA9876543210LL, 3, 0xFFDB97530ECA8642LL },
-+	{ 0xFEDCBA9876543210LL, 4, 0xFFEDCBA987654321LL },
-+	{ 0xFEDCBA9876543210LL, 28, 0xFFFFFFFFEDCBA987LL },
-+	{ 0xFEDCBA9876543210LL, 29, 0xFFFFFFFFF6E5D4C3LL },
-+	{ 0xFEDCBA9876543210LL, 30, 0xFFFFFFFFFB72EA61LL },
-+	{ 0xFEDCBA9876543210LL, 31, 0xFFFFFFFFFDB97530LL },
-+	{ 0xFEDCBA9876543210LL, 32, 0xFFFFFFFFFEDCBA98LL },
-+	{ 0xFEDCBA9876543210LL, 33, 0xFFFFFFFFFF6E5D4CLL },
-+	{ 0xFEDCBA9876543210LL, 34, 0xFFFFFFFFFFB72EA6LL },
-+	{ 0xFEDCBA9876543210LL, 35, 0xFFFFFFFFFFDB9753LL },
-+	{ 0xFEDCBA9876543210LL, 36, 0xFFFFFFFFFFEDCBA9LL },
-+	{ 0xAEDCBA9876543210LL, 60, 0xFFFFFFFFFFFFFFFALL },
-+	{ 0xAEDCBA9876543210LL, 61, 0xFFFFFFFFFFFFFFFDLL },
-+	{ 0xAEDCBA9876543210LL, 62, 0xFFFFFFFFFFFFFFFELL },
-+	{ 0xAEDCBA9876543210LL, 63, 0xFFFFFFFFFFFFFFFFLL },
-+};
-+
-+static void shdi3_test_ashrdi3(struct kunit *test)
-+{
-+	const struct shdi3_test_entry *e;
-+	long long ret;
-+
-+	for (e = ashrdi3_testdata;
-+	     e < ashrdi3_testdata + ARRAY_SIZE(ashrdi3_testdata); e++) {
-+		ret = __ashrdi3(e->input, e->shift);
-+		KUNIT_EXPECT_EQ_MSG(test, ret, e->result,
-+				    "    when evaluating __ashrdi3(%lld, %d)",
-+				    e->input, e->shift);
-+	}
-+}
-+
-+static const struct shdi3_test_entry lshrdi3_testdata[] = {
-+	/* https://github.com/llvm/llvm-project/compiler-rt/test/builtins/Unit/lshrdi3_test.c */
-+	{ 0x0123456789ABCDEFLL, 0, 0x123456789ABCDEFLL },
-+	{ 0x0123456789ABCDEFLL, 1, 0x91A2B3C4D5E6F7LL },
-+	{ 0x0123456789ABCDEFLL, 2, 0x48D159E26AF37BLL },
-+	{ 0x0123456789ABCDEFLL, 3, 0x2468ACF13579BDLL },
-+	{ 0x0123456789ABCDEFLL, 4, 0x123456789ABCDELL },
-+	{ 0x0123456789ABCDEFLL, 28, 0x12345678LL },
-+	{ 0x0123456789ABCDEFLL, 29, 0x91A2B3CLL },
-+	{ 0x0123456789ABCDEFLL, 30, 0x48D159ELL },
-+	{ 0x0123456789ABCDEFLL, 31, 0x2468ACFLL },
-+	{ 0x0123456789ABCDEFLL, 32, 0x1234567LL },
-+	{ 0x0123456789ABCDEFLL, 33, 0x91A2B3LL },
-+	{ 0x0123456789ABCDEFLL, 34, 0x48D159LL },
-+	{ 0x0123456789ABCDEFLL, 35, 0x2468ACLL },
-+	{ 0x0123456789ABCDEFLL, 36, 0x123456LL },
-+	{ 0x0123456789ABCDEFLL, 60, 0 },
-+	{ 0x0123456789ABCDEFLL, 61, 0 },
-+	{ 0x0123456789ABCDEFLL, 62, 0 },
-+	{ 0x0123456789ABCDEFLL, 63, 0 },
-+	{ 0xFEDCBA9876543210LL, 0, 0xFEDCBA9876543210LL },
-+	{ 0xFEDCBA9876543210LL, 1, 0x7F6E5D4C3B2A1908LL },
-+	{ 0xFEDCBA9876543210LL, 2, 0x3FB72EA61D950C84LL },
-+	{ 0xFEDCBA9876543210LL, 3, 0x1FDB97530ECA8642LL },
-+	{ 0xFEDCBA9876543210LL, 4, 0xFEDCBA987654321LL },
-+	{ 0xFEDCBA9876543210LL, 28, 0xFEDCBA987LL },
-+	{ 0xFEDCBA9876543210LL, 29, 0x7F6E5D4C3LL },
-+	{ 0xFEDCBA9876543210LL, 30, 0x3FB72EA61LL },
-+	{ 0xFEDCBA9876543210LL, 31, 0x1FDB97530LL },
-+	{ 0xFEDCBA9876543210LL, 32, 0xFEDCBA98LL },
-+	{ 0xFEDCBA9876543210LL, 33, 0x7F6E5D4CLL },
-+	{ 0xFEDCBA9876543210LL, 34, 0x3FB72EA6LL },
-+	{ 0xFEDCBA9876543210LL, 35, 0x1FDB9753LL },
-+	{ 0xFEDCBA9876543210LL, 36, 0xFEDCBA9LL },
-+	{ 0xAEDCBA9876543210LL, 60, 0xALL },
-+	{ 0xAEDCBA9876543210LL, 61, 0x5LL },
-+	{ 0xAEDCBA9876543210LL, 62, 0x2LL },
-+	{ 0xAEDCBA9876543210LL, 63, 0x1LL },
-+};
-+
-+static void shdi3_test_lshrdi3(struct kunit *test)
-+{
-+	const struct shdi3_test_entry *e;
-+	long long ret;
-+
-+	for (e = lshrdi3_testdata;
-+	     e < lshrdi3_testdata + ARRAY_SIZE(lshrdi3_testdata); e++) {
-+		ret = __lshrdi3(e->input, e->shift);
-+		KUNIT_EXPECT_EQ_MSG(test, ret, e->result,
-+				    "    when evaluating __lshrdi3(%lld, %d)",
-+				    e->input, e->shift);
-+	}
-+}
-+
-+static struct kunit_case shdi3_test_cases[] = {
-+	KUNIT_CASE(shdi3_test_ashldi3),
-+	KUNIT_CASE(shdi3_test_ashrdi3),
-+	KUNIT_CASE(shdi3_test_lshrdi3),
-+	{}
-+};
-+
-+static struct kunit_suite shdi3_test_suite = {
-+	.name = "shdi3",
-+	.test_cases = shdi3_test_cases,
-+};
-+kunit_test_suite(shdi3_test_suite);
-+
-+MODULE_DESCRIPTION("Test cases for __ashldi3(), __ashrdi3(), and __lshrdi3()");
-+MODULE_LICENSE("GPL");
+ 	res = 0;
+-	rv = 0;
+-	while (max_chars--) {
++	for (rv = 0; rv < max_chars; rv++, s++) {
+ 		unsigned int c = *s;
+ 		unsigned int lc = _tolower(c);
+ 		unsigned int val;
+@@ -76,15 +81,17 @@ unsigned int _parse_integer_limit(const char *s, unsigned int base, unsigned lon
+ 		 * it in the max base we support (16)
+ 		 */
+ 		if (unlikely(res & (~0ull << 60))) {
+-			if (res > div_u64(ULLONG_MAX - val, base))
+-				rv |= KSTRTOX_OVERFLOW;
++			if (check_mul_overflow(res, base, &res) ||
++			    check_add_overflow(res, val, &res)) {
++				res = ULLONG_MAX;
++				overflow = KSTRTOX_OVERFLOW;
++			}
++		} else {
++			res = res * base + val;
+ 		}
+-		res = res * base + val;
+-		rv++;
+-		s++;
+ 	}
+ 	*p = res;
+-	return rv;
++	return rv | overflow;
+ }
+ 
+ noinline
 -- 
 2.54.0
 
