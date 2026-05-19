@@ -1,62 +1,62 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A5D19408006;
-	Tue, 19 May 2026 15:24:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 746E140800F;
+	Tue, 19 May 2026 15:26:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779204292; cv=none; b=pqjLMDpJ5FmZyzbfTWRS/BJlqe5+e7ASu94RbLQr8EqRzk2wPVZGs0GK0OrQAFngTcEvqRy5IN624U/xA7W4o+llsd7tVf860hFywqDqscGSh8mGJ9PO2AgY4TrmQcSlQ9NXD7NXj6hoZZUX+KVgrr5qslaWq2Rm+XhM0ogJzRU=
+	t=1779204364; cv=none; b=ZevhNHBNddjcNOL4dpI1xVTdSwPkybulS6TsvWmhcSo+tWJxwoegGenN5Q6jXDw5iQxK0q4S17Cw4KfyUOtRfBWealiSSA+NJ4DbyBNPNwQ3g2DxCc9Nt+X6RRQIYiAk7Ynp0nYoWsFPwMfULFC0pGY+CLhz1edNPsWS04scbuY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779204292; c=relaxed/simple;
-	bh=YnvezWKZHJHKS2rlvWwaBf9roZI+rdXbINTjbGmL624=;
+	s=arc-20240116; t=1779204364; c=relaxed/simple;
+	bh=nng3lchtEiltmgibsnNMlShREbPl8qLmOTOSAYJ6qKs=;
 	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=nUp2zIh6XTbnGkiaxzpCovKnoi5smGyB/r9zxlvizm4OzJfad0Rp4JUhp5GqfU+Zg+3ZXGw6Vx3o1pfg28ofAobyl2J6lohe6BBHv8HXySyXQAIFi7XRA47jZjmiW2k9JwE+LMMSGZvtoxurzY0blX7roCySs7c2Mz7EZXxW/kQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Bafaitpp; arc=none smtp.client-ip=10.30.226.201
+	 Subject:Content-Type; b=olZdjX/E8abycevVVy3TWDpo/ZMCJ7426BJre+BBosm8eCdOP/kY/f3VQ4iGsYOyU3vyjuodLknvKKK1pw/+RVIxcfSVrgvM9etgVYYnktijHPfA4LCY4E19CLzCSwi33KDF8bEDcBKjk3cJs05yWmqZ3+98x/J+7KV484oRQlY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SwpDAxQe; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Bafaitpp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4E062C2BCC6;
-	Tue, 19 May 2026 15:24:52 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SwpDAxQe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD46BC2BCB3;
+	Tue, 19 May 2026 15:26:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1779204292;
-	bh=YnvezWKZHJHKS2rlvWwaBf9roZI+rdXbINTjbGmL624=;
+	s=k20201202; t=1779204364;
+	bh=nng3lchtEiltmgibsnNMlShREbPl8qLmOTOSAYJ6qKs=;
 	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=Bafaitppo61aMU9XTXBjibM7oYBdi+30S8e+3898gDTzrm8upxuSKbcA7zfGSK5fl
-	 2lZ5mUVRRyf7u0B1x+23nBoUce15MxjVMSq4fhKqGx4mZi7Qz0bv7HWT0Ju01tzudd
-	 NEQ2rxfRTGsv72KNaSma6fKoIpyT3xpgHfFrV60cTPdiJ4iH2YhFcvtA2bUy5KYz6A
-	 J/oVKe1vQ852LspNIqL5I4Oqbzh1xzSWhIS0VyRddkt/097wPEeAMSWTfEOna08xCU
-	 iqPMDo1fksau3hm4bSRrEvWmyhHpNP0QPM/tYpQg0UQYRd8fGuAzmfMka41ei4Bh0o
-	 m3nLBaGnZR7pQ==
+	b=SwpDAxQeRjXhu9p1f4grdwIusa/gOEWahVO49ND6XB4GYRgAfwAmG53Q+WnURdJ64
+	 DntddPiUBTx41bq171o8wf0Gfi5yamDxIcoHa66ZlqkUXEf91/YOJOIFp4MxcgynUU
+	 38w0riPFRTSph/hvEy4/RoHYevfZPtaXl21w9aqxJKxu0I7b0n4uh+Ba3TGWkmh2LE
+	 8IE9pHnqAiTQcM5VpuPs9B9AjnBxz9uDekG+IaexSKV+uLKAt/9kJptN9LQxRZx/SZ
+	 80fd4MR5oz9vwTOsnBH2+aBaxg3NBMgTDSSfmkstqcwmQTsCvtvdyKDw8Ph+n//Nf0
+	 Nd4vncUic23bA==
 Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id 8413AF4007C;
-	Tue, 19 May 2026 11:24:51 -0400 (EDT)
+	by mailfauth.phl.internal (Postfix) with ESMTP id E90A0F4007D;
+	Tue, 19 May 2026 11:26:02 -0400 (EDT)
 Received: from phl-imap-05 ([10.202.2.95])
-  by phl-compute-01.internal (MEProxy); Tue, 19 May 2026 11:24:51 -0400
-X-ME-Sender: <xms:w4AMapeBAZJE9xSNN0_ikLhMKJis6GoeVaB8tYu_oZ0pdtVzMrizkg>
-    <xme:w4AMaiCr1Ml_5y4wnkZ8pnI8pRBg9AF3irBEI5BfpRFZcCY9y0eCMaQ7TUrF-xx_E
-    OqmAJi6D8vP7sLZlaj_ilZt19GGtUWwL7eTf4qC-7CKgsC4_skzkw>
+  by phl-compute-01.internal (MEProxy); Tue, 19 May 2026 11:26:02 -0400
+X-ME-Sender: <xms:CoEMal813gVYtxckPH_3VgLfYCX1DubRDWSxOkH5fkeDZShXvOK7yw>
+    <xme:CoEMakjnspRhaWyB4EslAwCp4DR1YVBLqC4U15YHo_CGrP-WUI5ubl26yONGsQTcF
+    9xU7T32B3jfIEDRA_1bGjHFP3TNNT-x7R3s0nvENFDdeMien1MOCH8>
 X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgddugedvuddtucetufdoteggodetrf
     dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
     rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
-    gurhepofggfffhvfevkfgjfhfutgfgsehtqhertdertdejnecuhfhrohhmpedftehrugcu
+    gurhepofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrugcu
     uehivghshhgvuhhvvghlfdcuoegrrhgusgeskhgvrhhnvghlrdhorhhgqeenucggtffrrg
-    htthgvrhhnpeeuteeiudeigeekjedvheduieehteetgfdtuefghfejgffhfedtleehvdeh
-    fffhvdenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    htthgvrhhnpedvueehiedtvedtleekuddutefgffdtleetfeetveejveejieehfefhjeei
+    jeefudenucevlhhushhtvghrufhiiigvpedunecurfgrrhgrmhepmhgrihhlfhhrohhmpe
     grrhguodhmvghsmhhtphgruhhthhhpvghrshhonhgrlhhithihqdduieejtdehtddtjeel
     qdeffedvudeigeduhedqrghruggspeepkhgvrhhnvghlrdhorhhgseifohhrkhhofhgrrh
     gurdgtohhmpdhnsggprhgtphhtthhopeehpdhmohguvgepshhmthhpohhuthdprhgtphht
-    thhopegrrhgusgdoghhithesghhoohhglhgvrdgtohhmpdhrtghpthhtoheprhgrfhgrvg
-    hlrdhjrdifhihsohgtkhhisehinhhtvghlrdgtohhmpdhrtghpthhtoheprhgrfhgrvghl
-    sehkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdgrtghpihesvhhgvghrrd
-    hkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdgvfhhisehvghgvrhdrkhgv
+    thhopehrohhnghhtrghosegtvghsthgtrdgtnhdprhgtphhtthhopehrthhorgigsehfoh
+    igmhgrihhlrdgtohhmpdhrtghpthhtohepihhlihgrshdrrghprghlohguihhmrghssehl
+    ihhnrghrohdrohhrghdprhgtphhtthhopehlihhnuhigqdgvfhhisehvghgvrhdrkhgvrh
+    hnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqkhgvrhhnvghlsehvghgvrhdrkhgv
     rhhnvghlrdhorhhg
-X-ME-Proxy: <xmx:w4AMavqUOj4SO2B9H6Jb4JcEaH92x4XDWLuQyOtUkdnRQhlYw65XUw>
-    <xmx:w4AMailkPkcf9vCiarLZADkZAGo64SpgjyrqK64N4A0sHjjbnBJVEw>
-    <xmx:w4AManzDkp2VrdO0gSF6WktGUU9Sn9OYujo3omRtzJaAVhT7J90y2g>
-    <xmx:w4AMai_l36gPLI8hAmI_42I9ahKKSFb8qMDrvKyo_-TDorMqTGXSpQ>
-    <xmx:w4AMarIpVGFo9dp-QephAgUMyobyyyq9X1_1xj78L2GqoyyfICjrLgBC>
+X-ME-Proxy: <xmx:CoEMakKBWx5xIWS5tvgY2hUYybsjCrNaGaaF6sCuHrVzfwXn8AKRQw>
+    <xmx:CoEMatGu64vabz-DKUKulGAAZ2DBB-tpgUNgYXNtUxEGImxmc_N2Fw>
+    <xmx:CoEMagR9Tg9sWlAuObW-mC6b6X7Qr9IlhcGgAU1AqSwWXc8QPSK2_g>
+    <xmx:CoEMahcU3rcPiqzfYZsXXbqEQl54uepokTdKH3Gbq-XUefddiL463A>
+    <xmx:CoEManqSko9RdE_qYDW1reEQ_3OAXxgoYCswOt2c5iSBSAYFcNFPRq9G>
 Feedback-ID: ice86485a:Fastmail
 Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 69C67182007A; Tue, 19 May 2026 11:24:51 -0400 (EDT)
+	id CE904182007A; Tue, 19 May 2026 11:26:02 -0400 (EDT)
 X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -64,61 +64,45 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Tue, 19 May 2026 17:24:31 +0200
+Date: Tue, 19 May 2026 17:25:42 +0200
 From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Rafael J . Wysocki" <rafael@kernel.org>,
- "Ard Biesheuvel" <ardb+git@google.com>
-Cc: linux-efi@vger.kernel.org, "Linux ACPI" <linux-acpi@vger.kernel.org>,
- "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
-Message-Id: <8a5e09e2-7df3-4c5f-92be-309628dfdba7@app.fastmail.com>
-In-Reply-To: 
- <CAJZ5v0h5NvLK3Fs9Fw+GoKCs82SXP1_oRggiG_aH3wiuMkdnJA@mail.gmail.com>
-References: <20260519082316.1959158-2-ardb+git@google.com>
- <CAJZ5v0h5NvLK3Fs9Fw+GoKCs82SXP1_oRggiG_aH3wiuMkdnJA@mail.gmail.com>
-Subject: Re: [PATCH] efi: Allocate runtime workqueue before ACPI init
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+To: "Rong Tao" <rtoax@foxmail.com>,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "open list:EXTENSIBLE FIRMWARE INTERFACE (EFI)" <linux-efi@vger.kernel.org>,
+ "open list" <linux-kernel@vger.kernel.org>
+Cc: rongtao@cestc.cn
+Message-Id: <b2eaed8f-efea-40c5-bcf3-6f3cecd38a6d@app.fastmail.com>
+In-Reply-To: <tencent_270AE22BC7E81D6281019A105796C8E5AE06@qq.com>
+References: <tencent_270AE22BC7E81D6281019A105796C8E5AE06@qq.com>
+Subject: Re: [PATCH] efi: efi.h: Remove extra semicolon
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
 
-
-On Tue, 19 May 2026, at 16:12, Rafael J. Wysocki wrote:
-> On Tue, May 19, 2026 at 10:23=E2=80=AFAM Ard Biesheuvel <ardb+git@goog=
-le.com> wrote:
->>
->> From: Ard Biesheuvel <ardb@kernel.org>
->>
->> Since commit
->>
->>   5894cf571e14 ("acpi/prmt: Use EFI runtime sandbox to invoke PRM han=
-dlers")
->>
->> ACPI PRM calls are delegated to a workqueue which runs in a kernel
->> thread, making it easier to detect and mitigate faulting memory acces=
-ses
->> performed by the firmware.
->>
->> Rafael reports that such PRM accesses may occur before efisubsys_init=
-()
->> executes, which is where the workqueue is allocated, leading to NULL
->> pointer dereferences. Since acpi_init() [which triggers the early PRM
->> accesses] executes as a subsys_initcall() as well, and has its own
->> dependencies that may be sensitive to initcall ordering, deferring
->> acpi_init() is not an option.
->>
->> So instead, split off the workqueue allocation into its own postcore
->> initcall, as this is the only missing piece to allow EFI runtime calls
->> to be made. This ensures that EFI runtime call (including PRM calls) =
-are
->> accessible to all code running at subsys_initcall() level.
->>
->> Fixes: 5894cf571e14 ("acpi/prmt: Use EFI runtime sandbox to invoke PR=
-M handlers")
->> Reported-by: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
->> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+On Mon, 18 May 2026, at 09:02, Rong Tao wrote:
+> From: Rong Tao <rongtao@cestc.cn>
 >
-> This should work AFAICS, so
+> Remove extra semicolons from comments.
 >
-> Reviewed-by: Rafael J. Wysocki (Intel) <rafael@kernel.org>
+> Signed-off-by: Rong Tao <rongtao@cestc.cn>
+> ---
+>  include/linux/efi.h | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 72e76ec54641..ccbc35479684 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -61,7 +61,7 @@ typedef void *efi_handle_t;
+> 
+>  /*
+>   * The UEFI spec and EDK2 reference implementation both define EFI_GUID as
+> - * struct { u32 a; u16; b; u16 c; u8 d[8]; }; and so the implied alignment
+> + * struct { u32 a; u16 b; u16 c; u8 d[8]; }; and so the implied alignment
+>   * is 32 bits not 8 bits like our guid_t. In some cases (i.e., on 32-bit ARM),
+>   * this means that firmware services invoked by the kernel may assume that
+>   * efi_guid_t* arguments are 32-bit aligned, and use memory accessors that
+> -- 
+> 2.54.0
 
-OK, I'll queue this up.
+Thanks, queued up now.
