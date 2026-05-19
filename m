@@ -1,152 +1,150 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97EC5348C65
-	for <linux-efi@vger.kernel.org>; Tue, 19 May 2026 14:12:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DB6A3EA970
+	for <linux-efi@vger.kernel.org>; Tue, 19 May 2026 15:22:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779199959; cv=none; b=ZZg9QcI7yYHPs49lCTdihRZqiycbk9fbEPZriDq4NkyjXzv7o4GYI6kHG+nDPO9tg/bZNCvEyv3grxuCrk6aWlDDd7yagQ9FhXQrl4b9AMBXe3mFKX77CV1eoYqPM1GqxqQqnpfkpDy6iG4/kmdoKs4wKuNZe+LeBWMwhq/Dzn8=
+	t=1779204143; cv=none; b=P/pQqUrasEXPAlr2kcD5KASMXJVf6QTC36Sxmx6ATrC+C7FDNsBsRCUSRT6dzauQGGzxpq2qgusgkV8dvLvNlThqubqLTLsmtecNIF2sJ51rXAf5/KyRQ5HuwUhzaaXQg4w1LvQferBmY83/kgg1XfbZdR/UhwqoLcBnukSspUc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779199959; c=relaxed/simple;
-	bh=ys3VfdCIMI6SZCYAZr0JIhK48BGkSl8ZbpOceUW+Mcw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DLIORKL60uTmRmn1nbF6x8XVyR6hmCmLikXd8SgQZEVSvRfp/HA7cgviEJlZmlmqDYyUGwlRSo2DlEoRp01kgKMvPcQI40qlMpz+HFl3ic1yqsI4ZzkF6Da0oFSfi9EBcBcVz8jWDiZY9eH20GlnsGakG6pZZ2JBJgPu49Mjs1o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jWDabLoq; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1779204143; c=relaxed/simple;
+	bh=5VrOl2Y2oUsSYv+vFwkchuFKwthFO7I3gF2dpNwFzy8=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=Hco9WrB6dWUZCNQ+vwifXXpqYHQQtHF63/FzYoWVItRo9PT7m9zEiF5P7phNlyTs/E6h48ggvLJAS5g4pGyyrWkDzRDkynRIQEf9qiRHZEUOh9X3DtSmabRcbzXci5N0AkGbvQ6fVjpfRXPf4gtg54fFGh3eUmM4YQ69CYw5RQ0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=StC8dFRU; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jWDabLoq"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51613C4AF0B
-	for <linux-efi@vger.kernel.org>; Tue, 19 May 2026 14:12:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="StC8dFRU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0D4D4C2BCC6;
+	Tue, 19 May 2026 15:22:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1779199959;
-	bh=ys3VfdCIMI6SZCYAZr0JIhK48BGkSl8ZbpOceUW+Mcw=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=jWDabLoqiUUCbfzIrE1BRaqFOy/1gPCq2eG8ps/fFm3Xrvgxq4OqAqCHx657LbLDT
-	 8IijuYxhsszuuABHXTiFHOcUmzfGDbNaN8kFpknFRQ5xGvEjS8eeD7q0/92Q4eA0SL
-	 mMBFzQCw0HgGqtlAaT3r/YOVbZEaBFoN5qNwUeh4//4gPJ6mK7xob1lvfqqUbbWDZL
-	 OBcse7J/IMrfIrEUKGwil+vI7HT8787im5O7nZUrG1gujjJJxqNhq1H1L9HvOjhR+C
-	 kbi1soamtzG+nKZtH8uX1LfrbYwU3DigLSA3H+UOy7fjGE0k4XWDeSMICsVW+qf0sn
-	 rlXh0CQg5OW3A==
-Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-5a40d02b58bso2672532e87.3
-        for <linux-efi@vger.kernel.org>; Tue, 19 May 2026 07:12:39 -0700 (PDT)
-X-Gm-Message-State: AOJu0YzVm/+9OmW/zFltx/OCggUr7SvG7NIL880WCJ1zlHdvR5i4L7HF
-	/htmu5vFrGvaUKC4eM5S+0466LKfIr2pCfuGxkxCW0q6OQlQtzXddGpiqSSCkuUQlvSCpFayccc
-	5F3hAepoLgdXemaDovJX8VYgJqkA4haQ=
-X-Received: by 2002:a05:6512:3e0f:b0:5a8:891f:b3c8 with SMTP id
- 2adb3069b0e04-5aa0e7741c2mr5697397e87.39.1779199957668; Tue, 19 May 2026
- 07:12:37 -0700 (PDT)
+	s=k20201202; t=1779204143;
+	bh=5VrOl2Y2oUsSYv+vFwkchuFKwthFO7I3gF2dpNwFzy8=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
+	b=StC8dFRUzzXpNOavSawNy/OyAuX6qdJQfA6PI1LeZdFDgom9FhAfUasU04Aropq8u
+	 x1bY+/zwCkdkErcDZ35sn/XIVZBBMiGI5Md7cMA4r1AuXIEEUWOnaEdzt3vcOYzjO/
+	 XPwtAJxI0ClJJQIzvXYittRgnR8Af3ahCd016aKJzRAvJCtfId43qiW1/1xokJDhHc
+	 A/Me0yWGUnoGy25ZWBX+aSGy18BqJGpqDzH7vibviTKdBHepy5lcput+60xbT0rp89
+	 XaEEcLmLRgTUUyAVE/41kBze1hi+wLm9eyHQAdSOFcC73G3rf4kS3Me5Cr01L8OTPd
+	 STqw9LzG0jrIw==
+Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
+	by mailfauth.phl.internal (Postfix) with ESMTP id 3EA6AF4007C;
+	Tue, 19 May 2026 11:22:22 -0400 (EDT)
+Received: from phl-imap-05 ([10.202.2.95])
+  by phl-compute-01.internal (MEProxy); Tue, 19 May 2026 11:22:22 -0400
+X-ME-Sender: <xms:LoAMag38IDV-vBLzPZg-M2ChW8_zkunqK_xZ_bEPiFvQRf-Dobuj4w>
+    <xme:LoAMal7TCb-B8f2LNnzHCiMy72WdEEf7SMT6Nh49pNIjuBfoPCYSdt0zRLVTl1S2y
+    tPBoQv77PJlM1eZyPua14Tt1M8QWOGP2JGqtBwje7t2pqA6cmwRFdM>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefhedrtddtgddugedvuddtucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
+    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
+    gurhepofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrugcu
+    uehivghshhgvuhhvvghlfdcuoegrrhgusgeskhgvrhhnvghlrdhorhhgqeenucggtffrrg
+    htthgvrhhnpedvueehiedtvedtleekuddutefgffdtleetfeetveejveejieehfefhjeei
+    jeefudenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    grrhguodhmvghsmhhtphgruhhthhhpvghrshhonhgrlhhithihqdduieejtdehtddtjeel
+    qdeffedvudeigeduhedqrghruggspeepkhgvrhhnvghlrdhorhhgseifohhrkhhofhgrrh
+    gurdgtohhmpdhnsggprhgtphhtthhopeehpdhmohguvgepshhmthhpohhuthdprhgtphht
+    thhopegrrhgusgdoghhithesghhoohhglhgvrdgtohhmpdhrtghpthhtohepvggsihhggh
+    gvrhhssehkvghrnhgvlhdrohhrghdprhgtphhtthhopehkvggvsheskhgvrhhnvghlrdho
+    rhhgpdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnhgvlhdrohhrgh
+    dprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhr
+    gh
+X-ME-Proxy: <xmx:LoAMatAjDBRjxYCnEjN2HTP0H-3RTcGhttAPMfwmPo-s0Jk8oXIC7Q>
+    <xmx:LoAMakd5FNmfWjkYm61oeGBKuESDQOvx4krhJ8QCzQrkBATstfQDTA>
+    <xmx:LoAMakK1WoiOrlUbVjpN_NswdGvFtonWUE6GH2ThyPtFlqkQeuvlHg>
+    <xmx:LoAMan26wdkynmhokNg6IdX-A753STHKjISeIL8mBeTQJsIadOcl-w>
+    <xmx:LoAMaugPCF_yqLqx4OdbtwgC_arlx8SboZBOGtpWOiTcnPoTrn0StTPS>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id 19FEC182007A; Tue, 19 May 2026 11:22:21 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260519082316.1959158-2-ardb+git@google.com>
-In-Reply-To: <20260519082316.1959158-2-ardb+git@google.com>
-From: "Rafael J. Wysocki" <rafael@kernel.org>
-Date: Tue, 19 May 2026 16:12:25 +0200
-X-Gmail-Original-Message-ID: <CAJZ5v0h5NvLK3Fs9Fw+GoKCs82SXP1_oRggiG_aH3wiuMkdnJA@mail.gmail.com>
-X-Gm-Features: AVHnY4J1z7TCHiU8JsNJXAu7oLMdpyCdSwenLYcwTsf0Ue3WoyKdwh1etIzPlPg
-Message-ID: <CAJZ5v0h5NvLK3Fs9Fw+GoKCs82SXP1_oRggiG_aH3wiuMkdnJA@mail.gmail.com>
-Subject: Re: [PATCH] efi: Allocate runtime workqueue before ACPI init
-To: Ard Biesheuvel <ardb+git@google.com>
-Cc: linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, 
-	Ard Biesheuvel <ardb@kernel.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Date: Tue, 19 May 2026 17:22:01 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Ard Biesheuvel" <ardb+git@google.com>, linux-kernel@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, "Kees Cook" <kees@kernel.org>,
+ "Eric Biggers" <ebiggers@kernel.org>
+Message-Id: <6467020e-db1e-415b-9fc2-25f13760c875@app.fastmail.com>
+In-Reply-To: <20260501170156.2833364-2-ardb+git@google.com>
+References: <20260501170156.2833364-2-ardb+git@google.com>
+Subject: Re: [PATCH] lkdtm: Add case to provoke a crash in EFI runtime services
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Tue, May 19, 2026 at 10:23=E2=80=AFAM Ard Biesheuvel <ardb+git@google.co=
-m> wrote:
->
+On Fri, 1 May 2026, at 19:01, Ard Biesheuvel wrote:
 > From: Ard Biesheuvel <ardb@kernel.org>
 >
-> Since commit
+> Add a lkdtm test case that triggers a fault during the execution of a
+> EFI runtime service by passing a read-only variable as a by-ref argument
+> that the firmware is supposed to update.
 >
->   5894cf571e14 ("acpi/prmt: Use EFI runtime sandbox to invoke PRM handler=
-s")
+> This is useful for testing the graceful handling of faults/exception in
+> EFI platform firmware, which is implemented on x86 and arm64.
 >
-> ACPI PRM calls are delegated to a workqueue which runs in a kernel
-> thread, making it easier to detect and mitigate faulting memory accesses
-> performed by the firmware.
->
-> Rafael reports that such PRM accesses may occur before efisubsys_init()
-> executes, which is where the workqueue is allocated, leading to NULL
-> pointer dereferences. Since acpi_init() [which triggers the early PRM
-> accesses] executes as a subsys_initcall() as well, and has its own
-> dependencies that may be sensitive to initcall ordering, deferring
-> acpi_init() is not an option.
->
-> So instead, split off the workqueue allocation into its own postcore
-> initcall, as this is the only missing piece to allow EFI runtime calls
-> to be made. This ensures that EFI runtime call (including PRM calls) are
-> accessible to all code running at subsys_initcall() level.
->
-> Fixes: 5894cf571e14 ("acpi/prmt: Use EFI runtime sandbox to invoke PRM ha=
-ndlers")
-> Reported-by: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
 > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-
-This should work AFAICS, so
-
-Reviewed-by: Rafael J. Wysocki (Intel) <rafael@kernel.org>
-
 > ---
->  drivers/firmware/efi/efi.c | 28 ++++++++++++++++------------
->  1 file changed, 16 insertions(+), 12 deletions(-)
+>  drivers/misc/lkdtm/bugs.c | 27 +++++++++++++++++++++++++++
+>  1 file changed, 27 insertions(+)
 >
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index d04be38f1750..318d1cc9a066 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -402,21 +402,11 @@ static void __init efi_debugfs_init(void)
->  static inline void efi_debugfs_init(void) {}
+
+Ping?
+
+> diff --git a/drivers/misc/lkdtm/bugs.c b/drivers/misc/lkdtm/bugs.c
+> index e0098f314570..3eca2ef64aff 100644
+> --- a/drivers/misc/lkdtm/bugs.c
+> +++ b/drivers/misc/lkdtm/bugs.c
+> @@ -7,6 +7,7 @@
+>   */
+>  #include "lkdtm.h"
+>  #include <linux/cpu.h>
+> +#include <linux/efi.h>
+>  #include <linux/list.h>
+>  #include <linux/hrtimer.h>
+>  #include <linux/sched.h>
+> @@ -817,6 +818,29 @@ static noinline void lkdtm_CORRUPT_PAC(void)
 >  #endif
->
-> -/*
-> - * We register the efi subsystem with the firmware subsystem and the
-> - * efivars subsystem with the efi subsystem, if the system was booted wi=
-th
-> - * EFI.
-> - */
-> -static int __init efisubsys_init(void)
-> +static int __init efipostcore_init(void)
->  {
-> -       int error;
-> -
->         if (!efi_enabled(EFI_RUNTIME_SERVICES))
->                 efi.runtime_supported_mask =3D 0;
->
-> -       if (!efi_enabled(EFI_BOOT))
-> -               return 0;
-> -
->         if (efi.runtime_supported_mask) {
->                 /*
->                  * Since we process only one efi_runtime_service() at a t=
-ime, an
-> @@ -428,9 +418,23 @@ static int __init efisubsys_init(void)
->                         pr_err("Creating efi_rts_wq failed, EFI runtime s=
-ervices disabled.\n");
->                         clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
->                         efi.runtime_supported_mask =3D 0;
-> -                       return 0;
->                 }
->         }
-> +       return 0;
-> +}
-> +postcore_initcall(efipostcore_init);
-> +
-> +/*
-> + * We register the efi subsystem with the firmware subsystem and the
-> + * efivars subsystem with the efi subsystem, if the system was booted wi=
-th
-> + * EFI.
-> + */
-> +static int __init efisubsys_init(void)
+>  }
+> 
+> +static void __maybe_unused lkdtm_EFI_RUNTIME_CRASH(void)
 > +{
-> +       int error;
+> +	static unsigned long size __ro_after_init = sizeof(efi_char16_t);
+> +	efi_status_t status;
 > +
-> +       if (!efi_enabled(EFI_BOOT))
-> +               return 0;
->
->         if (efi_rt_services_supported(EFI_RT_SUPPORTED_TIME_SERVICES))
->                 platform_device_register_simple("rtc-efi", 0, NULL, 0);
-> --
+> +	if (!efi.get_next_variable ||
+> +	    !efi_enabled(EFI_RUNTIME_SERVICES) ||
+> +	    !efi_rt_services_supported(EFI_RT_SUPPORTED_GET_NEXT_VARIABLE_NAME)) {
+> +		pr_err("FAIL: EFI GetNextVariableName() is not available\n");
+> +		return;
+> +	}
+> +
+> +	/*
+> +	 * Provoke a fault by asking the firmware to write to a read-only
+> +	 * variable.
+> +	 */
+> +	status = efi.get_next_variable(&size, L"", &(efi_guid_t){});
+> +
+> +	if (status != EFI_ABORTED || efi_enabled(EFI_RUNTIME_SERVICES))
+> +		pr_err("FAIL: EFI GetNextVariable() did not abort (%#lx)\n",
+> +		       status);
+> +}
+> +
+>  static struct crashtype crashtypes[] = {
+>  	CRASHTYPE(PANIC),
+>  	CRASHTYPE(PANIC_STOP_IRQOFF),
+> @@ -850,6 +874,9 @@ static struct crashtype crashtypes[] = {
+>  	CRASHTYPE(UNSET_SMEP),
+>  	CRASHTYPE(DOUBLE_FAULT),
+>  	CRASHTYPE(CORRUPT_PAC),
+> +#ifdef CONFIG_EFI
+> +	CRASHTYPE(EFI_RUNTIME_CRASH),
+> +#endif
+>  };
+> 
+>  struct crashtype_category bugs_crashtypes = {
+> -- 
+> 2.54.0.545.g6539524ca2-goog
