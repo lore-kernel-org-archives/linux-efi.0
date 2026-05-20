@@ -1,108 +1,77 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D1DF2DA756;
-	Tue, 19 May 2026 19:10:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id A17812C3245;
+	Wed, 20 May 2026 02:09:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779217834; cv=none; b=TMDpk2jjESYpvnvoRkBjZhlGgjZ30GTtGChNJKo9gVvb6EH/UVuLTm8zF6Q2jcwm6yfvQin/eLcHl4NJG2oTqa3C2ULiF7qmW+F+L0HsXcBiu/WsJSdeRAJf1LHMpuSbt95Hu1MlM1onVA2BkEPnJL1RwB2kWLdr0yuSjbfcz6w=
+	t=1779242944; cv=none; b=I66WBqYc/GyY7RGfqpmSi/fLLNB+udFsijxcHUedQcQU/IuMPt/QvypwHyXfbGJHEAFV6Brs7+4LYoWLpZhOSMnawTQq4XikuSwkbnvG17Cop7Wpm+oRXRdBofpaqSzR0wsu/3Un4eejn8cljbq/WMGyVQaDMaepYOAmnIDynP0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779217834; c=relaxed/simple;
-	bh=jiIWfMA/RNWQsPN7OPtmXFk3Boi9ysbWIn6YyQ+sgZE=;
-	h=Date:From:To:Cc:Subject:Message-Id:In-Reply-To:References:
-	 Mime-Version:Content-Type; b=W5wKe6HfS/RzRXBwCt3lrnFt2rFzAp19YBnmjtUu8dwhh96KLUujt2f+CvPzPQv0EI3bliBmNTg3klrRx+k7srvgsQYWRQTbSub1cIdKGa25e9I76blgT3skNRYkeJ2RppHU0fKSNHUlXQfce/tWYDEwhRo6dM/RUyCLf15+Dbo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=ds7OmLDk; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1779242944; c=relaxed/simple;
+	bh=t/zcxRnmWow/5jiKAHWJPO/z52Ho0PtKFjig7sSxFyc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=fFI5u2RNdi/iHPQ8CyjU5ulO+1gsSf1OKGiSdEJH6kjG/a6gVkBoIHPqA2nzR+RpR39CindZ/eQkqiBSHq5Rrosmm605gomAGumziS4K+CSzvKe+Y1agd+TAIQ4nu185xRea6AEs83sMTuzTV1DsMfZVQl9LOB3/N7y8VAoZXyU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=fCQnfIwc; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="ds7OmLDk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 336F51F000E9;
-	Tue, 19 May 2026 19:10:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=linux-foundation.org; s=korg; t=1779217832;
-	bh=fgNZdK3NJsaTp5IvqSVDZRft25fsIJfb+L1i4SHqdtA=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References;
-	b=ds7OmLDkvieL4R92S3Zhu9KQe+lkz4nqE5rwqXqvFxRW9Rc9cfTflUhCYGVpKwCG0
-	 auLpjWdgmZimtBBjpQje2vujXXAI5UfyXliSqdTHZXTKvAGvMvHLLWBOtOfTMX3PI3
-	 YLtBoq/8zqaAzKZpG4uqyrBcIN2LgMQStvd4aTtY=
-Date: Tue, 19 May 2026 12:10:31 -0700
-From: Andrew Morton <akpm@linux-foundation.org>
-To: Dmitry Antipov <dmantipov@yandex.ru>
-Cc: Andy Shevchenko <andriy.shevchenko@intel.com>, Charlie Jenkins
- <thecharlesjenkins@gmail.com>, Paul Walmsley <pjw@kernel.org>, Palmer
- Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, Alexandre
- Ghiti <alex@ghiti.fr>, Ard Biesheuvel <ardb@kernel.org>,
- linux-riscv@lists.infradead.org, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v11 0/8] lib and lib/cmdline enhancements
-Message-Id: <20260519121031.95ff192c46f02eb05e847e42@linux-foundation.org>
-In-Reply-To: <20260519172259.908980-1-dmantipov@yandex.ru>
-References: <20260519172259.908980-1-dmantipov@yandex.ru>
-X-Mailer: Sylpheed 3.8.0beta1 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="fCQnfIwc"
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 73129355D;
+	Tue, 19 May 2026 19:08:50 -0700 (PDT)
+Received: from [10.164.18.45] (unknown [10.164.18.45])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 63B9C3F7B4;
+	Tue, 19 May 2026 19:08:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
+	t=1779242935; bh=t/zcxRnmWow/5jiKAHWJPO/z52Ho0PtKFjig7sSxFyc=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=fCQnfIwcTX0WscYmYVgcPeWcYVVdX9wlLPvNH72MeszU1VayFwTUD2vFsJ6PYR8Si
+	 SYKjKQx1RjR3VrZs5CR+egCRla1umReo9RHvaigqPs18mXW1O4foKIltE/GDDULh6I
+	 LqPVZT7yDFT5BQ6d7MCuTPvtXW/9KzI6D1i/sf+g=
+Message-ID: <2f60361d-43b9-4f7f-b786-7852d081f4a1@arm.com>
+Date: Wed, 20 May 2026 07:38:50 +0530
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] arm64/mm: Rename ptdesc_t
+To: "David Hildenbrand (Arm)" <david@kernel.org>,
+ Will Deacon <will@kernel.org>, Mike Rapoport <rppt@kernel.org>
+Cc: linux-arm-kernel@lists.infradead.org,
+ Catalin Marinas <catalin.marinas@arm.com>, linux-efi@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <20260430034933.541634-1-anshuman.khandual@arm.com>
+ <afMKEgJGWZpZjZub@kernel.org> <agw_Ih69WYh7NDWZ@willie-the-truck>
+ <34c31f7a-e3e5-47c1-9e41-e6e9a90e89d3@kernel.org>
+Content-Language: en-US
+From: Anshuman Khandual <anshuman.khandual@arm.com>
+In-Reply-To: <34c31f7a-e3e5-47c1-9e41-e6e9a90e89d3@kernel.org>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On Tue, 19 May 2026 20:22:51 +0300 Dmitry Antipov <dmantipov@yandex.ru> wrote:
 
-> This series is a merge of the recently posted [1] and [2]. The first
-> one is intended to adjust '_parse_integer_limit()' and 'memparse()' to
-> not ignore overflows, extend string to 64-bit integer conversion tests,
-> add KUnit-based test for 'memparse()' and fix kernel-doc glitches found
-> in lib/cmdline.c. The second one was originated from RISCV-specific
-> build fixes needed to integrate the former and now aims to provide
-> platform-specific double-word shifts and corresponding KUnit test.
+
+On 19/05/26 4:32 PM, David Hildenbrand (Arm) wrote:
+> On 5/19/26 12:44, Will Deacon wrote:
+>> On Thu, Apr 30, 2026 at 09:51:46AM +0200, Mike Rapoport wrote:
+>>> Hi Anshuman,
+>>>
+>>> On Thu, Apr 30, 2026 at 04:49:33AM +0100, Anshuman Khandual wrote:
+>>>> ptdesc_t sounds very similar to the core MM struct ptdesc which is actually
+>>>> the memory descriptor for page table allocations. Hence rename this typedef
+>>>> element as pxxval_t instead for better clarity and separation.
+>>>
+>>> Maybe we should keep the "pt" prefix and make it "ptval_t"?
+>>
+>> Yeah, the 'pxx' prefix really hurts my eyes. Please use something else!
 > 
-> This series was briefly tested on X86, RISCV32, ARM, and MIPS using QEMU,
-> and compile-tested for LoongArch32 as well.
+> Fine with me as long as we don't call it something with "pte" in it.
 > 
-> Getting feedback from RISCV core maintainers would be very helpful.
-> 
-> Special thanks to Andy Shevchenko, Charlie Jenkins, and Andrew Morton.
-> 
-> [1] https://lore.kernel.org/linux-riscv/20260403103338.1122415-1-dmantipov@yandex.ru
-> [2] https://lore.kernel.org/linux-riscv/20260427090105.705529-1-dmantipov@yandex.ru
 
-Thanks.  I updated mm.git's mm-nonmm-unstable branch to this version.
+Seems like there are two choices here
 
-Below is how v11 altered mm.git.  Please note that it's conventional to
-changelog the updates in the [0/N].  I see it there in the [6/8] and
-[7/8] changelogs:
+(A) pxdval_t
+(B) ptval_t which Mike had suggested earlier
 
-v11: add prototypes to arch/riscv/include/asm/asm-prototypes.h (Sashiko)
-v11: explicitly depends on arm/xtensa/microblaze or 32-bit riscv/sparc (Sashiko)
-
-
- arch/riscv/include/asm/asm-prototypes.h |    4 ++++
- lib/Kconfig.debug                       |    2 +-
- 2 files changed, 5 insertions(+), 1 deletion(-)
-
---- a/arch/riscv/include/asm/asm-prototypes.h~b
-+++ a/arch/riscv/include/asm/asm-prototypes.h
-@@ -5,6 +5,10 @@
- #include <linux/ftrace.h>
- #include <asm-generic/asm-prototypes.h>
- 
-+long long __lshrdi3(long long a, int b);
-+long long __ashrdi3(long long a, int b);
-+long long __ashldi3(long long a, int b);
-+
- long long __lshrti3(long long a, int b);
- long long __ashrti3(long long a, int b);
- long long __ashlti3(long long a, int b);
---- a/lib/Kconfig.debug~b
-+++ a/lib/Kconfig.debug
-@@ -2974,7 +2974,7 @@ config BITS_TEST
- config SHDI3_KUNIT_TEST
- 	tristate "KUnit test for __ashldi3(), __ashrdi3(), and __lshrdi3()"
- 	depends on KUNIT
--	depends on (32BIT || ARM)
-+	depends on ARM || XTENSA || MICROBLAZE || ((RISCV || SPARC) && !64BIT)
- 	help
- 	  This builds the unit test for __ashldi3(), __ashrdi3(), and
- 	  __lshrdi3() helper functions used to implement 64-bit arithmetic
-_
-
+Unless there is a preference will probably go with pxdval_t
