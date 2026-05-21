@@ -1,146 +1,83 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.15])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1787367283;
-	Thu, 21 May 2026 12:43:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28CB33E275F
+	for <linux-efi@vger.kernel.org>; Thu, 21 May 2026 13:34:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779367409; cv=none; b=EeRMBB37yYJkn10840/Ep21TuAuOnrgYECk0hd+FJ4rlC9FER2PKg7KJzvXI/HlKJX6Pn+ir3jSFdai7Sdri9Qa1cmhHyEaOkZku6agBghE7Xk2o77WWyWBXG8aA+LtFkY4ytClx5rR6KkPSULRGN3Sck9sF4JBJzZK45Xrqmmk=
+	t=1779370466; cv=none; b=kfflhRp8zRi3+U4MEz92ELbMDQi5dZUOx1OIxY72V1OWPiR7r5zo+1Totz8K22WyzRqNbXpCp4/brOGn59DrWRxFG8SagykVfxYToihOe11we95YZL4sHXIhwVi8REz81nL0+PwGQBYG8xPhCnStHJW2otM+9KTlNvzhdsPbnSk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779367409; c=relaxed/simple;
-	bh=6qGXnuBUztq2mFzcY8Yv6RaizNCIjxJo4qLhwBShajE=;
-	h=From:Date:To:cc:Subject:In-Reply-To:Message-ID:References:
-	 MIME-Version:Content-Type; b=fgMudER189JWFCZr8XFqEa7Pp+mbewNuKvmA2PSvqebNqpGMXoQF10XdBqCqsXzxPDIrEo+W6IRI94q4FUueUnBuqk3Rg+iro6Z0vCM/x167omh9hVXuyXjrzYbomVo+QmSdSBMQ/XCSHo9TSlotcViqvZ+DfZKLBlReA76M4V8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=pass smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Okr7lM7p; arc=none smtp.client-ip=198.175.65.15
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1779370466; c=relaxed/simple;
+	bh=E0rKsattX3JkwhOuHLwqhQu9cO+/sG9Kde45UsfFI6E=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=KGms9HYnM4Pmz/vjKrpi5c5u2VJFKA1xi/bpA48nAC6r1kqcm/zu++0ikIlygsQkjUXdunOiFFiFqlZqsVb+zvWpjKcIiXTjcc858euZiP1jhOCnLVVBjchdUohK2b/ngfc27rZm0Tm/rIMAl/yzd38Zf9TDjkL+qKkszuk0i84=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BLklzthZ; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Okr7lM7p"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1779367408; x=1810903408;
-  h=from:date:to:cc:subject:in-reply-to:message-id:
-   references:mime-version;
-  bh=6qGXnuBUztq2mFzcY8Yv6RaizNCIjxJo4qLhwBShajE=;
-  b=Okr7lM7pl9blWFJIL6NorN2rv/p2QgBEqSMZE7Gkew8liYSMTkADEKVO
-   UB5vXK9BXUj72R7TAh8A4LqCAxb+Y+9ebj+B5w/dKJjfdoNHH/ph4ueAL
-   53BUk8jVumC0ATcrg+mrEQX0LGLv7FfoqtKlSCeRSImkWopVP92LQyUjF
-   O37p0Kq4CNDO3PEpRFEfR7CwzS5jabUQWRC3s4pjE0VYD5M4fcXj7OaFf
-   ulUXHXEN+WsapR6pEBLGQwIgGAlpNIYBQh5c553OubzqrGH1Ik7msjCyb
-   9nIKbfB83KJO6rdGMWMFccrDtt7rFDoYPin/fnZp/S/rHUxlYSqhW0pCH
-   Q==;
-X-CSE-ConnectionGUID: 6/WScsa9SqOK9ToU4ThqQw==
-X-CSE-MsgGUID: p9AGGgSZRBq1U+4lrDyCJQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11792"; a="83903512"
-X-IronPort-AV: E=Sophos;i="6.23,246,1770624000"; 
-   d="scan'208";a="83903512"
-Received: from orviesa009.jf.intel.com ([10.64.159.149])
-  by orvoesa107.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 May 2026 05:43:28 -0700
-X-CSE-ConnectionGUID: O31rDEfJTZ+Q7ICIfpLrAg==
-X-CSE-MsgGUID: AYJuUjMbTAaLPORQgzm5FA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,246,1770624000"; 
-   d="scan'208";a="240543043"
-Received: from ijarvine-mobl1.ger.corp.intel.com (HELO localhost) ([10.245.244.98])
-  by orviesa009-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 May 2026 05:43:25 -0700
-From: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
-Date: Thu, 21 May 2026 15:43:21 +0300 (EEST)
-To: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-cc: Ard Biesheuvel <ardb@kernel.org>, Hans de Goede <hansg@kernel.org>, 
-    LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, 
-    platform-driver-x86@vger.kernel.org
-Subject: Re: [PATCH v4 2/2] platform/apple-gmux: use apple_brightness to save
- brightness to EFI
-In-Reply-To: <20260316153407.1781-3-atharvatiwarilinuxdev@gmail.com>
-Message-ID: <f5cb54b3-b30d-2e20-874a-824aab1c3eea@linux.intel.com>
-References: <20260316153407.1781-1-atharvatiwarilinuxdev@gmail.com> <20260316153407.1781-3-atharvatiwarilinuxdev@gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BLklzthZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 113F11F000E9;
+	Thu, 21 May 2026 13:34:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1779370464;
+	bh=O+N7JtBZl0kMFlocAcLwUFMKA7Rz7N0t187+S5hbFaw=;
+	h=From:To:Cc:Subject:Date;
+	b=BLklzthZxZiJ8YdVIoBwDO33G/6MoGyJtVZMNTKVsu9cbAZVdKF2hgIDaJYY/T+t6
+	 N3KBKJvxrhZdHaGJr2kj8OfImQh5fKVccjg71HFWzBHvbp5eH06WaqHhAv5QZsTKmO
+	 aAPznMi/TWRU2+50obuAnuB/SP0D2t5GL0nxJCLNXugBWkJZ/E+Wh5haCTqgD5vUZf
+	 DLKzxIyKivi66rNwDLBfWpNLIKCi9fwwKet4aP7vnpcv9YCtb3AwehINJkIJE2PM8A
+	 B4x986A5uAF6kL8qEBrmilmSwbeljjmArrJ/aTjPj2P8w6Ad/pnUmG/7B2fHHIdvh1
+	 KMG050lazYhoA==
+From: Ard Biesheuvel <ardb@kernel.org>
+To: torvalds@linux-foundation.org
+Cc: linux-efi@vger.kernel.org,
+	Ard Biesheuvel <ardb@kernel.org>
+Subject: [GIT PULL] EFI fixes for v7.1 #2
+Date: Thu, 21 May 2026 15:34:14 +0200
+Message-ID: <20260521133414.65900-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8bit
 
-On Mon, 16 Mar 2026, Atharva Tiwari wrote:
+Hello Linus,
 
-> use apple_brightness to save brightness to EFI.
+Please pull the EFI fixes below - details are in the tag.
 
-Please capitalize changelog text properly.
 
-> 
-> (tested on iMac20,1)
-> 
-> Signed-off-by: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
-> ---
->  drivers/platform/x86/apple-gmux.c | 21 +++++++++++++++++++++
->  1 file changed, 21 insertions(+)
-> 
-> diff --git a/drivers/platform/x86/apple-gmux.c b/drivers/platform/x86/apple-gmux.c
-> index 1417e230edbd..cab3122c1a86 100644
-> --- a/drivers/platform/x86/apple-gmux.c
-> +++ b/drivers/platform/x86/apple-gmux.c
-> @@ -22,6 +22,7 @@
->  #include <linux/pci.h>
->  #include <linux/vga_switcheroo.h>
->  #include <linux/debugfs.h>
-> +#include <linux/platform_data/apple-brightness.h>
->  #include <acpi/video.h>
->  #include <asm/io.h>
->  
-> @@ -78,6 +79,8 @@ struct apple_gmux_data {
->  	/* debugfs data */
->  	u8 selected_port;
->  	struct dentry *debug_dentry;
-> +
-> +	bool save_efi;
->  };
->  
->  static struct apple_gmux_data *apple_gmux_data;
-> @@ -960,6 +963,13 @@ static int gmux_probe(struct pnp_dev *pnp, const struct pnp_device_id *id)
->  	}
->  
->  	gmux_init_debugfs(gmux_data);
-> +	if (IS_ENABLED(CONFIG_APPLE_BRIGHTNESS)) {
-> +		ret = apple_brightness_probe(gmux_data->bdev, &gmux_get_brightness);
-> +		if (ret)
-> +			pr_warn("Unable to Enable EFI brightness save: %d\n", ret);
+The following changes since commit 2c340aab5485ebe9e33c01437dd4815ef33c8df5:
 
-Include for pr_warn() is missing from this file.
+  x86/efi: Restore IRQ state in EFI page fault handler (2026-05-05 09:31:28 +0200)
 
-> +		else
-> +			gmux_data->save_efi = true;
-> +	}
->  	return 0;
->  
->  err_register_handler:
-> @@ -1012,6 +1022,16 @@ static void gmux_remove(struct pnp_dev *pnp)
->  	kfree(gmux_data);
->  }
->  
-> +static void gmux_shutdown(struct pnp_dev *pnp)
-> +{
-> +	struct apple_gmux_data *gmux_data = pnp_get_drvdata(pnp);
-> +
-> +	if (IS_ENABLED(CONFIG_APPLE_BRIGHTNESS) && gmux_data->save_efi)
-> +		apple_brightness_shutdown();
-> +
-> +	gmux_remove(pnp);
-> +}
-> +
->  static const struct pnp_device_id gmux_device_ids[] = {
->  	{GMUX_ACPI_HID, 0},
->  	{"", 0}
-> @@ -1026,6 +1046,7 @@ static struct pnp_driver gmux_pnp_driver = {
->  	.name		= "apple-gmux",
->  	.probe		= gmux_probe,
->  	.remove		= gmux_remove,
-> +	.shutdown	= gmux_shutdown,
->  	.id_table	= gmux_device_ids,
->  	.driver		= {
->  			.pm = &gmux_dev_pm_ops,
-> 
+are available in the Git repository at:
 
--- 
- i.
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-fixes-for-v7.1-2
 
+for you to fetch changes up to d8809f6931065cbbf3554647a50a65a471ab5983:
+
+  efi: sysfb_efi: Extend quirk to cover IdeaPad Duet 3 10IGL5-LTE (2026-05-19 17:27:15 +0200)
+
+----------------------------------------------------------------
+EFI fixes for v7.1 #2
+
+- Permit ACPI PRM runtime firmware calls when acpi_init() runs
+
+- Add another Lenovo Ideapad framebuffer quirk
+
+- Cosmetic tweak
+
+----------------------------------------------------------------
+Ard Biesheuvel (1):
+      efi: Allocate runtime workqueue before ACPI init
+
+Marius Hoch (1):
+      efi: sysfb_efi: Extend quirk to cover IdeaPad Duet 3 10IGL5-LTE
+
+Rong Tao (1):
+      efi: efi.h: Remove extra semicolon
+
+ drivers/firmware/efi/efi.c       | 28 ++++++++++++++++------------
+ drivers/firmware/efi/sysfb_efi.c |  9 ++++++---
+ include/linux/efi.h              |  2 +-
+ 3 files changed, 23 insertions(+), 16 deletions(-)
