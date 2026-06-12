@@ -1,41 +1,41 @@
 Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9726439EF25;
-	Fri, 12 Jun 2026 11:02:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6368F39E6D4;
+	Fri, 12 Jun 2026 11:02:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781262137; cv=none; b=Lq6I4F0vu5f+SRIuC/7g/RmPy123JfiCWByP3ZaE2X1Ye4yzcD7yUxZvz+LWLourhfw2UU8u0UgNXfCv4gZ+ZMZ6Fg7C8AL9FTu/pFvs9h/liOhfUemh0gsdo3jzV+QxLlTKdNIr+ZT00XPPsuA+YgqLqHjEO9QOPeVO8zd3G58=
+	t=1781262141; cv=none; b=ZVqzOO1f3v3yzY+sEb9FDX496qOn3iwmV8shmDvuwBFx4lInSNHD5XKLeQfcf8k8rxY8hqw2EPIrZESMtyLg5ifQS0Sc2TLRGKFS8Mm0PFu3SP0VabtkFZf3lDAnhEMEmx1Beh1E7Fb8osvG34lc2oWgRfkNyjJ0nK3jwq/f6F0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781262137; c=relaxed/simple;
-	bh=bkKVE2YBxypJKYTqkpdYBWYX53CfufISKEIkFDmo6ms=;
+	s=arc-20240116; t=1781262141; c=relaxed/simple;
+	bh=ExZEGeAKb8Abe8FuJSPKlUqN/XGe2L+2AaiXj3Aue30=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=nCBlmCXOSp68XCCOYJtpWGAPw86mvOAiI/gBE5rr80BfCV+tlyEyEMXsE85zhHJzbu86vM55oQqQ4jD2hn6apCUdQfCuntaryKye5ZUn2Kp1JUcQzWg8iVueRgF0rNF+K0/nbKcmWnYWMPzKYKCvft3tuLzyale66vY1vl06emY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=MQPNA0j/; arc=none smtp.client-ip=82.195.75.108
+	 In-Reply-To:To:Cc; b=a39/0+sDd53RnJR7tin5bLOGHmI3lT4T1/hLZsnNtpvMQZzEZqmKj0FwechP3R6jq9FYs3tC/Y65ivtZic68alLp5FaCS6kxmztanmNus1EX4unJ0TtrMikrzp3IrWoX0+XtbQekUT97WgZMZnokvlKnoG6cjLej7EEsxnTyBsc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=nMwC5Mqf; arc=none smtp.client-ip=82.195.75.108
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="MQPNA0j/"
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="nMwC5Mqf"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
 	s=smtpauto.stravinsky; h=X-Debian-User:Cc:To:In-Reply-To:References:
 	Message-Id:Content-Transfer-Encoding:Content-Type:MIME-Version:Subject:Date:
 	From:Reply-To:Content-ID:Content-Description;
-	bh=ZxoLbrwOxQ8F1qc420GPLoYoR+1OtMo+FJvOdtqt+5g=; b=MQPNA0j//j7v9i0Q63HN7lUHi5
-	gN2we90IfkDrNPplJGGMZsxdnjJH54vcsXpGoHX6V7EPVabZsWoCs3H9ZFTaXaVaWnMlLOhjESHQ7
-	w0/70zr43jx84bI9GS6zDZ1TWdMkADEQ4+T8dKTzi330hMFZzyg0IpwtNLGCiJhbOrA6loI04bCGw
-	sLZDrTaexqO0ERtXd4HGMrBgPYmiQUIdoAFoA21U+mmERvAyBVLPSGLYd6JiVr7KY8Qm6sqweK17F
-	xxQ1LNmyud33rxNvEvfkn/v6yAFWhpjklFu9gw4Zf3ohkWiTH5PqYRbGbuhcmZ9374NNxZFRRf6TK
-	XTwwFozw==;
+	bh=6KOw4vKZntTKEbqtxTt5q4WIyNqHTwvW8Y79zQ6s3lo=; b=nMwC5Mqf5QI1iNq2ljWlOG4WK8
+	r92QryolAkLpHPH0hiWTDyn9QV+4gk39PPTsoIm+2j2WrIwmN9MnLmt+l+5bjcE6ea7dmYTDe2RZc
+	XWPNc4rX/hKgRoUHH8OcVuSdv5bxn4XeCIJu0Np3o0Sret5or25iFgD5sr8+1t2cvz9Z35ERBKYII
+	3V99GpF0TcYKTb6F2L9bGFmh+YidzKVjH+l/nPnCiWrSxunGZ2mIVkkH1/C78ET8aJ1e6pN8CFxD6
+	XPXCc5IlAYOBtAsGLgOefaqUli/g1uSaasErzDFannB1gbzxW55eBg++X7uMJIb/2iVDErLn9vzh1
+	DYGC5nsQ==;
 Received: from authenticated-user
 	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
 	(Exim 4.96)
 	(envelope-from <leitao@debian.org>)
-	id 1wXzeG-00AghH-0s;
-	Fri, 12 Jun 2026 11:02:04 +0000
+	id 1wXzeK-00Aghi-2h;
+	Fri, 12 Jun 2026 11:02:09 +0000
 From: Breno Leitao <leitao@debian.org>
-Date: Fri, 12 Jun 2026 04:01:31 -0700
-Subject: [PATCH v2 4/6] efi/runtime-wrappers: bound the wait for EFI
- runtime service calls
+Date: Fri, 12 Jun 2026 04:01:32 -0700
+Subject: [PATCH v2 5/6] efi/runtime-wrappers: honour EFI_RUNTIME_SERVICES
+ in the non-blocking paths
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -44,7 +44,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260612-efi_timeout-v2-4-f714bb016df6@debian.org>
+Message-Id: <20260612-efi_timeout-v2-5-f714bb016df6@debian.org>
 References: <20260612-efi_timeout-v2-0-f714bb016df6@debian.org>
 In-Reply-To: <20260612-efi_timeout-v2-0-f714bb016df6@debian.org>
 To: Ard Biesheuvel <ardb@kernel.org>, 
@@ -58,80 +58,81 @@ To: Ard Biesheuvel <ardb@kernel.org>,
 Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
  Breno Leitao <leitao@debian.org>, kernel-team@meta.com
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2443; i=leitao@debian.org;
- h=from:subject:message-id; bh=bkKVE2YBxypJKYTqkpdYBWYX53CfufISKEIkFDmo6ms=;
- b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqK+cTLDVY9+SNrKXmbbBU439YRGdsoCTs0RKME
- 9qnhEuRAjSJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCaivnEwAKCRA1o5Of/Hh3
- bZtNEACODfgkkhov52ktCKOOonBFpDdsMae+B7MvnG9rLUMnM4501f4t+/O4WTcmPtxhEbCpkJh
- 5yvDtZmnypi4Qnf+VzjuNt37Zm75p7RblfnYFo3k3TjFiCEGx65K4XCDIEefcUUKpagWWlVVGQL
- UoHTd6xoIPbrZa78bpuvvQqLZ3alBy5f19GhA1jlA8zaEyQdSpvRFJTYlbxEGWrRQf4/VGsLjRL
- hZ1Hbv2RjPkVjmDGwOMPGeDvDoiZUUdxGZoRRJCQirveN2F1r6hdvE8JztoSjJa4rVsKFGSHnvi
- 9/MXskvVrmmeBZMQIMc5uhe+09HEhf8z3ZQEdvuf7gbAc6OXfVzlGpBWK3iLh7oAOOO7zFUFDUO
- utzprWDv3ZKEXNSf7iAgDYs2R5g36HFChZtCRExarpiqQfiAgGNnI0ZZn6xHa9S0aIWdJsgnYir
- u49JZBo1jmfQYSW6pGOItAbqxHk/0KNV8wmZdg73TEHpSY+/+hU66Ghc36PXvHDPzIQbSbB1aBg
- axYJnz1iz9cC5chupaYm9rAMVDIFhbNlnre+aK6EtucufsrBjeNowQ/kRE5RpNDHRulrNKO2QDj
- 15ICnRLkGxpgP/hIZArqiqf6uRoTtpSZvL3UFd3R+X+2t/jDkD/KYxMi/wxOJ5/Hw8qeNK0ogie
- eCEO9V5P6ghXstA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2339; i=leitao@debian.org;
+ h=from:subject:message-id; bh=ExZEGeAKb8Abe8FuJSPKlUqN/XGe2L+2AaiXj3Aue30=;
+ b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqK+cTlq4lHgEvFVaax9NYsmdKbRr5kTyqx0eHL
+ loQs1zE2bqJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCaivnEwAKCRA1o5Of/Hh3
+ bfPoD/91+DRLsbfEaStihLIf5MII/kHtLWISVuZn4mxv1v8UN4egOjoqMdqLLa6tzkGdbd2VYgl
+ +Ubt8FA/UJWEYskLshRreLNjxFZ/Fhehh/kBIPCk86rSQiIM9Exbmntl4oZgNJjm99gBmrlvpFF
+ 2GNhQMYKvFE6R7zSebhFhDUeGuUuybULd8fWNuRgAzCo3GHSKz1lt19Db6nbfSrDf0bi6j3DmMS
+ ZbvGOWs7cj7fZCDicEDebxcfSOqVAGlu2D6dVtCsI4DgaVwJ6vyo2CyiZt2gRBRWVpEYGPLBgWB
+ uiWOSxLXPYrJ5nhMY6XaoLPdkqr9fLOPHptZJ231wiOjEcEuCn4UZ6kD3HM3iY14dbT39GH2pV3
+ CJEAKQJtY59VqAXugb80aK3SilkDLjiBZV9YUwAqm3tf3cmIG6A+gZPJ2C/wAvt3/CTHSInYcY3
+ 67kHzusmlt/eCkQjO0c+bNmPFAgddkX9DkTZOK2Mj+Pu7m2uhw7FRtsX6PtjFUxqyS/xopYs4Tw
+ rt5kP9kEDANx++PDmKuWKUJqOrADonUQFDcTK28IY2OgSwAmSZFEkkXtqkriJs6hs6Y21XwoOD9
+ +sqVMPkrIQmn67f8XNEO09+R+mzs4RHNxEtXnscWho35a40GddHy8MHcXlbIIBNVBMqXPaLd9iV
+ MibD2Xf/3HWhIvg==
 X-Developer-Key: i=leitao@debian.org; a=openpgp;
  fpr=AC8539A6E8F46702CA4A439B35A3939FFC78776D
 X-Debian-User: leitao
 
-When an EFI runtime service hangs in firmware, the efi_rts_wq worker is
-stuck inside the call and cannot be cancelled. __efi_queue_work() then
-waits on the completion forever while holding efi_runtime_lock, so every
-later EFI caller is wedged until reboot; the only symptom is a "workqueue
-lockup" and tasks piling up on the semaphore.
+Three wrappers call firmware directly instead of going through
+__efi_queue_work(), and none of them check whether runtime services are
+still enabled: virt_efi_set_variable_nb(),
+virt_efi_query_variable_info_nb() and virt_efi_reset_system(). Once a
+hang has cleared EFI_RUNTIME_SERVICES - or efi_recover_from_page_fault()
+has cleared it on a firmware page fault - these paths still enter the
+(possibly wedged) firmware, e.g. an EFI pstore write through the
+non-blocking SetVariable() variant, in violation of UEFI's
+non-reentrancy rules. reset_system() is reachable too: efi_reboot()
+only gates it on the static efi_rt_services_supported() mask, which does
+not track the runtime disable.
 
-Replace wait_for_completion() with wait_for_completion_timeout() bounded
-by EFI_RTS_TIMEOUT (120 seconds). On timeout, clear EFI_RUNTIME_SERVICES
-and return EFI_ABORTED so later callers fail fast at the entry check
-instead of each paying another 120 seconds. The wedged worker is
-intentionally leaked and keeps ownership of efi_rts_work.
+Check efi_enabled(EFI_RUNTIME_SERVICES) at the top of each before taking
+efi_runtime_lock and calling into firmware.
 
-Known limitation: the efi_rts_args the worker holds points into the
-caller's stack frame; if firmware unblocks after the timeout and writes
-the output buffers, they land in reused memory. Firmware hung this long
-rarely recovers; a follow-up could bounce the buffers through kmalloc.
-
+Suggested-by: Ard Biesheuvel <ardb@kernel.org>
 Signed-off-by: Breno Leitao <leitao@debian.org>
 ---
- drivers/firmware/efi/runtime-wrappers.c | 16 +++++++++++++++-
- 1 file changed, 15 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/runtime-wrappers.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
 diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 0cd350760446c..8badf0419a148 100644
+index 8badf0419a148..842f72d44211f 100644
 --- a/drivers/firmware/efi/runtime-wrappers.c
 +++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -118,6 +118,14 @@ union efi_rts_args {
+@@ -461,6 +461,9 @@ virt_efi_set_variable_nb(efi_char16_t *name, efi_guid_t *vendor, u32 attr,
+ {
+ 	efi_status_t status;
  
- struct efi_runtime_work efi_rts_work;
- 
-+/*
-+ * Upper bound on how long we wait for a single EFI runtime service
-+ * call to finish before declaring firmware wedged. Chosen to be longer
-+ * than any plausible legitimate call (including UpdateCapsule on slow
-+ * SPI-NOR) while still bounding userspace wait time.
-+ */
-+#define EFI_RTS_TIMEOUT		(120 * HZ)
++	if (!efi_enabled(EFI_RUNTIME_SERVICES))
++		return EFI_DEVICE_ERROR;
 +
- /*
-  * efi_queue_work:	Queue EFI runtime service call and wait for completion
-  * @_rts:		EFI runtime service function identifier
-@@ -342,7 +350,13 @@ static efi_status_t __efi_queue_work(enum efi_rts_ids id,
- 		goto exit;
- 	}
+ 	if (down_trylock(&efi_runtime_lock))
+ 		return EFI_NOT_READY;
  
--	wait_for_completion(&efi_rts_work.efi_rts_comp);
-+	if (!wait_for_completion_timeout(&efi_rts_work.efi_rts_comp,
-+					 EFI_RTS_TIMEOUT)) {
-+		pr_err("EFI runtime service %d wedged in firmware; disabling EFI runtime services\n",
-+		       id);
-+		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-+		return EFI_ABORTED;
+@@ -500,6 +503,9 @@ virt_efi_query_variable_info_nb(u32 attr, u64 *storage_space,
+ 	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
++	if (!efi_enabled(EFI_RUNTIME_SERVICES))
++		return EFI_DEVICE_ERROR;
++
+ 	if (down_trylock(&efi_runtime_lock))
+ 		return EFI_NOT_READY;
+ 
+@@ -527,6 +533,11 @@ static void __nocfi
+ virt_efi_reset_system(int reset_type, efi_status_t status,
+ 		      unsigned long data_size, efi_char16_t *data)
+ {
++	if (!efi_enabled(EFI_RUNTIME_SERVICES)) {
++		pr_warn("EFI Runtime Services are disabled, not invoking reset_system()\n");
++		return;
 +	}
- 
- 	WARN_ON_ONCE(efi_rts_work.status == EFI_ABORTED);
- exit:
++
+ 	if (down_trylock(&efi_runtime_lock)) {
+ 		pr_warn("failed to invoke the reset_system() runtime service:\n"
+ 			"could not get exclusive access to the firmware\n");
 
 -- 
 2.53.0-Meta
