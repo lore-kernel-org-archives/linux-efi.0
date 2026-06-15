@@ -1,36 +1,35 @@
-Received: from out-172.mta1.migadu.com (out-172.mta1.migadu.com [95.215.58.172])
+Received: from out-170.mta1.migadu.com (out-170.mta1.migadu.com [95.215.58.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B7902DF152
-	for <linux-efi@vger.kernel.org>; Mon, 15 Jun 2026 23:28:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAC7B337BAB
+	for <linux-efi@vger.kernel.org>; Mon, 15 Jun 2026 23:28:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781566124; cv=none; b=WI6chBnmNuBXesmHsaNtbhCxBgG9ZsNuMWAodfzWdwb61bihhPvlduG55DXe6rQvNBzlTkTV4i0fmIqi4BONHNHoF+yT5mYjC+z7L0lo2vXsOn9rNuuhCWjy5nod5L51ECWQmD6t117dT6lQ5elarLj65szP3hHTbDREvCxO1O4=
+	t=1781566128; cv=none; b=rX/DXX2fIgdd+pjSePTGbs4l3WbPsm7cwXwEVDx/RtpoT7A2fxZq1Ew8tOeenAw+NJshc2hBQZzR5cRdi2rcBRCK6yDKznXI4GiTstrZ84R4Mwk6gRTCpmSJmU0G1TregD0wHGVCnG1BKktljKUXNpqbzH8zVfABGKBWvyJOJl4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781566124; c=relaxed/simple;
-	bh=NNiG4rqPFC8BQrRXjhTqiLRidsNkTGaUd2xAU0lkm1M=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Fb7SaV1hxrI9O4Kp8dmaxP7we2oABDT1y0eRfkG5JaNjX+/gJ7Z1I4SiyFycNvMajOGEKuN46euikj6S32WQvRHrJYOjML7KE30XBYfLB+v2J965k/mvBtzKSeFUVXHlmqlMsHHeucRVw0X3ToTQkYshj82OE7D3bBKroqlx9gY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=cVG44EW3; arc=none smtp.client-ip=95.215.58.172
+	s=arc-20240116; t=1781566128; c=relaxed/simple;
+	bh=W8ZPnWClI1FOSOffrRXJpJp5is35eKP4cq6LR7fhCs8=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=VcllspIf6T+rWLWPixx17leHMvXNIDA5baQKoa59Ci6t8dxTX8srey8XA6Ps4e0ijsMhbjMs4XZCDRtj+ln/buEJ3b3sdR5RNpkFuL9p3mNXfIDxc2aqu4f8Bf7Kh4HtKeIrvCJsXaVw7WZkF0tcIlcXO7WX+9lz9eveLYwpVNY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=ISP+HsIX; arc=none smtp.client-ip=95.215.58.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="cVG44EW3"
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="ISP+HsIX"
 X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1781566121;
+	t=1781566115;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=bFD7PCYKgMNlQ0jJPMmBIf9JeT90Xg327A7enHcLmAQ=;
-	b=cVG44EW3QUCRCgsq2RqyhOsSP+ar7IZtxISVDRqexoye3m3MkwCuL4VwCJZ0tbO9jJUnfL
-	sK6MpkXMKSuGR3NQorsVjOFspqTCHgR5OWb9dQobANunc+yi6tch6aA6sL59rHbfm7Vl4J
-	OmKN5Y+VsweLxuoBzW/kEX6II7uKs5o=
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=4xr3tBk+BcbA0Ah+NVqqu2m6gD+J6uNNVuR2VL7WtzI=;
+	b=ISP+HsIXpQlsmofH36Ugigwu7YMla5aN6h9djLvy+3PewRaTGPwX1SLAO5LIN80oC5DqfL
+	ypMeNdRxv2pa0al8G2cGwjBTeu8iZQNvxdUBH8Jd2um+fIQGe48AgTjGFMiEL55FWE5+NN
+	P8rpR0rYGX7GMaMybJhSkG8/4KP3cZ4=
 From: Atish Patra <atish.patra@linux.dev>
-Date: Mon, 15 Jun 2026 16:28:21 -0700
-Subject: [PATCH 1/2] riscv: efi: Power off via EFI runtime services when
- available
+Subject: [PATCH 0/2] riscv: Use EFI runtime services for poweroff and
+ restart
+Date: Mon, 15 Jun 2026 16:28:20 -0700
+Message-Id: <20260615-efi_reset_shutdown-v1-0-9414edcbbab0@meta.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -39,9 +38,9 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260615-efi_reset_shutdown-v1-1-9414edcbbab0@meta.com>
-References: <20260615-efi_reset_shutdown-v1-0-9414edcbbab0@meta.com>
-In-Reply-To: <20260615-efi_reset_shutdown-v1-0-9414edcbbab0@meta.com>
+X-B4-Tracking: v=1; b=H4sIAJSKMGoC/x2MWwqAIBAAryL7naD2sq4SEVFb7o+G2wuiuyd9D
+ szMA4yRkKEVD0Q8iSn4BDoTMLnRryhpTgxGmUpVupS40BCRcR/YHfscLi/rxqhCjTZftIUUbjF
+ J9z/t+vf9AIeN/SRkAAAA
 To: Ard Biesheuvel <ardb@kernel.org>, 
  Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
  Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
@@ -51,35 +50,33 @@ Cc: linux-efi@vger.kernel.org, linux-riscv@lists.infradead.org,
  linux-kernel@vger.kernel.org, Atish Patra <atishp@meta.com>
 X-Migadu-Flow: FLOW_OUT
 
-From: Atish Patra <atishp@meta.com>
+Today RISC-V always uses the SBI SRST extension for both poweroff and restart,
+even when UEFI runtime services are available. This series makes RISC-V prefer
+EFI runtime services for both paths when available. The reset via EFI is
+required for EFI capsule updates and also documented as a preferred method
+in BRS 1.0 spec (e.g. URT_030)[1] 
 
-When booted via UEFI with runtime services enabled, EFI Reset Shutdown is
-the firmware-preferred shutdown path: it lets firmware run its own
-shutdown hooks which may invoke SBI SRST extension internally. However,
-RISC-V always powers off via the SBI SRST extension today and EFI runtime
-path is never used even when firmware provides it.
+Behavior on SBI-only (non-EFI) systems is unchanged.
 
-Enable the poweroff via EFI by overriding efi_poweroff_required()
+Tested under QEMU 'virt' with EDK2/UEFI firmware exposing runtime
+ResetSystem().
+
+[1] https://docs.riscv.org/reference/brs/uefi.html#uefi
 
 Signed-off-by: Atish Patra <atishp@meta.com>
 ---
- arch/riscv/kernel/efi.c | 5 +++++
- 1 file changed, 5 insertions(+)
+Atish Patra (2):
+      riscv: efi: Power off via EFI runtime services when available
+      riscv: Restart via EFI runtime services when available
 
-diff --git a/arch/riscv/kernel/efi.c b/arch/riscv/kernel/efi.c
-index b64bf1624a05..2d3cc57b4535 100644
---- a/arch/riscv/kernel/efi.c
-+++ b/arch/riscv/kernel/efi.c
-@@ -95,3 +95,8 @@ int __init efi_set_mapping_permissions(struct mm_struct *mm,
- 				   md->num_pages << EFI_PAGE_SHIFT,
- 				   set_permissions, md);
- }
-+
-+bool efi_poweroff_required(void)
-+{
-+	return efi_enabled(EFI_RUNTIME_SERVICES);
-+}
+ arch/riscv/kernel/efi.c   | 5 +++++
+ arch/riscv/kernel/reset.c | 7 +++++++
+ 2 files changed, 12 insertions(+)
+---
+base-commit: 8cd9520d35a6c38db6567e97dd93b1f11f185dc6
+change-id: 20260615-efi_reset_shutdown-792040a83f18
 
+Best regards,
 -- 
-2.53.0-Meta
+Atish Patra <atishp@meta.com>
 
