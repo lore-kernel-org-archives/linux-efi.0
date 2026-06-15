@@ -1,195 +1,216 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04E11345731
-	for <linux-efi@vger.kernel.org>; Fri, 12 Jun 2026 11:11:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76C1A408603;
+	Mon, 15 Jun 2026 16:10:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781262696; cv=none; b=TKQq7g93oQnWSZtAjNua9TfyZ/VtHantXrGJ7BbpmOCzoytjJpj2n75Fvgg1OaDx/Cg5VidnoDMHVgI4GX/7Z8H92iblHB94Bd7Vr1yUfi+dYZZnh1EHvwAGP5DkgRyJdRd2zRGcVobbyeLdqt3kjqd+D76Ob4egFVJhk5iyKr4=
+	t=1781539811; cv=none; b=MZQqMCQtX3jiIn/HPzoIj6MHS5ShzEXqO8/nNYhhMCl5XeojQXurP1TJ/AXOX33g0MAjtSTmYy75nB8G53YhQe0WVLvuqKQKZmV4HwFAdllAzOElM47+xJnIqsh3Z21m3FOYm2CHHoBtYpSS5JYCfasdFMJi8oB21HEHXd4C84o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781262696; c=relaxed/simple;
-	bh=fBYAEpgoH6cxa527iAK538WoCT+ndgQHLUeJbKSORIU=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=cch6MVausbnTMvDRBxsPk5JE0N2Oq/vR015d295SympdVGe5nXgVjahLKi+Jf8ShUzSmwqP67c/GmiDJDizkm2rTiThv9psGpk12JznWXNNEHX1pNMAALweENPUDPenhxrzUZDv0cuhxBcpuT8GDRQimC7o5LdCO5jh8d8honQE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MjtnFePb; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1781539811; c=relaxed/simple;
+	bh=RjmwbjJUekMN4XQbpwM2sAMQ8Q4VGqazX1lTIqnbeDs=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=IMl7CLdJOsS2s6bxCbiYu6LtSl35ibyDER8y61j9QAvdZR2VLKpRCnUJWFZJWGIMWcxlRNxAwAxt/x+J773LjG3QMktPr8+uR0bVZ/Q4X8HGr0n8SON811H+ce7WUmcdhZbFGrfUdWhmwCIXkGsjzpyfS0N5bGZhIc4USuEj9no=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=J2bt7UtU; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MjtnFePb"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 47B1E1F000E9;
-	Fri, 12 Jun 2026 11:11:33 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="J2bt7UtU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 659B51F000E9;
+	Mon, 15 Jun 2026 16:09:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781262693;
-	bh=lwR3AGs+s58U/CQtIGmRIplopDCSuhP6rnPNfMMKMnU=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=MjtnFePbxoJFsR6ScabI6waI+OniyYTo+RJEb9rLVhYXYiyrf+UNgt2bGOd+woZw/
-	 SbLSkComOR4lA8U+3flcHTUTYA26YrKpi9O8OollzlIsUNblXKC/5ORRkcchQE6w1z
-	 E+7IZ9OYoepyDhCTtlhdBtwhMSAk3fu8UlP3tKIUQZ0Ab0rqFdCZRx/j9wyAnvL/9Q
-	 kCooM93qZbLkYzcyV5DPKYScAMqfX2m+lVLpSJ3VrJF/W6Ashieh6MUCg53CTD8yNN
-	 vebVXHfIiPF9xkkUBQCvhQHAJbjv1/SxGrYtAf4RyH4ugqRu/cawp9fPXoapUIrGba
-	 9QwRGOQPqtmQw==
-Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id 5EA7BF40095;
-	Fri, 12 Jun 2026 07:11:32 -0400 (EDT)
-Received: from phl-imap-05 ([10.202.2.95])
-  by phl-compute-01.internal (MEProxy); Fri, 12 Jun 2026 07:11:32 -0400
-X-ME-Sender: <xms:ZOkrahcdWn27kxpD3k6S_1se8WWKCE6AEPE1M3w7o5kcy03rtclucw>
-    <xme:ZOkraqDgQ_Q46MVdZlYhBS1xcpMfkZBAajzECZ5w9ke882cIRM87HFj8leClsv9C1
-    kuLwrHFQN42CY3qVMS-3WOAhpobToG1gwtXy_cgPUr7nxlbDyuvRQ>
-X-ME-Proxy-Cause: dmFkZTFVJXeoBD943uVROk8yBmSMdxVi7Q6ue5a/7CR4nh3/IOEnJs89v/fr6CzQ55TDgt
-    HZJnu16VjMNfziHIs1+sPf3CgGCHZoeIgKVdjALsPJxQByU5d0yU7/jxhpxPcV2FyLVztx
-    f1CmpxEf9hneDI2chrwLE8oiz2JmsqZdXXYLNDifwm4avdBJ6eHVRNVtYlKAIrfsjJYWK/
-    aK0610+ZppCLfkX3ynEgwmmqEaeJFrDVUKImbv7g7ouHzQgoAsUqlXaA9flD1UQ+8bJj5K
-    k/QOhDtsQMcScfWUJwvXdSnUlFl3mM2Lb6rINMgoeAL6RvQmtyUoiyJKyYMVjzpYv5BtVF
-    bpw6v4hPz/Zoxs/WR+HRue9imWSKw9c6rdYMpYuishSboA2DnHkV9UIGiLGbxW7GZ8ctcg
-    2OG/dDcvPPvq8BV1/DSEzgGhGfGsYglvuI5bS9nUNfZ8UZ9m+v1Hf4YwvrYTjJH7P5BGJr
-    YCMu4+WK4H7C1KlkO/F6/WZO6grW4Jf9SB9cZ69PJHRiE0l6Bq2DzY9i0cvwjr0D8DzPZH
-    x4zMEhURkDcF3DWOQES464BVK0QtrycjeLSc1lBUDuX7bRXwKn/vO62iCgsW6TvIpcL0t8
-    MulSrpWAS9OpDX9rUnLyKxZEUs9OEpOzt9xnUoh6Wj+bOwdL/7/z5tfxUtIQ
-X-ME-Proxy: <xmx:ZOkralK3-jhY4mqDwtL4N1xDNMz5FvFLrw5gH8tUL_xVILXnLWtUMQ>
-    <xmx:ZOkravr3kX6bjowbpFpsyd6uNxll2hvvZ5KYTWXAGSTj23akcG80nw>
-    <xmx:ZOkrakhNZeXHHKxv9LjLaiA5mLqQgmlhKWTez2qpMWiW4VQXIKhVYg>
-    <xmx:ZOkrambjVi_1CPRwz9aoCSB9hkSP-MtckloGxCZAcIUZ9gLjxF4WqQ>
-    <xmx:ZOkrakm0Ux4Lu5g_P29EQxpWj3VtoilHD-DsVl5aWz0i8PSpbI5nFknZ>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 392AC182007E; Fri, 12 Jun 2026 07:11:32 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=k20260515; t=1781539810;
+	bh=WrhOiAXY4BpdFNkpuEH5kqbHucFA9LBquobYeTzjtI4=;
+	h=From:Subject:Date:To:Cc;
+	b=J2bt7UtU/OYY8PxVyIm3d95v5G+IcTrjBW3L2jU7dt2De3kFnXcxRBS+wcjkcf6fN
+	 XltNpsJON5Ei+eQjAfRadOoGZ6Zr5MKKrnWqjtat85KDYFuJIzaAhhV9joTPZvvnm/
+	 Upf4GSVXporZ+/9u524Qsag7+a/uWIBE8WrhynM4IvaF/bx9BOfhayePviKAuHtMdm
+	 yF/mMlzcia/W4uNmZrGta+pMv2x8g5cbMGvX0YqVwoVCDJpU+Ht9xei0zv8nicGVwV
+	 SRcRt86DYJ9ycUYURQM1lx9ByNJFh+o5TVH1JyohwC9u2Q2ptXr+Wwo4pEiWgn9BWI
+	 W8aRU0vDmzPwg==
+From: Vincent Mailhol <mailhol@kernel.org>
+Subject: [PATCH 00/19] init: discoverable root partitions, a.k.a. an
+ omittable "root=" cmdline option
+Date: Mon, 15 Jun 2026 18:08:56 +0200
+Message-Id: <20260615-discoverable-root_partitions-v1-0-39c78fac42e2@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Fri, 12 Jun 2026 13:11:11 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Breno Leitao" <leitao@debian.org>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- "Borislav Petkov" <bp@suse.de>, "Andy Lutomirski" <luto@kernel.org>,
- "Kees Cook" <kees@kernel.org>, "Tony Luck" <tony.luck@intel.com>,
- "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
- "Thomas Gleixner" <tglx@kernel.org>, "Ingo Molnar" <mingo@redhat.com>,
- "Borislav Petkov" <bp@alien8.de>,
- "Dave Hansen" <dave.hansen@linux.intel.com>, x86@kernel.org,
- "H . Peter Anvin" <hpa@zytor.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
- kernel-team@meta.com
-Message-Id: <b3780e66-dad0-4f39-9dc6-b74f23fabb62@app.fastmail.com>
-In-Reply-To: <20260612-efi_timeout-v2-6-f714bb016df6@debian.org>
-References: <20260612-efi_timeout-v2-0-f714bb016df6@debian.org>
- <20260612-efi_timeout-v2-6-f714bb016df6@debian.org>
-Subject: Re: [PATCH v2 6/6] efi/runtime-wrappers: retire the worker if a wedged call
- ever returns
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/x3MQQqEMAxA0atI1hZaQQWvMgySNlEDYiUpMiDef
+ YrLt/j/BmMVNpiaG5QvMclHRWgbSBseKzuhauh8N/ghBEdiKV+sGHd2mnOZT9QipXbmImGKSNi
+ PnqAuTuVFfu/+832eP+2uWG1uAAAA
+X-Change-ID: 20260611-discoverable-root_partitions-bdacbada570d
+To: Jens Axboe <axboe@kernel.dk>, Davidlohr Bueso <dave@stgolabs.net>, 
+ Alexander Viro <viro@zeniv.linux.org.uk>, 
+ Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>
+Cc: linux-kernel@vger.kernel.org, linux-block@vger.kernel.org, 
+ linux-efi@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+ Vincent Mailhol <mailhol@kernel.org>, 
+ Richard Henderson <richard.henderson@linaro.org>, 
+ Matt Turner <mattst88@gmail.com>, Magnus Lindholm <linmag7@gmail.com>, 
+ linux-alpha@vger.kernel.org, Vineet Gupta <vgupta@kernel.org>, 
+ linux-snps-arc@lists.infradead.org, Russell King <linux@armlinux.org.uk>, 
+ linux-arm-kernel@lists.infradead.org, 
+ Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+ Huacai Chen <chenhuacai@kernel.org>, WANG Xuerui <kernel@xen0n.name>, 
+ loongarch@lists.linux.dev, Thomas Bogendoerfer <tsbogend@alpha.franken.de>, 
+ linux-mips@vger.kernel.org, 
+ "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, 
+ Helge Deller <deller@gmx.de>, linux-parisc@vger.kernel.org, 
+ Madhavan Srinivasan <maddy@linux.ibm.com>, 
+ Michael Ellerman <mpe@ellerman.id.au>, linuxppc-dev@lists.ozlabs.org, 
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+ Albert Ou <aou@eecs.berkeley.edu>, linux-riscv@lists.infradead.org, 
+ Heiko Carstens <hca@linux.ibm.com>, Vasily Gorbik <gor@linux.ibm.com>, 
+ Alexander Gordeev <agordeev@linux.ibm.com>, linux-s390@vger.kernel.org, 
+ Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, 
+ Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, 
+ x86@kernel.org, Jonathan Corbet <corbet@lwn.net>, 
+ Shuah Khan <skhan@linuxfoundation.org>, linux-doc@vger.kernel.org
+X-Mailer: b4 0.14.3
+X-Developer-Signature: v=1; a=openpgp-sha256; l=6653; i=mailhol@kernel.org;
+ h=from:subject:message-id; bh=RjmwbjJUekMN4XQbpwM2sAMQ8Q4VGqazX1lTIqnbeDs=;
+ b=owGbwMvMwCV2McXO4Xp97WbG02pJDFkGyhcU3klMvHNzftiCl6lmH3kWl02+abz8VKXHlaTy/
+ w4vP39V7pjIwiDGxWAppsiyrJyTW6Gj0Dvs0F9LmDmsTCBDpEUaGICAhYEvNzGv1EjHSM9U21DP
+ EMjQMWLg4hSAqfbXZfgr2rolQuyW6w6JgNKDJ4tvO69i+ZPHkj6Tv9JAckFms/tLRoYma5u3R6a
+ 1csurnulLb7M78HnNmlIVnlf38k/kSby8dJsZAA==
+X-Developer-Key: i=mailhol@kernel.org; a=openpgp;
+ fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
 
-Hi,
+DPS [1] defines GPT partition type UUIDs for OS partitions and
+attributes that control whether such partitions should be
+automatically discovered. The specification states that:
 
-On Fri, 12 Jun 2026, at 13:01, Breno Leitao wrote:
-> When __efi_queue_work() times out it disables runtime services and
-> returns, but the kworker is still blocked inside firmware. If the
-> firmware eventually unblocks, efi_call_rts() would run its tail on an
-> efi_rts_work that the timed-out caller has long abandoned: signalling a
-> stale completion and clearing efi_runtime_lock_owner that may by then
-> belong to another caller.
->
-> If runtime services have been disabled by the time the call returns,
-> park the worker in a schedule() loop instead, so it never touches
-> efi_rts_work again or returns to the workqueue.
->
-> x86's efi_crash_gracefully_on_page_fault() already ends in the same loop
-> for the page-fault case. Factor it into efi_rts_park_worker() and call it
-> from both paths.
->
-> Suggested-by: Ard Biesheuvel <ardb@kernel.org>
-> Signed-off-by: Breno Leitao <leitao@debian.org>
-> ---
->  arch/x86/platform/efi/quirks.c          |  9 +--------
->  drivers/firmware/efi/runtime-wrappers.c | 21 +++++++++++++++++++++
->  include/linux/efi.h                     |  2 ++
->  3 files changed, 24 insertions(+), 8 deletions(-)
->
-> diff --git a/arch/x86/platform/efi/quirks.c 
-> b/arch/x86/platform/efi/quirks.c
-> index 90a065fcb1fab..02c56a02eb9bc 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -832,12 +832,5 @@ void efi_crash_gracefully_on_page_fault(unsigned 
-> long phys_addr,
->  	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
->  	pr_info("Froze efi_rts_wq and disabled EFI Runtime Services\n");
-> 
-> -	/*
-> -	 * Call schedule() in an infinite loop, so that any spurious wake ups
-> -	 * will never run efi_rts_wq again.
-> -	 */
-> -	for (;;) {
-> -		set_current_state(TASK_IDLE);
-> -		schedule();
-> -	}
-> +	efi_rts_park_worker();
->  }
-> diff --git a/drivers/firmware/efi/runtime-wrappers.c 
-> b/drivers/firmware/efi/runtime-wrappers.c
-> index 842f72d44211f..998e5f8f1c62c 100644
-> --- a/drivers/firmware/efi/runtime-wrappers.c
-> +++ b/drivers/firmware/efi/runtime-wrappers.c
-> @@ -219,6 +219,19 @@ static struct task_struct *efi_runtime_lock_owner;
->  extern struct semaphore __efi_uv_runtime_lock 
-> __alias(efi_runtime_lock);
->  #endif
-> 
-> +/*
-> + * Park a worker that must never run efi_rts_wq again: EFI runtime services
-> + * have been disabled and its efi_rts_work is abandoned. Loop in schedule()
-> + * so a spurious wakeup cannot resume it.
-> + */
-> +void efi_rts_park_worker(void)
-> +{
-> +	for (;;) {
-> +		set_current_state(TASK_IDLE);
-> +		schedule();
-> +	}
-> +}
-> +
->  /*
->   * Calls the appropriate efi_runtime_service() with the appropriate
->   * arguments.
-> @@ -320,6 +333,14 @@ static void __nocfi efi_call_rts(struct work_struct *work)
->  	efi_call_virt_check_flags(flags, efi_rts_work.caller);
->  	arch_efi_call_virt_teardown();
-> 
-> +	/*
-> +	 * If __efi_queue_work() timed out and disabled runtime services, the
-> +	 * caller is gone and efi_rts_work is no longer ours: park the worker
-> +	 * so it never signals the stale completion or runs again.
-> +	 */
-> +	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-> +		efi_rts_park_worker();
-> +
+  The OS can discover and mount the necessary file systems with a
+  non-existent or incomplete /etc/fstab file and without the root=
+  kernel command line option.
 
-So one thing to note here is that the arm64 version of the exception recovery
-(in efi_runtime_fixup_exception()) will also clear EFI_RUNTIME_SERVICES, and
-that will occur before this check. This means we will park the worker not only
-on a time out, but also on an sync exception in the firmware.
+DPS is already implemented in systemd-gpt-auto-generator [2], which,
+when embedded in an initrd, indeed allows automatic detection of the
+root filesystem through its partition type UUID.
 
-I suspect this is actually what we want, but it deserves to be called out.
+This series adds this discovery feature directly into the kernel so
+that people who are not using systemd or not using an initrd can still
+benefit from it. The implementation follows the same model as
+systemd-gpt-auto-generator:
 
+  - GPT partition type UUIDs are used for automatic discovery policy
+    only. No root=PARTTYPEUUID=xxx cmdline option or similar syntax is
+    added.
 
->  	efi_rts_work.status = status;
->  	complete(&efi_rts_work.efi_rts_comp);
->  	efi_runtime_lock_owner = NULL;
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 24221a8424121..015505423277e 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -1256,6 +1256,8 @@ extern struct efi_runtime_work efi_rts_work;
->  /* Workqueue to queue EFI Runtime Services */
->  extern struct workqueue_struct *efi_rts_wq;
-> 
-> +void efi_rts_park_worker(void);
-> +
->  struct linux_efi_memreserve {
->  	int		size;			// allocated size of the array
->  	atomic_t	count;			// number of entries used
->
-> -- 
-> 2.53.0-Meta
+  - The root= cmdline option takes precedence. This prevents unexpected
+    behaviour.
+
+  - Only the disk with the active EFI System Partition is scanned, as
+    required by DPS. The disk is identified through the Boot Loader
+    Interface LoaderDevicePartUUID EFI variable.
+
+The DPS no-auto attribute is also implemented, giving another option for
+the user to disable this auto discovery. However, the DPS read-only
+attribute is intentionally not enforced. The kernel already mounts the
+root filesystem read-only by default unless the command line requests
+rw, and user space remains responsible for deciding whether a discovered
+root should later be remounted read-write based on DPS metadata and
+local policy. The other partition type UUIDs (home, swap, var...) are
+also out of scope for the same reason: user space remains responsible
+for mounting anything other than the root partition.
+
+Patch 1 adds the ARCH_HAS_DPS_ROOT_PARTITION_TYPE_UUID capability and
+the hidden CONFIG_DPS_ROOT_AUTO_DISCOVERY Kconfig symbol used to signal
+whether the feature is available. Patches 2 to 12 declare the
+ARCH_HAS_DPS_ROOT_PARTITION_TYPE_UUID capability for the supported
+architectures and define their architecture-specific root partition type
+UUID values in asm/dps_root.h.
+
+Patches 13 to 16 make the GPT partition type UUID and the no-auto
+attribute available during early block lookup.
+
+Patch 17 is a small code refactor that prepares for patch 18, which
+updates the root mount path so that, when root= is omitted, the kernel
+reads LoaderDevicePartUUID and uses the early block lookup
+infrastructure to discover the DPS root partition on that disk.
+
+Finally, patch 19 documents this automatic root discovery feature.
+
+Tested with GRUB, which implements the LoaderDevicePartUUID EFI variable
+in its bli module [3]. With this, I was able to boot a kernel with a
+completely empty cmdline and no initrd.
+
+[1] The Discoverable Partitions Specification (DPS)
+Link: https://uapi-group.org/specifications/specs/discoverable_partitions_specification/
+
+[2] systemd-gpt-auto-generator
+Link: https://www.freedesktop.org/software/systemd/man/latest/systemd-gpt-auto-generator.html
+
+[3] GRUB -- §16.2 bli
+Link: https://www.gnu.org/software/grub/manual/grub/html_node/bli_005fmodule.html
+
+Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
+---
+Vincent Mailhol (19):
+      init: add DPS root partition type UUID capability
+      alpha: define DPS root partition type UUID
+      arc: define DPS root partition type UUID
+      arm: define DPS root partition type UUID
+      arm64: define DPS root partition type UUID
+      loongarch: define DPS root partition type UUID
+      mips: define DPS root partition type UUIDs
+      parisc: define DPS root partition type UUID
+      powerpc: define DPS root partition type UUIDs
+      riscv: define DPS root partition type UUIDs
+      s390: define DPS root partition type UUIDs
+      x86: define DPS root partition type UUIDs
+      block: store GPT partition type UUID
+      block: add early_lookup_bdev_by_type_uuid()
+      block: store GPT attributes as a raw value
+      block: don't discover partition with DPS no-auto GPT attribute
+      init: factor out root device lookup into lookup_root_device()
+      init: discover root by DPS partition type UUID
+      docs: document discoverable root partitions
+
+ Documentation/admin-guide/discoverable-root.rst | 33 +++++++++
+ Documentation/admin-guide/index.rst             |  1 +
+ Documentation/admin-guide/kernel-parameters.txt |  5 ++
+ arch/alpha/Kconfig                              |  1 +
+ arch/alpha/include/asm/dps_root.h               |  8 +++
+ arch/arc/Kconfig                                |  1 +
+ arch/arc/include/asm/dps_root.h                 |  8 +++
+ arch/arm/Kconfig                                |  1 +
+ arch/arm/include/asm/dps_root.h                 |  8 +++
+ arch/arm64/Kconfig                              |  1 +
+ arch/arm64/include/asm/dps_root.h               |  8 +++
+ arch/loongarch/Kconfig                          |  1 +
+ arch/loongarch/include/asm/dps_root.h           |  8 +++
+ arch/mips/Kconfig                               |  1 +
+ arch/mips/include/asm/dps_root.h                | 20 ++++++
+ arch/parisc/Kconfig                             |  1 +
+ arch/parisc/include/asm/dps_root.h              |  8 +++
+ arch/powerpc/Kconfig                            |  1 +
+ arch/powerpc/include/asm/dps_root.h             | 16 +++++
+ arch/riscv/Kconfig                              |  1 +
+ arch/riscv/include/asm/dps_root.h               | 12 ++++
+ arch/s390/Kconfig                               |  1 +
+ arch/s390/include/asm/dps_root.h                | 12 ++++
+ arch/x86/Kconfig                                |  1 +
+ arch/x86/include/asm/dps_root.h                 | 12 ++++
+ block/blk.h                                     |  1 +
+ block/early-lookup.c                            | 68 +++++++++++++++++-
+ block/partitions/core.c                         |  2 +
+ block/partitions/efi.c                          |  3 +
+ block/partitions/efi.h                          | 11 ++-
+ include/linux/blk_types.h                       |  1 +
+ include/linux/blkdev.h                          |  5 ++
+ include/linux/root_dev.h                        |  6 ++
+ init/Kconfig                                    |  6 ++
+ init/do_mounts.c                                | 94 ++++++++++++++++++++++++-
+ 35 files changed, 355 insertions(+), 12 deletions(-)
+---
+base-commit: 36808d5e983985bbda87e01059cccc071fe3ec8d
+change-id: 20260611-discoverable-root_partitions-bdacbada570d
+
+Best regards,
+-- 
+Vincent Mailhol <mailhol@kernel.org>
+
