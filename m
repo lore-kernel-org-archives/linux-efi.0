@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8173040913C;
-	Mon, 15 Jun 2026 16:10:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55215413635;
+	Mon, 15 Jun 2026 16:10:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781539854; cv=none; b=izbNIM8N1dTpBriHtpfOsZPW4fmzao6OHE4twQQeX0ns3SSCK0+OtOYNvE7DUHjidU8E6vWgM8KiatUPpJIHl3bhp1Ysngfaws6XnMbE1q5GQ6ZrUfu6Bjg3o1YDeuYWciLqjqsuh6bYyIzT9mqyTP4vJ3IUY0IWGQUkpdIbAPk=
+	t=1781539857; cv=none; b=LaXsMZPTBeA3YvPPFf6AV60BPH6WA0Lg32f3SWuq1SiO7lmimyXSQQWc69M1Ca+2nY+eLCAS/ghf9aN5jLnmkl6vlaMG1X15KtJeE4PuAOWwByPeeCyoKqjVFvxcl27HMV+952gPGIAYREgO7CZKtBEG0xlkcCCqLIsRGjup3p0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781539854; c=relaxed/simple;
-	bh=5YHw8EUONmlZy2eutAm4V6EttATg+v0U1yX80Dbp4rU=;
+	s=arc-20240116; t=1781539857; c=relaxed/simple;
+	bh=x3Z5z1vPWz0+SGUXLgSImcKZ5/DB7r5vdimwcwuJvH0=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=jBVG3iRrxzlBZKjnVuiCzQpbYN+jD1HhXct8vOtzNqT66uCknsRDTWW3Z8U2SawvTWvMTL3jgXJNNnJp/FByYMBUtAywpX1gBaq+aZyYzQ3CPUGziBPJZPSt73FXiIacqUT2gLK+8Dlp6QaXB0xX7X4PJBBhOhMbs8z7f3q+8fA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=E0lt+ubT; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=Xl4pfFNyL3PQweQ1XRIHD/CrxZGXvRIDh+S20Bq/AlGxC1NArzBSPOvH5osfzGS9S/fFjfip42OVrxoMGXKy/TLdsGI9pqPZsgQ5F3eP2UEVA7GlGT3FUVqWxzb08gQMziYlearcc8RkDrw+oqhS9LRrWChYgwZKZDJ44CIuhII=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mAF0QrBn; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="E0lt+ubT"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC8D21F00A3A;
-	Mon, 15 Jun 2026 16:10:49 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mAF0QrBn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E9AC41F000E9;
+	Mon, 15 Jun 2026 16:10:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781539853;
-	bh=c/TSOjS4JNuAfZOD2VN45im/LIbFGgPJlORf4/1RDdQ=;
+	s=k20260515; t=1781539856;
+	bh=0f3TEMAMyk1+FLZFDBGY9r+TZxNSD5gekrnqEHRaWOg=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=E0lt+ubTRCw0jNqPKCY0vTugPLNO1dlPYijEppVzICTFEVG4gOkPu3m/vNLZ2e5e2
-	 xOAqMwqV6E9DJh+gc3ZHN/aH6E1RJ1aVjPX98iL9pJKHUJricVpOWemqsBKrvhvykR
-	 nFfd8o0IMe/EuETkYNSZR3A/uDSdziRUt0WMzy4bYcJft9YeDCZDHw5HwirO7XP/yS
-	 A04QPHrrxbkhrXOQ3Nu4C4BITPHbGuZdg8h+pieRRMoWMArIMHCbTQbIvB8I6ukWVl
-	 9Jcj7A7vI+IlqE+INVBbK+NaxMFuJw0qa6islp4fNS3ywLSkuPyjRLi2lJxq/ZHWmq
-	 Y6kB34VIDa37A==
+	b=mAF0QrBngIMEqgQJcEJQl9z9Ih4RASbKxVV34FIA9W516TmM3tKEQP6jjjEIR9c1w
+	 yz1CPh3UPw8LGu2UkwUsmBsNtZWORxq40FgTcM3JLRrXR049OEv+oyTRmu2O9df80e
+	 qEvqz0WHfkTww8pvHREolPshGXrnkmygJZzNE0qOnZNalbhS3vji80Sp9UM0D8l6CO
+	 40i+RIMoZbPPWuXbbEioTozRVhtl3M6YkH0gukF1vBQCWqzis77pg471am0JfLmCA4
+	 W9NuF06woXlx8v0bhf8d51kaZO9mlZKIRXotH5Wz68OSvOzBxdhoT7ccHGBagtdg77
+	 LjIkM0jG6kLjg==
 From: Vincent Mailhol <mailhol@kernel.org>
-Date: Mon, 15 Jun 2026 18:09:08 +0200
-Subject: [PATCH 12/19] x86: define DPS root partition type UUIDs
+Date: Mon, 15 Jun 2026 18:09:09 +0200
+Subject: [PATCH 13/19] block: store GPT partition type UUID
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +37,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260615-discoverable-root_partitions-v1-12-39c78fac42e2@kernel.org>
+Message-Id: <20260615-discoverable-root_partitions-v1-13-39c78fac42e2@kernel.org>
 References: <20260615-discoverable-root_partitions-v1-0-39c78fac42e2@kernel.org>
 In-Reply-To: <20260615-discoverable-root_partitions-v1-0-39c78fac42e2@kernel.org>
 To: Jens Axboe <axboe@kernel.dk>, Davidlohr Bueso <dave@stgolabs.net>, 
@@ -45,72 +45,55 @@ To: Jens Axboe <axboe@kernel.dk>, Davidlohr Bueso <dave@stgolabs.net>,
  Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>
 Cc: linux-kernel@vger.kernel.org, linux-block@vger.kernel.org, 
  linux-efi@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
- Vincent Mailhol <mailhol@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
- Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
- Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org
+ Vincent Mailhol <mailhol@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1967; i=mailhol@kernel.org;
- h=from:subject:message-id; bh=5YHw8EUONmlZy2eutAm4V6EttATg+v0U1yX80Dbp4rU=;
- b=owGbwMvMwCV2McXO4Xp97WbG02pJDFkGylcjRZq8+z5PfZOsphQhvrWnUtJeO4wx3cdSqT6Dd
- 2uVXmLHRBYGMS4GSzFFlmXlnNwKHYXeYYf+WsLMYWUCGSIt0sAABCwMfLmJeaVGOkZ6ptqGeoZA
- ho4RAxenAEz19FhGhsnZ1nIGkfYnVooabd17ot99asKKfV8Xqn9gnrMxoaybrZeR4VmD4vat/lc
- iys8mWeRE+pofVXtdZPW1NoJv/YEZSjHuPAA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1421; i=mailhol@kernel.org;
+ h=from:subject:message-id; bh=x3Z5z1vPWz0+SGUXLgSImcKZ5/DB7r5vdimwcwuJvH0=;
+ b=owGbwMvMwCV2McXO4Xp97WbG02pJDFkGylcn3P0SdXhl6I5Ii1svL81Z+1D+irt0Emfhk3bmy
+ c5v9zuzdUxkYRDjYrAUU2RZVs7JrdBR6B126K8lzBxWJpAh0iINDEDAwsCXm5hXaqRjpGeqbahn
+ CGToGDFwcQrAVAt+ZWToND7FlzVzyVGdliUxR8OVHJYtMb4k2NxptP/jIZOg4rfSDH84LRwT15k
+ pLY5qXMN6Vs/53VFVh5I43/2yN9vWn1hmsp0bAA==
 X-Developer-Key: i=mailhol@kernel.org; a=openpgp;
  fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
 
-DPS [1] assigns GPT partition type UUIDs to operating system partitions.
-Root partitions use architecture-specific type UUIDs so the OS can
-discover the intended root filesystem without relying on a root= cmdline
-option.
+DPS [1] identifies OS partitions by GPT partition type UUID.
 
-Define DPS_ROOT_PARTITION_TYPE_UUID in asm/dps_root.h for the x86
-32/64-bit variants described by the specification and select
-ARCH_HAS_DPS_ROOT_PARTITION_TYPE_UUID.
+Keep that UUID in partition_meta_info and populate it while scanning EFI
+partition tables so early root discovery can use it.
 
 [1] The Discoverable Partitions Specification (DPS)
 Link: https://uapi-group.org/specifications/specs/discoverable_partitions_specification/
 
-Cc: Thomas Gleixner <tglx@kernel.org>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Dave Hansen <dave.hansen@linux.intel.com>
-Cc: x86@kernel.org
 Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
 ---
- arch/x86/Kconfig                |  1 +
- arch/x86/include/asm/dps_root.h | 12 ++++++++++++
- 2 files changed, 13 insertions(+)
+ block/partitions/efi.c | 1 +
+ include/linux/blkdev.h | 1 +
+ 2 files changed, 2 insertions(+)
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index b875d2f27e48..6b6e7b56f972 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -82,6 +82,7 @@ config X86
- 	select ARCH_HAS_DEBUG_VM_PGTABLE	if !X86_PAE
- 	select ARCH_HAS_DEVMEM_IS_ALLOWED
- 	select ARCH_HAS_DMA_OPS			if GART_IOMMU || XEN
-+	select ARCH_HAS_DPS_ROOT_PARTITION_TYPE_UUID
- 	select ARCH_HAS_EARLY_DEBUG		if KGDB
- 	select ARCH_HAS_ELF_RANDOMIZE
- 	select ARCH_HAS_EXECMEM_ROX		if X86_64 && STRICT_MODULE_RWX
-diff --git a/arch/x86/include/asm/dps_root.h b/arch/x86/include/asm/dps_root.h
-new file mode 100644
-index 000000000000..7c6ba5519d88
---- /dev/null
-+++ b/arch/x86/include/asm/dps_root.h
-@@ -0,0 +1,12 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+
-+#ifndef _ASM_X86_DPS_ROOT_H
-+#define _ASM_X86_DPS_ROOT_H
-+
-+#ifdef CONFIG_X86_64
-+#define DPS_ROOT_PARTITION_TYPE_UUID "4f68bce3-e8cd-4db1-96e7-fbcaf984b709"
-+#else
-+#define DPS_ROOT_PARTITION_TYPE_UUID "44479540-f297-41b2-9af7-d131d5f0458a"
-+#endif
-+
-+#endif /* _ASM_X86_DPS_ROOT_H */
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 9865d59093fa..4a3835ed9561 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -742,6 +742,7 @@ int efi_partition(struct parsed_partitions *state)
+ 
+ 		info = &state->parts[i + 1].info;
+ 		efi_guid_to_str(&ptes[i].unique_partition_guid, info->uuid);
++		efi_guid_to_str(&ptes[i].partition_type_guid, info->type_uuid);
+ 
+ 		/* Naively convert UTF16-LE to 7 bits. */
+ 		label_max = min(ARRAY_SIZE(info->volname) - 1,
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index 890128cdea1c..8ce85d21a1f4 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -67,6 +67,7 @@ extern const struct class block_class;
+ 
+ struct partition_meta_info {
+ 	char uuid[PARTITION_META_INFO_UUIDLTH];
++	char type_uuid[PARTITION_META_INFO_UUIDLTH];
+ 	u8 volname[PARTITION_META_INFO_VOLNAMELTH];
+ };
+ 
 
 -- 
 2.53.0
