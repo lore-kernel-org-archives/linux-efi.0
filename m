@@ -1,99 +1,122 @@
-Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f49.google.com (mail-pj1-f49.google.com [209.85.216.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D3073B9D97;
-	Tue, 16 Jun 2026 12:10:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E46C234FF79
+	for <linux-efi@vger.kernel.org>; Tue, 16 Jun 2026 18:30:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781611853; cv=none; b=kjAGke+lVhD1C/MJsGnWj5ULKglmJwJD2twBDMYOiUWU6uQpHZcD/uOoVKiwNFUh4BKNr56rz1/6dJ4k97Xr0mhYmSpDUlQZjUTfFGd+NOiG6+u8yoA1FP5ig+4HKoFd9dQJTt8hMyLGFXLyuBLRKc5QOR6UGO0FteRL9KzbAhw=
+	t=1781634612; cv=none; b=NROMB1geW1bKSIUQMY/tVRRZZt0TwnJKW0HZTasF3ecylTeh6SEu3vBRz83+VyPqzYiLhjv4sya3z22R8snG+jZyV03O4iXT/0zt1BjAKGiPF6xxOnFDqMi6CcH/FBs4SpoXAZZAPs9nLDhFIC6QtKxzE2Fxqi3xKVuNs+i5mNs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781611853; c=relaxed/simple;
-	bh=hgvzVOV/yi4NmqBy3wj/OQdnUNQXHzuZAdvJWy7t/Pg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=SP1fPOA/XwJT/GGrEneTYwJ0FIw3kaZhitwUpP5stj6MZJNvP+g2tEUpr2BAGxDgptm880noog33JE1z61qLmZGRyGndJvDAqUycrAs2/DAcM1RiYgTKAqczhrRdg9tJ1+jcM83AjLx3X9xBmlWiZFRI63hz3rpUrb4sWiu4SHo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=qu266pM5; arc=none smtp.client-ip=82.195.75.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
+	s=arc-20240116; t=1781634612; c=relaxed/simple;
+	bh=U2bfHtoJeOkasncTz6MQSAvgazv6WmGLk781Lw+Ys/E=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=QsEnFaDT2xCU7iqhBvj2QhTJEKQzFa/JG7Pj9xF4KnQmYW3aEiGBJNazMraE6eialKdirrsFO6p2Enkr72PE23tR2Nvy8IOqobLC/t8oUy+K7KTtOLSR04Gr1adOnNJxYama3Z2oy4Wn8JKAeLtwfP4XFMOJYJfGmF1zp9Qtkow=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=HuerNG2a; arc=none smtp.client-ip=209.85.216.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="qu266pM5"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
-	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=DmxqFHA1EQE/yqMqEUO6PKW/i3Bta7/e5+QC+vF9Rvc=; b=qu266pM5cdR99k5R1+oZ1XzLyW
-	FBaN0c5/KyySQOw4Nbr1S9T+KOI4OeggndDA3VJW2sakOqSVxGuZS4b5DdfINXNDymV0Ef4YLs4tg
-	qYq1GcAugihnsi/ABJGMZ15gYHgp2VnZpLCSWdl9FPTL+d651fjtWR+PMAqQyQIvt6Ub+zXCdvVw/
-	oKHLgVmrATuzLI/bVYRda0iCilmStpHW+OnxbxFBp1BLQbjwlD0kBgJSZqGWgzpsuf1Ofs66WQ6w+
-	wCSRZL39YlHMfFaZN4qqmrWxLQyrpgGdcUBFi+olcd7LMMcyiVq5GTBqu7EAZq1W9IShs4gn+J+fe
-	nMhbfpfw==;
-Received: from authenticated-user
-	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
-	(Exim 4.96)
-	(envelope-from <leitao@debian.org>)
-	id 1wZSco-00Dpve-1E;
-	Tue, 16 Jun 2026 12:10:38 +0000
-Date: Tue, 16 Jun 2026 05:10:33 -0700
-From: Breno Leitao <leitao@debian.org>
-To: Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Borislav Petkov <bp@suse.de>, Andy Lutomirski <luto@kernel.org>, 
-	Kees Cook <kees@kernel.org>, Tony Luck <tony.luck@intel.com>, 
-	"Guilherme G. Piccoli" <gpiccoli@igalia.com>, Thomas Gleixner <tglx@kernel.org>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	kernel-team@meta.com
-Subject: Re: [PATCH v2 5/6] efi/runtime-wrappers: honour EFI_RUNTIME_SERVICES
- in the non-blocking paths
-Message-ID: <ajEzSSE_JC2zN-WL@gmail.com>
-References: <20260612-efi_timeout-v2-0-f714bb016df6@debian.org>
- <20260612-efi_timeout-v2-5-f714bb016df6@debian.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HuerNG2a"
+Received: by mail-pj1-f49.google.com with SMTP id 98e67ed59e1d1-36bb3551f6eso3892051a91.1
+        for <linux-efi@vger.kernel.org>; Tue, 16 Jun 2026 11:30:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1781634610; x=1782239410; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Dv06OEZvF8tRVAKSy2Zj2XParkcF+9FcOKnYnV3pt4w=;
+        b=HuerNG2a9yoXsyaM0HVW7teZpRnwceBOEr0gIuh6ZZaE2G30auaFWhu2GV39UMNCAn
+         SSQwlxfwWlYju09FoeDT5oRKz7pAv5w7r0Zf/DNHmh9VLB6mQK2Ne4wWRgg6Mb3WThh7
+         wQKwXG/PngJlGaJXQoOA76iUiZeHm8BPPkj1S7g1EBkU3zs5oPon4v+Vt23ilSY64F7Y
+         I5HOU4IRhdH6XcHsKRr7GCR8sp39Qe0F0AVnCf3szITP524hYvd8iAYU/enLhhvJygCL
+         j5jRZPplDJ5QwEValn3fPQClflYdkdogvRzrBV4N8e6IeML+4jGzjYGkTVukP4hFWeAt
+         VyQw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1781634610; x=1782239410;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Dv06OEZvF8tRVAKSy2Zj2XParkcF+9FcOKnYnV3pt4w=;
+        b=evXZlmoTD3G1kws6vzhWaeh5UJACfbPI/WUp4bHXM96XY2vegrQyqX8uE//oFDV4Jq
+         WRGCdFWS4Lc+QHgyrqxISqn3nqGa+ZJAtJZBt0bjhJ41B37YXKUep/emsQyUAqNktlUJ
+         9irm2t0N9tl0h2zmZD9KBnOKJn4aNZI+AZnTGfcKEao0u2hKJfHbEvRdYFgw0a6r9CB1
+         XjmpzNG36xWioAyJkqMAwJpk6KMT3eucmO96TMqlMxVL/fE/Jy2GbPy9wDWaZFPpwD+k
+         f/BHQxo97aaJlpAIhPt2UQUjhqPuX1CZCvZOv4NDe4JDQ9/T+mm53bjiO4K3A7oI5drg
+         8DOg==
+X-Forwarded-Encrypted: i=1; AFNElJ8BLXbbW9c+axavr/vw1MdZr/8bfcn1mvFemBKoFCZ7SsP1mnjmMi66vAGSp+BnrnlqF4yQV+XM7kY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwO5OxYf1sMbQBzYzdLU7YDvxoXuuBQC04BGyglCZlsJ6Va1Fip
+	FZZb5bZpolcJkVBDfIahBSYeJX16gZdgHm2R/Iz9CcilGfGXdx08E7+t
+X-Gm-Gg: Acq92OH/xKTJ7lLXwHuF++l8YiiUDtafzoBVCD5Rd6Fd2XldmUdU0tGBoypht3gNoel
+	INYjCababDAX491nfH1Bq1s1obU5k1mo/t3U3lM8pLx6bUrU8JV/t6/lYzSDepM/LHQfOwHh1z/
+	bIQw3SOMhOuoJpF0V6y9Y18iYnbRaq/ANP81GcGW2Ul6X/UAD7dDg584343FX8I01eF+XVJ8cy8
+	eAc3XxOpGB07BRTbHpOLkGO9yo5N/uUkMkYqZkDstVT+Daphq7X5ZBKytI5l0YtDpgvm8JLqbM6
+	twiaTdejlmZb6ErrM7oJAp+O9tozVkWK3k2oyzZBBL7qEJIHVJ8EG5B3kkMD+iOaeuazARKaS8/
+	38ZxAJr6j2zdeR+qWljwKgItAd4LLfH6tGHopxxsgmNUKvY/20QDo+iJ5MbBfqDizv2n+zWGwaC
+	xi6I2hRu5w9NEq8qaohw==
+X-Received: by 2002:a17:90b:1fc4:b0:36b:75:6387 with SMTP id 98e67ed59e1d1-37c9343455bmr629532a91.8.1781634610240;
+        Tue, 16 Jun 2026 11:30:10 -0700 (PDT)
+Received: from ubuntu.. ([110.9.142.4])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2c43345e3ffsm141092685ad.71.2026.06.16.11.30.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 16 Jun 2026 11:30:09 -0700 (PDT)
+From: Sang-Heon Jeon <ekffu200098@gmail.com>
+To: Ard Biesheuvel <ardb@kernel.org>,
+	Borislav Petkov <bp@alien8.de>,
+	Chris Zankel <chris@zankel.net>,
+	Dave Hansen <dave.hansen@linux.intel.com>,
+	Ingo Molnar <mingo@redhat.com>,
+	John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>,
+	Madhavan Srinivasan <maddy@linux.ibm.com>,
+	Max Filippov <jcmvbkbc@gmail.com>,
+	Michael Ellerman <mpe@ellerman.id.au>,
+	Rich Felker <dalias@libc.org>,
+	Thomas Gleixner <tglx@kernel.org>,
+	Yoshinori Sato <ysato@users.sourceforge.jp>
+Cc: Sang-Heon Jeon <ekffu200098@gmail.com>,
+	"Christophe Leroy (CS GROUP)" <chleroy@kernel.org>,
+	"H. Peter Anvin" <hpa@zytor.com>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linuxppc-dev@lists.ozlabs.org,
+	linux-sh@vger.kernel.org,
+	Nicholas Piggin <npiggin@gmail.com>,
+	x86@kernel.org
+Subject: [PATCH 0/5] treewide: remove unreachable memblock_reserve() return value checks in early boot
+Date: Wed, 17 Jun 2026 03:29:51 +0900
+Message-ID: <20260616182959.2429774-1-ekffu200098@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260612-efi_timeout-v2-5-f714bb016df6@debian.org>
-X-Debian-User: leitao
+Content-Transfer-Encoding: 8bit
 
-On Fri, Jun 12, 2026 at 04:01:32AM -0700, Breno Leitao wrote:
-> Three wrappers call firmware directly instead of going through
-> __efi_queue_work(), and none of them check whether runtime services are
-> still enabled: virt_efi_set_variable_nb(),
-> virt_efi_query_variable_info_nb() and virt_efi_reset_system(). Once a
-> hang has cleared EFI_RUNTIME_SERVICES - or efi_recover_from_page_fault()
-> has cleared it on a firmware page fault - these paths still enter the
-> (possibly wedged) firmware, e.g. an EFI pstore write through the
-> non-blocking SetVariable() variant, in violation of UEFI's
-> non-reentrancy rules. reset_system() is reachable too: efi_reboot()
-> only gates it on the static efi_rt_services_supported() mask, which does
-> not track the runtime disable.
-> 
-> Check efi_enabled(EFI_RUNTIME_SERVICES) at the top of each before taking
-> efi_runtime_lock and calling into firmware.
-> 
-> Suggested-by: Ard Biesheuvel <ardb@kernel.org>
-> Signed-off-by: Breno Leitao <leitao@debian.org>
-> ---
->  drivers/firmware/efi/runtime-wrappers.c | 11 +++++++++++
->  1 file changed, 11 insertions(+)
-> 
-> diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-> index 8badf0419a148..842f72d44211f 100644
-> --- a/drivers/firmware/efi/runtime-wrappers.c
-> +++ b/drivers/firmware/efi/runtime-wrappers.c
-> @@ -461,6 +461,9 @@ virt_efi_set_variable_nb(efi_char16_t *name, efi_guid_t *vendor, u32 attr,
->  {
->  	efi_status_t status;
->  
-> +	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-> +		return EFI_DEVICE_ERROR;
-> +
->  	if (down_trylock(&efi_runtime_lock))
->  		return EFI_NOT_READY;
+memblock_reserve() can only return an error after memblock_allow_resize()
+has been called. Before that it either succeeds or panics, never returning
+an error.
 
-Shashiko reported a good feedback, that the check for
-EFI_RUNTIME_SERVICES needs to be inside the efi_runtime_lock to avoid
-TOCTOU issues. Fixing it and respining.
+Before memblock_allow_resize() is called, the return value checks of
+memblock_reserve() are unreachable and can be removed.
+
+All the call sites are in different trees, so I split the change into one
+patch per arch/subsystem. The patches are independent and can be applied
+separately.
+
+Sang-Heon Jeon (5):
+  x86/setup: remove unreachable memblock_reserve() return value check
+  sh: remove unreachable memblock_reserve() return value check
+  powerpc/fadump: remove unreachable memblock_reserve() return value
+    checks
+  xtensa: remove unreachable memblock_reserve() return value checks
+  Revert "tpm: do not ignore memblock_reserve return value"
+
+ arch/powerpc/kernel/fadump.c   | 14 +++-----------
+ arch/sh/kernel/machine_kexec.c |  7 +------
+ arch/x86/kernel/setup.c        |  7 ++-----
+ arch/xtensa/kernel/setup.c     | 13 +++++++------
+ drivers/firmware/efi/tpm.c     |  7 +------
+ 5 files changed, 14 insertions(+), 34 deletions(-)
+
+-- 
+2.43.0
+
