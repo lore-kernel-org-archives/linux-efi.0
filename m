@@ -1,41 +1,41 @@
 Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9A673B9D97;
-	Tue, 16 Jun 2026 12:10:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BDA3B438FF3;
+	Tue, 16 Jun 2026 12:10:08 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781611805; cv=none; b=SO0tlv11eoj9+TuKcNIo3MY2bugPcMvJDlCcwEAhSbFLITkBqwPJ9KChqGhJ97qm3IT1ybSxaOGvWQ7kVgnl7g5CiiNzs1lb2BCx5xhqLmjU2+AETYrd1xqDP7Klaf0Tri+fhzzqsgQNEtRCRAy4rbDakknzSa7J9L4B1HLNHuU=
+	t=1781611812; cv=none; b=KgIvfhSFNQ42FxU/EruA/RsAH4071/KofACPwKqi3gCHlGg3EFjvxjuFUygJFqCj6ICqvXhQiwvUqTopSpuLaj3y9AvvyZAjiEmWaA59BvrgtVzeoUPFJSTctYjMcTnlawn9jJY1LsbTnHZ52ucWoesyYm34zyI4NJJxSamBAUM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781611805; c=relaxed/simple;
-	bh=SLD34W7CoRVSbmBMu5pS1HEpqVJ+uepGd1TaRxKO69A=;
+	s=arc-20240116; t=1781611812; c=relaxed/simple;
+	bh=2/JDbVYjZLfh4w3eb77yc0BEWQEQY7/ob0SR2p63vK0=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=GjDy0DAj0mi9rZ5Fl2KrDks1AKmPwY+C8b1uSgpZFCWqa0/cD2jvq0BYDcCobYiOn9m0ubCGyi4gZya+DXK3fDRy8VV2fuE5ZU5g3Yuauxlrr3GOfZ5yLkWCMbDgHx768WErGXXhSQMhZLkAkx9W6c8F0Otf+XpmCVIfhKPUCuU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=jNIkJrrY; arc=none smtp.client-ip=82.195.75.108
+	 In-Reply-To:To:Cc; b=KEnQkn09ltlbDzeH9caPPgroCQVRQAgXhgmcaLHDkDnhyG3kIRpigM/JzK2LAP+2n+Ckt0MlloZ3+9xK8QlgmSSNGTaxlMVlxddQ0TN9KUaKotIBzAcKWifYlp9OpTGO0w3JMCqZnfgxqVro03R8AbIe+1BDbiplYXzrU87EzAs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=SOjnoYij; arc=none smtp.client-ip=82.195.75.108
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="jNIkJrrY"
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="SOjnoYij"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
 	s=smtpauto.stravinsky; h=X-Debian-User:Cc:To:In-Reply-To:References:
 	Message-Id:Content-Transfer-Encoding:Content-Type:MIME-Version:Subject:Date:
 	From:Reply-To:Content-ID:Content-Description;
-	bh=KLW0qbtpyW93HnHXZfuX/a6moNQod643wcBgtDkzCsM=; b=jNIkJrrYglpiftQzu0XSMsyqXx
-	miYu12x/vWUt3aP3LHM20BiWcqFbCmgQK/7mhC+A/WfBjxtMTpysdMqPyZ31jdx5/uLKPFcONB8cl
-	GtgFCud/S3TyUeXvSMfZhB5mCfh5S9XxHoCcx5pZPMG4X4dsSgz8zwMkUVLQ9fCA2t/pHCnr7OeQB
-	jHeUmKo8MPTtgm260o/geSsHL4wtk9bSVkDL313BRytNJliMyOwkMe33MTywteyCqgy/ggiwRk4bi
-	GcIva8eZP84a+G1MJxPHNLlNcY0lY6IBzYW2i0cR4vh6Z/Y0klcNWsFilyH33pgOmjLHb2zNeosYS
-	ZbObbaJA==;
+	bh=5JWJq9JumuQbJPB3n4t4VMloAqIKcm6OV0k+9iGlBXE=; b=SOjnoYij1+N5CAH76YMoa/Aq3m
+	27EXwCrxCAYyzHBAcmnwqEUhfDGFZ0qGKAfvGm4SZzRyPib7Ul1+OXNv9i8ZUSMQIhCE8g3QIeqX8
+	/F9qJfdHrsK1kfXdANiSr525d0UFYFbEiWudREva/H9vSnC3T+KbIRQXjZ/pdpMzjEWmTi3Uwv2Kr
+	LIpMFJx5+As+IwJZkjTZ50wDaajiouXfxIMzfoXxSF9sg0/RZS34NPRY2cLI6mXEX/AHeRu3rA0E+
+	MvD5pzvIoY+AGy9QVA4lr52uUEC+hk1Z13n7pHy1L2okQbk/3DwUspF4OCOQnS1Rh/vj1zzIOOJyR
+	vTFtD2+Q==;
 Received: from authenticated-user
 	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
 	(Exim 4.96)
 	(envelope-from <leitao@debian.org>)
-	id 1wZScA-00Dpsh-0v;
-	Tue, 16 Jun 2026 12:09:58 +0000
+	id 1wZScF-00Dpsq-2P;
+	Tue, 16 Jun 2026 12:10:03 +0000
 From: Breno Leitao <leitao@debian.org>
-Date: Tue, 16 Jun 2026 05:09:35 -0700
-Subject: [PATCH v3 2/7] efi/runtime-wrappers: factor out
- efi_rts_park_worker()
+Date: Tue, 16 Jun 2026 05:09:36 -0700
+Subject: [PATCH v3 3/7] efi/runtime-wrappers: handle queue_work() failure
+ with goto exit
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -44,7 +44,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260616-efi_timeout-v3-2-76dd1d26657b@debian.org>
+Message-Id: <20260616-efi_timeout-v3-3-76dd1d26657b@debian.org>
 References: <20260616-efi_timeout-v3-0-76dd1d26657b@debian.org>
 In-Reply-To: <20260616-efi_timeout-v3-0-76dd1d26657b@debian.org>
 To: Ard Biesheuvel <ardb@kernel.org>, 
@@ -58,95 +58,59 @@ To: Ard Biesheuvel <ardb@kernel.org>,
 Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
  Breno Leitao <leitao@debian.org>, kernel-team@meta.com
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2597; i=leitao@debian.org;
- h=from:subject:message-id; bh=SLD34W7CoRVSbmBMu5pS1HEpqVJ+uepGd1TaRxKO69A=;
- b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqMT0GbHepGv3ZK/GXKqsUm1810IZz14PyKVx6T
- W03MIXvFOGJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCajE9BgAKCRA1o5Of/Hh3
- bQ/WD/40XCPiM5oE5Ap2ZUPaBTMDhWLPezmg2t3glv1qvEfGTuWogNeXOxEI7r3eSqJIS29+Euv
- gy3OqwtRmBEH49OvilOdWXLl4JcIptWiTCGn7QBB3S1JNDUJkvfY2oAbcRzCsQNlQZsVcq6Qjvr
- 2NU7AmJ/KSxfFkFqt5bx6M+7qev8e17rVeVt5gHkT30W6SS7eBIL10oghSYeqR3p+euot8Ml7fR
- jd5K0++Xs6IALdnSCNBevTQ0fY6jI2AiwSccZ86SQBojZ/h2+dZUt4GQiNHYQIPYytg1MF5ltoF
- 6aoL3iee8IBKninZ0FhfWZ6Kh+CvFhuWUc3T831hBgU4EfkXr5P1+8c4jIU8PP1dMPfr2ZRubuI
- hNN0qKHp0YEHD6Br8KyqCa9ZNhYBoSTQE3DNAhyrCcXRNaDK176us6xg/tWLGTV+1IbNhtHro7v
- TkzR4tbBC5WM+T2fVJyW5RoMSgAmuJopWfn77rXPk6T9RF/5KFmmxQKB+TQtTf8rTf85miOK5Ya
- WM3BVZd+3fulYOUlpDVjYa+8I+EKWNczvDzA+jMsGfsyU1BjLOPSCQGO5Cyyw6AVs9dPdKsu/uU
- 1zpkIPKa6bwoiTnS34egHTwIo9AJTyl0jLxCPa5FwWgfGUZNFoTAASe48ic0hg2Hz1W46KSYsqv
- 8GVAZr9nt5xD6JQ==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1449; i=leitao@debian.org;
+ h=from:subject:message-id; bh=2/JDbVYjZLfh4w3eb77yc0BEWQEQY7/ob0SR2p63vK0=;
+ b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqMT0GlwKWvzA0UGIYMTbF8WZsHh70vclTFQ7/H
+ TPJWYVLRVKJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCajE9BgAKCRA1o5Of/Hh3
+ bRiFD/4gsD85ee/SvHMY42IWn48Ru1k+fYtctt1ZT7eDJE/S0ckeT5sqjmtJaUHfHNCg7i1/V62
+ 7hfEaDrslYhFK9aeThnI8BKQzO7HReAKxZSLM/imm1vE9qHr4rTwVGdCwhpfq/j9PTRBgzKz7fP
+ uttQkwB2wl+9wKpkuo0ityIc24mXdk9qSoKGKKgzFCWohCdooH+tvG8pZMru3gaPswLk1KJZ6C+
+ I51EsnJlP1hZcpQ3AUFdwY1uHlxTDChxyjltyNdZrikRDL6K4Q682rasp1KGXE7gNYEkyWJ8ivm
+ OnGAX0tPBdqTk7WqsoojG7Kf0Eks+DAeRBStbsQwUggam4rFi1bz2edBQwlpvDYZyNTU/8KZdYN
+ OreAplBlRZbhapwZrpI6LpzWyTSwv3LtAtP7GjvSTHC08kYrWMD95+Mtz87DS+v1z2DXKBKJoQ+
+ 1IkGRZSELKkDPvUeiXdnzC1iYW/WR6qY1Qp3W4l8BfKGutz02tSEYfZVRQicxEA1wNpYbXyf1h/
+ bQTlYyE0JXVMgrBb1WW7NHDjQUF28+Ll5tnh1VErWSQlZgE5DzM85IeaORbleyCr+aSW/syMpEj
+ uqCjGHN+c0hMcbkHbOowWaJvHzy4wZfkcJPezDnFSfEVax9wGPV/xvoq31IggGOSFHK1SeQlpfM
+ Q6XIl4JLbc6fM4g==
 X-Developer-Key: i=leitao@debian.org; a=openpgp;
  fpr=AC8539A6E8F46702CA4A439B35A3939FFC78776D
 X-Debian-User: leitao
 
-x86's efi_crash_gracefully_on_page_fault() ends in an infinite
-schedule() loop so the kworker that faulted in firmware never runs
-efi_rts_wq again. A later change needs the same "park this worker
-forever" primitive on the runtime service timeout path, so factor the
-loop into a shared efi_rts_park_worker() and call it from the x86
-page-fault handler.
+Convert the queue_work() failure path in __efi_queue_work() to a
+goto exit instead of falling through to the wait and the
+WARN_ON_ONCE(status == EFI_ABORTED) below it. A failed queue_work()
+leaves the status at its initial EFI_ABORTED, so that warning would
+fire even though no call ran; it is meant for a completed call that
+returned EFI_ABORTED.
 
-No functional change.
+No change for the common (successful enqueue) path. This also prepares
+__efi_queue_work() for the timeout handling added later.
 
 Signed-off-by: Breno Leitao <leitao@debian.org>
 ---
- arch/x86/platform/efi/quirks.c          |  9 +--------
- drivers/firmware/efi/runtime-wrappers.c | 13 +++++++++++++
- include/linux/efi.h                     |  2 ++
- 3 files changed, 16 insertions(+), 8 deletions(-)
+ drivers/firmware/efi/runtime-wrappers.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 90a065fcb1fab..02c56a02eb9bc 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -832,12 +832,5 @@ void efi_crash_gracefully_on_page_fault(unsigned long phys_addr,
- 	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
- 	pr_info("Froze efi_rts_wq and disabled EFI Runtime Services\n");
- 
--	/*
--	 * Call schedule() in an infinite loop, so that any spurious wake ups
--	 * will never run efi_rts_wq again.
--	 */
--	for (;;) {
--		set_current_state(TASK_IDLE);
--		schedule();
--	}
-+	efi_rts_park_worker();
- }
 diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index da8d296216441..a1e46ab003668 100644
+index a1e46ab003668..13857e5291b91 100644
 --- a/drivers/firmware/efi/runtime-wrappers.c
 +++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -211,6 +211,19 @@ static struct task_struct *efi_runtime_lock_owner;
- extern struct semaphore __efi_uv_runtime_lock __alias(efi_runtime_lock);
- #endif
- 
-+/*
-+ * Park a worker that must never run efi_rts_wq again: EFI runtime services
-+ * have been disabled and its efi_rts_work is abandoned. Loop in schedule()
-+ * so a spurious wakeup cannot resume it.
-+ */
-+void efi_rts_park_worker(void)
-+{
-+	for (;;) {
-+		set_current_state(TASK_IDLE);
-+		schedule();
+@@ -351,10 +351,12 @@ static efi_status_t __efi_queue_work(enum efi_rts_ids id,
+ 	 * queue_work() returns 0 if work was already on queue,
+ 	 * _ideally_ this should never happen.
+ 	 */
+-	if (queue_work(efi_rts_wq, &efi_rts_work.work))
+-		wait_for_completion(&efi_rts_work.efi_rts_comp);
+-	else
++	if (!queue_work(efi_rts_wq, &efi_rts_work.work)) {
+ 		pr_err("Failed to queue work to efi_rts_wq.\n");
++		goto exit;
 +	}
-+}
 +
- /*
-  * Calls the appropriate efi_runtime_service() with the appropriate
-  * arguments.
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 24221a8424121..015505423277e 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1256,6 +1256,8 @@ extern struct efi_runtime_work efi_rts_work;
- /* Workqueue to queue EFI Runtime Services */
- extern struct workqueue_struct *efi_rts_wq;
++	wait_for_completion(&efi_rts_work.efi_rts_comp);
  
-+void efi_rts_park_worker(void);
-+
- struct linux_efi_memreserve {
- 	int		size;			// allocated size of the array
- 	atomic_t	count;			// number of entries used
+ 	WARN_ON_ONCE(efi_rts_work.status == EFI_ABORTED);
+ exit:
 
 -- 
 2.53.0-Meta
