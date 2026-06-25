@@ -1,89 +1,71 @@
-Received: from www345.your-server.de (www345.your-server.de [78.46.144.83])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCD1F1E7C18;
-	Thu, 25 Jun 2026 17:37:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=78.46.144.83
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A64918C933;
+	Thu, 25 Jun 2026 20:14:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782409068; cv=none; b=VXPH0lHeJoTpjKgQO3f0qbJQo/MCUZKKWyJclyois99i3uAT1xflMAagKN6yVeydxed0HG6maGHP6vlNoqMrf1AZiXjm/2iYfvgcWXggQCnLXcLJ4HqMOV37VUaaFSnm1gmP6TwKjlYO3kQ+xRURv5TF0+Kd09itJHEkjoxKMA0=
+	t=1782418497; cv=none; b=TKed5htUuyESqTUFoIivxX7s4PdNiofkEkezMHvw33lNfjDk5c4O6oEdUXQ6IdOxD9xyna446bKtR+epROs7wOK6CeUC4GokiEkTqWLa9AaipxuQlMh1Fx6nGMpJak/dJx09ARn0tMmlUnOjtqakxuB4ybBhhvUfugm4Y4RBv2k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782409068; c=relaxed/simple;
-	bh=ytqu8V8dbYLdG4Ekloe3e2TJqIhDemmAqSzNR2GXpgU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Y+8pvynHkoyeR0Six5rneQYrVMhURBeylSX4JXJ/APJYjwaFyRXH0PXcxLgG4QMyvFh3t4KpBIRhjIs0/9ER4Y0LNJTPYgFqDFYlZLlkSgmWzsoLvxbAYxkvB+Mu8hPzXKZLBu8fHK7g2ssW2RempkiqPSNYZOu2RnGlgtlyZYU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tti0.net; spf=pass smtp.mailfrom=tti0.net; dkim=pass (2048-bit key) header.d=tti0.net header.i=@tti0.net header.b=RDTcxNpZ; arc=none smtp.client-ip=78.46.144.83
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tti0.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tti0.net
+	s=arc-20240116; t=1782418497; c=relaxed/simple;
+	bh=wZq75Qj71Iqh0UgcYccUJY0GJRMgaRnNeSxEYh69W3g=;
+	h=Date:From:To:cc:Subject:In-Reply-To:Message-ID:References:
+	 MIME-Version:Content-Type; b=nHasNQvOJUwRRChwQh+cfXI+6FNeMu3+Y6IHVrHQaioEISM4dSjlwFt7IgfTlpx++ZYA2BkzpswZ9qzxbqiOOqRbJP6p0R3XjtL6fRUdboirTdbM5or2G6ot1A8+tuaxgZD+zQ/tZ4XrhuThikkHxv9k5ovi8+1rygWkshnLv1w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fzLhRwL9; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tti0.net header.i=@tti0.net header.b="RDTcxNpZ"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=tti0.net;
-	s=default2601; h=Content-Transfer-Encoding:MIME-Version:Message-ID:Date:
-	Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:In-Reply-To:References;
-	bh=yIzt0fmhxg0NIzVSuppKs0YdrAQS3wyZ9hAh87rsox4=; b=RDTcxNpZPgEjLuYPMqdWv3CxUw
-	IRkLCkx50OwrpumrFdbkq1LqGWJOYW74HxoT8kq3CKHu9zUN+JPfy1sDYdc6E2KhjbLYa7KQI1Noj
-	/kuLRadxPodLQn7QbVvDv2YtJ99cNZ4g0OWTyhKG96zKyZ4Qpg0MNst8oQIjqL/clyWE1BaDX9IQG
-	5nyLrXerTgby1V0fhrgn0oG4PE1sKS+m+rBXpKqatpva1h+uC/8Hg5KV9PRfPWr+kfgxdiWQk9E+q
-	TKRb0Wmk8IidB8Vpdcebu5R6clCJFWDQuDrR5QWwGODbfOKKYsgqGcQKvZ6hBg1ddiT6s70wD3c9T
-	vO1dkJCg==;
-Received: from sslproxy06.your-server.de ([78.46.172.3])
-	by www345.your-server.de with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.96.2)
-	(envelope-from <theodore@tti0.net>)
-	id 1wcncv-000PAc-0H;
-	Thu, 25 Jun 2026 19:12:33 +0200
-Received: from localhost ([127.0.0.1])
-	by sslproxy06.your-server.de with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.96)
-	(envelope-from <theodore@tti0.net>)
-	id 1wcncu-000Fa5-27;
-	Thu, 25 Jun 2026 19:12:32 +0200
-From: Theodore Tucker <theodore@tti0.net>
-To: linux-kernel@vger.kernel.org
-Cc: linux-efi@vger.kernel.org,
-	gpiccoli@igalia.com,
-	tony.luck@intel.com,
-	kees@kernel.org,
-	ilias.apalodimas@linaro.org,
-	ardb@kernel.org,
-	Theodore Tucker <theodore@tti0.net>
-Subject: [PATCH] efi: Make EFI_VARS_PSTORE depend on EFIVAR_FS
-Date: Thu, 25 Jun 2026 18:12:14 +0100
-Message-ID: <20260625171214.8058-1-theodore@tti0.net>
-X-Mailer: git-send-email 2.47.3
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fzLhRwL9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 72E841F000E9;
+	Thu, 25 Jun 2026 20:14:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1782418496;
+	bh=cPmr9mqHehuH/8SL5EU6QQ+XWWK8jrMA1RsYVuKM7PE=;
+	h=Date:From:To:cc:Subject:In-Reply-To:References;
+	b=fzLhRwL9+cBtKC2y8H6yxrFXyLco1lzXeMjs1ociwQZqMhP/fHHVGqzbmkvmHGM/j
+	 8RaL3mJjYI5AWnTuB7x1GNwPjRK6wH1/pVVxAMvlMT9+g8Ikj2qLqYq5t7eYcKdn3w
+	 B2PikCanp9CecXtcTQBQ7JhKojFMnbPOU1ATYYcxkGMBO+ghOsWpn3hdGfkivQfqu2
+	 E459XqU/tzStlO2WbRYAzF+KpeCV/4FszJXHKgZoHbaRjPTfpTbthezxW6xc07k2AZ
+	 HKku2LuVXyux7iGCpEqIKUqeVnNVFbvbCCoOBYMjzR8iUtAZ9o1A1O/MBrFtGM3JRg
+	 9kkjLZx5DGlkQ==
+Date: Thu, 25 Jun 2026 14:14:54 -0600 (MDT)
+From: Paul Walmsley <pjw@kernel.org>
+To: Atish Patra <atish.patra@linux.dev>
+cc: Ard Biesheuvel <ardb@kernel.org>, 
+    Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
+    Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+    Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, 
+    linux-efi@vger.kernel.org, linux-riscv@lists.infradead.org, 
+    linux-kernel@vger.kernel.org, Atish Patra <atishp@meta.com>
+Subject: Re: [PATCH 0/2] riscv: Use EFI runtime services for poweroff and
+ restart
+In-Reply-To: <20260615-efi_reset_shutdown-v1-0-9414edcbbab0@meta.com>
+Message-ID: <0167594c-0c54-cbb0-a981-26df2a5bfb3c@kernel.org>
+References: <20260615-efi_reset_shutdown-v1-0-9414edcbbab0@meta.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Virus-Scanned: Clear (ClamAV 1.4.3/28042/Thu Jun 25 08:27:10 2026)
+Content-Type: text/plain; charset=US-ASCII
 
-The efivars backend to pstore will not register if the efivarfs is
-not available. The efivars sysfs interface was removed in Linux 6.0,
-meaning efivarfs is now the only way pstore can write into EFI
-variables. Making the dependency on the efivarfs explicit removes
-a stumbling block when configuring a kernel with pstore.
+On Mon, 15 Jun 2026, Atish Patra wrote:
 
-Signed-off-by: Theodore Tucker <theodore@tti0.net>
----
- drivers/firmware/efi/Kconfig | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> Today RISC-V always uses the SBI SRST extension for both poweroff and restart,
+> even when UEFI runtime services are available. This series makes RISC-V prefer
+> EFI runtime services for both paths when available. The reset via EFI is
+> required for EFI capsule updates and also documented as a preferred method
+> in BRS 1.0 spec (e.g. URT_030)[1] 
+> 
+> Behavior on SBI-only (non-EFI) systems is unchanged.
+> 
+> Tested under QEMU 'virt' with EDK2/UEFI firmware exposing runtime
+> ResetSystem().
+> 
+> [1] https://docs.riscv.org/reference/brs/uefi.html#uefi
+> 
+> Signed-off-by: Atish Patra <atishp@meta.com>
 
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 29e0729299f5..8dfd21e7a8e4 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -9,7 +9,7 @@ config EFI_ESRT
- 
- config EFI_VARS_PSTORE
- 	tristate "Register efivars backend for pstore"
--	depends on PSTORE
-+	depends on PSTORE && EFIVAR_FS
- 	select UCS2_STRING
- 	default y
- 	help
--- 
-2.47.3
+Thanks, queued for v7.3.
 
+
+- Paul
