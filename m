@@ -1,118 +1,234 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.21])
+Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87169347BDC;
-	Mon, 29 Jun 2026 07:35:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 523C13BED08;
+	Wed,  1 Jul 2026 09:12:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782718557; cv=none; b=YUjI5jyyyMHyY/eOh7IEpB5IL+5WGMZysmj9FNmq/a4VMqEmxCE3kFstyZz5JgShT0rGsZG0t+aXQHgvjjQTaQPor0D/3aiPiADd643CBqVaUZvCLoTAsuARPZFhZhQrkozD0RkTJUSPjXvL6ZT1zbUXudxD8pSJzaJzqhW7wbU=
+	t=1782897151; cv=none; b=s4hmW+cU8zFsLnc2zeYbzTxIbrUORPijRQl0kCMEawDc9OKj62k8C1+ahDG4gVTFMlKu6JiPPoYydiZEQ5oB1yFA2hTQmRMcS8XzY+Y7YhCGR6olNklNoPAEpCK5jp8YIrzOW6iRl5MGw6/cgcgVjMuz5xz/2eGQzUkN8gkHTqU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782718557; c=relaxed/simple;
-	bh=2zatEBFdK9tskA5xMCuwhriCR8d/k+4Lgiw5vm1QE50=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=X+HDKN4jikqnbIia3P9LXCKkAfcmlq5xvHw2YCacox3s+bynk7tlbulfF7nYpCDkCghjNnxzdL2KryqZ+E+kATPcEhWvqP0QVQ7JiGUevorIvoDRcT5NmEQ8wgjMFchAIOrvFh4vSjdyr04bgjzn2rvaCj3Z8d/ZjKvUwOo9qh4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=pass smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=FM7oxT9Z; arc=none smtp.client-ip=198.175.65.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1782897151; c=relaxed/simple;
+	bh=VxUjj+58AxN1DHcZllF59XGxoFN64vOpQQG615c8HNA=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=cOFi8iqNAuc5KOtOHu2q73QHwCAYvmM/NkJAcvAC2ZWwAWu2yDw/v8FxzvmRvftHAJ44r/KzRx7dQB6ltV9ankIIyBUznyZue1zqK0rqksr8yc5T+9Frou7cW5vHZ7tTxO6Leuua5ob3I8jF5Daa2ycyPbXdKAjqiGZi/W1zWtk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=HaQp00z+; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=Nr8GrEXi; arc=none smtp.client-ip=193.142.43.55
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="FM7oxT9Z"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1782718553; x=1814254553;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=2zatEBFdK9tskA5xMCuwhriCR8d/k+4Lgiw5vm1QE50=;
-  b=FM7oxT9Z00r0Jia8D4c6tgFm1iEbwfgohqbVZx1Ui1tE1Ehebbq2VpAd
-   mqW827tsiti+qYgEhJaZSY3uFZ2Rfe/WyHOlVHw12dMYFd9K119nwNvWm
-   XHRwjHtyIeM1pg9SvuF9iwE2hZ+5qUziUCBVCqO06balM/gMy793rAGd4
-   5qfm0ymGXw+6K/r/+JLusWd2A/z8ydjTlhMkPW3azH6FOIxMRBvQWRnYn
-   hCSKBbjEuiUEGX5vlwwqWmDERYpf5U3+xnIMFiKWCfh4r/aDwAe51DwBb
-   CREvSRxQU2cVV44JYpYE3SBBdI8Dt/DtQ6HrGC8F1gk7dMdx68AYW3YDv
-   w==;
-X-CSE-ConnectionGUID: ju54942sTPC0980juBxX2Q==
-X-CSE-MsgGUID: qbpfCqX3Qiue6pgJpTg4KA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11831"; a="83276365"
-X-IronPort-AV: E=Sophos;i="6.24,231,1774335600"; 
-   d="scan'208";a="83276365"
-Received: from orviesa006.jf.intel.com ([10.64.159.146])
-  by orvoesa113.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jun 2026 00:35:51 -0700
-X-CSE-ConnectionGUID: LA/j0INTRCeqBSkQMZkB5w==
-X-CSE-MsgGUID: SxLdSLYtT0OyqBtaePGndw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.24,231,1774335600"; 
-   d="scan'208";a="250189857"
-Received: from kniemiec-mobl1.ger.corp.intel.com (HELO localhost) ([10.245.244.207])
-  by orviesa006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jun 2026 00:35:47 -0700
-Date: Mon, 29 Jun 2026 10:35:40 +0300
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To: Markus Elfring <Markus.Elfring@web.de>
-Cc: linux-block@vger.kernel.org, linux-efi@vger.kernel.org,
-	linux-ntfs-dev@lists.sourceforge.net, linux-s390@vger.kernel.org,
-	Christophe Jaillet <christophe.jaillet@wanadoo.fr>,
-	Davidlohr Bueso <dave@stgolabs.net>,
-	Jan =?iso-8859-1?Q?H=F6ppner?= <hoeppner@linux.ibm.com>,
-	Jens Axboe <axboe@kernel.dk>, Josh Law <objecting@objecting.org>,
-	Kees Cook <kees@kernel.org>, Md Haris Iqbal <haris.iqbal@linux.dev>,
-	Richard Russon <ldm@flatcap.org>,
-	Stefan Haberland <sth@linux.ibm.com>,
-	Thorsten Blum <thorsten.blum@linux.dev>, vulab@iscas.ac.cn,
-	LKML <linux-kernel@vger.kernel.org>,
-	kernel-janitors@vger.kernel.org,
+	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="HaQp00z+";
+	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="Nr8GrEXi"
+Date: Wed, 1 Jul 2026 11:12:26 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
+	s=2020; t=1782897147;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=VxUjj+58AxN1DHcZllF59XGxoFN64vOpQQG615c8HNA=;
+	b=HaQp00z++5NRvJYVHWDOmBOxrWr5RhP6Nyw6ZNOpHMGRX5TfxZi/jmnCAeLa6/AEYl1siF
+	ZZLi9L9G/mRQgD4BZOsbljQuufgnPe61LN/zfZhKLKHcRjFbdaAq0u4UlTBnZQ1E0Otool
+	XY6QWyHoVLA8V7U9Pvby1r6KmRP7IxIai6LlOyNhPKidTORQWlP+z+iP/YnClAxMJki4m1
+	Vbrhh0ZHOwsX5wDbcBBMPOxBj4Gq5DBZLKdlnVYyhif3jCtG5NvFmGYrCVg439rAyBGkJr
+	vQyvbhzP4TyZ8JaP/v9XQlI35bPmSwjolXNnefQIj7aXgZmR2pPAJ0H3ISW7gg==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
+	s=2020e; t=1782897147;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=VxUjj+58AxN1DHcZllF59XGxoFN64vOpQQG615c8HNA=;
+	b=Nr8GrEXiJ/sKMV0gvf+V2fSf/wvKN6Np/MBR+idrWgrto2GX7DIiG0OIJsMKlYOA5cX12Z
+	Wk4IaoZI1e6AlIAw==
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+To: linux-rt-devel@lists.linux.dev, linux-doc@vger.kernel.org,
+	linux-efi@vger.kernel.org, op-tee@lists.trustedfirmware.org
+Cc: Ard Biesheuvel <ardb@kernel.org>, Clark Williams <clrkwllms@kernel.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Jan Kiszka <jan.kiszka@siemens.com>,
+	Jens Wiklander <jens.wiklander@linaro.org>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Shuah Khan <skhan@linuxfoundation.org>,
 	Steven Rostedt <rostedt@goodmis.org>,
-	Woradorn Laodhanadhaworn <woradorn.laon@gmail.com>
-Subject: Re: [PATCH v2] block: partitions: Use seq_buf_putc() at 24 places
-Message-ID: <akIgTBcvrZLfY2iL@ashevche-desk.local>
-References: <59dfd2ef-2fda-4dd0-a288-52c35613e778@web.de>
- <ajzkRM_RFKBpp0i5@ashevche-desk.local>
- <7de415a7-457d-4dd2-aebb-8e179fa0bbcd@web.de>
- <aj061omzs5WN5ar6@ashevche-desk.local>
- <7360cab3-7a2f-4903-85f1-0f03387b0d88@web.de>
+	John Ogness <john.ogness@linutronix.de>
+Subject: [PATCH] Documentation: Extend the real-time hardware bits with some
+ firmware bits
+Message-ID: <20260701091226.7SWW4TrT@linutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <7360cab3-7a2f-4903-85f1-0f03387b0d88@web.de>
-Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
- krs, Bertel Jungin Aukio 5, 02600 Espoo
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jun 29, 2026 at 09:16:09AM +0200, Markus Elfring wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Mon, 29 Jun 2026 08:10:24 +0200
-> 
-> Single line breaks should occasionally be put into a sequence buffer.
-> Thus use the seq_buf_putc() function in these implementations.
-> 
-> The source code was transformed by using the Coccinelle software.
-> 
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
-> ---
-> 
-> v2:
-> * Andy Shevchenko requested to preserve two blank lines.
+I have been reviewing how OP=E2=80=91TEE is implemented and how secure=E2=
+=80=91world
+invocations behave. The goal was to determine whether an OP=E2=80=91TEE cal=
+l can
+delay the Linux side and introduce latency depending on the time spent
+in the secure world.
 
-This comment in the context of the given commit message may be odd.
-The blank lines mentioned were in the code that previous coccinelle
-script removed, id est the code
+Similar latency effects are already known for EFI runtime services, but
+this was not documented. To mitigate the impact, EFI runtime invocations
+can be restricted to specific CPUs so that real=E2=80=91time workloads on o=
+ther
+CPUs remain unaffected. This mechanism, however, is only described in
+the commit that introduced it.
 
-	...blank line...
-	seq_buf_puts()
-	...blank line...
+This change adds a firmware section that documents these behaviours
+explicitly. It highlights cases where firmware can delay the kernel,
+information that may be unfamiliar to some users and surprising-or
+concerning-to others.
 
-the script transformed to a single line
+Assisted-by: Microsoft-Copilot
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
 
-	seq_buf_putc()
+I would appreciate an ACK from the OP-TEE camp that I got my little
+research right.
 
-So my request is to keep the original blank line(s) as is.
+ Documentation/core-api/real-time/hardware.rst | 92 +++++++++++++++++++
+ 1 file changed, 92 insertions(+)
 
-> * The source code transformation was extended to all affected places
->   for this software area.
-
--- 
-With Best Regards,
-Andy Shevchenko
-
+diff --git a/Documentation/core-api/real-time/hardware.rst b/Documentation/=
+core-api/real-time/hardware.rst
+index 19f9bb3786e03..fb113848c2f70 100644
+--- a/Documentation/core-api/real-time/hardware.rst
++++ b/Documentation/core-api/real-time/hardware.rst
+@@ -130,3 +130,95 @@ https://github.com/Linutronix/RTC-Testbench.
+ The goal of this project is to validate real-time network communication. I=
+t can
+ be thought of as a "cyclictest" for networking and also serves as a starti=
+ng
+ point for application development.
++
++Firmware
++--------
++
++The firmware often plays a significant role in system operation because it=
+ can
++perform tasks that the kernel cannot directly access, and in some cases it=
+ can
++even preempt or intercept the kernel.
++
++A common example of firmware assisting the kernel is when it provides a ge=
+neric
++interface to a resource. Instead of accessing an RTC chip through an I2C h=
+ost
++controller, the kernel may query the firmware for the current time, and the
++firmware then accesses the RTC behind the scenes.
++
++Firmware can also intercept kernel execution by providing services that
++temporarily take control of the system. One example is memory scrubbing, w=
+here
++the firmware periodically pauses the kernel, reads back portions of system
++memory, and then returns control. During this time, the kernel is effectiv=
+ely
++interrupted.
++In contrast, some systems provide hardware=E2=80=91based memory scrubbing,=
+ which
++operates independently of firmware or software. See
++Documentation/edac/scrub.rst for details.
++
++If the kernel is intercepted for longer periods then these periods can be =
+made
++visible with the hardware latency detector. See
++Documentation/trace/hwlat_detector.rst.
++
++The kernel can also be intercepted in response to specific events, such as
++overheating. In this case, the firmware may throttle the CPU or shut it do=
+wn
++immediately to prevent hardware damage.
++
++Unless the firmware is well documented, it should be thoroughly tested to
++uncover any unexpected behaviour.
++
++EFI
++~~~~
++
++EFI provides runtime services that act as a communication interface betwee=
+n the
++firmware and the operating system. One such service is reading and writing=
+ EFI
++variables, which are used, for example, to determine the boot source.
++
++Invoking a runtime service may require the architecture to disable kernel
++preemption or interrupts during the call. This means the duration of a ser=
+vice
++invocation directly affects the system=E2=80=99s observable latency. There=
+ is also
++nothing that prevents a service call from disabling interrupts internally =
+while
++it runs.
++
++For these reasons, EFI runtime services are disabled by default on a PREEM=
+PT_RT
++kernel. They can still be enabled at boot time or via a Kconfig option if
++required.
++The native EFI runtime service implementation (where both the EFI service =
+and
++the kernel are either 32=E2=80=91bit or 64=E2=80=91bit executables) uses a=
+ wrapper mechanism
++that invokes the service through a dedicated workqueue. This workqueue is =
+named
++efi_runtime, and it can be restricted to a housekeeping CPU using the
++``/sys/devices/virtual/workqueue/efi_runtime/cpumask`` sysfs file. Assigni=
+ng it
++to a housekeeping CPU ensures that potentially long service invocations do=
+ not
++impact the real=E2=80=91time workload which is restricted to other CPUs.
++
++It must also be verified that the runtime services behave as expected. Some
++implementations on the x86 architecture pause all other CPUs while one CPU
++performs the service call. In such cases, the interruption affects all CPU=
+s,
++and restricting the workqueue to a single CPU provides no benefit.
++
++OP-TEE (ARM)
++~~~~~~~~~~~~
++
++OP=E2=80=91TEE uses a global serialization mechanism (the "big lock"), ens=
+uring that on
++each core only one OP=E2=80=91TEE thread executes secure=E2=80=91world cod=
+e at a time.
++
++Execution flows from the normal world (Linux) into the secure world (OP=E2=
+=80=91TEE)
++through the secure monitor at EL3. Linux and OP=E2=80=91TEE cannot disable=
+ or mask each
++other=E2=80=99s interrupts because both run at EL1 in different security s=
+tates.
++
++Architecturally, the secure monitor can mask or reroute normal=E2=80=91wor=
+ld interrupts
++before entering the secure world. In a correct OP=E2=80=91TEE/ TF=E2=80=91=
+A implementation, it
++does not do this for the duration of secure calls. Normal=E2=80=91world in=
+terrupts
++remain deliverable, and a normal=E2=80=91world IRQ will preempt OP=E2=80=
+=91TEE via EL3 and
++return control to Linux.
++
++Secure=E2=80=91world interrupts (FIQs) are possible if the SoC routes a de=
+vice's
++interrupt as secure. Such a secure FIQ will preempt Linux immediately, trap
++into EL3, and transfer control to OP=E2=80=91TEE's secure interrupt handle=
+r. Linux
++cannot mask or preempt this. Secure FIQ handlers must therefore be extreme=
+ly
++short to avoid introducing noticeable latency.
++
++The transition from normal world -> secure monitor -> OP=E2=80=91TEE and b=
+ack introduces
++additional latency due to world switching and context save/ restore. This
++overhead is typically a few microseconds and usually remains in the noise
++floor.
++
++If the secure monitor masks normal=E2=80=91world interrupts during OP=E2=
+=80=91TEE invocations,
++or if OP=E2=80=91TEE uses long=E2=80=91running secure FIQ handlers, then O=
+P=E2=80=91TEE can introduce
++measurable latency spikes.
+--=20
+2.53.0
 
