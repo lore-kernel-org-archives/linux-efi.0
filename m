@@ -1,57 +1,71 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
+Received: from canpmsgout03.his.huawei.com (canpmsgout03.his.huawei.com [113.46.200.218])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2286113C918;
-	Fri,  3 Jul 2026 00:40:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D895B35A387;
+	Fri,  3 Jul 2026 10:02:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=113.46.200.218
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783039204; cv=none; b=g5uJswKs4CdRLkrz4h9CqzwOF25xz+gWIs3Nt5NSG5Z9OzmTjw1JMKw19ruwUcBJtaQ5Ngo/lLcq734j2orPWToVPPDQ30HMee89eiC7cjoubhNUI9jkyw1ONKaesi+MSAZ+8BZWL8IVoHB0BaQQZ1yf8efkSaiPmYOAh8YO9q0=
+	t=1783072944; cv=none; b=snTWxADMKBFAKsz0CqYFb2TNpXIkb+SUWewfUkSykA4vGdWstVjQxA7iZNC0BZY0FgAkfuiNN0qxjP3z2QXT3tnlFVzzGoBBj6vlIClwoTvkPlEV68VNX2FgXUVD3Z4wvGU0A8/qCAi5U6JvAHvFikK0Wg2fB7pGfCrqxIn0PEE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783039204; c=relaxed/simple;
-	bh=WphSfNuhWIbNhvb8JfM9MwRmFV4W3Ca596Mp7xRkXBY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=JmWCytr0t+w+hNr0ZButLHPgAHKbUO6G1SrHqE4pDhs9cgF4SFqE8iCoqE+qEurdMIDlVrFFkStDa3EZGXy3wG1OOfowgBetzzyQ3EnryrqMRup1kF5CDSOiiz4DUixkwzgBvQkt8xLUoNRNSZiTfOjVlWOAM6JYAijfaOxdBxw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=MJkHuKCM; arc=none smtp.client-ip=198.175.65.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1783072944; c=relaxed/simple;
+	bh=JWCxTOsV2dA7z6VxVONQlPLmdWFhrFsM9+oISbpODdQ=;
+	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=NuNwsNmSNe6e52Jg70Gx3idpkQUoZJUm6rq1z7gpWC+7RQD3Vp4PdPyqZ2qjxoDVJEieqNJ6wmhax/tdUOp1IIXPL4VyMzAO/iCDs8WRGhY017cTHbkVoYwXWlIHEnyWnEFt+Kk2A24bc0R+gK92sgLHowAItkcSCNGq8G8R7wo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b=GQIlrVZ2; arc=none smtp.client-ip=113.46.200.218
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="MJkHuKCM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1783039202; x=1814575202;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=WphSfNuhWIbNhvb8JfM9MwRmFV4W3Ca596Mp7xRkXBY=;
-  b=MJkHuKCM2Lj/FFflqMpuk2IIHfmh04Xk8fAWkHlPewZrQ1pPib3reehl
-   DaXnjQ4H17g9fsbsuA6TrI8drrQlwXXzySo3dVItfGtris+e1SGpOV2ls
-   fTRTbMBZ90uBGO97ZQak59ssoLBTtOxgNLc+zw0yk5awObiXaVhoj4EXc
-   D6nNX8sphPB9IzeCkmeCsVny+94+ycPh4hZol4gnDGozLP2J1rsfirAw4
-   da4MVl09DsctPl8icyZyXTKyn5E1jS2+V2OlRFUHjaJ8Mofyw87cfHd4a
-   88RekCQFtAy2A8TTBeenu/J1+2UZpVChPOrlHcFu+KZsXXlEYwKmBZ0mv
-   Q==;
-X-CSE-ConnectionGUID: SkXTbybrTFOLeijQaGlskw==
-X-CSE-MsgGUID: WAoD/AqASyCkZbPf+L+a9Q==
-X-IronPort-AV: E=McAfee;i="6800,10657,11835"; a="94150638"
-X-IronPort-AV: E=Sophos;i="6.25,144,1779174000"; 
-   d="scan'208";a="94150638"
-Received: from fmviesa008.fm.intel.com ([10.60.135.148])
-  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Jul 2026 17:40:02 -0700
-X-CSE-ConnectionGUID: VjIwKFdsSxe/7s39diUiFg==
-X-CSE-MsgGUID: 5YvBqIatT/GyHEz5ytUb3g==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,144,1779174000"; 
-   d="scan'208";a="250329284"
-Received: from junxiao.bj.intel.com ([10.238.152.69])
-  by fmviesa008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Jul 2026 17:39:59 -0700
-From: Junxiao Chang <junxiao.chang@intel.com>
-To: ardb@kernel.org,
-	ilias.apalodimas@linaro.org,
-	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: -cc=junxiao.chang@intel.com
-Subject: [PATCH] mefi: add dynamic control interface for EFI runtime services
-Date: Sat,  4 Jul 2026 08:33:41 +0800
-Message-ID: <20260704003341.3923900-1-junxiao.chang@intel.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b="GQIlrVZ2"
+dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
+	c=relaxed/relaxed; q=dns/txt;
+	h=From;
+	bh=6a6mDkZdZ+OBlzajcYcMQbQWF9p+PLV7Ah7P0dvJklc=;
+	b=GQIlrVZ2TK2Rh0A1ilD5HVA8yknucAhH67lTSe6r48BWk3EDCcBlSkzlbr6qFvR03KaIfWqvE
+	zvQiPmt0FDevX4I+nFoCFyz+bGAkEc3V7z6DKm1cOrX+XBvoZSd6QN/NxywOTp3aBlb867A9zaW
+	SmlycWbjr+Gfuv7/0K4wGYE=
+Received: from mail.maildlp.com (unknown [172.19.162.197])
+	by canpmsgout03.his.huawei.com (SkyGuard) with ESMTPS id 4gs8GL65XfzpSvY;
+	Fri,  3 Jul 2026 17:53:46 +0800 (CST)
+Received: from dggpemf500011.china.huawei.com (unknown [7.185.36.131])
+	by mail.maildlp.com (Postfix) with ESMTPS id 4167F40579;
+	Fri,  3 Jul 2026 18:02:18 +0800 (CST)
+Received: from huawei.com (10.90.53.73) by dggpemf500011.china.huawei.com
+ (7.185.36.131) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.11; Fri, 3 Jul
+ 2026 18:02:14 +0800
+From: Jinjie Ruan <ruanjinjie@huawei.com>
+To: <catalin.marinas@arm.com>, <will@kernel.org>, <corbet@lwn.net>,
+	<skhan@linuxfoundation.org>, <maz@kernel.org>, <ardb@kernel.org>,
+	<ilias.apalodimas@linaro.org>, <oupton@kernel.org>, <joey.gouly@arm.com>,
+	<seiden@linux.ibm.com>, <suzuki.poulose@arm.com>, <yuzenghui@huawei.com>,
+	<oleg@redhat.com>, <mark.rutland@arm.com>, <lpieralisi@kernel.org>,
+	<tglx@kernel.org>, <ada.coupriediaz@arm.com>, <anshuman.khandual@arm.com>,
+	<ruanjinjie@huawei.com>, <ebiggers@kernel.org>, <broonie@kernel.org>,
+	<mrigendra.chaubey@gmail.com>, <baohua@kernel.org>, <lucaswei@google.com>,
+	<james.morse@arm.com>, <zengheng4@huawei.com>, <thuth@redhat.com>,
+	<yang@os.amperecomputing.com>, <leo.bras@arm.com>, <Sascha.Bischoff@arm.com>,
+	<james.clark@linaro.org>, <peterz@infradead.org>, <leitao@debian.org>,
+	<ben.horgan@arm.com>, <punit.agrawal@oss.qualcomm.com>, <gshan@redhat.com>,
+	<osama.abdelkader@gmail.com>, <fengchengwen@huawei.com>,
+	<ryan.roberts@arm.com>, <yangyicong@hisilicon.com>, <kevin.brodsky@arm.com>,
+	<kees@kernel.org>, <jeson.gao@unisoc.com>, <zhaoyang.huang@unisoc.com>,
+	<ryotkkr98@gmail.com>, <wsw9603@163.com>, <pasha.tatashin@soleen.com>,
+	<jeremy.linton@arm.com>, <schuster.simon@siemens-energy.com>,
+	<osandov@fb.com>, <arnd@arndb.de>, <zhangpengjie2@huawei.com>,
+	<smostafa@google.com>, <vladimir.murzin@arm.com>, <tabba@google.com>,
+	<vdonnefort@google.com>, <kaleshsingh@google.com>, <jic23@kernel.org>,
+	<timothy.hayes@arm.com>, <alexandru.elisei@arm.com>, <zenghui.yu@linux.dev>,
+	<david@kernel.org>, <akpm@linux-foundation.org>, <ljs@kernel.org>,
+	<memxor@gmail.com>, <qperret@google.com>, <chaitanyas.prakash@arm.com>,
+	<linux-arm-kernel@lists.infradead.org>, <linux-doc@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>, <linux-efi@vger.kernel.org>,
+	<kvmarm@lists.linux.dev>
+Subject: [PATCH 01/17] arm64: Move DAIF macros to ptrace.h and use them centrally
+Date: Fri, 3 Jul 2026 18:01:19 +0800
+Message-ID: <20260703100135.2512312-2-ruanjinjie@huawei.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260703100135.2512312-1-ruanjinjie@huawei.com>
+References: <20260703100135.2512312-1-ruanjinjie@huawei.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -59,122 +73,254 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: kwepems200002.china.huawei.com (7.221.188.68) To
+ dggpemf500011.china.huawei.com (7.185.36.131)
 
-Add an interface to dynamically enable or disable EFI runtime
-services at runtime. By default, EFI runtime services remain
-enabled, but they can be temporarily disabled to improve real-time
-latency.
+Currently, various subsystems and low-level headers explicitly combine
+PSR_I_BIT, PSR_F_BIT, and other DAIF bits (such as D and A) to mask
+or unmask interrupts and exceptions. This hardcoded approach reduces
+code readability and increases the maintenance burden when managing
+processor contexts.
 
-Currently, EFI runtime services are typically disabled on RT
-systems using kernel parameters such as "noefi" or "efi=disable".
-However, this permanently disables EFI services, preventing use
-cases such as UEFI firmware updates.
+So move the definitions of DAIF_PROCCTX, DAIF_PROCCTX_NOIRQ, DAIF_ERRCTX,
+and DAIF_MASK from <asm/daifflags.h> to <asm/ptrace.h>. And clean this up
+by replacing explicit bitmask combinations with the unified
+macros defined in <asm/daifflags.h>. Specifically:
 
-With this change, EFI runtime services can be disabled during
-execution of real-time workloads and re-enabled afterwards,
-allowing better balance between real-time performance and firmware
-service availability.
+- Replace `PSR_I_BIT | PSR_F_BIT` with `DAIF_PROCCTX_NOIRQ` where
+  normal interrupts are disabled but NMIs/asynchronous errors can
+  still be taken.
 
-Signed-off-by: Junxiao Chang <junxiao.chang@intel.com>
+- Replace the full explicit DAIF bit mask with `DAIF_MASK`.
+
+This unifies DAIF flag manipulation across kvm, cpuidle, daifflags, and
+efi subsystems, making the code more readable.
+
+Signed-off-by: Jinjie Ruan <ruanjinjie@huawei.com>
 ---
- .../admin-guide/kernel-parameters.txt         |  5 ++-
- drivers/firmware/efi/efi.c                    | 39 +++++++++++++++++++
- 2 files changed, 43 insertions(+), 1 deletion(-)
+ arch/arm64/include/asm/cpuidle.h   |  3 ++-
+ arch/arm64/include/asm/daifflags.h | 12 +++---------
+ arch/arm64/include/asm/efi.h       |  2 +-
+ arch/arm64/include/asm/ptrace.h    | 11 +++++++----
+ arch/arm64/kvm/emulate-nested.c    |  6 +++---
+ arch/arm64/kvm/hyp/nvhe/host.S     |  4 ++--
+ arch/arm64/kvm/hyp/nvhe/hyp-init.S |  3 ++-
+ arch/arm64/kvm/hyp/nvhe/hyp-main.c |  4 ++--
+ arch/arm64/kvm/reset.c             |  6 ++----
+ 9 files changed, 24 insertions(+), 27 deletions(-)
 
-diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index b5493a7f8f228..533213101f808 100644
---- a/Documentation/admin-guide/kernel-parameters.txt
-+++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -1595,7 +1595,8 @@ Kernel parameters
- 	efi=		[EFI,EARLY]
- 			Format: { "debug", "disable_early_pci_dma",
- 				  "nochunk", "noruntime", "nosoftreserve",
--				  "novamap", "no_disable_early_pci_dma" }
-+				  "novamap", "no_disable_early_pci_dma",
-+				  "dynamic" }
- 			debug: enable misc debug output.
- 			disable_early_pci_dma: disable the busmaster bit on all
- 			PCI bridges while in the EFI boot stub.
-@@ -1612,6 +1613,8 @@ Kernel parameters
- 			novamap: do not call SetVirtualAddressMap().
- 			no_disable_early_pci_dma: Leave the busmaster bit set
- 			on all PCI bridges while in the EFI boot stub
-+			dynamic: enable EFI runtime services, which can be
-+			disabled via /sys/firmware/efi/dynamic_enable.
+diff --git a/arch/arm64/include/asm/cpuidle.h b/arch/arm64/include/asm/cpuidle.h
+index 2047713e097d..64ddb533d3ec 100644
+--- a/arch/arm64/include/asm/cpuidle.h
++++ b/arch/arm64/include/asm/cpuidle.h
+@@ -6,6 +6,7 @@
  
- 	efi_no_storage_paranoia [EFI,X86,EARLY]
- 			Using this parameter you can use more than 50% of
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 0327a39d31fa5..18d5d99fab821 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -81,6 +81,7 @@ struct mm_struct efi_mm = {
+ #ifdef CONFIG_ARM64_PSEUDO_NMI
+ #include <asm/arch_gicv3.h>
++#include <asm/ptrace.h>
  
- struct workqueue_struct *efi_rts_wq;
+ struct arm_cpuidle_irq_context {
+ 	unsigned long pmr;
+@@ -17,7 +18,7 @@ struct arm_cpuidle_irq_context {
+ 		struct arm_cpuidle_irq_context *c = __c;		\
+ 		if (system_uses_irq_prio_masking()) {			\
+ 			c->daif_bits = read_sysreg(daif);		\
+-			write_sysreg(c->daif_bits | PSR_I_BIT | PSR_F_BIT, \
++			write_sysreg(c->daif_bits | DAIF_PROCCTX_NOIRQ, \
+ 				     daif);				\
+ 			c->pmr = gic_read_pmr();			\
+ 			gic_write_pmr(GIC_PRIO_IRQON | GIC_PRIO_PSR_I_SET); \
+diff --git a/arch/arm64/include/asm/daifflags.h b/arch/arm64/include/asm/daifflags.h
+index 795b35128467..3a4b63a948ac 100644
+--- a/arch/arm64/include/asm/daifflags.h
++++ b/arch/arm64/include/asm/daifflags.h
+@@ -12,12 +12,6 @@
+ #include <asm/cpufeature.h>
+ #include <asm/ptrace.h>
  
-+static bool efi_in_dynamic __initdata;
- static bool disable_runtime = IS_ENABLED(CONFIG_EFI_DISABLE_RUNTIME);
- static int __init setup_noefi(char *arg)
+-#define DAIF_PROCCTX		0
+-#define DAIF_PROCCTX_NOIRQ	(PSR_I_BIT | PSR_F_BIT)
+-#define DAIF_ERRCTX		(PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
+-#define DAIF_MASK		(PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
+-
+-
+ /* mask/save/unmask/restore all exceptions, including interrupts. */
+ static __always_inline void local_daif_mask(void)
  {
-@@ -115,6 +116,11 @@ static int __init parse_efi_cmdline(char *str)
- 	if (parse_option_str(str, "runtime"))
- 		disable_runtime = false;
- 
-+	if (parse_option_str(str, "dynamic")) {
-+		disable_runtime = false;
-+		efi_in_dynamic = true;
-+	}
-+
- 	if (parse_option_str(str, "nosoftreserve"))
- 		set_bit(EFI_MEM_NO_SOFT_RESERVE, &efi.flags);
- 
-@@ -401,6 +407,34 @@ static void __init efi_debugfs_init(void)
- static inline void efi_debugfs_init(void) {}
- #endif
- 
-+static ssize_t efi_dynamic_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
-+{
-+	return sprintf(buf, "%d\n", efi_enabled(EFI_RUNTIME_SERVICES));
-+}
-+
-+static ssize_t efi_dynamic_store(struct kobject *kobj, struct kobj_attribute *attr,
-+				 const char *buf, size_t count)
-+{
-+	int ret;
-+	bool enable;
-+
-+	ret = kstrtobool(buf, &enable);
-+	if (ret)
-+		return ret;
-+
-+	if (enable)
-+		set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-+	else {
-+		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-+		if (efi_rts_wq)
-+			flush_workqueue(efi_rts_wq);
-+	}
-+
-+	return count;
-+}
-+static struct kobj_attribute efi_dynamic_attr =
-+	__ATTR(dynamic_enable, 0644, efi_dynamic_show, efi_dynamic_store);
-+
- static int __init efipostcore_init(void)
- {
- 	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-@@ -446,6 +480,11 @@ static int __init efisubsys_init(void)
- 		goto err_destroy_wq;
+@@ -47,7 +41,7 @@ static __always_inline unsigned long local_daif_save_flags(void)
+ 	if (system_uses_irq_prio_masking()) {
+ 		/* If IRQs are masked with PMR, reflect it in the flags */
+ 		if (read_sysreg_s(SYS_ICC_PMR_EL1) != GIC_PRIO_IRQON)
+-			flags |= PSR_I_BIT | PSR_F_BIT;
++			flags |= DAIF_PROCCTX_NOIRQ;
  	}
  
-+	if (efi_in_dynamic && efi.runtime_supported_mask) {
-+		if (sysfs_create_file(efi_kobj, &efi_dynamic_attr.attr))
-+			pr_warn("unable to register efi dynamic sysfs interface\n");
-+	}
+ 	return flags;
+@@ -69,7 +63,7 @@ static __always_inline void local_daif_restore(unsigned long flags)
+ 	bool irq_disabled = flags & PSR_I_BIT;
+ 
+ 	WARN_ON(system_has_prio_mask_debugging() &&
+-		(read_sysreg(daif) & (PSR_I_BIT | PSR_F_BIT)) != (PSR_I_BIT | PSR_F_BIT));
++		(read_sysreg(daif) & DAIF_PROCCTX_NOIRQ) != DAIF_PROCCTX_NOIRQ);
+ 
+ 	if (!irq_disabled) {
+ 		trace_hardirqs_on();
+@@ -86,7 +80,7 @@ static __always_inline void local_daif_restore(unsigned long flags)
+ 			 * If interrupts are disabled but we can take
+ 			 * asynchronous errors, we can take NMIs
+ 			 */
+-			flags &= ~(PSR_I_BIT | PSR_F_BIT);
++			flags &= ~DAIF_PROCCTX_NOIRQ;
+ 			pmr = GIC_PRIO_IRQOFF;
+ 		} else {
+ 			pmr = GIC_PRIO_IRQON | GIC_PRIO_PSR_I_SET;
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index e8a9783235cb..ae2a24868ee7 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -48,7 +48,7 @@ void arch_efi_call_virt_teardown(void);
+ 	(efi_rt_stack_top != NULL &&					\
+ 	 on_task_stack(current, READ_ONCE(efi_rt_stack_top[-1]), 1))
+ 
+-#define ARCH_EFI_IRQ_FLAGS_MASK (PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
++#define ARCH_EFI_IRQ_FLAGS_MASK (DAIF_MASK)
+ 
+ /*
+  * Even when Linux uses IRQ priorities for IRQ disabling, EFI does not.
+diff --git a/arch/arm64/include/asm/ptrace.h b/arch/arm64/include/asm/ptrace.h
+index 39582511ad72..f33f75881c9a 100644
+--- a/arch/arm64/include/asm/ptrace.h
++++ b/arch/arm64/include/asm/ptrace.h
+@@ -12,14 +12,17 @@
+ 
+ #include <uapi/asm/ptrace.h>
+ 
++#define DAIF_PROCCTX		0
++#define DAIF_PROCCTX_NOIRQ	(PSR_I_BIT | PSR_F_BIT)
++#define DAIF_ERRCTX		(PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
++#define DAIF_MASK		(PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
 +
- 	if (efi_rt_services_supported(EFI_RT_SUPPORTED_GET_VARIABLE |
- 				      EFI_RT_SUPPORTED_GET_NEXT_VARIABLE_NAME)) {
- 		error = generic_ops_register();
+ /* Current Exception Level values, as contained in CurrentEL */
+ #define CurrentEL_EL1		(1 << 2)
+ #define CurrentEL_EL2		(2 << 2)
+ 
+-#define INIT_PSTATE_EL1 \
+-	(PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT | PSR_MODE_EL1h)
+-#define INIT_PSTATE_EL2 \
+-	(PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT | PSR_MODE_EL2h)
++#define INIT_PSTATE_EL1	(DAIF_MASK | PSR_MODE_EL1h)
++#define INIT_PSTATE_EL2	(DAIF_MASK | PSR_MODE_EL2h)
+ 
+ #include <linux/irqchip/arm-gic-v3-prio.h>
+ 
+diff --git a/arch/arm64/kvm/emulate-nested.c b/arch/arm64/kvm/emulate-nested.c
+index e688bc5139c1..356b67aa8dc0 100644
+--- a/arch/arm64/kvm/emulate-nested.c
++++ b/arch/arm64/kvm/emulate-nested.c
+@@ -9,6 +9,7 @@
+ 
+ #include <asm/kvm_emulate.h>
+ #include <asm/kvm_nested.h>
++#include <asm/ptrace.h>
+ 
+ #include "hyp/include/hyp/adjust_pc.h"
+ 
+@@ -2754,9 +2755,8 @@ static u64 kvm_check_illegal_exception_return(struct kvm_vcpu *vcpu, u64 spsr)
+ 		 */
+ 		spsr = *vcpu_cpsr(vcpu);
+ 
+-		spsr &= (PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT |
+-			 PSR_N_BIT | PSR_Z_BIT | PSR_C_BIT | PSR_V_BIT |
+-			 PSR_MODE_MASK | PSR_MODE32_BIT);
++		spsr &= (DAIF_MASK | PSR_N_BIT | PSR_Z_BIT | PSR_C_BIT |
++			 PSR_V_BIT | PSR_MODE_MASK | PSR_MODE32_BIT);
+ 		spsr |= PSR_IL_BIT;
+ 	}
+ 
+diff --git a/arch/arm64/kvm/hyp/nvhe/host.S b/arch/arm64/kvm/hyp/nvhe/host.S
+index 9393fe3ea6a1..cbe2a616c726 100644
+--- a/arch/arm64/kvm/hyp/nvhe/host.S
++++ b/arch/arm64/kvm/hyp/nvhe/host.S
+@@ -11,6 +11,7 @@
+ #include <asm/kvm_asm.h>
+ #include <asm/kvm_mmu.h>
+ #include <asm/kvm_ptrauth.h>
++#include <asm/ptrace.h>
+ 
+ 	.text
+ 
+@@ -111,8 +112,7 @@ SYM_FUNC_END(__host_enter)
+  */
+ SYM_FUNC_START(__hyp_do_panic)
+ 	/* Prepare and exit to the host's panic function. */
+-	mov	lr, #(PSR_F_BIT | PSR_I_BIT | PSR_A_BIT | PSR_D_BIT |\
+-		      PSR_MODE_EL1h)
++	mov	lr, #(DAIF_MASK | PSR_MODE_EL1h)
+ 	msr	spsr_el2, lr
+ 	adr_l	lr, nvhe_hyp_panic_handler
+ 	hyp_kimg_va lr, x6
+diff --git a/arch/arm64/kvm/hyp/nvhe/hyp-init.S b/arch/arm64/kvm/hyp/nvhe/hyp-init.S
+index 89cb553be1e5..26ea02e7f5fd 100644
+--- a/arch/arm64/kvm/hyp/nvhe/hyp-init.S
++++ b/arch/arm64/kvm/hyp/nvhe/hyp-init.S
+@@ -15,6 +15,7 @@
+ #include <asm/kvm_asm.h>
+ #include <asm/kvm_mmu.h>
+ #include <asm/pgtable-hwdef.h>
++#include <asm/ptrace.h>
+ #include <asm/sysreg.h>
+ #include <asm/virt.h>
+ 
+@@ -224,7 +225,7 @@ SYM_CODE_START(__kvm_handle_stub_hvc)
+ 
+ 	/* This is where we're about to jump, staying at EL2 */
+ 	msr	elr_el2, x1
+-	mov	x0, #(PSR_F_BIT | PSR_I_BIT | PSR_A_BIT | PSR_D_BIT | PSR_MODE_EL2h)
++	mov	x0, #(DAIF_MASK | PSR_MODE_EL2h)
+ 	msr	spsr_el2, x0
+ 
+ 	/* Shuffle the arguments, and don't come back */
+diff --git a/arch/arm64/kvm/hyp/nvhe/hyp-main.c b/arch/arm64/kvm/hyp/nvhe/hyp-main.c
+index d3c69de698f4..69dfbbe109ad 100644
+--- a/arch/arm64/kvm/hyp/nvhe/hyp-main.c
++++ b/arch/arm64/kvm/hyp/nvhe/hyp-main.c
+@@ -8,6 +8,7 @@
+ #include <hyp/switch.h>
+ 
+ #include <asm/pgtable-types.h>
++#include <asm/ptrace.h>
+ #include <asm/kvm_asm.h>
+ #include <asm/kvm_emulate.h>
+ #include <asm/kvm_host.h>
+@@ -859,8 +860,7 @@ void inject_host_exception(u64 esr)
+ 	}
+ 
+ 	spsr_el2 &= spsr_mask;
+-	spsr_el2 |= PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT |
+-		    PSR_MODE_EL1h;
++	spsr_el2 |= DAIF_MASK | PSR_MODE_EL1h;
+ 
+ 	sctlr = read_sysreg_el1(SYS_SCTLR);
+ 	if (!(sctlr & SCTLR_EL1_SPAN))
+diff --git a/arch/arm64/kvm/reset.c b/arch/arm64/kvm/reset.c
+index b963fd975aac..0e1167eee5c0 100644
+--- a/arch/arm64/kvm/reset.c
++++ b/arch/arm64/kvm/reset.c
+@@ -37,11 +37,9 @@ unsigned int __ro_after_init kvm_host_sve_max_vl;
+ /*
+  * ARMv8 Reset Values
+  */
+-#define VCPU_RESET_PSTATE_EL1	(PSR_MODE_EL1h | PSR_A_BIT | PSR_I_BIT | \
+-				 PSR_F_BIT | PSR_D_BIT)
++#define VCPU_RESET_PSTATE_EL1	(PSR_MODE_EL1h | DAIF_MASK)
+ 
+-#define VCPU_RESET_PSTATE_EL2	(PSR_MODE_EL2h | PSR_A_BIT | PSR_I_BIT | \
+-				 PSR_F_BIT | PSR_D_BIT)
++#define VCPU_RESET_PSTATE_EL2	(PSR_MODE_EL2h | DAIF_MASK)
+ 
+ #define VCPU_RESET_PSTATE_SVC	(PSR_AA32_MODE_SVC | PSR_AA32_A_BIT | \
+ 				 PSR_AA32_I_BIT | PSR_AA32_F_BIT)
 -- 
-2.43.0
+2.34.1
 
