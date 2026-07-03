@@ -1,31 +1,31 @@
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 4BE8B3D647C;
-	Fri,  3 Jul 2026 13:38:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 85A013E5EC0;
+	Fri,  3 Jul 2026 13:48:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783085939; cv=none; b=lhgpYa0SmU3qnR8RVdNUVYpG3TjJJatyPUdZdyE3dtT6iRghGleqs5/bN2T2pAIXYKMpS3uZzmTR2FMEusrvdw8mF3WaPv4HzZmwP3D7H7p9FoLb6F9lusCN0B/zjMb+ZZdZaFa8QkuiRIPb9NUeVr0xskIwvuEsxAOzm7NRXAE=
+	t=1783086535; cv=none; b=j10nxb4kqLZrX90kL2G6JFUIvqang3XhrfYR80TuoXtIETxc0EUzSSGk/vgSJZowBGcNwNXyNX9RmMTym/X8wv1jesR1fXvE645Sem/USf1WRay9r5hTgHz9s90UPhSmxjYjgvHYt9jcR3rBkOBeWC6WPMn9fsbb2rjQ+E3Hbao=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783085939; c=relaxed/simple;
-	bh=TdNv/Q8j27+x4YGYDKNRipiubl2dTsS0qcruRe2TA+I=;
+	s=arc-20240116; t=1783086535; c=relaxed/simple;
+	bh=JE1wIOADRpHx3rjKf5CevdUQRrlXUMz9viKfAsm6GSU=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type:Content-Disposition; b=BAR37imBBNv9QK2c+j8V6kRXzPBjuMbBU06BTo71zx/y5+QM/CielpqIBDfcP0CA/corz3gEvmHi5VRRBqvVXqTycHWII7aCP08w0d21CuYMai9HgSdvlBK3QV34hLgc0hhSSiPpZ7qE4o08CtDGyBbL+B2Ahm/u0DhBNIsI2fw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=Fjw8cd8K; arc=none smtp.client-ip=217.140.110.172
+	 MIME-Version:Content-Type:Content-Disposition; b=S3CfwSy612gK1Cxl3KQFMhyARlqAFONUJRjKobS9MTVMqH9vhT556zOEEO1KK62ztMadoSUnImqqknkW8mnPaqWw7vkfLk/RgbM3GqCbPd3Z/7odiaCmD8jiM3KFE+oUUBzkDZaQgjPCdIFd9p1V0T4r4y8zUjO8r6oGA+fDvLU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=BNJzT/zf; arc=none smtp.client-ip=217.140.110.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="Fjw8cd8K"
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="BNJzT/zf"
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 596014651;
-	Fri,  3 Jul 2026 06:38:51 -0700 (PDT)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 7EE181570;
+	Fri,  3 Jul 2026 06:48:47 -0700 (PDT)
 Received: from LeoBrasDK.cambridge.arm.com (LeoBrasDK.cambridge.arm.com [10.2.212.21])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 032E23F85F;
-	Fri,  3 Jul 2026 06:38:45 -0700 (PDT)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 482393F85F;
+	Fri,  3 Jul 2026 06:48:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1783085935; bh=TdNv/Q8j27+x4YGYDKNRipiubl2dTsS0qcruRe2TA+I=;
+	t=1783086531; bh=JE1wIOADRpHx3rjKf5CevdUQRrlXUMz9viKfAsm6GSU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=Fjw8cd8Kv8k4e70QRBcY/BLxDi+lUEFZpZdrzoXq8FZ/HRENwevf3BtiMiFfQ4k6V
-	 y34pZeCHrQsVWp5QphsalOfP7mPKwptA8pLHVRo5LqZfIEhcdS+OAnX4PJlchlqbBj
-	 5anyS9szrxUm8wbJKiN0ulfVNQxXoAlw2iJH622k=
+	b=BNJzT/zfMFPyIuAaGTfj9pIskznaoNaMWI/Ws5HOgGVvHkXOeYC5tLi3HDsRw13an
+	 y5Yy18nnmF2YjmBuAhmbnZwNi6+FIFjUVkeBGQTlvBkVm0PAcTi65d/wBH5qFfzANh
+	 BO4Cp7Zgad3HnuTEt+IhP27pVPteZj6Xx90mUzOI=
 From: Leonardo Bras <leo.bras@arm.com>
 To: Jinjie Ruan <ruanjinjie@huawei.com>
 Cc: Leonardo Bras <leo.bras@arm.com>,
@@ -100,8 +100,8 @@ Cc: Leonardo Bras <leo.bras@arm.com>,
 	linux-efi@vger.kernel.org,
 	kvmarm@lists.linux.dev
 Subject: Re: [PATCH 02/17] arm64: Rework exception masking into abstract logical mask
-Date: Fri,  3 Jul 2026 14:38:40 +0100
-Message-ID: <ake7YFGAA_jMWhzy@LeoBrasDK>
+Date: Fri,  3 Jul 2026 14:48:40 +0100
+Message-ID: <ake9uC5Mad2qihBN@LeoBrasDK>
 X-Mailer: git-send-email 2.55.0
 In-Reply-To: <20260703100135.2512312-3-ruanjinjie@huawei.com>
 References: <20260703100135.2512312-1-ruanjinjie@huawei.com> <20260703100135.2512312-3-ruanjinjie@huawei.com>
@@ -428,18 +428,15 @@ On Fri, Jul 03, 2026 at 06:01:20PM +0800, Jinjie Ruan wrote:
 > +	unsigned long pmr;
 > +	unsigned long allint;		// for future FEAT_NMI use
 > +};
-> +
-> +static inline struct exception_mask arm64_make_procctx_mask(void)
 
-By the code you removed, I understand that those new functions should not 
-be marked as 'inline' but as '__always_inline'.
-
-Is there any reason why you decided to use 'inline' instead?
+Also, out of curiosity: it looks like all those bits would fit a single 
+u32. Have you considered using a bit-field, instead of 3 ulongs?
 
 Thanks!
 Leo
 
-
+> +
+> +static inline struct exception_mask arm64_make_procctx_mask(void)
 > +{
 > +	struct exception_mask mask;
 > +
