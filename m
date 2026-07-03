@@ -1,38 +1,38 @@
-Received: from canpmsgout12.his.huawei.com (canpmsgout12.his.huawei.com [113.46.200.227])
+Received: from canpmsgout02.his.huawei.com (canpmsgout02.his.huawei.com [113.46.200.217])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5123F3C1F54;
-	Fri,  3 Jul 2026 10:02:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=113.46.200.227
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12CCD3C4143;
+	Fri,  3 Jul 2026 10:02:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=113.46.200.217
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783072964; cv=none; b=ntO9zWYS2Osv17bfP4BTzHTwy1cE58jAWMIBijtw9iVEmsA89SJ0uXKue5e+IaPavNc/tN36FavlspfIDWAda3MZ+kFka0YX/OavudDR49NECbWZC58q9AwX9uzV51pSa1sghM5m1oNDBQ2cPjtpj5KviYJsU7OEVu3DsDiuN0A=
+	t=1783072967; cv=none; b=jyma28K7Z8mV2Ntnb+h1/0LyZtmV322Pwhli03WVtHX8O/9Od/0Z6iDI3DpO0LfNLs2LEuXwbRp2wsDZld3nnftcfEvAGxD0oBpi7GIUse+vnUDnximi3cRAZolgQcF64DUyKkxxt0YB5zRLKntswdH48/bZvZsV2jp1/4tkz4I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783072964; c=relaxed/simple;
-	bh=UYttZPNqnPvZfLvQoB+WNpCfxmRItnYnovuL7RZsXxU=;
+	s=arc-20240116; t=1783072967; c=relaxed/simple;
+	bh=NDFexQ5BKeDf4gEuFlHQ8AsOpoifbFfm//3bGq7vdDU=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Bwi11Vu/DaZg+6/dEESnhOB1Id/XBPprPEXniCDOFD27y+ZGAwKmLtOy11yONQuW44KMgavwIV4liEjB+YOQQl57npaHbapu9cXX4MTbbwUUEO64OAyMQ3wyHhwYokPbimE8AZ/8G+GtlSYjzR9e1VgI98Nge8PL1w21zRITp+Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b=hCPpf0iG; arc=none smtp.client-ip=113.46.200.227
+	 MIME-Version:Content-Type; b=Pq403A5eH0/i77NfT+TZ6ISsgfyy9wQ+KhWbQXL2yfI9tRmi6CQBbFI6yLUnuDPn8HhI6+gOx58pq2Fij+os9+cBIZa5+7rHqbjr58u+O7hqz0BzXQ+1xYYIM757CoX77gS1qjewMyN0Le/8m2SeLZcI85vGhiZornePRTuR3NA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b=WvopodRT; arc=none smtp.client-ip=113.46.200.217
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b="hCPpf0iG"
+	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b="WvopodRT"
 dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
 	c=relaxed/relaxed; q=dns/txt;
 	h=From;
-	bh=yC+GvXJXF7ns50jtoBy3GLrOtyF8DcS+nS3jky1laCI=;
-	b=hCPpf0iG3J9jkY7feIN37KwSWvX6FpOvM3kbqMWZy3nRQsKexH+HM3WQMw88mmzK5bxJ4bNWC
-	mT32Ow3RyAMDylrmJ40wJKS3URNL0P4esGj/qOnM3TEfsci8w/G9tbEDpe74sRnhutrrzQAjZr8
-	hLZJeK0m5cF4kHX3leRHMjA=
-Received: from mail.maildlp.com (unknown [172.19.162.92])
-	by canpmsgout12.his.huawei.com (SkyGuard) with ESMTPS id 4gs8Gc6QmmznTv4;
-	Fri,  3 Jul 2026 17:54:00 +0800 (CST)
+	bh=VL6qCd0a4PG2MJPT7gtPh7SqzyGRsG/EHUESrsti9Sk=;
+	b=WvopodRTvpSktb01egf0YexerCdPdzpqHZO8UJBVXX3M4xpjMacrmJMm2pV1QqhNWm3y+gn7X
+	a6wNV+Sq7C1c1VkhNYaukRfbEkq5kbOpjhxK7ECqhZ78hgMuPqJB8eBdFwa43qIQ+O0Vxl9NS71
+	2mdJ7MNmkCxQwyqBJHC9HOs=
+Received: from mail.maildlp.com (unknown [172.19.162.197])
+	by canpmsgout02.his.huawei.com (SkyGuard) with ESMTPS id 4gs8GP23rfzcZyF;
+	Fri,  3 Jul 2026 17:53:49 +0800 (CST)
 Received: from dggpemf500011.china.huawei.com (unknown [7.185.36.131])
-	by mail.maildlp.com (Postfix) with ESMTPS id B167940586;
-	Fri,  3 Jul 2026 18:02:39 +0800 (CST)
+	by mail.maildlp.com (Postfix) with ESMTPS id 59C3440579;
+	Fri,  3 Jul 2026 18:02:43 +0800 (CST)
 Received: from huawei.com (10.90.53.73) by dggpemf500011.china.huawei.com
  (7.185.36.131) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.11; Fri, 3 Jul
- 2026 18:02:36 +0800
+ 2026 18:02:39 +0800
 From: Jinjie Ruan <ruanjinjie@huawei.com>
 To: <catalin.marinas@arm.com>, <will@kernel.org>, <corbet@lwn.net>,
 	<skhan@linuxfoundation.org>, <maz@kernel.org>, <ardb@kernel.org>,
@@ -60,9 +60,9 @@ To: <catalin.marinas@arm.com>, <will@kernel.org>, <corbet@lwn.net>,
 	<linux-arm-kernel@lists.infradead.org>, <linux-doc@vger.kernel.org>,
 	<linux-kernel@vger.kernel.org>, <linux-efi@vger.kernel.org>,
 	<kvmarm@lists.linux.dev>
-Subject: [PATCH 07/17] arm64/sysreg: Add definitions for immediate versions of MSR ALLINT
-Date: Fri, 3 Jul 2026 18:01:25 +0800
-Message-ID: <20260703100135.2512312-8-ruanjinjie@huawei.com>
+Subject: [PATCH 08/17] arm64/hyp-stub: Enable access to ALLINT
+Date: Fri, 3 Jul 2026 18:01:26 +0800
+Message-ID: <20260703100135.2512312-9-ruanjinjie@huawei.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260703100135.2512312-1-ruanjinjie@huawei.com>
 References: <20260703100135.2512312-1-ruanjinjie@huawei.com>
@@ -79,68 +79,42 @@ X-ClientProxiedBy: kwepems200002.china.huawei.com (7.221.188.68) To
 
 From: Mark Brown <broonie@kernel.org>
 
-Encodings are provided for ALLINT which allow setting of ALLINT.ALLINT
-using an immediate rather than requiring that a register be loaded with
-the value to write. Since these don't currently fit within the scheme we
-have for sysreg generation add manual encodings like we currently do for
-other similar registers such as SVCR.
-
-Since it is required that these immediate versions be encoded with xzr
-as the source register provide asm wrapper which ensure this is the
-case.
+In order to use NMIs we need to ensure that traps are disabled for it so
+update HCRX_EL2 to ensure that TALLINT is not set when we detect support
+for NMIs.
 
 Signed-off-by: Mark Brown <broonie@kernel.org>
 Signed-off-by: Marc Zyngier <maz@kernel.org>
-Link: https://lore.kernel.org/r/20221112151708.175147-5-broonie@kernel.org
+Link: https://lore.kernel.org/r/20221112151708.175147-7-broonie@kernel.org
 Signed-off-by: Jinjie Ruan <ruanjinjie@huawei.com>
 ---
- arch/arm64/include/asm/nmi.h    | 23 +++++++++++++++++++++++
- arch/arm64/include/asm/sysreg.h |  2 ++
- 2 files changed, 25 insertions(+)
- create mode 100644 arch/arm64/include/asm/nmi.h
+ arch/arm64/include/asm/el2_setup.h | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/arch/arm64/include/asm/nmi.h b/arch/arm64/include/asm/nmi.h
-new file mode 100644
-index 000000000000..eb2c9a8350cc
---- /dev/null
-+++ b/arch/arm64/include/asm/nmi.h
-@@ -0,0 +1,23 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * Copyright (C) 2022 ARM Ltd.
-+ */
-+#ifndef __ASM_NMI_H
-+#define __ASM_NMI_H
+diff --git a/arch/arm64/include/asm/el2_setup.h b/arch/arm64/include/asm/el2_setup.h
+index aa8ec9df8024..73b8997f8d43 100644
+--- a/arch/arm64/include/asm/el2_setup.h
++++ b/arch/arm64/include/asm/el2_setup.h
+@@ -600,6 +600,19 @@
+ 
+ 	msr_s	SYS_SMPRIMAP_EL2, xzr		// Make all priorities equal
+ .Lskip_sme_\@:
 +
-+#ifdef CONFIG_ARM64_NMI
-+static __always_inline void _allint_clear(void)
-+{
-+	asm volatile(__msr_s(SYS_ALLINT_CLR, "xzr"));
-+}
++	// NMIs
++	__check_override id_aa64pfr1, ID_AA64PFR1_EL1_NMI_SHIFT, 4, .Linit_nmi_\@, .Lskip_nmi_\@, x1, x2
 +
-+static __always_inline void _allint_set(void)
-+{
-+	asm volatile(__msr_s(SYS_ALLINT_SET, "xzr"));
-+}
-+#else
-+static __always_inline void _allint_clear(void) { }
-+static __always_inline void _allint_set(void) { }
-+#endif /* CONFIG_ARM64_NMI */
++.Linit_nmi_\@:
++	mrs	x1, id_aa64mmfr1_el1		// HCRX_EL2 present?
++	ubfx	x1, x1, #ID_AA64MMFR1_EL1_HCX_SHIFT, #4
++	cbz	x1, .Lskip_nmi_\@
 +
-+#endif
-diff --git a/arch/arm64/include/asm/sysreg.h b/arch/arm64/include/asm/sysreg.h
-index 7aa08d59d494..6d2c6bc1b985 100644
---- a/arch/arm64/include/asm/sysreg.h
-+++ b/arch/arm64/include/asm/sysreg.h
-@@ -179,6 +179,8 @@
-  * System registers, organised loosely by encoding but grouped together
-  * where the architected name contains an index. e.g. ID_MMFR<n>_EL1.
-  */
-+#define SYS_ALLINT_CLR			sys_reg(0, 1, 4, 0, 0)
-+#define SYS_ALLINT_SET			sys_reg(0, 1, 4, 1, 0)
- #define SYS_SVCR_SMSTOP_SM_EL0		sys_reg(0, 3, 4, 2, 3)
- #define SYS_SVCR_SMSTART_SM_EL0		sys_reg(0, 3, 4, 3, 3)
- #define SYS_SVCR_SMSTOP_SMZA_EL0	sys_reg(0, 3, 4, 6, 3)
++	mrs_s	x1, SYS_HCRX_EL2
++	and	x1, x1, # ~HCRX_EL2_TALLINT_MASK	// Don't trap ALLINT
++	msr_s	SYS_HCRX_EL2, x1
++.Lskip_nmi_\@:
+ .endm
+ 
+ #endif /* __ARM_KVM_INIT_H__ */
 -- 
 2.34.1
 
