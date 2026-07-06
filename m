@@ -1,107 +1,275 @@
-Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
+Received: from canpmsgout10.his.huawei.com (canpmsgout10.his.huawei.com [113.46.200.225])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 495FE27732;
-	Fri,  3 Jul 2026 16:45:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7ECB223702;
+	Mon,  6 Jul 2026 01:10:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=113.46.200.225
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783097138; cv=none; b=HE5IFekcL5P2V7VqGT9HfpwReDA0G0nNPbMR+xa41eKRiBfkNtwXDE4HhH0o5JKIe2MtQcAkaP+jvMBxwTc3R+0/ogQ5DBHp/sQo5Ta8U3AsTF3b3q1I8UvTSFnaimb+5omdU5bUYuu2896PenwTHXHhkbL8EaAa2ori44yB93s=
+	t=1783300263; cv=none; b=Dw8OtnsM5hfxTz2pYEpbiKZPrSQroUdUmCSzBmq280cWnNeUyBJ70tSU//FnQRu2vSIN71zb/uoFYOtHUchpIXO5tKC3VFryBLMnEThNscOP/5kpXbO9fQky0HK9da+As9ksj1kRAx80qIq8QE/ibyROpJvkIOrDk96zXp9bn5c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783097138; c=relaxed/simple;
-	bh=0DRZ2smuBcmNbxpX37Hz2EgOkA+rk2Dh8WvQYelSEMo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=InTGwnIjJkVo8wc9jN2EkEtXTFKPyJnTVRgfZO4Fuz6d7uqWZ5BlAuta5b6Om2OOSOt2vqfFCtLbHun0hBD7VcmtP3DczUpeiL6ghnsdp09aGXG8X12V9ytJ67u/76f/UWJTIsilzrMFXHwk3TsslfMDIsk5FGqHxo1+F2X7yH0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=E0GDICzy; arc=none smtp.client-ip=82.195.75.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
+	s=arc-20240116; t=1783300263; c=relaxed/simple;
+	bh=+mFtAZF0Y1qfK9ADwCo+hiTtit9pa08Y6Ft+SqCB77k=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=WMjja4uHYtjjaOiXTGDnY8zUToRUzYpQXSarPa6zlvZ4d1OYfMIpdZ+YJ2OlaRyPekKSgDbON9twZiqnri7QNutB/tf996Cs60rfuEZbRY4TuLl/8YSY2glJ3bDbSc0ricD24rSp8u2KqyedfMHchfESbfCiHlEBDWpUxjoLXpk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b=gXhF0EEq; arc=none smtp.client-ip=113.46.200.225
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="E0GDICzy"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
-	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=oytYUjBSAM6Spo5uHh1E+ruoHlc7Qx0XVI6YVgYR4W0=; b=E0GDICzyxiEzkb1P1PTSVX/dVw
-	VmKHeNXg+otnMSNWJGB/XkjhUL0j7yonSPmQAu+C/Udh7xPN+dZemORrAS3b+4D8Gj47HkVri42rx
-	GKgldjgD4S4efDLbncRFppb/a/NNFhIhgNpatLLb+KaX2LRbr7BYEfaHnCVtHBuDhIVfXGcU+St7m
-	Rrq6y2vJpYduX9hTKjA7Y63IZti8sk7pdikdtC7r0afBHaE72b880h+bJnPFTnGeP5jQVfzU1Nopj
-	pbj66BcLAKn5MqITFO2pjdqBSOXxSCqhM3NZl4mZW5T5zFWKPfe8yN6RA6Y1I7GL43fweacMW2/H3
-	CvYs1Cuw==;
-Received: from authenticated-user
-	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
-	(Exim 4.96)
-	(envelope-from <leitao@debian.org>)
-	id 1wfh04-009XSc-13;
-	Fri, 03 Jul 2026 16:44:24 +0000
-Date: Fri, 3 Jul 2026 09:44:11 -0700
-From: Breno Leitao <leitao@debian.org>
-To: Jinjie Ruan <ruanjinjie@huawei.com>
-Cc: catalin.marinas@arm.com, will@kernel.org, corbet@lwn.net, 
-	skhan@linuxfoundation.org, maz@kernel.org, ardb@kernel.org, ilias.apalodimas@linaro.org, 
-	oupton@kernel.org, joey.gouly@arm.com, seiden@linux.ibm.com, suzuki.poulose@arm.com, 
-	yuzenghui@huawei.com, oleg@redhat.com, mark.rutland@arm.com, lpieralisi@kernel.org, 
-	tglx@kernel.org, ada.coupriediaz@arm.com, anshuman.khandual@arm.com, 
-	ebiggers@kernel.org, broonie@kernel.org, mrigendra.chaubey@gmail.com, 
-	baohua@kernel.org, lucaswei@google.com, james.morse@arm.com, zengheng4@huawei.com, 
-	thuth@redhat.com, yang@os.amperecomputing.com, leo.bras@arm.com, 
-	Sascha.Bischoff@arm.com, james.clark@linaro.org, peterz@infradead.org, ben.horgan@arm.com, 
-	punit.agrawal@oss.qualcomm.com, gshan@redhat.com, osama.abdelkader@gmail.com, 
-	fengchengwen@huawei.com, ryan.roberts@arm.com, yangyicong@hisilicon.com, 
-	kevin.brodsky@arm.com, kees@kernel.org, jeson.gao@unisoc.com, zhaoyang.huang@unisoc.com, 
-	ryotkkr98@gmail.com, wsw9603@163.com, pasha.tatashin@soleen.com, 
-	jeremy.linton@arm.com, schuster.simon@siemens-energy.com, osandov@fb.com, arnd@arndb.de, 
-	zhangpengjie2@huawei.com, smostafa@google.com, vladimir.murzin@arm.com, tabba@google.com, 
-	vdonnefort@google.com, kaleshsingh@google.com, jic23@kernel.org, timothy.hayes@arm.com, 
-	alexandru.elisei@arm.com, zenghui.yu@linux.dev, david@kernel.org, 
-	akpm@linux-foundation.org, ljs@kernel.org, memxor@gmail.com, qperret@google.com, 
-	chaitanyas.prakash@arm.com, linux-arm-kernel@lists.infradead.org, linux-doc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, kvmarm@lists.linux.dev
-Subject: Re: [PATCH 01/17] arm64: Move DAIF macros to ptrace.h and use them
- centrally
-Message-ID: <akfl8VwB-RkHIFgm@gmail.com>
-References: <20260703100135.2512312-1-ruanjinjie@huawei.com>
- <20260703100135.2512312-2-ruanjinjie@huawei.com>
+	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b="gXhF0EEq"
+dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
+	c=relaxed/relaxed; q=dns/txt;
+	h=From;
+	bh=fKW/eZslkM1EUWN4dnuNhaWVEjQYW+mbj+8OJe7YWmg=;
+	b=gXhF0EEqSo+6LwAzTVBtw4M7Bl7hoYpbRCzdeXyHZznOH6FTwvLj6lIWGn/6//n8GcNWsPAQT
+	9Ga9EkK2d8RfZ83YTV/WHXkb6YzIHbbkVQSg5sP5vrY0QIW5hDzjx1ljXSD68C2iTRTyXxRJUab
+	UdqiEkQRIIRSGY6/73tx1GM=
+Received: from mail.maildlp.com (unknown [172.19.163.214])
+	by canpmsgout10.his.huawei.com (SkyGuard) with ESMTPS id 4gtmJt6nk3z1K96m;
+	Mon,  6 Jul 2026 09:01:34 +0800 (CST)
+Received: from dggpemf500011.china.huawei.com (unknown [7.185.36.131])
+	by mail.maildlp.com (Postfix) with ESMTPS id 4D8614056C;
+	Mon,  6 Jul 2026 09:10:46 +0800 (CST)
+Received: from [10.67.109.254] (10.67.109.254) by
+ dggpemf500011.china.huawei.com (7.185.36.131) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.11; Mon, 6 Jul 2026 09:10:41 +0800
+Message-ID: <6c84d7f6-ce5b-49f0-889b-7e953cf29bf6@huawei.com>
+Date: Mon, 6 Jul 2026 09:10:40 +0800
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260703100135.2512312-2-ruanjinjie@huawei.com>
-X-Debian-User: leitao
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 00/17] arm64: Support FEAT_NMI and Rework Exception
+ Masking
+To: Mark Rutland <mark.rutland@arm.com>
+CC: <catalin.marinas@arm.com>, <will@kernel.org>, <corbet@lwn.net>,
+	<skhan@linuxfoundation.org>, <maz@kernel.org>, <ardb@kernel.org>,
+	<ilias.apalodimas@linaro.org>, <oupton@kernel.org>, <joey.gouly@arm.com>,
+	<seiden@linux.ibm.com>, <suzuki.poulose@arm.com>, <yuzenghui@huawei.com>,
+	<oleg@redhat.com>, <lpieralisi@kernel.org>, <tglx@kernel.org>,
+	<ada.coupriediaz@arm.com>, <anshuman.khandual@arm.com>,
+	<ebiggers@kernel.org>, <broonie@kernel.org>, <mrigendra.chaubey@gmail.com>,
+	<baohua@kernel.org>, <lucaswei@google.com>, <james.morse@arm.com>,
+	<zengheng4@huawei.com>, <thuth@redhat.com>, <yang@os.amperecomputing.com>,
+	<leo.bras@arm.com>, <Sascha.Bischoff@arm.com>, <james.clark@linaro.org>,
+	<peterz@infradead.org>, <leitao@debian.org>, <ben.horgan@arm.com>,
+	<punit.agrawal@oss.qualcomm.com>, <gshan@redhat.com>,
+	<osama.abdelkader@gmail.com>, <fengchengwen@huawei.com>,
+	<ryan.roberts@arm.com>, <yangyicong@hisilicon.com>, <kevin.brodsky@arm.com>,
+	<kees@kernel.org>, <jeson.gao@unisoc.com>, <zhaoyang.huang@unisoc.com>,
+	<ryotkkr98@gmail.com>, <wsw9603@163.com>, <pasha.tatashin@soleen.com>,
+	<jeremy.linton@arm.com>, <schuster.simon@siemens-energy.com>,
+	<osandov@fb.com>, <arnd@arndb.de>, <zhangpengjie2@huawei.com>,
+	<smostafa@google.com>, <vladimir.murzin@arm.com>, <tabba@google.com>,
+	<vdonnefort@google.com>, <kaleshsingh@google.com>, <jic23@kernel.org>,
+	<timothy.hayes@arm.com>, <alexandru.elisei@arm.com>, <zenghui.yu@linux.dev>,
+	<david@kernel.org>, <akpm@linux-foundation.org>, <ljs@kernel.org>,
+	<memxor@gmail.com>, <qperret@google.com>, <chaitanyas.prakash@arm.com>,
+	<linux-arm-kernel@lists.infradead.org>, <linux-doc@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>, <linux-efi@vger.kernel.org>,
+	<kvmarm@lists.linux.dev>
+References: <20260703100135.2512312-1-ruanjinjie@huawei.com>
+ <akfECMwlZL1aoXHl@J2N7QTR9R3>
+From: Jinjie Ruan <ruanjinjie@huawei.com>
+In-Reply-To: <akfECMwlZL1aoXHl@J2N7QTR9R3>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: kwepems200002.china.huawei.com (7.221.188.68) To
+ dggpemf500011.china.huawei.com (7.185.36.131)
 
-On Fri, Jul 03, 2026 at 06:01:19PM +0800, Jinjie Ruan wrote:
-> So move the definitions of DAIF_PROCCTX, DAIF_PROCCTX_NOIRQ, DAIF_ERRCTX,
-> and DAIF_MASK from <asm/daifflags.h> to <asm/ptrace.h>. 
 
-This seems a bit counter intuitive, to have DAIF definitions at
-arm/ptrace.h instead of asm/daifflags.h, no?
 
-> diff --git a/arch/arm64/kvm/hyp/nvhe/host.S b/arch/arm64/kvm/hyp/nvhe/host.S
-> index 9393fe3ea6a1..cbe2a616c726 100644
-> --- a/arch/arm64/kvm/hyp/nvhe/host.S
-> +++ b/arch/arm64/kvm/hyp/nvhe/host.S
-> @@ -11,6 +11,7 @@
->  #include <asm/kvm_asm.h>
->  #include <asm/kvm_mmu.h>
->  #include <asm/kvm_ptrauth.h>
-> +#include <asm/ptrace.h>
+On 7/3/2026 10:15 PM, Mark Rutland wrote:
+> Hi Jinjie
+> On Fri, Jul 03, 2026 at 06:01:18PM +0800, Jinjie Ruan wrote:
+>> Hi all,
+> 
+> Vladimir (cc'd) has also been working on NMI support, but hadn't posted
+> to the list yet (due to some delays with testing).
+> 
+> I haven't had the chance to look at this yet, but at a high-level we'll
+> need to figure out what to do going forwards.
 
-..
 
-> diff --git a/arch/arm64/kvm/hyp/nvhe/hyp-init.S b/arch/arm64/kvm/hyp/nvhe/hyp-init.S
-> index 89cb553be1e5..26ea02e7f5fd 100644
-> --- a/arch/arm64/kvm/hyp/nvhe/hyp-init.S
-> +++ b/arch/arm64/kvm/hyp/nvhe/hyp-init.S
-> @@ -15,6 +15,7 @@
->  #include <asm/kvm_asm.h>
->  #include <asm/kvm_mmu.h>
->  #include <asm/pgtable-hwdef.h>
-> +#include <asm/ptrace.h>
+Hi Mark,
 
-And then you need to do this in many low level files, which sounds less
-intuitive to have to have ptrace.h include instead of asm/daifflags.h
-(which is clear why we need it).
+Thanks for the heads-up. We are very excited about the NMI support and
+would love to see the related refactoring and FEAT_NMI features
+mainlined as early as possible.
 
---breno
+We are completely open and flexible regarding the collaboration model
+going forward. Whether Vladimir posts his series and we assist with
+review and testing, or we drive the development while Vladimir helps
+with testing and review, either way is highly welcomed on our side.
+
+Our ultimate goal is to get this aligned and landed smoothly. Please let
+us know how you and Vladimir would prefer to proceed once you've had a
+chance to look into this.
+
+Best regards,
+Jinjie
+
+> 
+> Mark.
+> 
+>> This patch series implements support for the ARMv8.8-A/v9.3-A
+>> hardware NMI extension (FEAT_NMI), introducing the use of PSTATE.ALLINT
+>> to manage superpriority interrupts on arm64.
+>>
+>> Background and Current Status
+>> -----------------------------
+>>
+>> The hardware ecosystem is already mature and fully ready for FEAT_NMI:
+>>
+>> - Production Hardware: Huawei's Kunpeng servers (such as the HIP12 based
+>>   platforms) already feature native hardware support for FEAT_NMI.
+>>
+>> - Emulation: QEMU has integrated robust FEAT_NMI emulation[1] support
+>>   since 2024.
+>>
+>> Despite the hardware readiness, upstream support for FEAT_NMI has been
+>> delayed. Previous patch[2] attempts tried to bundle ALLINT management
+>> directly into the existing DAIF abstraction layers. As Mark Rutland
+>> pointed out[3], pretending ALLINT or pseudo-NMI (GIC PMR) is part of
+>> DAIF creates convoluted, unmaintainable hacks that frequently fail to
+>> handle complex edge cases correctly (such as state escape during
+>> context switching).
+>>
+>> Reworking Exception Masking (Mark's Feedback)
+>> ---------------------------------------------
+>>
+>> Following Mark Rutland's strong recommendation ("We must clean up
+>> the existing approach before we add the real NMI support"), this series
+>> does not simply stack FEAT_NMI on top of the old framework. Instead, it
+>> completely reworks how the arm64 kernel manages abstract and logical
+>> exception masks.
+>>
+>> Per Mark's guidelines, this series achieves the following architectural
+>> improvements:
+>>
+>> 1. Entry/Exit Specific Helpers (a):
+>>
+>>    Introduces abstract exception mask helpers specifically for exception
+>>    boundaries. They handle unified unmask-at-entry and mask-at-exit
+>>    behaviors. This decouples the entry/exit paths from raw DAIF
+>>    manipulation. In this series, these helpers are first refactored to
+>>    manage DAIF + PMR cleanly, preparing the ground before any FEAT_NMI
+>>    code is introduced.
+>>
+>> 2. Logical Exception Mask Separation (b):
+>>
+>>    Introduces a decoupled logical mask tracking mechanism that treats DAIF,
+>>    PMR, and ALLINT as separate, distinct elements. This enables accurate
+>>    irqflag tracking and debug assertions to save, restore, and validate all
+>>    elements without forcing them to fake or pollute a traditional DAIF
+>>    layout.
+>>
+>> Production Bug Fixes & Integration
+>> -----------------------------------
+>>
+>> On top of this solid architectural foundation, this series adds the actual
+>> support for FEAT_NMI (ALLINT management). Crucially, during baisc testing
+>> and validation on production Kunpeng (HIP12) servers, we identified and
+>> resolved several critical bugs.
+>>
+>> The series is structured as follows:
+>>
+>> - Patches 1-5: Clean up and rework the existing DAIF/PMR masking into
+>>   separate logical exception helpers (Pre-requisite refactoring).
+>>
+>> - Patches 6-17: Add FEAT_NMI support for ARM64, including specific
+>>   stability fixes found on Kunpeng hardware and QEmu.
+>>
+>> Any feedback, testing, or review, especially regarding the exception
+>> masking refactoring, is highly appreciated.
+>>
+>> [1]: https://lore.kernel.org/all/20240407081733.3231820-1-ruanjinjie@huawei.com/
+>> [2]: https://lore.kernel.org/linux-arm-kernel/20221112151708.175147-1-broonie@kernel.org/
+>> [3]: https://lore.kernel.org/linux-arm-kernel/Y5c9SLeJacLYHmP7@FVFF77S0Q05N/
+>>
+>> Jinjie Ruan (5):
+>>   arm64: Move DAIF macros to ptrace.h and use them centrally
+>>   arm64: Rework exception masking into abstract logical mask
+>>   arm64: entry: arm64: entry: Move DAIF masking for EL1 exit to C code
+>>   arm64: entry: Add entry-specific helpers
+>>   arm64: Introduce helpers for restoring standard exception masks
+>>
+>> Lorenzo Pieralisi (1):
+>>   irqchip/gic-v3: Implement FEAT_GICv3_NMI support
+>>
+>> Mark Brown (11):
+>>   arm64/booting: Document boot requirements for FEAT_NMI
+>>   arm64/sysreg: Add definitions for immediate versions of MSR ALLINT
+>>   arm64/hyp-stub: Enable access to ALLINT
+>>   arm64/idreg: Add an override for FEAT_NMI
+>>   arm64/cpufeature: Detect PE support for FEAT_NMI
+>>   KVM: arm64: Hide FEAT_NMI from guests
+>>   arm64/nmi: Manage masking for superpriority interrupts along with DAIF
+>>   arm64/entry: Don't call preempt_schedule_irq() with NMIs masked
+>>   arm64/irq: Document handling of FEAT_NMI in irqflags.h
+>>   arm64/nmi: Add handling of superpriority interrupts as NMIs
+>>   arm64/nmi: Add Kconfig for NMI
+>>
+>>  Documentation/arch/arm64/booting.rst     |   6 +
+>>  arch/arm64/Kconfig                       |  17 ++
+>>  arch/arm64/include/asm/arch_gicv3.h      |   7 +-
+>>  arch/arm64/include/asm/assembler.h       |  17 +-
+>>  arch/arm64/include/asm/cpufeature.h      |   5 +
+>>  arch/arm64/include/asm/cpuidle.h         |  30 ++-
+>>  arch/arm64/include/asm/daifflags.h       | 144 --------------
+>>  arch/arm64/include/asm/efi.h             |  22 ++-
+>>  arch/arm64/include/asm/el2_setup.h       |  13 ++
+>>  arch/arm64/include/asm/entry-common.h    |  11 +-
+>>  arch/arm64/include/asm/exception_masks.h | 232 +++++++++++++++++++++++
+>>  arch/arm64/include/asm/irq.h             |   2 +
+>>  arch/arm64/include/asm/irqflags.h        |  10 +
+>>  arch/arm64/include/asm/kvm_host.h        |   2 +-
+>>  arch/arm64/include/asm/mmu_context.h     |   2 +-
+>>  arch/arm64/include/asm/nmi.h             |  23 +++
+>>  arch/arm64/include/asm/ptrace.h          |  11 +-
+>>  arch/arm64/include/asm/sysreg.h          |   2 +
+>>  arch/arm64/include/uapi/asm/ptrace.h     |   1 +
+>>  arch/arm64/kernel/acpi.c                 |  14 +-
+>>  arch/arm64/kernel/cpufeature.c           |  58 +++++-
+>>  arch/arm64/kernel/debug-monitors.c       |   9 +-
+>>  arch/arm64/kernel/entry-common.c         | 167 +++++++++++-----
+>>  arch/arm64/kernel/entry.S                |   4 -
+>>  arch/arm64/kernel/hibernate.c            |  10 +-
+>>  arch/arm64/kernel/idle.c                 |   7 +-
+>>  arch/arm64/kernel/irq.c                  |  36 +++-
+>>  arch/arm64/kernel/machine_kexec.c        |   4 +-
+>>  arch/arm64/kernel/pi/idreg-override.c    |   1 +
+>>  arch/arm64/kernel/probes/kprobes.c       |   9 +-
+>>  arch/arm64/kernel/process.c              |   7 +-
+>>  arch/arm64/kernel/setup.c                |   4 +-
+>>  arch/arm64/kernel/signal.c               |   2 +-
+>>  arch/arm64/kernel/smp.c                  |  22 +--
+>>  arch/arm64/kernel/suspend.c              |  15 +-
+>>  arch/arm64/kernel/traps.c                |   2 +-
+>>  arch/arm64/kvm/emulate-nested.c          |   6 +-
+>>  arch/arm64/kvm/hyp/include/hyp/switch.h  |   6 +
+>>  arch/arm64/kvm/hyp/nvhe/host.S           |   4 +-
+>>  arch/arm64/kvm/hyp/nvhe/hyp-init.S       |   3 +-
+>>  arch/arm64/kvm/hyp/nvhe/hyp-main.c       |   4 +-
+>>  arch/arm64/kvm/hyp/vgic-v3-sr.c          |   6 +-
+>>  arch/arm64/kvm/hyp/vhe/switch.c          |   6 +-
+>>  arch/arm64/kvm/reset.c                   |   6 +-
+>>  arch/arm64/mm/fault.c                    |   2 +-
+>>  arch/arm64/mm/mmu.c                      |   6 +-
+>>  arch/arm64/tools/cpucaps                 |   2 +
+>>  drivers/firmware/psci/psci.c             |   7 +-
+>>  drivers/irqchip/irq-gic-v3.c             | 152 +++++++++++++--
+>>  include/linux/irqchip/arm-gic-v3.h       |   4 +
+>>  50 files changed, 822 insertions(+), 320 deletions(-)
+>>  delete mode 100644 arch/arm64/include/asm/daifflags.h
+>>  create mode 100644 arch/arm64/include/asm/exception_masks.h
+>>  create mode 100644 arch/arm64/include/asm/nmi.h
+>>
+>> -- 
+>> 2.34.1
+>>
+> 
+
