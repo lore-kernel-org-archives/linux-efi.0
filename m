@@ -1,82 +1,1193 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from canpmsgout03.his.huawei.com (canpmsgout03.his.huawei.com [113.46.200.218])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32B8842A80;
-	Tue,  7 Jul 2026 06:17:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB4D925CC57;
+	Tue,  7 Jul 2026 08:39:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=113.46.200.218
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783405041; cv=none; b=D2V064qxcNUnmXeBpTnGg5XIo1X5lK7q5GPQ3P2MJXzokNNXy2J/3ul6OcKfUxqf2fSwWGeUJJpPahudbLuaC6tR4g2xm4vccfh/V1JhDGyDtn9Yp1A9PlF26buSu1Vmh3p3n8xEQdFCISWuCSvTIUfgGsHE/d0lBCW7zneHdEI=
+	t=1783413568; cv=none; b=CR4/sAFMl2cZU9rvJHTFx6xBe2OypV1b5ecEK1uRT0KndyeqIXm/VcJ7krimy07v8Z5T6wKWJWhr8Ms9O5JqKLTNSFAdgkejnELa2FjKsACyPSXm8C2Cc6WAKZK3HnODNLSEkrjsZ7226u1Taj5474AunP53992fp/qVlPubTjY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783405041; c=relaxed/simple;
-	bh=zu0uu2fq2xHP4Jth5+S9wdRCRiksjRN/THePIUsujrU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Lni3iPEeWufsT9yZ3toWPQxu4i7TxTV13VMQxQRMit2k0VdlucGw+aT8bJH9iKF6DlDwgckF3rRLge3pcXm1FCl2LUlgu3JwLrYX5oTMs3R8ylvNVfKaolmZDs9urbHZS2Cs64VwH/nDCA3RkK86bcBLl/5SIlOTUotHvBY4EC4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=l9LZ68VX; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1783413568; c=relaxed/simple;
+	bh=b8aoSBxsloWedyuemOOsYhDp47LtgWRoP5ja6nwChHs=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=YYvYQi6Pq2leebsf+fKegAAcGthKg4hqjLTiRU6j66FurMMTkwp1GPCKsy2doqQH0XzKG3i6j2b4DkqPc747ThLjvN1l14BzwQub/o+iuxo1QKBZkS5V9wVJFvLaQV6djW9BR6hrvxTfhmrNK/DnhNAYDFmrsKZF/jdMtKPfHc8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b=5b9USQMy; arc=none smtp.client-ip=113.46.200.218
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="l9LZ68VX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8C0651F000E9;
-	Tue,  7 Jul 2026 06:17:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1783405039;
-	bh=836SAMNcgYGznpPv4pDFhhl2VYFtwB3MUE7NXhRTR44=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=l9LZ68VXwiy2wzLo7a6kET2rVY4gxtpjyT5oNRV80EH+ueCCspXQGjjIAlDlLzyeO
-	 YFYx6l0N+wz+Yy6oMl2JKy3lr/dXU/sJGiE/Mk3RNnxpzjGu+j5vbStTn4Sbhjgc14
-	 aZe8rHO3zg0yr1Yfzs6dPtpo6gK9Hw+qdCT0DXbO8vE8KJ8xBpvmIl7MIxNsP9+Ok4
-	 tlnMXmxQ9La5/V8b47TJbYkAWoQQODk2Hx1nTtTghnvdeQPJLOaNeS7bpTJcdHx+vX
-	 lejiXTi4/7NIktdzxwyfeeL4MkfFWX0K2bNuHqFaSu9rbXvb1YZT2M+vVWfQe5DPsX
-	 vROavjbjpHKiA==
-Date: Tue, 7 Jul 2026 09:17:08 +0300
-From: Mike Rapoport <rppt@kernel.org>
-To: Sang-Heon Jeon <ekffu200098@gmail.com>
-Cc: Ard Biesheuvel <ardb@kernel.org>, Borislav Petkov <bp@alien8.de>,
-	Chris Zankel <chris@zankel.net>,
-	Dave Hansen <dave.hansen@linux.intel.com>,
-	Ingo Molnar <mingo@redhat.com>,
-	John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>,
-	Madhavan Srinivasan <maddy@linux.ibm.com>,
-	Max Filippov <jcmvbkbc@gmail.com>,
-	Michael Ellerman <mpe@ellerman.id.au>,
-	Rich Felker <dalias@libc.org>, Thomas Gleixner <tglx@kernel.org>,
-	Yoshinori Sato <ysato@users.sourceforge.jp>, linux-mm@kvack.org,
-	"Christophe Leroy (CS GROUP)" <chleroy@kernel.org>,
-	"H. Peter Anvin" <hpa@zytor.com>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org,
-	Nicholas Piggin <npiggin@gmail.com>, x86@kernel.org
-Subject: Re: [PATCH v2 0/5] treewide: remove unreachable memblock_reserve()
- return value checks in early boot
-Message-ID: <akyZ5DhIV_Grn1Kc@kernel.org>
-References: <20260706163753.193875-1-ekffu200098@gmail.com>
+	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b="5b9USQMy"
+dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
+	c=relaxed/relaxed; q=dns/txt;
+	h=From;
+	bh=TcDI4lYtNhhqhxMkW8xBZSl9FAupFUlr6+y/0YQeDY0=;
+	b=5b9USQMyZYTATe2xcDkYDOxCz9/4wr4Xq/7NfyTS1KJvZukyEJgY0G4i8oNMyh1Ck53QnEx0b
+	DvKVcY4zpXA0OsYvXCTtqa0sJZJkihQahhTCzecnbmxYvJS6qfvjcDk0wcI1cPhTIrghPT6IlfI
+	/0nES5J+mnQ+ZjflZtzvHLw=
+Received: from mail.maildlp.com (unknown [172.19.162.144])
+	by canpmsgout03.his.huawei.com (SkyGuard) with ESMTPS id 4gvZDX690vzpStg;
+	Tue,  7 Jul 2026 16:30:36 +0800 (CST)
+Received: from dggpemf500011.china.huawei.com (unknown [7.185.36.131])
+	by mail.maildlp.com (Postfix) with ESMTPS id 3840B4056E;
+	Tue,  7 Jul 2026 16:39:15 +0800 (CST)
+Received: from [10.67.109.254] (10.67.109.254) by
+ dggpemf500011.china.huawei.com (7.185.36.131) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.11; Tue, 7 Jul 2026 16:39:11 +0800
+Message-ID: <1b655a22-5948-49f0-8ad1-09d9c43d9261@huawei.com>
+Date: Tue, 7 Jul 2026 16:39:10 +0800
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260706163753.193875-1-ekffu200098@gmail.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 02/17] arm64: Rework exception masking into abstract
+ logical mask
+To: Leonardo Bras <leo.bras@arm.com>
+CC: <catalin.marinas@arm.com>, <will@kernel.org>, <corbet@lwn.net>,
+	<skhan@linuxfoundation.org>, <maz@kernel.org>, <ardb@kernel.org>,
+	<ilias.apalodimas@linaro.org>, <oupton@kernel.org>, <joey.gouly@arm.com>,
+	<seiden@linux.ibm.com>, <suzuki.poulose@arm.com>, <yuzenghui@huawei.com>,
+	<oleg@redhat.com>, <mark.rutland@arm.com>, <lpieralisi@kernel.org>,
+	<tglx@kernel.org>, <ada.coupriediaz@arm.com>, <anshuman.khandual@arm.com>,
+	<ebiggers@kernel.org>, <broonie@kernel.org>, <mrigendra.chaubey@gmail.com>,
+	<baohua@kernel.org>, <lucaswei@google.com>, <james.morse@arm.com>,
+	<zengheng4@huawei.com>, <thuth@redhat.com>, <yang@os.amperecomputing.com>,
+	<Sascha.Bischoff@arm.com>, <james.clark@linaro.org>, <peterz@infradead.org>,
+	<leitao@debian.org>, <ben.horgan@arm.com>, <punit.agrawal@oss.qualcomm.com>,
+	<gshan@redhat.com>, <osama.abdelkader@gmail.com>, <fengchengwen@huawei.com>,
+	<ryan.roberts@arm.com>, <yangyicong@hisilicon.com>, <kevin.brodsky@arm.com>,
+	<kees@kernel.org>, <jeson.gao@unisoc.com>, <zhaoyang.huang@unisoc.com>,
+	<ryotkkr98@gmail.com>, <wsw9603@163.com>, <pasha.tatashin@soleen.com>,
+	<jeremy.linton@arm.com>, <schuster.simon@siemens-energy.com>,
+	<osandov@fb.com>, <arnd@arndb.de>, <zhangpengjie2@huawei.com>,
+	<smostafa@google.com>, <vladimir.murzin@arm.com>, <tabba@google.com>,
+	<vdonnefort@google.com>, <kaleshsingh@google.com>, <jic23@kernel.org>,
+	<timothy.hayes@arm.com>, <alexandru.elisei@arm.com>, <zenghui.yu@linux.dev>,
+	<david@kernel.org>, <akpm@linux-foundation.org>, <ljs@kernel.org>,
+	<memxor@gmail.com>, <qperret@google.com>, <chaitanyas.prakash@arm.com>,
+	<linux-arm-kernel@lists.infradead.org>, <linux-doc@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>, <linux-efi@vger.kernel.org>,
+	<kvmarm@lists.linux.dev>
+References: <20260703100135.2512312-1-ruanjinjie@huawei.com>
+ <20260703100135.2512312-3-ruanjinjie@huawei.com> <ake9uC5Mad2qihBN@LeoBrasDK>
+ <9f57f349-c3db-4102-bab4-cc37f3b3f759@huawei.com>
+ <akuxFSaef-bXVrO-@LeoBrasDK>
+From: Jinjie Ruan <ruanjinjie@huawei.com>
+In-Reply-To: <akuxFSaef-bXVrO-@LeoBrasDK>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: kwepems500001.china.huawei.com (7.221.188.70) To
+ dggpemf500011.china.huawei.com (7.185.36.131)
 
-Hi Sang-Heon,
 
-On Tue, Jul 07, 2026 at 01:37:48AM +0900, Sang-Heon Jeon wrote:
-> memblock_reserve() can only return an error after memblock_allow_resize()
-> has been called. Before that it either succeeds or panics, never returning
-> an error.
+
+On 7/6/2026 9:43 PM, Leonardo Bras wrote:
+> On Mon, Jul 06, 2026 at 09:15:35PM +0800, Jinjie Ruan wrote:
+>>
+>>
+
+[...]
+
+>>>> -}
+>>>> -#endif
+>>>> diff --git a/arch/arm64/include/asm/entry-common.h b/arch/arm64/include/asm/entry-common.h
+>>>> index cab8cd78f693..3d8b38ce7afb 100644
+>>>> --- a/arch/arm64/include/asm/entry-common.h
+>>>> +++ b/arch/arm64/include/asm/entry-common.h
+>>>> @@ -6,7 +6,7 @@
+>>>>  #include <linux/thread_info.h>
+>>>>  
+>>>>  #include <asm/cpufeature.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/fpsimd.h>
+>>>>  #include <asm/mte.h>
+>>>>  #include <asm/stacktrace.h>
+>>>> diff --git a/arch/arm64/include/asm/exception_masks.h b/arch/arm64/include/asm/exception_masks.h
+>>>> new file mode 100644
+>>>> index 000000000000..0a21fb97c3ca
+>>>> --- /dev/null
+>>>> +++ b/arch/arm64/include/asm/exception_masks.h
+>>>> @@ -0,0 +1,141 @@
+>>>> +/* SPDX-License-Identifier: GPL-2.0-only */
+>>>> +/*
+>>>> + * Copyright (C) 2017 ARM Ltd.
+>>>> + */
+>>>> +#ifndef __ASM_EXCEPTION_MASKS_H
+>>>> +#define __ASM_EXCEPTION_MASKS_H
+>>>> +
+>>>> +#include <linux/irqflags.h>
+>>>> +
+>>>> +#include <asm/arch_gicv3.h>
+>>>> +#include <asm/barrier.h>
+>>>> +#include <asm/cpufeature.h>
+>>>> +#include <asm/ptrace.h>
+>>>> +
+>>>> +/*
+>>>> + * Logical exception mask: tracks the three independent exception
+>>>> + * masking controls on arm64:
+>>>> + *  - DAIF (PSTATE.{D,A,I,F} bits)
+>>>> + *  - PMR  (ICC_PMR_EL1)
+>>>> + *  - ALLINT (PSTATE.ALLINT)
+>>>> + */
+>>>> +struct exception_mask {
+>>>> +	unsigned long daif;
+>>>> +	unsigned long pmr;
+>>>> +	unsigned long allint;		// for future FEAT_NMI use
+>>>> +};
+>>>
+>>> Also, out of curiosity: it looks like all those bits would fit a single 
+>>> u32. Have you considered using a bit-field, instead of 3 ulongs?
+>>
+>> Hi Leonardo,
+>>
+>> Thanks for the suggestion! We did consider a bit‑field as below.
 > 
-> Before memblock_allow_resize() is called, the return value checks of
-> memblock_reserve() are unreachable and can be removed.
+> Glad it helps :)
+> 
+>>
+>> +typedef union exception_mask {
+>> +       unsigned long irqflags;
+>> +       struct {
+>> +               u32 daif   : 10;
+>> +               u32 pmr    : 8;
+>> +               u32 allint : 14;
+> 
+> PMR does have 8bits, but are not allint a single bit, and daif 4 
+> sequential bits? Any reason you gave them 14 bits and 10 bits respectively?
+> 
+> (If it's about keeping them on a total of 32-bits, you could always add a 
+> 'unused' with the remaining bits).
+> 
+>> +        };
+>> +} exception_mask_t;
 
-I'd rather keep these checks.
+Hi Leonardo,
 
-Removing them relies on internal details of memblock_reserve() implementation
-and the existing event sequence. If the code would move around relying on
-panic in memblock_reserve() may not be correct.
+Correct, the hardware bit positions are:
 
-And the few bytes and cycles the change saves do not worth the churn.
+- DAIF bits 6–9
 
--- 
-Sincerely yours,
-Mike.
+-  PMR bits 0–7
+
+- ALLINT bit 13.
+
+The field widths (10, 8, 14) in the union are purely a software packing
+layout to represent the combined exception state as a single 32‑bit
+word—they don't mirror the hardware register layout.
+
+This avoids manual shifting/masking when passing the whole value around,
+while still keeping each field large enough to hold its hardware value
+(and the extra bits remain unused).
+
+Best regards,
+Jinjie
+
+>>
+>> This compresses the three fields into 4 bytes (saving memory) while
+>> keeping full compatibility with the existing `unsigned long`‑ based APIs
+>> (e.g., `local_daif_save/restore`).
+>>
+>> Thanks again,
+>> Jinjie
+> 
+> Awesome, thanks!
+> Leo
+> 
+>>
+>>>
+>>> Thanks!
+>>> Leo
+>>>
+>>>> +
+>>>> +static inline struct exception_mask arm64_make_procctx_mask(void)
+>>>> +{
+>>>> +	struct exception_mask mask;
+>>>> +
+>>>> +	mask.daif = DAIF_PROCCTX;
+>>>> +	if (system_uses_irq_prio_masking())
+>>>> +		mask.pmr = GIC_PRIO_IRQON;
+>>>> +
+>>>> +	mask.allint = 0;
+>>>> +
+>>>> +	return mask;
+>>>> +}
+>>>> +
+>>>> +static inline struct exception_mask arm64_make_errctx_mask(void)
+>>>> +{
+>>>> +	struct exception_mask mask;
+>>>> +
+>>>> +	mask.daif = DAIF_ERRCTX;
+>>>> +	if (system_uses_irq_prio_masking())
+>>>> +		mask.pmr = GIC_PRIO_IRQON | GIC_PRIO_PSR_I_SET;
+>>>> +
+>>>> +	mask.allint = 0;
+>>>> +
+>>>> +	return mask;
+>>>> +}
+>>>> +
+>>>> +static inline struct exception_mask arm64_make_noirq_mask(void)
+>>>> +{
+>>>> +	struct exception_mask mask;
+>>>> +
+>>>> +	if (system_uses_irq_prio_masking()) {
+>>>> +		mask.daif = 0;
+>>>> +		mask.pmr = GIC_PRIO_IRQOFF;
+>>>> +	} else
+>>>> +		mask.daif = DAIF_PROCCTX_NOIRQ;
+>>>> +
+>>>> +	mask.allint = 0;
+>>>> +
+>>>> +	return mask;
+>>>> +}
+>>>> +
+>>>> +/* Mask all exceptions immediately */
+>>>> +static inline void local_exception_mask(void)
+>>>> +{
+>>>> +	WARN_ON(system_has_prio_mask_debugging() &&
+>>>> +		(read_sysreg_s(SYS_ICC_PMR_EL1) == (GIC_PRIO_IRQOFF |
+>>>> +						    GIC_PRIO_PSR_I_SET)));
+>>>> +
+>>>> +	asm volatile("msr daifset, #0xf" ::: "memory");
+>>>> +
+>>>> +	if (system_uses_irq_prio_masking())
+>>>> +		gic_write_pmr(GIC_PRIO_IRQON | GIC_PRIO_PSR_I_SET);
+>>>> +
+>>>> +	trace_hardirqs_off();
+>>>> +}
+>>>> +
+>>>> +static inline void local_exception_save_mask(struct exception_mask *mask)
+>>>> +{
+>>>> +	mask->daif = read_sysreg(daif);
+>>>> +	if (system_uses_irq_prio_masking())
+>>>> +		mask->pmr = gic_read_pmr();
+>>>> +
+>>>> +	mask->allint = 0;
+>>>> +}
+>>>> +
+>>>> +static inline struct exception_mask local_exception_save_and_mask(void)
+>>>> +{
+>>>> +	struct exception_mask mask;
+>>>> +
+>>>> +	local_exception_save_mask(&mask);
+>>>> +	local_exception_mask();
+>>>> +
+>>>> +	return mask;
+>>>> +}
+>>>> +
+>>>> +static inline void local_exception_restore(const struct exception_mask mask)
+>>>> +{
+>>>> +	bool irq_disabled = mask.daif & PSR_I_BIT;
+>>>> +
+>>>> +	if (system_uses_irq_prio_masking())
+>>>> +		irq_disabled |= (mask.pmr == GIC_PRIO_IRQOFF);
+>>>> +
+>>>> +	WARN_ON(system_has_prio_mask_debugging() &&
+>>>> +		(read_sysreg(daif) & DAIF_PROCCTX_NOIRQ) != DAIF_PROCCTX_NOIRQ);
+>>>> +
+>>>> +	if (!irq_disabled)
+>>>> +		trace_hardirqs_on();
+>>>> +
+>>>> +	if (system_uses_irq_prio_masking()) {
+>>>> +		gic_write_pmr(mask.pmr);
+>>>> +		pmr_sync();
+>>>> +	}
+>>>> +
+>>>> +	write_sysreg(mask.daif, daif);
+>>>> +
+>>>> +	if (irq_disabled)
+>>>> +		trace_hardirqs_off();
+>>>> +}
+>>>> +
+>>>> +/*
+>>>> + * Called by synchronous exception handlers to restore the DAIF bits that were
+>>>> + * modified by taking an exception.
+>>>> + */
+>>>> +static inline void local_exception_inherit(struct pt_regs *regs)
+>>>> +{
+>>>> +	if (!regs_irqs_disabled(regs))
+>>>> +		trace_hardirqs_on();
+>>>> +
+>>>> +	if (system_uses_irq_prio_masking())
+>>>> +		gic_write_pmr(regs->pmr);
+>>>> +
+>>>> +	write_sysreg(regs->pstate & DAIF_MASK, daif);
+>>>> +}
+>>>> +#endif /* __ASM_EXCEPTION_MASKS_H */
+>>>> diff --git a/arch/arm64/include/asm/kvm_host.h b/arch/arm64/include/asm/kvm_host.h
+>>>> index bae2c4f92ef5..8a443a379689 100644
+>>>> --- a/arch/arm64/include/asm/kvm_host.h
+>>>> +++ b/arch/arm64/include/asm/kvm_host.h
+>>>> @@ -23,7 +23,7 @@
+>>>>  #include <asm/barrier.h>
+>>>>  #include <asm/cpufeature.h>
+>>>>  #include <asm/cputype.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/fpsimd.h>
+>>>>  #include <asm/kvm.h>
+>>>>  #include <asm/kvm_asm.h>
+>>>> diff --git a/arch/arm64/include/asm/mmu_context.h b/arch/arm64/include/asm/mmu_context.h
+>>>> index 803b68758152..6103925f85b7 100644
+>>>> --- a/arch/arm64/include/asm/mmu_context.h
+>>>> +++ b/arch/arm64/include/asm/mmu_context.h
+>>>> @@ -19,7 +19,7 @@
+>>>>  
+>>>>  #include <asm/cacheflush.h>
+>>>>  #include <asm/cpufeature.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/gcs.h>
+>>>>  #include <asm/proc-fns.h>
+>>>>  #include <asm/cputype.h>
+>>>> diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+>>>> index 5891f92c2035..4d413419309d 100644
+>>>> --- a/arch/arm64/kernel/acpi.c
+>>>> +++ b/arch/arm64/kernel/acpi.c
+>>>> @@ -33,7 +33,7 @@
+>>>>  #include <acpi/processor.h>
+>>>>  #include <asm/cputype.h>
+>>>>  #include <asm/cpu_ops.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/smp_plat.h>
+>>>>  
+>>>>  int acpi_noirq = 1;		/* skip ACPI IRQ initialization */
+>>>> @@ -388,14 +388,14 @@ void __iomem *acpi_os_ioremap(acpi_physical_address phys, acpi_size size)
+>>>>   */
+>>>>  int apei_claim_sea(struct pt_regs *regs)
+>>>>  {
+>>>> -	int err = -ENOENT;
+>>>> +	struct exception_mask current_mask;
+>>>>  	bool return_to_irqs_enabled;
+>>>> -	unsigned long current_flags;
+>>>> +	int err = -ENOENT;
+>>>>  
+>>>>  	if (!IS_ENABLED(CONFIG_ACPI_APEI_GHES))
+>>>>  		return err;
+>>>>  
+>>>> -	current_flags = local_daif_save_flags();
+>>>> +	local_exception_save_mask(&current_mask);
+>>>>  
+>>>>  	/* current_flags isn't useful here as daif doesn't tell us about pNMI */
+>>>>  	return_to_irqs_enabled = !irqs_disabled_flags(arch_local_save_flags());
+>>>> @@ -407,7 +407,7 @@ int apei_claim_sea(struct pt_regs *regs)
+>>>>  	 * SEA can interrupt SError, mask it and describe this as an NMI so
+>>>>  	 * that APEI defers the handling.
+>>>>  	 */
+>>>> -	local_daif_restore(DAIF_ERRCTX);
+>>>> +	local_exception_restore(arm64_make_errctx_mask());
+>>>>  	nmi_enter();
+>>>>  	err = ghes_notify_sea();
+>>>>  	nmi_exit();
+>>>> @@ -418,7 +418,7 @@ int apei_claim_sea(struct pt_regs *regs)
+>>>>  	 */
+>>>>  	if (!err) {
+>>>>  		if (return_to_irqs_enabled) {
+>>>> -			local_daif_restore(DAIF_PROCCTX_NOIRQ);
+>>>> +			local_exception_restore(arm64_make_noirq_mask());
+>>>>  			__irq_enter();
+>>>>  			irq_work_run();
+>>>>  			__irq_exit();
+>>>> @@ -428,7 +428,7 @@ int apei_claim_sea(struct pt_regs *regs)
+>>>>  		}
+>>>>  	}
+>>>>  
+>>>> -	local_daif_restore(current_flags);
+>>>> +	local_exception_restore(current_mask);
+>>>>  
+>>>>  	return err;
+>>>>  }
+>>>> diff --git a/arch/arm64/kernel/debug-monitors.c b/arch/arm64/kernel/debug-monitors.c
+>>>> index 29307642f4c9..5b53034428e4 100644
+>>>> --- a/arch/arm64/kernel/debug-monitors.c
+>>>> +++ b/arch/arm64/kernel/debug-monitors.c
+>>>> @@ -19,7 +19,7 @@
+>>>>  
+>>>>  #include <asm/cpufeature.h>
+>>>>  #include <asm/cputype.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/debug-monitors.h>
+>>>>  #include <asm/exception.h>
+>>>>  #include <asm/kgdb.h>
+>>>> @@ -40,10 +40,11 @@ u8 debug_monitors_arch(void)
+>>>>   */
+>>>>  static void mdscr_write(u64 mdscr)
+>>>>  {
+>>>> -	unsigned long flags;
+>>>> -	flags = local_daif_save();
+>>>> +	struct exception_mask mask;
+>>>> +
+>>>> +	mask = local_exception_save_and_mask();
+>>>>  	write_sysreg(mdscr, mdscr_el1);
+>>>> -	local_daif_restore(flags);
+>>>> +	local_exception_restore(mask);
+>>>>  }
+>>>>  NOKPROBE_SYMBOL(mdscr_write);
+>>>>  
+>>>> diff --git a/arch/arm64/kernel/entry-common.c b/arch/arm64/kernel/entry-common.c
+>>>> index ceb4eb11232a..195af3f8001e 100644
+>>>> --- a/arch/arm64/kernel/entry-common.c
+>>>> +++ b/arch/arm64/kernel/entry-common.c
+>>>> @@ -18,7 +18,7 @@
+>>>>  #include <linux/thread_info.h>
+>>>>  
+>>>>  #include <asm/cpufeature.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/esr.h>
+>>>>  #include <asm/exception.h>
+>>>>  #include <asm/fpsimd.h>
+>>>> @@ -57,7 +57,7 @@ static void noinstr arm64_exit_to_kernel_mode(struct pt_regs *regs,
+>>>>  {
+>>>>  	local_irq_disable();
+>>>>  	irqentry_exit_to_kernel_mode_preempt(regs, state);
+>>>> -	local_daif_mask();
+>>>> +	local_exception_mask();
+>>>>  	mte_check_tfsr_exit();
+>>>>  	irqentry_exit_to_kernel_mode_after_preempt(regs, state);
+>>>>  }
+>>>> @@ -86,7 +86,7 @@ static __always_inline void arm64_syscall_exit_to_user_mode(struct pt_regs *regs
+>>>>  {
+>>>>  	local_irq_disable();
+>>>>  	syscall_exit_to_user_mode_prepare(regs);
+>>>> -	local_daif_mask();
+>>>> +	local_exception_mask();
+>>>>  	sme_exit_to_user_mode();
+>>>>  	mte_check_tfsr_exit();
+>>>>  	exit_to_user_mode();
+>>>> @@ -101,7 +101,7 @@ static __always_inline void arm64_exit_to_user_mode(struct pt_regs *regs)
+>>>>  {
+>>>>  	local_irq_disable();
+>>>>  	irqentry_exit_to_user_mode_prepare(regs);
+>>>> -	local_daif_mask();
+>>>> +	local_exception_mask();
+>>>>  	sme_exit_to_user_mode();
+>>>>  	mte_check_tfsr_exit();
+>>>>  	exit_to_user_mode();
+>>>> @@ -318,7 +318,7 @@ static void noinstr el1_abort(struct pt_regs *regs, unsigned long esr)
+>>>>  	irqentry_state_t state;
+>>>>  
+>>>>  	state = arm64_enter_from_kernel_mode(regs);
+>>>> -	local_daif_inherit(regs);
+>>>> +	local_exception_inherit(regs);
+>>>>  	do_mem_abort(far, esr, regs);
+>>>>  	arm64_exit_to_kernel_mode(regs, state);
+>>>>  }
+>>>> @@ -329,7 +329,7 @@ static void noinstr el1_pc(struct pt_regs *regs, unsigned long esr)
+>>>>  	irqentry_state_t state;
+>>>>  
+>>>>  	state = arm64_enter_from_kernel_mode(regs);
+>>>> -	local_daif_inherit(regs);
+>>>> +	local_exception_inherit(regs);
+>>>>  	do_sp_pc_abort(far, esr, regs);
+>>>>  	arm64_exit_to_kernel_mode(regs, state);
+>>>>  }
+>>>> @@ -339,7 +339,7 @@ static void noinstr el1_undef(struct pt_regs *regs, unsigned long esr)
+>>>>  	irqentry_state_t state;
+>>>>  
+>>>>  	state = arm64_enter_from_kernel_mode(regs);
+>>>> -	local_daif_inherit(regs);
+>>>> +	local_exception_inherit(regs);
+>>>>  	do_el1_undef(regs, esr);
+>>>>  	arm64_exit_to_kernel_mode(regs, state);
+>>>>  }
+>>>> @@ -349,7 +349,7 @@ static void noinstr el1_bti(struct pt_regs *regs, unsigned long esr)
+>>>>  	irqentry_state_t state;
+>>>>  
+>>>>  	state = arm64_enter_from_kernel_mode(regs);
+>>>> -	local_daif_inherit(regs);
+>>>> +	local_exception_inherit(regs);
+>>>>  	do_el1_bti(regs, esr);
+>>>>  	arm64_exit_to_kernel_mode(regs, state);
+>>>>  }
+>>>> @@ -359,7 +359,7 @@ static void noinstr el1_gcs(struct pt_regs *regs, unsigned long esr)
+>>>>  	irqentry_state_t state;
+>>>>  
+>>>>  	state = arm64_enter_from_kernel_mode(regs);
+>>>> -	local_daif_inherit(regs);
+>>>> +	local_exception_inherit(regs);
+>>>>  	do_el1_gcs(regs, esr);
+>>>>  	arm64_exit_to_kernel_mode(regs, state);
+>>>>  }
+>>>> @@ -369,7 +369,7 @@ static void noinstr el1_mops(struct pt_regs *regs, unsigned long esr)
+>>>>  	irqentry_state_t state;
+>>>>  
+>>>>  	state = arm64_enter_from_kernel_mode(regs);
+>>>> -	local_daif_inherit(regs);
+>>>> +	local_exception_inherit(regs);
+>>>>  	do_el1_mops(regs, esr);
+>>>>  	arm64_exit_to_kernel_mode(regs, state);
+>>>>  }
+>>>> @@ -434,7 +434,7 @@ static void noinstr el1_fpac(struct pt_regs *regs, unsigned long esr)
+>>>>  	irqentry_state_t state;
+>>>>  
+>>>>  	state = arm64_enter_from_kernel_mode(regs);
+>>>> -	local_daif_inherit(regs);
+>>>> +	local_exception_inherit(regs);
+>>>>  	do_el1_fpac(regs, esr);
+>>>>  	arm64_exit_to_kernel_mode(regs, state);
+>>>>  }
+>>>> @@ -537,7 +537,7 @@ asmlinkage void noinstr el1h_64_error_handler(struct pt_regs *regs)
+>>>>  	unsigned long esr = read_sysreg(esr_el1);
+>>>>  	irqentry_state_t state;
+>>>>  
+>>>> -	local_daif_restore(DAIF_ERRCTX);
+>>>> +	local_exception_restore(arm64_make_errctx_mask());
+>>>>  	state = irqentry_nmi_enter(regs);
+>>>>  	do_serror(regs, esr);
+>>>>  	irqentry_nmi_exit(regs, state);
+>>>> @@ -548,7 +548,7 @@ static void noinstr el0_da(struct pt_regs *regs, unsigned long esr)
+>>>>  	unsigned long far = read_sysreg(far_el1);
+>>>>  
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_mem_abort(far, esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -566,7 +566,7 @@ static void noinstr el0_ia(struct pt_regs *regs, unsigned long esr)
+>>>>  		arm64_apply_bp_hardening();
+>>>>  
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_mem_abort(far, esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -574,7 +574,7 @@ static void noinstr el0_ia(struct pt_regs *regs, unsigned long esr)
+>>>>  static void noinstr el0_fpsimd_acc(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_fpsimd_acc(esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -582,7 +582,7 @@ static void noinstr el0_fpsimd_acc(struct pt_regs *regs, unsigned long esr)
+>>>>  static void noinstr el0_sve_acc(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_sve_acc(esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -590,7 +590,7 @@ static void noinstr el0_sve_acc(struct pt_regs *regs, unsigned long esr)
+>>>>  static void noinstr el0_sme_acc(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_sme_acc(esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -598,7 +598,7 @@ static void noinstr el0_sme_acc(struct pt_regs *regs, unsigned long esr)
+>>>>  static void noinstr el0_fpsimd_exc(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_fpsimd_exc(esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -606,7 +606,7 @@ static void noinstr el0_fpsimd_exc(struct pt_regs *regs, unsigned long esr)
+>>>>  static void noinstr el0_sys(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_el0_sys(esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -619,7 +619,7 @@ static void noinstr el0_pc(struct pt_regs *regs, unsigned long esr)
+>>>>  		arm64_apply_bp_hardening();
+>>>>  
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_sp_pc_abort(far, esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -627,7 +627,7 @@ static void noinstr el0_pc(struct pt_regs *regs, unsigned long esr)
+>>>>  static void noinstr el0_sp(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_sp_pc_abort(regs->sp, esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -635,7 +635,7 @@ static void noinstr el0_sp(struct pt_regs *regs, unsigned long esr)
+>>>>  static void noinstr el0_undef(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_el0_undef(regs, esr);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -643,7 +643,7 @@ static void noinstr el0_undef(struct pt_regs *regs, unsigned long esr)
+>>>>  static void noinstr el0_bti(struct pt_regs *regs)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_el0_bti(regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -651,7 +651,7 @@ static void noinstr el0_bti(struct pt_regs *regs)
+>>>>  static void noinstr el0_mops(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_el0_mops(regs, esr);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -659,7 +659,7 @@ static void noinstr el0_mops(struct pt_regs *regs, unsigned long esr)
+>>>>  static void noinstr el0_gcs(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_el0_gcs(regs, esr);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -667,7 +667,7 @@ static void noinstr el0_gcs(struct pt_regs *regs, unsigned long esr)
+>>>>  static void noinstr el0_inv(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	bad_el0_sync(regs, 0, esr);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -681,7 +681,7 @@ static void noinstr el0_breakpt(struct pt_regs *regs, unsigned long esr)
+>>>>  	debug_exception_enter(regs);
+>>>>  	do_breakpoint(esr, regs);
+>>>>  	debug_exception_exit(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>>  
+>>>> @@ -700,7 +700,7 @@ static void noinstr el0_softstp(struct pt_regs *regs, unsigned long esr)
+>>>>  	 * the single-step is complete.
+>>>>  	 */
+>>>>  	step_done = try_step_suspended_breakpoints(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	if (!step_done)
+>>>>  		do_el0_softstep(esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>> @@ -715,14 +715,14 @@ static void noinstr el0_watchpt(struct pt_regs *regs, unsigned long esr)
+>>>>  	debug_exception_enter(regs);
+>>>>  	do_watchpoint(far, esr, regs);
+>>>>  	debug_exception_exit(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>>  
+>>>>  static void noinstr el0_brk64(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_el0_brk64(esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -732,7 +732,7 @@ static void noinstr el0_svc(struct pt_regs *regs)
+>>>>  	arm64_syscall_enter_from_user_mode(regs);
+>>>>  	cortex_a76_erratum_1463225_svc_handler();
+>>>>  	fpsimd_syscall_enter();
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_el0_svc(regs);
+>>>>  	arm64_syscall_exit_to_user_mode(regs);
+>>>>  	fpsimd_syscall_exit();
+>>>> @@ -741,7 +741,7 @@ static void noinstr el0_svc(struct pt_regs *regs)
+>>>>  static void noinstr el0_fpac(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_el0_fpac(regs, esr);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -857,11 +857,11 @@ static void noinstr __el0_error_handler_common(struct pt_regs *regs)
+>>>>  	irqentry_state_t state;
+>>>>  
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_ERRCTX);
+>>>> +	local_exception_restore(arm64_make_errctx_mask());
+>>>>  	state = irqentry_nmi_enter(regs);
+>>>>  	do_serror(regs, esr);
+>>>>  	irqentry_nmi_exit(regs, state);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>>  
+>>>> @@ -874,7 +874,7 @@ asmlinkage void noinstr el0t_64_error_handler(struct pt_regs *regs)
+>>>>  static void noinstr el0_cp15(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_el0_cp15(esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -883,7 +883,7 @@ static void noinstr el0_svc_compat(struct pt_regs *regs)
+>>>>  {
+>>>>  	arm64_syscall_enter_from_user_mode(regs);
+>>>>  	cortex_a76_erratum_1463225_svc_handler();
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_el0_svc_compat(regs);
+>>>>  	arm64_syscall_exit_to_user_mode(regs);
+>>>>  }
+>>>> @@ -891,7 +891,7 @@ static void noinstr el0_svc_compat(struct pt_regs *regs)
+>>>>  static void noinstr el0_bkpt32(struct pt_regs *regs, unsigned long esr)
+>>>>  {
+>>>>  	arm64_enter_from_user_mode(regs);
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  	do_bkpt32(esr, regs);
+>>>>  	arm64_exit_to_user_mode(regs);
+>>>>  }
+>>>> diff --git a/arch/arm64/kernel/hibernate.c b/arch/arm64/kernel/hibernate.c
+>>>> index 9717568518ba..f6996b22fa29 100644
+>>>> --- a/arch/arm64/kernel/hibernate.c
+>>>> +++ b/arch/arm64/kernel/hibernate.c
+>>>> @@ -20,7 +20,7 @@
+>>>>  #include <asm/barrier.h>
+>>>>  #include <asm/cacheflush.h>
+>>>>  #include <asm/cputype.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/irqflags.h>
+>>>>  #include <asm/kexec.h>
+>>>>  #include <asm/memory.h>
+>>>> @@ -332,16 +332,16 @@ static void swsusp_mte_restore_tags(void)
+>>>>  
+>>>>  int swsusp_arch_suspend(void)
+>>>>  {
+>>>> -	int ret = 0;
+>>>> -	unsigned long flags;
+>>>>  	struct sleep_stack_data state;
+>>>> +	struct exception_mask mask;
+>>>> +	int ret = 0;
+>>>>  
+>>>>  	if (cpus_are_stuck_in_kernel()) {
+>>>>  		pr_err("Can't hibernate: no mechanism to offline secondary CPUs.\n");
+>>>>  		return -EBUSY;
+>>>>  	}
+>>>>  
+>>>> -	flags = local_daif_save();
+>>>> +	mask = local_exception_save_and_mask();
+>>>>  
+>>>>  	if (__cpu_suspend_enter(&state)) {
+>>>>  		/* make the crash dump kernel image visible/saveable */
+>>>> @@ -391,7 +391,7 @@ int swsusp_arch_suspend(void)
+>>>>  		spectre_v4_enable_mitigation(NULL);
+>>>>  	}
+>>>>  
+>>>> -	local_daif_restore(flags);
+>>>> +	local_exception_restore(mask);
+>>>>  
+>>>>  	return ret;
+>>>>  }
+>>>> diff --git a/arch/arm64/kernel/idle.c b/arch/arm64/kernel/idle.c
+>>>> index 05cfb347ec26..3997e297691e 100644
+>>>> --- a/arch/arm64/kernel/idle.c
+>>>> +++ b/arch/arm64/kernel/idle.c
+>>>> @@ -6,6 +6,7 @@
+>>>>  #include <linux/cpu.h>
+>>>>  #include <linux/irqflags.h>
+>>>>  
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/barrier.h>
+>>>>  #include <asm/cpuidle.h>
+>>>>  #include <asm/cpufeature.h>
+>>>> @@ -22,14 +23,14 @@
+>>>>   */
+>>>>  void __cpuidle cpu_do_idle(void)
+>>>>  {
+>>>> -	struct arm_cpuidle_irq_context context;
+>>>> +	struct exception_mask mask;
+>>>>  
+>>>> -	arm_cpuidle_save_irq_context(&context);
+>>>> +	arm_cpuidle_save_irq_context(&mask);
+>>>>  
+>>>>  	dsb(sy);
+>>>>  	wfi();
+>>>>  
+>>>> -	arm_cpuidle_restore_irq_context(&context);
+>>>> +	arm_cpuidle_restore_irq_context(&mask);
+>>>>  }
+>>>>  
+>>>>  /*
+>>>> diff --git a/arch/arm64/kernel/irq.c b/arch/arm64/kernel/irq.c
+>>>> index 9fafd826002b..9e7fb0d22586 100644
+>>>> --- a/arch/arm64/kernel/irq.c
+>>>> +++ b/arch/arm64/kernel/irq.c
+>>>> @@ -21,7 +21,7 @@
+>>>>  #include <linux/seq_file.h>
+>>>>  #include <linux/smp.h>
+>>>>  #include <linux/vmalloc.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/exception.h>
+>>>>  #include <asm/numa.h>
+>>>>  #include <asm/softirq_stack.h>
+>>>> @@ -130,6 +130,6 @@ void __init init_IRQ(void)
+>>>>  		 * the PMR/PSR pair to a consistent state.
+>>>>  		 */
+>>>>  		WARN_ON(read_sysreg(daif) & PSR_A_BIT);
+>>>> -		local_daif_restore(DAIF_PROCCTX_NOIRQ);
+>>>> +		local_exception_restore(arm64_make_noirq_mask());
+>>>>  	}
+>>>>  }
+>>>> diff --git a/arch/arm64/kernel/machine_kexec.c b/arch/arm64/kernel/machine_kexec.c
+>>>> index c5693a32e49b..a8676ee10ea2 100644
+>>>> --- a/arch/arm64/kernel/machine_kexec.c
+>>>> +++ b/arch/arm64/kernel/machine_kexec.c
+>>>> @@ -17,7 +17,7 @@
+>>>>  
+>>>>  #include <asm/cacheflush.h>
+>>>>  #include <asm/cpu_ops.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/memory.h>
+>>>>  #include <asm/mmu.h>
+>>>>  #include <asm/mmu_context.h>
+>>>> @@ -173,7 +173,7 @@ void machine_kexec(struct kimage *kimage)
+>>>>  
+>>>>  	pr_info("Bye!\n");
+>>>>  
+>>>> -	local_daif_mask();
+>>>> +	local_exception_mask();
+>>>>  
+>>>>  	/*
+>>>>  	 * Both restart and kernel_reloc will shutdown the MMU, disable data
+>>>> diff --git a/arch/arm64/kernel/probes/kprobes.c b/arch/arm64/kernel/probes/kprobes.c
+>>>> index 43a0361a8bf0..70d311e415ac 100644
+>>>> --- a/arch/arm64/kernel/probes/kprobes.c
+>>>> +++ b/arch/arm64/kernel/probes/kprobes.c
+>>>> @@ -24,7 +24,7 @@
+>>>>  #include <linux/vmalloc.h>
+>>>>  
+>>>>  #include <asm/cacheflush.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/debug-monitors.h>
+>>>>  #include <asm/insn.h>
+>>>>  #include <asm/irq.h>
+>>>> diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+>>>> index 23c05dc7a8f2..10507e55e2ce 100644
+>>>> --- a/arch/arm64/kernel/setup.c
+>>>> +++ b/arch/arm64/kernel/setup.c
+>>>> @@ -37,7 +37,7 @@
+>>>>  #include <asm/fixmap.h>
+>>>>  #include <asm/cpu.h>
+>>>>  #include <asm/cputype.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/elf.h>
+>>>>  #include <asm/cpufeature.h>
+>>>>  #include <asm/cpu_ops.h>
+>>>> @@ -311,7 +311,7 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
+>>>>  	 * IRQ and FIQ will be unmasked after the root irqchip has been
+>>>>  	 * detected and initialized.
+>>>>  	 */
+>>>> -	local_daif_restore(DAIF_PROCCTX_NOIRQ);
+>>>> +	local_exception_restore(arm64_make_noirq_mask());
+>>>>  
+>>>>  	/*
+>>>>  	 * TTBR0 is only used for the identity mapping at this stage. Make it
+>>>> diff --git a/arch/arm64/kernel/signal.c b/arch/arm64/kernel/signal.c
+>>>> index 38e6fa204c17..ea39b47ae0eb 100644
+>>>> --- a/arch/arm64/kernel/signal.c
+>>>> +++ b/arch/arm64/kernel/signal.c
+>>>> @@ -22,7 +22,7 @@
+>>>>  #include <linux/syscalls.h>
+>>>>  #include <linux/pkeys.h>
+>>>>  
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/debug-monitors.h>
+>>>>  #include <asm/elf.h>
+>>>>  #include <asm/exception.h>
+>>>> diff --git a/arch/arm64/kernel/smp.c b/arch/arm64/kernel/smp.c
+>>>> index d46022f72075..d153ff77d25c 100644
+>>>> --- a/arch/arm64/kernel/smp.c
+>>>> +++ b/arch/arm64/kernel/smp.c
+>>>> @@ -42,7 +42,7 @@
+>>>>  #include <asm/cpu.h>
+>>>>  #include <asm/cputype.h>
+>>>>  #include <asm/cpu_ops.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/kvm_mmu.h>
+>>>>  #include <asm/mmu_context.h>
+>>>>  #include <asm/numa.h>
+>>>> @@ -263,7 +263,7 @@ asmlinkage notrace void secondary_start_kernel(void)
+>>>>  	 * as the root irqchip has already been detected and initialized we can
+>>>>  	 * unmask IRQ and FIQ at the same time.
+>>>>  	 */
+>>>> -	local_daif_restore(DAIF_PROCCTX);
+>>>> +	local_exception_restore(arm64_make_procctx_mask());
+>>>>  
+>>>>  	/*
+>>>>  	 * OK, it's off to the idle thread for us
+>>>> @@ -370,7 +370,7 @@ void __noreturn cpu_die(void)
+>>>>  
+>>>>  	idle_task_exit();
+>>>>  
+>>>> -	local_daif_mask();
+>>>> +	local_exception_mask();
+>>>>  
+>>>>  	/* Tell cpuhp_bp_sync_dead() that this CPU is now safe to dispose of */
+>>>>  	cpuhp_ap_report_dead();
+>>>> @@ -870,7 +870,7 @@ static void __noreturn local_cpu_stop(unsigned int cpu)
+>>>>  {
+>>>>  	set_cpu_online(cpu, false);
+>>>>  
+>>>> -	local_daif_mask();
+>>>> +	local_exception_mask();
+>>>>  	sdei_mask_local_cpu();
+>>>>  	cpu_park_loop();
+>>>>  }
+>>>> @@ -889,14 +889,14 @@ static void __noreturn ipi_cpu_crash_stop(unsigned int cpu, struct pt_regs *regs
+>>>>  {
+>>>>  #ifdef CONFIG_KEXEC_CORE
+>>>>  	/*
+>>>> -	 * Use local_daif_mask() instead of local_irq_disable() to make sure
+>>>> -	 * that pseudo-NMIs are disabled. The "crash stop" code starts with
+>>>> -	 * an IRQ and falls back to NMI (which might be pseudo). If the IRQ
+>>>> -	 * finally goes through right as we're timing out then the NMI could
+>>>> -	 * interrupt us. It's better to prevent the NMI and let the IRQ
+>>>> -	 * finish since the pt_regs will be better.
+>>>> +	 * Use local_exception_mask() instead of local_irq_disable()
+>>>> +	 * to make sure that pseudo-NMIs are disabled. The "crash stop" code
+>>>> +	 * starts with an IRQ and falls back to NMI (which might be pseudo).
+>>>> +	 * If the IRQ finally goes through right as we're timing out then
+>>>> +	 * the NMI could interrupt us. It's better to prevent the NMI and let
+>>>> +	 * the IRQ finish since the pt_regs will be better.
+>>>>  	 */
+>>>> -	local_daif_mask();
+>>>> +	local_exception_mask();
+>>>>  
+>>>>  	crash_save_cpu(regs, cpu);
+>>>>  
+>>>> diff --git a/arch/arm64/kernel/suspend.c b/arch/arm64/kernel/suspend.c
+>>>> index eaaff94329cd..af16120818ac 100644
+>>>> --- a/arch/arm64/kernel/suspend.c
+>>>> +++ b/arch/arm64/kernel/suspend.c
+>>>> @@ -9,7 +9,7 @@
+>>>>  #include <asm/cacheflush.h>
+>>>>  #include <asm/cpufeature.h>
+>>>>  #include <asm/cpuidle.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/debug-monitors.h>
+>>>>  #include <asm/exec.h>
+>>>>  #include <asm/fpsimd.h>
+>>>> @@ -96,10 +96,9 @@ void notrace __cpu_suspend_exit(void)
+>>>>   */
+>>>>  int cpu_suspend(unsigned long arg, int (*fn)(unsigned long))
+>>>>  {
+>>>> -	int ret = 0;
+>>>> -	unsigned long flags;
+>>>> +	struct exception_mask mask, cpuidle_mask;
+>>>>  	struct sleep_stack_data state;
+>>>> -	struct arm_cpuidle_irq_context context;
+>>>> +	int ret = 0;
+>>>>  
+>>>>  	/*
+>>>>  	 * Some portions of CPU state (e.g. PSTATE.{PAN,DIT}) are initialized
+>>>> @@ -122,7 +121,7 @@ int cpu_suspend(unsigned long arg, int (*fn)(unsigned long))
+>>>>  	 * hardirqs should be firmly off by now. This really ought to use
+>>>>  	 * something like raw_local_daif_save().
+>>>>  	 */
+>>>> -	flags = local_daif_save();
+>>>> +	mask = local_exception_save_and_mask();
+>>>>  
+>>>>  	/*
+>>>>  	 * Function graph tracer state gets inconsistent when the kernel
+>>>> @@ -135,7 +134,7 @@ int cpu_suspend(unsigned long arg, int (*fn)(unsigned long))
+>>>>  	 * Switch to using DAIF.IF instead of PMR in order to reliably
+>>>>  	 * resume if we're using pseudo-NMIs.
+>>>>  	 */
+>>>> -	arm_cpuidle_save_irq_context(&context);
+>>>> +	arm_cpuidle_save_irq_context(&cpuidle_mask);
+>>>>  
+>>>>  	ct_cpuidle_enter();
+>>>>  
+>>>> @@ -159,7 +158,7 @@ int cpu_suspend(unsigned long arg, int (*fn)(unsigned long))
+>>>>  		__cpu_suspend_exit();
+>>>>  	}
+>>>>  
+>>>> -	arm_cpuidle_restore_irq_context(&context);
+>>>> +	arm_cpuidle_restore_irq_context(&cpuidle_mask);
+>>>>  
+>>>>  	unpause_graph_tracing();
+>>>>  
+>>>> @@ -168,7 +167,7 @@ int cpu_suspend(unsigned long arg, int (*fn)(unsigned long))
+>>>>  	 * restored, so from this point onwards, debugging is fully
+>>>>  	 * reenabled if it was enabled when core started shutdown.
+>>>>  	 */
+>>>> -	local_daif_restore(flags);
+>>>> +	local_exception_restore(mask);
+>>>>  
+>>>>  	return ret;
+>>>>  }
+>>>> diff --git a/arch/arm64/kernel/traps.c b/arch/arm64/kernel/traps.c
+>>>> index 914282016069..fcc18b182eb2 100644
+>>>> --- a/arch/arm64/kernel/traps.c
+>>>> +++ b/arch/arm64/kernel/traps.c
+>>>> @@ -33,7 +33,7 @@
+>>>>  #include <asm/atomic.h>
+>>>>  #include <asm/bug.h>
+>>>>  #include <asm/cpufeature.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/debug-monitors.h>
+>>>>  #include <asm/efi.h>
+>>>>  #include <asm/esr.h>
+>>>> diff --git a/arch/arm64/kvm/hyp/vgic-v3-sr.c b/arch/arm64/kvm/hyp/vgic-v3-sr.c
+>>>> index c4d2f1feea8b..96187ef5a025 100644
+>>>> --- a/arch/arm64/kvm/hyp/vgic-v3-sr.c
+>>>> +++ b/arch/arm64/kvm/hyp/vgic-v3-sr.c
+>>>> @@ -445,8 +445,8 @@ void __vgic_v3_init_lrs(void)
+>>>>   */
+>>>>  u64 __vgic_v3_get_gic_config(void)
+>>>>  {
+>>>> +	struct exception_mask mask;
+>>>>  	u64 val, sre;
+>>>> -	unsigned long flags = 0;
+>>>>  
+>>>>  	/*
+>>>>  	 * In compat mode, we cannot access ICC_SRE_EL1 at any EL
+>>>> @@ -476,7 +476,7 @@ u64 __vgic_v3_get_gic_config(void)
+>>>>  	 * of the exception entry to EL2.
+>>>>  	 */
+>>>>  	if (has_vhe()) {
+>>>> -		flags = local_daif_save();
+>>>> +		mask = local_exception_save_and_mask();
+>>>>  	} else {
+>>>>  		sysreg_clear_set_hcr(0, HCR_AMO | HCR_FMO | HCR_IMO);
+>>>>  		isb();
+>>>> @@ -491,7 +491,7 @@ u64 __vgic_v3_get_gic_config(void)
+>>>>  	isb();
+>>>>  
+>>>>  	if (has_vhe()) {
+>>>> -		local_daif_restore(flags);
+>>>> +		local_exception_restore(mask);
+>>>>  	} else {
+>>>>  		sysreg_clear_set_hcr(HCR_AMO | HCR_FMO | HCR_IMO, 0);
+>>>>  		isb();
+>>>> diff --git a/arch/arm64/kvm/hyp/vhe/switch.c b/arch/arm64/kvm/hyp/vhe/switch.c
+>>>> index bbe9cebd3d9d..024876efe0c3 100644
+>>>> --- a/arch/arm64/kvm/hyp/vhe/switch.c
+>>>> +++ b/arch/arm64/kvm/hyp/vhe/switch.c
+>>>> @@ -631,7 +631,7 @@ int __kvm_vcpu_run(struct kvm_vcpu *vcpu)
+>>>>  {
+>>>>  	int ret;
+>>>>  
+>>>> -	local_daif_mask();
+>>>> +	local_exception_mask();
+>>>>  
+>>>>  	/*
+>>>>  	 * Having IRQs masked via PMR when entering the guest means the GIC
+>>>> @@ -647,10 +647,10 @@ int __kvm_vcpu_run(struct kvm_vcpu *vcpu)
+>>>>  	ret = __kvm_vcpu_run_vhe(vcpu);
+>>>>  
+>>>>  	/*
+>>>> -	 * local_daif_restore() takes care to properly restore PSTATE.DAIF
+>>>> +	 * local_exception_restore() takes care to properly restore PSTATE.DAIF
+>>>>  	 * and the GIC PMR if the host is using IRQ priorities.
+>>>>  	 */
+>>>> -	local_daif_restore(DAIF_PROCCTX_NOIRQ);
+>>>> +	local_exception_restore(arm64_make_noirq_mask());
+>>>>  
+>>>>  	return ret;
+>>>>  }
+>>>> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+>>>> index 85e23388f9bb..f7b8e87a099e 100644
+>>>> --- a/arch/arm64/mm/fault.c
+>>>> +++ b/arch/arm64/mm/fault.c
+>>>> @@ -34,7 +34,7 @@
+>>>>  #include <asm/cpufeature.h>
+>>>>  #include <asm/efi.h>
+>>>>  #include <asm/exception.h>
+>>>> -#include <asm/daifflags.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/debug-monitors.h>
+>>>>  #include <asm/esr.h>
+>>>>  #include <asm/kprobes.h>
+>>>> diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+>>>> index f2be501468ce..9afcd2bc2fd1 100644
+>>>> --- a/arch/arm64/mm/mmu.c
+>>>> +++ b/arch/arm64/mm/mmu.c
+>>>> @@ -2307,7 +2307,7 @@ void __cpu_replace_ttbr1(pgd_t *pgdp, bool cnp)
+>>>>  	typedef void (ttbr_replace_func)(phys_addr_t);
+>>>>  	extern ttbr_replace_func idmap_cpu_replace_ttbr1;
+>>>>  	ttbr_replace_func *replace_phys;
+>>>> -	unsigned long daif;
+>>>> +	struct exception_mask mask;
+>>>>  
+>>>>  	/* phys_to_ttbr() zeros lower 2 bits of ttbr with 52-bit PA */
+>>>>  	phys_addr_t ttbr1 = phys_to_ttbr(virt_to_phys(pgdp));
+>>>> @@ -2323,9 +2323,9 @@ void __cpu_replace_ttbr1(pgd_t *pgdp, bool cnp)
+>>>>  	 * We really don't want to take *any* exceptions while TTBR1 is
+>>>>  	 * in the process of being replaced so mask everything.
+>>>>  	 */
+>>>> -	daif = local_daif_save();
+>>>> +	mask = local_exception_save_and_mask();
+>>>>  	replace_phys(ttbr1);
+>>>> -	local_daif_restore(daif);
+>>>> +	local_exception_restore(mask);
+>>>>  
+>>>>  	cpu_uninstall_idmap();
+>>>>  }
+>>>> diff --git a/drivers/firmware/psci/psci.c b/drivers/firmware/psci/psci.c
+>>>> index e73bae6cb23a..4cc834db7c15 100644
+>>>> --- a/drivers/firmware/psci/psci.c
+>>>> +++ b/drivers/firmware/psci/psci.c
+>>>> @@ -24,6 +24,7 @@
+>>>>  
+>>>>  #include <asm/cpuidle.h>
+>>>>  #include <asm/cputype.h>
+>>>> +#include <asm/exception_masks.h>
+>>>>  #include <asm/hypervisor.h>
+>>>>  #include <asm/system_misc.h>
+>>>>  #include <asm/smp_plat.h>
+>>>> @@ -503,12 +504,12 @@ int psci_cpu_suspend_enter(u32 state)
+>>>>  	int ret;
+>>>>  
+>>>>  	if (!psci_power_state_loses_context(state)) {
+>>>> -		struct arm_cpuidle_irq_context context;
+>>>> +		struct exception_mask mask;
+>>>>  
+>>>>  		ct_cpuidle_enter();
+>>>> -		arm_cpuidle_save_irq_context(&context);
+>>>> +		arm_cpuidle_save_irq_context(&mask);
+>>>>  		ret = psci_ops.cpu_suspend(state, 0);
+>>>> -		arm_cpuidle_restore_irq_context(&context);
+>>>> +		arm_cpuidle_restore_irq_context(&mask);
+>>>>  		ct_cpuidle_exit();
+>>>>  	} else {
+>>>>  		/*
+>>>> -- 
+>>>> 2.34.1
+>>>>
+>>>
+>>
+> 
+
