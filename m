@@ -1,86 +1,133 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+Received: from esa9.hc1455-7.c3s2.iphmx.com (esa9.hc1455-7.c3s2.iphmx.com [139.138.36.223])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A340B3597B
-	for <linux-efi@vger.kernel.org>; Fri, 10 Jul 2026 00:44:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A88A37186F;
+	Fri, 10 Jul 2026 06:24:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=139.138.36.223
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783644265; cv=none; b=P/cyGn31VA14Tyj2DhQqa5/jSbKkHnBc8Mx0ejkIZJHj+1g8gUFtUPJkWeN4dyUel4rGZ3k38ORSkuHVrgtvQMGUK+e4/XiVm5j+SQZGVUEy8qInDqMOluYDTK9K6Q3xd2DyA+bgQmPhMJJArT2I2KTrJLByk413vBLNmrN5V+4=
+	t=1783664668; cv=none; b=dteTXd42EtQ/ggO+cZZYybq3cdcbA3njZYtllIaTgfTBIPWxzu1Qy+k8IOecABOfsagwlWrZyb/EEWYxwqSt+k45qc9Hy39eJNpRCSCs+qDFBims85c4WoEXBo4ju8lQRej/IhKjP2apuNxeR/xLV8lUr8EvA9828ObTg80Nz1E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783644265; c=relaxed/simple;
-	bh=w7CUkjmGxatJBiJUw3LuLkhyzsYPio+AJhCNAAkyB5Y=;
-	h=Date:From:To:Cc:Subject:Message-ID; b=nLG0Y1bpQ43FqjIpcoznF8gKecvspGgy8cGZuGxOJlgCCNxLdYaAq4m2ie9BuQ4ENYcvFbS9E9BIEbX5r3HtHiWxD39RV4gUv5oYKCvqFib0v78bWESNDPkhsXp3JXyiaj5EAXK+NHYPTnSC16+foR3OyCBvqOLFgI6+/vKv3QU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=a7nHmuSJ; arc=none smtp.client-ip=198.175.65.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1783664668; c=relaxed/simple;
+	bh=HFnS/IroUgrD3Efyx//OAMn0jrlTbDHdOHhqt9ZqYx4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FCN9FkVe1miFR79uEzduNWVtnEaFgYxR7am3h9H6OLkVpyeUl8Ls4rNtFpxXBNarYr13DcxrF+e0wJ9vqVF2OZFkxdHAAGSuIZmkTXKDJE/L3Dd9+OPei3bB7so9qYST3cMb4ml84ikQQgniyugmswiBnkJaTs91AdmZOWC5mAw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=GiSIlRnM; arc=none smtp.client-ip=139.138.36.223
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fujitsu.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="a7nHmuSJ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1783644263; x=1815180263;
-  h=date:from:to:cc:subject:message-id;
-  bh=w7CUkjmGxatJBiJUw3LuLkhyzsYPio+AJhCNAAkyB5Y=;
-  b=a7nHmuSJ8IyCe28NHmSCKy75vusBxG6Hqsce1/4RvrbAMvnJDfP2T2Ds
-   0tlvYGEVG3HhRBkJJ3BMJhNuMApY15erXqVF2pwR+kBOVWFEjuAHAfp0d
-   jEXn2hUIrli1zgsQyxOPpH8xyzqwWIsyGcHqLaseRO6X9x3AqO54Ujeip
-   aoju3ba+vQ9oJLdTik3wTCxQhll5hRxNDhJ4ZdJJLWmfXG0wg/gXhVJ+F
-   zs4Hhsyc6UMduxQWQw8Ze6iQidTECaRLL60sDYr8FJCKWO8p/3qf2a01N
-   q99/kk+uPVXMZKT/l8vPLwAT9hJghXC1Tunn/IinG47RAr3sfk6c70UeE
-   w==;
-X-CSE-ConnectionGUID: +8llNTFASgKLzJMs5aLpfA==
-X-CSE-MsgGUID: ww0emFuQTXi1V07qRadqkw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11841"; a="101768631"
-X-IronPort-AV: E=Sophos;i="6.25,154,1779174000"; 
-   d="scan'208";a="101768631"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jul 2026 17:44:22 -0700
-X-CSE-ConnectionGUID: CjPQEVvySCec9h4nTh+Ajg==
-X-CSE-MsgGUID: pRaXLPz2Q8as0JTqnQaEkw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,154,1779174000"; 
-   d="scan'208";a="284833663"
-Received: from lkp-server02.sh.intel.com (HELO ea128546eb3d) ([10.239.97.151])
-  by orviesa002.jf.intel.com with ESMTP; 09 Jul 2026 17:44:20 -0700
-Received: from kbuild by ea128546eb3d with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1whzLl-00000000IJf-0WMZ;
-	Fri, 10 Jul 2026 00:44:17 +0000
-Date: Fri, 10 Jul 2026 08:43:57 +0800
-From: kernel test robot <lkp@intel.com>
-To: Breno Leitao <leitao@debian.org>
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
- linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>
-Subject: [efi:next 2/7] vmlinux.o: warning: objtool:
- efi_crash_gracefully_on_page_fault+0xc3: efi_rts_park_worker() missing
- __noreturn in .c/.h or NORETURN() in noreturns.h
-Message-ID: <202607100848.iWPxdkhX-lkp@intel.com>
-User-Agent: s-nail v14.9.25
+	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="GiSIlRnM"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj2;
+  t=1783664666; x=1815200666;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=HFnS/IroUgrD3Efyx//OAMn0jrlTbDHdOHhqt9ZqYx4=;
+  b=GiSIlRnMMhHWeaFY/VHwTlEXj3F0lDq4M1fmw92+l7xO60nJAMp+kCPI
+   zDd0eQjNE5TcJ1oUkUKJXt+gxQNfPw2xgQaZIWembqANbWYTiWSVvqGXQ
+   3EyxejOHsTfmS8p5J9XGrmrfMWRkAPFvn1VA5PiHqTYvVTKZCNW2ivSKD
+   YviCOXUUCVJkm1nDVFyoxGfmB2jMMnTfIZ79vojpB4ZK31Fpp61uea/5I
+   WkqXLa5diVE97FUtJIKXIXrGo55LJLyomcestm5jjaFM88YFckPiu7OgU
+   7U46WlOCQat9TIwBjRX5Qiotlbef69pp5mYv/imn8FkzGVjR5m2wsWU5s
+   Q==;
+X-CSE-ConnectionGUID: POcJ7gvtQTCyue1+O4rclA==
+X-CSE-MsgGUID: L2iczwXKRSad85vIC+qcVQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11841"; a="234349836"
+X-IronPort-AV: E=Sophos;i="6.25,154,1779116400"; 
+   d="scan'208";a="234349836"
+Received: from gmgwuk01.global.fujitsu.com ([172.187.114.235])
+  by esa9.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Jul 2026 15:23:15 +0900
+Received: from az2uksmgm1.o.css.fujitsu.com (unknown [10.151.22.198])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by gmgwuk01.global.fujitsu.com (Postfix) with ESMTPS id D8D5AC00359;
+	Fri, 10 Jul 2026 06:23:14 +0000 (UTC)
+Received: from az2nlsmom2.o.css.fujitsu.com (unknown [10.150.26.200])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by az2uksmgm1.o.css.fujitsu.com (Postfix) with ESMTPS id 8FA1396847F;
+	Fri, 10 Jul 2026 06:23:14 +0000 (UTC)
+Received: from whale.soft.fujitsu.com (unknown [10.125.16.33])
+	by az2nlsmom2.o.css.fujitsu.com (Postfix) with ESMTP id 1B9FF18021A7;
+	Fri, 10 Jul 2026 06:23:07 +0000 (UTC)
+From: Koki Iwata <iwata.koki@fujitsu.com>
+To: Jonathan Corbet <corbet@lwn.net>,
+	Ard Biesheuvel <ardb@kernel.org>
+Cc: Shuah Khan <skhan@linuxfoundation.org>,
+	Matthew Garrett <matthew.garrett@nebula.com>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	Borislav Petkov <bp@alien8.de>,
+	Randy Dunlap <rdunlap@infradead.org>,
+	Thomas Gleixner <tglx@kernel.org>,
+	Feng Tang <feng.tang@linux.alibaba.com>,
+	Dapeng Mi <dapeng1.mi@linux.intel.com>,
+	Marco Elver <elver@google.com>,
+	Jakub Kicinski <kuba@kernel.org>,
+	Eric Biggers <ebiggers@kernel.org>,
+	Li RongQing <lirongqing@baidu.com>,
+	"Paul E . McKenney" <paulmck@kernel.org>,
+	Matt Fleming <mfleming@cloudflare.com>,
+	linux-doc@vger.kernel.org,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	iwata.koki@fujitsu.com
+Subject: [PATCH RESEND] Documentation: admin-guide: fix a doc for efi_no_storage_paranoia the "5KB" instead of the "50%"
+Date: Fri, 10 Jul 2026 15:22:44 +0900
+Message-ID: <20260710062306.1204206-1-iwata.koki@fujitsu.com>
+X-Mailer: git-send-email 2.52.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-Hi Breno,
+From: Iwata Koki <iwata.koki@fujitsu.com>
 
-FYI, the error/warning was bisected to this commit, please ignore it if it's irrelevant.
+The documentation for 'efi_no_storage_paranoia' incorrectly states
+the kernel cannot use "more than 50%" of the EFI variable storage.
 
-tree:   https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
-head:   cf790fdb851867532b9a0f88588dcce648dbffe9
-commit: 3e5ba97c181e32ca9b810414272b57bb7600998e [2/7] efi/runtime-wrappers: factor out efi_rts_park_worker()
-config: x86_64-buildonly-randconfig-006-20260710 (https://download.01.org/0day-ci/archive/20260710/202607100848.iWPxdkhX-lkp@intel.com/config)
-compiler: clang version 22.1.3 (https://github.com/llvm/llvm-project e9846648fd6183ee6d8cbdb4502213fcf902a211)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260710/202607100848.iWPxdkhX-lkp@intel.com/reproduce)
+This percentage-based explanation has been outdated since commit
+f8b8404337de ("Modify UEFI anti-bricking code") introduced a fixed 5KB
+minimum reserve threshold (EFI_MIN_RESERVE) in
+arch/x86/platform/efi/quirks.c. At that time, the documentation was not
+updated to reflect this change.
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202607100848.iWPxdkhX-lkp@intel.com/
+Update the documentation to reflect the "5KB" instead of the "50%".
 
-All warnings (new ones prefixed by >>):
+Fixes: f8b8404337de ("Modify UEFI anti-bricking code")
+Signed-off-by: Koki Iwata <iwata.koki@fujitsu.com>
+---
+ Documentation/admin-guide/kernel-parameters.txt | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
 
->> vmlinux.o: warning: objtool: efi_crash_gracefully_on_page_fault+0xc3: efi_rts_park_worker() missing __noreturn in .c/.h or NORETURN() in noreturns.h
+diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+index b5493a7f8f22..3f75969a679b 100644
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -1614,10 +1614,17 @@ Kernel parameters
+ 			on all PCI bridges while in the EFI boot stub
+ 
+ 	efi_no_storage_paranoia [EFI,X86,EARLY]
+-			Using this parameter you can use more than 50% of
+-			your efi variable storage. Use this parameter only if
+-			you are really sure that your UEFI does sane gc and
+-			fulfills the spec otherwise your board may brick.
++			The kernel reserves 5KB of EFI variable storage for
++			safety, because some UEFI implementation may fail to
++			boot if there's insufficient space in the EFI variable
++			storage.
++
++			Using this parameter, you can use the 5KB reservation
++			in the EFI variable storage.
++
++			However, Use this parameter only if you are really
++			sure that your UEFI does sane gc and fulfills the spec
++			otherwise your board may brick.
+ 
+ 	efivar_ssdt=	[EFI; X86] Name of an EFI variable that contains an SSDT
+ 			that is to be dynamically loaded by Linux. If there are
+-- 
+2.52.0
 
---
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
