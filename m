@@ -1,103 +1,216 @@
-Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f47.google.com (mail-pj1-f47.google.com [209.85.216.47])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12B9B24DCF6;
-	Fri, 10 Jul 2026 13:48:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3567F2C15B0
+	for <linux-efi@vger.kernel.org>; Sat, 11 Jul 2026 16:01:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783691313; cv=none; b=oedQGdlPu4oE01Rz6UGSPE1egGdnr+VH7RuqyfoA4Ud2JHpC9fQW/n7CLnq+U0Lqm5KsTiDrRPPON3dfuHgN6cXRYrNoSMFtYOHHieaVICSe38IfW7WlpNeO1vyAj7AnkkgfVHw0DKCAdP9xmkBPNx5uHn1BCkVQGpylG4A8v1w=
+	t=1783785675; cv=none; b=YyD9M1L1j06LzbN7PiOBN/dA8LxVbBF/0w/WKaheZ1MlA1/uhUBRlUaA27lJgELiez2Kd9SfWGc6TR+RxJCw6CIBWKaVlduAWSeJF11mjCsBDvL9lkbEZYAR7n5kJQ20+hvlS82FX0R1+YAw+S74Fl40IFn068Dmfz7BnVa65rc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783691313; c=relaxed/simple;
-	bh=1rQiDuFmyQTc45dNNlmvidmWC5c+gF53OqATGm3+jUo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BqyQWAcrRaT8RUCCXK4aq6seqSeikJqicZ5+4ZuRViDD3ANPxXE5ehvG3mmPemEdQQV3kHV6R+yuurjA08qiJH3262F0ZOsHz7ud2wCTuWyMnmx97dobhlgKq+jX9Qg/K1DyoGsPMAFe0+FYHDk3XbY//QxL1GAPowfZVZwCqfY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=b/kLjpu2; arc=none smtp.client-ip=82.195.75.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
+	s=arc-20240116; t=1783785675; c=relaxed/simple;
+	bh=N7RC+uZRrlKgQQELyWXcXycrqlZe8qncc17h5i528c4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qGhkt4le38UlhZvUDmMHDMT9TmkqLR4yggeuClg+z3D8tI4Nfo2env530RvsIuQ4eFhL0uyPY+mIdOYAeg/QVFtqhvHUDPRoBwqAkDo2JFh1t2FalJt4glmVglrGR7S6k7VobZJZlluOt020bjG36EtEV3DdWIZ8p4V8o10qeko=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=h1sn6KvL; arc=none smtp.client-ip=209.85.216.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="b/kLjpu2"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
-	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=p0xPCXywvWmCNeuSV++rBW+PCnq/E7RY4p8aqyn5l8o=; b=b/kLjpu2lU4T2IJnIRw4mz7gME
-	hK4z24HnWSGiYAmVftSaKRkDQCUyMMsojswFoxLAObJ+6YCZ7Ho8XTUdUlW2Fye5cuFkNnXtnpNgV
-	l1/d79/BvicUyJxaVbSh+xF8v1o9quDKEgDiv4Npy82/d9y7mFb0240MD/DxyyTiX4nuPBkLiZAq5
-	GnJNVxA8PkhWnmB7y75iWfF7U+4V7DHGEHn7x61z7pcgVwwKChreWwbKtQWvkH3PKikDf3fhHyuVh
-	icmwrGFyJHNp/SwDj3z4VCCznLjPqmh7FLV/4IERPcSGtltnoOnMPeJBWA2laGaiiflVN4AJNhZmj
-	mPheHXCQ==;
-Received: from authenticated-user
-	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
-	(Exim 4.96)
-	(envelope-from <leitao@debian.org>)
-	id 1wiBaF-004WJa-1B;
-	Fri, 10 Jul 2026 13:48:03 +0000
-Date: Fri, 10 Jul 2026 06:47:57 -0700
-From: Breno Leitao <leitao@debian.org>
-To: Yeoreum Yun <yeoreum.yun@arm.com>
-Cc: Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Borislav Petkov <bp@suse.de>, Andy Lutomirski <luto@kernel.org>, 
-	Kees Cook <kees@kernel.org>, Tony Luck <tony.luck@intel.com>, 
-	"Guilherme G. Piccoli" <gpiccoli@igalia.com>, Thomas Gleixner <tglx@kernel.org>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
-	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-team@meta.com
-Subject: Re: [PATCH v3 5/7] efi/runtime-wrappers: bound the wait for EFI
- runtime service calls
-Message-ID: <alD3ZFgfgMj0_qoT@gmail.com>
-References: <20260616-efi_timeout-v3-0-76dd1d26657b@debian.org>
- <20260616-efi_timeout-v3-5-76dd1d26657b@debian.org>
- <ak9GEtPuFv_1Sqcw@e129823.arm.com>
- <alDJNWZdBpkIZrcM@gmail.com>
- <alDMRabP9s6Pqhxq@e129823.arm.com>
- <alDTjHtL5Q4ormKb@gmail.com>
- <alDW8vjjU_f7dkIK@e129823.arm.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="h1sn6KvL"
+Received: by mail-pj1-f47.google.com with SMTP id 98e67ed59e1d1-382a3fe0d28so1893890a91.0
+        for <linux-efi@vger.kernel.org>; Sat, 11 Jul 2026 09:01:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1783785673; x=1784390473; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=JayLLvpAgBylhvulp5IdQiUHgZ6NsRSyedzXc8seza8=;
+        b=h1sn6KvLpn5hppyIM0tn+DMR6xwsCKmcQlqpWfWpIrnmj1ZoT02vejWpDz22WVCOgM
+         xecWQn80Jpuqqdvd/0UmtgFx1fDnub+Swf7i9Vmp9OquronEK3D61xZC/4hYtWbBPO1J
+         zdoILp+W+eqEt4TQ5Q8Cdw/p2DtSY/gQbeujFfbq86dYBbrvmR1+p0lSlDCdBT15uYXm
+         lOauePim5VCd4EouaPCasFzZnkVNHfUlUTUnPiwoUpNt7u177W9ObjulC3xZhdRSyQ2y
+         84NHn3JKFIvElaZDAnolY/reDNPHCpyVPajsYVTEwJE4pLxlkOAMGOvvnV3z4ighe2+K
+         aMgA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1783785673; x=1784390473;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=JayLLvpAgBylhvulp5IdQiUHgZ6NsRSyedzXc8seza8=;
+        b=Y0seSe9ClEL0y+oO7bdRfw43DijpZbGl7/PZuojhld8sBgXQiHVFGOia6bta18z2mF
+         erldRcMwzhsReIUJDHXnR6ala0v1ykUJPUSKKXC6YjFtKkhiED+ixQiK6cVjrhZaUSUl
+         T6xffVkmabUGhW/1HDoD+nOD27rf3bxjWCLSDDweFtBcDk97s3Hd0n/hywcYBuafyZ80
+         BVBLrqTh8Tga0cWlvqPmm60zoenTHypqlKPjDOi1CaqUWCmsNEQZxR1+qCeq99em1PsW
+         eyNwt24ag09h9s+9DVNFNGDLhaJehxAgTUXDvTU69oeQ+n0GQz3/hyYJyEbvPgh9JEfj
+         rNzA==
+X-Forwarded-Encrypted: i=1; AHgh+RpRiPovj5/IkwTZw+KZt4KgpbD4N9+mMKdr4WRZuuacMVGGPCuysF9430Dl0bM1+s7OJ0sv2KlkfgA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyJr2YgISzRDC9NoyuAHucFSmdVTXXBs6pc9xWKU4jgjp9ulkXB
+	q8P48YUdJoxkxVkV/yVlbQZ8na3sMs2KuajD0rxi/yLTQJGe3Gq1d3uV
+X-Gm-Gg: AfdE7cl3cLMD+vGRIa3MHLCTSGZL1Qw3k03POM9EpJxzGfxaSc1yAPMuff3vIWAZzpn
+	22fOUzbj+VbkzBA9u1rqblFggZpDUYZkKEbcz+kfI2egO2zZ3SRhFkN8uTBcw37gzpubX82P9+0
+	ZOR4Cw4hWEUf35oUzUnUgOo/UapYMR/zKxtz8bz1IDKvxWw0GQ5a3/3HP3b3aKjbiVu/LgU7Ssc
+	40qsrFJ5OtHzBtPu3oaWN/4qbLZ5JzZ86ianRB7a1A13usdjr23mWcLgbVXdJcvW/OBdh7FfRtb
+	u2RIsh+RB2lP4glVbKHcWvgL0F7XtiZtXEovOsMTFgavrokr9+h7UCvQCAznxCRPGVpqzgcOp2O
+	tM5LhwmGeZdS8PNxmNpJzRSLnl5OLIn5hOKrSEex+kQoixZHf62L3n9I+M3cqrbJ+mzfkVFU/MA
+	pJk3B4tP+u2el1cPCnFYXP
+X-Received: by 2002:a17:90b:4c49:b0:381:270c:4dd1 with SMTP id 98e67ed59e1d1-38dc774d270mr3079721a91.20.1783785673221;
+        Sat, 11 Jul 2026 09:01:13 -0700 (PDT)
+Received: from titan.lan ([2603:8000:df01:38f7:255c:dd03:30a6:e57b])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3120c8e41fcsm20951952eec.15.2026.07.11.09.01.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 11 Jul 2026 09:01:12 -0700 (PDT)
+From: Ross Philipson <ross.philipson@gmail.com>
+To: linux-kernel@vger.kernel.org,
+	x86@kernel.org,
+	linux-integrity@vger.kernel.org,
+	linux-crypto@vger.kernel.org,
+	linux-efi@vger.kernel.org
+Cc: ross.philipson@gmail.com,
+	dpsmith@apertussolutions.com,
+	tglx@linutronix.de,
+	mingo@redhat.com,
+	bp@alien8.de,
+	hpa@zytor.com,
+	dave.hansen@linux.intel.com,
+	ardb@kernel.org,
+	mjg59@srcf.ucam.org,
+	James.Bottomley@hansenpartnership.com,
+	peterhuewe@gmx.de,
+	jarkko@kernel.org,
+	luto@amacapital.net,
+	herbert@gondor.apana.org.au,
+	davem@davemloft.net,
+	corbet@lwn.net,
+	kanth.ghatraju@oracle.com,
+	daniel.kiper@oracle.com,
+	andrew.cooper3@citrix.com,
+	trenchboot-devel@googlegroups.com
+Subject: [PATCH v2 00/10] tpm: Reorganize public headers and extract tpm-buf for standalone reuse
+Date: Sat, 11 Jul 2026 09:01:00 -0700
+Message-ID: <20260711160110.267780-1-ross.philipson@gmail.com>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <alDW8vjjU_f7dkIK@e129823.arm.com>
-X-Debian-User: leitao
+Content-Transfer-Encoding: 8bit
 
-On Fri, Jul 10, 2026 at 12:26:42PM +0100, Yeoreum Yun wrote:
-> > On Fri, Jul 10, 2026 at 11:41:09AM +0100, Yeoreum Yun wrote:
-> > > > Hello Yeoreum,
-> > > > 
-> > > > On Thu, Jul 09, 2026 at 07:56:18AM +0100, Yeoreum Yun wrote:
-> > > > > 
-> > > > > One of my concern is for the UpdateCapsule runtime service.
-> > > > > It might have a case where takes more then 2 mins and there's one
-> > > > > RFC to support a runtime capsule update for arm platform [1].
-> > > > 
-> > > > I'm not familiar with UpdateCapsule. Are you suggesting that a 2-minute
-> > > > wait for an EFI call should be acceptable (?!)
-> > > > 
-> > > > Wouldn't that trigger stalls and hung-task/wq warnings throughout the
-> > > > kernel?
-> > > 
-> > > Might for default config timeout for hung-task. However at least
-> > > its timeout configurable.
-> > > 
-> > > TBH, normally it wouldn't task more than 2 mins.
-> > > But for a in case of *slow firmware*, would be good to make
-> > > runtime-service timeout configurable at least?
-> > 
-> > OK, that is fair request.
-> > 
-> > I would suggest we do an additional patch with this change, if Ard is
-> > positive on the idea.
-> > 
-> > Yeoreum, would you like to do it, or should I do it?
-> 
-> It's up to you. I don't care who will do this :)
-> But if you have no bandwidth, I'll take once your patch is merged
-> and Ard agrees for this.
+This series reorganizes the TPM subsystem's public headers for better
+modularity and maintainability while extracting the `tpm_buf`
+abstraction into a new standalone header (`include/linux/tpm_buf.h`).
+The goal is to allow other kernel components to construct, parse, and
+manipulate TPM commands, responses, and TPM2B-sized buffers without
+pulling in the full set of TPM driver headers and implementation details
+from `<linux/tpm.h>`.
 
-Sounds good. Let's wait for Ard's feedback on the additional patches
-[1], and we can decide how to proceed from there.
+Key elements of the series:
+- Split version-specific (TPM1/TPM2), common, and platform-specific
+  (PTP) definitions out of the main headers into dedicated files
+  (tpm_command.h updates and the new include/linux/tpm_ptp.h).
+- Clean up include dependencies (e.g., remove the main TPM header from
+  the TPM event log header).
+- Refine the tpm_buf implementation for improved memory safety and a
+  cleaner API suitable for standalone use.
+- Introduce include/linux/tpm_buf.h (with helpers for
+  init/reset/append/read operations) so the buffer logic can be reused
+  more broadly (e.g., by security subsystems, measurement architectures,
+  or early-boot components).
 
-Link: https://lore.kernel.org/all/alDDv3XGXVdd1mri@gmail.com/ [1]
+This work originated in the TrenchBoot/Secure Launch development tree
+but provides general benefits to the upstream kernel by reducing header
+coupling and enabling safer, more reusable TPM buffer handling. It
+builds on prior refactoring efforts and incorporates improvements for
+robustness.
+
+Note on this version: This is a breakout of the TPM driver related
+changes from the Secure Launch v16 series. As it includes Sashiko review
+changes, it is being considered v2. Another noteworthy change is the
+replacement of patch #9, "tpm-buf: Implement managed allocations", with
+the recently posted variation titled "tpm-buf: Memory-safe allocations".
+Additional API cleanups were made to the tpm-buf code to better support
+standalone reuse.
+
+Version note: This series extracts the TPM driver-related changes from
+the Secure Launch v16 series as a standalone patchset. Because it
+incorporates the Sashiko review changes, it is now designated v2. A
+notable update is the replacement of patch #9 ("tpm-buf: Implement
+managed allocations") with the recently posted variant titled "tpm-buf:
+Memory-safe allocations." Additional API cleanups were also made to the
+tpm-buf code to improve its suitability for standalone reuse.
+
+Series based off: torvalds/master
+dc59e4fea9d83f03bad6bddf3fa2e52491777482
+
+Thanks,
+Ross Philipson and Daniel P. Smith
+
+Changelog:
+
+- Replaced "tpm-buf: Implement managed allocations" with "tpm-buf:
+  Memory-safe allocations": New implementation uses fixed-size
+  kzalloc(TPM_BUFSIZE) (or stack-backed) buffers with explicit capacity
+  tracking, strict __tpm_buf_size_invariant checks, improved TPM2B
+  handling, and validation during init/reset/append to prevent overflows,
+  size mismatches, and potential memory corruption issues associated with
+  the prior __get_free_page based approach.
+
+- Updated "tpm-buf: Merge TPM_BUF_BOUNDARY_ERROR and TPM_BUF_OVERFLOW":
+  Simplifies the error flag handling in the buffer abstraction by
+  combining related overflow/boundary conditions into a single, clearer
+  error state.
+
+- Updated "tpm-buf: Remove chip parameter from tpm_buf_append_handle()":
+  Makes the handle-append helper more generic and independent of struct
+  tpm_chip, improving its suitability for standalone reuse outside the
+  core TPM driver.
+
+- Updated "tpm-buf: Add TPM buffer support header for standalone reuse":
+  Refreshed to build on top of the new memory-safe implementation, the
+  merged error codes, and the chip-parameter removal for a cleaner, more
+  reusable public API and header.
+
+- Header reorganization patches ("tpm: Initial step to reorganize TPM
+  public headers", moves of TPM1/TPM2/common/platform definitions to
+  command/ptp headers, and removal of main TPM header from event log
+  header) are retained with the same overall structure and intent; they
+  benefit from the refined tpm-buf code and minor consistency adjustments.
+
+Alec Brown (1):
+  tpm: Remove main TPM header from TPM event log header
+
+Jarkko Sakkinen (3):
+  tpm-buf: Merge TPM_BUF_BOUNDARY_ERROR and TPM_BUF_OVERFLOW
+  tpm-buf: Remove chip parameter from tpm_buf_append_handle()
+  tpm-buf: Memory-safe allocations
+
+Ross Philipson (6):
+  tpm: Initial step to reorganize TPM public headers
+  tpm: Move TPM1 specific definitions to the command header
+  tpm: Move TPM2 specific definitions to the command header
+  tpm: Move TPM common base definitions to the command header
+  tpm: Move platform specific definitions to the new PTP header
+  tpm-buf: Add TPM buffer support header for standalone reuse
+
+ drivers/char/tpm/tpm-buf.c                | 145 +++---
+ drivers/char/tpm/tpm-sysfs.c              |  26 +-
+ drivers/char/tpm/tpm.h                    | 180 --------
+ drivers/char/tpm/tpm1-cmd.c               | 180 ++++----
+ drivers/char/tpm/tpm2-cmd.c               | 321 ++++++--------
+ drivers/char/tpm/tpm2-sessions.c          | 164 ++++---
+ drivers/char/tpm/tpm2-space.c             |  57 +--
+ drivers/char/tpm/tpm_tis_core.h           |  64 +--
+ drivers/char/tpm/tpm_vtpm_proxy.c         |  30 +-
+ include/keys/trusted_tpm.h                |   1 -
+ include/linux/tpm.h                       | 230 +---------
+ include/linux/tpm_buf.h                   |  60 +++
+ include/linux/tpm_command.h               | 518 +++++++++++++++++++++-
+ include/linux/tpm_eventlog.h              |   2 +-
+ include/linux/tpm_ptp.h                   | 133 ++++++
+ security/keys/trusted-keys/trusted_tpm1.c |  45 +-
+ security/keys/trusted-keys/trusted_tpm2.c | 166 +++----
+ 17 files changed, 1237 insertions(+), 1085 deletions(-)
+ create mode 100644 include/linux/tpm_buf.h
+ create mode 100644 include/linux/tpm_ptp.h
+
+--
+2.54.0
+
