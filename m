@@ -1,63 +1,63 @@
-Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
+Received: from mail-pl1-f182.google.com (mail-pl1-f182.google.com [209.85.214.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DE573CBE6B
-	for <linux-efi@vger.kernel.org>; Sat, 11 Jul 2026 16:01:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F73F3C8737
+	for <linux-efi@vger.kernel.org>; Sat, 11 Jul 2026 16:01:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783785693; cv=none; b=k8IDMItsVLpoRzbXfBeNQPdPjJ7s1rwAJvcQ767T9/xb0JPFePXPcfdFDuDG66pyoTkIDPl41jN4FXFhZ6rC15ocC1XGBsFLUckPhzEnXDaSLqglLuie/9l8RlozKTYo41UBc5eWmvkUtujdz6FZ98whJEvtMeWiP94eoBmbC/I=
+	t=1783785695; cv=none; b=XPdrHpqzZG4MG664MaGJHvuafwWRlTWo1VGpjyVw2N2KASJ+9ZBwNLrOmE5oqJxc4GKNhq1/TDm+GQDqxaYTWkVAINSzcdmwhFTlX/1bU3f8dBYrt97D6gG4LQEH5w6DCJzPm3fwI2WrmU7xkT3XUfMSaut6fa7HKg/sYRW2Tpc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783785693; c=relaxed/simple;
-	bh=IKmtT9Cq3h0iSyz5OU+oULBN9QjQwnAFo0SgsEd/FNw=;
+	s=arc-20240116; t=1783785695; c=relaxed/simple;
+	bh=SWTmQxbm+O3CiuFQm/Zj3X9aRzkg0EYTJlhP8g+50ZE=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=fAM07vSFxcRkuiuutDei2VBaC1iI75YEsvIrrJm1gLzojPlKrsayUVpPilrnmBltoktUKiGz0Ju5wKgScbr9VcV5YhicBBRzaV6fNLqtRfBqznUTrjsgI1uPxuG8zKaUiJ+YrvGWnQK8bMpMz3zCyifbN+x3PplOrmQm7pvq+jU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=sU7lOGiY; arc=none smtp.client-ip=209.85.210.171
+	 MIME-Version; b=fcVaRm4OilFRaUNpW163GbRit61oOXflH7DfXTCfT16AFs4c3BySXRsSTjVOZseyu0oVXN1+QnNL+hE0OrF4Wht3HpIFXLY5TT/EOlSKyU3WIljW33MEhYHBqFDaFGgt9HAAakbHSA4FgWOHJ1ocGqZuIhdOdS7UkYXLW9CWN08=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=g8t864WG; arc=none smtp.client-ip=209.85.214.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sU7lOGiY"
-Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-8487088510aso1867798b3a.0
-        for <linux-efi@vger.kernel.org>; Sat, 11 Jul 2026 09:01:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="g8t864WG"
+Received: by mail-pl1-f182.google.com with SMTP id d9443c01a7336-2c7cfa17fedso26790425ad.3
+        for <linux-efi@vger.kernel.org>; Sat, 11 Jul 2026 09:01:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1783785691; x=1784390491; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1783785694; x=1784390494; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=cQmIuXUkp3rrMVH26ZTOPg/E2zd6zUa3wMeq4GmUl8U=;
-        b=sU7lOGiYCEn+vZz+m7AlLz/9PaJBqIaw39uDkYdKHj91RkHMneXRw59+r5iRGlFsPC
-         l3o1PkfuudH2Otilf3PzKW51gb7P+lrfpAVTYPqr9IcUC55rN+Gp/eWLX+X7JXosdGek
-         rHV77NuW0lCseauKaQGnniivSHYbemtpz2c+QiknMlmY4i7iIm7pFatbCl9a35tACEm+
-         rFwpxlOQ4i9qMUPDLQazWMkS+gqXwik40joCFUeP6DDxy2xgp/UzGe8mU0HqlGvzBpsv
-         e43IS2IQhcSYskhHsRDBxoOZdoNF1y2dTBcnW9V3jSSbdv2meXc7wmoxa1+ILOpXZ3Cw
-         cqqg==
+        bh=h8PdlfVA45gq99DCqpKxVhIV4ifAok/KN5VEGME0LcA=;
+        b=g8t864WGg/9SeihPvThSlxO6aPm1JKP+lZV5uqf4SxOGm5cSaLmszjo+qTr6W6Mk4i
+         i14kRKNOH832Rpk8M5BB5PtKC7VLJXcSEJRneJywRQLIH7R+XR6FXOCnazpwyzxwdZ/T
+         gnRXjR2omx7pImL8ZekUjMxErBXvDvNakGBHgedgE8h3Z7I6OZjO083vHKk4ULtAcUt5
+         kCG5ZtX94y7CNTHg+Rdj6YLPfn0RFSmlQ7bbXidPQJxboDwLUtlaijiOD12HagX4tLKe
+         njOr4SDL/GGhi9XkSB3VneKsmO+ngrX2jI9elAcoD6bzhp4TAGfNTFDyTAjci6Myf+dn
+         byUg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783785691; x=1784390491;
+        d=1e100.net; s=20251104; t=1783785694; x=1784390494;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=cQmIuXUkp3rrMVH26ZTOPg/E2zd6zUa3wMeq4GmUl8U=;
-        b=dUh/NOxJMlnhkCNpi+HDvI+I5KHOlXRBijwS1QI33AVgzm2yIyKu4djrpXQEo3Magp
-         QBlZMmk1ph3K2Lvv3Yo1teei8Ckvd9Ux7w1ttkDOe2otv1wxJ6TqPqyUJ2/4a2WEKL7B
-         TQSNCeqHMFwBVq2Qu/tDgTV+ny12Ub8Y1NAFQhrpxAH7Phcc0FQigXqikeWk7Ssfpiif
-         CKTEfZCA5aso+ytG8w8nm4oyhy3ECCkunMuBCYJ9ZvJqXsqnhsoElA3i6jTUAwvW3S/2
-         pEuXKMosdpH4sE2efhYEPF8Z9LwC9LPpDRxbGx7XUavPr+EJ7/nubNKUk6L72BHF0Z/m
-         IotA==
-X-Forwarded-Encrypted: i=1; AHgh+Rps0sObX3M6uKCnLkcbH83F1LiToFsmijhwWKaLlwIXI0vB599Iwzs01RrzfqPJlo9k24iPDIRR170=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyWS27Ke1HatfH2f9AzWOwrOmZkzBCJHo3xCbeszKmj+9AbkJF9
-	wG7e2p7u2pw68AKVFSW7KRXakPBAY64ClOrEi+VPG6BOc1oCrExQyvx9
-X-Gm-Gg: AfdE7cnS3Oes9HidQBXRQJK9moSjMoOlHxcOjFjMywnEz2XMPSovESI9MzHIkAb9znq
-	97SWRfefzaHGKgr1bC1qFjpS060rCRASY3jxC97gmw6Psih5qkGDAYvYfR2Lqk1J+NLWGlnvopx
-	NfIb+W3UetPoWDQF5AHGlfIpmMBVBdvqjZuEsGDAu7wnkPgC6QJVzJK6E+ASdBFmFiHebzzUhtK
-	IwgHjHRxPaz7pjAyx4dtSoI8Xl9SBZsdy/toZE4JrFGpKwJHqmJdqdxzwF9vsy64oxtiQh9vUkc
-	+pKqvAoLz+VrS15nu+Gp7uwhZiPrUi6Dy86jahgMHQXaL+SpPgAG87qnxV3QmiztatlksEl6RBE
-	siol8TyBqrE7iCOKXPuwl2VogUZ2gwjb4uLpBMzfPKNKfeANnzyFaYL1BORX0TlelEWkLjyPSt3
-	8Bf5rr31VZ0GsPlWDPtmD6
-X-Received: by 2002:a05:6a20:1f28:b0:3bf:b182:94e with SMTP id adf61e73a8af0-3c110a12782mr3463511637.5.1783785690620;
-        Sat, 11 Jul 2026 09:01:30 -0700 (PDT)
+        bh=h8PdlfVA45gq99DCqpKxVhIV4ifAok/KN5VEGME0LcA=;
+        b=Tc+aZzt7t6lTJz1ADL9ETUOZqQIxcK+Wtnl2oDqn8P/FqNmHwPwPCub00uNPtXjgL3
+         iBRTWcUJRkiy2SSsU6Lh1GIsIWVzFvghWwgzqnJ7wCZcCvfiRWs8CK6XL9wPJgwFoE6Y
+         jycIAGaxrGdoxV7ILmFgogwXw5kXDlhXfF1mN8eTDOMff5ML6Hg4rI6Sjpzndo7DDq26
+         3Bpa3PfdzPuG++/v3QdvMYi5AR8xJlCq7EazQ/zy0eT8QpxmP/dnQVQgAuX8uV51PZ/l
+         0b82SWNFabrAT+n/1JEY+D4OrQFSUb33wem6+pBux+SVIUuO+plAAeRRWd4SzmRv52Q8
+         RmcQ==
+X-Forwarded-Encrypted: i=1; AHgh+Rpd2TFHD5mv3JMMIrvFyxCfAzxB2MjbCUSM3eOoVSaoBw11KnwFB1vtvEdT4c66/6/22VxuOUAFp3I=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxpbjGSd1F9hLnsxV8m34aXAWz6ZPXmeG2NpcT/EZqUw5N8VYao
+	U4LUp2iF+1XxpH+SnUIkaxl9nJg/+hyKdnsgIDc+2JYWWdzgZNjm8EbL
+X-Gm-Gg: AfdE7clnFYLPeI+rUejc0FgJJcyxVHfKM3WMGfLimItNn9HEpzhWAONSG+L4jPmtftv
+	E90DPrNxlDMdUyEbUTxZ/8L6LJx7KecR7Bc3uEgN8b6eLoGT8GgxzgshCKzlaBTWpRJRJhHCAEK
+	KUlUda0J61YbzHrswG4gDFw1PWtwogDJW2EuOaSNqyJcBcWBxY2tUVrLBpxGlB0xtwDhRpt4RJv
+	abbXFarFnvbXFPyie2t1bVBjyDgzR0+3PGzGDdZwf6jVwdEhwycg7ylmTEcE99j/w/3S/CJgJT4
+	sH2xcALNDGWEBLzaTpgYR34drQUm6XYwpw+lo+aQQ3F2rMpW8uHiZCfQ+gQTAwafb5BlYMD7f5X
+	2LhiqQ4y/IK6LgcEWWZW42tzrs2fg6KoojT0E54qpcsjHc9M6UQYyQmrmW+ZOFM6j0dpXvHRZ8B
+	q1kY3UUBogI8B02JbqrS3L
+X-Received: by 2002:a17:90a:da83:b0:384:d509:7274 with SMTP id 98e67ed59e1d1-38dc75f63bemr3176054a91.15.1783785694020;
+        Sat, 11 Jul 2026 09:01:34 -0700 (PDT)
 Received: from titan.lan ([2603:8000:df01:38f7:255c:dd03:30a6:e57b])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-13b8deb2a21sm7919739c88.3.2026.07.11.09.01.28
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3118ee6091dsm54498068eec.14.2026.07.11.09.01.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 11 Jul 2026 09:01:29 -0700 (PDT)
+        Sat, 11 Jul 2026 09:01:32 -0700 (PDT)
 From: Ross Philipson <ross.philipson@gmail.com>
 To: linux-kernel@vger.kernel.org,
 	x86@kernel.org,
@@ -84,9 +84,9 @@ Cc: ross.philipson@gmail.com,
 	daniel.kiper@oracle.com,
 	andrew.cooper3@citrix.com,
 	trenchboot-devel@googlegroups.com
-Subject: [PATCH v2 05/10] tpm: Move platform specific definitions to the new PTP header
-Date: Sat, 11 Jul 2026 09:01:05 -0700
-Message-ID: <20260711160110.267780-6-ross.philipson@gmail.com>
+Subject: [PATCH v2 06/10] tpm: Remove main TPM header from TPM event log header
+Date: Sat, 11 Jul 2026 09:01:06 -0700
+Message-ID: <20260711160110.267780-7-ross.philipson@gmail.com>
 X-Mailer: git-send-email 2.55.0
 In-Reply-To: <20260711160110.267780-1-ross.philipson@gmail.com>
 References: <20260711160110.267780-1-ross.philipson@gmail.com>
@@ -98,247 +98,30 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-These are definitions for TPM 2.0 interface and interactions with
-the platform as defined in the TCG specification:
+From: Alec Brown <alec.r.brown@oracle.com>
 
-These definitions are located here in a separate file to avoid conflicts
-with vendor specific TIS/FIFO definition (e.g. STMicroelectronics,
-Infineon Technologies, etc). This allows the TCG defined TIS/FIFO
-interface to be in a public header while the former chip specific
-implementations contain their own definitions. TPM 1.x family chips
-that adhere to the TCG specifications use the TIS/FIFO interface as
-defined here.
+Allow the TPM event log functionality to be used without including
+the main TPM driver definitions.
 
-TCG PC Client Platform TPM Profile (PTP) Specification
- - https://trustedcomputinggroup.org/resource/pc-client-platform-tpm-profile-ptp-specification/
-
-Co-developed-by: Daniel P. Smith <dpsmith@apertussolutions.com>
-Signed-off-by: Daniel P. Smith <dpsmith@apertussolutions.com>
-Co-developed-by: Alec Brown <alec.r.brown@oracle.com>
 Signed-off-by: Alec Brown <alec.r.brown@oracle.com>
 Signed-off-by: Ross Philipson <ross.philipson@gmail.com>
 ---
- drivers/char/tpm/tpm_tis_core.h |  64 +--------------
- include/linux/tpm_ptp.h         | 133 ++++++++++++++++++++++++++++++++
- 2 files changed, 134 insertions(+), 63 deletions(-)
- create mode 100644 include/linux/tpm_ptp.h
+ include/linux/tpm_eventlog.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/char/tpm/tpm_tis_core.h b/drivers/char/tpm/tpm_tis_core.h
-index aa6d78898ef3..d737b3d67411 100644
---- a/drivers/char/tpm/tpm_tis_core.h
-+++ b/drivers/char/tpm/tpm_tis_core.h
-@@ -19,71 +19,9 @@
- #ifndef __TPM_TIS_CORE_H__
- #define __TPM_TIS_CORE_H__
+diff --git a/include/linux/tpm_eventlog.h b/include/linux/tpm_eventlog.h
+index aff8ea2fa98e..40fe92eb7deb 100644
+--- a/include/linux/tpm_eventlog.h
++++ b/include/linux/tpm_eventlog.h
+@@ -3,7 +3,7 @@
+ #ifndef __LINUX_TPM_EVENTLOG_H__
+ #define __LINUX_TPM_EVENTLOG_H__
  
-+#include <linux/tpm_ptp.h>
- #include "tpm.h"
+-#include <linux/tpm.h>
++#include <linux/tpm_command.h>
  
--enum tis_access {
--	TPM_ACCESS_VALID = 0x80,
--	TPM_ACCESS_ACTIVE_LOCALITY = 0x20,
--	TPM_ACCESS_REQUEST_PENDING = 0x04,
--	TPM_ACCESS_REQUEST_USE = 0x02,
--};
--
--enum tis_status {
--	TPM_STS_VALID = 0x80,
--	TPM_STS_COMMAND_READY = 0x40,
--	TPM_STS_GO = 0x20,
--	TPM_STS_DATA_AVAIL = 0x10,
--	TPM_STS_DATA_EXPECT = 0x08,
--	TPM_STS_RESPONSE_RETRY = 0x02,
--	TPM_STS_READ_ZERO = 0x23, /* bits that must be zero on read */
--};
--
--enum tis_int_flags {
--	TPM_GLOBAL_INT_ENABLE = 0x80000000,
--	TPM_INTF_BURST_COUNT_STATIC = 0x100,
--	TPM_INTF_CMD_READY_INT = 0x080,
--	TPM_INTF_INT_EDGE_FALLING = 0x040,
--	TPM_INTF_INT_EDGE_RISING = 0x020,
--	TPM_INTF_INT_LEVEL_LOW = 0x010,
--	TPM_INTF_INT_LEVEL_HIGH = 0x008,
--	TPM_INTF_LOCALITY_CHANGE_INT = 0x004,
--	TPM_INTF_STS_VALID_INT = 0x002,
--	TPM_INTF_DATA_AVAIL_INT = 0x001,
--};
--
--enum tis_defaults {
--	TIS_MEM_LEN = 0x5000,
--	TIS_SHORT_TIMEOUT = 750,	/* ms */
--	TIS_LONG_TIMEOUT = 4000,	/* 4 secs */
--	TIS_TIMEOUT_MIN_ATML = 14700,	/* usecs */
--	TIS_TIMEOUT_MAX_ATML = 15000,	/* usecs */
--};
--
--/* Some timeout values are needed before it is known whether the chip is
-- * TPM 1.0 or TPM 2.0.
-- */
--#define TIS_TIMEOUT_A_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_A)
--#define TIS_TIMEOUT_B_MAX	max_t(int, TIS_LONG_TIMEOUT, TPM2_TIMEOUT_B)
--#define TIS_TIMEOUT_C_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_C)
--#define TIS_TIMEOUT_D_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_D)
--
--#define	TPM_ACCESS(l)			(0x0000 | ((l) << 12))
--#define	TPM_INT_ENABLE(l)		(0x0008 | ((l) << 12))
--#define	TPM_INT_VECTOR(l)		(0x000C | ((l) << 12))
--#define	TPM_INT_STATUS(l)		(0x0010 | ((l) << 12))
--#define	TPM_INTF_CAPS(l)		(0x0014 | ((l) << 12))
--#define	TPM_STS(l)			(0x0018 | ((l) << 12))
--#define	TPM_STS3(l)			(0x001b | ((l) << 12))
--#define	TPM_DATA_FIFO(l)		(0x0024 | ((l) << 12))
--
--#define	TPM_DID_VID(l)			(0x0F00 | ((l) << 12))
--#define	TPM_RID(l)			(0x0F04 | ((l) << 12))
--
--#define LPC_CNTRL_OFFSET		0x84
--#define LPC_CLKRUN_EN			(1 << 2)
--#define INTEL_LEGACY_BLK_BASE_ADDR	0xFED08000
--#define ILB_REMAP_SIZE			0x100
--
- enum tpm_tis_flags {
- 	TPM_TIS_ITPM_WORKAROUND		= 0,
- 	TPM_TIS_INVALID_STATUS		= 1,
-diff --git a/include/linux/tpm_ptp.h b/include/linux/tpm_ptp.h
-new file mode 100644
-index 000000000000..e80ed810a269
---- /dev/null
-+++ b/include/linux/tpm_ptp.h
-@@ -0,0 +1,133 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * Following copyright information was take from the original file
-+ * <drivers/char/tpm/tpm_tis_core.h> where the definitions were moved
-+ * from:
-+ *
-+ * Copyright (C) 2005, 2006 IBM Corporation
-+ * Copyright (C) 2014, 2015 Intel Corporation
-+ *
-+ * Authors:
-+ * Leendert van Doorn <leendert@watson.ibm.com>
-+ * Kylene Hall <kjhall@us.ibm.com>
-+ *
-+ * Maintained by: <tpmdd-devel@lists.sourceforge.net>
-+ *
-+ * Device driver for TCG/TCPA TPM (trusted platform module).
-+ * Specifications at www.trustedcomputinggroup.org
-+ *
-+ * This device driver implements the TPM interface as defined in
-+ * the TCG TPM Interface Spec version 1.2, revision 1.0.
-+ */
-+
-+#ifndef __LINUX_TPM_PTP_H__
-+#define __LINUX_TPM_PTP_H__
-+
-+/*
-+ * TCG PC Client Platform TPM Profile (PTP) Specification
-+ * https://trustedcomputinggroup.org/resource/pc-client-platform-tpm-profile-ptp-specification/
-+ */
-+
-+/* TIS/FIFO macros and definitions */
-+
-+enum tis_access {
-+	TPM_ACCESS_VALID		= 0x80,
-+	TPM_ACCESS_ACTIVE_LOCALITY	= 0x20,	/* (R) */
-+	TPM_ACCESS_RELINQUISH_LOCALITY	= 0x20, /* (W) */
-+	TPM_ACCESS_REQUEST_PENDING	= 0x04,	/* (W) */
-+	TPM_ACCESS_REQUEST_USE		= 0x02,	/* (W) */
-+};
-+
-+enum tis_status {
-+	TPM_STS_VALID		= 0x80, /* (R) */
-+	TPM_STS_COMMAND_READY	= 0x40, /* (R) */
-+	TPM_STS_DATA_AVAIL	= 0x10, /* (R) */
-+	TPM_STS_DATA_EXPECT	= 0x08, /* (R) */
-+	TPM_STS_GO		= 0x20, /* (W) */
-+	TPM_STS_RESPONSE_RETRY	= 0x02, /* (R) */
-+	TPM_STS_READ_ZERO	= 0x23, /* bits that must be zero on read */
-+};
-+
-+enum tis_int_flags {
-+	TPM_GLOBAL_INT_ENABLE		= 0x80000000,
-+	TPM_INTF_BURST_COUNT_STATIC	= 0x100,
-+	TPM_INTF_CMD_READY_INT		= 0x080,
-+	TPM_INTF_INT_EDGE_FALLING	= 0x040,
-+	TPM_INTF_INT_EDGE_RISING	= 0x020,
-+	TPM_INTF_INT_LEVEL_LOW		= 0x010,
-+	TPM_INTF_INT_LEVEL_HIGH		= 0x008,
-+	TPM_INTF_LOCALITY_CHANGE_INT	= 0x004,
-+	TPM_INTF_STS_VALID_INT		= 0x002,
-+	TPM_INTF_DATA_AVAIL_INT		= 0x001,
-+};
-+
-+enum tis_defaults {
-+	TIS_MEM_LEN		= 0x5000,
-+	TIS_SHORT_TIMEOUT	= 750,   /* ms */
-+	TIS_LONG_TIMEOUT	= 4000,  /* 4 secs */
-+	TIS_TIMEOUT_MIN_ATML	= 14700, /* usecs */
-+	TIS_TIMEOUT_MAX_ATML	= 15000, /* usecs */
-+};
-+
-+#define TIS_MEM_X86_LPC_BASE		0xFED40000
-+#define INTEL_LEGACY_BLK_BASE_ADDR	0xFED08000
-+
-+enum tis_x86_defaults {
-+	TIS_MEM_X86_LEN			= 0x5000,
-+	ILB_REMAP_SIZE			= 0x100,
-+	LPC_CNTRL_OFFSET		= 0x84,
-+	LPC_CLKRUN_EN			= (1 << 2),
-+};
-+
-+/*
-+ * Some timeout values are needed before it is known whether the chip is
-+ * TPM 1.0 or TPM 2.0.
-+ */
-+#define TIS_TIMEOUT_A_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_A)
-+#define TIS_TIMEOUT_B_MAX	max_t(int, TIS_LONG_TIMEOUT, TPM2_TIMEOUT_B)
-+#define TIS_TIMEOUT_C_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_C)
-+#define TIS_TIMEOUT_D_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_D)
-+
-+#define	TPM_ACCESS(l)			(0x0000 | ((l) << 12))
-+#define	TPM_INT_ENABLE(l)		(0x0008 | ((l) << 12))
-+#define	TPM_INT_VECTOR(l)		(0x000C | ((l) << 12))
-+#define	TPM_INT_STATUS(l)		(0x0010 | ((l) << 12))
-+#define	TPM_INTF_CAPS(l)		(0x0014 | ((l) << 12))
-+#define	TPM_STS(l)			(0x0018 | ((l) << 12))
-+#define	TPM_STS3(l)			(0x001b | ((l) << 12))
-+#define	TPM_DATA_FIFO(l)		(0x0024 | ((l) << 12))
-+#define	TPM_INTF_ID(l)			(0x0030 | ((l) << 12))
-+
-+#define	TPM_DID_VID(l)			(0x0F00 | ((l) << 12))
-+#define	TPM_RID(l)			(0x0F04 | ((l) << 12))
-+
-+/* TPM HW Interface and Capabilities */
-+#define TPM_TIS_INTF_ACTIVE		0x00
-+#define TPM_CRB_INTF_ACTIVE		0x01
-+
-+#define TPM_INTID_INTERFACE_TYPE	GENMASK(3, 0)
-+#define TPM_INTID_INTERFACE_VERSION	GENMASK(7, 4)
-+#define TPM_INTID_CAP_LOCALITY		BIT(8)
-+#define TPM_INTID_CAP_TIS		BIT(13)
-+#define TPM_INTID_CAP_CRB		BIT(14)
-+#define TPM_INTID_CAP_IF_RES		GENMASK(16, 15)
-+#define TPM_INTID_INTERFACE_SELECTOR	GENMASK(18, 17)
-+#define TPM_INTID_INTF_SEL_LOCK		BIT(19)
-+
-+#define TPM_TIS_INTF_12			0x00
-+#define TPM_TIS_INTF_13			0x02
-+#define TPM2_TIS_INTF_13		0x03
-+
-+#define TPM_INTF_DATA_AVAIL_INT_SUPPORT		BIT(0)
-+#define TPM_INTF_STS_VALID_INT_SUPPORT		BIT(1)
-+#define TPM_INTF_LOCALITY_CHANGE_INT_SUPPORT	BIT(2)
-+#define TPM_INTF_INTERRUPT_LEVEL_HIGH		BIT(3)
-+#define TPM_INTF_INTERRUPT_LEVEL_LOW		BIT(4)
-+#define TPM_INTF_INTERRUPT_EDGE_RISING		BIT(5)
-+#define TPM_INTF_INTERRUPT_EDGE_FALLING		BIT(6)
-+#define TPM_INTF_COMMAND_READY_INT_SUPPORT	BIT(7)
-+#define TPM_INTF_BURST_COUNT_STATIC		BIT(8)
-+#define TPM_INTF_DATA_TRANSFER_SIZE_SUPPORT	GENMASK(10, 9)
-+#define TPM_INTF_INTERFACE_VERSION		GENMASK(30, 28)
-+
-+#endif
+ #define TCG_EVENT_NAME_LEN_MAX	255
+ #define MAX_TEXT_EVENT		1000	/* Max event string length */
 -- 
 2.55.0
 
