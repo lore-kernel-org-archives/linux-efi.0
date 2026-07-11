@@ -1,63 +1,63 @@
-Received: from mail-pj1-f46.google.com (mail-pj1-f46.google.com [209.85.216.46])
+Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71DAF3CAE8D
-	for <linux-efi@vger.kernel.org>; Sat, 11 Jul 2026 16:01:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DE573CBE6B
+	for <linux-efi@vger.kernel.org>; Sat, 11 Jul 2026 16:01:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783785689; cv=none; b=jc4lKEzWyrb2jQQXkv1uQ0gxEzOw+Ae29c/y+qnkcKGn3X0zQE4A6kR+xRIb/nXgXgHe/YYwJeQTJVFtuXER310rETmEa+VSZBjruJ7IcaEFBfzlILcO/DcmNDwWcg8aKBkL09dMLn3b9E1gyw0d+VTLTMsguwIb784C0uOyoJ0=
+	t=1783785693; cv=none; b=k8IDMItsVLpoRzbXfBeNQPdPjJ7s1rwAJvcQ767T9/xb0JPFePXPcfdFDuDG66pyoTkIDPl41jN4FXFhZ6rC15ocC1XGBsFLUckPhzEnXDaSLqglLuie/9l8RlozKTYo41UBc5eWmvkUtujdz6FZ98whJEvtMeWiP94eoBmbC/I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783785689; c=relaxed/simple;
-	bh=WAHXIWt/28rU2ug/gCEyKlRd6r6MFxAWKp1tyCUWz6w=;
+	s=arc-20240116; t=1783785693; c=relaxed/simple;
+	bh=IKmtT9Cq3h0iSyz5OU+oULBN9QjQwnAFo0SgsEd/FNw=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ZIPNfNanwZJar9pSlaGdnSHkZ6hol6Dj3pwuqvbMIHKOEHoGpkxBo6iHiLYLOzR+To1Hm/78zzh1RnwJ7WNldmWvwGjRNFDlzJLH0etsQ2zpv3B538B9yMdr5GEqYjUuRqSJK+O9tsciy7ZBG4dfrW6ea/xMfV9NWnOU+mqL4VQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=f8jtevj0; arc=none smtp.client-ip=209.85.216.46
+	 MIME-Version; b=fAM07vSFxcRkuiuutDei2VBaC1iI75YEsvIrrJm1gLzojPlKrsayUVpPilrnmBltoktUKiGz0Ju5wKgScbr9VcV5YhicBBRzaV6fNLqtRfBqznUTrjsgI1uPxuG8zKaUiJ+YrvGWnQK8bMpMz3zCyifbN+x3PplOrmQm7pvq+jU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=sU7lOGiY; arc=none smtp.client-ip=209.85.210.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="f8jtevj0"
-Received: by mail-pj1-f46.google.com with SMTP id 98e67ed59e1d1-382a3fe0d28so1894024a91.0
-        for <linux-efi@vger.kernel.org>; Sat, 11 Jul 2026 09:01:27 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sU7lOGiY"
+Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-8487088510aso1867798b3a.0
+        for <linux-efi@vger.kernel.org>; Sat, 11 Jul 2026 09:01:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1783785687; x=1784390487; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1783785691; x=1784390491; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=EatEz12Vd+2xKsXS+ldmzV7vhTKPvC5kQIMvkNXC19w=;
-        b=f8jtevj0J9ZaC1hzkGbg8CdL5PhA45UKMQ3DNyfQ43S6ls1Gh1Og+3nbhx7zRj2mNi
-         u9RM82lZv9n0GkAoNJmGzm4DFv8P1aavxiEeuFBLwNBL0gctmZs/FCFkzhE9UzH9HrPE
-         jMoinfycvDFpC4xndf2sqSghl7GOnddVdQrYLHv1d8JgQWo7iA1U+hyu75+w773siWEk
-         8QgNwoJSn1hXYoQSbGRZ46mYetGs+N1TV/GCt4r7ENznCCfFNF5AwPofiwj/vWMx2RlY
-         6eZcnlWkvUa7LnmQ3hcicCQVhq5FyKeNDsH7/tq4rchSFSMSlfqpDZWwsbjVsb0l4RJo
-         EljQ==
+        bh=cQmIuXUkp3rrMVH26ZTOPg/E2zd6zUa3wMeq4GmUl8U=;
+        b=sU7lOGiYCEn+vZz+m7AlLz/9PaJBqIaw39uDkYdKHj91RkHMneXRw59+r5iRGlFsPC
+         l3o1PkfuudH2Otilf3PzKW51gb7P+lrfpAVTYPqr9IcUC55rN+Gp/eWLX+X7JXosdGek
+         rHV77NuW0lCseauKaQGnniivSHYbemtpz2c+QiknMlmY4i7iIm7pFatbCl9a35tACEm+
+         rFwpxlOQ4i9qMUPDLQazWMkS+gqXwik40joCFUeP6DDxy2xgp/UzGe8mU0HqlGvzBpsv
+         e43IS2IQhcSYskhHsRDBxoOZdoNF1y2dTBcnW9V3jSSbdv2meXc7wmoxa1+ILOpXZ3Cw
+         cqqg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783785687; x=1784390487;
+        d=1e100.net; s=20251104; t=1783785691; x=1784390491;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=EatEz12Vd+2xKsXS+ldmzV7vhTKPvC5kQIMvkNXC19w=;
-        b=iWj0sJXmsPfexPy8V7FIq7+WNEWhx1J5YOYam6w7FCFdUDRADDdCkZSXVfb9DOoyiO
-         L+axqicHZf1EPBFBt7Xk1Ns40gv/5ij3A3rdraGm5q9H/8+MchKKZr5Pa8Kw/QCFwFvB
-         MROSAriszsqNL3ZlKxLZpt5YpERU6BauYyB1hleDAQLx2I9CYX7UZovQV5AO5/QKk+3z
-         biDhnOTMe32iYz8K0Q3TaZ/vVHK036GrR6RBaW4lfEWGqlZZBkbxU2o0fPPU5WsFHJk6
-         hCwLxeaxjkC/V91w/lu9ND6v1FOhWdg4HBlnmibjx+O1RfmCEkV6UGli/MxHyYwFAKLa
-         1ZEg==
-X-Forwarded-Encrypted: i=1; AHgh+RrWM21g4ZT6V4CmVwkahggdBjuS+2rTL3PTSkOaLVuhNznz3RgMcR7MKhn5ZPCS3qNKYfKjlNncB+M=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyPjmowHCj6DMGMEkAg+d4A0Vz7Po9ut2T4+bYw9I5yxE8SA9ZY
-	6RGvtSs6K+SR7zhOPYLbGBR9i/m+gMLl3lKJGqG4lXhg6KXRxUcu0XmK
-X-Gm-Gg: AfdE7cnoMbBhd0/FA3bFLXl/OeF9WmiY33zBFUzaVwLQ+sPBCZP/JpeZ0MVW6svKLYE
-	Gu/8vmzyPV9KmLIL6boG6H/tmOsJGwqc0zlku3o87hWXuYD7ek+JXZzKSPacmbpBEi5hkNA85YE
-	Y0EAoptRfV576xoKU8+1YEtaRWh07dwRxl57w3CC5kS2lW60AZ/u7OoJNS6yV4vR+ORqs8XMAxm
-	iW4DmLiQ3fmZY/dKecSCQ0tcqLx70t2S/FrjomaAGA6kShxJacOGsVakPcSu34PanZzveZmpd7v
-	VU5RVMVuHGzOrjL3e+iiwS7yF5d1EnASsiMvdKbHC8iaXvrYa50r5yDuqosD42vPvVQt2rG76iA
-	xOHfPtOYmYd/fz+c5rhP7OXVXw4sMjiQBFtsNxdgKRnRFAooYt8caoW9ecT7OdwHbF7tGQ4ayV0
-	DjP2joXFO252YS02tgefeA
-X-Received: by 2002:a17:90a:d408:b0:381:50ab:1594 with SMTP id 98e67ed59e1d1-38dc774d1fcmr3402700a91.27.1783785686817;
-        Sat, 11 Jul 2026 09:01:26 -0700 (PDT)
+        bh=cQmIuXUkp3rrMVH26ZTOPg/E2zd6zUa3wMeq4GmUl8U=;
+        b=dUh/NOxJMlnhkCNpi+HDvI+I5KHOlXRBijwS1QI33AVgzm2yIyKu4djrpXQEo3Magp
+         QBlZMmk1ph3K2Lvv3Yo1teei8Ckvd9Ux7w1ttkDOe2otv1wxJ6TqPqyUJ2/4a2WEKL7B
+         TQSNCeqHMFwBVq2Qu/tDgTV+ny12Ub8Y1NAFQhrpxAH7Phcc0FQigXqikeWk7Ssfpiif
+         CKTEfZCA5aso+ytG8w8nm4oyhy3ECCkunMuBCYJ9ZvJqXsqnhsoElA3i6jTUAwvW3S/2
+         pEuXKMosdpH4sE2efhYEPF8Z9LwC9LPpDRxbGx7XUavPr+EJ7/nubNKUk6L72BHF0Z/m
+         IotA==
+X-Forwarded-Encrypted: i=1; AHgh+Rps0sObX3M6uKCnLkcbH83F1LiToFsmijhwWKaLlwIXI0vB599Iwzs01RrzfqPJlo9k24iPDIRR170=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyWS27Ke1HatfH2f9AzWOwrOmZkzBCJHo3xCbeszKmj+9AbkJF9
+	wG7e2p7u2pw68AKVFSW7KRXakPBAY64ClOrEi+VPG6BOc1oCrExQyvx9
+X-Gm-Gg: AfdE7cnS3Oes9HidQBXRQJK9moSjMoOlHxcOjFjMywnEz2XMPSovESI9MzHIkAb9znq
+	97SWRfefzaHGKgr1bC1qFjpS060rCRASY3jxC97gmw6Psih5qkGDAYvYfR2Lqk1J+NLWGlnvopx
+	NfIb+W3UetPoWDQF5AHGlfIpmMBVBdvqjZuEsGDAu7wnkPgC6QJVzJK6E+ASdBFmFiHebzzUhtK
+	IwgHjHRxPaz7pjAyx4dtSoI8Xl9SBZsdy/toZE4JrFGpKwJHqmJdqdxzwF9vsy64oxtiQh9vUkc
+	+pKqvAoLz+VrS15nu+Gp7uwhZiPrUi6Dy86jahgMHQXaL+SpPgAG87qnxV3QmiztatlksEl6RBE
+	siol8TyBqrE7iCOKXPuwl2VogUZ2gwjb4uLpBMzfPKNKfeANnzyFaYL1BORX0TlelEWkLjyPSt3
+	8Bf5rr31VZ0GsPlWDPtmD6
+X-Received: by 2002:a05:6a20:1f28:b0:3bf:b182:94e with SMTP id adf61e73a8af0-3c110a12782mr3463511637.5.1783785690620;
+        Sat, 11 Jul 2026 09:01:30 -0700 (PDT)
 Received: from titan.lan ([2603:8000:df01:38f7:255c:dd03:30a6:e57b])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3118ee6091dsm54496968eec.14.2026.07.11.09.01.24
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-13b8deb2a21sm7919739c88.3.2026.07.11.09.01.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 11 Jul 2026 09:01:25 -0700 (PDT)
+        Sat, 11 Jul 2026 09:01:29 -0700 (PDT)
 From: Ross Philipson <ross.philipson@gmail.com>
 To: linux-kernel@vger.kernel.org,
 	x86@kernel.org,
@@ -84,9 +84,9 @@ Cc: ross.philipson@gmail.com,
 	daniel.kiper@oracle.com,
 	andrew.cooper3@citrix.com,
 	trenchboot-devel@googlegroups.com
-Subject: [PATCH v2 04/10] tpm: Move TPM common base definitions to the command header
-Date: Sat, 11 Jul 2026 09:01:04 -0700
-Message-ID: <20260711160110.267780-5-ross.philipson@gmail.com>
+Subject: [PATCH v2 05/10] tpm: Move platform specific definitions to the new PTP header
+Date: Sat, 11 Jul 2026 09:01:05 -0700
+Message-ID: <20260711160110.267780-6-ross.philipson@gmail.com>
 X-Mailer: git-send-email 2.55.0
 In-Reply-To: <20260711160110.267780-1-ross.philipson@gmail.com>
 References: <20260711160110.267780-1-ross.philipson@gmail.com>
@@ -98,9 +98,19 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-These are top level definitions shared by both TPM 1 and 2
-family chips. This includes core definitions like TPM localities,
-common crypto algorithm IDs, and the base TPM command header.
+These are definitions for TPM 2.0 interface and interactions with
+the platform as defined in the TCG specification:
+
+These definitions are located here in a separate file to avoid conflicts
+with vendor specific TIS/FIFO definition (e.g. STMicroelectronics,
+Infineon Technologies, etc). This allows the TCG defined TIS/FIFO
+interface to be in a public header while the former chip specific
+implementations contain their own definitions. TPM 1.x family chips
+that adhere to the TCG specifications use the TIS/FIFO interface as
+defined here.
+
+TCG PC Client Platform TPM Profile (PTP) Specification
+ - https://trustedcomputinggroup.org/resource/pc-client-platform-tpm-profile-ptp-specification/
 
 Co-developed-by: Daniel P. Smith <dpsmith@apertussolutions.com>
 Signed-off-by: Daniel P. Smith <dpsmith@apertussolutions.com>
@@ -108,218 +118,227 @@ Co-developed-by: Alec Brown <alec.r.brown@oracle.com>
 Signed-off-by: Alec Brown <alec.r.brown@oracle.com>
 Signed-off-by: Ross Philipson <ross.philipson@gmail.com>
 ---
- drivers/char/tpm/tpm.h      |  1 -
- include/linux/tpm.h         | 50 +-------------------
- include/linux/tpm_command.h | 91 +++++++++++++++++++++++++++++++++++++
- 3 files changed, 92 insertions(+), 50 deletions(-)
+ drivers/char/tpm/tpm_tis_core.h |  64 +--------------
+ include/linux/tpm_ptp.h         | 133 ++++++++++++++++++++++++++++++++
+ 2 files changed, 134 insertions(+), 63 deletions(-)
+ create mode 100644 include/linux/tpm_ptp.h
 
-diff --git a/drivers/char/tpm/tpm.h b/drivers/char/tpm/tpm.h
-index 680f89d9c9f9..fa554c5ad80b 100644
---- a/drivers/char/tpm/tpm.h
-+++ b/drivers/char/tpm/tpm.h
-@@ -33,7 +33,6 @@
- #endif
+diff --git a/drivers/char/tpm/tpm_tis_core.h b/drivers/char/tpm/tpm_tis_core.h
+index aa6d78898ef3..d737b3d67411 100644
+--- a/drivers/char/tpm/tpm_tis_core.h
++++ b/drivers/char/tpm/tpm_tis_core.h
+@@ -19,71 +19,9 @@
+ #ifndef __TPM_TIS_CORE_H__
+ #define __TPM_TIS_CORE_H__
  
- #define TPM_MINOR		224	/* officially assigned */
--#define TPM_BUFSIZE		4096
- #define TPM_NUM_DEVICES		65536
- #define TPM_RETRY		50
++#include <linux/tpm_ptp.h>
+ #include "tpm.h"
  
-diff --git a/include/linux/tpm.h b/include/linux/tpm.h
-index 8551b24c2bff..3630b2ea6aef 100644
---- a/include/linux/tpm.h
-+++ b/include/linux/tpm.h
-@@ -27,49 +27,12 @@
- 
- #include <linux/tpm_command.h>
- 
--#define TPM_DIGEST_SIZE 20	/* Max TPM v1.2 PCR size */
--
--#define TPM2_MAX_DIGEST_SIZE	SHA512_DIGEST_SIZE
--#define TPM2_MAX_PCR_BANKS	8
--
- struct tpm_chip;
- struct trusted_key_payload;
- struct trusted_key_options;
- /* opaque structure, holds auth session parameters like the session key */
- struct tpm2_auth;
- 
--/* if you add a new hash to this, increment TPM_MAX_HASHES below */
--enum tpm_algorithms {
--	TPM_ALG_ERROR		= 0x0000,
--	TPM_ALG_SHA1		= 0x0004,
--	TPM_ALG_AES		= 0x0006,
--	TPM_ALG_KEYEDHASH	= 0x0008,
--	TPM_ALG_SHA256		= 0x000B,
--	TPM_ALG_SHA384		= 0x000C,
--	TPM_ALG_SHA512		= 0x000D,
--	TPM_ALG_NULL		= 0x0010,
--	TPM_ALG_SM3_256		= 0x0012,
--	TPM_ALG_ECC		= 0x0023,
--	TPM_ALG_CFB		= 0x0043,
+-enum tis_access {
+-	TPM_ACCESS_VALID = 0x80,
+-	TPM_ACCESS_ACTIVE_LOCALITY = 0x20,
+-	TPM_ACCESS_REQUEST_PENDING = 0x04,
+-	TPM_ACCESS_REQUEST_USE = 0x02,
 -};
 -
--/*
-- * maximum number of hashing algorithms a TPM can have.  This is
-- * basically a count of every hash in tpm_algorithms above
+-enum tis_status {
+-	TPM_STS_VALID = 0x80,
+-	TPM_STS_COMMAND_READY = 0x40,
+-	TPM_STS_GO = 0x20,
+-	TPM_STS_DATA_AVAIL = 0x10,
+-	TPM_STS_DATA_EXPECT = 0x08,
+-	TPM_STS_RESPONSE_RETRY = 0x02,
+-	TPM_STS_READ_ZERO = 0x23, /* bits that must be zero on read */
+-};
+-
+-enum tis_int_flags {
+-	TPM_GLOBAL_INT_ENABLE = 0x80000000,
+-	TPM_INTF_BURST_COUNT_STATIC = 0x100,
+-	TPM_INTF_CMD_READY_INT = 0x080,
+-	TPM_INTF_INT_EDGE_FALLING = 0x040,
+-	TPM_INTF_INT_EDGE_RISING = 0x020,
+-	TPM_INTF_INT_LEVEL_LOW = 0x010,
+-	TPM_INTF_INT_LEVEL_HIGH = 0x008,
+-	TPM_INTF_LOCALITY_CHANGE_INT = 0x004,
+-	TPM_INTF_STS_VALID_INT = 0x002,
+-	TPM_INTF_DATA_AVAIL_INT = 0x001,
+-};
+-
+-enum tis_defaults {
+-	TIS_MEM_LEN = 0x5000,
+-	TIS_SHORT_TIMEOUT = 750,	/* ms */
+-	TIS_LONG_TIMEOUT = 4000,	/* 4 secs */
+-	TIS_TIMEOUT_MIN_ATML = 14700,	/* usecs */
+-	TIS_TIMEOUT_MAX_ATML = 15000,	/* usecs */
+-};
+-
+-/* Some timeout values are needed before it is known whether the chip is
+- * TPM 1.0 or TPM 2.0.
 - */
--#define TPM_MAX_HASHES	5
+-#define TIS_TIMEOUT_A_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_A)
+-#define TIS_TIMEOUT_B_MAX	max_t(int, TIS_LONG_TIMEOUT, TPM2_TIMEOUT_B)
+-#define TIS_TIMEOUT_C_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_C)
+-#define TIS_TIMEOUT_D_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_D)
 -
--struct tpm_digest {
--	u16 alg_id;
--	u8 digest[TPM2_MAX_DIGEST_SIZE];
--} __packed;
+-#define	TPM_ACCESS(l)			(0x0000 | ((l) << 12))
+-#define	TPM_INT_ENABLE(l)		(0x0008 | ((l) << 12))
+-#define	TPM_INT_VECTOR(l)		(0x000C | ((l) << 12))
+-#define	TPM_INT_STATUS(l)		(0x0010 | ((l) << 12))
+-#define	TPM_INTF_CAPS(l)		(0x0014 | ((l) << 12))
+-#define	TPM_STS(l)			(0x0018 | ((l) << 12))
+-#define	TPM_STS3(l)			(0x001b | ((l) << 12))
+-#define	TPM_DATA_FIFO(l)		(0x0024 | ((l) << 12))
 -
--struct tpm_bank_info {
--	u16 alg_id;
--	u16 digest_size;
--	u16 crypto_id;
--};
+-#define	TPM_DID_VID(l)			(0x0F00 | ((l) << 12))
+-#define	TPM_RID(l)			(0x0F04 | ((l) << 12))
 -
- enum TPM_OPS_FLAGS {
- 	TPM_OPS_AUTO_STARTUP = BIT(0),
- };
-@@ -127,7 +90,7 @@ struct tpm_chip_seqops {
- 	const struct seq_operations *seqops;
- };
- 
--/* fixed define for the curve we use which is NIST_P256 */
-+/* Fixed define for the curve we use which is NIST_P256 */
- #define EC_PT_SZ	32
- 
- /*
-@@ -209,8 +172,6 @@ struct tpm_chip {
- #endif
- };
- 
--#define TPM_HEADER_SIZE		10
+-#define LPC_CNTRL_OFFSET		0x84
+-#define LPC_CLKRUN_EN			(1 << 2)
+-#define INTEL_LEGACY_BLK_BASE_ADDR	0xFED08000
+-#define ILB_REMAP_SIZE			0x100
 -
- static inline enum tpm2_mso_type tpm2_handle_mso(u32 handle)
- {
- 	return handle >> 24;
-@@ -239,15 +200,6 @@ enum tpm_chip_flags {
- 
- #define to_tpm_chip(d) container_of(d, struct tpm_chip, dev)
- 
--struct tpm_header {
--	__be16 tag;
--	__be32 length;
--	union {
--		__be32 ordinal;
--		__be32 return_code;
--	};
--} __packed;
--
- enum tpm_buf_flags {
- 	/* the capacity exceeded: */
- 	TPM_BUF_OVERFLOW	= BIT(0),
-diff --git a/include/linux/tpm_command.h b/include/linux/tpm_command.h
-index 9dd903dd6b5c..fc446a1282e2 100644
---- a/include/linux/tpm_command.h
-+++ b/include/linux/tpm_command.h
-@@ -2,6 +2,8 @@
- #ifndef __LINUX_TPM_COMMAND_H__
- #define __LINUX_TPM_COMMAND_H__
- 
-+#include <crypto/sha2.h>
-+
- /*
-  * == TPM 1 Family Chips ==
-  *
-@@ -427,4 +429,93 @@ struct tpm2_context {
- 	__be16 blob_size;
- } __packed;
- 
+ enum tpm_tis_flags {
+ 	TPM_TIS_ITPM_WORKAROUND		= 0,
+ 	TPM_TIS_INVALID_STATUS		= 1,
+diff --git a/include/linux/tpm_ptp.h b/include/linux/tpm_ptp.h
+new file mode 100644
+index 000000000000..e80ed810a269
+--- /dev/null
++++ b/include/linux/tpm_ptp.h
+@@ -0,0 +1,133 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
 +/*
-+ * == TPM Common Defs ==
++ * Following copyright information was take from the original file
++ * <drivers/char/tpm/tpm_tis_core.h> where the definitions were moved
++ * from:
++ *
++ * Copyright (C) 2005, 2006 IBM Corporation
++ * Copyright (C) 2014, 2015 Intel Corporation
++ *
++ * Authors:
++ * Leendert van Doorn <leendert@watson.ibm.com>
++ * Kylene Hall <kjhall@us.ibm.com>
++ *
++ * Maintained by: <tpmdd-devel@lists.sourceforge.net>
++ *
++ * Device driver for TCG/TCPA TPM (trusted platform module).
++ * Specifications at www.trustedcomputinggroup.org
++ *
++ * This device driver implements the TPM interface as defined in
++ * the TCG TPM Interface Spec version 1.2, revision 1.0.
 + */
 +
-+#define TPM_DIGEST_SIZE		20	/* Max TPM v1.2 PCR size */
-+#define TPM_BUFSIZE		4096
++#ifndef __LINUX_TPM_PTP_H__
++#define __LINUX_TPM_PTP_H__
 +
 +/*
-+ * SHA-512 is, as of today, the largest digest in the TCG algorithm repository.
++ * TCG PC Client Platform TPM Profile (PTP) Specification
++ * https://trustedcomputinggroup.org/resource/pc-client-platform-tpm-profile-ptp-specification/
 + */
-+#define TPM2_MAX_DIGEST_SIZE	SHA512_DIGEST_SIZE
 +
-+/*
-+ * A TPM name digest i.e., TPMT_HA, is a concatenation of TPM_ALG_ID of the
-+ * name algorithm and hash of TPMT_PUBLIC.
-+ */
-+#define TPM2_MAX_NAME_SIZE	(TPM2_MAX_DIGEST_SIZE + 2)
++/* TIS/FIFO macros and definitions */
 +
-+/*
-+ * Fixed define for the size of a name.  This is actually HASHALG size
-+ * plus 2, so 32 for SHA256
-+ */
-+#define TPM2_NULL_NAME_SIZE	34
++enum tis_access {
++	TPM_ACCESS_VALID		= 0x80,
++	TPM_ACCESS_ACTIVE_LOCALITY	= 0x20,	/* (R) */
++	TPM_ACCESS_RELINQUISH_LOCALITY	= 0x20, /* (W) */
++	TPM_ACCESS_REQUEST_PENDING	= 0x04,	/* (W) */
++	TPM_ACCESS_REQUEST_USE		= 0x02,	/* (W) */
++};
 +
-+/*
-+ * The maximum number of PCR banks.
-+ */
-+#define TPM2_MAX_PCR_BANKS	8
++enum tis_status {
++	TPM_STS_VALID		= 0x80, /* (R) */
++	TPM_STS_COMMAND_READY	= 0x40, /* (R) */
++	TPM_STS_DATA_AVAIL	= 0x10, /* (R) */
++	TPM_STS_DATA_EXPECT	= 0x08, /* (R) */
++	TPM_STS_GO		= 0x20, /* (W) */
++	TPM_STS_RESPONSE_RETRY	= 0x02, /* (R) */
++	TPM_STS_READ_ZERO	= 0x23, /* bits that must be zero on read */
++};
 +
-+/* If you add a new hash to this, increment TPM_MAX_HASHES below */
-+enum tpm_algorithms {
-+	TPM_ALG_ERROR		= 0x0000,
-+	TPM_ALG_SHA1		= 0x0004,
-+	TPM_ALG_AES		= 0x0006,
-+	TPM_ALG_KEYEDHASH	= 0x0008,
-+	TPM_ALG_SHA256		= 0x000B,
-+	TPM_ALG_SHA384		= 0x000C,
-+	TPM_ALG_SHA512		= 0x000D,
-+	TPM_ALG_NULL		= 0x0010,
-+	TPM_ALG_SM3_256		= 0x0012,
-+	TPM_ALG_ECC		= 0x0023,
-+	TPM_ALG_CFB		= 0x0043,
++enum tis_int_flags {
++	TPM_GLOBAL_INT_ENABLE		= 0x80000000,
++	TPM_INTF_BURST_COUNT_STATIC	= 0x100,
++	TPM_INTF_CMD_READY_INT		= 0x080,
++	TPM_INTF_INT_EDGE_FALLING	= 0x040,
++	TPM_INTF_INT_EDGE_RISING	= 0x020,
++	TPM_INTF_INT_LEVEL_LOW		= 0x010,
++	TPM_INTF_INT_LEVEL_HIGH		= 0x008,
++	TPM_INTF_LOCALITY_CHANGE_INT	= 0x004,
++	TPM_INTF_STS_VALID_INT		= 0x002,
++	TPM_INTF_DATA_AVAIL_INT		= 0x001,
++};
++
++enum tis_defaults {
++	TIS_MEM_LEN		= 0x5000,
++	TIS_SHORT_TIMEOUT	= 750,   /* ms */
++	TIS_LONG_TIMEOUT	= 4000,  /* 4 secs */
++	TIS_TIMEOUT_MIN_ATML	= 14700, /* usecs */
++	TIS_TIMEOUT_MAX_ATML	= 15000, /* usecs */
++};
++
++#define TIS_MEM_X86_LPC_BASE		0xFED40000
++#define INTEL_LEGACY_BLK_BASE_ADDR	0xFED08000
++
++enum tis_x86_defaults {
++	TIS_MEM_X86_LEN			= 0x5000,
++	ILB_REMAP_SIZE			= 0x100,
++	LPC_CNTRL_OFFSET		= 0x84,
++	LPC_CLKRUN_EN			= (1 << 2),
 +};
 +
 +/*
-+ * The locality (0 - 4) for a TPM, as defined in section 3.2 of the
-+ * Client Platform Profile Specification.
++ * Some timeout values are needed before it is known whether the chip is
++ * TPM 1.0 or TPM 2.0.
 + */
-+enum tpm_localities {
-+	TPM_LOCALITY_0		= 0, /* Static RTM */
-+	TPM_LOCALITY_1		= 1, /* Dynamic OS */
-+	TPM_LOCALITY_2		= 2, /* DRTM Environment */
-+	TPM_LOCALITY_3		= 3, /* Aux Components */
-+	TPM_LOCALITY_4		= 4, /* CPU DRTM Establishment */
-+	TPM_MAX_LOCALITY	= TPM_LOCALITY_4
-+};
++#define TIS_TIMEOUT_A_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_A)
++#define TIS_TIMEOUT_B_MAX	max_t(int, TIS_LONG_TIMEOUT, TPM2_TIMEOUT_B)
++#define TIS_TIMEOUT_C_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_C)
++#define TIS_TIMEOUT_D_MAX	max_t(int, TIS_SHORT_TIMEOUT, TPM2_TIMEOUT_D)
 +
-+/*
-+ * Structure to represent active PCR algorithm banks usable by the
-+ * TPM chip.
-+ */
-+struct tpm_bank_info {
-+	u16 alg_id;
-+	u16 digest_size;
-+	u16 crypto_id;
-+};
++#define	TPM_ACCESS(l)			(0x0000 | ((l) << 12))
++#define	TPM_INT_ENABLE(l)		(0x0008 | ((l) << 12))
++#define	TPM_INT_VECTOR(l)		(0x000C | ((l) << 12))
++#define	TPM_INT_STATUS(l)		(0x0010 | ((l) << 12))
++#define	TPM_INTF_CAPS(l)		(0x0014 | ((l) << 12))
++#define	TPM_STS(l)			(0x0018 | ((l) << 12))
++#define	TPM_STS3(l)			(0x001b | ((l) << 12))
++#define	TPM_DATA_FIFO(l)		(0x0024 | ((l) << 12))
++#define	TPM_INTF_ID(l)			(0x0030 | ((l) << 12))
 +
-+/*
-+ * Maximum number of hashing algorithms a TPM can have.  This is
-+ * basically a count of every hash in tpm_algorithms above
-+ */
-+#define TPM_MAX_HASHES		5
++#define	TPM_DID_VID(l)			(0x0F00 | ((l) << 12))
++#define	TPM_RID(l)			(0x0F04 | ((l) << 12))
 +
-+struct tpm_digest {
-+	u16 alg_id;
-+	u8 digest[TPM2_MAX_DIGEST_SIZE];
-+} __packed;
++/* TPM HW Interface and Capabilities */
++#define TPM_TIS_INTF_ACTIVE		0x00
++#define TPM_CRB_INTF_ACTIVE		0x01
 +
-+#define TPM_HEADER_SIZE		10
++#define TPM_INTID_INTERFACE_TYPE	GENMASK(3, 0)
++#define TPM_INTID_INTERFACE_VERSION	GENMASK(7, 4)
++#define TPM_INTID_CAP_LOCALITY		BIT(8)
++#define TPM_INTID_CAP_TIS		BIT(13)
++#define TPM_INTID_CAP_CRB		BIT(14)
++#define TPM_INTID_CAP_IF_RES		GENMASK(16, 15)
++#define TPM_INTID_INTERFACE_SELECTOR	GENMASK(18, 17)
++#define TPM_INTID_INTF_SEL_LOCK		BIT(19)
 +
-+struct tpm_header {
-+	__be16 tag;
-+	__be32 length;
-+	union {
-+		__be32 ordinal;
-+		__be32 return_code;
-+	};
-+} __packed;
++#define TPM_TIS_INTF_12			0x00
++#define TPM_TIS_INTF_13			0x02
++#define TPM2_TIS_INTF_13		0x03
 +
- #endif
++#define TPM_INTF_DATA_AVAIL_INT_SUPPORT		BIT(0)
++#define TPM_INTF_STS_VALID_INT_SUPPORT		BIT(1)
++#define TPM_INTF_LOCALITY_CHANGE_INT_SUPPORT	BIT(2)
++#define TPM_INTF_INTERRUPT_LEVEL_HIGH		BIT(3)
++#define TPM_INTF_INTERRUPT_LEVEL_LOW		BIT(4)
++#define TPM_INTF_INTERRUPT_EDGE_RISING		BIT(5)
++#define TPM_INTF_INTERRUPT_EDGE_FALLING		BIT(6)
++#define TPM_INTF_COMMAND_READY_INT_SUPPORT	BIT(7)
++#define TPM_INTF_BURST_COUNT_STATIC		BIT(8)
++#define TPM_INTF_DATA_TRANSFER_SIZE_SUPPORT	GENMASK(10, 9)
++#define TPM_INTF_INTERFACE_VERSION		GENMASK(30, 28)
++
++#endif
 -- 
 2.55.0
 
