@@ -1,34 +1,35 @@
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 59EB843FD12;
-	Tue, 14 Jul 2026 14:07:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 33E2F47DD62;
+	Tue, 14 Jul 2026 14:07:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784038036; cv=none; b=LMxOz6gOomFx/zNf51c2IPUDXdmNLu1YFy6e8e+8j42lsOjJG3TyjX+kWSeuOQXvzdq400kZ8IyuYquPDMFdxMIeXPHObFZXOC7H8iNY+EWFUuZ51JidWicZ14NN9HYKB5rKOoaZc3zGm7dnwrKg5npdCRY2mkAXe2lDyM1FBI0=
+	t=1784038044; cv=none; b=ZStobTDGjRSvHCOZHECUWn2pfNynF8YBPaJ34ovaS2O4DV4zh2kaKQcYEP3gZyyXiQkvg9XlaLICc8nZiC3HbFr6z1FvhnPjgI4B+UWUrf78T7BEOcj3CN2jWTwTXawjtCio6hy2RYIumNh0NMbfnB7UrrhEr48uw9mN+f6pv6U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784038036; c=relaxed/simple;
-	bh=rJhmHjtmDwxS2CewudUO1k4saVZojxZevQnlJp6OZ7c=;
+	s=arc-20240116; t=1784038044; c=relaxed/simple;
+	bh=W5yMHnXfWcnH1ZpiyUJxzPFiGyzR0nmofTO/4v3XglM=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=TYhlUQoKrddjhBLWlAmO098EHFWwWLOOd6absRK9rCi8Y8mwylwwuYMeCVWoqC08xgWryiwZZwCGdCixZcbWJ31r5Zu34kQsRGoTXBGLStHTbR4i3fdQR6gI7IUjra9VAjC4tawsd+LNcCsExfZ2KyMQ3epd5b59h5KNO1bhCOE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=P+LRFNmi; arc=none smtp.client-ip=217.140.110.172
+	 In-Reply-To:To:Cc; b=MlQTP0ZY+NjAEcSqlHGDQbM8wsSVTRfQ5ex43qh8btgsG/D/X/lbrsoTMSD4PlGrrLAXrSUUy0sSkVuMQbuluLRZve0TxBr9fkSAWGmXymwqufhupWFMwiZcXnuYCXSD/csPJpJuPbUqkPLjRSEp5QhpxiuEE1wmnZPSqbaB6aE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=tcs2QjbO; arc=none smtp.client-ip=217.140.110.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="P+LRFNmi"
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="tcs2QjbO"
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 972261C25;
-	Tue, 14 Jul 2026 07:07:09 -0700 (PDT)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 485791C25;
+	Tue, 14 Jul 2026 07:07:17 -0700 (PDT)
 Received: from localhost.localdomain (e123572-lin.cambridge.arm.com [10.2.208.46])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 645503F7B4;
-	Tue, 14 Jul 2026 07:07:06 -0700 (PDT)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 211913FBB1;
+	Tue, 14 Jul 2026 07:07:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1784038033; bh=rJhmHjtmDwxS2CewudUO1k4saVZojxZevQnlJp6OZ7c=;
+	t=1784038041; bh=W5yMHnXfWcnH1ZpiyUJxzPFiGyzR0nmofTO/4v3XglM=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=P+LRFNmiDvhW3q79+Et/h/V1cKdtJE0WCcRDkD/ESazXMLOt5jc8Kgt41NbWh4J4L
-	 irPYHd6dn5v2zgZP369nbxfm7fp2OsfV6xC2C9cTmmDmdF9sgXDGCBBMWKG6COr/1p
-	 x9UUMt3JnkFOkdtZWVFuRaLX87Bjnkvu74XTX8nc=
+	b=tcs2QjbOfi2UrOaEb3Be0yDpY6GZomCe7QbbhuAt79rvxsFv0nPzL+CWkgYpCVks/
+	 ogkFHzzFifaJTeH1MCRm+XyD/611Im1Ut2kp5sQ9dzHO1o7eUkGFrrRiH6Z4V/RDtz
+	 /vlFqoX8JwYVcEUc2qvYwpr+Gn4LoNg3DQ/uWfI4=
 From: Kevin Brodsky <kevin.brodsky@arm.com>
-Date: Tue, 14 Jul 2026 15:04:05 +0100
-Subject: [PATCH 16/22] efi: mark efi_mm as a kernel mm
+Date: Tue, 14 Jul 2026 15:04:06 +0100
+Subject: [PATCH 17/22] mm: pagewalk: drop redundant address check for
+ kernel mm walks
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260714-remove_pgtable_cdtor-v1-16-44be8a7685d7@arm.com>
+Message-Id: <20260714-remove_pgtable_cdtor-v1-17-44be8a7685d7@arm.com>
 References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
 In-Reply-To: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
 To: linux-mm@kvack.org
@@ -76,47 +77,62 @@ Cc: Kevin Brodsky <kevin.brodsky@arm.com>,
  "Matthew Wilcox (Oracle)" <willy@infradead.org>, 
  linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1784037902; l=1355;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1784037902; l=1902;
  i=kevin.brodsky@arm.com; s=20260427; h=from:subject:message-id;
- bh=rJhmHjtmDwxS2CewudUO1k4saVZojxZevQnlJp6OZ7c=;
- b=xEbohehI3oM6XdwxICHsVginMSV7tAi9MA1ZH+OAmyTQN4j1iQ5NsQqwBRdPZXQYf6lyJ7RCE
- SjcaLPZMgbgBfEX879PTsxhhu4WlXQHubYLk+EEaXhOv3f1B8VSkhhq
+ bh=W5yMHnXfWcnH1ZpiyUJxzPFiGyzR0nmofTO/4v3XglM=;
+ b=TFBgeJD80Ix+w11MAOvfP3+Vh87dI14Hnq0FHr8NrSRBwD9XPKoZw/aAqVJc1+sG5OV8cIA+P
+ hlg2L1E8nGiAdR9B4tzknmDLhA26Dhv64+3Fs4YGAcZ8Y3UcdoWIKP6
 X-Developer-Key: i=kevin.brodsky@arm.com; a=ed25519;
  pk=N2QG+eJKrvkNovwhhwJhnJ4+ScVfsGCHldmqLfcMTFs=
 
-efi_mm is a kernel-owned address space used for EFI runtime
-mappings, but it is currently treated like a user address space when
-manipulating its page tables. There does not seem to be a good
-reason for this, and it creates unnecessary complications when
-creating its page tables.
+Commit 8b1cb4a2e819 ("mm/pagewalk: fix EFI_PGT_DUMP of
+espfix area") made no-VMA page table walks use
+pte_offset_kernel() for any address above TASK_SIZE. This avoided
+pte_offset_map() validation on EFI page table dumps, where efi_mm
+could walk x86 espfix PMDs that intentionally look bad to pmd_bad().
 
-Mark it with the new MMF_KERNEL flag so that the page table handling
-treats it like init_mm. In particular, this means that:
+efi_mm is now marked with MMF_KERNEL, and no-VMA walks use
+mm_is_kernel() to select pte_offset_kernel() for kernel mm's. As a
+result we no longer need to handle the EFI_PGT_DUMP case explicitly.The
+address check is therefore redundant for EFI_PGT_DUMP and makes the
+condition harder to reason about.
 
-* Split page table locks are no longer initialised or used for
-  efi_mm's page tables.
+Remove the address check and associated comment; mm_is_kernel()
+should be sufficient on its own.
 
-* pagetable_*_ctor() and pagetable_dtor() no longer need to be
-  called for efi_mm's page tables.
+Tested by booting x86 QEMU with CONFIG_EFI_PGT_DUMP=y and reading
+/sys/kernel/debug/page_tables/efi.
 
 Assisted-by: Codex:GPT-5.5
 Signed-off-by: Kevin Brodsky <kevin.brodsky@arm.com>
 ---
- drivers/firmware/efi/efi.c | 1 +
- 1 file changed, 1 insertion(+)
+ mm/pagewalk.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 0327a39d31fa..e5ca45bdc890 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -69,6 +69,7 @@ struct mm_struct efi_mm = {
- 	.mm_mt			= MTREE_INIT_EXT(mm_mt, MM_MT_FLAGS, efi_mm.mmap_lock),
- 	.mm_users		= ATOMIC_INIT(2),
- 	.mm_count		= ATOMIC_INIT(1),
-+	.flags			= MM_FLAGS_INIT(MMF_KERNEL_MASK),
- 	.write_protect_seq      = SEQCNT_ZERO(efi_mm.write_protect_seq),
- 	MMAP_LOCK_INITIALIZER(efi_mm)
- 	.page_table_lock	= __SPIN_LOCK_UNLOCKED(efi_mm.page_table_lock),
+diff --git a/mm/pagewalk.c b/mm/pagewalk.c
+index a3f47d1de3c5..0dd9d4ad9b68 100644
+--- a/mm/pagewalk.c
++++ b/mm/pagewalk.c
+@@ -68,17 +68,14 @@ static int walk_pte_range(pmd_t *pmd, unsigned long addr, unsigned long end,
+ 	if (walk->no_vma) {
+ 		/*
+ 		 * pte_offset_map() might apply user-specific validation.
+-		 * Indeed, on x86_64 the pmd entries set up by init_espfix_ap()
+-		 * fit its pmd_bad() check (_PAGE_NX set and _PAGE_RW clear),
+-		 * and CONFIG_EFI_PGT_DUMP efi_mm goes so far as to walk them.
+ 		 */
+-		if (mm_is_kernel(walk->mm) || addr >= TASK_SIZE)
++		if (mm_is_kernel(walk->mm))
+ 			pte = pte_offset_kernel(pmd, addr);
+ 		else
+ 			pte = pte_offset_map(pmd, addr);
+ 		if (pte) {
+ 			err = walk_pte_range_inner(pte, addr, end, walk);
+-			if (!mm_is_kernel(walk->mm) && addr < TASK_SIZE)
++			if (!mm_is_kernel(walk->mm))
+ 				pte_unmap(pte);
+ 		}
+ 	} else {
 
 -- 
 2.51.2
