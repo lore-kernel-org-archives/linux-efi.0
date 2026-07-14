@@ -1,34 +1,34 @@
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 78EC847DD43;
-	Tue, 14 Jul 2026 14:06:43 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 4D15B47D93A;
+	Tue, 14 Jul 2026 14:06:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784038005; cv=none; b=ctFbVVB18lbtefmnfVRdjenb3XQTX3LVxZ6TJn3lGRiqyqeQP9NU8vWxzKmdRGI4Sws1omrYrb1HZgoZV+CjWnarNzdbmj8MMm6aCklbwFaZbTzxP3ZeanBU8NWecKSn9UXT7urbphcLalyw4/jFquYMwLH4tiloUsMVQY6ZYjs=
+	t=1784038013; cv=none; b=Jl1PDwUy/uYSLglBJOhVsSlm4QduUBcYHiZvENAHW8UmqvyMNgn216KrIwCAv7YXlxz1Hm4b0G560S2E9Qmr+oVtzM4XKl9pSCMUnyhhrbJdyVOlAk9tKyj9y7c9Bq2zWgMncX0bdn8P895bZFTTF1S525B41WuIk+R+5/fie8U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784038005; c=relaxed/simple;
-	bh=mkvNiLNNU7+2GzQNF8eqTlv1xCMmv8/GPTLyXVohroo=;
+	s=arc-20240116; t=1784038013; c=relaxed/simple;
+	bh=xWTuMpf6qcthpUhdZ9Vhm6UlW2cWk5z6914Plajhwho=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=uI1xagh+UCfamEVcRyRck5bKgiw1Q3qlZIB2wFA3hjKIHPaFp3JalgBNL+CiagiLqJn+f9+j7qtyPB+iMyrC/fyEfWxgSYnkPjghTxxW7kXjO9iUHaR46CKroFHcRZ4Vh+6qHjSB2lkHqGIdN7uteedN9N0NaNtFhYYLtNdQy0s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=HIiwhwiW; arc=none smtp.client-ip=217.140.110.172
+	 In-Reply-To:To:Cc; b=lNlmrcRdba2wgcLa756NzBDBmXZh2CRiNENw2DksqFyRmhejuWKsdG04G94zKQBqzg7yInworiRPcAllPSUOkzAn0wyU1hB00EGmQKXOFEDh8J9jrWd6z5bEdr7VB9IR95BH9mjEJyQsRdd0tWIBLDN6gSzF/deeL1pcpsRLNgM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=GMJ+Mweg; arc=none smtp.client-ip=217.140.110.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="HIiwhwiW"
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="GMJ+Mweg"
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id A1B981576;
-	Tue, 14 Jul 2026 07:06:38 -0700 (PDT)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 608D21C00;
+	Tue, 14 Jul 2026 07:06:46 -0700 (PDT)
 Received: from localhost.localdomain (e123572-lin.cambridge.arm.com [10.2.208.46])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 7BDF53F7B4;
-	Tue, 14 Jul 2026 07:06:35 -0700 (PDT)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 3991D3F7B4;
+	Tue, 14 Jul 2026 07:06:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1784038002; bh=mkvNiLNNU7+2GzQNF8eqTlv1xCMmv8/GPTLyXVohroo=;
+	t=1784038010; bh=xWTuMpf6qcthpUhdZ9Vhm6UlW2cWk5z6914Plajhwho=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=HIiwhwiW5/FaoSRBjo11aX1AZpPuYcroDE7X41LVr/xwN0xxR7sqYi+EShBKHthpF
-	 n4f8woYlTVlDt26juvjhHDNOK/I92UerlQVr0VVHNOso4VCLR4Gq0Tj1gOY6PCuWSc
-	 FVgEvZfyeKpZuGic61DbMkRghFHRNE75lpgzlmYM=
+	b=GMJ+Mweg4iK/hY2NAgr6zHJe6LPOAI5rsbTNiAYQyxWefiCu+6VoxAQ21IJMDkVx+
+	 ivh2GnjSQemn2gdz2SposUZ6wFQonR0LDcZWwnq1rZX1jAwRhXlTvacd46t1gd3VoM
+	 7DeK6ToDs/ry10Z8LOV9mjtgQLtlBMud0j8fDq/U=
 From: Kevin Brodsky <kevin.brodsky@arm.com>
-Date: Tue, 14 Jul 2026 15:04:01 +0100
-Subject: [PATCH 12/22] x86/mm: use mm_is_kernel() for kernel mm checks
+Date: Tue, 14 Jul 2026 15:04:02 +0100
+Subject: [PATCH 13/22] mm: account page table pages when allocated
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +37,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260714-remove_pgtable_cdtor-v1-12-44be8a7685d7@arm.com>
+Message-Id: <20260714-remove_pgtable_cdtor-v1-13-44be8a7685d7@arm.com>
 References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
 In-Reply-To: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
 To: linux-mm@kvack.org
@@ -76,109 +76,78 @@ Cc: Kevin Brodsky <kevin.brodsky@arm.com>,
  "Matthew Wilcox (Oracle)" <willy@infradead.org>, 
  linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1784037902; l=3862;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1784037902; l=2350;
  i=kevin.brodsky@arm.com; s=20260427; h=from:subject:message-id;
- bh=mkvNiLNNU7+2GzQNF8eqTlv1xCMmv8/GPTLyXVohroo=;
- b=TL/ATO2WidViUjXp4JukAFDeik9Bhx9UKyamDJVrFhja594xcdOFPLXtYE8/VvFDMq3oXLjVT
- 9Ry1qd/NBLGBGmKjBP3mLajDf99Eimk93BsQgUsx2B9iCCZoXZcZow+
+ bh=xWTuMpf6qcthpUhdZ9Vhm6UlW2cWk5z6914Plajhwho=;
+ b=Xnk+oBg7ELc/ZeSLJzK7tAUlR2bpnh9Zc229tTiVuKMeFbivMucrP27RTRDStMzPBnxxJrXcn
+ geH5EZLthaDBgWisWH5/sH0N2po6PG3n0k30stRCmsudF2ar5ckSV8d
 X-Developer-Key: i=kevin.brodsky@arm.com; a=ed25519;
  pk=N2QG+eJKrvkNovwhhwJhnJ4+ScVfsGCHldmqLfcMTFs=
 
-The new MMF_KERNEL flag identifies kernel-owned mm's. Checking the
-flag with mm_is_kernel() is preferred over comparing directly
-against &init_mm.
+As a step towards removing pagetable ctor/dtor calls for kernel
+mm's, move the memory accounting from the ctor/dtor to
+pagetable_{alloc,free}.
 
-No functional change, as only init_mm has MMF_KERNEL set for now.
+The ctor is normally called after pagetable_alloc() (and dtor before
+pagetable_free()) so this patch should have no functional effect in
+most cases. Where calls to ctor/dtor are currently missing (e.g.
+x86's split_large_page()), this patch should improve the accounting.
 
-Assisted-by: Codex:GPT-5.5
+This patch is based on Matthew's earlier implementation linked
+below, with the difference that when freeing the accounting is
+updated in __pagetable_free(), meaning that the update is delayed
+until the pages are actually freed in the
+CONFIG_ASYNC_KERNEL_PGTABLE_FREE case. This shouldn't matter in
+practice.
+
+Suggested-by: "Matthew Wilcox (Oracle)" <willy@infradead.org>
+Link: https://lore.kernel.org/r/20251113140448.1814860-3-willy@infradead.org
 Signed-off-by: Kevin Brodsky <kevin.brodsky@arm.com>
 ---
- arch/x86/include/asm/tlbflush.h | 8 ++++----
- arch/x86/mm/pgtable.c           | 2 +-
- arch/x86/mm/tlb.c               | 9 +++++----
- 3 files changed, 10 insertions(+), 9 deletions(-)
+ include/linux/mm.h | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/include/asm/tlbflush.h b/arch/x86/include/asm/tlbflush.h
-index 0545fe75c3fa..4af1cf711a60 100644
---- a/arch/x86/include/asm/tlbflush.h
-+++ b/arch/x86/include/asm/tlbflush.h
-@@ -159,10 +159,10 @@ struct tlb_state_shared {
- 	 *  - Actively using an mm.  Our CPU's bit will be set in
- 	 *    mm_cpumask(loaded_mm) and is_lazy == false;
- 	 *
--	 *  - Not using a real mm.  loaded_mm == &init_mm.  Our CPU's bit
--	 *    will not be set in mm_cpumask(&init_mm) and is_lazy == false.
-+	 *  - Not using a real mm. loaded_mm is a kernel mm. Our CPU's bit
-+	 *    will not be set in mm_cpumask(loaded_mm) and is_lazy == false.
- 	 *
--	 *  - Lazily using a real mm.  loaded_mm != &init_mm, our bit
-+	 *  - Lazily using a real mm. loaded_mm is not a kernel mm, our bit
- 	 *    is set in mm_cpumask(loaded_mm), but is_lazy == true.
- 	 *    We're heuristically guessing that the CR3 load we
- 	 *    skipped more than makes up for the overhead added by
-@@ -188,7 +188,7 @@ DECLARE_PER_CPU_SHARED_ALIGNED(struct tlb_state_shared, cpu_tlbstate_shared);
- #define enter_lazy_tlb enter_lazy_tlb
- static __always_inline void enter_lazy_tlb(struct mm_struct *mm, struct task_struct *tsk)
+diff --git a/include/linux/mm.h b/include/linux/mm.h
+index b336eb32faa0..361a0d7b74c5 100644
+--- a/include/linux/mm.h
++++ b/include/linux/mm.h
+@@ -3681,6 +3681,11 @@ static inline struct ptdesc *pagetable_alloc_noprof(gfp_t gfp, unsigned int orde
  {
--	if (this_cpu_read(cpu_tlbstate.loaded_mm) == &init_mm)
-+	if (mm_is_kernel(this_cpu_read(cpu_tlbstate.loaded_mm)))
- 		return;
+ 	struct page *page = alloc_pages_noprof(gfp | __GFP_COMP, order);
  
- 	this_cpu_write(cpu_tlbstate_shared.is_lazy, true);
-diff --git a/arch/x86/mm/pgtable.c b/arch/x86/mm/pgtable.c
-index f32facdb3035..91d2a6f2ac5a 100644
---- a/arch/x86/mm/pgtable.c
-+++ b/arch/x86/mm/pgtable.c
-@@ -168,7 +168,7 @@ static int preallocate_pmds(struct mm_struct *mm, pmd_t *pmds[], int count)
- 	bool failed = false;
- 	gfp_t gfp = GFP_PGTABLE_USER;
++	if (!page)
++		return NULL;
++
++	lruvec_stat_add_folio(page_folio(page), NR_PAGETABLE);
++
+ 	return page_ptdesc(page);
+ }
+ #define pagetable_alloc(...)	alloc_hooks(pagetable_alloc_noprof(__VA_ARGS__))
+@@ -3689,6 +3694,8 @@ static inline void __pagetable_free(struct ptdesc *pt)
+ {
+ 	struct page *page = ptdesc_page(pt);
  
--	if (mm == &init_mm)
-+	if (mm_is_kernel(mm))
- 		gfp &= ~__GFP_ACCOUNT;
- 	gfp &= ~__GFP_HIGHMEM;
++	lruvec_stat_sub_folio(page_folio(page), NR_PAGETABLE);
++
+ 	__free_pages(page, compound_order(page));
+ }
  
-diff --git a/arch/x86/mm/tlb.c b/arch/x86/mm/tlb.c
-index 1023acadd8f8..5517cab8ad00 100644
---- a/arch/x86/mm/tlb.c
-+++ b/arch/x86/mm/tlb.c
-@@ -594,7 +594,7 @@ void leave_mm(void)
- 	 * This needs to happen before any other sanity checks due to
- 	 * intel_idle's shenanigans.
- 	 */
--	if (loaded_mm == &init_mm)
-+	if (mm_is_kernel(loaded_mm))
- 		return;
+@@ -3797,7 +3804,6 @@ static inline void __pagetable_ctor(struct ptdesc *ptdesc)
+ 	struct folio *folio = ptdesc_folio(ptdesc);
  
- 	/* Warn if we're not lazy. */
-@@ -855,7 +855,7 @@ void switch_mm_irqs_off(struct mm_struct *unused, struct mm_struct *next,
- 		 * cpu_tlbstate_shared.is_lazy whether or not to send an IPI.
- 		 */
- 		if (IS_ENABLED(CONFIG_DEBUG_VM) &&
--		    WARN_ON_ONCE(prev != &init_mm && !is_notrack_mm(prev) &&
-+		    WARN_ON_ONCE(!mm_is_kernel(prev) && !is_notrack_mm(prev) &&
- 				 !cpumask_test_cpu(cpu, mm_cpumask(next))))
- 			cpumask_set_cpu(cpu, mm_cpumask(next));
+ 	__folio_set_pgtable(folio);
+-	lruvec_stat_add_folio(folio, NR_PAGETABLE);
+ }
  
-@@ -932,7 +932,8 @@ void switch_mm_irqs_off(struct mm_struct *unused, struct mm_struct *next,
- 		 * This way switch_mm() must see the new tlb_gen or
- 		 * flush_tlb_mm_range() must see the new loaded_mm, or both.
- 		 */
--		if (next != &init_mm && !cpumask_test_cpu(cpu, mm_cpumask(next)))
-+		if (!mm_is_kernel(next) &&
-+		    !cpumask_test_cpu(cpu, mm_cpumask(next)))
- 			cpumask_set_cpu(cpu, mm_cpumask(next));
- 		else
- 			smp_mb();
-@@ -1134,7 +1135,7 @@ static void flush_tlb_func(void *info)
- 		return;
- 	}
+ static inline void pagetable_dtor(struct ptdesc *ptdesc)
+@@ -3806,7 +3812,6 @@ static inline void pagetable_dtor(struct ptdesc *ptdesc)
  
--	if (unlikely(loaded_mm == &init_mm))
-+	if (unlikely(mm_is_kernel(loaded_mm)))
- 		return;
+ 	ptlock_free(ptdesc);
+ 	__folio_clear_pgtable(folio);
+-	lruvec_stat_sub_folio(folio, NR_PAGETABLE);
+ }
  
- 	/* Reload the ASID if transitioning into or out of a global ASID */
+ static inline void pagetable_dtor_free(struct ptdesc *ptdesc)
 
 -- 
 2.51.2
