@@ -1,34 +1,34 @@
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 4198447D921;
-	Tue, 14 Jul 2026 14:05:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 03C6043F8AF;
+	Tue, 14 Jul 2026 14:05:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784037928; cv=none; b=KkV8MmsFhz+zFygW9USYd175yvLipw1vwSu18jUH0j61z8oJAbdoFsNr1wppztPUsCgxgA0GUaj3ub7ZLC/SdlhKfGPibDRIzKcACGUh/NzGH+kp7bFdf0SZmN7AlvSCCmUApHNg41H52jOL+dMmZFxB/33VxJ+dcFLVHSDGYLM=
+	t=1784037935; cv=none; b=DBq+JYZeH/Vaf8JyVSfwKZeA+icRFWqgr5f1/BwMWAyWkKke85LYt6kQ0Iatihz2+f9Ojy1xec9rnHxD60BFPR4cMT2h46INUR1cMAlxx+Ahsp7Q8oyMRmUMNKWX4xliIWxVxw0kqGm2CHB3/HkMlyzLYY9O+NJ+tuLQCtGSee0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784037928; c=relaxed/simple;
-	bh=xWJCKsvCSbOTf1MrL+nqfsWcuzx4IBI4MMfjRE6PTH4=;
+	s=arc-20240116; t=1784037935; c=relaxed/simple;
+	bh=FInc2gTxhVQc4LYtwtKoJPw43dSvFTnMs+LPVQ5s9u0=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=AE3iFcNViK58TP2en4quy+k4RhoootMeyU/YnlM8g9mEs7ugJi06NHiGDf4zYlG4wANLP60k/9cVBjKaYsov54+hFAoZ3gD4XQT9rFXOumWztwFBq6WdVUxnsteSwEW+yNSJL/P710xK9jwsyQwgO/c+UL8B66WUADC2Gj8iDYg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=L/UyKrDH; arc=none smtp.client-ip=217.140.110.172
+	 In-Reply-To:To:Cc; b=EG10cxRB8Da6rsROWmwzv5EQ6K9aYuiY3wrvsLA42nMkUPNo5NCIVbuzLCF1aMP8OF7DYyMBpMk3kZvjItG+Wz3orBMH0JmZa0xw0IJnybVRZhUPhBaU8dfj3D1TznIsI97ZlkMKukWxRktIPNa5Ahs8aRF8SeTFkZyh5Sx0KgA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=Bm1/z7nw; arc=none smtp.client-ip=217.140.110.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="L/UyKrDH"
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="Bm1/z7nw"
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 6425C1516;
-	Tue, 14 Jul 2026 07:05:21 -0700 (PDT)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 1DB181516;
+	Tue, 14 Jul 2026 07:05:29 -0700 (PDT)
 Received: from localhost.localdomain (e123572-lin.cambridge.arm.com [10.2.208.46])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 3A07F3F7B4;
-	Tue, 14 Jul 2026 07:05:18 -0700 (PDT)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id ECA813F7B4;
+	Tue, 14 Jul 2026 07:05:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1784037925; bh=xWJCKsvCSbOTf1MrL+nqfsWcuzx4IBI4MMfjRE6PTH4=;
+	t=1784037933; bh=FInc2gTxhVQc4LYtwtKoJPw43dSvFTnMs+LPVQ5s9u0=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=L/UyKrDH31P2AxfsB5zaY1mh6o9sykjNj6yB/yMXG8ePSNTlccGqvWENIvdaG1tfJ
-	 Wk0YZEQWyX1mVS8XhODJBz5n9MI25kkc+YIk8/N9y9yuoLWoSBYTDhb1fyTBkqd7HI
-	 cav7VW0lg3rVkGLnx2wAlICXEbNLvp2RP9uBMl74=
+	b=Bm1/z7nw3ZrVQHSoXKrtxTQs91wc4RUrXfic6nvC1VPB3At2KepfWXr7Aw3HYFpkn
+	 ioHo5OCLJkJiU6MHz48diP4nr6YFWtjQg3UL72aeFoQQSfWxPSBxVE10gNTyxwI//k
+	 BrtCJZVqyK4Ji57oD58xPcYajyNM3z8AN78Fhrlw=
 From: Kevin Brodsky <kevin.brodsky@arm.com>
-Date: Tue, 14 Jul 2026 15:03:51 +0100
-Subject: [PATCH 02/22] mm: move mm_flags helpers to mm_types.h
+Date: Tue, 14 Jul 2026 15:03:52 +0100
+Subject: [PATCH 03/22] mm: introduce MMF_KERNEL flag and set it for init_mm
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +37,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260714-remove_pgtable_cdtor-v1-2-44be8a7685d7@arm.com>
+Message-Id: <20260714-remove_pgtable_cdtor-v1-3-44be8a7685d7@arm.com>
 References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
 In-Reply-To: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
 To: linux-mm@kvack.org
@@ -76,120 +76,78 @@ Cc: Kevin Brodsky <kevin.brodsky@arm.com>,
  "Matthew Wilcox (Oracle)" <willy@infradead.org>, 
  linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1784037902; l=3490;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1784037902; l=2504;
  i=kevin.brodsky@arm.com; s=20260427; h=from:subject:message-id;
- bh=xWJCKsvCSbOTf1MrL+nqfsWcuzx4IBI4MMfjRE6PTH4=;
- b=hjHVW6q/l9oVND5egfxNDc6FE64eNht6hv1NYHcLYYfk3GK4zKlatRLYEID3yBr+Cr2y6GvLX
- wE73qcbXnDpDJQn8OyUXgdNbqTA1wZVDqiAytR24UH8BGEWoTGJECyr
+ bh=FInc2gTxhVQc4LYtwtKoJPw43dSvFTnMs+LPVQ5s9u0=;
+ b=LLyApQy3cCX+sEK7+yEv+wdSQwFfqhZ/PtGYmJI+JJbZMoulhtvHZSYrG2onhzlRcBnCeJhTe
+ oQ14mia3FhGBEfCDsSpVX5EPWBdyUPXpBCd8WmZOxEP54NLEVWz9CaD
 X-Developer-Key: i=kevin.brodsky@arm.com; a=ed25519;
  pk=N2QG+eJKrvkNovwhhwJhnJ4+ScVfsGCHldmqLfcMTFs=
 
-Some of the mm_flags helpers are defined in <linux/mm_types.h>,
-while others are defined in <linux/mm.h>. We will soon need to call
-one of the latter helpers from mm_types.h.
+mm code often needs to know whether some mm represents a kernel or
+user address space. This is currently done by comparing the mm
+pointer with &init_mm; besides not being particularly elegant, this
+ignores the fact that other mm's (e.g. efi_mm) may also represent
+parts of the kernel address space.
 
-Regroup all the helpers in mm_types.h to keep things simple.
+Introduce a new mm flag MMF_KERNEL and set it for init_mm.
+Subsequent patches will use this flag to replace comparisons with
+&init_mm. No functional change is introduced for now.
 
-Also remove #include's that were added specifically for these
-helpers in mm.h.
-
+Assisted-by: Codex:GPT-5.5
 Signed-off-by: Kevin Brodsky <kevin.brodsky@arm.com>
 ---
- include/linux/mm.h       | 32 --------------------------------
- include/linux/mm_types.h | 30 ++++++++++++++++++++++++++++++
- 2 files changed, 30 insertions(+), 32 deletions(-)
+ include/linux/mm_types.h | 10 ++++++++++
+ mm/init-mm.c             |  1 +
+ 2 files changed, 11 insertions(+)
 
-diff --git a/include/linux/mm.h b/include/linux/mm.h
-index 32bb723ffbb9..7a4b8e7ac8f4 100644
---- a/include/linux/mm.h
-+++ b/include/linux/mm.h
-@@ -34,8 +34,6 @@
- #include <linux/slab.h>
- #include <linux/cacheinfo.h>
- #include <linux/rcuwait.h>
--#include <linux/bitmap.h>
--#include <linux/bitops.h>
- #include <linux/iommu-debug-pagealloc.h>
- #include <linux/kcsan-checks.h>
- 
-@@ -948,36 +946,6 @@ static inline void assert_fault_locked(const struct vm_fault *vmf)
- }
- #endif /* CONFIG_PER_VMA_LOCK */
- 
--static inline bool mm_flags_test(int flag, const struct mm_struct *mm)
--{
--	return test_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
--}
--
--static inline bool mm_flags_test_and_set(int flag, struct mm_struct *mm)
--{
--	return test_and_set_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
--}
--
--static inline bool mm_flags_test_and_clear(int flag, struct mm_struct *mm)
--{
--	return test_and_clear_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
--}
--
--static inline void mm_flags_set(int flag, struct mm_struct *mm)
--{
--	set_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
--}
--
--static inline void mm_flags_clear(int flag, struct mm_struct *mm)
--{
--	clear_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
--}
--
--static inline void mm_flags_clear_all(struct mm_struct *mm)
--{
--	bitmap_zero(ACCESS_PRIVATE(&mm->flags, __mm_flags), NUM_MM_FLAG_BITS);
--}
--
- extern const struct vm_operations_struct vma_dummy_vm_ops;
- 
- static inline void vma_init(struct vm_area_struct *vma, struct mm_struct *mm)
 diff --git a/include/linux/mm_types.h b/include/linux/mm_types.h
-index b4129beb9c4a..a2e0dc5892ff 100644
+index a2e0dc5892ff..7838ea3aac00 100644
 --- a/include/linux/mm_types.h
 +++ b/include/linux/mm_types.h
-@@ -1414,6 +1414,36 @@ struct mm_struct {
+@@ -1414,6 +1414,8 @@ struct mm_struct {
  	char flexible_array[] __aligned(__alignof__(unsigned long));
  };
  
-+static inline bool mm_flags_test(int flag, const struct mm_struct *mm)
-+{
-+	return test_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
-+}
++#define MM_FLAGS_INIT(flags)	{ .__mm_flags = { BITMAP_FROM_U64(flags) } }
 +
-+static inline bool mm_flags_test_and_set(int flag, struct mm_struct *mm)
-+{
-+	return test_and_set_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
-+}
-+
-+static inline bool mm_flags_test_and_clear(int flag, struct mm_struct *mm)
-+{
-+	return test_and_clear_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
-+}
-+
-+static inline void mm_flags_set(int flag, struct mm_struct *mm)
-+{
-+	set_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
-+}
-+
-+static inline void mm_flags_clear(int flag, struct mm_struct *mm)
-+{
-+	clear_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
-+}
-+
-+static inline void mm_flags_clear_all(struct mm_struct *mm)
-+{
-+	bitmap_zero(ACCESS_PRIVATE(&mm->flags, __mm_flags), NUM_MM_FLAG_BITS);
-+}
-+
- /* Copy value to the first system word of mm flags, non-atomically. */
- static inline void __mm_flags_overwrite_word(struct mm_struct *mm, unsigned long value)
+ static inline bool mm_flags_test(int flag, const struct mm_struct *mm)
  {
+ 	return test_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
+@@ -2001,6 +2003,9 @@ enum {
+ #define MMF_TOPDOWN		31	/* mm searches top down by default */
+ #define MMF_TOPDOWN_MASK	BIT(MMF_TOPDOWN)
+ 
++#define MMF_KERNEL		32	/* mm belongs to the kernel */
++#define MMF_KERNEL_MASK		BIT_ULL(MMF_KERNEL)
++
+ #define MMF_INIT_LEGACY_MASK	(MMF_DUMP_FILTER_MASK |\
+ 				 MMF_DISABLE_THP_MASK | MMF_HAS_MDWE_MASK |\
+ 				 MMF_VM_MERGE_ANY_MASK | MMF_TOPDOWN_MASK)
+@@ -2008,6 +2013,11 @@ enum {
+ /* Legacy flags must fit within 32 bits. */
+ static_assert((u64)MMF_INIT_LEGACY_MASK <= (u64)UINT_MAX);
+ 
++static inline bool mm_is_kernel(const struct mm_struct *mm)
++{
++	return mm && mm_flags_test(MMF_KERNEL, mm);
++}
++
+ /*
+  * Initialise legacy flags according to masks, propagating selected flags on
+  * fork. Further flag manipulation can be performed by the caller.
+diff --git a/mm/init-mm.c b/mm/init-mm.c
+index 3e792aad7626..93773269bf87 100644
+--- a/mm/init-mm.c
++++ b/mm/init-mm.c
+@@ -34,6 +34,7 @@ struct mm_struct init_mm = {
+ 	.pgd		= swapper_pg_dir,
+ 	.mm_users	= ATOMIC_INIT(2),
+ 	.mm_count	= ATOMIC_INIT(1),
++	.flags		= MM_FLAGS_INIT(MMF_KERNEL_MASK),
+ 	.write_protect_seq = SEQCNT_ZERO(init_mm.write_protect_seq),
+ 	MMAP_LOCK_INITIALIZER(init_mm)
+ 	.page_table_lock =  __SPIN_LOCK_UNLOCKED(init_mm.page_table_lock),
 
 -- 
 2.51.2
