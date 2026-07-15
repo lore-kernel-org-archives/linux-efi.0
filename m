@@ -1,161 +1,138 @@
-Received: from mail-ot1-f51.google.com (mail-ot1-f51.google.com [209.85.210.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 357AA3A8732
-	for <linux-efi@vger.kernel.org>; Wed, 15 Jul 2026 11:36:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.210.51
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784115392; cv=pass; b=SI+cAXpU4Sac2n/8n8eYVQkpdD+dxy8Y4j6He0BaTJz9e1su2SAIzcqHwrKYyQ1lUo8GSn0XTBr+875k4gzOlX6tT+6KEfvsHIoawAppZk0cH1REQ039cQZhS5v9a3Bt0p5ZtDQUTTxz/h8rE5YEAwmd9JKKFG601nIkEgYfg5Q=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784115392; c=relaxed/simple;
-	bh=7ZEtkZBQmdX0etetnBFbvuoc6k7xP4dTkloxYVpfa9w=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=rNKCmiCgMZEmIvSfgaDqCOU/hmQdCKy5sbHNZTd+PPVP6iJadkjF7gOsPT+qz6lj61HXYi/b/xOf7arKYbOshxHhYukirP9+ukubfdCeQoarx42qNtGxHt317fuOoC1bc6k8B84JdAjWp8Zmz21NS8ea0UG8wuNnkhq8lqYzczM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com; spf=pass smtp.mailfrom=bytedance.com; dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b=Js7j0C9P; arc=pass smtp.client-ip=209.85.210.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bytedance.com
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 6298B39A046;
+	Wed, 15 Jul 2026 15:07:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1784128040; cv=none; b=IVvNafFWVP8J+Hppqv2yk29PL2ApuFOK4c5qCtu/+PoTPOSVZ2a1fcnAz60xl5/SLbZ/hlvmV9YsVUSWlHEyBpEVzSJgPdSrnJoQEQPBq1Vvr/Z1cCMPK0xhjOidQdeZpq6sZl23DrgTKL81i8WQ0fNF+Sy1mKYKocpOHx494N4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1784128040; c=relaxed/simple;
+	bh=+jFMWWv220aZ8z/A3E0zhi9BB4H/u0SqqJRjY/UOWiM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=S4sDuHt4fLZwdres2R1OuCSecel6zALaLiWY1dcKQXNDpTSRfSMrIiBB0VNLqWA0l934diTAkV32LxUI//1mYPRSYF5+h9h91tFbEHTGN1ccsCKxbV8ZsLzBDYvqB8gXjswDccFFxL13paeITeFdsjO48Trz9v+tnT9pY7WAdRo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=Z5zyq2Hj; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b="Js7j0C9P"
-Received: by mail-ot1-f51.google.com with SMTP id 46e09a7af769-7ec3b429a3aso1506825a34.1
-        for <linux-efi@vger.kernel.org>; Wed, 15 Jul 2026 04:36:29 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1784115389; cv=none;
-        d=google.com; s=arc-20260327;
-        b=Qr5x1sFFZfyVLF3g8FCmP/0DqgcaoOFjLmyexVsQDld7owuIxJJPPLmJZRVz+L1ctg
-         SHvrBb1ADQnTfFvpWY/hy1JIKw3qApDbMckXFqycy1IJ3uW5XbafJB0hDaAB6M525vft
-         +tGH5s/M064NuR0IrZqAzbb1TWa7GZzAM6GzfbtC2j4AUJ0E/LG/RBuCPkqJFXqHyWXK
-         iQngVI6ksINvLJFybiayz7s1p5yPVC3ZzoHmDLXFMqWHZ+eieYas9Dr7JBwgZMsp4OTq
-         zdQSxnRdSOor/9FPHPci6WxUZoTQMBdcyY9iVK2ZdXeTPNqQy917e4XL3sGaPTavCHpp
-         vciA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=7ZEtkZBQmdX0etetnBFbvuoc6k7xP4dTkloxYVpfa9w=;
-        fh=k+sdg4/f5kze9STvANsOjx/wlsq6isXpLAT82ywb4DE=;
-        b=hs7mwTFQ9X+YrxjqzKU5MsjddFQAgVEZqX+FbNHfTKHPkEVZokD95WTzR8F01JBASp
-         gLPbfkJ/Qoo1EEpzjLXkpxpzG6Gw4sReJct8JsLRhS9qyUDssBJpcdZDDYIAniGFbzAh
-         RewL2MWEi4Gcv2yYG54sTam245D24ut0N2G6blqTUv9zZxdikldVTnwmW8VlWzbDEnxQ
-         122Y/wnQFHh0mrt7c9W/5qm0aGIivZzSFHLr1DD4PiHXxw3i3xBbk2j5EbEeEab7wv2u
-         VrNLH8ODBcuo8brPByhNiuYfnw29RLqUnZEUUm6yneXaeE3W+kRvMaNoJE8jPTgHISr0
-         KGOg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bytedance.com; s=google; t=1784115389; x=1784720189; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=7ZEtkZBQmdX0etetnBFbvuoc6k7xP4dTkloxYVpfa9w=;
-        b=Js7j0C9P69DMl0Yz8gVeC6BScsJ92/IevL2d6M3FTmvPKTakVuTZXdW1mQ0B3MTBH7
-         61bG+dkByME74DswURQMirDXuINylsitsRbRtclkb59TYn0yot1REnffkwOL9NvialsV
-         01+fqZAeXs5ctswZZIe6AL4tst12mxutq+hXG1RGveMAyMkcoxxu3Pt5Dlzkpn0BFSra
-         ItzTgnXJFt7+v2jXPVRqEM3Y7g+EyPOe3oQeenph2tG+SbTb0Z+OH/c+KT5fw/tXQA08
-         90Auq/4UaIahdCGyOVyHQAn//z86PF4tLq5KnpBzWIp5UG0kXriIQoOTLN7ir1ISd7My
-         8TTQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784115389; x=1784720189;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=7ZEtkZBQmdX0etetnBFbvuoc6k7xP4dTkloxYVpfa9w=;
-        b=QwKeMFmtA5zDgLetASZvW6PI7zcXb03s4YbnzVSfQ10xfkj/PZ0bSfIULTcpViIwhY
-         vR7IHPxZDYFhChf4Ekcg9VoaW9+iOPV2Uusvo+GoFJWPUYQVpBxawk8JgRgs1cghuiyZ
-         XSuM24BmFDztDXRq7Xnhq3XyhpiRvqig382hLlFit+eX7z4HgTJ9jfgrm6t4AtsMvhLj
-         PulIUXmbVocRFcg7mc/HNwhyrD76vKALva7AoFQAU2u+JSji4FhF2BMFyjMmzRvWmkcH
-         C99D7R0p2NLnT43upeTZOibKpIsxyZmJnQgS+nzVU+xFxWnuL5b4buSMrUwXw+x19oeX
-         bSyQ==
-X-Forwarded-Encrypted: i=1; AHgh+RqoIhvG8UHm2L3eObPLiwbeZjY6PrfrNCxIrP/CUzaObYKFdUzYpZjJbripmZScLBwT1a4WYEe0bfs=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yynyq9HM0Itq/odffZqj7sfcNbUZXMN2XpJd3JlA2XzS3VTq79Y
-	xrzR6MVwruOJ7aSTA6uZePutgwLE1jFg5xv5yPzq9xdmV4haD6qjao4hd3B8MC9UG7107DCDdl/
-	jrkVjR3enrZzQsN1cH9WO0bOeTgbvjtpHE3HcXLzjuQ==
-X-Gm-Gg: AfdE7clGX72ujPZeMsBC9yffhejMbM+ZLrJuSC+AlJPq6fBfS8cN+bw0hdtQQPq2ImT
-	fDTS3J3GfIFRTZmo+xge0MXMbwiLvvtmuF6TaTc25i9GgwdGeApskiY6xILm4Hn5vnp6O3XtHWK
-	+slrCo2gzhTR3suKPdo1UiJ1KDirrrSgtpwwyLtm7sWrXbhh7pwKZLMmxYI7noGDG+V+Q/jIGtm
-	N7TUGLfF/lcloKVIj1CVzVSZKGOcAL91JJblpVaN62BC/tfxSvZdg+YWE0vyOYnVUKuGX3xEas=
-X-Received: by 2002:a05:6830:6d4f:b0:7e6:e1d2:3bd0 with SMTP id
- 46e09a7af769-7ec420f059fmr4345745a34.10.1784115388897; Wed, 15 Jul 2026
- 04:36:28 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="Z5zyq2Hj"
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 8F4601477;
+	Wed, 15 Jul 2026 08:07:13 -0700 (PDT)
+Received: from [10.57.82.220] (unknown [10.57.82.220])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 28E1B3F905;
+	Wed, 15 Jul 2026 08:07:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
+	t=1784128037; bh=+jFMWWv220aZ8z/A3E0zhi9BB4H/u0SqqJRjY/UOWiM=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=Z5zyq2HjC1J3H+2sS3zu5v1h+CSpo+X2JamGTGR0pKplJ+iyMq9LehKG+jacWhbPZ
+	 WPUxV70PTchy+e9ITMIQB1lc3Qrkdac2O7M9gEkdlvEpppy6u5k2BxIx/dsQ5U+PV6
+	 B4YDMFmLqLte+c5rOhprH1XGuK2zbmrCTYOVdNc8=
+Message-ID: <6d167aaa-e9b0-4687-970c-1c67d0df6344@arm.com>
+Date: Wed, 15 Jul 2026 17:07:02 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260421092457.37649-1-cuiyunhui@bytedance.com> <62c418bc-082b-4ae2-a889-f63dd2b7f503@kernel.org>
-In-Reply-To: <62c418bc-082b-4ae2-a889-f63dd2b7f503@kernel.org>
-From: yunhui cui <cuiyunhui@bytedance.com>
-Date: Wed, 15 Jul 2026 19:36:16 +0800
-X-Gm-Features: AUfX_my7GduNMyP3_qMrw3wVYCX4eNM5Te_gdOiwtTrcP35i3khqzqzTVVZ3zhc
-Message-ID: <CAEEQ3wm72=CKNxXsSszZqiWDSHDZcAUgppxXxEAXyCy=uB+zaw@mail.gmail.com>
-Subject: Re: [External] Re: [PATCH v1 0/7] riscv: add Svnapot-based contiguous
- PTE support
-To: "David Hildenbrand (Arm)" <david@kernel.org>
-Cc: akpm@linux-foundation.org, alex@ghiti.fr, andrew+kernel@donnellan.id.au, 
-	andreyknvl@gmail.com, anup@brainfault.org, aou@eecs.berkeley.edu, 
-	apopple@nvidia.com, ardb@kernel.org, atish.patra@linux.dev, 
-	baolin.wang@linux.alibaba.com, debug@rivosinc.com, 
-	djordje.todorovic@htecgroup.com, dvyukov@google.com, elver@google.com, 
-	glider@google.com, ilias.apalodimas@linaro.org, junhui.liu@pigmoral.tech, 
-	kasan-dev@googlegroups.com, kees@kernel.org, kevin.brodsky@arm.com, 
-	kvm-riscv@lists.infradead.org, kvm@vger.kernel.org, linux-efi@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org, 
-	liu.xuemei1@zte.com.cn, ljs@kernel.org, namcao@linutronix.de, 
-	osalvador@suse.de, palmer@dabbelt.com, pjw@kernel.org, rmclure@linux.ibm.com, 
-	rostedt@goodmis.org, rppt@kernel.org, ryabinin.a.a@gmail.com, 
-	surenb@google.com, vincenzo.frascino@arm.com, vishal.moola@gmail.com, 
-	wangruikang@iscas.ac.cn, zhangchunyan@iscas.ac.cn
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 00/22] Simplify special kernel page table handling
+To: linux-mm@kvack.org
+Cc: Andrew Morton <akpm@linux-foundation.org>,
+ David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>,
+ "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
+ Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
+ Michal Hocko <mhocko@suse.com>, Pasha Tatashin <pasha.tatashin@soleen.com>,
+ Russell King <linux@armlinux.org.uk>,
+ Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
+ Ryan Roberts <ryan.roberts@arm.com>, linux-arm-kernel@lists.infradead.org,
+ Huacai Chen <chenhuacai@kernel.org>, loongarch@lists.linux.dev,
+ "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+ Helge Deller <deller@gmx.de>, linux-parisc@vger.kernel.org,
+ Madhavan Srinivasan <maddy@linux.ibm.com>,
+ Michael Ellerman <mpe@ellerman.id.au>, linuxppc-dev@lists.ozlabs.org,
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+ Albert Ou <aou@eecs.berkeley.edu>, linux-riscv@lists.infradead.org,
+ Heiko Carstens <hca@linux.ibm.com>, Vasily Gorbik <gor@linux.ibm.com>,
+ Alexander Gordeev <agordeev@linux.ibm.com>,
+ Gerald Schaefer <gerald.schaefer@linux.ibm.com>, linux-s390@vger.kernel.org,
+ "David S. Miller" <davem@davemloft.net>,
+ Andreas Larsson <andreas@gaisler.com>, sparclinux@vger.kernel.org,
+ Richard Weinberger <richard@nod.at>,
+ Anton Ivanov <anton.ivanov@cambridgegreys.com>,
+ Johannes Berg <johannes@sipsolutions.net>, linux-um@lists.infradead.org,
+ Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+ Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
+ "H. Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>,
+ Peter Zijlstra <peterz@infradead.org>, Ning Sun <ning.sun@intel.com>,
+ x86@kernel.org, tboot-devel@lists.sourceforge.net,
+ Ard Biesheuvel <ardb@kernel.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
+ Vishal Moola <vishal.moola@gmail.com>, Alistair Popple <apopple@nvidia.com>,
+ "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+ linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
+References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
+From: Kevin Brodsky <kevin.brodsky@arm.com>
+Content-Language: en-GB
+In-Reply-To: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hi David,
+On 14/07/2026 16:03, Kevin Brodsky wrote:
+> Page table constructors and destructors were originally introduced
+> specifically for user PTE pages. Over time, their use became more
+> widespread, and starting from v6.16 they are called at all levels
+> and for both user and kernel page tables [1]. Or so I thought. Turns
+> out, we still have various special kernel page tables where the
+> ctor/dtor are not called; vmemmap page tables is one such case.
+>
+> Looking closer, we do not actually need per-level ctors for kernel
+> page tables. In fact we do not need ctors for them at all, because
+> nothing is specific to kernel page tables in the ctor/dtor and
+> nowadays they should be allocated with pagetable_alloc().
+>
+> Here's the plan: all the generic page table handling moves to
+> pagetable_{alloc,free}(). Whatever is left is specific to user page
+> tables; the ctor/dtor are only called for user page tables at the
+> required levels (PTE/PMD), and renamed to make that clear.
+>
+> Doing this will allow us to remove a good amount of special casing,
+> but there's quite a bit of churn to get there. Here's what this
+> series does:
+>
+> 1. Introduce the concept of "kernel mm" and replace most comparisons
+>    with &init_mm with a flag check (patch 1-12); no functional change
+>    so far.
+>
+> 2. Move the page table accounting/type setting to pagetable_{alloc,free}
+>    (patch 13-15). Kernel mm's do not need to call the ctor/dtor any
+>    more.
 
-On Tue, Apr 21, 2026 at 7:28=E2=80=AFPM David Hildenbrand (Arm)
-<david@kernel.org> wrote:
->
-> On 4/21/26 11:24, Yunhui Cui wrote:
-> > Hi,
-> >
-> > First of all, thanks to Ryan Roberts for the work on mTHP and
-> > Contiguous PTE support on arm64. That work provides a very useful
-> > reference for reducing page fault overhead and TLB pressure for
-> > large but still PTE-mapped memory ranges.
-> >
-> > This series adds Svnapot-based contiguous PTE support for RISC-V.
-> >
-> > To achieve similar benefits on RISC-V, this series introduces a
-> > Contiguous-PTE-like mechanism built on top of the Svnapot extension.
-> > The intent is to preserve the core-MM PTE semantics while allowing
-> > RISC-V to transparently fold eligible base-page mappings into
-> > Svnapot-encoded contiguous mappings when possible.
-> >
-> > The series splits the low-level raw PTE helpers from the public
-> > core-MM-facing PTE helpers, so that:
-> >
-> > -the __xxx helpers expose the raw hardware PTE encoding,
-> > -the xxx helpers provide the semantic view expected by core MM,
-> > -and Svnapot-aware handling is centralized in the public wrapper layer.
->
->
-> Just curious, is there opportunity to share some of the code with arm64,
-> factoring out helpers that handle something like
-> CONFIG_ARCH_HAS_CONTIG_PTES ?
+The underlying assumption here is that pagetable_{alloc,free} are used
+wherever the ctor/dtor are called, and as Sashiko pointed out there are
+counterexamples:
 
-arm64 contpte and RISC-V Svnapot look similar at a high level, but they
-do not model contiguous mappings in the same way. arm64 keeps ordinary
-base PTEs and adds PTE_CONT, while Svnapot encodes a naturally aligned
-range directly in the PTEs. Because of that, this series exposes a
-logical per-page sub-PTE view to generic MM, while keeping the raw
-Svnapot encoding underneath.
+1. sparc32 calls the ctor/dtor for user PTE pages, but uses a custom
+allocator.
 
-So the differences are not only in the low-level encoding, but also in
-the public PTE semantics and in some of the fold/unfold and TLB rules.
+2. archs that do not select MMU_GATHER_TABLE_FREE do not use
+pagetable_free() in tlb_remove_table().
 
->
->
-> --
-> Cheers,
->
-> David
+3. arch_remove_memory() and vmemmap_free() are a bit of a mess - some
+archs call the dtor and/or use pagetable_free() for freeing the direct
+map page tables, some don't.
 
-Thanks,
-Yunhui
+How I'm thinking to address these:
+
+1. sparc32 does not use split ptlocks, so maybe doing the memory
+accounting explicitly? Otherwise, we may need to keep the page type
+handling + memory accounting in a separate helper that sparc32 can
+explicitly call.
+
+2. Always enable MMU_GATHER_TABLE_FREE. pagetable_free() should always
+be used for pages allocated with pagetable_alloc().
+
+3. Go through all the implementations of memory hotplug and vmemmap, and
+ensure that pagetable_free() is used for those pages allocated with
+pagetable_free() (and only those). That may well call for a separate series.
+
+- Kevin
