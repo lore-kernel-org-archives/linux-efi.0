@@ -1,144 +1,162 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 42FAC3FE36D;
-	Thu, 16 Jul 2026 10:24:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from mail-pf1-f177.google.com (mail-pf1-f177.google.com [209.85.210.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA10941E6CC
+	for <linux-efi@vger.kernel.org>; Thu, 16 Jul 2026 12:42:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784197474; cv=none; b=JAgY6RJu/yUkx5YTsPL9zMebed7MwGuNAyf43e/FHC7wYEmiLJp5oaztnzIYbqJ4r9s256FKJhe+h+6xw3Vx7wfMGu2BpSA1dhBJ5HXMW8MT7K1oRZsyFJakIIseTn/NPy2Q7iAiV4C1kN92GmUox/YwXxO1n6YbpcxLs1gPM4E=
+	t=1784205765; cv=none; b=O/6psGy4i2YiyrTXyV3MHvrWY3LJk94GQkwdcEWvXTAs99dntmCbAfjjBeTw+e4xRuELiOAMeUdTaTfjJy+6EXtrXgi7FGdpl+39ERlRibStl1Ln4M2j0sWDdcfN+9VBCOHICABIEVRsclR7fuu5I7ZgF2MrYzwgfZoALLfSkCQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784197474; c=relaxed/simple;
-	bh=khk7OVdasrmWElu7v+he5pwEjEyq3lY0VQWweIBUcxo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=MFyEMc2IHLcVfPvcTvPdduivOARlwsWo6cjx/Cz1tryvDzmR7ScoaOv5WpjG2M6Hq2ctImRGth6ty8WjesOzQnEDiqPQIKkiu3ami/caxS3L59aCEE8sx74ggV4JaF8DrUdJuvyFSeyMhe/vYdHQq0eTRbUb+OyYy4wIr/REbBM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=SWDF44sf; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+	s=arc-20240116; t=1784205765; c=relaxed/simple;
+	bh=KoU3jsnnA0LPxfAs14/DKdbgfb7G6JNo4LfiKF8vP0s=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=SZVFcGnBGXbnJb1ubzKTwYuxUpWb6Jy1b4E8KWHXkFkobigeGmtgFUVaL2VcgTY16M5IUBhN9B2muYcTf5YAAT/uLEwGAVV7a4gZ6nfoCpFazjQFJV5Bc5jtABWjJww2afTAkhVe0NH2HmCwF0VotrKL1I280tq92O9rBHztu2M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com; spf=pass smtp.mailfrom=bytedance.com; dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b=DCL6GzBX; arc=none smtp.client-ip=209.85.210.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bytedance.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="SWDF44sf"
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 3F8F5339;
-	Thu, 16 Jul 2026 03:24:28 -0700 (PDT)
-Received: from [10.57.83.230] (unknown [10.57.83.230])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 182553F7B4;
-	Thu, 16 Jul 2026 03:24:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1784197472; bh=khk7OVdasrmWElu7v+he5pwEjEyq3lY0VQWweIBUcxo=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=SWDF44sfS9ouTQyhsoNdjcWghv45qcZdrZRpeHggINaskI2QpA6EEqdwPjW+Vmzil
-	 Oyq849N1iPFY3DmI3306OC+qsEo5JxlkY3KFxgqlm9GhUkNprXodnPXqeKyEOXySIf
-	 HsuDVJWHrNHvd1lWMUDXxIJ2DVjDYvMciJe7gb58=
-Message-ID: <b0811447-e865-4cde-a45d-8a9f0bd25a4a@arm.com>
-Date: Thu, 16 Jul 2026 12:24:18 +0200
+	dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b="DCL6GzBX"
+Received: by mail-pf1-f177.google.com with SMTP id d2e1a72fcca58-8453427d3f4so5922826b3a.3
+        for <linux-efi@vger.kernel.org>; Thu, 16 Jul 2026 05:42:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=bytedance.com; s=google; t=1784205762; x=1784810562; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=SXHE9RUaBpTIzBZsLxmZxoZ7/zzqOF995lpxXageMRM=;
+        b=DCL6GzBXuZIrpg5r4Dn7bmiec2yTU3ygsAk6XwK6sevV+7plqUyDAbaLoVIOIeJNjW
+         wzPQfXizcKLAqeFJ5/0Uv/sUHhiXwumIhDwy+NjLZwH9Zg75ixLw9zL5UzPsHg7pGbOk
+         Uwt2/qOSctOOcArx3Wx7zx8cwq5yPE4BlLsfeiN4Rm8HVpTk5dZO41HajxR+si6xWYw5
+         tWMgQX91KXhXZb+tgoAteFh2TdWeHGNcYS4pYwOXj0rsNbIGQNTAV3uC4F0DWYmVJTra
+         LpFZFFw25HJiUKzLsTg8JzR/0ialUkomNAL6K31BudhwuzOiiKrJfmRd04GoO0H0MC26
+         LQbw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1784205762; x=1784810562;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=SXHE9RUaBpTIzBZsLxmZxoZ7/zzqOF995lpxXageMRM=;
+        b=dJ8bWDE23GIPBiTsOQBUnLXkcsNQ98U/uVlpDXx/tj2WcWjgzjERoS8fNIb+Q6G0oi
+         gD+3KYpC+TZL9oL+DHAOGcztvscUu1Zhqr/2SEO0eLfNhVbwBp/vBExu+8ekmjjYIAG2
+         ZSwVON5nldLR/zhoFqshxBQD8tV/5UCiqz799YA4Juztj0Xx6+SzRc9xtBZGn9ecJoj3
+         eUOm0QtkIwK+uMj9YA3rb2f7lmHaD2Zcq0hkJ7W1UDM1pFnuBScN9Es1HmDqTHT6bgv0
+         aNZVwfOsOrxIPhznSG4J8ZfbAs/4uvCE8iNujBaZsrk7PJKYysoPUmsYSMLtVIUhyc5y
+         0SGg==
+X-Forwarded-Encrypted: i=1; AHgh+RpsO8fRiqfg5VIN4CwE167Kf+laASXug1Te8Ua9wlTIuL3ouqP4HyHOROrscn8SGUAg14UDe1VEe5A=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyfIKvkDFEUTka907fXH5AIfhHRFQGkluYcygoR/W5avoMlCaPZ
+	AqTvIPMEydNC1c2g9bCIBY4eFs1JP3vX/pZgs+3HVXOCinrgm9VxNhcGoHWEoLntU1s=
+X-Gm-Gg: AfdE7cn1x/OIcO1XOvyvhJyWzTy1us7wSfQVtUycEwM6h+NSD4iFKslhNJqB/oBDYl0
+	MyUlKm/k+rBWIFrUnMEKYczLg+dqKbZ3EwGQ93hCvq6BgW3Rj25AwZ8Kq+6eTLSiphfrw6MwWzh
+	xSKXyZ+qt9pCLZ4KGyiJE3cSBjqH4nA2zSxWsOnJyHRitkaP3gw/Aw18G+HBvHvxM/waiHecszQ
+	iJEhcHVhMI5XQjWAIkV3Xxe6xRiwKY4CMzhP/c2O3ldo51yS12CgGlrHbbytTcNQmvgzpuqhy2n
+	eCOmWJLDAq2zUrd3dP6aV8VMkfWtl/3XzLMXbQq33/DF5Jv072wIQPcOgN65uszlZM2BCyvUk1+
+	nlnkjkTiR6ekpTdDlHdJ/tRcI9sLS+6+tR5Lh5Lt/2x1PTbUqmbsIKCpYtV2iZq+R+aWiSL+xG+
+	AvuYwFkRuHuazoIqAtazbajIs=
+X-Received: by 2002:a05:6a00:815:b0:847:7f38:27c6 with SMTP id d2e1a72fcca58-84a672b4789mr6422956b3a.50.1784205761835;
+        Thu, 16 Jul 2026 05:42:41 -0700 (PDT)
+Received: from L6YN4KR4K9.bytedance.net ([2408:8606:1800:501::2:f])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-cb258eeaba2sm1730793a12.12.2026.07.16.05.42.33
+        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
+        Thu, 16 Jul 2026 05:42:41 -0700 (PDT)
+From: Yunhui Cui <cuiyunhui@bytedance.com>
+To: linux-riscv@lists.infradead.org,
+	linux-mm@kvack.org,
+	linux-kernel@vger.kernel.org
+Cc: linux-arch@vger.kernel.org,
+	kvm-riscv@lists.infradead.org,
+	kvm@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-efi@vger.kernel.org,
+	linux-perf-users@vger.kernel.org,
+	kasan-dev@googlegroups.com,
+	Yunhui Cui <cuiyunhui@bytedance.com>
+Subject: [PATCH v2 00/15] riscv: add Svnapot PTE folding support
+Date: Thu, 16 Jul 2026 20:41:35 +0800
+Message-Id: <cover.1784201104.git.cuiyunhui@bytedance.com>
+X-Mailer: git-send-email 2.39.2 (Apple Git-143)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 17/22] mm: pagewalk: drop redundant address check for
- kernel mm walks
-To: linux-mm@kvack.org
-Cc: Andrew Morton <akpm@linux-foundation.org>,
- David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>,
- "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
- Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
- Michal Hocko <mhocko@suse.com>, Pasha Tatashin <pasha.tatashin@soleen.com>,
- Russell King <linux@armlinux.org.uk>,
- Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
- Ryan Roberts <ryan.roberts@arm.com>, linux-arm-kernel@lists.infradead.org,
- Huacai Chen <chenhuacai@kernel.org>, loongarch@lists.linux.dev,
- "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
- Helge Deller <deller@gmx.de>, linux-parisc@vger.kernel.org,
- Madhavan Srinivasan <maddy@linux.ibm.com>,
- Michael Ellerman <mpe@ellerman.id.au>, linuxppc-dev@lists.ozlabs.org,
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
- Albert Ou <aou@eecs.berkeley.edu>, linux-riscv@lists.infradead.org,
- Heiko Carstens <hca@linux.ibm.com>, Vasily Gorbik <gor@linux.ibm.com>,
- Alexander Gordeev <agordeev@linux.ibm.com>,
- Gerald Schaefer <gerald.schaefer@linux.ibm.com>, linux-s390@vger.kernel.org,
- "David S. Miller" <davem@davemloft.net>,
- Andreas Larsson <andreas@gaisler.com>, sparclinux@vger.kernel.org,
- Richard Weinberger <richard@nod.at>,
- Anton Ivanov <anton.ivanov@cambridgegreys.com>,
- Johannes Berg <johannes@sipsolutions.net>, linux-um@lists.infradead.org,
- Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
- Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
- "H. Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>,
- Peter Zijlstra <peterz@infradead.org>, Ning Sun <ning.sun@intel.com>,
- x86@kernel.org, tboot-devel@lists.sourceforge.net,
- Ard Biesheuvel <ardb@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
- Vishal Moola <vishal.moola@gmail.com>, Alistair Popple <apopple@nvidia.com>,
- "Matthew Wilcox (Oracle)" <willy@infradead.org>,
- linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
-References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
- <20260714-remove_pgtable_cdtor-v1-17-44be8a7685d7@arm.com>
-From: Kevin Brodsky <kevin.brodsky@arm.com>
-Content-Language: en-GB
-In-Reply-To: <20260714-remove_pgtable_cdtor-v1-17-44be8a7685d7@arm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 14/07/2026 16:04, Kevin Brodsky wrote:
-> Commit 8b1cb4a2e819 ("mm/pagewalk: fix EFI_PGT_DUMP of
-> espfix area") made no-VMA page table walks use
-> pte_offset_kernel() for any address above TASK_SIZE. This avoided
-> pte_offset_map() validation on EFI page table dumps, where efi_mm
-> could walk x86 espfix PMDs that intentionally look bad to pmd_bad().
+Svnapot can encode a naturally aligned 64KB range as a single folded
+PTE block. This series adds the RISC-V MM support needed to use that
+encoding for suitable user mappings while preserving the generic MM view
+of PAGE_SIZE PTEs.
 
-Sashiko rightly doesn't like this patch. Turns out 8b1cb4a2e819's commit
-message and the comment it added are narrower than what the problem
-really is: on x86, due to things like
-/sys/kernel/debug/page_tables/current_kernel, we may be walking kernel
-page tables even when walk->mm is a regular user mm. Just checking the
-mm is therefore not sufficient.
+The series starts by adding raw PTE helpers and switching architecture
+page-table users that must see the encoded page-table entry to those raw
+helpers. It then introduces Svnapot read-side and update helpers for
+folded PTE ranges. Later patches make the generic PTE batch and leaf-size
+interfaces work with the raw encoded view where required, avoid redundant
+A/D aggregation and TLB flushes, optimize mprotect() for Svnapot ranges,
+and request 64KB executable folios when Svnapot is available so text
+mappings can benefit from lower iTLB pressure.
 
-Will replace this patch with a rewording of the comment to avoid
-suggesting the issue is specific to efi_mm.
+Dependency:
+  - This series depends on the prerequisite RISC-V patch posted at:
+    https://lore.kernel.org/all/20260618064406.14508-1-cuiyunhui@bytedance.com/
 
-- Kevin
+Changes in v2:
+  - Rework the v1 7-patch series into 15 smaller patches: split raw PTE
+    helper introduction from the architecture-user conversion, and split
+    Svnapot contpte handling into read-side and update-side pieces.
+  - Add the generic MM helper changes needed by folded Svnapot mappings,
+    including folio-batch comparison flags, raw-entry leaf-size queries and
+    fast-GUP-specific lockless PTE helpers.
+  - Make the RISC-V pte_batch_hint() implementation honor folio batch
+    flags, and preserve Svnapot leaf-size semantics via __ptep_leaf_size().
+  - Add follow-up fixes and optimizations that were not in v1: avoid
+    redundant A/D aggregation, avoid Svnapot consistency checks in
+    ptep_get(), avoid A/D aggregation in fast-GUP, remove a redundant TLB
+    flush, optimize mprotect() for Svnapot mappings, and request large
+    executable folios when Svnapot is available.
+
+Yunhui Cui (15):
+  riscv: introduce raw PTE helpers
+  riscv: switch arch page-table users to raw PTE helpers
+  riscv/mm: implement Svnapot contpte read-side helpers
+  riscv/mm: implement Svnapot contpte update helpers
+  mm: extend pte batch and leaf-size helpers
+  riscv: make pte_batch_hint() honor folio batch flags
+  riscv/mm: preserve Svnapot leaf-size semantics for page-table
+    consumers
+  riscv/mm: avoid redundant Svnapot A/D aggregation
+  riscv/mm: avoid Svnapot consistency checks in ptep_get()
+  mm/gup: add fast-GUP specific lockless PTE helpers
+  riscv: mm: avoid Svnapot A/D aggregation in fast-GUP
+  arm64: mm: avoid contpte A/D aggregation in fast-GUP
+  riscv/mm: remove redundant TLB flush in napotpte_convert
+  riscv/mm: optimize mprotect for Svnapot mappings
+  riscv: mm: Request large exec folios for Svnapot
+
+ arch/arm64/include/asm/pgtable.h |  25 +-
+ arch/riscv/include/asm/kfence.h  |   4 +-
+ arch/riscv/include/asm/pgtable.h | 480 +++++++++++++++++-
+ arch/riscv/kernel/efi.c          |   4 +-
+ arch/riscv/kernel/hibernate.c    |   3 +-
+ arch/riscv/kvm/gstage.c          |  25 +-
+ arch/riscv/kvm/mmu.c             |   4 +-
+ arch/riscv/mm/Makefile           |   1 +
+ arch/riscv/mm/contpte.c          | 804 +++++++++++++++++++++++++++++++
+ arch/riscv/mm/fault.c            |   4 +-
+ arch/riscv/mm/hugetlbpage.c      | 135 ++++--
+ arch/riscv/mm/init.c             |   8 +-
+ arch/riscv/mm/kasan_init.c       |  16 +-
+ arch/riscv/mm/pageattr.c         |  12 +-
+ arch/riscv/mm/pgtable.c          |  52 +-
+ include/linux/pgtable.h          |  71 ++-
+ kernel/events/core.c             |   2 +-
+ mm/gup.c                         |   6 +-
+ mm/internal.h                    |  39 +-
+ mm/mincore.c                     |   2 +-
+ mm/mremap.c                      |   2 +-
+ 21 files changed, 1542 insertions(+), 157 deletions(-)
+ create mode 100644 arch/riscv/mm/contpte.c
 
 
-> efi_mm is now marked with MMF_KERNEL, and no-VMA walks use
-> mm_is_kernel() to select pte_offset_kernel() for kernel mm's. As a
-> result we no longer need to handle the EFI_PGT_DUMP case explicitly.The
-> address check is therefore redundant for EFI_PGT_DUMP and makes the
-> condition harder to reason about.
->
-> Remove the address check and associated comment; mm_is_kernel()
-> should be sufficient on its own.
->
-> Tested by booting x86 QEMU with CONFIG_EFI_PGT_DUMP=y and reading
-> /sys/kernel/debug/page_tables/efi.
->
-> Assisted-by: Codex:GPT-5.5
-> Signed-off-by: Kevin Brodsky <kevin.brodsky@arm.com>
-> ---
->  mm/pagewalk.c | 7 ++-----
->  1 file changed, 2 insertions(+), 5 deletions(-)
->
-> diff --git a/mm/pagewalk.c b/mm/pagewalk.c
-> index a3f47d1de3c5..0dd9d4ad9b68 100644
-> --- a/mm/pagewalk.c
-> +++ b/mm/pagewalk.c
-> @@ -68,17 +68,14 @@ static int walk_pte_range(pmd_t *pmd, unsigned long addr, unsigned long end,
->  	if (walk->no_vma) {
->  		/*
->  		 * pte_offset_map() might apply user-specific validation.
-> -		 * Indeed, on x86_64 the pmd entries set up by init_espfix_ap()
-> -		 * fit its pmd_bad() check (_PAGE_NX set and _PAGE_RW clear),
-> -		 * and CONFIG_EFI_PGT_DUMP efi_mm goes so far as to walk them.
->  		 */
-> -		if (mm_is_kernel(walk->mm) || addr >= TASK_SIZE)
-> +		if (mm_is_kernel(walk->mm))
->  			pte = pte_offset_kernel(pmd, addr);
->  		else
->  			pte = pte_offset_map(pmd, addr);
->  		if (pte) {
->  			err = walk_pte_range_inner(pte, addr, end, walk);
-> -			if (!mm_is_kernel(walk->mm) && addr < TASK_SIZE)
-> +			if (!mm_is_kernel(walk->mm))
->  				pte_unmap(pte);
->  		}
->  	} else {
->
+base-commit: b8809969e1d7a591e0f49dd464a5d04b3cf02ab1
+-- 
+2.39.5
+
