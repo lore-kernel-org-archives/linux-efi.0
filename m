@@ -1,63 +1,63 @@
-Received: from mail-pg1-f173.google.com (mail-pg1-f173.google.com [209.85.215.173])
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC7D0420498
-	for <linux-efi@vger.kernel.org>; Thu, 16 Jul 2026 12:44:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9C6C41D656
+	for <linux-efi@vger.kernel.org>; Thu, 16 Jul 2026 12:44:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784205891; cv=none; b=fz9KNMGqzmnwTiij6Sp3oXOg6pGLb/UyX8kLIE7KVWlDm92qibqjRdfh8auqYTcH9XXi82WYBhfhR8tcNfgboKtv3NreM1y2wwZEZxCZD9pw1d2q+8GnrfHu6/I4sxzUak59FSedu3mcUj8Ac4kLvBNg0FCGocHqHy2QKgW9fAM=
+	t=1784205900; cv=none; b=KH1Q8g5M20NnCISe5Av4mO5yRN0MCh+7HW8gLA0QF20CvZsdGFTBY5IA7V11MXBFTFjq62hZXSLmpRsjlzkspiPpjfQF7JAzh4N1VUkmBt6GGBwqtZ0tdZmk3+xlsl5FbvLrU7VBMKruPc0WpTHOCT/gKGyI1b8SZEnZwsVND5I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784205891; c=relaxed/simple;
-	bh=8QB7Nm89twoLMmPuv/JvcX/X4fT+yA9XR/MJbmS0oGI=;
+	s=arc-20240116; t=1784205900; c=relaxed/simple;
+	bh=ybAp/Hmnc3TAueG66xnodqF9+Bp3yZdy6u6JbQGTD4E=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=NcQTmR2EErpIGyME4dGpEJrB2FgVYwo6Xy/J2HUwz4L4Zo6demH3aGZroy9091N8XXrMw0GOnWxBg/YvMZslU5UO4ahcaS+ZEy8iBfXB3o1tUI4N4hjyn8s9EaDKXQpVwKZmh+nQwy3/HvyZ2kFUtMXIh+dLfVHxsRrIggUH+EU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com; spf=pass smtp.mailfrom=bytedance.com; dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b=EN4Ycm9g; arc=none smtp.client-ip=209.85.215.173
+	 MIME-Version; b=i967Y7jEv4q4ZJBLhV5I3PeQd4u2hX04WOpvZgaY3pe1CsVc0ZhWN41x+z0coK00m2q208Oy9Ids7Tolmh4RTapYWIxHd075bWP7e8sGF1euap2MR5JARl/+365x8F4G2xy2ydF24O161AMsVK7npBYktcbPkAULa1VcsJ50iPk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com; spf=pass smtp.mailfrom=bytedance.com; dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b=MUbSTRUR; arc=none smtp.client-ip=209.85.214.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bytedance.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b="EN4Ycm9g"
-Received: by mail-pg1-f173.google.com with SMTP id 41be03b00d2f7-c99eaa1f020so3119924a12.2
-        for <linux-efi@vger.kernel.org>; Thu, 16 Jul 2026 05:44:49 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=bytedance.com header.i=@bytedance.com header.b="MUbSTRUR"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2cace91f112so63347355ad.0
+        for <linux-efi@vger.kernel.org>; Thu, 16 Jul 2026 05:44:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bytedance.com; s=google; t=1784205889; x=1784810689; darn=vger.kernel.org;
+        d=bytedance.com; s=google; t=1784205898; x=1784810698; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=P62EVeZeD6Lr+EK73ByExkJlzskm2POoZpW1kwtVtAQ=;
-        b=EN4Ycm9g0slYOsJopCov6pgza00nzUbxRgBoSu5NYgP8H4wRZnzQbKMJBIslkss026
-         CVeC+X3pJWuKv/yminjErCaOhH78K6kiunf6OnjQjVAsKOCbKm6IEsQ/kylcQ8hrq1hF
-         TQgVMzZ9ISmKRUR4YX10lCclrIlonYJJSTHXl/1nD7xQhg+X5X3/CyDSzMwTT9YnK70o
-         e3EVd2d8ftse+yNHg1yP1cDp5BJt8wO2yzuFgaqtqKqWSblQF1hiMfwB5kfAX3cv/Vil
-         x7u0r2f0Az9SkEk9j0VZ44ODMu04mq4YzOH69cX6U+QpvOGEIgRGkU+ZGBxSRtZi3Jmx
-         gdNw==
+        bh=igNuDXnwdUCT2dm/vIcI/M9kQJ6fMwWaxma7wgKaCpI=;
+        b=MUbSTRURVANI8QAKE7ELCYR0rI7ExejRVAjeV9XMDIhl5okUOjsWO4JBdblNUhYmtH
+         ppZCrNRxUk/330nLIPhHo+fI5J7cJCukbhaGP807E9LqxMy/bkaVJlicpb5Hjf8yXYl+
+         PTpc2IF71XhO4uJ5QPFicMgiSMYwV3BPjtsF6IntBi05yOsDRQJq8vh0d2fD+NxHLidh
+         wqbdlz3QrVgO2dw/WO7ATLh3cBaJ5YUZHLaM0eGXOPLxS3VCeRW3IVMv/kiull43rv0F
+         UqXNjc7ykwlt10+k986cuFuk1GZ6hnGni/37BVT4BjOQxTvkEWmsyFXXWca6MZ4ce/v3
+         Cc7w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784205889; x=1784810689;
+        d=1e100.net; s=20251104; t=1784205898; x=1784810698;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=P62EVeZeD6Lr+EK73ByExkJlzskm2POoZpW1kwtVtAQ=;
-        b=WNLiJ+U3gwn5SyTWVpoYhSuDQou53nnD/z0l+d9lCXrKLaarLD10EJY9cpakF4reBW
-         SAgrdEf2p58Iihg2GGpH8dpkzudR+VjBRQ0mZOEuNREr1eF7M24ABJJV6Y1EeIrb2rLr
-         V13uO2Fn3O1K8yWd6o9JZIVhV130QSyCGFpVRB3PMXYgIyajjC3wZMy3ro0wKq+LVpor
-         qkDhNvC1V62kq6VpBMcrw+/jITPsqq7oyZwAKInFvFvK0bWIbNLkFeC5Y8xyFhEmCJrd
-         CgYn683Sa0hFssU11TX1ozfDDkSmAJd5URkr4/hcEDOzUF9hRgLKRSAX04+xrOGLJzQs
-         niwg==
-X-Forwarded-Encrypted: i=1; AHgh+RqfxVh+eA523UNlswsq3tIRcn0gECQryNxuXdBhEYQp/ihtT/8hLBXV5hNs5nQ0tiodgmNx3bGlxW0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxFrE0daj4cgeoibMfDBQhphXCtkNoj9xk29c/X5PALbfHr4l7V
-	XMhgeKB2wfwiree4WG+0rwtsVF4HtO9BZy6+mJ89Wwj4IgU+fTSKVP95BJX6xeeUZIM=
-X-Gm-Gg: AfdE7cnq7uLYstsNbc1oQI9G5JolYAQOT7HFNOlp15wIh1n1eGcRAvjTnYilPwEuMom
-	5cBAGWSnMiyRpcFo5Ah/WZLaTpmnW6Yo5+6o036Lq0E37Tfdwxur6ypCDvtjl6k8OWEfVC9mefI
-	yn7UXNgwOr4E1ZxRn6PZOXZ/6IQ3e5aBMc1Azp4f15aLB80JASCj2qukzEqok2OSoGxpqNtFaOP
-	m+okY36w5llGSLjIPVl0C9YVyM6O06fFcFAzzSj3Uj2dVnuMxSsHWVVcjz5hGJJRFkc1tTQMbBO
-	7RXiARy+QNutH3VQTrWn/vz0FsjMBhJc804hO7/4lSfSockoSn+7zZpPOWfUxHRcwfpXeTuXE6E
-	qfwnnEwj7r4paOC2y9gdKRQbBLVLAd2zf26/FKjg1NXvi6/8TmTdHQ5n0ZWpN3PrCuQf6c7mFsC
-	otXh26lYlu6pYWNjsCmSiQJGk=
-X-Received: by 2002:a05:6a21:7117:b0:3c3:89ce:b5bc with SMTP id adf61e73a8af0-3c389ced5b6mr3647677637.15.1784205889298;
-        Thu, 16 Jul 2026 05:44:49 -0700 (PDT)
+        bh=igNuDXnwdUCT2dm/vIcI/M9kQJ6fMwWaxma7wgKaCpI=;
+        b=jK7yzOIY4OcpvouIXN5MgMyhI1V9iRknwDlvA5hIqtXEJxpjM88JNu6qJdRoYo7Es1
+         PzuxryvwsRmKbPW3d7L+8NCicsA4XqTSIMaRb/CowyMj9LJhC+yhBWlBJtcpnzm0m6uD
+         g2m/pP9SS1eDsbJuwMcAmuxruqu+q5jDLZRSsv+41lBqZ2g19fumGHIVQH5AZE4vfIKt
+         GONP25Yhw+fDCUGONmRwoDJTmf07kv+mTth6Foyc7KBAN7BzpOgH3DGmOLl1+1IcYwyv
+         a3TSZtYax1ZPTZW7urwgEutzC9QDDa9oogNP1W1PLxZ+qlBFrHVelaWBd+RPNCNVnr5s
+         TuJg==
+X-Forwarded-Encrypted: i=1; AHgh+RqvzMAEdE0Z2aBESowvrhuhXDAhw2dh76HmgOQJthnFWSjjqyxzc0nHWpEoPYlJ+OhCiT1N66P1Hwk=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzm5ZFgkDKx6Ay5N0l/ikBxor0GptKijyGro7C7eF7GBrXdrW7z
+	GCkT54jjIP2q5IQ0FSQMzgHLFZ8Ex0QduWr3XpxdIOEEgZtgTTWQnwDw+dFFMs0WE40=
+X-Gm-Gg: AfdE7cnUJpy0tEBvPA80q35zCHBZjJkMixT7kK4B5a3NgdYOcdCuK/j4+ykm4ZKLkUN
+	UuMlorzhl+sJ0SQV5+oXh2CRY7MjJhgbBei3sw50Uc3c9IMH246ySWyG3dHlpy9LXouAWS3Lbd7
+	Nezc+E70ErogVPr3tQnKC5zYK+QC5a506/jdy8j4DyehC01D6j3K7QyK/LR/+Hd8Mi+NY8IGH+o
+	7Ti7RSsRKhXufAzicFcT8UUByGRNcY9CkYiBle/F2OSllhGLeytpAdYJUnnVW57PNTOwemn4vrb
+	lbnjBa4vDej1OqnNPafO7AGrfHWcq8dQcZIEAeimdl0JjDtfH6knRLZVyb95piuVy9TgAAZDNCD
+	JfWQELTMGuSGMaWdNflMXWvW9vIl0TfYuZewbK28AyRSQZB/bGuKe7q2rfkY+PaHDiExp0VBx5k
+	aa/rBqcG9cBDwy3xpGoK+QmoM=
+X-Received: by 2002:a05:6a21:7318:b0:3bf:a881:4094 with SMTP id adf61e73a8af0-3c36c35d245mr7182183637.50.1784205898111;
+        Thu, 16 Jul 2026 05:44:58 -0700 (PDT)
 Received: from L6YN4KR4K9.bytedance.net ([2408:8606:1800:501::2:f])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-cb258eeaba2sm1730793a12.12.2026.07.16.05.44.41
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-cb258eeaba2sm1730793a12.12.2026.07.16.05.44.49
         (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Thu, 16 Jul 2026 05:44:48 -0700 (PDT)
+        Thu, 16 Jul 2026 05:44:57 -0700 (PDT)
 From: Yunhui Cui <cuiyunhui@bytedance.com>
 To: linux-riscv@lists.infradead.org,
 	linux-mm@kvack.org,
@@ -70,9 +70,9 @@ Cc: linux-arch@vger.kernel.org,
 	linux-perf-users@vger.kernel.org,
 	kasan-dev@googlegroups.com,
 	Yunhui Cui <cuiyunhui@bytedance.com>
-Subject: [PATCH v2 14/15] riscv/mm: optimize mprotect for Svnapot mappings
-Date: Thu, 16 Jul 2026 20:41:49 +0800
-Message-Id: <8b79ddc3311e1dc32b150b7efbaed5a187ee5ccd.1784201104.git.cuiyunhui@bytedance.com>
+Subject: [PATCH v2 15/15] riscv: mm: Request large exec folios for Svnapot
+Date: Thu, 16 Jul 2026 20:41:50 +0800
+Message-Id: <88438f09b79ceab1548aff17384814b7f699a43d.1784201104.git.cuiyunhui@bytedance.com>
 X-Mailer: git-send-email 2.39.2 (Apple Git-143)
 In-Reply-To: <cover.1784201104.git.cuiyunhui@bytedance.com>
 References: <cover.1784201104.git.cuiyunhui@bytedance.com>
@@ -84,136 +84,41 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Svnapot represents a naturally aligned range as a block of base PTEs, but
-generic mprotect() still processes a full block one base PTE at a time.
-For a full-block permission change, that repeatedly clears and reinstalls
-the same logical mapping and then has to reconstruct the folded Svnapot
-block afterwards, making the operation unnecessarily expensive.
+The Svnapot MM support in this series allows generic MM paths to operate
+on folded 64KB executable mappings while preserving a per-page public PTE
+view. To benefit from that more often, executable file-backed mappings
+should be faulted in with a folio size that can be folded into a Svnapot
+range.
 
-Use the batched protection transaction hooks to handle a full Svnapot
-block as one operation. The fast path is restricted to user mappings
-where hardware Svnapot is supported, the range is exactly one aligned
-Svnapot block, and every sub-PTE is consistent with the block PTE. The
-generic per-PTE fallback remains in place for partial, unaligned, special,
-non-user, or otherwise inconsistent mappings.
-
-libMicro mprotect median latency improves on the full-block cases:
-
-  mprot_tw4m   (-l 4m   -w -t -f /dev/zero): 40.4 us -> 4.3 us
-  mprot_tw128k (-l 128k -w -t -f /dev/zero): about 15-16% faster
+Request 64KB executable folios when Svnapot is available, so executable
+text mappings are more likely to be installed as folded Svnapot blocks
+and benefit from lower iTLB pressure. Keep the default order-0 behavior
+when Svnapot is unavailable.
 
 Signed-off-by: Yunhui Cui <cuiyunhui@bytedance.com>
 ---
- arch/riscv/include/asm/pgtable.h |  8 ++++
- arch/riscv/mm/contpte.c          | 76 ++++++++++++++++++++++++++++++++
- 2 files changed, 84 insertions(+)
+ arch/riscv/include/asm/pgtable.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/arch/riscv/include/asm/pgtable.h b/arch/riscv/include/asm/pgtable.h
-index 3727c148fa0fc..b546e6614c558 100644
+index b546e6614c558..6801ba135c483 100644
 --- a/arch/riscv/include/asm/pgtable.h
 +++ b/arch/riscv/include/asm/pgtable.h
-@@ -619,6 +619,14 @@ int napotpte_ptep_test_and_clear_young(struct vm_area_struct *vma,
- 				       unsigned long address, pte_t *ptep);
- int napotpte_ptep_clear_flush_young(struct vm_area_struct *vma,
- 				    unsigned long address, pte_t *ptep);
-+#define modify_prot_start_ptes modify_prot_start_ptes
-+pte_t modify_prot_start_ptes(struct vm_area_struct *vma,
-+			     unsigned long addr, pte_t *ptep,
-+			     unsigned int nr);
-+#define modify_prot_commit_ptes modify_prot_commit_ptes
-+void modify_prot_commit_ptes(struct vm_area_struct *vma, unsigned long addr,
-+			     pte_t *ptep, pte_t old_pte, pte_t pte,
-+			     unsigned int nr);
- #endif
- 
- #ifdef CONFIG_ARCH_HAS_PTE_PROTNONE
-diff --git a/arch/riscv/mm/contpte.c b/arch/riscv/mm/contpte.c
-index 8289f39d6e188..6a1156629d115 100644
---- a/arch/riscv/mm/contpte.c
-+++ b/arch/riscv/mm/contpte.c
-@@ -190,6 +190,82 @@ napotpte_is_batch_consistent(pte_t pte, pte_t batch_pte, fpb_t flags)
- 	       pte_val(batch_pte);
+@@ -296,6 +296,14 @@ static __always_inline bool has_svnapot(void)
+ 	return riscv_has_extension_likely(RISCV_ISA_EXT_SVNAPOT);
  }
  
-+static bool napotpte_can_modify_prot_block(struct mm_struct *mm,
-+					   unsigned long addr, pte_t *ptep,
-+					   unsigned int nr, pte_t *raw_pte)
-+{
-+	pte_t raw, pte;
-+	unsigned int i;
++/*
++ * Request executable file-backed mappings to be read into 64KB folios when
++ * Svnapot is available. A naturally aligned 64KB folio can be folded into a
++ * Svnapot PTE range, reducing iTLB pressure for executable text.
++ */
++#define exec_folio_order() \
++	(has_svnapot() ? NAPOT_CONT64KB_ORDER : 0)
 +
-+	if (!napot_hw_supported() || !mm_is_user(mm))
-+		return false;
-+
-+	if (nr != napotpte_pte_num())
-+		return false;
-+
-+	if (addr != napot_align_addr(addr) || ptep != napot_align_ptep(ptep))
-+		return false;
-+
-+	raw = READ_ONCE(*ptep);
-+	if (!pte_present_napot(raw) || pte_special(raw))
-+		return false;
-+
-+	for (i = 0; i < nr; i++) {
-+		pte = READ_ONCE(ptep[i]);
-+		if (!napotpte_is_consistent(pte, raw))
-+			return false;
-+	}
-+
-+	*raw_pte = raw;
-+	return true;
-+}
-+
-+pte_t modify_prot_start_ptes(struct vm_area_struct *vma, unsigned long addr,
-+			     pte_t *ptep, unsigned int nr)
-+{
-+	struct mm_struct *mm = vma->vm_mm;
-+	unsigned long ptent_addr;
-+	pte_t raw, pte, ptent;
-+	unsigned int i;
-+
-+	if (napotpte_can_modify_prot_block(mm, addr, ptep, nr, &raw)) {
-+		pte = pte_mknonnapot(raw, addr);
-+
-+		for (i = 0; i < nr; i++) {
-+			ptent_addr = addr + i * PAGE_SIZE;
-+			ptent = __ptep_get_and_clear_noptc(ptep + i);
-+			page_table_check_pte_clear(mm, ptent_addr,
-+						   pte_mknonnapot(ptent, ptent_addr));
-+			if (pte_dirty(ptent))
-+				pte = riscv_pte_mkhwdirty(pte);
-+			if (pte_young(ptent))
-+				pte = pte_mkyoung(pte);
-+		}
-+
-+		return pte;
-+	}
-+
-+	pte = __ptep_modify_prot_start(vma, addr, ptep);
-+	while (--nr) {
-+		ptep++;
-+		addr += PAGE_SIZE;
-+		ptent = __ptep_modify_prot_start(vma, addr, ptep);
-+		if (pte_dirty(ptent))
-+			pte = pte_mkdirty(pte);
-+		if (pte_young(ptent))
-+			pte = pte_mkyoung(pte);
-+	}
-+
-+	return pte;
-+}
-+
-+void modify_prot_commit_ptes(struct vm_area_struct *vma, unsigned long addr,
-+			     pte_t *ptep, pte_t old_pte, pte_t pte,
-+			     unsigned int nr)
-+{
-+	set_ptes(vma->vm_mm, addr, ptep, pte, nr);
-+}
-+
- static inline pte_t
- napotpte_normalize_batch_pte(pte_t *ptep, pte_t orig_pte, fpb_t flags)
+ static inline unsigned long pte_napot(pte_t pte)
  {
+ 	return pte_val(pte) & _PAGE_NAPOT;
 -- 
 2.39.5
 
