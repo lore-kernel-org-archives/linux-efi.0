@@ -1,33 +1,33 @@
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 7B24B36A004;
-	Thu, 16 Jul 2026 09:49:45 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 42FAC3FE36D;
+	Thu, 16 Jul 2026 10:24:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784195387; cv=none; b=LLKpAd3NrV1FBX8Z45bsQllg8gxIIzZmZKpoS63NDJaSI4pq68LjCmlyOxOPtJRFXZcqoEtEYNjoWzEETJ7uxQ/TqNNcSS0g4DIdsqjgF2jgZRqwBm6lt3F6Ua69W5WxraSN7E2HBRX6QeKs8qMkV8cSMzoqZQTiAnsH31LGVtw=
+	t=1784197474; cv=none; b=JAgY6RJu/yUkx5YTsPL9zMebed7MwGuNAyf43e/FHC7wYEmiLJp5oaztnzIYbqJ4r9s256FKJhe+h+6xw3Vx7wfMGu2BpSA1dhBJ5HXMW8MT7K1oRZsyFJakIIseTn/NPy2Q7iAiV4C1kN92GmUox/YwXxO1n6YbpcxLs1gPM4E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784195387; c=relaxed/simple;
-	bh=DULupypI0kQO6VR/9Hnm6xvd1I56RK/sZSlBe1w/CWE=;
+	s=arc-20240116; t=1784197474; c=relaxed/simple;
+	bh=khk7OVdasrmWElu7v+he5pwEjEyq3lY0VQWweIBUcxo=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=OPlGC599hv9fl39nXkGgOC/MR7zBr2mRZ0RfYnN4vWvzsouHC++lqa7RovGO+J0x01QryJGDgba7cpq3akcpV+Xy2Z3hhEiXXYY/vXZq5zteuy6n1Y26np8FDXgd9eT5i8XzyEE43oeoyDeqPj6Ytnr6oqwxz52R5+PYZqAU5bI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=s0WjY92k; arc=none smtp.client-ip=217.140.110.172
+	 In-Reply-To:Content-Type; b=MFyEMc2IHLcVfPvcTvPdduivOARlwsWo6cjx/Cz1tryvDzmR7ScoaOv5WpjG2M6Hq2ctImRGth6ty8WjesOzQnEDiqPQIKkiu3ami/caxS3L59aCEE8sx74ggV4JaF8DrUdJuvyFSeyMhe/vYdHQq0eTRbUb+OyYy4wIr/REbBM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=SWDF44sf; arc=none smtp.client-ip=217.140.110.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="s0WjY92k"
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="SWDF44sf"
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id A1C082F;
-	Thu, 16 Jul 2026 02:49:40 -0700 (PDT)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 3F8F5339;
+	Thu, 16 Jul 2026 03:24:28 -0700 (PDT)
 Received: from [10.57.83.230] (unknown [10.57.83.230])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 28D693F905;
-	Thu, 16 Jul 2026 02:49:33 -0700 (PDT)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 182553F7B4;
+	Thu, 16 Jul 2026 03:24:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1784195384; bh=DULupypI0kQO6VR/9Hnm6xvd1I56RK/sZSlBe1w/CWE=;
+	t=1784197472; bh=khk7OVdasrmWElu7v+he5pwEjEyq3lY0VQWweIBUcxo=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=s0WjY92k6FXXGsVb/uHJpLBIVOYUjUI8eS0BHss4CJRfj+QIoU4lVy2lHkTcCkoLf
-	 HXbioh4bhVzyH7KrUz8UAnwAXsoSNPBoK+CXb0kGziyOHBz0wHOsqFAI5ri0j0KaxN
-	 AXVBsuWhv1zZICmG2yvm8TKcS7aYUdVdoYT9nYUs=
-Message-ID: <f3afa5df-73f3-49da-87a6-d75eb5f3610f@arm.com>
-Date: Thu, 16 Jul 2026 11:49:31 +0200
+	b=SWDF44sfS9ouTQyhsoNdjcWghv45qcZdrZRpeHggINaskI2QpA6EEqdwPjW+Vmzil
+	 Oyq849N1iPFY3DmI3306OC+qsEo5JxlkY3KFxgqlm9GhUkNprXodnPXqeKyEOXySIf
+	 HsuDVJWHrNHvd1lWMUDXxIJ2DVjDYvMciJe7gb58=
+Message-ID: <b0811447-e865-4cde-a45d-8a9f0bd25a4a@arm.com>
+Date: Thu, 16 Jul 2026 12:24:18 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -35,9 +35,10 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 14/22] mm: set page table page type when allocated
-To: Vishal Moola <vishal.moola@gmail.com>
-Cc: linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>,
+Subject: Re: [PATCH 17/22] mm: pagewalk: drop redundant address check for
+ kernel mm walks
+To: linux-mm@kvack.org
+Cc: Andrew Morton <akpm@linux-foundation.org>,
  David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>,
  "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
  Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
@@ -46,7 +47,7 @@ Cc: linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>,
  Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
  Ryan Roberts <ryan.roberts@arm.com>, linux-arm-kernel@lists.infradead.org,
  Huacai Chen <chenhuacai@kernel.org>, loongarch@lists.linux.dev,
- "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+ "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
  Helge Deller <deller@gmx.de>, linux-parisc@vger.kernel.org,
  Madhavan Srinivasan <maddy@linux.ibm.com>,
  Michael Ellerman <mpe@ellerman.id.au>, linuxppc-dev@lists.ozlabs.org,
@@ -67,48 +68,77 @@ Cc: linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>,
  x86@kernel.org, tboot-devel@lists.sourceforge.net,
  Ard Biesheuvel <ardb@kernel.org>,
  Ilias Apalodimas <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
- Alistair Popple <apopple@nvidia.com>,
+ Vishal Moola <vishal.moola@gmail.com>, Alistair Popple <apopple@nvidia.com>,
  "Matthew Wilcox (Oracle)" <willy@infradead.org>,
  linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
 References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
- <20260714-remove_pgtable_cdtor-v1-14-44be8a7685d7@arm.com>
- <alZSwAM4pwmMOeaD@fedora>
+ <20260714-remove_pgtable_cdtor-v1-17-44be8a7685d7@arm.com>
 From: Kevin Brodsky <kevin.brodsky@arm.com>
 Content-Language: en-GB
-In-Reply-To: <alZSwAM4pwmMOeaD@fedora>
+In-Reply-To: <20260714-remove_pgtable_cdtor-v1-17-44be8a7685d7@arm.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 14/07/2026 17:16, Vishal Moola wrote:
-> On Tue, Jul 14, 2026 at 03:04:03PM +0100, Kevin Brodsky wrote:
->> As a step towards removing pagetable ctor/dtor calls for kernel
->> mm's, move the page type updates from the ctor/dtor to
->> pagetable_{alloc,free}.
-> Thanks for doing this patchset.
+On 14/07/2026 16:04, Kevin Brodsky wrote:
+> Commit 8b1cb4a2e819 ("mm/pagewalk: fix EFI_PGT_DUMP of
+> espfix area") made no-VMA page table walks use
+> pte_offset_kernel() for any address above TASK_SIZE. This avoided
+> pte_offset_map() validation on EFI page table dumps, where efi_mm
+> could walk x86 espfix PMDs that intentionally look bad to pmd_bad().
 
-Thanks for suggesting it :) It's turning out to be quite a bit more
-involved than I expected though! (There are multiple cases where we call
-the ctor/dtor without using pagetable_{alloc,free}, see my reply to the
-cover letter.)
+Sashiko rightly doesn't like this patch. Turns out 8b1cb4a2e819's commit
+message and the comment it added are narrower than what the problem
+really is: on x86, due to things like
+/sys/kernel/debug/page_tables/current_kernel, we may be walking kernel
+page tables even when walk->mm is a regular user mm. Just checking the
+mm is therefore not sufficient.
 
-> We should switch over from __folio_set_pgtable() to __SetPagePgtable()
-> in this patch. Ptdescs and folios should be treated as distinctly
-> independent of each other.
-
-I sure remember the previous discussion, but my reading of your comments
-[1] is that we cannot really change this as long as pagetable_alloc()
-can be called with order > 0, right? Multiple archs still rely on that.
-
-> Eventually, we want to replace the memcg accounting as well, but
-> there's no existing API for that right now. Lets leave that as is for
-> now; this patchset is big enough already ;)
-
-Yep, looks like there was an attempt to improve this but it had to be
-reverted [2].
+Will replace this patch with a rewording of the comment to avoid
+suggesting the issue is specific to efi_mm.
 
 - Kevin
 
-[1] https://lore.kernel.org/all/aha321ndGSdReBJR@fedora/
-[2]
-https://lore.kernel.org/all/20260225002434.2953895-1-axelrasmussen@google.com/
 
+> efi_mm is now marked with MMF_KERNEL, and no-VMA walks use
+> mm_is_kernel() to select pte_offset_kernel() for kernel mm's. As a
+> result we no longer need to handle the EFI_PGT_DUMP case explicitly.The
+> address check is therefore redundant for EFI_PGT_DUMP and makes the
+> condition harder to reason about.
+>
+> Remove the address check and associated comment; mm_is_kernel()
+> should be sufficient on its own.
+>
+> Tested by booting x86 QEMU with CONFIG_EFI_PGT_DUMP=y and reading
+> /sys/kernel/debug/page_tables/efi.
+>
+> Assisted-by: Codex:GPT-5.5
+> Signed-off-by: Kevin Brodsky <kevin.brodsky@arm.com>
+> ---
+>  mm/pagewalk.c | 7 ++-----
+>  1 file changed, 2 insertions(+), 5 deletions(-)
+>
+> diff --git a/mm/pagewalk.c b/mm/pagewalk.c
+> index a3f47d1de3c5..0dd9d4ad9b68 100644
+> --- a/mm/pagewalk.c
+> +++ b/mm/pagewalk.c
+> @@ -68,17 +68,14 @@ static int walk_pte_range(pmd_t *pmd, unsigned long addr, unsigned long end,
+>  	if (walk->no_vma) {
+>  		/*
+>  		 * pte_offset_map() might apply user-specific validation.
+> -		 * Indeed, on x86_64 the pmd entries set up by init_espfix_ap()
+> -		 * fit its pmd_bad() check (_PAGE_NX set and _PAGE_RW clear),
+> -		 * and CONFIG_EFI_PGT_DUMP efi_mm goes so far as to walk them.
+>  		 */
+> -		if (mm_is_kernel(walk->mm) || addr >= TASK_SIZE)
+> +		if (mm_is_kernel(walk->mm))
+>  			pte = pte_offset_kernel(pmd, addr);
+>  		else
+>  			pte = pte_offset_map(pmd, addr);
+>  		if (pte) {
+>  			err = walk_pte_range_inner(pte, addr, end, walk);
+> -			if (!mm_is_kernel(walk->mm) && addr < TASK_SIZE)
+> +			if (!mm_is_kernel(walk->mm))
+>  				pte_unmap(pte);
+>  		}
+>  	} else {
+>
