@@ -1,41 +1,41 @@
 Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BFB4429034;
-	Fri, 17 Jul 2026 14:03:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E0C11CEAC2;
+	Fri, 17 Jul 2026 14:03:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784297014; cv=none; b=pE7/T5UaVS6U+vU9M9Hg97sNDY41Nc/Vox22fQQEm/sWTjJkPxpsYdLOG8snUc5coLIcoKQJX+VatqNujFjjgit+5XWLICSPqN2HTpZUOxla1QtXsPy/78lhwzU5r5qLy/Q2+7xjIFIZ3quMTjIlUZ3h6kNU7utk7cTfkYkaBuM=
+	t=1784297018; cv=none; b=WodKjeTXEFqiiisw4yBUJ2voVCe0o4QdVBp7qD0K4SL1EqR9cXQn9sfB6O/ZVcmBRUxUj8V8MkBsdXfGNeqIo6rFdrb/jmL5V27ycgGpzfKeTzo/9GZxxXrWm71xGUO1GhG4yQZvFEmoVGrPrH75GrdL+yTKcbL39jdVmkFnS2I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784297014; c=relaxed/simple;
-	bh=tVC3qjK2uT7R1b63jjn7gm8DEZPWnfi5O6+kdXwvQWg=;
+	s=arc-20240116; t=1784297018; c=relaxed/simple;
+	bh=1B5wbOTz4R16KdCWBh2WpnOWjS/l3+Etg9EdeiHv4gY=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=CkYhY5kwr6j9pfOWViXtVgDQYGadwx2xpVXc8vKj2/sSjRkLjMKa0Ny0dJwxGrw7Ul9bfDvCkVIvCe0UAT98G4qAqRFoOcaUcBcW0WwEDjQsRpqVFTmQoYwQiAYOZhGYArS5tQavpw7kQf5rGlUZ6HHr59FFafVShhd3ar2bIkQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=CPkUm7bE; arc=none smtp.client-ip=82.195.75.108
+	 In-Reply-To:To:Cc; b=Vy4AYH2dVG3qmzQ5vV4CjYWftCELSZcF9H1rqL4GEJhjhKYBwqnrXPFcz+Q+eZjnspLiI8flbPp5pnuiMHCA1+m9P0h+G8HEN87WdkrU13ofeFgrJMKeXJ2sWIfdijU2yC9L618u7YxxVqJGpdGLiUpJe5gU3WCRFAC/iey4ePc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=f76xJR+u; arc=none smtp.client-ip=82.195.75.108
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="CPkUm7bE"
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="f76xJR+u"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
 	s=smtpauto.stravinsky; h=X-Debian-User:Cc:To:In-Reply-To:References:
 	Message-Id:Content-Transfer-Encoding:Content-Type:MIME-Version:Subject:Date:
 	From:Reply-To:Content-ID:Content-Description;
-	bh=xLHoBAC97Z8vKvZnpYvz5TMDtvC87jPH3QPXAp2zb00=; b=CPkUm7bEgxpkSeb9CZM34STENE
-	FEXFrMiLbqKqbQABw1a/ozpsCYvZLgSLBRYdYqlFsBr09VW9cUWfFT7CFSi4kTttCFlXg5nwKHMmi
-	LRH9CYsQKiO0KxpvaguyUakbKFDOF8r2//psUz6RR6eqGnt6VqRf/mBewEuoVeDYgVfyZjn5opo/P
-	mDw0d45oUXZAxTxvTuTwzfA1pJ4IUwWUudi8z9bf2bCSb6xeROtf2ulEnAdRifKoD6uuL3p+T3CBQ
-	FbdJUWSQcHTcJ0tKqKuik74juD7Z3f0msS1gC2SDDLkDujpZDaq5ry1Y0nK4iNIlwZXnqGJNA46nm
-	F2v3ED1A==;
+	bh=ryAibA3UWy163Q6txvfKm94io1oYGbkfbCSFpMGxh9A=; b=f76xJR+uGbWEAJkrNJKR/tsl//
+	WYE8RZ/bdvihZPqQVALvdJXAXd0luydJM5tO3DcPuh6IcD0cWa+z1BNiQ1u5UucJOB5JRH0Othykv
+	UMwkzmw0aBkECVJZfRTHUtfn80/1R1PfdL3DFMRDQgEpOZw8tlB+LnpCKdhvosEqqG4FFwMcPsFOB
+	3RRCfu7tu2eejltF0LelTy8oynnvwXvWUeXvWCdeWNmJZdFwEx/06WKZatKYxIV9BFUwOoAocQ90U
+	Wd5BgwDvNU8TmwmMn9WbWhI7TCQ177hcNIBcvW2KEBhP6ckDZ1vXLiJ9Adyj/cCK5/f+x+5r2vyyC
+	CMcjQrBg==;
 Received: from authenticated-user
 	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
 	(Exim 4.96)
 	(envelope-from <leitao@debian.org>)
-	id 1wkjA2-004eC1-01;
-	Fri, 17 Jul 2026 14:03:30 +0000
+	id 1wkjA6-004eCN-2h;
+	Fri, 17 Jul 2026 14:03:35 +0000
 From: Breno Leitao <leitao@debian.org>
-Date: Fri, 17 Jul 2026 07:03:04 -0700
-Subject: [PATCH RFC 2/3] efi: record hardware-poisoned frames into the
- poisoned-memory table
+Date: Fri, 17 Jul 2026 07:03:05 -0700
+Subject: [PATCH RFC 3/3] efi: reserve inherited poisoned frames before the
+ allocator comes up
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -44,7 +44,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260717-hwpoison-kho-v1-2-9c5eda551998@debian.org>
+Message-Id: <20260717-hwpoison-kho-v1-3-9c5eda551998@debian.org>
 References: <20260717-hwpoison-kho-v1-0-9c5eda551998@debian.org>
 In-Reply-To: <20260717-hwpoison-kho-v1-0-9c5eda551998@debian.org>
 To: kas@kernel.org, Ard Biesheuvel <ardb@kernel.org>, 
@@ -57,235 +57,145 @@ Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
  anilagrawal@meta.com, rmikey@meta.com, linux-mm@kvack.org, 
  Breno Leitao <leitao@debian.org>, kernel-team@meta.com
 X-Mailer: b4 0.16-dev-d5d98
-X-Developer-Signature: v=1; a=openpgp-sha256; l=6844; i=leitao@debian.org;
- h=from:subject:message-id; bh=tVC3qjK2uT7R1b63jjn7gm8DEZPWnfi5O6+kdXwvQWg=;
- b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqWjYjmedAAxB69t9q8yvBYFMgnREjkexS1Y1MX
- 25OxrVY+caJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCalo2IwAKCRA1o5Of/Hh3
- bWtHD/0YD4LUadpZ5uQnSghE+/YmW4gy5OYa5OHvbl13MYqcn687RTaEOMpbzHKm/M5P5Va3cUn
- nG/rFRDO3Y/Au62KDx9N2YWXclmNQfmIxebaae1EMqKFZIAHbJ2hdGzz/6J82RcaIQsLRrtu1xo
- vnP4I6169hUvVfc2gdiFz9WGEje5ir+dRgp7EXX3yZd1O1/xZT3I1t/WB+j5xpiqrTvosPY7d+d
- fqmlLxqVJKwWfQBrA3v6qB0fOxEEtEm6IFyp+31I+BGzqxdkaGc2Js9tet3JDTkV/Wa34aZcDle
- jcRPGNFrlPOCBUf0goF1FcJZXAYIquG9O7GtG31dWMmJAj1hbF9MsI1mgQAUPer9ranqDDVGAvl
- gKGnRdZSIvZXg9agpFSZDLQp9MpySovgkJBrHUQ1hiYCCHlpwuv8+/jBMuv55J6zjH5YHHLw14Y
- zB0eTDfDpLDcuxRpo+fEmkcEOlxBoZeRBCpvIf3aM3YTub4lgk5vQ+XDiGyCCE9axS1dpegff3y
- Zpooc5zGBLMen1xK6M95pkSb3sG8rfJ6aCKvuhsXDvKc/blrkfWZ8D7Ii9tVGQvQzgRKFc29U8u
- Z+r+oUtqUlxeUojYMwHFB5lmhvbwGbyPth53OAxt9DJkS82665X3bx52qYvXSHtX/kYwWWxx7Ed
- L290f6k1JcU8mGA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4040; i=leitao@debian.org;
+ h=from:subject:message-id; bh=1B5wbOTz4R16KdCWBh2WpnOWjS/l3+Etg9EdeiHv4gY=;
+ b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqWjYjQRjUyRtH/XxcTVFxIPVxq7RYO+/+BCjcB
+ Jpu4BhAffyJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCalo2IwAKCRA1o5Of/Hh3
+ baKhD/46lld3B8rE2OEoWjHPbUAYkrTmb8nHu4KGL0VfoOm2qVA78qrlblfXHLVXi4FGdJwgXwU
+ pGaKmoyrJxdTC2YysG7atzAwzcn7l4U0gXH47H88iuZmxUPtlKuABXB0ZRRXDytkLFhMe6Y5zfh
+ jCiW3OMXaxthxI2oWzzhx4kQrOqc5QGakw65b0/QepAb7JEajcobdzMcpd4McKT1n7p6CGRUVhx
+ uio4QoQGBmcJ1g5koob9oUv+xXhun08peIflK/Y+d7jTawKWR8P1WE/1XkIsvTXjKJDO+zI4AIQ
+ KXR/5afyqeW1YFwT4TkzbtWkbi3IwIiYpXLevmnVaixbqtLgCZGb1wTBbt2B3oWOX/LzPoXkhd8
+ URkg15PB9QcQrgP/5fo3TzwQkLWtveFxSLhehKQPJq6GR5glWV5UyZpNcoALX4aQU1bJUPklyPp
+ 7gr+xYYSuMkdyYPlKzJajkpmB/u+Jx2PnymK2a4TDs8HpWOyQyGHdYPrPT3bf8SDfGGc4Z3BZ42
+ 5Q4vfmaMpaYzVxEDDTYiaU6lCXUo74Auom/P4NHHto2fhaSMMMya1MC1uAoHTwVU6sZYXxlp6vr
+ X8Yfcz1ocqDk7QjUnc+E4QGdEgfgy2wPa/uQziSv4jNQZMllHDi42D/c9xCua1/Fy+CNJf48stV
+ +m9lt0Ib/FWg2qA==
 X-Developer-Key: i=leitao@debian.org; a=openpgp;
  fpr=AC8539A6E8F46702CA4A439B35A3939FFC78776D
 X-Debian-User: leitao
 
-num_poisoned_pages_inc() and num_poisoned_pages_sub() are the single choke
-point for every poison and unpoison event. Hook them so each hardware-poisoned
-frame is appended to the LINUX_EFI_POISONED_MEMORY table, and each unpoison
-tombstones its entry so a frame that is good again is not carried forward.
+On the next kernel, walk the LINUX_EFI_POISONED_MEMORY table during EFI init --
+before memblock hands memory to the buddy allocator -- and memblock_reserve()
+each recorded frame, so a frame poisoned under a previous kernel is never
+handed back out across a kexec. Entries a later unpoison cleared are skipped.
 
-The append mirrors efi_mem_reserve_persistent(): claim a slot in an existing
-list entry, or allocate and link a new list page -- itself reserved via
-memreserve so it survives to the next kernel. memory_failure() has already
-taken the frame out of this kernel's allocator, so only the cross-kexec record
-happens here.
+This mirrors the memreserve consume loop and runs from the same place, early
+enough to keep the frames out of memblock and the buddy allocator.
 
 Signed-off-by: Breno Leitao <leitao@debian.org>
 ---
- drivers/firmware/efi/Makefile |   1 +
- drivers/firmware/efi/poison.c | 127 ++++++++++++++++++++++++++++++++++++++++++
- include/linux/efi.h           |   8 +++
- mm/memory-failure.c           |   6 +-
- 4 files changed, 141 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/efi.c    |  3 +++
+ drivers/firmware/efi/poison.c | 53 +++++++++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h           |  2 ++
+ 3 files changed, 58 insertions(+)
 
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 8efbcf699e4ff..05d0a490923e5 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -43,4 +43,5 @@ obj-$(CONFIG_EFI_EARLYCON)		+= earlycon.o
- obj-$(CONFIG_UEFI_CPER_ARM)		+= cper-arm.o
- obj-$(CONFIG_UEFI_CPER_X86)		+= cper-x86.o
- obj-$(CONFIG_UNACCEPTED_MEMORY)		+= unaccepted_memory.o
-+obj-$(CONFIG_EFI_POISONED_MEMORY)	+= poison.o
- obj-$(CONFIG_TEE_STMM_EFI)		+= stmm/tee_stmm_efi.o
-diff --git a/drivers/firmware/efi/poison.c b/drivers/firmware/efi/poison.c
-new file mode 100644
-index 0000000000000..ed3b8cee21ba6
---- /dev/null
-+++ b/drivers/firmware/efi/poison.c
-@@ -0,0 +1,127 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * Runtime handling for the LINUX_EFI_POISONED_MEMORY configuration table:
-+ * record and clear poisoned frames so the next kexec kernel can keep them out
-+ * of its allocator.
-+ *
-+ * Copyright (c) 2026 Meta Platforms, Inc. and affiliates.
-+ * Copyright (c) 2026 Breno Leitao <leitao@debian.org>
-+ */
-+
-+#define pr_fmt(fmt) "efi: " fmt
-+
-+#include <linux/efi.h>
-+#include <linux/io.h>
-+#include <linux/mm.h>
-+#include <linux/sizes.h>
-+#include <linux/spinlock.h>
-+
-+static struct linux_efi_poisoned_memory *efi_poisoned_memory_root __ro_after_init;
-+static DEFINE_SPINLOCK(efi_poisoned_memory_lock);
-+
-+static int __init efi_poisoned_memory_map_root(void)
-+{
-+	if (efi.poisoned_memory == EFI_INVALID_TABLE_ADDR)
-+		return -ENODEV;
-+
-+	efi_poisoned_memory_root = memremap(efi.poisoned_memory,
-+					    sizeof(*efi_poisoned_memory_root),
-+					    MEMREMAP_WB);
-+	if (WARN_ON_ONCE(!efi_poisoned_memory_root))
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index f3b799930be44..1db041dce61ec 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -808,6 +808,9 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
+ 		}
+ 	}
+ 
++	if (efi_reserve_poisoned_memory())
 +		return -ENOMEM;
-+	return 0;
-+}
 +
-+static int __init efi_poisoned_memory_root_init(void)
-+{
-+	if (efi_poisoned_memory_root)
-+		return 0;
-+	if (efi_poisoned_memory_map_root())
-+		efi_poisoned_memory_root = (void *)ULONG_MAX;
-+	return 0;
-+}
-+early_initcall(efi_poisoned_memory_root_init);
-+
-+/*
-+ * Record a hardware-poisoned frame so the next kernel can keep it out of its
-+ * allocator. memory_failure() has already removed it from this kernel, so only
-+ * the cross-kexec record is needed here.
-+ */
-+void efi_hwpoison_record_pfn(unsigned long pfn)
-+{
-+	phys_addr_t addr = PFN_PHYS(pfn);
-+	struct linux_efi_poisoned_memory *pm;
-+	unsigned long ppm;
-+	int index;
-+
-+	if (!efi_poisoned_memory_root ||
-+	    efi_poisoned_memory_root == (void *)ULONG_MAX)
-+		return;
-+
-+	/* Try to claim a slot in an existing list entry. */
-+	for (ppm = efi_poisoned_memory_root->next; ppm; ) {
-+		pm = memremap(ppm, sizeof(*pm), MEMREMAP_WB);
-+		if (!pm)
-+			return;
-+		index = atomic_fetch_add_unless(&pm->count, 1, pm->size);
-+		if (index < pm->size) {
-+			pm->entry[index].base = addr;
-+			pm->entry[index].size = PAGE_SIZE;
-+			memunmap(pm);
-+			return;
-+		}
-+		ppm = pm->next;
-+		memunmap(pm);
-+	}
-+
-+	/*
-+	 * No slot free - allocate a new list entry and link it in. The page
-+	 * stays allocated for the rest of this boot, and the next kernel
-+	 * reserves it while parsing the EFI configuration tables, so no
-+	 * separate cross-kexec reservation is needed here.
-+	 */
-+	pm = (void *)__get_free_page(GFP_ATOMIC);
-+	if (!pm)
-+		return;
-+
-+	pm->size = EFI_POISONED_MEMORY_COUNT(SZ_4K);
-+	atomic_set(&pm->count, 1);
-+	pm->entry[0].base = addr;
-+	pm->entry[0].size = PAGE_SIZE;
-+
-+	spin_lock(&efi_poisoned_memory_lock);
-+	pm->next = efi_poisoned_memory_root->next;
-+	efi_poisoned_memory_root->next = __pa(pm);
-+	spin_unlock(&efi_poisoned_memory_lock);
-+}
+ 	if (rt_prop != EFI_INVALID_TABLE_ADDR) {
+ 		efi_rt_properties_table_t *tbl;
+ 
+diff --git a/drivers/firmware/efi/poison.c b/drivers/firmware/efi/poison.c
+index ed3b8cee21ba6..971f131e6c556 100644
+--- a/drivers/firmware/efi/poison.c
++++ b/drivers/firmware/efi/poison.c
+@@ -4,6 +4,10 @@
+  * record and clear poisoned frames so the next kexec kernel can keep them out
+  * of its allocator.
+  *
++ * Handling for the LINUX_EFI_POISONED_MEMORY configuration table: record and
++ * clear poisoned frames at runtime, and reserve frames inherited across a kexec
++ * before the allocator comes up, so the next kernel keeps them out.
++ *
+  * Copyright (c) 2026 Meta Platforms, Inc. and affiliates.
+  * Copyright (c) 2026 Breno Leitao <leitao@debian.org>
+  */
+@@ -12,7 +16,9 @@
+ 
+ #include <linux/efi.h>
+ #include <linux/io.h>
++#include <linux/memblock.h>
+ #include <linux/mm.h>
++#include <linux/overflow.h>
+ #include <linux/sizes.h>
+ #include <linux/spinlock.h>
+ 
+@@ -125,3 +131,50 @@ void efi_hwpoison_unrecord_pfn(unsigned long pfn)
+ 		memunmap(pm);
+ 	}
+ }
 +
 +/*
-+ * A frame was unpoisoned (typically the hwpoison injector under test).
-+ * Tombstone its entry so the next kernel does not reserve a now-good frame.
++ * Reserve every frame recorded in the poisoned-memory table inherited across
++ * kexec, before the page allocator is up. Called from efi_config_parse_tables().
 + */
-+void efi_hwpoison_unrecord_pfn(unsigned long pfn)
++int __init efi_reserve_poisoned_memory(void)
 +{
-+	phys_addr_t addr = PFN_PHYS(pfn);
-+	struct linux_efi_poisoned_memory *pm;
-+	unsigned long ppm;
++	unsigned long ppm = efi.poisoned_memory;
++	unsigned int nr_poison = 0;
 +	int i;
 +
-+	if (!efi_poisoned_memory_root ||
-+	    efi_poisoned_memory_root == (void *)ULONG_MAX)
-+		return;
++	if (ppm == EFI_INVALID_TABLE_ADDR)
++		return 0;
 +
-+	for (ppm = efi_poisoned_memory_root->next; ppm; ) {
-+		pm = memremap(ppm, sizeof(*pm), MEMREMAP_WB);
-+		if (!pm)
-+			return;
++	while (ppm) {
++		struct linux_efi_poisoned_memory *pm;
++		u8 *p;
++
++		p = early_memremap(ALIGN_DOWN(ppm, PAGE_SIZE), PAGE_SIZE);
++		if (!p) {
++			pr_err("Could not map poisoned-memory entry!\n");
++			return -ENOMEM;
++		}
++
++		pm = (void *)(p + ppm % PAGE_SIZE);
++
++		/* reserve the list entry itself */
++		memblock_reserve(ppm, struct_size(pm, entry, pm->size));
++
 +		for (i = 0; i < atomic_read(&pm->count); i++) {
-+			if (pm->entry[i].base == addr) {
-+				pm->entry[i].size = 0;
-+				memunmap(pm);
-+				return;
++			/* skip entries cleared by a later unpoison */
++			if (pm->entry[i].size) {
++				memblock_reserve(pm->entry[i].base,
++						 pm->entry[i].size);
++				nr_poison++;
 +			}
 +		}
++
 +		ppm = pm->next;
-+		memunmap(pm);
++		early_memunmap(p, PAGE_SIZE);
 +	}
++
++	if (nr_poison)
++		pr_info("reserved %u hardware-poisoned frame(s) inherited across kexec\n",
++			nr_poison);
++	return 0;
 +}
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 7787eb8d4e4c1..bd1b0934881fb 100644
+index bd1b0934881fb..3dcfce7f593fb 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -1292,6 +1292,14 @@ struct linux_efi_poisoned_memory {
- 	(((size) - sizeof(struct linux_efi_poisoned_memory)) \
+@@ -1293,9 +1293,11 @@ struct linux_efi_poisoned_memory {
  	/ sizeof_field(struct linux_efi_poisoned_memory, entry[0]))
  
-+#ifdef CONFIG_EFI_POISONED_MEMORY
-+void efi_hwpoison_record_pfn(unsigned long pfn);
-+void efi_hwpoison_unrecord_pfn(unsigned long pfn);
-+#else
-+static inline void efi_hwpoison_record_pfn(unsigned long pfn) { }
-+static inline void efi_hwpoison_unrecord_pfn(unsigned long pfn) { }
-+#endif
-+
- void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size);
- 
- /*
-diff --git a/mm/memory-failure.c b/mm/memory-failure.c
-index aaf14608b30e2..03fa921ef1b7a 100644
---- a/mm/memory-failure.c
-+++ b/mm/memory-failure.c
-@@ -43,6 +43,7 @@
- #include <linux/sched/signal.h>
- #include <linux/sched/task.h>
- #include <linux/dax.h>
-+#include <linux/efi.h>
- #include <linux/ksm.h>
- #include <linux/rmap.h>
- #include <linux/export.h>
-@@ -87,13 +88,16 @@ void num_poisoned_pages_inc(unsigned long pfn)
- {
- 	atomic_long_inc(&num_poisoned_pages);
- 	memblk_nr_poison_inc(pfn);
-+	efi_hwpoison_record_pfn(pfn);
- }
- 
- void num_poisoned_pages_sub(unsigned long pfn, long i)
- {
- 	atomic_long_sub(i, &num_poisoned_pages);
--	if (pfn != -1UL)
-+	if (pfn != -1UL) {
- 		memblk_nr_poison_sub(pfn, i);
-+		efi_hwpoison_unrecord_pfn(pfn);
-+	}
- }
- 
- /**
+ #ifdef CONFIG_EFI_POISONED_MEMORY
++int efi_reserve_poisoned_memory(void);
+ void efi_hwpoison_record_pfn(unsigned long pfn);
+ void efi_hwpoison_unrecord_pfn(unsigned long pfn);
+ #else
++static inline int efi_reserve_poisoned_memory(void) { return 0; }
+ static inline void efi_hwpoison_record_pfn(unsigned long pfn) { }
+ static inline void efi_hwpoison_unrecord_pfn(unsigned long pfn) { }
+ #endif
 
 -- 
 2.53.0-Meta
