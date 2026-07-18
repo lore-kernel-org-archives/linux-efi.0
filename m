@@ -1,202 +1,252 @@
-Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
+Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E0C11CEAC2;
-	Fri, 17 Jul 2026 14:03:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D54F51C3BFC;
+	Sat, 18 Jul 2026 17:50:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784297018; cv=none; b=WodKjeTXEFqiiisw4yBUJ2voVCe0o4QdVBp7qD0K4SL1EqR9cXQn9sfB6O/ZVcmBRUxUj8V8MkBsdXfGNeqIo6rFdrb/jmL5V27ycgGpzfKeTzo/9GZxxXrWm71xGUO1GhG4yQZvFEmoVGrPrH75GrdL+yTKcbL39jdVmkFnS2I=
+	t=1784397052; cv=none; b=Do9C8bjoixW3D3WZ8TwTtseF/TU/t51VWg1/jbJG0+2YTafB3xPHDCWIbRoCSADF05H6AYORzcfysd3WcjvdLREPFbGbfI2FbFX08AHDnuOsQL7rT4EeAq3tFVB82XwF86mrxTj+xpRrgqq2Kln3oxEqGWiTDXWk7imenkr8zJ0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784297018; c=relaxed/simple;
-	bh=1B5wbOTz4R16KdCWBh2WpnOWjS/l3+Etg9EdeiHv4gY=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Vy4AYH2dVG3qmzQ5vV4CjYWftCELSZcF9H1rqL4GEJhjhKYBwqnrXPFcz+Q+eZjnspLiI8flbPp5pnuiMHCA1+m9P0h+G8HEN87WdkrU13ofeFgrJMKeXJ2sWIfdijU2yC9L618u7YxxVqJGpdGLiUpJe5gU3WCRFAC/iey4ePc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=f76xJR+u; arc=none smtp.client-ip=82.195.75.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
+	s=arc-20240116; t=1784397052; c=relaxed/simple;
+	bh=zj4qSNDtULYDhnhA07hGtlgRFL5SaSzumHLu5l9GxG4=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=UTWMJAgAuEIlHy5ypAS+nYOiYCmOxqp0sMZRoeTqZgXCaP8LOFtp/+ycgMJmSYu6tEkYN7HoKYZrrceOxtsQM+P334LldhKW/A8rwElL+QtD0VX/Qmumq5g/5n1+ShHr1dZ/GBOTOozozuG/thvuwsB1AmRnG1FiNj76OiQun1k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=UjRGUH1e; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=Y3DZm8us; arc=none smtp.client-ip=193.142.43.55
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="f76xJR+u"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
-	s=smtpauto.stravinsky; h=X-Debian-User:Cc:To:In-Reply-To:References:
-	Message-Id:Content-Transfer-Encoding:Content-Type:MIME-Version:Subject:Date:
-	From:Reply-To:Content-ID:Content-Description;
-	bh=ryAibA3UWy163Q6txvfKm94io1oYGbkfbCSFpMGxh9A=; b=f76xJR+uGbWEAJkrNJKR/tsl//
-	WYE8RZ/bdvihZPqQVALvdJXAXd0luydJM5tO3DcPuh6IcD0cWa+z1BNiQ1u5UucJOB5JRH0Othykv
-	UMwkzmw0aBkECVJZfRTHUtfn80/1R1PfdL3DFMRDQgEpOZw8tlB+LnpCKdhvosEqqG4FFwMcPsFOB
-	3RRCfu7tu2eejltF0LelTy8oynnvwXvWUeXvWCdeWNmJZdFwEx/06WKZatKYxIV9BFUwOoAocQ90U
-	Wd5BgwDvNU8TmwmMn9WbWhI7TCQ177hcNIBcvW2KEBhP6ckDZ1vXLiJ9Adyj/cCK5/f+x+5r2vyyC
-	CMcjQrBg==;
-Received: from authenticated-user
-	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
-	(Exim 4.96)
-	(envelope-from <leitao@debian.org>)
-	id 1wkjA6-004eCN-2h;
-	Fri, 17 Jul 2026 14:03:35 +0000
-From: Breno Leitao <leitao@debian.org>
-Date: Fri, 17 Jul 2026 07:03:05 -0700
-Subject: [PATCH RFC 3/3] efi: reserve inherited poisoned frames before the
- allocator comes up
+	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="UjRGUH1e";
+	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="Y3DZm8us"
+Date: Sat, 18 Jul 2026 19:50:41 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
+	s=2020; t=1784397042;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=HnCRoTidLdTf7uGb5+cyEo3j85yiTiGjdgCJTfUNd9A=;
+	b=UjRGUH1ewnXDB+7bA3vY6bllDRkAsrRs0EJiAw/WLA8f8siIUfzo2kcwtLuilIO16djMt9
+	vyKB0nvQ51/ASWbhyRPEEywx9XHjDyGmn/cAaneOGvH9pWseHX1wHgUbsGXmz9O1s4UhWB
+	He3WU+uQL79LQt5RQ0Pr7Ra7ckplXiZw4qjQOy41x66R9GlggrEP7CkWmn9r4W7REjUlW2
+	ZdhtWGPRQ+StUxCM0E4uaRc6+OE7ab15WIvTzRfeZRHm7RgWsN2RvkUWNnlzDz7AxV6zF1
+	IGY3Hh1WVeqKrgzjBdg2RK3g+gOS/ubuP76SSQhzE+CYpxPgkoQqQHN32pY5Tg==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
+	s=2020e; t=1784397042;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=HnCRoTidLdTf7uGb5+cyEo3j85yiTiGjdgCJTfUNd9A=;
+	b=Y3DZm8usu39GZQIHABG8FHwW08JUSpfhXzvxxmIvKt0c/W5XTtRbzRJc5w25addlSNighs
+	AMwxxIkmKgs3rKDw==
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+To: linux-rt-devel@lists.linux.dev, linux-doc@vger.kernel.org,
+	linux-efi@vger.kernel.org
+Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	"jenswi@kernel.org" <jenswi@kernel.org>,
+	op-tee@lists.trustedfirmware.org, Ard Biesheuvel <ardb@kernel.org>,
+	Clark Williams <clrkwllms@kernel.org>,
+	Jan Kiszka <jan.kiszka@siemens.com>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Shuah Khan <skhan@linuxfoundation.org>,
+	Steven Rostedt <rostedt@goodmis.org>,
+	John Ogness <john.ogness@linutronix.de>
+Subject: [PATCH v2] Documentation: Extend the real-time hardware bits with
+ some firmware bits
+Message-ID: <20260718175041.QXn9iOFK@linutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260717-hwpoison-kho-v1-3-9c5eda551998@debian.org>
-References: <20260717-hwpoison-kho-v1-0-9c5eda551998@debian.org>
-In-Reply-To: <20260717-hwpoison-kho-v1-0-9c5eda551998@debian.org>
-To: kas@kernel.org, Ard Biesheuvel <ardb@kernel.org>, 
- Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
- Miaohe Lin <linmiaohe@huawei.com>, 
- Naoya Horiguchi <nao.horiguchi@gmail.com>, 
- Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
- kexec@lists.infradead.org, rneu@meta.com, riel@surriel.com, caggio@meta.com, 
- anilagrawal@meta.com, rmikey@meta.com, linux-mm@kvack.org, 
- Breno Leitao <leitao@debian.org>, kernel-team@meta.com
-X-Mailer: b4 0.16-dev-d5d98
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4040; i=leitao@debian.org;
- h=from:subject:message-id; bh=1B5wbOTz4R16KdCWBh2WpnOWjS/l3+Etg9EdeiHv4gY=;
- b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqWjYjQRjUyRtH/XxcTVFxIPVxq7RYO+/+BCjcB
- Jpu4BhAffyJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCalo2IwAKCRA1o5Of/Hh3
- baKhD/46lld3B8rE2OEoWjHPbUAYkrTmb8nHu4KGL0VfoOm2qVA78qrlblfXHLVXi4FGdJwgXwU
- pGaKmoyrJxdTC2YysG7atzAwzcn7l4U0gXH47H88iuZmxUPtlKuABXB0ZRRXDytkLFhMe6Y5zfh
- jCiW3OMXaxthxI2oWzzhx4kQrOqc5QGakw65b0/QepAb7JEajcobdzMcpd4McKT1n7p6CGRUVhx
- uio4QoQGBmcJ1g5koob9oUv+xXhun08peIflK/Y+d7jTawKWR8P1WE/1XkIsvTXjKJDO+zI4AIQ
- KXR/5afyqeW1YFwT4TkzbtWkbi3IwIiYpXLevmnVaixbqtLgCZGb1wTBbt2B3oWOX/LzPoXkhd8
- URkg15PB9QcQrgP/5fo3TzwQkLWtveFxSLhehKQPJq6GR5glWV5UyZpNcoALX4aQU1bJUPklyPp
- 7gr+xYYSuMkdyYPlKzJajkpmB/u+Jx2PnymK2a4TDs8HpWOyQyGHdYPrPT3bf8SDfGGc4Z3BZ42
- 5Q4vfmaMpaYzVxEDDTYiaU6lCXUo74Auom/P4NHHto2fhaSMMMya1MC1uAoHTwVU6sZYXxlp6vr
- X8Yfcz1ocqDk7QjUnc+E4QGdEgfgy2wPa/uQziSv4jNQZMllHDi42D/c9xCua1/Fy+CNJf48stV
- +m9lt0Ib/FWg2qA==
-X-Developer-Key: i=leitao@debian.org; a=openpgp;
- fpr=AC8539A6E8F46702CA4A439B35A3939FFC78776D
-X-Debian-User: leitao
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On the next kernel, walk the LINUX_EFI_POISONED_MEMORY table during EFI init --
-before memblock hands memory to the buddy allocator -- and memblock_reserve()
-each recorded frame, so a frame poisoned under a previous kernel is never
-handed back out across a kexec. Entries a later unpoison cleared are skipped.
+I have been reviewing how OP=E2=80=91TEE is implemented and how secure=E2=
+=80=91world
+invocations behave. The goal was to determine whether an OP=E2=80=91TEE cal=
+l can
+delay the Linux side and introduce latency depending on the time spent
+in the secure world.
 
-This mirrors the memreserve consume loop and runs from the same place, early
-enough to keep the frames out of memblock and the buddy allocator.
+Similar latency effects are already known for EFI runtime services, but
+this was not documented. To mitigate the impact, EFI runtime invocations
+can be restricted to specific CPUs so that real=E2=80=91time workloads on o=
+ther
+CPUs remain unaffected. This mechanism, however, is only described in
+the commit that introduced it.
 
-Signed-off-by: Breno Leitao <leitao@debian.org>
+This change adds a firmware section that documents these behaviours
+explicitly. It highlights cases where firmware can delay the kernel,
+information that may be unfamiliar to some users and surprising-or
+concerning-to others.
+
+Assisted-by: Microsoft-Copilot
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
 ---
- drivers/firmware/efi/efi.c    |  3 +++
- drivers/firmware/efi/poison.c | 53 +++++++++++++++++++++++++++++++++++++++++++
- include/linux/efi.h           |  2 ++
- 3 files changed, 58 insertions(+)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index f3b799930be44..1db041dce61ec 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -808,6 +808,9 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
- 		}
- 	}
- 
-+	if (efi_reserve_poisoned_memory())
-+		return -ENOMEM;
-+
- 	if (rt_prop != EFI_INVALID_TABLE_ADDR) {
- 		efi_rt_properties_table_t *tbl;
- 
-diff --git a/drivers/firmware/efi/poison.c b/drivers/firmware/efi/poison.c
-index ed3b8cee21ba6..971f131e6c556 100644
---- a/drivers/firmware/efi/poison.c
-+++ b/drivers/firmware/efi/poison.c
-@@ -4,6 +4,10 @@
-  * record and clear poisoned frames so the next kexec kernel can keep them out
-  * of its allocator.
-  *
-+ * Handling for the LINUX_EFI_POISONED_MEMORY configuration table: record and
-+ * clear poisoned frames at runtime, and reserve frames inherited across a kexec
-+ * before the allocator comes up, so the next kernel keeps them out.
-+ *
-  * Copyright (c) 2026 Meta Platforms, Inc. and affiliates.
-  * Copyright (c) 2026 Breno Leitao <leitao@debian.org>
-  */
-@@ -12,7 +16,9 @@
- 
- #include <linux/efi.h>
- #include <linux/io.h>
-+#include <linux/memblock.h>
- #include <linux/mm.h>
-+#include <linux/overflow.h>
- #include <linux/sizes.h>
- #include <linux/spinlock.h>
- 
-@@ -125,3 +131,50 @@ void efi_hwpoison_unrecord_pfn(unsigned long pfn)
- 		memunmap(pm);
- 	}
- }
-+
-+/*
-+ * Reserve every frame recorded in the poisoned-memory table inherited across
-+ * kexec, before the page allocator is up. Called from efi_config_parse_tables().
-+ */
-+int __init efi_reserve_poisoned_memory(void)
-+{
-+	unsigned long ppm = efi.poisoned_memory;
-+	unsigned int nr_poison = 0;
-+	int i;
-+
-+	if (ppm == EFI_INVALID_TABLE_ADDR)
-+		return 0;
-+
-+	while (ppm) {
-+		struct linux_efi_poisoned_memory *pm;
-+		u8 *p;
-+
-+		p = early_memremap(ALIGN_DOWN(ppm, PAGE_SIZE), PAGE_SIZE);
-+		if (!p) {
-+			pr_err("Could not map poisoned-memory entry!\n");
-+			return -ENOMEM;
-+		}
-+
-+		pm = (void *)(p + ppm % PAGE_SIZE);
-+
-+		/* reserve the list entry itself */
-+		memblock_reserve(ppm, struct_size(pm, entry, pm->size));
-+
-+		for (i = 0; i < atomic_read(&pm->count); i++) {
-+			/* skip entries cleared by a later unpoison */
-+			if (pm->entry[i].size) {
-+				memblock_reserve(pm->entry[i].base,
-+						 pm->entry[i].size);
-+				nr_poison++;
-+			}
-+		}
-+
-+		ppm = pm->next;
-+		early_memunmap(p, PAGE_SIZE);
-+	}
-+
-+	if (nr_poison)
-+		pr_info("reserved %u hardware-poisoned frame(s) inherited across kexec\n",
-+			nr_poison);
-+	return 0;
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index bd1b0934881fb..3dcfce7f593fb 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1293,9 +1293,11 @@ struct linux_efi_poisoned_memory {
- 	/ sizeof_field(struct linux_efi_poisoned_memory, entry[0]))
- 
- #ifdef CONFIG_EFI_POISONED_MEMORY
-+int efi_reserve_poisoned_memory(void);
- void efi_hwpoison_record_pfn(unsigned long pfn);
- void efi_hwpoison_unrecord_pfn(unsigned long pfn);
- #else
-+static inline int efi_reserve_poisoned_memory(void) { return 0; }
- static inline void efi_hwpoison_record_pfn(unsigned long pfn) { }
- static inline void efi_hwpoison_unrecord_pfn(unsigned long pfn) { }
- #endif
+v1=E2=80=A6v2: https://lore.kernel.org/all/20260701091226.7SWW4TrT@linutron=
+ix.de
+- Rewrote the OP-TEE bits after some feedback from Ilias and Jens.
+  Added a link to the TF-A/OP-TEE documentation. The main difference is
+  that in contrast to my initial belief, OP-TEE can disable
+  normal-world's interrupts and it is not guaranteed that normal world
+  can always preempt the secure world.
 
--- 
-2.53.0-Meta
+ Documentation/core-api/real-time/hardware.rst | 104 ++++++++++++++++++
+ 1 file changed, 104 insertions(+)
+
+diff --git a/Documentation/core-api/real-time/hardware.rst b/Documentation/=
+core-api/real-time/hardware.rst
+index 19f9bb3786e03..9f95e75e6aa18 100644
+--- a/Documentation/core-api/real-time/hardware.rst
++++ b/Documentation/core-api/real-time/hardware.rst
+@@ -130,3 +130,107 @@ https://github.com/Linutronix/RTC-Testbench.
+ The goal of this project is to validate real-time network communication. I=
+t can
+ be thought of as a "cyclictest" for networking and also serves as a starti=
+ng
+ point for application development.
++
++Firmware
++--------
++
++The firmware often plays a significant role in system operation because it=
+ can
++perform tasks that the kernel cannot directly access, and in some cases it=
+ can
++even preempt or intercept the kernel.
++
++A common example of firmware assisting the kernel is when it provides a ge=
+neric
++interface to a resource. Instead of accessing an RTC chip through an I2C h=
+ost
++controller, the kernel may query the firmware for the current time, and the
++firmware then accesses the RTC behind the scenes.
++
++Firmware can also intercept kernel execution by providing services that
++temporarily take control of the system. One example is memory scrubbing, w=
+here
++the firmware periodically pauses the kernel, reads back portions of system
++memory, and then returns control. During this time, the kernel is effectiv=
+ely
++interrupted.
++In contrast, some systems provide hardware-based memory scrubbing, which
++operates independently of firmware or software. See
++Documentation/edac/scrub.rst for details.
++
++If the kernel is intercepted for longer periods then these periods can be =
+made
++visible with the hardware latency detector. See
++Documentation/trace/hwlat_detector.rst.
++
++The kernel can also be intercepted in response to specific events, such as
++overheating. In this case, the firmware may throttle the CPU or shut it do=
+wn
++immediately to prevent hardware damage.
++
++Unless the firmware is well documented, it should be thoroughly tested to
++uncover any unexpected behaviour.
++
++EFI
++~~~~
++
++EFI provides runtime services that act as a communication interface betwee=
+n the
++firmware and the operating system. One such service is reading and writing=
+ EFI
++variables, which are used, for example, to determine the boot source.
++
++Invoking a runtime service may require the architecture to disable kernel
++preemption or interrupts during the call. This means the duration of a ser=
+vice
++invocation directly affects the system=E2=80=99s observable latency. There=
+ is also
++nothing that prevents a service call from disabling interrupts internally =
+while
++it runs.
++
++For these reasons, EFI runtime services are disabled by default on a PREEM=
+PT_RT
++kernel. They can still be enabled at boot time or via a Kconfig option if
++required.
++The native EFI runtime service implementation (where both the EFI service =
+and
++the kernel are either 32-bit or 64-bit executables) uses a wrapper mechani=
+sm
++that invokes the service through a dedicated workqueue. This workqueue is =
+named
++efi_runtime, and it can be restricted to a housekeeping CPU using the
++``/sys/devices/virtual/workqueue/efi_runtime/cpumask`` sysfs file. Assigni=
+ng it
++to a housekeeping CPU ensures that potentially long service invocations do=
+ not
++impact the real-time workload which is restricted to other CPUs.
++
++It must also be verified that the runtime services behave as expected. Some
++implementations on the x86 architecture pause all other CPUs while one CPU
++performs the service call. In such cases, the interruption affects all CPU=
+s,
++and restricting the workqueue to a single CPU provides no benefit.
++
++OP-TEE (ARM)
++~~~~~~~~~~~~
++
++Execution flows from the normal world (Linux) into the secure world (OP-TE=
+E)
++through the secure monitor at EL3. The transition is initiated by the `smc`
++(Secure Monitor Call) opcode or the `hvc` (Hypervisor Call) opcode together
++with a function identifier. The calling convention defines two types of ca=
+lls:
++**yielding calls** and **fast calls**:
++
++- A **yielding call** unmasks interrupts before handling the requested ser=
+vice,
++  allowing normal world interrupts to occur.
++- A **fast call** handles the requested service atomically, without allowi=
+ng
++  interrupts from either the normal world or the secure world.
++
++In addition, the secure world (EL3 and OP-TEE) can receive interrupts rout=
+ed to
++the secure world. While a secure world interrupt is being serviced,
++normal world interrupts are masked and cannot preempt the operation.
++
++The transition from normal world to secure monitor to OP-TEE and back intr=
+oduces
++additional latency due to world switching and context save/restore. This
++overhead is typically a few microseconds and usually remains within the no=
+ise
++floor.
++
++It is worth noting that the normal world cannot mask secure interrupts, wh=
+ile
++the secure world can mask normal-world interrupts during execution. How OP=
+-TEE
++affects real-time workloads depends on whether secure interrupts are enabl=
+ed
++and which OP-TEE services are invoked.
++
++A practical concern is any fast call that runs longer than expected, for
++example a function that occasionally performs a long-running cryptographic
++computation. Another example that may block in an unexpected way are OP-TEE
++drivers that issue RPC requests. An OP-TEE service in the secure world (RP=
+MB
++for instance) may need to issue a request back to the normal world (the Li=
+nux
++driver) in order to complete the operation. While Linux remains preemptibl=
+e,
++the thread that issued the request stays blocked until the RPC completes a=
+nd
++the secure function call returns.
++
++The TF-A project provides documentation on interrupt management:
++https://trustedfirmware-a.readthedocs.io/en/latest/design/interrupt-framew=
+ork-design.html#interrupt-management-framework
++
++The OP-TEE project provides documentation on how interrupts are handled:
++https://optee.readthedocs.io/en/latest/architecture/core.html#interrupt-ha=
+ndling
+--=20
+2.53.0
 
