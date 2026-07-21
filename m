@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C72F4D8DB4;
-	Tue, 21 Jul 2026 15:07:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C625A4D90B1;
+	Tue, 21 Jul 2026 15:12:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784646458; cv=none; b=YLbVXy8PE7OVACBJ0P4ggHB0Pi8lI5fExSEPfRnHve1stUOS5S8kDBGrOUHarJyJ5BdxZY/OPQ2696IoV2RfpshZKJ3d4cUgV8pNnaNNj2aZ8dxVXwKdy+blIdWhtD1PrhazuDOmL1oFMoqOnaeck+2QJgfof+zk4PnO8Fk+v+4=
+	t=1784646749; cv=none; b=ooZ47jIx5YYVjB7x6vb/KujC7gugO1NVNG4GS9tjb9yy2aVZ5fTR/LroGXXEbgo7Gq56wrVa2HmOubiOHx5fUPVPlAx5TGhDXhISVS4DArd26qVcHAgJ+pcVaTZy1iZqdSdWQLKciG8YmxLLZDgHpj/3a7yNJBWH2IfaYmEiAVg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784646458; c=relaxed/simple;
-	bh=X+7y9/RVdkZb18fq+P0NPcd0EHBPAnNTri4BCfm24Tk=;
+	s=arc-20240116; t=1784646749; c=relaxed/simple;
+	bh=6yGBSZl/SIs3xU7wg4g91rx18cI4nNB8tEe2qcBMHro=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=aIa4sWU3mCAt6daNaPaasoxQC5fju075br2A8xMNxpUrgTNzHiA/1+uaF255LcqYPYkNNnd3r9R3ssTOfbt+tHT7+pK65HlP/xyGMFnfuSGsSzGnaKoDtIfEPymuhEXiGCmZqKiLkuL7uFArB2c3gLhr+2lQAWwQsdMaPRZ9Kjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RN3uJG0M; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:Content-Type; b=oDKTPou0cKTrCXI3sWApnlMNvmC/CjFOo2+DWJ7CYLBC91Ee9GRrSUCZD+z9QoCe1o7O5Eaxx8WuyheCQc9j3+B7qlKSCRgJwdnaa1P6Vv0GA2EzekhmZ11v57albwrgxJKU5pgT2o7UoNBWXZP1aL0SyXiuimclcucQIclQjDg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SAHldLLt; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RN3uJG0M"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C6A151F000E9;
-	Tue, 21 Jul 2026 15:07:23 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SAHldLLt"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A02A41F000E9;
+	Tue, 21 Jul 2026 15:12:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784646456;
-	bh=mM22wXNqV+CNPvkdpjW41Isrw3g8nd8xGQ5BFOB02PI=;
+	s=k20260515; t=1784646747;
+	bh=dKHsQTtEuYgX66yr5l7qTAts/c0fmhleRyEHOKKYymE=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=RN3uJG0MKYkntwW4hxDo3qUFPMhpku3GDnQrJrwqiNxB7yZEM6TnuHnBDCWJO90it
-	 02gHwiFiCaHCVJOPhX0VNJDXeMofaa0s0BJ2/Drvm9eVZnTluHf4BI+Ddgb6gKi9KX
-	 AzFrBF9yts9UMP5t+O0NQcrIuKnhMfh2wM8Yqn1Ej+X0uuOXq0Q0R28VM7PbeIEvI/
-	 m0PhFOrHuwevuAEA7lPzJb1FsAYH0FKc5nvki+6pXx7+QRWF7swgYuqaD1KZSwY/wp
-	 LYnK2HBN/1j2D2AqEsFiRRHEoPYFEtsrpUEIWiS6UM1lANNVXU6k4KoJt5clL++S4O
-	 +vfed+lG/TEOw==
-Message-ID: <0d75daa4-a034-4094-bce5-57938d294163@kernel.org>
-Date: Tue, 21 Jul 2026 17:07:22 +0200
+	b=SAHldLLtU7xQLUi26xcrFkkKYS9P2o0TLlkOjzUmM1ZX+ko0k4a5qoTy1XIzPnGuR
+	 cUwpVC2pjk/AcJZnO2ck/hKhSbf0g7wXo4wDqxpuQwgnlryAB+OI4sFQmwKGpjwACd
+	 enYLSrkvYR2jeki4Otq+ltW90hWiBaTrF/JNXyF+yRPm5yNU9EjacdD6Eez4RxQWkS
+	 R/vMNpXomL7UbrNL+StWd5DkroEC3h3/ANJZihtyBxVHJDlK0GJboY1KU7BdfMJaKq
+	 VKu4K28N8WCS7Gwfe+dJ3I52jWqP8Ne73GQo4qa4GIm81yq4+MD6smuws6cHVq8Lwc
+	 157dab58h6V9g==
+Message-ID: <e95aabc0-522b-4660-958a-d648c1cfa78f@kernel.org>
+Date: Tue, 21 Jul 2026 17:12:13 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -35,7 +35,8 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 04/22] mm: use mm_is_kernel() in generic page table code
+Subject: Re: [PATCH 15/22] mm: only initialise pt_share_count for user
+ pgtables
 To: Kevin Brodsky <kevin.brodsky@arm.com>, linux-mm@kvack.org
 Cc: Andrew Morton <akpm@linux-foundation.org>,
  Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>,
@@ -71,8 +72,7 @@ Cc: Andrew Morton <akpm@linux-foundation.org>,
  "Matthew Wilcox (Oracle)" <willy@infradead.org>,
  linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
 References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
- <20260714-remove_pgtable_cdtor-v1-4-44be8a7685d7@arm.com>
- <02565237-d777-4c63-8b17-817df59feac4@arm.com>
+ <20260714-remove_pgtable_cdtor-v1-15-44be8a7685d7@arm.com>
 From: "David Hildenbrand (Arm)" <david@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=david@kernel.org; keydata=
@@ -119,34 +119,46 @@ Autocrypt: addr=david@kernel.org; keydata=
  3iyY2Nsd7JxfKu1PRhCGwXzRw5TlfEsoRI7V9A8isUCoqE2Dzh3FvYHVeX4Us+bRL/oqareJ
  CIFqgYMyvHj7Q06kTKmauOe4Nf0l0qEkIuIzfoLJ3qr5UyXc2hLtWyT9Ir+lYlX9efqh7mOY
  qIws/H2t
-In-Reply-To: <02565237-d777-4c63-8b17-817df59feac4@arm.com>
+In-Reply-To: <20260714-remove_pgtable_cdtor-v1-15-44be8a7685d7@arm.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 7/16/26 11:35, Kevin Brodsky wrote:
-> On 14/07/2026 16:03, Kevin Brodsky wrote:
->> diff --git a/mm/memory.c b/mm/memory.c
->> index d5e87624f692..c0244c0b0756 100644
->> --- a/mm/memory.c
->> +++ b/mm/memory.c
->> @@ -3394,13 +3394,13 @@ static int apply_to_pte_range(struct mm_struct *mm, pmd_t *pmd,
->>  	spinlock_t *ptl;
->>  
->>  	if (create) {
->> - mapped_pte = pte = (mm == &init_mm) ?
->> + mapped_pte = pte = mm_is_kernel(mm) ?
->>  			pte_alloc_kernel_track(pmd, addr, mask) :
->>  			pte_alloc_map_lock(mm, pmd, addr, &ptl);
+On 7/14/26 16:04, Kevin Brodsky wrote:
+> ptdesc_pmd_pts_init() initialises the pt_share_count ptdesc field.
+> That field is only used for hugetlb tracking purposes, so there is
+> no need to initialise it for kernel page tables. Skip the call for
+> kernel page tables, like pmd_ptlock_init().
 > 
-> As noted by Sashiko, this is a little problematic because if
-> apply_to_page_range() is called on efi_mm, then we will end up with
-> __pte_alloc_kernel() taking the init_mm lock, since that's hardcoded.
+> From now on pagetable_*_ctor() and pagetable_dtor() do nothing for
+> kernel page tables.
 > 
-> That probably means we should pass the mm to __pte_alloc_kernel().
+> Signed-off-by: Kevin Brodsky <kevin.brodsky@arm.com>
+> ---
+>  include/linux/mm.h | 9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
+> 
+> diff --git a/include/linux/mm.h b/include/linux/mm.h
+> index 94f0fb1c662a..b217ccbed5a3 100644
+> --- a/include/linux/mm.h
+> +++ b/include/linux/mm.h
+> @@ -3905,9 +3905,12 @@ static inline spinlock_t *pmd_lock(struct mm_struct *mm, pmd_t *pmd)
+>  static inline bool pagetable_pmd_ctor(struct mm_struct *mm,
+>  				      struct ptdesc *ptdesc)
+>  {
+> -	if (!mm_is_kernel(mm) && !pmd_ptlock_init(ptdesc))
+> -		return false;
+> -	ptdesc_pmd_pts_init(ptdesc);
+> +	if (!mm_is_kernel(mm)) {
+> +		if (!pmd_ptlock_init(ptdesc))
+> +			return false;
+> +		ptdesc_pmd_pts_init(ptdesc);
+> +	}
+> +
 
-Agreed.
+I'd have said "the initialization is cheap, why bother", but we already do have
+the mm_is_kernel() check in place, so
 
-I guess we have to audit all existing init_mm usage?
+Acked-by: David Hildenbrand (Arm) <david@kernel.org>
 
 -- 
 Cheers,
