@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3049D4C9561;
-	Tue, 21 Jul 2026 14:57:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C56AF4C9565;
+	Tue, 21 Jul 2026 14:57:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784645839; cv=none; b=OyFXT16/PIGx+TS0Hq21d0MGMihj98ohgte0bd6HrxPFcAabMIXW/3AhCHeLhmgthjsApIBy03K1J+eJX8znpn+O9dR9ixlP0rM/vYO3F1KFj/1Q1RUpGnE0r8fFzcgDMNpW59KQg/daL15eJaxp1e1u5hF7kXKTKpVPdtA+/eU=
+	t=1784645866; cv=none; b=TprnOBKcbdwh7hU/yf9hs/BISdjfC8iMeKMBX+SqE4pDCSdGat7VaGgmBujke4zZDxsYEMbeKKcVp5muCiBjWSt9AHw9r8V/aetnF1q5Qp6hUjga5HXeFP3RuH7GwxD/qRaySN29xJZUZKDENeZRG1nfiS3g9rOZjA3hzYKg5a0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784645839; c=relaxed/simple;
-	bh=XSSPNqcWaWwFE0k6ohelXUQ2e/0TNSYoCc/cSMKanb8=;
+	s=arc-20240116; t=1784645866; c=relaxed/simple;
+	bh=k1IrslADbd5H+jZhXwhFCYXRqfnTHCKJTDOMlyl3Q2s=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=H3DUhCRBevsXL8eb0EcVl8vke7MkzhKBIHl6sprsEI2OjnQ8B90yUbenu79FnHl4JAq0dkqkOuHnPav2JLbo13CQ7wbbr4zaAmQmfWa8RYU2LsxPICYUlO/W/jcmrg1SAoRyuJiPWGubG7ysJ+9Yx1y/wP/hK8bv9g9R/pxAVrc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WgSfBD18; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:Content-Type; b=ij0J8iAE09D9TU9fxgaya+jqbnMqhWMW3tNsPqvpKFSaPeRgoQwhG1urgs0WzFfNP9EqfeY2S6k1s0r8+7duCevx8rs3SKia/P8ioaTvpDtinHA3eLX74fRnPm1mviUF+F2cJY15RL0s//olrxbtCeKtHiOzdYanjAoqjQ2fjNw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CF605gLh; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WgSfBD18"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 629C01F000E9;
-	Tue, 21 Jul 2026 14:57:05 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CF605gLh"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51D9E1F000E9;
+	Tue, 21 Jul 2026 14:57:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784645838;
-	bh=X2h5bpBFH+7npqK5spxeWS5f6StKH/bYQuKFvgmb620=;
+	s=k20260515; t=1784645865;
+	bh=FE8BGgQW0fYMcN8NBCYcnkW6qzjkh5NcrjtCMjU8eh4=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=WgSfBD18nsRmmrJbieRHbTVnpndeVh/tD76HjXec6RXFgapMArMcgsdjnj3ag9o+z
-	 gRz5mmhtSTZHrmYy5ISeCHWFYOTq7G1IN/AumKXpJns+CtzdzduEIoHtuwoerwhrZ9
-	 o+cHYXj3YXpuJr8AKYsSMPqZD19eTtjcpMp2+2Cc2bAb4BA8C0oZQBcuuIci3G3RQU
-	 ifhNI6BDFoki0rZELq87NBJ4bnC/uCZ1USuEO623tHk4h8hxI+SQsbYiOmFvQARDUZ
-	 nwmxkjaQnS2o0Ipn8VUe3e09evZb5SLADluS5GaT349oximkYtUuU/T1Q9kT98BPoX
-	 VnzApXzpWL2iw==
-Message-ID: <45118388-cf5e-4407-b2a2-ec67727cc4a4@kernel.org>
-Date: Tue, 21 Jul 2026 16:57:03 +0200
+	b=CF605gLhkL6zeNadf6XOk+7+Xs2t0BTo91YzpcEjV43Dy4ytRnKlrI1fy3IfzLfr2
+	 H237T7YQRtv9qWHYksEwmMf5RE3ZYvRoJSOeXXL+2yh4D1dEUPcTyLwLec9+Zn3EgK
+	 qqCNVLPEojFqEefP3dviDr8CHO/fP2J8TwcR2ZYzx237I42d3HVsZR1VLnvfEXyRKs
+	 0SKBkLrnKLIE8EkkKJgQ+T6TW+p6uojk9GEgxOrVIp+aEpxVUV3oDZJRz7AsXfNubY
+	 ynooLXX47XDmMejrp+qJn7sUW0kyUeIx0eFx+Ch1dtyXdtQo0kiZamHTYgY5ojROd/
+	 /R4xf4Sm53OYw==
+Message-ID: <4da506a7-11e2-4cfd-9f0b-ad8635190e89@kernel.org>
+Date: Tue, 21 Jul 2026 16:57:30 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -35,7 +35,7 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 01/22] mm: drop unused __mm_flags_set_mask_bits_word()
+Subject: Re: [PATCH 02/22] mm: move mm_flags helpers to mm_types.h
 To: Kevin Brodsky <kevin.brodsky@arm.com>, linux-mm@kvack.org
 Cc: Andrew Morton <akpm@linux-foundation.org>,
  Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>,
@@ -71,7 +71,7 @@ Cc: Andrew Morton <akpm@linux-foundation.org>,
  "Matthew Wilcox (Oracle)" <willy@infradead.org>,
  linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
 References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
- <20260714-remove_pgtable_cdtor-v1-1-44be8a7685d7@arm.com>
+ <20260714-remove_pgtable_cdtor-v1-2-44be8a7685d7@arm.com>
 From: "David Hildenbrand (Arm)" <david@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=david@kernel.org; keydata=
@@ -118,20 +118,20 @@ Autocrypt: addr=david@kernel.org; keydata=
  3iyY2Nsd7JxfKu1PRhCGwXzRw5TlfEsoRI7V9A8isUCoqE2Dzh3FvYHVeX4Us+bRL/oqareJ
  CIFqgYMyvHj7Q06kTKmauOe4Nf0l0qEkIuIzfoLJ3qr5UyXc2hLtWyT9Ir+lYlX9efqh7mOY
  qIws/H2t
-In-Reply-To: <20260714-remove_pgtable_cdtor-v1-1-44be8a7685d7@arm.com>
+In-Reply-To: <20260714-remove_pgtable_cdtor-v1-2-44be8a7685d7@arm.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 7/14/26 16:03, Kevin Brodsky wrote:
-> Commit 39f8049cd49f ("mm: update coredump logic to correctly
-> use bitmap mm flags") added coredump-specific helpers for the
-> remaining masked mm-flags update users.
+> Some of the mm_flags helpers are defined in <linux/mm_types.h>,
+> while others are defined in <linux/mm.h>. We will soon need to call
+> one of the latter helpers from mm_types.h.
 > 
-> That left __mm_flags_set_mask_bits_word() without any callers.
-> This is a special-purpose helper that is unlikely to be useful for
-> other purposes; best to remove it.
+> Regroup all the helpers in mm_types.h to keep things simple.
 > 
-> Assisted-by: Codex:GPT-5.5
+> Also remove #include's that were added specifically for these
+> helpers in mm.h.
+> 
 > Signed-off-by: Kevin Brodsky <kevin.brodsky@arm.com>
 > ---
 
