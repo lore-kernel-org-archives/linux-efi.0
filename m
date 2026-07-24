@@ -1,33 +1,33 @@
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id AA07735E1CB;
-	Fri, 24 Jul 2026 16:25:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 2CB4E33439A;
+	Fri, 24 Jul 2026 16:31:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784910355; cv=none; b=nAGXxLT8oma0LTM7ZW02FVFXX2lgEqFPgnbpUn45tIy35AdaOwqjriDm8TS3uWjkCjSHos0wJvXyvlL2hSoTx+SaQi4pLLIltbUYDteqfq+yN53MydgJSsXZHWsgtTDmR53+0IweKKCw6plZGnjV1ErcwtqYnYEw2RmXlGSetz0=
+	t=1784910709; cv=none; b=bUIc4ADfhaUU2jVsvhdgTAb8zh+tysTYQtPjthJyJdCOQOhxcC3yqrNa1/CnB4LBYjC44E79pNVnt2PLlmmjIyXC/TXRMUiBvyZT/LBq+HROvz501AzAqadcrWt1POLpubIxSOttWd2fhhA765nzu4mg1Jg1nAqzVqCluBEr9Ug=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784910355; c=relaxed/simple;
-	bh=90PjtwWiYZulmqV39H8fGSHBZ8shBRidW6H3XBOLz1E=;
+	s=arc-20240116; t=1784910709; c=relaxed/simple;
+	bh=NEwnT35D7tuzT3xeTQQMHkJEWGepfSu0cwMv30sxXLk=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=nEhHnrUil7TmNinULKm+lMp1dPRJTVK/XeVtjnLczLfyowPBsf/KDeKOd0lJSHkFUtXRGnZyGxBUj1D4giofGTB8txBQR44G8+KnU9yc76hvzlZOIsDaq39ioySlyIDYxCpBjdySf77Z6e/lXdd3I5kCE19vuLg3OkxVBzmKdpU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=LSeaOheA; arc=none smtp.client-ip=217.140.110.172
+	 In-Reply-To:Content-Type; b=trB7VcuLSPvxptxp6Zb9oQRJBZu3Y3R+BcIQ8jRbXcIswDG/De66Vb5Frx1O7lEUS+QNcu/Vl+e79LJzLf9bp1/ydbQ8nw8W6Ocy+3FrQ+9HIHoKGDEKaSvN69OK5yJ1aHPoaOgBNeNST64MK+dVSJfFwWqPw3O5QHVoIJxDxjY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=rJ2DJJ7D; arc=none smtp.client-ip=217.140.110.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="LSeaOheA"
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="rJ2DJJ7D"
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 66C911655;
-	Fri, 24 Jul 2026 09:25:48 -0700 (PDT)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 4DF711BC0;
+	Fri, 24 Jul 2026 09:31:43 -0700 (PDT)
 Received: from [10.57.0.90] (unknown [10.57.0.90])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 8D9153F66F;
-	Fri, 24 Jul 2026 09:25:38 -0700 (PDT)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id ACA703F66F;
+	Fri, 24 Jul 2026 09:31:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1784910352; bh=90PjtwWiYZulmqV39H8fGSHBZ8shBRidW6H3XBOLz1E=;
+	t=1784910707; bh=NEwnT35D7tuzT3xeTQQMHkJEWGepfSu0cwMv30sxXLk=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=LSeaOheALTDiD44xvkD55jNPMvVMiWCKhoAY3QOMhLgjHKQ4vGk/sCbVALnk8LQcs
-	 UGzo+QT8sgIjgylea7jT8NDptv0jyxQHH1Yl0mF7+8llAZ/r++VL9OJQZ9z7INpPWZ
-	 IvaE6ewh0IBZMWQRx7oS05rwa6Tfr8Ub24gxyRR8=
-Message-ID: <13be2648-f68d-46ae-ae8a-5ca9e067cc90@arm.com>
-Date: Fri, 24 Jul 2026 18:25:35 +0200
+	b=rJ2DJJ7D9c7D1FVu9FvWF7Hq7v5HoLI/CdhriAp1fJ4dLBnD8EJRRWBa3d3TSeSRj
+	 y4giJ+zCCtRJVGca1Zy4119yCr4CT8kuPBEs9cPEAEswfrfTiiEZd9fOxFya5yiDAq
+	 5lH15CX22toaprtjLQyFDxQHqVRAyMvOmxdmryBU=
+Message-ID: <c17ccb0b-9f6b-4521-a992-bdc658b91597@arm.com>
+Date: Fri, 24 Jul 2026 18:31:32 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -35,19 +35,18 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 15/22] mm: only initialise pt_share_count for user
- pgtables
-To: "David Hildenbrand (Arm)" <david@kernel.org>, linux-mm@kvack.org
-Cc: Andrew Morton <akpm@linux-foundation.org>,
- Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>,
- Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>,
- Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>,
- Pasha Tatashin <pasha.tatashin@soleen.com>,
+Subject: Re: [PATCH 14/22] mm: set page table page type when allocated
+To: Vishal Moola <vishal.moola@gmail.com>
+Cc: linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>,
+ David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>,
+ "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
+ Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
+ Michal Hocko <mhocko@suse.com>, Pasha Tatashin <pasha.tatashin@soleen.com>,
  Russell King <linux@armlinux.org.uk>,
  Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
  Ryan Roberts <ryan.roberts@arm.com>, linux-arm-kernel@lists.infradead.org,
  Huacai Chen <chenhuacai@kernel.org>, loongarch@lists.linux.dev,
- "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+ "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
  Helge Deller <deller@gmx.de>, linux-parisc@vger.kernel.org,
  Madhavan Srinivasan <maddy@linux.ibm.com>,
  Michael Ellerman <mpe@ellerman.id.au>, linuxppc-dev@lists.ozlabs.org,
@@ -68,60 +67,57 @@ Cc: Andrew Morton <akpm@linux-foundation.org>,
  x86@kernel.org, tboot-devel@lists.sourceforge.net,
  Ard Biesheuvel <ardb@kernel.org>,
  Ilias Apalodimas <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
- Vishal Moola <vishal.moola@gmail.com>, Alistair Popple <apopple@nvidia.com>,
+ Alistair Popple <apopple@nvidia.com>,
  "Matthew Wilcox (Oracle)" <willy@infradead.org>,
  linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
 References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
- <20260714-remove_pgtable_cdtor-v1-15-44be8a7685d7@arm.com>
- <e95aabc0-522b-4660-958a-d648c1cfa78f@kernel.org>
+ <20260714-remove_pgtable_cdtor-v1-14-44be8a7685d7@arm.com>
+ <alZSwAM4pwmMOeaD@fedora> <f3afa5df-73f3-49da-87a6-d75eb5f3610f@arm.com>
+ <al5xZHiFwatn518I@fedora>
 From: Kevin Brodsky <kevin.brodsky@arm.com>
 Content-Language: en-GB
-In-Reply-To: <e95aabc0-522b-4660-958a-d648c1cfa78f@kernel.org>
+In-Reply-To: <al5xZHiFwatn518I@fedora>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 21/07/2026 17:12, David Hildenbrand (Arm) wrote:
-> On 7/14/26 16:04, Kevin Brodsky wrote:
->> ptdesc_pmd_pts_init() initialises the pt_share_count ptdesc field.
->> That field is only used for hugetlb tracking purposes, so there is
->> no need to initialise it for kernel page tables. Skip the call for
->> kernel page tables, like pmd_ptlock_init().
->>
->> From now on pagetable_*_ctor() and pagetable_dtor() do nothing for
->> kernel page tables.
->>
->> Signed-off-by: Kevin Brodsky <kevin.brodsky@arm.com>
->> ---
->>  include/linux/mm.h | 9 ++++++---
->>  1 file changed, 6 insertions(+), 3 deletions(-)
->>
->> diff --git a/include/linux/mm.h b/include/linux/mm.h
->> index 94f0fb1c662a..b217ccbed5a3 100644
->> --- a/include/linux/mm.h
->> +++ b/include/linux/mm.h
->> @@ -3905,9 +3905,12 @@ static inline spinlock_t *pmd_lock(struct mm_struct *mm, pmd_t *pmd)
->>  static inline bool pagetable_pmd_ctor(struct mm_struct *mm,
->>  				      struct ptdesc *ptdesc)
->>  {
->> -	if (!mm_is_kernel(mm) && !pmd_ptlock_init(ptdesc))
->> -		return false;
->> -	ptdesc_pmd_pts_init(ptdesc);
->> +	if (!mm_is_kernel(mm)) {
->> +		if (!pmd_ptlock_init(ptdesc))
->> +			return false;
->> +		ptdesc_pmd_pts_init(ptdesc);
->> +	}
->> +
-> I'd have said "the initialization is cheap, why bother", but we already do have
-> the mm_is_kernel() check in place, so
+On 20/07/2026 21:05, Vishal Moola wrote:
+> On Thu, Jul 16, 2026 at 11:49:31AM +0200, Kevin Brodsky wrote:
+>>> We should switch over from __folio_set_pgtable() to __SetPagePgtable()
+>>> in this patch. Ptdescs and folios should be treated as distinctly
+>>> independent of each other.
+>> I sure remember the previous discussion, but my reading of your comments
+>> [1] is that we cannot really change this as long as pagetable_alloc()
+>> can be called with order > 0, right? Multiple archs still rely on that.
+> Kinda...
+>
+> The concern was about callers accessing tail pages directly for that
+> information. Using the folio API ensures that we always look into the
+> head page.
+>
+> Since we're now doing it at allocation time, we know we always have the
+> head page, so it's fine.
 
-This isn't mainly about the overhead, but rather the fact that from here
-on the ctor/dtor do nothing for kernel page tables. Patch 20-22 rely on
-this, and in part 2 I would go further and only ever call the ctor/dtor
-for user page tables, so that the mm_is_kernel() check can be dropped.
+Ah got it, that makes sense.
 
-> Acked-by: David Hildenbrand (Arm) <david@kernel.org>
+>
+> The dtor/free should be more questionable because the underlying api
+> uses virt_to_page() which could look at a tail page... oopsie. I
+> haven't seen any reports tied to it so its probably fine (the
+> setting/clearing has been using the folio API since ptdescs).
 
-Thanks for the reviews!
+Right, that should be fine - calling pagetable_free() on anything else
+than a ptdesc allocated by pagetable_alloc() is a bug, so if we get any
+crash because of this we should just go and fix the underlying issue.
+I'd still switch to __SetPagePgtable() in a separate commit to improve
+bisectability.
+
+FWIW there are definitely cases where pagetable_free() and
+pagetable_alloc() calls aren't properly matched (see my reply to the
+cover letter), this needs to be addressed for this series anyway.
+
+> We can say thats a happy accident that makes distinguishing ptdescs
+> and folios easier :)
+
+Indeed!
 
 - Kevin
