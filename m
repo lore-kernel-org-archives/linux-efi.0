@@ -1,138 +1,182 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C010327707;
-	Sat,  1 Aug 2026 13:47:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 10ADC86334;
+	Sat,  1 Aug 2026 14:43:15 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785592058; cv=none; b=EhUgsOO9nixYBTQiiFMhz2M5oj7nNtSgV+4nsSLI26OF9/GH6SkkKnBoxhVy6M+aDLcwOMSEnZ3uYna+VQNOlQZbhtGM/XltWQu11kwq2VwF2+NJJl7edf4kwiHPFXoI98KPBgTcqTTy10BRkO0zSE4nocwC9w1UEBnIJYejPCA=
+	t=1785595397; cv=none; b=XITaF61nSN6JvlOc5QgURw+I365JeKl2y7mLujSEbZDf9MsT1JY6wJT9KpaI/W/zEt3Fb4b6Rni1Id4jGJQtHdTdFxWr/FFpI0orhH0FAfoj8is8gvBi8vSddy5wGEdxq+uSxYMFF3L8CFRmr2//sIbIRqx3yxPjnxxthdmMRVk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785592058; c=relaxed/simple;
-	bh=BmR8BvDLGQawpWu6SDAdqGH+HM8BZzGn9O10ZoOIdxk=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=DEBWhL6ZnEyB8hyJRJh/JZuVdG/tZLHAWL+sbpvPqg87e2mIx2eiL8ilteLJ2mgLR9/LwID8PWVSu124TSbGniOpZS0WiW+zbq+KmD7f2ag5Gp1djxKipvmUvZUoXzDCS/ZdZ+PnH89M4csA0g8DCigFW01InU8fGIBk+148qg0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BvJgqoCc; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1785595397; c=relaxed/simple;
+	bh=W2dntG/0Mza5NRLs2IUYdgsQm487Xbbfw4m6cnvZQU8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=B8gIGK/dAtCRBzHEhm/Ks+esAU4Uem5JdQUKTIO0rfvdEqoaJRhynvlmdeoSsZBdR4YnT3bFTtWXproQjMw0tLmkQq7kFP2iU9vew5HWOxd+8q/RHcviBArYW+05jOgzfr2r4SQTax2/i7LQscU4y/3aO58MNDbmYlKN7X6DXC8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IWwj/8Td; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BvJgqoCc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 376FE1F00ACA;
-	Sat,  1 Aug 2026 13:47:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IWwj/8Td"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 722741F00AC4;
+	Sat,  1 Aug 2026 14:43:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785592056;
-	bh=BmR8BvDLGQawpWu6SDAdqGH+HM8BZzGn9O10ZoOIdxk=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=BvJgqoCcjzK0my+V6zthd8Cf7+8frrmBjl5SmbnBrzidEZgUxLJPwCA+vd+Mj1Ib7
-	 HfIh5geClKeWho/6/B7zzg0XwV9LaB7dV7aPdBFZ0LPhSlIR2ptAcFsiBp96nRHypc
-	 cYqne1tVNBf9srVX0UZXcWzPESjmCi8W/amSbOsREWnfsGcqIpZD8yxlqu/G4s+5/o
-	 MUG2m1drMc71sN+bCwUB9P+RiTWg2Xe1+SrCdWpPfVTXvuQqQgyO/0SaqOkwFUgEzD
-	 SLL9ChmWnfJJzlzaBc70pKalBlZmUuyPOa4lgIw3qi8Qchm6PzkoE1SuT83f3QJbfZ
-	 FUgEeMlyBq47Q==
-Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.phl.internal (Postfix) with ESMTP id 580ACF4006B;
-	Sat,  1 Aug 2026 09:47:35 -0400 (EDT)
-Received: from phl-imap-05 ([10.202.2.95])
-  by phl-compute-01.internal (MEProxy); Sat, 01 Aug 2026 09:47:35 -0400
-X-ME-Sender: <xms:9_htagXB4GiEAlvio3dNBfM0SsiC8r_DAY5ajsEROzcC_tsRDdQa4Q>
-    <xme:9_htavaAR7dfnAQhj6knBdwPsf11S2hZOSdbFREGDgPDzkiw3fRjJNkYWmXYsh0B1
-    Gu69FpgieFsL6KFCGOUHA_jJoLXBdFhLyivQw_KbjO4moSYArrk699T>
-X-ME-Proxy-Cause: dmFkZTEDwg3yV68t36/NM1bZaHcUarLhsIfdyumGS1EqvAM50BJMZmr7ytOb8H1PaI3/G8
-    /BG+Eru8/uVSDplKOOR4apA2xiRt5k+ancRT/frMcRZH6NR6XekVy1j1BQy/NCkDsIlM+e
-    vXPZfMWtHRdCqBwYSHWhimj4spZ+p4WL4BKJ0UnBDNqUwOFgppcvBLI3OHzM9xNr0ZRXeX
-    NUvHcAa5Wa5Np44YIgDeQHZBhfvc4r9dqqHmxDgCIh8d0fGkqZVspqa/06gLR7Y92IwKbO
-    RQZ6U1jFETgYxYfJm3Ps+KSL3VNP34xxV/xS9uPP/wc0CRkTFb8aod2+WWVXm3BLiDc1tT
-    8wLfK/rMcmDL3If8tsFIsSPQlE8puPROfTc1mY6XCpvjdDb77fyyTOxLf988vGdcAV5yVv
-    fx/Y+X8hh83rgnECZQAlXGO/MKPYHWFBGkeRMKZ8jt5A0YLfd9KpyDKDfUy9iUfCFfXzDQ
-    jhmK44AhNHTs90qr5DqLv7QMOy1XYx1JHv8C2r1V7bp4/xzaQESeAaaY5er3ecJHEp+fpJ
-    5VlHvnmfu8sojFSBOiT6AN4lg3BTIeRw5rg1sEF7LCldB/8Z6iMgOBFYViICvEICMQONxX
-    R/gLgWtIu2wYieLiDPaBrYrzFUq4IoMe9ckVQ1DVsUyn7OqKTwbEyo7Z8NqA
-X-ME-Proxy: <xmx:9_htaurrbxZQTiFKw2GT6Y32gnzECDw6yfyKTVuT2YSgSc-UYlOPQA>
-    <xmx:9_htaiDCPgvH3wdSIqdGyoN7Jp3Y5L5dgAgorGOvjz6Dx336BoV2uQ>
-    <xmx:9_htajZOzvwX9zKeQgRzUoYWtAt14YeHb2LpwY1KSCGM2i50qsanOQ>
-    <xmx:9_htat5j9o5zj4O4oeFwAS-hqVeBmzRSjbsqNBxAsG6zIEa2Yy3dUQ>
-    <xmx:9_htasYj61aOu7GKgsnRzY0_dnCkFBXRGdrjETv9eM94ZvEdFxT_vjT->
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 38178182007E; Sat,  1 Aug 2026 09:47:35 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=k20260515; t=1785595395;
+	bh=Rrg1wMRr524Wsc7KUE/wtIu9lPkC6t78r94Ihq9U164=;
+	h=From:To:Cc:Subject:Date;
+	b=IWwj/8Td5aSupHeeDBwHnmBfR8wGhbgNTze7I2mf/B679OELyIh7SUzae24ZdrsiE
+	 nnbhvQ6cPeQwd1YJwDE/vCwwNAkrDxbuqJ89gAixzq8XfJTJk4h0urLGbC9RXa99DY
+	 nRBb/JzwOeM1exi3CvS8tHCLWxPCvZnRdCkRlyfvgexn4P8zcwBd3n4gJusTWbcan3
+	 6n21USKrJYMeffkmEFiM3C1T4kwLjYQWh7xX9kjuUibqwBdxks87wh3IpPDmd/XJ6C
+	 dizBca+C4sX1H6nd0vF2CtAOAAKKyYCfUuUrVna+w4UpTemQr0VofsUAleol4luFIa
+	 MNkhqfpLXCJWQ==
+From: Ard Biesheuvel <ardb@kernel.org>
+To: linux-efi@vger.kernel.org
+Cc: x86@kernel.org,
+	Anisse Astier <an.astier@criteo.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	stable@vger.kernel.org,
+	Ravi Bangoria <ravi.bangoria@amd.com>
+Subject: [PATCH] efivarfs: Cache occupied and available space
+Date: Sat,  1 Aug 2026 16:42:59 +0200
+Message-ID: <20260801144258.15977-2-ardb@kernel.org>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Sat, 01 Aug 2026 15:47:14 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Vincent Mailhol" <mailhol@kernel.org>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
-Message-Id: <0aad56b5-a650-49c6-a193-db65c4c4395e@app.fastmail.com>
-In-Reply-To: <20260725-efi_stub_bli-v1-1-966e4748077f@kernel.org>
-References: <20260725-efi_stub_bli-v1-1-966e4748077f@kernel.org>
-Subject: Re: [PATCH] efi/libstub: populate LoaderDevicePartUUID
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+X-Developer-Signature: v=1; a=openpgp-sha256; l=5007; i=ardb@kernel.org; h=from:subject; bh=W2dntG/0Mza5NRLs2IUYdgsQm487Xbbfw4m6cnvZQU8=; b=owGbwMvMwCVmkMcZplerG8N4Wi2JISuP9TOf6wsm/aI5fbOWMB+M+7pnc653omPcFOmglFeXp 897eFy0o5SFQYyLQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAEzkoRjD/yLTe/8cbJl3PW3y 1/54zJKBqdfmY8rlNZMKl8yO5EtmKmH4p31bwEjG7nuLxMdzNs7V/dP2OZ39KcZVs0ZydeHe5yU KjAA=
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+Content-Transfer-Encoding: 8bit
 
-Hi Vincent,
+Ravi reports that statfs() may be called by unprivileged users on the
+efivarfs mount point, resulting in repeated calls to QueryVariableInfo()
+which are disproportionately costly on x86 systems where the variable
+store is backed by SMM, as each SMM entry requires a rendez-vous of all
+the CPUs.
 
-On Sat, 25 Jul 2026, at 01:11, Vincent Mailhol wrote:
-> The Boot Loader Interface [1] defines LoaderDevicePartUUID. That
-> variable contains the GPT partition UUID of the device path from which
-> the boot loader was loaded.
->
-> This is used for example by systemd-gpt-auto-generator [2] to identify
-> the disk the boot loader was launched from and automatically detect and
-> mount partitions on it.
->
-> GRUB populates it [3], but most EFI firmware implementations do not.
-> Because of that, the variable is missing when booting the kernel from
-> the EFI stub.
->
-> Read the loaded image device path, extract the GUID signature from its
-> GPT HD() device path node and publish it as LoaderDevicePartUUID under
-> the Linux loader entry vendor GUID. Do not overwrite an existing
-> variable, so a boot loader supplied value keeps precedence.
->
-> Use a volatile variable with boot-service and runtime access so the
-> value remains available to user space services such as systemd, without
-> persisting stale boot state across resets.
->
-> Install the efi_bli_set_variables() hook in both the generic efi-stub.c
-> path and the x86-specific x86-stub.c path.
->
-> [1] The Boot Loader Interface
-> Link: https://systemd.io/BOOT_LOADER_INTERFACE/
->
-> [2] systemd-gpt-auto-generator
-> Link:=20
-> https://www.freedesktop.org/software/systemd/man/latest/systemd-gpt-au=
-to-generator.html
->
-> [3] GRUB -- =C2=A716.2 bli
-> Link:=20
-> https://www.gnu.org/software/grub/manual/grub/html_node/bli_005fmodule=
-.html
->
-> Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
-> ---
-> Here is a bit of extra context around this patch. I recently installed
-> coreboot on my machine with edk2 as the payload. After booting the
-> kernel directly from the EFI stub instead of booting it from GRUB, I
-> noticed that some partitions which were previously mounted automatical=
-ly
-> were not mounted anymore.
->
-> Upon investigation, I found that those partitions were mounted
-> automatically using DPS [4]. DPS needs the LoaderDevicePartUUID EFI
-> variable, which was set by GRUB but not by edk2.
->
-> I first proposed a series to add that variable in edk2 [5]. The change
-> was not well received because BLI is perceived as too specific to Linux
-> systems. Upon reflection, I concluded that the kernel EFI stub is the
-> best location to implement it because it resolves the problem for EFI
-> firmware implementations in one place.
->
+So cache the output of QueryVariableInfo(), and invalidate the cached
+values when an entry is added or deleted, or the variable store is
+synchronized after a suspend/resume sequence.
 
-So it is the bootloader that sets this variable, and you want to boot
-without a bootloader, right?
+Cc: <stable@vger.kernel.org>
+Reported-by: Ravi Bangoria <ravi.bangoria@amd.com>
+Fixes: d86ff3333cb1 ("efivarfs: expose used and total size")
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ fs/efivarfs/internal.h |  2 ++
+ fs/efivarfs/super.c    | 21 +++++++++++---------
+ fs/efivarfs/vars.c     |  9 +++++++++
+ 3 files changed, 23 insertions(+), 9 deletions(-)
 
-What about systemd-boot, does it set this variable?
+diff --git a/fs/efivarfs/internal.h b/fs/efivarfs/internal.h
+index f913b6824289..d43789bc7839 100644
+--- a/fs/efivarfs/internal.h
++++ b/fs/efivarfs/internal.h
+@@ -31,6 +31,8 @@ struct efivar_entry {
+ 	bool removed;
+ };
+ 
++extern u64 efivar_storage_space, efivar_remaining_space;
++
+ static inline struct efivar_entry *efivar_entry(struct inode *inode)
+ {
+ 	return container_of(inode, struct efivar_entry, vfs_inode);
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index 733c19571f1c..3691a2a087a0 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -23,6 +23,8 @@
+ #include "internal.h"
+ #include "../internal.h"
+ 
++u64 efivar_storage_space, efivar_remaining_space;
++
+ static int efivarfs_ops_notifier(struct notifier_block *nb, unsigned long event,
+ 				 void *data)
+ {
+@@ -82,15 +84,16 @@ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
+ 	const u32 attr = EFI_VARIABLE_NON_VOLATILE |
+ 			 EFI_VARIABLE_BOOTSERVICE_ACCESS |
+ 			 EFI_VARIABLE_RUNTIME_ACCESS;
+-	u64 storage_space, remaining_space, max_variable_size;
+ 	u64 id = huge_encode_dev(dentry->d_sb->s_dev);
++	u64 max_variable_size;
+ 	efi_status_t status;
+ 
+ 	/* Some UEFI firmware does not implement QueryVariableInfo() */
+-	storage_space = remaining_space = 0;
+-	if (efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
+-		status = efivar_query_variable_info(attr, &storage_space,
+-						    &remaining_space,
++	if (efivar_storage_space == 0 &&
++	    efivar_remaining_space == 0 &&
++	    efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
++		status = efivar_query_variable_info(attr, &efivar_storage_space,
++						    &efivar_remaining_space,
+ 						    &max_variable_size);
+ 		if (status != EFI_SUCCESS && status != EFI_UNSUPPORTED)
+ 			pr_warn_ratelimited("query_variable_info() failed: 0x%lx\n",
+@@ -104,8 +107,8 @@ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
+ 	 */
+ 	buf->f_bsize	= 1;
+ 	buf->f_namelen	= NAME_MAX;
+-	buf->f_blocks	= storage_space;
+-	buf->f_bfree	= remaining_space;
++	buf->f_blocks	= efivar_storage_space;
++	buf->f_bfree	= efivar_remaining_space;
+ 	buf->f_type	= dentry->d_sb->s_magic;
+ 	buf->f_fsid	= u64_to_fsid(id);
+ 
+@@ -114,8 +117,8 @@ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
+ 	 * when the storage_paranoia x86 quirk is active. To use more, users
+ 	 * should boot the kernel with efi_no_storage_paranoia.
+ 	 */
+-	if (remaining_space > efivar_reserved_space())
+-		buf->f_bavail = remaining_space - efivar_reserved_space();
++	if (efivar_remaining_space > efivar_reserved_space())
++		buf->f_bavail = efivar_remaining_space - efivar_reserved_space();
+ 	else
+ 		buf->f_bavail = 0;
+ 
+diff --git a/fs/efivarfs/vars.c b/fs/efivarfs/vars.c
+index 6833c3d24b54..4196963695bd 100644
+--- a/fs/efivarfs/vars.c
++++ b/fs/efivarfs/vars.c
+@@ -361,6 +361,11 @@ static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
+ 	kfree(str8);
+ }
+ 
++static void efivar_invalidate_cached_storage_space(void)
++{
++	efivar_storage_space = efivar_remaining_space = 0;
++}
++
+ /**
+  * efivar_init - build the initial list of EFI variables
+  * @func: callback function to invoke for every variable
+@@ -450,6 +455,7 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 	} while (status != EFI_NOT_FOUND);
+ 
+ 	efivar_unlock();
++	efivar_invalidate_cached_storage_space();
+ free:
+ 	kfree(variable_name);
+ 
+@@ -480,6 +486,8 @@ int efivar_entry_delete(struct efivar_entry *entry)
+ 					    &entry->var.VendorGuid,
+ 					    0, 0, NULL, false);
+ 	efivar_unlock();
++	efivar_invalidate_cached_storage_space();
++
+ 	if (!(status == EFI_SUCCESS || status == EFI_NOT_FOUND))
+ 		return efi_status_to_err(status);
+ 
+@@ -620,6 +628,7 @@ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
+ 				    NULL, size, NULL);
+ 
+ 	efivar_unlock();
++	efivar_invalidate_cached_storage_space();
+ 
+ 	if (status && status != EFI_BUFFER_TOO_SMALL)
+ 		return efi_status_to_err(status);
+-- 
+2.55.0.508.g3f0d502094-goog
 
