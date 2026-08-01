@@ -1,174 +1,89 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.13])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A02E3B27F7;
-	Thu, 30 Jul 2026 06:30:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7776917B505
+	for <linux-efi@vger.kernel.org>; Sat,  1 Aug 2026 13:02:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785393030; cv=none; b=JvZxcD2C0+3MOmROnjzBt3xjlgUzB1uB5d/rXzKAbfm83ElGg6Id/nAcZf6moEECIh7n1euYsz+VNia/vkACfg8j1BaHcNW+aWODOrJQnlVunNaIK6jQHMr+OIEXMIiwBQIlliArnJCB2smZ9SzW7o8nuVYf+98KEpebvz/XRIU=
+	t=1785589350; cv=none; b=g9iJQJPODrFO9zYGTkPqyWYs3VSkfvFt2/i4Bety8BToFL/14CYz4mHNtbRjO1h0FldhXqDM5L8askbWLc3kt1iOBkLD6SLL6Q5C0zl8MCZXtS3r2zmSmx5P0CSGgWtnJRT23/zEog0eqsbuM0Px6OnZZl3PQdEDyFXcXWJLIaI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785393030; c=relaxed/simple;
-	bh=NZArUfPvS37aqM9pvd6b4Aj+9b7uqENuPYTItn+5Rsw=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=q3MhxHAACSdHxWL041vHWX93AebWiNUWylLeM8ZdKLHdEXKcqL3MuO643MO5w6ew0sqmR1NyXMcP5wJFkbySJGOZacKgVTB1lpYby2CD7sC3mU17QXeOeJ7L5yg26RA5s1Hb+qQUQXsSNfv9l3xLzZ8sKkw79K0SFZKDx4G+/Uo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=UPPyZSiU; arc=none smtp.client-ip=192.198.163.13
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1785589350; c=relaxed/simple;
+	bh=KpGelcy3dV6dcE5a3kY0Is5pD8kDCs10hKfBy70Nd3E=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=iTCFfSeE9DM0/LGAiGI9EFL9/RmC3e78r5ZXuXj4oKmaUBcfFhXBTukgbCubCmFItlOonhfKr+uR9eD4uq1Cut0VfOIBu7l1tBToP3W7t+9RLEcAkpmHLQs/K0GgQ2J5ei2UcLcFseqJnW+S7zmeFDQ+/cM8cpkvHonVP5qdLPc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=So3IFPbp; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="UPPyZSiU"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1785393028; x=1816929028;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=NZArUfPvS37aqM9pvd6b4Aj+9b7uqENuPYTItn+5Rsw=;
-  b=UPPyZSiU2/GcVOAX88wrvh+cQZUpje+EL5C2Xe2S9rGMKb+rHmYhICp9
-   tH0lL1VgTlGyPRoTf8rFPa/ITV52E2oYyOspvmTYn1tiQirTmaPJZchm7
-   uDBlfjrGAxaGKnhppIK7apIKKL33Wt2dkVCk0jy/HPz3I1l0XLvhBg7DS
-   S1k8DXfwYiyYNyMOSuRzEnE42nIe169vPDk42bMjSnUOlDmGO7IMRKRPN
-   PO22gHpSIAk+NA1Vf1CvdURPnfQ/Azb6lYvmHchNpKi86a5VLe5SKlBJO
-   9Iy+3MG/H0HVzAAvXW9lOjX89Cyhv+32XG3G1OBbrcwR4mddNoe7TN4Au
-   A==;
-X-CSE-ConnectionGUID: IqMq3gUMQ7+Mko07tKydpg==
-X-CSE-MsgGUID: sseVTkMfQkeQeZkHoSo4bQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11859"; a="88543507"
-X-IronPort-AV: E=Sophos;i="6.25,194,1779174000"; 
-   d="scan'208";a="88543507"
-Received: from orviesa001.jf.intel.com ([10.64.159.141])
-  by fmvoesa107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jul 2026 23:30:26 -0700
-X-CSE-ConnectionGUID: 9u8jWPcKRs2P848Do+0W7Q==
-X-CSE-MsgGUID: BS1lLcMrSnm5GWNSqh7NmA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,194,1779174000"; 
-   d="scan'208";a="298429773"
-Received: from junxiao.bj.intel.com ([10.238.152.69])
-  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jul 2026 23:30:24 -0700
-From: Junxiao Chang <junxiao.chang@intel.com>
-To: ardb@kernel.org,
-	ilias.apalodimas@linaro.org,
-	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: bigeasy@linutronix.de,
-	junxiao.chang@intel.com
-Subject: [PATCH] efi: add dynamic control interface for EFI runtime services
-Date: Fri, 31 Jul 2026 14:24:23 +0800
-Message-ID: <20260731062423.639771-1-junxiao.chang@intel.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260704003341.3923900-1-junxiao.chang@intel.com>
-References: <20260704003341.3923900-1-junxiao.chang@intel.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="So3IFPbp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F02231F00ACA;
+	Sat,  1 Aug 2026 13:02:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1785589349;
+	bh=hIghveZ5FZu3VtatR5eaqjMI1oITT5BEJT6hRgDu/bY=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=So3IFPbp1JdznwQmBP+4Pn2ntp9ZKoHIc8RulXnoUMGvbi9F9OGUpcxruhsYzcFZp
+	 C40EkWqkvSJL5giLOKCt0vjg/VI9+qvxfWbBXNq5IR2es0E4rojfLVvDO7uUy8i92+
+	 ita5rnxjIS/GfLtWDxOyJEc0etXjiRI+WpxVtnvxliKVak5XTIpkjlqI0VVDKQy6Ap
+	 H+wSdwYpyoEpmyXY/yV9CFYYnMR9G1flJEAIM5J19Euu4uZtVynfclUMYs5mmhPb+2
+	 Fpv0KCrX+gwasLz8NyH4Md0dAqOP6YNQ3DnvPPPqMKPD0kUxq3u6/ZkrhLGPVdtv+t
+	 PHdGSeCkFda1Q==
+Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
+	by mailfauth.phl.internal (Postfix) with ESMTP id E6684F40070;
+	Sat,  1 Aug 2026 09:02:27 -0400 (EDT)
+Received: from phl-imap-05 ([10.202.2.95])
+  by phl-compute-01.internal (MEProxy); Sat, 01 Aug 2026 09:02:27 -0400
+X-ME-Sender: <xms:Y-5takh6VdYvXg5oxlsjk-9QJgNj8hfCppU8smEQVhrrpyryS-gzIg>
+    <xme:Y-5tan2UMBSsyyx_Y6Wu3ihpKiez41Kb_Is9r-WGZ7iRBuhnPs15pAu2QTp4b0G76
+    _7tu97iZdQE1OGZ7MUIX5Kcf4xTBX0Tkvt3F3qKNJKnbc-ZPN9ZMlk6>
+X-ME-Proxy-Cause: dmFkZTGLKE1CXZpqSUcsmgMPFeJRWtCbkZdfvHgn+Dg73ouCGS8LvrrPqXF6rWeXl92T2u
+    oAwZUiXQPLrOLuz571xjM7AJ1pAeaqKAHpl9UAlGOAOo+PMQysnwyrDjvUaI/2lgS6wAc5
+    w0QvvSJDMEJFUUV9M5XsLcC/OlJpskphBNNSkv3f39K2cAySNbJ/qdi1rOhmWHxVuCTzyt
+    u2A49H0VKZmpqoPZCBCHY38207vuazn3x7IwH6uBlm/KBB9G2oRiQSzl/zPDBq8dHY9aaD
+    LxD74w7G6OER+NPW2HHajbnwPCvKEUaKuuKL7iyGr790XqEbockvTEpL5WhrgoDp31zjWF
+    NU7hLhAAlFXVTV3SLy3BQEvtSbDHXFPjK0cxZUXdnOjwrn+Alb2He8ESyI7R+kLPwG+srl
+    x9f5VmYiel/4rjM3WaFix1uLmlNwLDljfcGm0leBylSBGBN7qPprYxKj/gv+BmEA3zxZZH
+    7qB8dWH+Pa4+aMahqBVK/suIPrkZbQ4vNht2U/YUp0K3wkNmXVL+SsftWgw2FOb4iUJL1n
+    iQn6TrgHpF6N+OP3wvSYKbyLLMQhU7Q/9hweSqPyEH+XAqAh1xzs5yLthsD+QXXpUoyDWF
+    p0ndDocg8sPEZ/dnvIn2w505NEvy8w8eI5UIby1qP3KZ3oFlUwXFLCaNK8Kg
+X-ME-Proxy: <xmx:Y-5taiXntVZubJveVeRTCP8UhfxSgBtHWt9Qe2asvNRavJpTowrksA>
+    <xmx:Y-5taiTqq3wzkZft35GTIlFwHylK_bvI-0a3eJlgXbuCP5sX8Zx50A>
+    <xmx:Y-5tagNkguMqGi2sYqm2o9A2DHXf-vuVPh9vXJsL-V8FzXhsi0MsDw>
+    <xmx:Y-5tagS3ELXQQV0RiSy5pqYNrNR2onhi-QDFVNOMeoC-rzD-Vu60oA>
+    <xmx:Y-5tauhTsbJonuW1k16ZAlO4jRXcWoIUIVXTEuREsKCwfX85NQOkMV3t>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id A8A2A182007E; Sat,  1 Aug 2026 09:02:27 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Date: Sat, 01 Aug 2026 15:02:07 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Lukas Wunner" <lukas@wunner.de>, "Pengpeng Hou" <pengpeng@iscas.ac.cn>
+Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Message-Id: <e58a7764-c6aa-4937-a177-2f9cbbdb4bdf@app.fastmail.com>
+In-Reply-To: <akufkl7EVZUa0tlY@wunner.de>
+References: <20260706091813.77792-1-pengpeng@iscas.ac.cn>
+ <akufkl7EVZUa0tlY@wunner.de>
+Subject: Re: [PATCH] efi: apple-properties: validate setup data header length
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-Add an interface for PREEMPT_RT kernels to dynamically enable or
-disable EFI runtime services.
 
-EFI runtime services are typically disabled on RT systems using
-kernel parameters such as "noefi" or "efi=disable" to avoid
-long latency caused by firmware calls. However, this permanently
-disables EFI runtime services, preventing operations such as UEFI
-firmware updates.
 
-With this change, EFI runtime services can be disabled while
-real-time workloads are running and re-enabled afterwards,
-providing low-latency operation without permanently sacrificing
-firmware functionality.
+On Mon, 6 Jul 2026, at 14:29, Lukas Wunner wrote:
+> On Mon, Jul 06, 2026 at 05:18:13PM +0800, Pengpeng Hou wrote:
+>> map_properties() remaps the Apple properties setup_data payload
+>> and then reads the properties header fields.
+>> 
+>> Reject a truncated payload before checking the header version and length
+>> fields.
+>> 
+>> Signed-off-by: Pengpeng Hou <pengpeng@iscas.ac.cn>
+>
+> Reviewed-by: Lukas Wunner <lukas@wunner.de>
 
-Signed-off-by: Junxiao Chang <junxiao.chang@intel.com>
----
- drivers/firmware/efi/efi.c              | 31 +++++++++++++++++++++++++
- drivers/firmware/efi/runtime-wrappers.c | 15 ++++++++++++
- include/linux/efi.h                     |  1 +
- 3 files changed, 47 insertions(+)
-
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 0327a39d31fa5..f57784a815c61 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -401,6 +401,32 @@ static void __init efi_debugfs_init(void)
- static inline void efi_debugfs_init(void) {}
- #endif
- 
-+static ssize_t efi_dynamic_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
-+{
-+	return sprintf(buf, "%d\n", efi_enabled(EFI_RUNTIME_SERVICES));
-+}
-+
-+static ssize_t efi_dynamic_store(struct kobject *kobj, struct kobj_attribute *attr,
-+				 const char *buf, size_t count)
-+{
-+	int ret;
-+	bool enable;
-+
-+	ret = kstrtobool(buf, &enable);
-+	if (ret)
-+		return ret;
-+
-+	if (efi_runtime_set_enable_flag(enable) != EFI_SUCCESS) {
-+		pr_warn("unable to enable/disable efi runtime service\n");
-+		return -EAGAIN;
-+	}
-+
-+	return count;
-+}
-+
-+static struct kobj_attribute efi_dynamic_attr =
-+	__ATTR(dynamic_enable, 0644, efi_dynamic_show, efi_dynamic_store);
-+
- static int __init efipostcore_init(void)
- {
- 	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-@@ -446,6 +472,11 @@ static int __init efisubsys_init(void)
- 		goto err_destroy_wq;
- 	}
- 
-+	if (IS_ENABLED(CONFIG_PREEMPT_RT) && efi.runtime_supported_mask) {
-+		if (sysfs_create_file(efi_kobj, &efi_dynamic_attr.attr))
-+			pr_warn("unable to register efi dynamic sysfs interface\n");
-+	}
-+
- 	if (efi_rt_services_supported(EFI_RT_SUPPORTED_GET_VARIABLE |
- 				      EFI_RT_SUPPORTED_GET_NEXT_VARIABLE_NAME)) {
- 		error = generic_ops_register();
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index da8d296216441..8d1554714e3f4 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -602,3 +602,18 @@ void efi_runtime_assert_lock_held(void)
- {
- 	WARN_ON(efi_runtime_lock_owner != current);
- }
-+
-+efi_status_t efi_runtime_set_enable_flag(bool enable)
-+{
-+	if (down_interruptible(&efi_runtime_lock))
-+		return EFI_ABORTED;
-+
-+	if (enable)
-+		set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-+	else
-+		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-+
-+	up(&efi_runtime_lock);
-+
-+	return EFI_SUCCESS;
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index ccbc35479684a..98b76008fd426 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1109,6 +1109,7 @@ extern void efi_call_virt_check_flags(unsigned long flags, const void *caller);
- extern unsigned long efi_call_virt_save_flags(void);
- 
- void efi_runtime_assert_lock_held(void);
-+efi_status_t efi_runtime_set_enable_flag(bool enable);
- 
- enum efi_secureboot_mode {
- 	efi_secureboot_mode_unset,
--- 
-2.43.0
-
+Applied to efi/next - thanks.
