@@ -1,142 +1,177 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63E5E2BE05A;
-	Sat,  1 Aug 2026 22:23:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9D4B2DC798
+	for <linux-efi@vger.kernel.org>; Sun,  2 Aug 2026 03:37:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785623009; cv=none; b=kBYmcAvYw5cRMPLbQh42BuVscV186DDo3/4nsOMLoKS6NQqZHoCo+VcdY6vOU6r+0l8qgzSI87NScfy1x6Dg1GnUx2++e4CbgFKctG/CGEw2lxeIX6wEJh1FzXJ06Dt1hubrBiaB2NdBDeKBFGROyr5ya1MnOhRjEkOsmerViPw=
+	t=1785641866; cv=none; b=Zs5+Z+7sPB/dIChSBlSWUz5CnFjCOxIDX9oUtAkX4NzyBWsFHFuI+gLzRkrfpQnSsMPkHJmAHp6BgldBcT9yPo3ElzVfJ49mGyv10ZmVCRhEgT2lYMi3/SnG9B6unzUzrw78OMa/z78or3wbJvvVB1b3wNOP1FhYznOdG2MKEew=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785623009; c=relaxed/simple;
-	bh=+b6ml37KHikMRBjn++jnwL+l5aXLxO2ITUAlQ6Jg+Hc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Y7qumyLetx7QGxr8xv0oR5I8VgBOa90qQiDA5tAadgtK6AOYN4rYQOiU71P4MqAi+dRX/iXaEeobTiijm1Ok0/zEfl+6aM4xDtRYbPv7/DyC9uHVT5zqHW7tJsVDK6j9bGq3qZWCRYgR8P+g8iqIDdU0ZAhpJU1h70aCD2GXsF8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aAHQnJ2S; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1785641866; c=relaxed/simple;
+	bh=Cf1KNB++DfL0jcisNnaxKsGoRicJlMpb8cl86N3PXXY=;
+	h=Date:From:To:Cc:Subject:Message-ID; b=kW3Nl/QJIgDZrcrgNE7Y/7LMBQ63T/OapeXsn4gayeOSbb61quT4lfKxqBW6Y01KllK5f/URhmOv13qi7FFPhc2GZ6W0OMh7MmyQPiBRpzwJIlbNPVb8KCFUf+oYz2gLkzzknzVz1JFzzmFsKm6531ytJvOSGbpq4RTHAOiI9bc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=mcx0xaOk; arc=none smtp.client-ip=192.198.163.16
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aAHQnJ2S"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0A1661F00AC4;
-	Sat,  1 Aug 2026 22:23:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785623008;
-	bh=4tGj03GAiv20y4kHdsiJOTseAiPDSpGYtxJwFTrA8iU=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=aAHQnJ2SBcHNSf5HZnE1qntBANlwNzw4OmGdwLoqzjTikoJtbTOfwmFMoXudz/Tp0
-	 sech7kX57lZgliYvs7Ezr2fNPuSP9mJmdc0m1bS0H5S7RilnlB8U7GZQZ2BJiFRIe3
-	 cQ5HPbo2xdMpoi2B4+qPiLIRv3nJFMqAJ+ZC+MqydDvkXuiJHHImfYdAptme125JzJ
-	 nCyjtUTSkq8TK4tUDUDLI5G2bEETn/LPaAyqDyLtGpd/rHQMAvwokr28tAMp/okRjn
-	 iGJtknq4+zdY3DnVxhCilqR0OWikbUQ50wI+7UYsJcaI20Brt9fPjr0u8jC2IgTmT1
-	 FU+WV6gq/VyVQ==
-Message-ID: <96dac58a-9f10-4bd5-ad7d-c238743b60e7@kernel.org>
-Date: Sun, 2 Aug 2026 00:23:25 +0200
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="mcx0xaOk"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1785641865; x=1817177865;
+  h=date:from:to:cc:subject:message-id;
+  bh=Cf1KNB++DfL0jcisNnaxKsGoRicJlMpb8cl86N3PXXY=;
+  b=mcx0xaOkL8u9tFQc44WO0xSAWpugEkMTUhAANCRTH610H3o/LsaY6GgU
+   XgIX7h17kOwMiJPO9QAVj2rgOi6cExypWZtgaSp+hejxm9B+Vn1flXaqK
+   ppvebiZ40EACiaNZil5E27csKjNG+ZwxMCuj0IUZkl04tYeZB12ZBwPao
+   h4KWhrkEKl/vIrpAKHv5KuRw0yYGVAJkQTAvr7XH7lg2vRrWJb1msKYlw
+   zjPWflzCvhPSR/kLmWu+41rGI7VK03TrShLPkGnRp496rXc1v6o9WelLR
+   djA8qI0/qEpx/yjFuqVSrWDOhfpV0vAO6ly/MSLgTlkrk9wBsw90vyhyt
+   w==;
+X-CSE-ConnectionGUID: dwxITkfzQhGCtDAYVhJhdg==
+X-CSE-MsgGUID: cCqyughDTKK5odFOrkpwDw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11862"; a="73755974"
+X-IronPort-AV: E=Sophos;i="6.25,199,1779174000"; 
+   d="scan'208";a="73755974"
+Received: from orviesa002.jf.intel.com ([10.64.159.142])
+  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Aug 2026 20:37:43 -0700
+X-CSE-ConnectionGUID: KS+f01iURjiTDi9SSF5LWw==
+X-CSE-MsgGUID: tWB90GTRQqm9/Y0X7M5eQw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.25,199,1779174000"; 
+   d="scan'208";a="290848273"
+Received: from lkp-server01.sh.intel.com (HELO 6eda058d650d) ([10.239.97.150])
+  by orviesa002.jf.intel.com with ESMTP; 01 Aug 2026 20:37:43 -0700
+Received: from kbuild by 6eda058d650d with local (Exim 4.98.2)
+	(envelope-from <lkp@intel.com>)
+	id 1wqN1A-000000004MT-0FdF;
+	Sun, 02 Aug 2026 03:37:40 +0000
+Date: Sun, 02 Aug 2026 11:37:26 +0800
+From: kernel test robot <lkp@intel.com>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: linux-efi@vger.kernel.org
+Subject: [efi:next] BUILD SUCCESS
+ 44e4ec1a802d2078743f7a77f46af3e2213a3b4e
+Message-ID: <202608021115.UqNjPWIL-lkp@intel.com>
+User-Agent: s-nail v14.9.25
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: *** SPAM *** Re: [PATCH] efi/libstub: populate
- LoaderDevicePartUUID
-To: Ard Biesheuvel <ardb@kernel.org>, Vincent Mailhol <mailhol@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
-References: <20260725-efi_stub_bli-v1-1-966e4748077f@kernel.org>
- <0aad56b5-a650-49c6-a193-db65c4c4395e@app.fastmail.com>
-From: Vincent Mailhol <mailhol@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=mailhol@kernel.org; keydata=
- xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
- JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
- fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
- F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
- 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
- YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
- dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
- zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
-In-Reply-To: <0aad56b5-a650-49c6-a193-db65c4c4395e@app.fastmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
 
-On 01/08/2026 at 15:47, Ard Biesheuvel wrote:
-> Hi Vincent,
-> 
-> On Sat, 25 Jul 2026, at 01:11, Vincent Mailhol wrote:
->> The Boot Loader Interface [1] defines LoaderDevicePartUUID. That
->> variable contains the GPT partition UUID of the device path from which
->> the boot loader was loaded.
->>
->> This is used for example by systemd-gpt-auto-generator [2] to identify
->> the disk the boot loader was launched from and automatically detect and
->> mount partitions on it.
->>
->> GRUB populates it [3], but most EFI firmware implementations do not.
->> Because of that, the variable is missing when booting the kernel from
->> the EFI stub.
->>
->> Read the loaded image device path, extract the GUID signature from its
->> GPT HD() device path node and publish it as LoaderDevicePartUUID under
->> the Linux loader entry vendor GUID. Do not overwrite an existing
->> variable, so a boot loader supplied value keeps precedence.
->>
->> Use a volatile variable with boot-service and runtime access so the
->> value remains available to user space services such as systemd, without
->> persisting stale boot state across resets.
->>
->> Install the efi_bli_set_variables() hook in both the generic efi-stub.c
->> path and the x86-specific x86-stub.c path.
->>
->> [1] The Boot Loader Interface
->> Link: https://systemd.io/BOOT_LOADER_INTERFACE/
->>
->> [2] systemd-gpt-auto-generator
->> Link: 
->> https://www.freedesktop.org/software/systemd/man/latest/systemd-gpt-auto-generator.html
->>
->> [3] GRUB -- §16.2 bli
->> Link: 
->> https://www.gnu.org/software/grub/manual/grub/html_node/bli_005fmodule.html
->>
->> Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
->> ---
->> Here is a bit of extra context around this patch. I recently installed
->> coreboot on my machine with edk2 as the payload. After booting the
->> kernel directly from the EFI stub instead of booting it from GRUB, I
->> noticed that some partitions which were previously mounted automatically
->> were not mounted anymore.
->>
->> Upon investigation, I found that those partitions were mounted
->> automatically using DPS [4]. DPS needs the LoaderDevicePartUUID EFI
->> variable, which was set by GRUB but not by edk2.
->>
->> I first proposed a series to add that variable in edk2 [5]. The change
->> was not well received because BLI is perceived as too specific to Linux
->> systems. Upon reflection, I concluded that the kernel EFI stub is the
->> best location to implement it because it resolves the problem for EFI
->> firmware implementations in one place.
->>
-> 
-> So it is the bootloader that sets this variable, and you want to boot
-> without a bootloader, right?
+tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
+branch HEAD: 44e4ec1a802d2078743f7a77f46af3e2213a3b4e  efi: apple-properties: validate setup data header length
 
-Kind of.
+elapsed time: 788m
 
-In my view, when booting through the EFI stub, the EFI stub becomes the
-boot loader. I can also quote Documentation/admin-guide/efi-stub.rst:
+configs tested: 100
+configs skipped: 1
 
-  Since the EFI boot stub performs the jobs of a boot loader, in a
-  certain sense it IS the boot loader.
+The following configs have been built successfully.
+More configs may be tested in the coming days.
 
-which supports that idea.
+tested configs:
+alpha                            allnoconfig    gcc-16.1.0
+alpha                           allyesconfig    gcc-16.1.0
+alpha                              defconfig    gcc-16.1.0
+arc                             allmodconfig    gcc-16.1.0
+arc                             allyesconfig    gcc-16.1.0
+arc                  randconfig-001-20260802    gcc-15.2.0
+arc                  randconfig-002-20260802    gcc-15.2.0
+arm                         pxa910_defconfig    gcc-16.1.0
+arm                  randconfig-001-20260802    gcc-15.2.0
+arm                  randconfig-002-20260802    gcc-15.2.0
+arm                  randconfig-003-20260802    gcc-15.2.0
+arm                  randconfig-004-20260802    gcc-15.2.0
+arm64                randconfig-001-20260802    gcc-9.5.0
+arm64                randconfig-002-20260802    gcc-9.5.0
+arm64                randconfig-003-20260802    gcc-9.5.0
+arm64                randconfig-004-20260802    gcc-9.5.0
+csky                            allmodconfig    gcc-16.1.0
+csky                 randconfig-001-20260802    gcc-9.5.0
+csky                 randconfig-002-20260802    gcc-9.5.0
+hexagon              randconfig-001-20260802    clang-24
+hexagon              randconfig-002-20260802    clang-24
+i386                            allmodconfig    gcc-14
+i386       buildonly-randconfig-001-20260802    gcc-14
+i386       buildonly-randconfig-002-20260802    gcc-14
+i386       buildonly-randconfig-003-20260802    gcc-14
+i386       buildonly-randconfig-004-20260802    gcc-14
+i386       buildonly-randconfig-005-20260802    gcc-14
+i386       buildonly-randconfig-006-20260802    gcc-14
+i386                 randconfig-001-20260802    gcc-14
+i386                 randconfig-002-20260802    gcc-14
+i386                 randconfig-003-20260802    gcc-14
+i386                 randconfig-004-20260802    gcc-14
+i386                 randconfig-005-20260802    gcc-14
+i386                 randconfig-006-20260802    gcc-14
+i386                 randconfig-007-20260802    gcc-14
+i386                 randconfig-011-20260802    gcc-14
+i386                 randconfig-012-20260802    gcc-14
+i386                 randconfig-013-20260802    gcc-14
+i386                 randconfig-014-20260802    gcc-14
+i386                 randconfig-015-20260802    gcc-14
+i386                 randconfig-016-20260802    gcc-14
+i386                 randconfig-017-20260802    gcc-14
+loongarch                          defconfig    clang-24
+loongarch            randconfig-001-20260802    clang-24
+loongarch            randconfig-002-20260802    clang-24
+nios2                           allmodconfig    gcc-11.5.0
+nios2                            allnoconfig    gcc-11.5.0
+nios2                randconfig-001-20260802    clang-24
+nios2                randconfig-002-20260802    clang-24
+parisc                          allmodconfig    gcc-16.1.0
+parisc                          allyesconfig    gcc-16.1.0
+parisc                             defconfig    gcc-16.1.0
+parisc               randconfig-001-20260802    gcc-14.3.0
+parisc               randconfig-002-20260802    gcc-14.3.0
+powerpc                  bluestone_defconfig    clang-24
+powerpc              randconfig-001-20260802    gcc-14.3.0
+powerpc              randconfig-002-20260802    gcc-14.3.0
+powerpc64            randconfig-001-20260802    gcc-14.3.0
+powerpc64            randconfig-002-20260802    gcc-14.3.0
+riscv                randconfig-001-20260802    gcc-13.4.0
+riscv                randconfig-002-20260802    gcc-13.4.0
+s390                 randconfig-001-20260802    gcc-13.4.0
+s390                 randconfig-002-20260802    gcc-13.4.0
+sh                                 defconfig    gcc-16.1.0
+sh                   randconfig-001-20260802    gcc-13.4.0
+sh                   randconfig-002-20260802    gcc-13.4.0
+sparc                randconfig-001-20260802    gcc-12.5.0
+sparc                randconfig-002-20260802    gcc-12.5.0
+sparc64              randconfig-001-20260802    gcc-12.5.0
+sparc64              randconfig-002-20260802    gcc-12.5.0
+um                   randconfig-001-20260802    gcc-12.5.0
+um                   randconfig-002-20260802    gcc-12.5.0
+x86_64     buildonly-randconfig-001-20260802    gcc-12
+x86_64     buildonly-randconfig-002-20260802    gcc-12
+x86_64     buildonly-randconfig-003-20260802    gcc-12
+x86_64     buildonly-randconfig-004-20260802    gcc-12
+x86_64     buildonly-randconfig-005-20260802    gcc-12
+x86_64     buildonly-randconfig-006-20260802    gcc-12
+x86_64                                 kexec    clang-22
+x86_64               randconfig-001-20260802    clang-22
+x86_64               randconfig-002-20260802    clang-22
+x86_64               randconfig-003-20260802    clang-22
+x86_64               randconfig-004-20260802    clang-22
+x86_64               randconfig-005-20260802    clang-22
+x86_64               randconfig-006-20260802    clang-22
+x86_64               randconfig-011-20260802    clang-22
+x86_64               randconfig-012-20260802    clang-22
+x86_64               randconfig-013-20260802    clang-22
+x86_64               randconfig-014-20260802    clang-22
+x86_64               randconfig-015-20260802    clang-22
+x86_64               randconfig-016-20260802    clang-22
+x86_64               randconfig-071-20260802    gcc-12
+x86_64               randconfig-072-20260802    gcc-12
+x86_64               randconfig-073-20260802    gcc-12
+x86_64               randconfig-074-20260802    gcc-12
+x86_64               randconfig-075-20260802    gcc-12
+x86_64               randconfig-076-20260802    gcc-12
+x86_64                          rhel-9.4-bpf    gcc-14
+xtensa               randconfig-001-20260802    gcc-12.5.0
+xtensa               randconfig-002-20260802    gcc-12.5.0
 
-> What about systemd-boot, does it set this variable?
-
-Yes, it sets it in its efi_main().
-
-Link: https://github.com/ivandavidov/systemd-boot/blob/master/project/src/sd-boot/boot.c#L1760-L1762
-
-But IMHO, using systemd-boot kind of defeats the purpose of directly
-booting the kernel from its EFI stub.
-
- 
-Yours sincerely,
-Vincent Mailhol
+--
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
