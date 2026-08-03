@@ -1,177 +1,179 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9D4B2DC798
-	for <linux-efi@vger.kernel.org>; Sun,  2 Aug 2026 03:37:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77BF53BCD14;
+	Mon,  3 Aug 2026 13:59:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785641866; cv=none; b=Zs5+Z+7sPB/dIChSBlSWUz5CnFjCOxIDX9oUtAkX4NzyBWsFHFuI+gLzRkrfpQnSsMPkHJmAHp6BgldBcT9yPo3ElzVfJ49mGyv10ZmVCRhEgT2lYMi3/SnG9B6unzUzrw78OMa/z78or3wbJvvVB1b3wNOP1FhYznOdG2MKEew=
+	t=1785765589; cv=none; b=lm+hWmeqLyOtUmfEUqfxF0+/LmW70sKyuwuJiKaaYMKAlIujB545DLz+KHAT9bSZRpyyhlu3dxi4q/a389S7qR1kNcADyqoZlF9g57RKCjcTgWYt9f58CoyTPmDsQJgetjPMgSQUewv6S+ev15YCqZW+WK5MTUTI9b3pvLT1mxs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785641866; c=relaxed/simple;
-	bh=Cf1KNB++DfL0jcisNnaxKsGoRicJlMpb8cl86N3PXXY=;
-	h=Date:From:To:Cc:Subject:Message-ID; b=kW3Nl/QJIgDZrcrgNE7Y/7LMBQ63T/OapeXsn4gayeOSbb61quT4lfKxqBW6Y01KllK5f/URhmOv13qi7FFPhc2GZ6W0OMh7MmyQPiBRpzwJIlbNPVb8KCFUf+oYz2gLkzzknzVz1JFzzmFsKm6531ytJvOSGbpq4RTHAOiI9bc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=mcx0xaOk; arc=none smtp.client-ip=192.198.163.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1785765589; c=relaxed/simple;
+	bh=BMco7cE6ZUb0x1sY/U4XBBksWpvbpHojwOQxtubK6HA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=hl5RUgkce6lCHMieWkU+EChNLtQXBCOAwSRdG09e4fZXXpGaxlNC1KXotjKY+8ClocGsCPAgl7QlPw5NKAklGDC7CxgNCImVIh5naguQcVci7oOl1RMu9VuZ86Wr3/jy3iwdzqRCemdnRrBt4QrHef2cyhgkGdfFie8wDCjk8EI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VdJzXRQm; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="mcx0xaOk"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1785641865; x=1817177865;
-  h=date:from:to:cc:subject:message-id;
-  bh=Cf1KNB++DfL0jcisNnaxKsGoRicJlMpb8cl86N3PXXY=;
-  b=mcx0xaOkL8u9tFQc44WO0xSAWpugEkMTUhAANCRTH610H3o/LsaY6GgU
-   XgIX7h17kOwMiJPO9QAVj2rgOi6cExypWZtgaSp+hejxm9B+Vn1flXaqK
-   ppvebiZ40EACiaNZil5E27csKjNG+ZwxMCuj0IUZkl04tYeZB12ZBwPao
-   h4KWhrkEKl/vIrpAKHv5KuRw0yYGVAJkQTAvr7XH7lg2vRrWJb1msKYlw
-   zjPWflzCvhPSR/kLmWu+41rGI7VK03TrShLPkGnRp496rXc1v6o9WelLR
-   djA8qI0/qEpx/yjFuqVSrWDOhfpV0vAO6ly/MSLgTlkrk9wBsw90vyhyt
-   w==;
-X-CSE-ConnectionGUID: dwxITkfzQhGCtDAYVhJhdg==
-X-CSE-MsgGUID: cCqyughDTKK5odFOrkpwDw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11862"; a="73755974"
-X-IronPort-AV: E=Sophos;i="6.25,199,1779174000"; 
-   d="scan'208";a="73755974"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Aug 2026 20:37:43 -0700
-X-CSE-ConnectionGUID: KS+f01iURjiTDi9SSF5LWw==
-X-CSE-MsgGUID: tWB90GTRQqm9/Y0X7M5eQw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,199,1779174000"; 
-   d="scan'208";a="290848273"
-Received: from lkp-server01.sh.intel.com (HELO 6eda058d650d) ([10.239.97.150])
-  by orviesa002.jf.intel.com with ESMTP; 01 Aug 2026 20:37:43 -0700
-Received: from kbuild by 6eda058d650d with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1wqN1A-000000004MT-0FdF;
-	Sun, 02 Aug 2026 03:37:40 +0000
-Date: Sun, 02 Aug 2026 11:37:26 +0800
-From: kernel test robot <lkp@intel.com>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: linux-efi@vger.kernel.org
-Subject: [efi:next] BUILD SUCCESS
- 44e4ec1a802d2078743f7a77f46af3e2213a3b4e
-Message-ID: <202608021115.UqNjPWIL-lkp@intel.com>
-User-Agent: s-nail v14.9.25
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VdJzXRQm"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6E4B91F000E9;
+	Mon,  3 Aug 2026 13:59:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1785765588;
+	bh=JgJjMGVQwXfN1+lfqi/7mzYbORC4vBXwntqjWOpjj5Y=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=VdJzXRQmCKCQ7JgyKiUD1/ILZ8ALjapAPRXEniDDnzS1EoQJOd2Rh4mnj01mS0kaC
+	 SkdwvAXDVmUbSsA21mXsGUsV6UFqBCfzHqr7sKaMJIwGAPUZ/EuQ/qXVQNy9gbWQou
+	 k9r4ZeSmv7XSpcXC6vcb89age58OUEyz0Y3jtZ3UkudyTNaZ5gI+4+nRjmeVka/o9q
+	 /dN7dYJ78mn13G49euOFXvjaEbz3SgPDfvCdEu2cZqtsnpAXKCLf+lhpTv+wU8hwAu
+	 5uCt9p7JGa3sPVxgYgc/nGl9g631hfgqX2Lq234uZ0mjzzpUHJEqevNTssxpWPfwhD
+	 A251zj+Snu4hw==
+Message-ID: <01f07ea2-8bdd-4450-8a49-548f8b646cfd@kernel.org>
+Date: Mon, 3 Aug 2026 15:59:35 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 03/22] mm: introduce MMF_KERNEL flag and set it for
+ init_mm
+To: Kevin Brodsky <kevin.brodsky@arm.com>, linux-mm@kvack.org
+Cc: Andrew Morton <akpm@linux-foundation.org>,
+ David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>,
+ "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
+ Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
+ Michal Hocko <mhocko@suse.com>, Pasha Tatashin <pasha.tatashin@soleen.com>,
+ Russell King <linux@armlinux.org.uk>,
+ Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
+ Ryan Roberts <ryan.roberts@arm.com>, linux-arm-kernel@lists.infradead.org,
+ Huacai Chen <chenhuacai@kernel.org>, loongarch@lists.linux.dev,
+ "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+ Helge Deller <deller@gmx.de>, linux-parisc@vger.kernel.org,
+ Madhavan Srinivasan <maddy@linux.ibm.com>,
+ Michael Ellerman <mpe@ellerman.id.au>, linuxppc-dev@lists.ozlabs.org,
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+ Albert Ou <aou@eecs.berkeley.edu>, linux-riscv@lists.infradead.org,
+ Heiko Carstens <hca@linux.ibm.com>, Vasily Gorbik <gor@linux.ibm.com>,
+ Alexander Gordeev <agordeev@linux.ibm.com>,
+ Gerald Schaefer <gerald.schaefer@linux.ibm.com>, linux-s390@vger.kernel.org,
+ "David S. Miller" <davem@davemloft.net>,
+ Andreas Larsson <andreas@gaisler.com>, sparclinux@vger.kernel.org,
+ Richard Weinberger <richard@nod.at>,
+ Anton Ivanov <anton.ivanov@cambridgegreys.com>,
+ Johannes Berg <johannes@sipsolutions.net>, linux-um@lists.infradead.org,
+ Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+ Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
+ "H. Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>,
+ Peter Zijlstra <peterz@infradead.org>, Ning Sun <ning.sun@intel.com>,
+ x86@kernel.org, tboot-devel@lists.sourceforge.net,
+ Ard Biesheuvel <ardb@kernel.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
+ Vishal Moola <vishal.moola@gmail.com>, Alistair Popple <apopple@nvidia.com>,
+ "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+ linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
+References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
+ <20260714-remove_pgtable_cdtor-v1-3-44be8a7685d7@arm.com>
+Content-Language: fr-FR
+From: "Christophe Leroy (CS GROUP)" <chleroy@kernel.org>
+In-Reply-To: <20260714-remove_pgtable_cdtor-v1-3-44be8a7685d7@arm.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
-branch HEAD: 44e4ec1a802d2078743f7a77f46af3e2213a3b4e  efi: apple-properties: validate setup data header length
 
-elapsed time: 788m
 
-configs tested: 100
-configs skipped: 1
+Le 14/07/2026 à 16:03, Kevin Brodsky a écrit :
+> mm code often needs to know whether some mm represents a kernel or
+> user address space. This is currently done by comparing the mm
+> pointer with &init_mm; besides not being particularly elegant, this
+> ignores the fact that other mm's (e.g. efi_mm) may also represent
+> parts of the kernel address space.
+> 
+> Introduce a new mm flag MMF_KERNEL and set it for init_mm.
+> Subsequent patches will use this flag to replace comparisons with
+> &init_mm. No functional change is introduced for now.
 
-The following configs have been built successfully.
-More configs may be tested in the coming days.
+Did you consider performance impact ? This test is usually done in quite 
+critical memory handling functions.
 
-tested configs:
-alpha                            allnoconfig    gcc-16.1.0
-alpha                           allyesconfig    gcc-16.1.0
-alpha                              defconfig    gcc-16.1.0
-arc                             allmodconfig    gcc-16.1.0
-arc                             allyesconfig    gcc-16.1.0
-arc                  randconfig-001-20260802    gcc-15.2.0
-arc                  randconfig-002-20260802    gcc-15.2.0
-arm                         pxa910_defconfig    gcc-16.1.0
-arm                  randconfig-001-20260802    gcc-15.2.0
-arm                  randconfig-002-20260802    gcc-15.2.0
-arm                  randconfig-003-20260802    gcc-15.2.0
-arm                  randconfig-004-20260802    gcc-15.2.0
-arm64                randconfig-001-20260802    gcc-9.5.0
-arm64                randconfig-002-20260802    gcc-9.5.0
-arm64                randconfig-003-20260802    gcc-9.5.0
-arm64                randconfig-004-20260802    gcc-9.5.0
-csky                            allmodconfig    gcc-16.1.0
-csky                 randconfig-001-20260802    gcc-9.5.0
-csky                 randconfig-002-20260802    gcc-9.5.0
-hexagon              randconfig-001-20260802    clang-24
-hexagon              randconfig-002-20260802    clang-24
-i386                            allmodconfig    gcc-14
-i386       buildonly-randconfig-001-20260802    gcc-14
-i386       buildonly-randconfig-002-20260802    gcc-14
-i386       buildonly-randconfig-003-20260802    gcc-14
-i386       buildonly-randconfig-004-20260802    gcc-14
-i386       buildonly-randconfig-005-20260802    gcc-14
-i386       buildonly-randconfig-006-20260802    gcc-14
-i386                 randconfig-001-20260802    gcc-14
-i386                 randconfig-002-20260802    gcc-14
-i386                 randconfig-003-20260802    gcc-14
-i386                 randconfig-004-20260802    gcc-14
-i386                 randconfig-005-20260802    gcc-14
-i386                 randconfig-006-20260802    gcc-14
-i386                 randconfig-007-20260802    gcc-14
-i386                 randconfig-011-20260802    gcc-14
-i386                 randconfig-012-20260802    gcc-14
-i386                 randconfig-013-20260802    gcc-14
-i386                 randconfig-014-20260802    gcc-14
-i386                 randconfig-015-20260802    gcc-14
-i386                 randconfig-016-20260802    gcc-14
-i386                 randconfig-017-20260802    gcc-14
-loongarch                          defconfig    clang-24
-loongarch            randconfig-001-20260802    clang-24
-loongarch            randconfig-002-20260802    clang-24
-nios2                           allmodconfig    gcc-11.5.0
-nios2                            allnoconfig    gcc-11.5.0
-nios2                randconfig-001-20260802    clang-24
-nios2                randconfig-002-20260802    clang-24
-parisc                          allmodconfig    gcc-16.1.0
-parisc                          allyesconfig    gcc-16.1.0
-parisc                             defconfig    gcc-16.1.0
-parisc               randconfig-001-20260802    gcc-14.3.0
-parisc               randconfig-002-20260802    gcc-14.3.0
-powerpc                  bluestone_defconfig    clang-24
-powerpc              randconfig-001-20260802    gcc-14.3.0
-powerpc              randconfig-002-20260802    gcc-14.3.0
-powerpc64            randconfig-001-20260802    gcc-14.3.0
-powerpc64            randconfig-002-20260802    gcc-14.3.0
-riscv                randconfig-001-20260802    gcc-13.4.0
-riscv                randconfig-002-20260802    gcc-13.4.0
-s390                 randconfig-001-20260802    gcc-13.4.0
-s390                 randconfig-002-20260802    gcc-13.4.0
-sh                                 defconfig    gcc-16.1.0
-sh                   randconfig-001-20260802    gcc-13.4.0
-sh                   randconfig-002-20260802    gcc-13.4.0
-sparc                randconfig-001-20260802    gcc-12.5.0
-sparc                randconfig-002-20260802    gcc-12.5.0
-sparc64              randconfig-001-20260802    gcc-12.5.0
-sparc64              randconfig-002-20260802    gcc-12.5.0
-um                   randconfig-001-20260802    gcc-12.5.0
-um                   randconfig-002-20260802    gcc-12.5.0
-x86_64     buildonly-randconfig-001-20260802    gcc-12
-x86_64     buildonly-randconfig-002-20260802    gcc-12
-x86_64     buildonly-randconfig-003-20260802    gcc-12
-x86_64     buildonly-randconfig-004-20260802    gcc-12
-x86_64     buildonly-randconfig-005-20260802    gcc-12
-x86_64     buildonly-randconfig-006-20260802    gcc-12
-x86_64                                 kexec    clang-22
-x86_64               randconfig-001-20260802    clang-22
-x86_64               randconfig-002-20260802    clang-22
-x86_64               randconfig-003-20260802    clang-22
-x86_64               randconfig-004-20260802    clang-22
-x86_64               randconfig-005-20260802    clang-22
-x86_64               randconfig-006-20260802    clang-22
-x86_64               randconfig-011-20260802    clang-22
-x86_64               randconfig-012-20260802    clang-22
-x86_64               randconfig-013-20260802    clang-22
-x86_64               randconfig-014-20260802    clang-22
-x86_64               randconfig-015-20260802    clang-22
-x86_64               randconfig-016-20260802    clang-22
-x86_64               randconfig-071-20260802    gcc-12
-x86_64               randconfig-072-20260802    gcc-12
-x86_64               randconfig-073-20260802    gcc-12
-x86_64               randconfig-074-20260802    gcc-12
-x86_64               randconfig-075-20260802    gcc-12
-x86_64               randconfig-076-20260802    gcc-12
-x86_64                          rhel-9.4-bpf    gcc-14
-xtensa               randconfig-001-20260802    gcc-12.5.0
-xtensa               randconfig-002-20260802    gcc-12.5.0
+init_mm is known at link time. Before your patch 08/22 there is just a 
+comparison of mm (r3) with a constant (loaded in r10):
 
---
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+c0014048 <assert_pte_locked>:
+c0014048:	3d 40 c1 09 	lis     r10,-16119
+c001404c:	39 4a 03 98 	addi    r10,r10,920
+c0014050:	7c 03 50 00 	cmpw    r3,r10
+c0014054:	4d 82 00 20 	beqlr
+...
+
+After patch 08/22 we have, it first checks that mm is not 0, then it 
+loads the word located at mm+528 then AND it with 0x1. This load might 
+be costly.
+
+c0014048 <assert_pte_locked>:
+c0014048:	2c 03 00 00 	cmpwi   r3,0
+c001404c:	7c 85 23 78 	mr      r5,r4
+c0014050:	41 82 00 10 	beq     c0014060 <assert_pte_locked+0x18>
+c0014054:	81 23 02 10 	lwz     r9,528(r3)
+c0014058:	71 29 00 01 	andi.   r9,r9,1
+c001405c:	4c 82 00 20 	bnelr
+...
+
+Christophe
+
+> 
+> Assisted-by: Codex:GPT-5.5
+> Signed-off-by: Kevin Brodsky <kevin.brodsky@arm.com>
+> ---
+>   include/linux/mm_types.h | 10 ++++++++++
+>   mm/init-mm.c             |  1 +
+>   2 files changed, 11 insertions(+)
+> 
+> diff --git a/include/linux/mm_types.h b/include/linux/mm_types.h
+> index a2e0dc5892ff..7838ea3aac00 100644
+> --- a/include/linux/mm_types.h
+> +++ b/include/linux/mm_types.h
+> @@ -1414,6 +1414,8 @@ struct mm_struct {
+>   	char flexible_array[] __aligned(__alignof__(unsigned long));
+>   };
+>   
+> +#define MM_FLAGS_INIT(flags)	{ .__mm_flags = { BITMAP_FROM_U64(flags) } }
+> +
+>   static inline bool mm_flags_test(int flag, const struct mm_struct *mm)
+>   {
+>   	return test_bit(flag, ACCESS_PRIVATE(&mm->flags, __mm_flags));
+> @@ -2001,6 +2003,9 @@ enum {
+>   #define MMF_TOPDOWN		31	/* mm searches top down by default */
+>   #define MMF_TOPDOWN_MASK	BIT(MMF_TOPDOWN)
+>   
+> +#define MMF_KERNEL		32	/* mm belongs to the kernel */
+> +#define MMF_KERNEL_MASK		BIT_ULL(MMF_KERNEL)
+> +
+>   #define MMF_INIT_LEGACY_MASK	(MMF_DUMP_FILTER_MASK |\
+>   				 MMF_DISABLE_THP_MASK | MMF_HAS_MDWE_MASK |\
+>   				 MMF_VM_MERGE_ANY_MASK | MMF_TOPDOWN_MASK)
+> @@ -2008,6 +2013,11 @@ enum {
+>   /* Legacy flags must fit within 32 bits. */
+>   static_assert((u64)MMF_INIT_LEGACY_MASK <= (u64)UINT_MAX);
+>   
+> +static inline bool mm_is_kernel(const struct mm_struct *mm)
+> +{
+> +	return mm && mm_flags_test(MMF_KERNEL, mm);
+> +}
+> +
+>   /*
+>    * Initialise legacy flags according to masks, propagating selected flags on
+>    * fork. Further flag manipulation can be performed by the caller.
+> diff --git a/mm/init-mm.c b/mm/init-mm.c
+> index 3e792aad7626..93773269bf87 100644
+> --- a/mm/init-mm.c
+> +++ b/mm/init-mm.c
+> @@ -34,6 +34,7 @@ struct mm_struct init_mm = {
+>   	.pgd		= swapper_pg_dir,
+>   	.mm_users	= ATOMIC_INIT(2),
+>   	.mm_count	= ATOMIC_INIT(1),
+> +	.flags		= MM_FLAGS_INIT(MMF_KERNEL_MASK),
+>   	.write_protect_seq = SEQCNT_ZERO(init_mm.write_protect_seq),
+>   	MMAP_LOCK_INITIALIZER(init_mm)
+>   	.page_table_lock =  __SPIN_LOCK_UNLOCKED(init_mm.page_table_lock),
+> 
+
