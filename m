@@ -1,250 +1,157 @@
-Received: from fhigh-b2-smtp.messagingengine.com (fhigh-b2-smtp.messagingengine.com [202.12.124.153])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E54F84734C6;
-	Tue,  4 Aug 2026 16:01:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.153
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89C264BCAA2;
+	Tue,  4 Aug 2026 20:05:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785859267; cv=none; b=G0uzgY3MCSfn3TirUZ/fKY1r+9Z907sJysH+I5L2EwvevC5zAEp4Hf0iVuHh9xfJ3wozasaDPPGYHYXtWhXvD2q/xcANrCTwK5O6sc2VwMm4iDTdPFGupJ+PuOazyJtY52korVrqAnIDDxL6EIc1E6h/9vKGAV8YNNHe23dIr3Q=
+	t=1785873920; cv=none; b=FriowJemA4anchzrG4jqQkrxAD+4dQQNHhcsPyLiutj1qFGQTXwdYonm/6jxNqOoaJ/CVDO5w6KSyjRZuQDBTMQ4Lbg6jN+6Rbi9PkaEcQH/egAodOv4Cyyr5JYekJep00EF9XOQlGTluNLUKkrEy76CSC9vbogSiosyY7N3rhI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785859267; c=relaxed/simple;
-	bh=amA/zNFZTLgxeWDrshmk2tq6j/UbuhratCW+sZ0Id6E=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Jt8VKdIqI9Ng+yofJQiWvWXXexkWSz3SlKPLhq6mpmFuLr3MiQru5ZaoP2hbpIONY4xq3F+W8cstqc9zFa9m4t0MK9Xf4Alf1kssGsUbhftIpXsG1fkxu1kB95QohQGpxhw42ZdHFeNDJFbAWrNZE3goZG6cm88Gqr0KMFLVNo0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=astier.eu; spf=pass smtp.mailfrom=astier.eu; dkim=pass (2048-bit key) header.d=astier.eu header.i=@astier.eu header.b=mXvOOc6D; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=e2KrbUUM; arc=none smtp.client-ip=202.12.124.153
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=astier.eu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=astier.eu
+	s=arc-20240116; t=1785873920; c=relaxed/simple;
+	bh=rbBk7ax4ArpPoz48bpwPnsFLDFL4n8dlYquR9wY+sXY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=AcR4AqRrNlVcQ5BNXUkPE7/hhqQ77ctvk28/9yHcKMmE8nM8EJJRxyJzVZEnER5MKLV+5/PyEYSIoB8NLWMcED3uWrcqobPQJgBH2x6Q0LNGyuBQQpXaD7y7aME+EAmh6oyT8vEYqBTRe1lCdoJAVjqi2MHnTS8ohrzOT1Z3J/E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lmBC0h24; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=astier.eu header.i=@astier.eu header.b="mXvOOc6D";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="e2KrbUUM"
-Received: from phl-compute-03.internal (phl-compute-03.internal [10.202.2.43])
-	by mailfhigh.stl.internal (Postfix) with ESMTP id 1FDB37A014A;
-	Tue,  4 Aug 2026 12:01:05 -0400 (EDT)
-Received: from phl-frontend-03 ([10.202.2.162])
-  by phl-compute-03.internal (MEProxy); Tue, 04 Aug 2026 12:01:05 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=astier.eu; h=cc
-	:cc:content-type:content-type:date:date:from:from:in-reply-to
-	:in-reply-to:message-id:mime-version:references:reply-to:subject
-	:subject:to:to; s=fm2; t=1785859264; x=1785945664; bh=WGaGMtoMRE
-	M94Sk31ffrXiM7wUJRVVKWVpv6IYqhd9U=; b=mXvOOc6DB2rfC7g4lSRr9JJjbP
-	Ll5t8eSZBTCtPTPqLkDB4iCwDbw6dGqMLKw/xqFeFGMioUJmWpKi274QF5YsX9BB
-	L34FqmAlwCudM95BTdHByic8gxC0KiN1Kk05jR4nKVh981m4c8D5ezIniJLWgt1n
-	ESVF87fzazxjuOsthHN7H3wX7x//F4EJxmE6aCQqqkKOH0xqfuYt8qrlEZjw6iX2
-	dZhvNHhPjYvZDXS59hY30KIVVlmvkxka2ZW9p2H0jh09U06FlfQyxmr1bjzfzXY5
-	HgXoCozezQp+YY60vyzp6X/9Dz3v7OoibR5uM02+efwGl6/F5bli4hrT1B5Q==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-type:content-type:date:date
-	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-	:message-id:mime-version:references:reply-to:subject:subject:to
-	:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=
-	1785859264; x=1785945664; bh=WGaGMtoMREM94Sk31ffrXiM7wUJRVVKWVpv
-	6IYqhd9U=; b=e2KrbUUM9uXJbfyG/17bGUIAIdCpqgPYGb1DDosbT/D7gGpcp7+
-	4GbGHEPfO3Z+cL4onWz5FDq/m55HtymRZqM1Dy7MmfykMOtpu+QeYb87nPeS2kdC
-	I9qli7jksmocGbKJ+dUDDG9HM8bR29RwuMHyVZsIwpLbdp9N/PdCwmmWErouIW2c
-	5BWS0xMLN1fq4JuOo+Kdf0JEcb5uGEcLo6L8F552gxssALCwv2FFy+IJDMEc0LjC
-	LdDYalegvko2k6X62lYU03zy84czrXegRw3F/moO5GIgkf69Jje2l5hOdXkyJXeI
-	BeowLHOzug0IxOnzaxJrgOwtFdXA/idPJcg==
-X-ME-Sender: <xms:wAxyaowIh94w3Dnf6p8qcRjHLb7oEIDmJfe39xPynSg1Tyd9pRYOlg>
-    <xme:wAxyatyV3d_E0Xv5a0BjQOey4pgHwdbwYlGxbzhwtVdivJ9RSiNJQ82cglBnyFKPj
-    o3UKuQ47plvjl2mf-JRwYdFKnRYfM7XBwhIKvLIzbXVx9Rge_9mjRYQ>
-X-ME-Received: <xmr:wAxyaqYz4okG8MbgwLMuW1gaOU1E7kx32i0mjGn-mhwD4TmFIOesijZPylY>
-X-ME-Proxy-Cause: dmFkZTEqwEKzxuD4pnELxQQmO2GGUhQoBSvYe92M8+k2S/Xr6b8AhthiUB+1wE7at074AV
-    9zwKMYE5WV2LvkU8WbZeWwtwfdG2pTWtmIXMp9UbQz/iPE5ZTzTyJRVWDDIdos3jofJ2R5
-    5O7R/69aOcBXEXzdomYUsf/IYTyVKUrtlZIjbFmq6JAcV21VjOKNJzZbtmtF3q4pKcO5tK
-    hlU/e1z8NEj4QS7ypBt20eEOPOVGCo2uQRo1FpE2f3vmJbSFG44Qyjjp9XSRil/ZUfke1C
-    anuFurdH8E2rQ5edNQ56tW2D6soSZh/WV4yDEjVXkG08UYB2/h1597+rvbk6FtrKWZdAWT
-    V3AEXKJZFYG4z0ddxbIYWvg/LevRNoNbHR4jxIW069zx2GjWBv7XgEZ6rXCUnTMXmXlB+A
-    otpndcVPwW4O3gT7oJF+LLRRDq+opLpIRAgY7qca8omLEo98nOmpTAFKiMklgEarDNPr/U
-    u9UiK1jggK6WTsSEOfX6MD82s03IAfDw5M78qpUEi6XCzlDk39qfNNr9LILVCJ2FzL0Cd9
-    rTPotUrGxsr9L9iFHn2x9ZnoMGH/NT7kcZQ1m2ymgGN40hZhldb12wM1tvnrJKxENsmUDn
-    qFDgZBXWCwoF5VYDVcZsEPc2iVN2fSncD+IzWQ0RRBFjPG9NIk/pe43mI8dg
-X-ME-Proxy: <xmx:wAxyamV7u4SG0nMbBA2UR4oSNM7RlAYlbUEgAyTDHUwbwKw2CVlsOA>
-    <xmx:wAxyagiQBaIGzoHyI4dxxuPQpsCPHPYHSGbYtvlfqd7YkW8eBlqs2A>
-    <xmx:wAxyasvElqqNOBQFS95FcDHAK0NX8j1w-2b3NxNBUXftrywZwW__-Q>
-    <xmx:wAxyah6H59R_Vcz2BkRFtRVCGIvdozzbYM3PXINH2eBzNAYOLyN7SQ>
-    <xmx:wAxyanOmU55KdkVL3Qho6-6zbU0JvNz6EZllgYNDl4o9OJ36_BYzDfdK>
-Feedback-ID: iccec46d4:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
- 4 Aug 2026 12:01:03 -0400 (EDT)
-Date: Tue, 4 Aug 2026 18:01:01 +0200
-From: Anisse Astier <anisse@astier.eu>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: linux-efi@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org,
-	Ravi Bangoria <ravi.bangoria@amd.com>
-Subject: Re: [PATCH] efivarfs: Cache occupied and available space
-Message-ID: <anILrU83ClMOZ6hO@PF620VM5>
-References: <20260801144258.15977-2-ardb@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lmBC0h24"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5A3E1F000E9;
+	Tue,  4 Aug 2026 20:05:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1785873918;
+	bh=PxfkStZE2LTjNr1PwVAWLYYSwCtVtLYKfRYDpA3yXOE=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=lmBC0h24rolfH+r0Dl1RDnp1oBN8r63IKKQe6STBxoHo3MGyyzMZ23NOCrqhFMPgC
+	 Q9nacMvoe5AmvOnuyDsI8u8iDpQUHaiR7gp6SL/88ff/UCR0Wvr23911S/nvZ584po
+	 Tykh20hUiEMYDsE/bzhsNfqwAB1eka9IEC6KI+UT0vtgE+jpKHjP9Oik2Sx4lNuopE
+	 1wIyz7vF/Nqw/5FJ3QjPPLwLR1ckph+TdO1l7dYWdwBKNBgd2ns4s/ZL62Wo6Tfsdp
+	 jkwG1C37dDDG0FPRoAdqTC5HUStitcJP9bpRYhoS6tyMM8rOJ2aDc93/twVEc7T/R7
+	 86SQRjoWS8HmA==
+Message-ID: <be3fba3c-4f31-4407-aa78-3408aa043f46@kernel.org>
+Date: Tue, 4 Aug 2026 22:05:13 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260801144258.15977-2-ardb@kernel.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] efi/libstub: populate LoaderDevicePartUUID
+To: Ard Biesheuvel <ardb@kernel.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+References: <20260725-efi_stub_bli-v1-1-966e4748077f@kernel.org>
+ <0aad56b5-a650-49c6-a193-db65c4c4395e@app.fastmail.com>
+From: Vincent Mailhol <mailhol@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=mailhol@kernel.org; keydata=
+ xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
+ JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
+ fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
+ F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
+ 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
+ YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
+ dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
+ zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
+In-Reply-To: <0aad56b5-a650-49c6-a193-db65c4c4395e@app.fastmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 Hi Ard,
 
-Please find a few comments below,
+This is a resend of:
 
-On Sat, Aug 01, 2026 at 04:42:59PM +0200, Ard Biesheuvel wrote:
-> Ravi reports that statfs() may be called by unprivileged users on the
-> efivarfs mount point, resulting in repeated calls to QueryVariableInfo()
-> which are disproportionately costly on x86 systems where the variable
-> store is backed by SMM, as each SMM entry requires a rendez-vous of all
-> the CPUs.
+  https://lore.kernel.org/all/96dac58a-9f10-4bd5-ad7d-c238743b60e7@kernel.org/
+
+My SMTP server detected your message as spam and prefixed the message
+subject with:
+
+  *** SPAM ***
+
+And this stayed in the subject of my reply. Now, I am worried that you
+may not have gotten it because of that, thus this resend.
+
+Aside from the fixed email subject, this is the same message.
+
+On 01/08/2026 at 15:47, Ard Biesheuvel wrote:
+> Hi Vincent,
 > 
-> So cache the output of QueryVariableInfo(), and invalidate the cached
-> values when an entry is added or deleted, or the variable store is
-> synchronized after a suspend/resume sequence.
+> On Sat, 25 Jul 2026, at 01:11, Vincent Mailhol wrote:
+>> The Boot Loader Interface [1] defines LoaderDevicePartUUID. That
+>> variable contains the GPT partition UUID of the device path from which
+>> the boot loader was loaded.
+>>
+>> This is used for example by systemd-gpt-auto-generator [2] to identify
+>> the disk the boot loader was launched from and automatically detect and
+>> mount partitions on it.
+>>
+>> GRUB populates it [3], but most EFI firmware implementations do not.
+>> Because of that, the variable is missing when booting the kernel from
+>> the EFI stub.
+>>
+>> Read the loaded image device path, extract the GUID signature from its
+>> GPT HD() device path node and publish it as LoaderDevicePartUUID under
+>> the Linux loader entry vendor GUID. Do not overwrite an existing
+>> variable, so a boot loader supplied value keeps precedence.
+>>
+>> Use a volatile variable with boot-service and runtime access so the
+>> value remains available to user space services such as systemd, without
+>> persisting stale boot state across resets.
+>>
+>> Install the efi_bli_set_variables() hook in both the generic efi-stub.c
+>> path and the x86-specific x86-stub.c path.
+>>
+>> [1] The Boot Loader Interface
+>> Link: https://systemd.io/BOOT_LOADER_INTERFACE/
+>>
+>> [2] systemd-gpt-auto-generator
+>> Link: 
+>> https://www.freedesktop.org/software/systemd/man/latest/systemd-gpt-auto-generator.html
+>>
+>> [3] GRUB -- §16.2 bli
+>> Link: 
+>> https://www.gnu.org/software/grub/manual/grub/html_node/bli_005fmodule.html
+>>
+>> Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
+>> ---
+>> Here is a bit of extra context around this patch. I recently installed
+>> coreboot on my machine with edk2 as the payload. After booting the
+>> kernel directly from the EFI stub instead of booting it from GRUB, I
+>> noticed that some partitions which were previously mounted automatically
+>> were not mounted anymore.
+>>
+>> Upon investigation, I found that those partitions were mounted
+>> automatically using DPS [4]. DPS needs the LoaderDevicePartUUID EFI
+>> variable, which was set by GRUB but not by edk2.
+>>
+>> I first proposed a series to add that variable in edk2 [5]. The change
+>> was not well received because BLI is perceived as too specific to Linux
+>> systems. Upon reflection, I concluded that the kernel EFI stub is the
+>> best location to implement it because it resolves the problem for EFI
+>> firmware implementations in one place.
+>>
 > 
-> Cc: <stable@vger.kernel.org>
-> Reported-by: Ravi Bangoria <ravi.bangoria@amd.com>
-> Fixes: d86ff3333cb1 ("efivarfs: expose used and total size")
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-> ---
->  fs/efivarfs/internal.h |  2 ++
->  fs/efivarfs/super.c    | 21 +++++++++++---------
->  fs/efivarfs/vars.c     |  9 +++++++++
->  3 files changed, 23 insertions(+), 9 deletions(-)
-> 
-> diff --git a/fs/efivarfs/internal.h b/fs/efivarfs/internal.h
-> index f913b6824289..d43789bc7839 100644
-> --- a/fs/efivarfs/internal.h
-> +++ b/fs/efivarfs/internal.h
-> @@ -31,6 +31,8 @@ struct efivar_entry {
->  	bool removed;
->  };
->  
-> +extern u64 efivar_storage_space, efivar_remaining_space;
-> +
->  static inline struct efivar_entry *efivar_entry(struct inode *inode)
->  {
->  	return container_of(inode, struct efivar_entry, vfs_inode);
-> diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-> index 733c19571f1c..3691a2a087a0 100644
-> --- a/fs/efivarfs/super.c
-> +++ b/fs/efivarfs/super.c
-> @@ -23,6 +23,8 @@
->  #include "internal.h"
->  #include "../internal.h"
->  
-> +u64 efivar_storage_space, efivar_remaining_space;
-> +
-Since those are globals (before they were only local to the function),
-I'd put them behind a lock now, probably efivar_lock, because we need
-something that's globally available.
+> So it is the bootloader that sets this variable, and you want to boot
+> without a bootloader, right?
 
-statfs could be raced from userspace vs the rest of the code; and
-efivar_invalidate_cached_storage_space is only called outside the lock.
+Kind of.
 
->  static int efivarfs_ops_notifier(struct notifier_block *nb, unsigned long event,
->  				 void *data)
->  {
-> @@ -82,15 +84,16 @@ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
->  	const u32 attr = EFI_VARIABLE_NON_VOLATILE |
->  			 EFI_VARIABLE_BOOTSERVICE_ACCESS |
->  			 EFI_VARIABLE_RUNTIME_ACCESS;
-> -	u64 storage_space, remaining_space, max_variable_size;
->  	u64 id = huge_encode_dev(dentry->d_sb->s_dev);
-> +	u64 max_variable_size;
->  	efi_status_t status;
->  
->  	/* Some UEFI firmware does not implement QueryVariableInfo() */
-> -	storage_space = remaining_space = 0;
-> -	if (efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
-> -		status = efivar_query_variable_info(attr, &storage_space,
-> -						    &remaining_space,
-> +	if (efivar_storage_space == 0 &&
-> +	    efivar_remaining_space == 0 &&
-> +	    efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
-> +		status = efivar_query_variable_info(attr, &efivar_storage_space,
-> +						    &efivar_remaining_space,
->  						    &max_variable_size);
->  		if (status != EFI_SUCCESS && status != EFI_UNSUPPORTED)
->  			pr_warn_ratelimited("query_variable_info() failed: 0x%lx\n",
+In my view, when booting through the EFI stub, the EFI stub becomes the
+boot loader. I can also quote Documentation/admin-guide/efi-stub.rst:
 
-We've had issues with firmware in the past, shouldn't we be a bit more
-defensive here in case of errors? I'd reset both variables on error in
-case an incomplete write to one of the variables gives us an invalid state.
+  Since the EFI boot stub performs the jobs of a boot loader, in a
+  certain sense it IS the boot loader.
 
-> @@ -104,8 +107,8 @@ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
->  	 */
->  	buf->f_bsize	= 1;
->  	buf->f_namelen	= NAME_MAX;
-> -	buf->f_blocks	= storage_space;
-> -	buf->f_bfree	= remaining_space;
-> +	buf->f_blocks	= efivar_storage_space;
-> +	buf->f_bfree	= efivar_remaining_space;
->  	buf->f_type	= dentry->d_sb->s_magic;
->  	buf->f_fsid	= u64_to_fsid(id);
->  
-> @@ -114,8 +117,8 @@ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
->  	 * when the storage_paranoia x86 quirk is active. To use more, users
->  	 * should boot the kernel with efi_no_storage_paranoia.
->  	 */
-> -	if (remaining_space > efivar_reserved_space())
-> -		buf->f_bavail = remaining_space - efivar_reserved_space();
-> +	if (efivar_remaining_space > efivar_reserved_space())
-> +		buf->f_bavail = efivar_remaining_space - efivar_reserved_space();
->  	else
->  		buf->f_bavail = 0;
->  
-> diff --git a/fs/efivarfs/vars.c b/fs/efivarfs/vars.c
-> index 6833c3d24b54..4196963695bd 100644
-> --- a/fs/efivarfs/vars.c
-> +++ b/fs/efivarfs/vars.c
-> @@ -361,6 +361,11 @@ static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
->  	kfree(str8);
->  }
->  
-> +static void efivar_invalidate_cached_storage_space(void)
-> +{
-> +	efivar_storage_space = efivar_remaining_space = 0;
-> +}
-> +
->  /**
->   * efivar_init - build the initial list of EFI variables
->   * @func: callback function to invoke for every variable
-> @@ -450,6 +455,7 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
->  	} while (status != EFI_NOT_FOUND);
->  
->  	efivar_unlock();
-> +	efivar_invalidate_cached_storage_space();
->  free:
->  	kfree(variable_name);
->  
-> @@ -480,6 +486,8 @@ int efivar_entry_delete(struct efivar_entry *entry)
->  					    &entry->var.VendorGuid,
->  					    0, 0, NULL, false);
->  	efivar_unlock();
-> +	efivar_invalidate_cached_storage_space();
-> +
->  	if (!(status == EFI_SUCCESS || status == EFI_NOT_FOUND))
->  		return efi_status_to_err(status);
->  
-> @@ -620,6 +628,7 @@ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
->  				    NULL, size, NULL);
->  
->  	efivar_unlock();
-> +	efivar_invalidate_cached_storage_space();
+which supports that idea.
+ 
+> What about systemd-boot, does it set this variable?
 
-In this function, the error path for efi_set_variable_locked (that could
-have triggered an EFI_OUT_OF_RESOURCES) is not covered by the
-invalidation.
+Yes, it sets it in its efi_main().
 
->  
->  	if (status && status != EFI_BUFFER_TOO_SMALL)
->  		return efi_status_to_err(status);
-> -- 
+Link: https://github.com/ivandavidov/systemd-boot/blob/master/project/src/sd-boot/boot.c#L1760-L1762
 
-Couldn't the variables be written outside of efivarfs as well?
-efivar_set_variable can be called from other code? pstore could maybe be
-ignored if it's only used during crashes (I'm not sure), but I see at
-least one other driver calling it as well. Wouldn't that change the
-available/free size?
+But IMHO, using systemd-boot kind of defeats the purpose of directly
+booting the kernel from its EFI stub.
 
-Regards,
-
-Anisse
+ 
+Yours sincerely,
+Vincent Mailhol
