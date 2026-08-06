@@ -1,157 +1,187 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89C264BCAA2;
-	Tue,  4 Aug 2026 20:05:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27E0B414DCB;
+	Wed,  5 Aug 2026 09:55:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785873920; cv=none; b=FriowJemA4anchzrG4jqQkrxAD+4dQQNHhcsPyLiutj1qFGQTXwdYonm/6jxNqOoaJ/CVDO5w6KSyjRZuQDBTMQ4Lbg6jN+6Rbi9PkaEcQH/egAodOv4Cyyr5JYekJep00EF9XOQlGTluNLUKkrEy76CSC9vbogSiosyY7N3rhI=
+	t=1785923713; cv=none; b=RJBgnNESVF30129Ov+FemgZHb3xecOsOcVXLRLaBHG2RQYl9NQ69DIF5hYmZhnznbTU9t9p3E6WgzmYaQDCRB+xSXNF003rDkAiuV5bAygoBVGUu5V7Q+DvvsZrTDQg50AJBxZhKwMVeMlGefDtHOmr2OzyfXKHwpAW90QDlwds=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785873920; c=relaxed/simple;
-	bh=rbBk7ax4ArpPoz48bpwPnsFLDFL4n8dlYquR9wY+sXY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=AcR4AqRrNlVcQ5BNXUkPE7/hhqQ77ctvk28/9yHcKMmE8nM8EJJRxyJzVZEnER5MKLV+5/PyEYSIoB8NLWMcED3uWrcqobPQJgBH2x6Q0LNGyuBQQpXaD7y7aME+EAmh6oyT8vEYqBTRe1lCdoJAVjqi2MHnTS8ohrzOT1Z3J/E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lmBC0h24; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1785923713; c=relaxed/simple;
+	bh=42kgk8ku6NfLS+gtLcjyvQYSOd8Pi9hGFBDV8zn0e+0=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=nnBRE/V5O4CQdKSYLdvO17ENZ1dI0rR1r4ZU/D9QUvaGI7imolUBhj/pKwLGS/MTMCYSUxYGog6dl3BebkwAvv5VE/KuT0L0e3Yf/vjJoKqH3P1kdmUinMDKAvnGZZwRrpKLmbGhlieg5GFfeS9qeU95uRg9q8p6zf2psjsPMh0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=g9OhP3tE; arc=none smtp.client-ip=192.198.163.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lmBC0h24"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5A3E1F000E9;
-	Tue,  4 Aug 2026 20:05:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785873918;
-	bh=PxfkStZE2LTjNr1PwVAWLYYSwCtVtLYKfRYDpA3yXOE=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=lmBC0h24rolfH+r0Dl1RDnp1oBN8r63IKKQe6STBxoHo3MGyyzMZ23NOCrqhFMPgC
-	 Q9nacMvoe5AmvOnuyDsI8u8iDpQUHaiR7gp6SL/88ff/UCR0Wvr23911S/nvZ584po
-	 Tykh20hUiEMYDsE/bzhsNfqwAB1eka9IEC6KI+UT0vtgE+jpKHjP9Oik2Sx4lNuopE
-	 1wIyz7vF/Nqw/5FJ3QjPPLwLR1ckph+TdO1l7dYWdwBKNBgd2ns4s/ZL62Wo6Tfsdp
-	 jkwG1C37dDDG0FPRoAdqTC5HUStitcJP9bpRYhoS6tyMM8rOJ2aDc93/twVEc7T/R7
-	 86SQRjoWS8HmA==
-Message-ID: <be3fba3c-4f31-4407-aa78-3408aa043f46@kernel.org>
-Date: Tue, 4 Aug 2026 22:05:13 +0200
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="g9OhP3tE"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1785923712; x=1817459712;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=42kgk8ku6NfLS+gtLcjyvQYSOd8Pi9hGFBDV8zn0e+0=;
+  b=g9OhP3tE35PEZ1UFHFalCFd6jLM2KDNJI3qi//rCJhA+FwH41YXyBGqr
+   gAzWVHA9SjMANtmLdnKc8t//iVG5rnKykJyDsjG98kane8Zu5Q86nUt8B
+   GuBsFcWO39nRiu4b8Qb9oMw3vsBCJlN779Q4FSf3lZSUcqyxCGpIu3d0X
+   xmuOK55syUL+bGvcEOIgS0QIL9iAgw4YvCPhm9ekkQGlp/5/c/zvk+pBO
+   OXzwQh9PZ22uiaN04gTu5vfzuB/NuYITqGw/Yn+kMQt6ox2QX9LS949z+
+   4Yyikmd52uiOC3qaIZUkz31xgNihQONCjIow0M4BdRAmIedrApaZ4Uq3J
+   A==;
+X-CSE-ConnectionGUID: s/bpxoaEQCazptWnXI3cKQ==
+X-CSE-MsgGUID: 1BVbJ7LzQsys9nWNTJ8pxg==
+X-IronPort-AV: E=McAfee;i="6800,10657,11865"; a="97140819"
+X-IronPort-AV: E=Sophos;i="6.25,206,1779174000"; 
+   d="scan'208";a="97140819"
+Received: from orviesa007.jf.intel.com ([10.64.159.147])
+  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Aug 2026 02:55:12 -0700
+X-CSE-ConnectionGUID: Mobx2ToTQ1CnuzTkDpFKgw==
+X-CSE-MsgGUID: rgyq+AAZRMWotbqVGU+DlQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.25,206,1779174000"; 
+   d="scan'208";a="261822987"
+Received: from junxiao.bj.intel.com ([10.238.152.69])
+  by orviesa007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Aug 2026 02:55:10 -0700
+From: Junxiao Chang <junxiao.chang@intel.com>
+To: ardb@kernel.org,
+	ilias.apalodimas@linaro.org,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: bigeasy@linutronix.de,
+	junxiao.chang@intel.com
+Subject: [PATCH] efi: add dynamic control interface for EFI runtime services
+Date: Thu,  6 Aug 2026 17:49:01 +0800
+Message-ID: <20260806094901.1709381-1-junxiao.chang@intel.com>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20260704003341.3923900-1-junxiao.chang@intel.com>
+References: <20260704003341.3923900-1-junxiao.chang@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] efi/libstub: populate LoaderDevicePartUUID
-To: Ard Biesheuvel <ardb@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
-References: <20260725-efi_stub_bli-v1-1-966e4748077f@kernel.org>
- <0aad56b5-a650-49c6-a193-db65c4c4395e@app.fastmail.com>
-From: Vincent Mailhol <mailhol@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=mailhol@kernel.org; keydata=
- xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
- JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
- fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
- F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
- 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
- YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
- dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
- zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
-In-Reply-To: <0aad56b5-a650-49c6-a193-db65c4c4395e@app.fastmail.com>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Hi Ard,
+Add an interface for PREEMPT_RT kernels to dynamically enable or
+disable EFI runtime services.
 
-This is a resend of:
+EFI runtime services are typically disabled on RT systems using
+kernel parameters such as "noefi" or "efi=disable" to avoid
+long latency caused by firmware calls. However, this permanently
+disables EFI runtime services, preventing operations such as UEFI
+firmware updates.
 
-  https://lore.kernel.org/all/96dac58a-9f10-4bd5-ad7d-c238743b60e7@kernel.org/
+With this change, EFI runtime services can be disabled while
+real-time workloads are running and re-enabled afterwards,
+providing low-latency operation without permanently sacrificing
+firmware functionality.
 
-My SMTP server detected your message as spam and prefixed the message
-subject with:
+Signed-off-by: Junxiao Chang <junxiao.chang@intel.com>
+---
+ drivers/firmware/efi/efi.c              | 31 +++++++++++++++++++++++++
+ drivers/firmware/efi/runtime-wrappers.c | 28 ++++++++++++++++++++++
+ include/linux/efi.h                     |  1 +
+ 3 files changed, 60 insertions(+)
 
-  *** SPAM ***
-
-And this stayed in the subject of my reply. Now, I am worried that you
-may not have gotten it because of that, thus this resend.
-
-Aside from the fixed email subject, this is the same message.
-
-On 01/08/2026 at 15:47, Ard Biesheuvel wrote:
-> Hi Vincent,
-> 
-> On Sat, 25 Jul 2026, at 01:11, Vincent Mailhol wrote:
->> The Boot Loader Interface [1] defines LoaderDevicePartUUID. That
->> variable contains the GPT partition UUID of the device path from which
->> the boot loader was loaded.
->>
->> This is used for example by systemd-gpt-auto-generator [2] to identify
->> the disk the boot loader was launched from and automatically detect and
->> mount partitions on it.
->>
->> GRUB populates it [3], but most EFI firmware implementations do not.
->> Because of that, the variable is missing when booting the kernel from
->> the EFI stub.
->>
->> Read the loaded image device path, extract the GUID signature from its
->> GPT HD() device path node and publish it as LoaderDevicePartUUID under
->> the Linux loader entry vendor GUID. Do not overwrite an existing
->> variable, so a boot loader supplied value keeps precedence.
->>
->> Use a volatile variable with boot-service and runtime access so the
->> value remains available to user space services such as systemd, without
->> persisting stale boot state across resets.
->>
->> Install the efi_bli_set_variables() hook in both the generic efi-stub.c
->> path and the x86-specific x86-stub.c path.
->>
->> [1] The Boot Loader Interface
->> Link: https://systemd.io/BOOT_LOADER_INTERFACE/
->>
->> [2] systemd-gpt-auto-generator
->> Link: 
->> https://www.freedesktop.org/software/systemd/man/latest/systemd-gpt-auto-generator.html
->>
->> [3] GRUB -- §16.2 bli
->> Link: 
->> https://www.gnu.org/software/grub/manual/grub/html_node/bli_005fmodule.html
->>
->> Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
->> ---
->> Here is a bit of extra context around this patch. I recently installed
->> coreboot on my machine with edk2 as the payload. After booting the
->> kernel directly from the EFI stub instead of booting it from GRUB, I
->> noticed that some partitions which were previously mounted automatically
->> were not mounted anymore.
->>
->> Upon investigation, I found that those partitions were mounted
->> automatically using DPS [4]. DPS needs the LoaderDevicePartUUID EFI
->> variable, which was set by GRUB but not by edk2.
->>
->> I first proposed a series to add that variable in edk2 [5]. The change
->> was not well received because BLI is perceived as too specific to Linux
->> systems. Upon reflection, I concluded that the kernel EFI stub is the
->> best location to implement it because it resolves the problem for EFI
->> firmware implementations in one place.
->>
-> 
-> So it is the bootloader that sets this variable, and you want to boot
-> without a bootloader, right?
-
-Kind of.
-
-In my view, when booting through the EFI stub, the EFI stub becomes the
-boot loader. I can also quote Documentation/admin-guide/efi-stub.rst:
-
-  Since the EFI boot stub performs the jobs of a boot loader, in a
-  certain sense it IS the boot loader.
-
-which supports that idea.
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 0327a39d31fa5..f57784a815c61 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -401,6 +401,32 @@ static void __init efi_debugfs_init(void)
+ static inline void efi_debugfs_init(void) {}
+ #endif
  
-> What about systemd-boot, does it set this variable?
-
-Yes, it sets it in its efi_main().
-
-Link: https://github.com/ivandavidov/systemd-boot/blob/master/project/src/sd-boot/boot.c#L1760-L1762
-
-But IMHO, using systemd-boot kind of defeats the purpose of directly
-booting the kernel from its EFI stub.
-
++static ssize_t efi_dynamic_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
++{
++	return sprintf(buf, "%d\n", efi_enabled(EFI_RUNTIME_SERVICES));
++}
++
++static ssize_t efi_dynamic_store(struct kobject *kobj, struct kobj_attribute *attr,
++				 const char *buf, size_t count)
++{
++	int ret;
++	bool enable;
++
++	ret = kstrtobool(buf, &enable);
++	if (ret)
++		return ret;
++
++	if (efi_runtime_set_enable_flag(enable) != EFI_SUCCESS) {
++		pr_warn("unable to enable/disable efi runtime service\n");
++		return -EAGAIN;
++	}
++
++	return count;
++}
++
++static struct kobj_attribute efi_dynamic_attr =
++	__ATTR(dynamic_enable, 0644, efi_dynamic_show, efi_dynamic_store);
++
+ static int __init efipostcore_init(void)
+ {
+ 	if (!efi_enabled(EFI_RUNTIME_SERVICES))
+@@ -446,6 +472,11 @@ static int __init efisubsys_init(void)
+ 		goto err_destroy_wq;
+ 	}
  
-Yours sincerely,
-Vincent Mailhol
++	if (IS_ENABLED(CONFIG_PREEMPT_RT) && efi.runtime_supported_mask) {
++		if (sysfs_create_file(efi_kobj, &efi_dynamic_attr.attr))
++			pr_warn("unable to register efi dynamic sysfs interface\n");
++	}
++
+ 	if (efi_rt_services_supported(EFI_RT_SUPPORTED_GET_VARIABLE |
+ 				      EFI_RT_SUPPORTED_GET_NEXT_VARIABLE_NAME)) {
+ 		error = generic_ops_register();
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index da8d296216441..24cd8d0478385 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -602,3 +602,31 @@ void efi_runtime_assert_lock_held(void)
+ {
+ 	WARN_ON(efi_runtime_lock_owner != current);
+ }
++
++efi_status_t efi_runtime_set_enable_flag(bool enable)
++{
++	static bool dynamic_disabled;
++	efi_status_t ret = EFI_NOT_READY;
++
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
++
++	if (enable) {
++		/* It could be enabled only if it is disabled here */
++		if (dynamic_disabled) {
++			set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
++			dynamic_disabled = false;
++			ret = EFI_SUCCESS;
++		}
++	} else {
++		if (efi_enabled(EFI_RUNTIME_SERVICES)) {
++			clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
++			dynamic_disabled = true;
++			ret = EFI_SUCCESS;
++		}
++	}
++
++	up(&efi_runtime_lock);
++
++	return ret;
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index ccbc35479684a..98b76008fd426 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1109,6 +1109,7 @@ extern void efi_call_virt_check_flags(unsigned long flags, const void *caller);
+ extern unsigned long efi_call_virt_save_flags(void);
+ 
+ void efi_runtime_assert_lock_held(void);
++efi_status_t efi_runtime_set_enable_flag(bool enable);
+ 
+ enum efi_secureboot_mode {
+ 	efi_secureboot_mode_unset,
+-- 
+2.43.0
+
