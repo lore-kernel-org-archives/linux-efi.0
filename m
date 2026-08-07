@@ -1,30 +1,32 @@
-Received: from out-170.mta1.migadu.com (out-170.mta1.migadu.com [95.215.58.170])
+Received: from out-188.mta1.migadu.com (out-188.mta1.migadu.com [95.215.58.188])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8AB83DD86A
-	for <linux-efi@vger.kernel.org>; Fri,  7 Aug 2026 10:37:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A1E03F9F4C
+	for <linux-efi@vger.kernel.org>; Fri,  7 Aug 2026 10:38:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.188
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786099064; cv=none; b=ZQ/3yoqsBuhaoKzgUsE/vPN+ksMrydjZUFnBRubqpujrZpfhK5O4yJ4zP4gRF46t5oNLi+9C9GRpOMKom2/0r8b7liACNSx8MdDRvXisjTsVfMbcByL2TiYFyrRZGldHQciCy02az5Bt1MQxjuvNZXwRSz393IGHFDQAN3qo6xg=
+	t=1786099092; cv=none; b=TLxFIQwutM2I4c2RGJ75LTIVfkq3xtogWfHW8Btw4PPw5yy2NfHdEA5obBBK4X6TI4Gb5eY4Rc6WmyoZ56RaYKUsz5/Q7TYmQEnf13908vj3VPa8v/Skfzf07a0B0J+KNMVc8Tcx3ei69K3rIAladpUig5JTVX8JmNarZeBS4T4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786099064; c=relaxed/simple;
-	bh=+9NMX/X3s7VxPcdjVvvpKj6PsqSVc1Z0Q5fvBvtwqb4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=gwLWfYoTjUTf/zwrhZLcywGDVc6QjqNlhWA86cuRrjcpa/n5x5vHW6aAOcciXtPbHhJX3dJ/icUCRewrJCxb09LYTxOaPbM6e97/lprhIUjfbm0m5dILh2FaojR8uqo0VtC6an9SzWjQa62W/bOqq0MkNz9ijJKWDCiVccOyoew=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=WLPoKe7s; arc=none smtp.client-ip=95.215.58.170
+	s=arc-20240116; t=1786099092; c=relaxed/simple;
+	bh=M0AMxb+cVwP+atxrSkKPR5Z4+wp0xXh/yRjnQIRVMmw=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=ot4I87OmuUrwL7i1jfiYJJkCqZdvTTttqhOb4bS/jI7pSKBNP5J96UTZAwf2NTB+x1ggbwRaE40vhWK5IcHC/TCJ0zKpW4sgMTWAD8FqchsxggnHsg3deQUYC8iZOM27A/gwaxcZDeS8Eg1Cfk84mGEAhQ9TEboRUEV8SIhWX0k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=nUqGglQE; arc=none smtp.client-ip=95.215.58.188
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="WLPoKe7s"
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="nUqGglQE"
 X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1786099058;
+	t=1786099088;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=T8eUR9MkUG60eJZwmCZAPZdUpIwjYHZLD8FcPW9hHxQ=;
-	b=WLPoKe7s1dubXiAmrOn/QUOvubfTBkfa0El+vYm0jaNP0r8ZVbkIgRUDAyINqUkRDJEe8Y
-	J+HiF8MsfWjXy7RLn5mdtCbDGnmZAkDxiXBr0UnTbqUpb4vDFfLahzbrQ6g4KutgO4RYfY
-	kn1sFGJtexHELzrKxrchUC6XOhAF4ms=
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=8MnGA2XpLaKtX7cmmtolKrMtU3s+BumW1DYNOt54uYU=;
+	b=nUqGglQEFSiDP4w9XvLdasgzgUzCQg3EnaBt8s3qJmMZ9muZcSGKjRgCCxC6fluOTVKSvm
+	ouR+zIBF+Rfk3GovmnF0OOku9DgEgMRJniWkjd5Hmv1wpvfO38bX97LZBO5HGVKAJB1uoZ
+	i51ax670tcY7f0PpRSNY+JBndvEY7kY=
 From: George Guo <dongtai.guo@linux.dev>
 To: chenhuacai@kernel.org,
 	rppt@kernel.org,
@@ -41,9 +43,11 @@ Cc: guodongtai@kylinos.cn,
 	linux-mm@kvack.org,
 	linux-kselftest@vger.kernel.org,
 	linux-efi@vger.kernel.org
-Subject: [PATCH v4 0/4] LoongArch: add KHO support and selftests
-Date: Fri,  7 Aug 2026 18:37:10 +0800
-Message-ID: <20260807103714.33074-1-dongtai.guo@linux.dev>
+Subject: [PATCH v4 1/4] efi: add a KHO configuration table GUID
+Date: Fri,  7 Aug 2026 18:37:11 +0800
+Message-ID: <20260807103714.33074-2-dongtai.guo@linux.dev>
+In-Reply-To: <20260807103714.33074-1-dongtai.guo@linux.dev>
+References: <20260807103714.33074-1-dongtai.guo@linux.dev>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -53,109 +57,84 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Migadu-Flow: FLOW_OUT
 
-This series enables Kexec Handover (KHO) on LoongArch, making it the
-third architecture (after x86 and arm64) to set
-ARCH_SUPPORTS_KEXEC_HANDOVER.  That is the only remaining gate for Live
-Update (LUO) to run on LoongArch.
+From: George Guo <guodongtai@kylinos.cn>
 
-The hard part is the transport: how the first kernel hands the KHO state
-(the KHO FDT and the scratch region) to the second kernel across kexec.
+Kexec Handover (KHO) passes the address of its state FDT and of its
+scratch area from the current kernel to the next one.  On architectures
+that boot with a device tree, the current kernel writes the
+linux,kho-fdt and linux,kho-scratch properties into /chosen, and the next
+kernel reads them back in early_init_dt_check_kho().
 
-Why not the command line or an FDT
-----------------------------------
+Architectures that boot through EFI without a device tree have no such
+channel.  LoongArch is one of them: its efistub passes the EFI system
+table and the command line to the core kernel directly and never creates
+an FDT.  x86 has the same problem and carries the state out of band
+instead, in a struct kho_data in the setup_data chain of its boot
+protocol.
 
-LoongArch boots from EFI, but unlike arm64 and riscv its efistub does not
-build a boot FDT.  It passes the EFI system table and the command line
-straight to the core kernel [1].  There is no /chosen node to carry the
-blob, so the arm64 path (drivers/of/kexec.c:kho_add_chosen() writes
-linux,kho-fdt and linux,kho-scratch; drivers/of/fdt.c:
-early_init_dt_check_kho() reads them) does not apply.
+Add an out-of-band channel for EFI: a LINUX_EFI_KHO_TABLE_GUID
+configuration table entry, under a randomly generated GUID, pointing at a
+struct linux_efi_kho_data.  The
+current kernel loads the structure and an extended configuration table as
+kexec segments, then switches the EFI system table to the new table
+before jumping.  The next kernel finds the entry by GUID and calls
+kho_populate().
 
-Two earlier transports were tried and rejected:
+The structure carries no version field.  An incompatible change to the
+layout must use a new GUID, which is the usual rule for EFI configuration
+tables.  The handover payload itself is versioned separately, by the
+compatible string of the KHO state FDT that kho_populate() checks.
 
-  * v1 put the handover addresses on the kernel command line.  Pratyush
-    found that odd and asked for a DT-based alternative.
+This patch adds the definitions only.  LoongArch is the first user; any
+other EFI architecture without a boot FDT can use the same channel.
 
-  * v2/v3 synthesized an FDT and rewrote the DEVICE_TREE_GUID entry in the
-    EFI config table so the generic FDT reader would find it.  Pratyush
-    called that "even more hacky" than the command line [2].
+Signed-off-by: George Guo <guodongtai@kylinos.cn>
+---
+ include/linux/efi.h | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
-The v4 transport
-----------------
-
-v4 follows the x86 setup_data idea, in EFI terms.  The first kernel packs
-the KHO state into a small struct (linux_efi_kho_data: fdt addr/size and
-scratch addr/size), appends a pointer to it under a dedicated
-LINUX_EFI_KHO_TABLE_GUID entry in a new EFI config table, loads both as
-kexec segments, and switches st->tables before jumping.  The second kernel
-scans the config table for that GUID in setup_arch() and calls
-kho_populate() directly.  This is the approach proposed in [3].
-
-It addresses both objections: nothing is exposed on the command line, and
-no FDT is synthesized.  It also meets Huacai's constraint: it reuses the
-EFI system table LoongArch already has, with no dependency on a boot FDT
-the efistub never creates.
-
-Patch layout
-------------
-
-  Patches 1-2 implement the transport.  Patch 1 adds the EFI config table
-  GUID and the handover struct to include/linux/efi.h.  It is split out so
-  the EFI maintainers can review it on its own.  Patch 2 wires up the
-  LoongArch side: ARCH_SUPPORTS_KEXEC_HANDOVER, the write side in
-  machine_kexec_file.c, the st->tables switch in machine_kexec(), and the
-  reader in setup_arch().
-
-  Patch 3 is a build fix for kernel/liveupdate/luo_session.c that the
-  series depends on under CONFIG_KFENCE=y on LoongArch.  It was sent
-  standalone as v2 and acked by Mike.  It is folded in here at his request
-  to send it along with this series [4].
-
-  Patch 4 adds LoongArch vmtest support to the KHO selftests and folds in
-  the two points Mike raised on v3 (use "VM" instead of the ad-hoc
-  "virt machine"; run every architecture under timeout(1), not only
-  LoongArch).
-
-Patch 1 is aimed at the EFI tree.  Patches 2-4 are aimed at the LoongArch
-and KHO trees.  I expect the whole series to go through the KHO tree with
-Ard's and Huacai's acks.
-
-Changes since v3
-----------------
-
-  * Rework the transport: drop the synthesized FDT and the
-    DEVICE_TREE_GUID rewrite.  Pass the KHO state through a dedicated EFI
-    configuration table GUID and call kho_populate() directly (patches
-    1, 2).
-  * Fold in the luo_session build fix (previously standalone v2, acked by
-    Mike) as patch 3, at his request.
-  * selftests: address Mike's v3 review (use "VM"; always run under
-    timeout(1)).
-  * Rebase onto v7.2-rc6.
-
-[1] Huacai Chen: https://lore.kernel.org/r/CAAhV-H5B6Mj2-AffkstJ4f8EEmvvPOGXoDy2QNudKD2kSz2XkA@mail.gmail.com/
-[2] Pratyush Yadav: https://lore.kernel.org/r/2vxzjyqzj8s2.fsf@kernel.org/
-[3] https://lore.kernel.org/r/20260717071551.11904-1-dongtai.guo@linux.dev/
-[4] Mike Rapoport: https://lore.kernel.org/r/ai5nYlbERQBXRHSp@kernel.org/
-
-George Guo (4):
-  efi: add a KHO configuration table GUID
-  LoongArch: kexec: add KHO support
-  liveupdate: luo_session: include linux/mm.h for virt/phys translation
-  selftests/kho: add LoongArch vmtest support
-
- arch/loongarch/Kconfig                     |   3 +
- arch/loongarch/include/asm/kexec.h         |   7 ++
- arch/loongarch/kernel/machine_kexec.c      |  16 +++
- arch/loongarch/kernel/machine_kexec_file.c | 131 +++++++++++++++++++++
- arch/loongarch/kernel/setup.c              |  41 +++++++
- include/linux/efi.h                        |  24 ++++
- kernel/liveupdate/luo_session.c            |   1 +
- tools/testing/selftests/kho/loongarch.conf |  11 ++
- tools/testing/selftests/kho/vmtest.sh      |  22 ++--
- 9 files changed, 249 insertions(+), 7 deletions(-)
- create mode 100644 tools/testing/selftests/kho/loongarch.conf
-
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index ccbc35479684..789ab9e4312a 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -422,6 +422,7 @@ void efi_native_runtime_setup(void);
+ #define LINUX_EFI_COCO_SECRET_AREA_GUID		EFI_GUID(0xadf956ad, 0xe98c, 0x484c,  0xae, 0x11, 0xb5, 0x1c, 0x7d, 0x33, 0x64, 0x47)
+ #define LINUX_EFI_BOOT_MEMMAP_GUID		EFI_GUID(0x800f683f, 0xd08b, 0x423a,  0xa2, 0x93, 0x96, 0x5c, 0x3c, 0x6f, 0xe2, 0xb4)
+ #define LINUX_EFI_UNACCEPTED_MEM_TABLE_GUID	EFI_GUID(0xd5d1de3c, 0x105c, 0x44f9,  0x9e, 0xa9, 0xbc, 0xef, 0x98, 0x12, 0x00, 0x31)
++#define LINUX_EFI_KHO_TABLE_GUID		EFI_GUID(0xc941b6c7, 0x7b3f, 0x4af6,  0x9e, 0x50, 0xfc, 0xb3, 0xa8, 0x86, 0x8a, 0x17)
+ 
+ #define RISCV_EFI_BOOT_PROTOCOL_GUID		EFI_GUID(0xccd15fec, 0x6f73, 0x4eec,  0x83, 0x95, 0x3e, 0x69, 0xe4, 0xb9, 0x40, 0xbf)
+ 
+@@ -1271,6 +1272,29 @@ struct linux_efi_memreserve {
+ 
+ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size);
+ 
++/*
++ * The LINUX_EFI_KHO_TABLE_GUID config table points to this structure.  It
++ * carries the kexec handover (KHO) state from the current kernel to the next
++ * one: the addresses of the KHO state FDT and of the scratch area.
++ *
++ * This is the handover channel for architectures that boot through EFI without
++ * a device tree, where the /chosen linux,kho-fdt and linux,kho-scratch
++ * properties read by early_init_dt_check_kho() are not available.  The current
++ * kernel loads the structure and an extended configuration table as kexec
++ * segments; the next kernel finds it by GUID and calls kho_populate().
++ *
++ * The layout is an ABI between the two kernels and is fixed.  It carries no
++ * version field: an incompatible change must use a new GUID, and the handover
++ * payload itself is versioned separately by the compatible string of the KHO
++ * state FDT, which kho_populate() checks.
++ */
++struct linux_efi_kho_data {
++	u64 fdt_addr;
++	u64 fdt_size;
++	u64 scratch_addr;
++	u64 scratch_size;
++} __packed;
++
+ /*
+  * The LINUX_EFI_MOK_VARIABLE_TABLE_GUID config table can be provided
+  * to the kernel by an EFI boot loader. The table contains a packed
 -- 
 2.53.0
 
