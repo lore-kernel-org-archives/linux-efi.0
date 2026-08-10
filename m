@@ -1,166 +1,157 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 188E8415F36
-	for <linux-efi@vger.kernel.org>; Mon, 10 Aug 2026 15:43:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39CF03F86F0;
+	Mon, 10 Aug 2026 16:19:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786376633; cv=none; b=rXMrz7h2oLuBItCKLa72iIyP+tKR5rcFsNayg/hY495VDovIX3wdcigoWl+LJz+tDCL1DBx3+a1ixWEhmBmOrgoCk23pWQOVJe0il3fiuIRl62GBZbxE1t+CJKxOpk9g8iNTY7YD0hSz7gkmrqZ5PjSBPqCof7jTkMHLxnPkH4U=
+	t=1786378790; cv=none; b=WsqG+FawTWhh5GrnvinAIBEv4pFf0Fa6WnVTRz9UevAh5ur8GQGetv+0I5zAfn8goHd2XI8jyOjCCGxiqOsIqnXD77eOQ9T0WL3azhM/ctkwggYbwj58hH7IDCBWLWWdNrkYbXpvfaLi1QQiBJJkbFtlRZcCrnHH0AQD49qsFVM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786376633; c=relaxed/simple;
-	bh=YIZs804ULgvhPTfcv60vz7TxYe81em1M3QKFMAhpT48=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=jhOJovLi6UKFeXYkrerTNvDEC2aAITvuM894ICKMel1GEdJiGcyU+Bbp1D3GHrFLYxMcaa8JnaLmd7zAAmM1huJF1/kCtq689DSKeefCBjzTLoP8o8XaboFsvuDwCRLRjFsduufmzG8Q8oaSlvA4jEXusbWQAMPKQFifVQmrthI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JGd314SS; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1786378790; c=relaxed/simple;
+	bh=vft1JYAzyPUorOjdBSDXGTPSmgvMONe4ZelyyhyPgSw=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=Nl7phdvacyVWEHolCLZEbtnfBI7A/dnYOKQjsf824FySH/LoMewBWp+x7xk+ByAhWR+l1hxDFQQRWdbg7lf+2diaJux8wzV3ZL7kn/2vaJxwiAqpnQvAmQ8d0I3jki8i2j4l/QbwY9M604/qq79yd/ZUY9/rRlO1cSkTgtp6Xyw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KP3fMCtV; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JGd314SS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 454311F00A3D;
-	Mon, 10 Aug 2026 15:43:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KP3fMCtV"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3D4751F000E9;
+	Mon, 10 Aug 2026 16:19:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1786376631;
-	bh=05YK56mFtHrEuaFcPHkzwDatIY9V5n4yQHJVl624XGE=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=JGd314SSxzNTgV0kF8sv7E9q+qKl1lRuwsg5ipHPh+VTTLODwZYeVepO+PsqzkZzz
-	 j2LgdoiGtZocYdYBH3E4SjYLaKizcrROSG8fTglPdFk1f2yYAzC41O4xSUc2gL+Q9Q
-	 ZkLSxPrytGsuPowWdY+as4vcqC8F4Ar2vEhvWa4RRX0sXcPk4eF0ZgnZNTGW3GjquA
-	 yETuQLMrhDP7vX0DPaTWW4zP1lVGMaSZqQPs9fg8FuyEj7djUezUwuwXh6JSxyrM9J
-	 8sBsHYq9lHOWhEf3tShXLwEsHu3h6Nh2gp+lrZhZ3HWIKubu/ZlNKRxGvSs1Dl++Ws
-	 JftpWElfY0u1A==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id BE685198005A;
-	Mon, 10 Aug 2026 11:43:49 -0400 (EDT)
-Received: from ams-imap-19 ([10.64.2.39])
-  by ams-compute-02.internal (MEProxy); Mon, 10 Aug 2026 11:43:49 -0400
-X-ME-Sender: <xms:s_F5agwMLUhYZRg7a6-YjKHLqhoi66bPpSn_jXW6MP0-BUdBgOEO7g>
-    <xme:s_F5avG8n5LTYaWYEQu2N-3e6dIKi0xH0lEpvJP2TCw_Wp2Fqy1lawWMofRuEH4zA
-    TETZk5ytkhmSQHdPPWAcs3Ojg2-xykMM3DcQiEoOmSLKl2JCTJeUCHJ>
-X-ME-Proxy-Cause: dmFkZTE74I8Lt/EZObcXqeW81Rvt2Zx8ARAuW+8n/TWZEgPsKNrz4nphPQ4lIEyYiB6h7S
-    LHagim+WOIAmy5azWIBETOPfib40UL/0ozB491E5MorMU177tGnxDh9l+Jqge+hmwo+d6n
-    VAaeJIZwhxAD4Dkoj1dxXOekxc33Mb84Jeb9ifb1o7D7qLKmdjxhT7io/G0LoK20+R0CvN
-    7l1e9FDUhMXofKEhRIwi+F5FCtHiHpkh1cTu2nyS+QYvK3H262SQ6x9KMc9MYQzeRHD3WQ
-    TkYj2QWtG+J3eHBnJOZFlSeSuMf6zyg2EfFU7HlOFG/WJJW0LaD2CRmNarCxnh2COZ0+ar
-    WUpFZ9uRTfizBsuQNtK4Qk6lreTQCwt+LWezxZv9CAc2ItG8uqSMwliec4lEtOxoCXfEMI
-    cJTNz5dpkr+/W45/CCDMCAP5+BsgNDsd90Q3WlapahV6DTbRhGxSeovuEJofpwobpkUyga
-    MQluz5pQegqYqr2Dyo8mHRRrhz7dxYJPO3hYsawn7dlfctSI4W1NAeFSs/+dj76wezZCEQ
-    4ZBVZAATlREqE7wblGh+9agiZM74waIVktQY3bdraPr/jh1Q22rWyWCyA5Adcntjy99Kdz
-    J1tPxunSAeJtnvSbfw34gMU0y1Hbbfpt3zBh2H6BecQGvUVky8nAk5zmmAeg
-X-ME-Proxy: <xmx:tfF5amunpkCOZAILHtXzL4Dk2W8-a7fNblfAS0Z0GrXrFisBNQ19YA>
-    <xmx:tfF5agYgkG-J9jnh2-gc0L3tRARmLUIQSxCcsIFruael4gJMlmh42Q>
-    <xmx:tfF5amA2KzgIM8kcgKKj-RxgnixTUEuAIZ61JG-7CHxuQkLMJt52ng>
-    <xmx:tfF5ag8dYi8LbZVW7Yl07DxJDTf7bnA6zkPn7CNyGK7mJ9ya4yP7OQ>
-    <xmx:tfF5aqTVvOelbF-JMfmP9HL83XYq7fLJd8uzWGhjAPblJvdIHauynxJ7>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id A58372F81643; Mon, 10 Aug 2026 11:43:47 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=k20260515; t=1786378788;
+	bh=vWFF5rbpHjkJVsF6rYCEgkXwe2H85cOSrnKD6SoYu/s=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date;
+	b=KP3fMCtVOHkjkiegq2GgwH9YPInvhvDmEUuuGn4JZMsYwY2MwFps4JRByvplPOHCP
+	 9RhXPvwpDboJLnctJuK21ybEl6SfcdfKJ0psbl62EImczU78jwlrH77d4FgHroailz
+	 ICKmE6pAea+OP/q4KpsnmC5lP7KJhbY2/SrgOXM9wy5IVDrPQXf8SQ9l08PMgohBzu
+	 35QXMP6ecEqvEcDHjr+Lc4GnKYNKCAIsGVCeKjCmjCzGDs8P01voF22M8uTk+uReLZ
+	 4oAGMFyzVA+aGyjOmmBJ5NEa6/pPg5xL41w1l7UJ4zF4Tx39PZ0uvl1yWJr4dfs8/m
+	 0cHEVsNm/N0gg==
+From: Pratyush Yadav <pratyush@kernel.org>
+To: Huacai Chen <chenhuacai@kernel.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>,  George Guo <dongtai.guo@linux.dev>,
+  Mike Rapoport <rppt@kernel.org>,  pasha.tatashin@soleen.com,
+  pratyush@kernel.org,  shuah@kernel.org,  guodongtai@kylinos.cn,  WANG
+ Xuerui <kernel@xen0n.name>,  graf@amazon.com,  loongarch@lists.linux.dev,
+  linux-kernel@vger.kernel.org,  kexec@lists.infradead.org,
+  linux-mm@kvack.org,  linux-kselftest@vger.kernel.org,
+  linux-efi@vger.kernel.org
+Subject: Re: [PATCH v4 1/4] efi: add a KHO configuration table GUID
+In-Reply-To: <CAAhV-H6UufWevaCds851xSxEMLeLcq+8wpoWq8OyeXib25GEUQ@mail.gmail.com>
+	(Huacai Chen's message of "Mon, 10 Aug 2026 22:35:37 +0800")
+References: <20260807103714.33074-1-dongtai.guo@linux.dev>
+	<20260807103714.33074-2-dongtai.guo@linux.dev>
+	<CAAhV-H4xxPXVRNXP42CBtMdVXbBZ4E6A997jZmw7HpEUSFAj9g@mail.gmail.com>
+	<96bd0e57-b517-4008-905f-9860661afaf2@app.fastmail.com>
+	<CAAhV-H6UufWevaCds851xSxEMLeLcq+8wpoWq8OyeXib25GEUQ@mail.gmail.com>
+Date: Mon, 10 Aug 2026 18:19:44 +0200
+Message-ID: <2vxzse4m54nz.fsf@kernel.org>
+User-Agent: Gnus/5.13 (Gnus v5.13)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Mon, 10 Aug 2026 17:43:27 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Will Deacon" <will@kernel.org>
-Cc: "gus bourg" <gus@bourg.net>, "Catalin Marinas" <catalin.marinas@arm.com>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- stable@vger.kernel.org
-Message-Id: <1473a7a8-7e96-4c7e-9973-98682b3f6999@app.fastmail.com>
-In-Reply-To: <anmwTDnFR2cgxkqR@willie-the-truck>
-References: <20260806000144.3388823-1-gus@bourg.net>
- <anXMug2_-vZl_pZ7@willie-the-truck>
- <30c5499e-8041-4e39-933b-c5220d53be77@app.fastmail.com>
- <anmwTDnFR2cgxkqR@willie-the-truck>
-Subject: Re: [PATCH] arm64/efi: Do not call EFI runtime services preemptibly under SW
- PAN
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
+On Mon, Aug 10 2026, Huacai Chen wrote:
 
-
-On Mon, 10 Aug 2026, at 13:04, Will Deacon wrote:
-> On Fri, Aug 07, 2026 at 04:56:00PM +0300, Ard Biesheuvel wrote:
->> 
->> 
->> On Fri, 7 Aug 2026, at 15:16, Will Deacon wrote:
->> > On Wed, Aug 05, 2026 at 05:01:44PM -0700, gus bourg wrote:
->> >> From: Gus Bourg <gus@bourg.net>
->> >> 
->> >> When PAN is emulated by switching TTBR0_EL1, arch_efi_call_virt_setup()
->> >> installs the EFI mm into TTBR0_EL1 via uaccess_ttbr0_enable(), and only a
->> >> return from exception ever puts it back: check_and_switch_context() skips
->> >> the register write by design ("Defer TTBR0_EL1 setting for user threads to
->> >> uaccess_enable() when emulating PAN"), and __switch_to() does not touch it
->> >> either. switch_mm() updates only thread_info->ttbr0.
->> >> 
->> >> Since commit a5baf582f4c0 ("arm64/efi: Call EFI runtime services without
->> >> disabling preemption") the runtime call is preemptible, so the EFI worker
->> >> can now be scheduled out inside that window. An involuntary preemption is
->> >> harmless, because __swpan_entry_el1()/__swpan_exit_el1() save and restore
->> >> the state around the exception. A voluntary reschedule is not: it performs
->> >> no return from exception, so the worker resumes with another task's
->> >> TTBR0_EL1 - or reserved_pg_dir - and the next efi_mm access takes a level 0
->> >> translation fault.
->> >> 
->> >> There is such a preemption point in arch_efi_call_virt_setup() itself,
->> >> immediately after the TTBR0 install: __efi_fpsimd_begin() ->
->> >> kernel_neon_begin() -> put_cpu_fpsimd_context() -> local_bh_enable() ->
->> >> preempt_check_resched().
+> On Mon, Aug 10, 2026 at 9:14=E2=80=AFPM Ard Biesheuvel <ardb@kernel.org> =
+wrote:
+>>
+>>
+>>
+>> On Sun, 9 Aug 2026, at 06:18, Huacai Chen wrote:
+>> > Hi, George,
 >> >
->> > Hmm, can we move the ttbr0 toggling until after __efi_fpsimd_begin() so
->> > that this preemption point doesn't interfere?
+>> > On Fri, Aug 7, 2026 at 6:38=E2=80=AFPM George Guo <dongtai.guo@linux.d=
+ev> wrote:
+>> >>
+>> >> From: George Guo <guodongtai@kylinos.cn>
+>> >>
+>> >> Kexec Handover (KHO) passes the address of its state FDT and of its
+>> >> scratch area from the current kernel to the next one.  On architectur=
+es
+>> >> that boot with a device tree, the current kernel writes the
+>> >> linux,kho-fdt and linux,kho-scratch properties into /chosen, and the =
+next
+>> >> kernel reads them back in early_init_dt_check_kho().
+>> >>
+>> >> Architectures that boot through EFI without a device tree have no such
+>> >> channel.  LoongArch is one of them: its efistub passes the EFI system
+>> >> table and the command line to the core kernel directly and never crea=
+tes
+>> >> an FDT.  x86 has the same problem and carries the state out of band
+>> >> instead, in a struct kho_data in the setup_data chain of its boot
+>> >> protocol.
+>> >>
+>> >> Add an out-of-band channel for EFI: a LINUX_EFI_KHO_TABLE_GUID
+>> >> configuration table entry, under a randomly generated GUID, pointing =
+at a
+>> >> struct linux_efi_kho_data.  The
+>> >> current kernel loads the structure and an extended configuration tabl=
+e as
+>> >> kexec segments, then switches the EFI system table to the new table
+>> >> before jumping.  The next kernel finds the entry by GUID and calls
+>> >> kho_populate().
+>> >>
+>> >> The structure carries no version field.  An incompatible change to the
+>> >> layout must use a new GUID, which is the usual rule for EFI configura=
+tion
+>> >> tables.  The handover payload itself is versioned separately, by the
+>> >> compatible string of the KHO state FDT that kho_populate() checks.
+>> >>
+>> >> This patch adds the definitions only.  LoongArch is the first user; a=
+ny
+>> >> other EFI architecture without a boot FDT can use the same channel.
+>> >>
+>> >> Signed-off-by: George Guo <guodongtai@kylinos.cn>
+>> >> ---
+>> >>  include/linux/efi.h | 24 ++++++++++++++++++++++++
+>> >>  1 file changed, 24 insertions(+)
+>> >>
+>> >> diff --git a/include/linux/efi.h b/include/linux/efi.h
+>> >> index ccbc35479684..789ab9e4312a 100644
+>> >> --- a/include/linux/efi.h
+>> >> +++ b/include/linux/efi.h
+>> >> @@ -422,6 +422,7 @@ void efi_native_runtime_setup(void);
+>> >>  #define LINUX_EFI_COCO_SECRET_AREA_GUID                EFI_GUID(0xad=
+f956ad, 0xe98c, 0x484c,  0xae, 0x11, 0xb5, 0x1c, 0x7d, 0x33, 0x64, 0x47)
+>> >>  #define LINUX_EFI_BOOT_MEMMAP_GUID             EFI_GUID(0x800f683f, =
+0xd08b, 0x423a,  0xa2, 0x93, 0x96, 0x5c, 0x3c, 0x6f, 0xe2, 0xb4)
+>> >>  #define LINUX_EFI_UNACCEPTED_MEM_TABLE_GUID    EFI_GUID(0xd5d1de3c, =
+0x105c, 0x44f9,  0x9e, 0xa9, 0xbc, 0xef, 0x98, 0x12, 0x00, 0x31)
+>> >> +#define LINUX_EFI_KHO_TABLE_GUID               EFI_GUID(0xc941b6c7, =
+0x7b3f, 0x4af6,  0x9e, 0x50, 0xfc, 0xb3, 0xa8, 0x86, 0x8a, 0x17)
+>> > I don't know whether it is allowed to define a new TABLE ID while
+>> > doesn't touch the UEFI SPEC.
 >> >
->> 
->> Either that, or tweak the logic so that the switch is done eagerly in
->> this particular case (untested):
->> 
->> --- a/arch/arm64/mm/context.c
->> +++ b/arch/arm64/mm/context.c
->> @@ -266,7 +266,7 @@
->>          * Defer TTBR0_EL1 setting for user threads to uaccess_enable() when
->>          * emulating PAN.
->>          */
->> -       if (!system_uses_ttbr0_pan())
->> +       if (!system_uses_ttbr0_pan() || mm_is_efi(mm))
->>                 cpu_switch_mm(mm->pgd, mm);
->>  }
->
-> I think I'd prefer to avoid special-casing this, if we can. I was just
-> thinking of the diff below.
->
+>>
+>> That is fine in principle: the whole reason for using GUIDs as identifie=
+rs
+>> in UEFI is that everyone can invent their own, and the risk of conflicts=
+ is
+>> negligible.
+>>
+>> All LINUX_EFI_* GUIDs are Linux inventions, and are not mentioned in the
+>> UEFI spec at all.
+> OK, then I think the direction of this series is correct now, and I
+> hope there will be more archs share this GUID.
 
-I think that should work, yes. I don't think we dereference any EFI runtime
-pointers after coming back from the firmware call, so even if there are any
-voluntary preemption points lurking (in the pr_err() inside
-efi_call_virt_check_flags(), for instance), they should not trigger an access
-that hits TTBR0.
+Agreed.
 
-
-
+Perhaps we can move x86 over to use this as well? If I understand
+correctly, pretty much all modern x86 systems have UEFI, so it would
+make sense for KHO to directly use the generic UEFI bits for x86 as well
+instead of having it via setup data.
 
 >
-> --->8
->
-> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> index 30cd7f804398..0ec90fd1754e 100644
-> --- a/arch/arm64/kernel/efi.c
-> +++ b/arch/arm64/kernel/efi.c
-> @@ -184,6 +184,8 @@ void arch_efi_call_virt_setup(void)
->                 efi_virtmap_load();
->         }
-> 
-> +       __efi_fpsimd_begin();
-> +
->         /*
->          * Enable access to the valid TTBR0_EL1 and invoke the errata
->          * workaround directly since there is no return from exception when
-> @@ -191,8 +193,6 @@ void arch_efi_call_virt_setup(void)
->          */
->         uaccess_ttbr0_enable();
->         post_ttbr_update_workaround();
-> -
-> -       __efi_fpsimd_begin();
->  }
-> 
->  void arch_efi_call_virt_teardown(void)
+> BTW, I think LINUX_EFI_KEXEC_HANDOVER_GUID may be a little better than
+> LINUX_EFI_KHO_TABLE_GUID.
+
++1, that sounds better.
+
+--=20
+Regards,
+Pratyush Yadav
