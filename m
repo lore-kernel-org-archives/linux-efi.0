@@ -1,150 +1,76 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92C0A432315;
-	Mon, 10 Aug 2026 17:44:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7857842A7A0;
+	Mon, 10 Aug 2026 18:50:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786383895; cv=none; b=dGCKkxswgEGj2+4yzhsqRU+p5CZPr5CTOEJVPDeHo3BP4WBEGuVqZDyYewdVve0YlXgbYCrA8j5e4fDLAz6MeqT5kG6D87SJlwV7IM2lbCnl0iToiQ5V7ekp58TfH6A39zJGWbEFiVOwn/RtmNXqgdSQCVnkBP3O9uH6m+aEkXE=
+	t=1786387839; cv=none; b=Gk7ZtJxC6aGe5ZPTP/ltU8sgdpUQTeaQppP3Xth+xp5JlKnUE6sGVDBkWXYsxXIWb69DxQhUHTcxsxO0ys4TSV5+EcHgiItYd8Tb9GlbomvCK5Cp61MJ9Pk/jdhf2JTQJ1bkFk7ata39mVbmIHbOW7aIzGuTN3NbXnAhUz2n96Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786383895; c=relaxed/simple;
-	bh=7d5arm4sONKjUAZwfzhFgGhw5Ewk/HRhTgKSncvL5ps=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=gCrnN6W2YM6zUcQJtnk5Qs3a48bcNtmyxbGATnscqqM0uffMAXPA8OPZo+difVq9e3njcJyRsKcW1pO/3KNkPbQEHSwv3nJyT3acNU/bMkcODtY4RdCZMCVUzStL5ACEUJGDdS7pqV8SRpcA0+gwqO0SJbrRSmGuxwajco+W5zs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TDhG6LdU; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1786387839; c=relaxed/simple;
+	bh=FlRD3XvpX1OtCPsSmZz2SGRV+x8ebfoJvdyxconAxXg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=a8YPnXU2tOlmOqc+5RbEGyeMzmbZPHAt1Pf5pHYc8w9KOXNpzPK8gThQAFaxeKBm9OAGOAsTb0T4xuJtCRlyEFLGgy3NQ0OHIZ0VzopJ6QLy1NaOd3DDzNrSU4zWkGUOyNdpTDc6QVBWDai06V6cRBQEJ+qxyTZNqKG22OrC4X8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QVldVe1c; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TDhG6LdU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 76D551F000E9;
-	Mon, 10 Aug 2026 17:44:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QVldVe1c"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CAA551F00A3A;
+	Mon, 10 Aug 2026 18:50:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1786383894;
-	bh=MP2+23zFvL9Yev7WTv4ThtH3GwLxgP0jNN2O9q9lsco=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date;
-	b=TDhG6LdU+xmaROsqFck3hBtm6iNfonUwi9trFk34RupcKybOSt6P84/qzbjudd9Wu
-	 evlBRW4nJ4HD0cll3MkA8vYdh0GN1X0UBLa8kl7uNslZW5quVAfTSogtkkhWJqAYuj
-	 j7BA3bAWZpBSUxiQmPhfKrlPUpF8ouMqV6yQJoBzflBNPbfXGT9B47IkJtk2usAEJb
-	 5JCsFPUcg5MjoJAiS2uk3tAlrNLp3Vdpc70GQjFvauDt/Wta74NeZghnfO0ZnasdzM
-	 QKHvsZnV5iWN4njlQb4AEJEqQEycrrAzS7XJi2Nk1PiIGxYlteW+dasD4OpI51JJA1
-	 lga2SFv2CjFQA==
-From: Pratyush Yadav <pratyush@kernel.org>
-To: Pratyush Yadav <pratyush@kernel.org>
-Cc: Huacai Chen <chenhuacai@kernel.org>,  George Guo
- <dongtai.guo@linux.dev>,  rppt@kernel.org,  pasha.tatashin@soleen.com,
-  shuah@kernel.org,  ardb@kernel.org,  guodongtai@kylinos.cn,
-  kernel@xen0n.name,  graf@amazon.com,  loongarch@lists.linux.dev,
-  linux-kernel@vger.kernel.org,  kexec@lists.infradead.org,
-  linux-mm@kvack.org,  linux-kselftest@vger.kernel.org,
-  linux-efi@vger.kernel.org,  Kexin Liu <liukexin@kylinos.cn>
-Subject: Re: [PATCH v4 3/4] liveupdate: luo_session: include linux/mm.h for
- virt/phys translation
-In-Reply-To: <2vxzjypx6fka.fsf@kernel.org> (Pratyush Yadav's message of "Mon,
-	10 Aug 2026 19:39:01 +0200")
-References: <20260807103714.33074-1-dongtai.guo@linux.dev>
-	<20260807103714.33074-4-dongtai.guo@linux.dev>
-	<CAAhV-H4pK10ONo=viJyUJBiiFb_7pbB9LaNkQWH=83r+7E0iTA@mail.gmail.com>
-	<2vxzjypx6fka.fsf@kernel.org>
-Date: Mon, 10 Aug 2026 19:44:49 +0200
-Message-ID: <2vxzfr0l6fam.fsf@kernel.org>
-User-Agent: Gnus/5.13 (Gnus v5.13)
+	s=k20260515; t=1786387838;
+	bh=UtAY2Kq/mLIhmPVIgt8ZoTQ90y8AvDRG1NswgunEo0o=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=QVldVe1cR++MDM0SqEGueUbJXb/7923NikIkVyaf1OXk6tHJQbi8B0snFA/qs5XRw
+	 1VREgAwGY11bFDJOH73kDk5BWZuLOhWZu8IOm+0g0T7oUL0Ky+8Xj+R4QPG/4wgnmQ
+	 koywgiI1PW2ms1NTS96H+pbwpMB9811gatNQ/L0JWAmkWHKrtEnmZG2RCp39VEy2Rs
+	 RiSpRvN94gKz/C1puHgisUwi5hjwZwrACfRo5C55v3xKanXblDGtaqt7XbnmpiPToO
+	 bynp1Z9vxe/zBGzrlZCw9kYklzrBXTTutKLkY1KnCDD1rjfU79l94NusY3JocACyGc
+	 3nF/atJ76Qa7g==
+Date: Mon, 10 Aug 2026 11:50:36 -0700
+From: Wei Liu <wei.liu@kernel.org>
+To: Wei Hu <weh@linux.microsoft.com>
+Cc: linux-hyperv@vger.kernel.org, linux-kernel@vger.kernel.org,
+	"K. Y. Srinivasan" <kys@microsoft.com>,
+	Haiyang Zhang <haiyangz@microsoft.com>,
+	Wei Liu <wei.liu@kernel.org>, Dexuan Cui <decui@microsoft.com>,
+	Long Li <longli@microsoft.com>, Wei Hu <weh@microsoft.com>,
+	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+	"H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Arnd Bergmann <arnd@arndb.de>, linux-efi@vger.kernel.org,
+	linux-arch@vger.kernel.org
+Subject: Re: [PATCH v2 12/13] hyperv: add MSHV Dom0 root-partition boot
+ enablement (EFI HvLoader)
+Message-ID: <20260810185036.GA2496954@liuwe-devbox-debian-v2.local>
+References: <20260810124527.1409634-1-weh@linux.microsoft.com>
+ <20260810124527.1409634-13-weh@linux.microsoft.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260810124527.1409634-13-weh@linux.microsoft.com>
 
-On Mon, Aug 10 2026, Pratyush Yadav wrote:
+On Mon, Aug 10, 2026 at 12:45:06PM +0000, Wei Hu wrote:
+> From: Wei Hu <weh@microsoft.com>
+> 
+> Port the EFI HvLoader protocol handshake (efi-mshv stub + SETUP_MSHV) and
+> the hyperv_resvd_new memory reservation so an upstream kernel can boot as
+> a Microsoft Hypervisor (MSHV) root partition. Mainline lacks this
+> Linux-side enablement, so lxhvloader declines to hand off a stock kernel
+> as root.
+> 
+> Signed-off-by: Wei Hu <weh@microsoft.com>
 
-> On Mon, Aug 10 2026, Huacai Chen wrote:
->
->> Hi, George,
->>
->> This should be the 2nd patch.
->
-> Agreed.
->
-> With that done,
->
-> Reviewed-by: Pratyush Yadav <pratyush@kernel.org>
+This patch should be dropped from this series.
 
-Actually, I take this back. Sashiko has found some problems. See below.
+I don't think we should modify the EFI stub yet. We should explore other
+methods first.
 
->
->>
->> Huacai
->>
->> On Fri, Aug 7, 2026 at 6:39=E2=80=AFPM George Guo <dongtai.guo@linux.dev=
-> wrote:
->>>
->>> From: George Guo <guodongtai@kylinos.cn>
->>>
->>> luo_session.c calls virt_to_phys() and phys_to_virt(). On LoongArch with
->>> CONFIG_KFENCE=3Dy, these macros (in arch/loongarch/include/asm/io.h) ex=
-pand
->>> to offset_in_page() and page_address(), both declared in <linux/mm.h>.
-
-https://sashiko.dev/#/patchset/20260807103714.33074-5-dongtai.guo@linux.dev
-
-    Is this description accurate? Looking at luo_session.c, it does not act=
-ually
-    call virt_to_phys().
-    The implicit declaration error appears to originate from arch_kfence_in=
-it_pool()
-    in arch/loongarch/include/asm/kfence.h, which is implicitly included via
-    <linux/slab.h>.
-    arch/loongarch/include/asm/kfence.h:arch_kfence_init_pool() {
-        ...
-                    virt_to_phys((void *)kfence_pool), PAGE_KERNEL);
-        ...
-    }
-    Could the fix be applied to the architecture header instead, to prevent=
- any
-    other kernel C file on LoongArch with CONFIG_KFENCE=3Dy from suffering =
-the same
-    build failure if it includes <linux/slab.h> before <linux/mm.h>?
-
-I at least don't see any virt_to_phys() or phys_to_virt() in
-luo_session.c. So you need to go and take another look at what the real
-problem is and what the fix should be.
-
->>>
->>> Since luo_session.c only includes <linux/io.h>, the translation unit fa=
-ils
->>> to build with CONFIG_KFENCE=3Dy:
->>>
->>>   asm/io.h: error: implicit declaration of function 'offset_in_page'
->>>   asm/io.h: error: implicit declaration of function 'page_address'
->>>
->>> Add the missing include to fix these build errors.
->>>
->>> Co-developed-by: Kexin Liu <liukexin@kylinos.cn>
->>> Signed-off-by: Kexin Liu <liukexin@kylinos.cn>
->>> Signed-off-by: George Guo <guodongtai@kylinos.cn>
->>> Acked-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
->>> ---
->>>  kernel/liveupdate/luo_session.c | 1 +
->>>  1 file changed, 1 insertion(+)
->>>
->>> diff --git a/kernel/liveupdate/luo_session.c b/kernel/liveupdate/luo_se=
-ssion.c
->>> index f38b5b18f3f8..31490ac7b63d 100644
->>> --- a/kernel/liveupdate/luo_session.c
->>> +++ b/kernel/liveupdate/luo_session.c
->>> @@ -94,6 +94,7 @@
->>>  #include <linux/kho/abi/luo.h>
->>>  #include <linux/list.h>
->>>  #include <linux/liveupdate.h>
->>> +#include <linux/mm.h>
->>>  #include <linux/mutex.h>
->>>  #include <linux/rwsem.h>
->>>  #include <linux/slab.h>
->>> --
->>> 2.53.0
->>>
->>>
-
---=20
-Regards,
-Pratyush Yadav
+Thanks,
+Wei
