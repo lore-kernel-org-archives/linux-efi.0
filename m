@@ -1,133 +1,148 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 257C737B02D;
-	Mon, 10 Aug 2026 14:07:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D7512F6918
+	for <linux-efi@vger.kernel.org>; Mon, 10 Aug 2026 14:35:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786370877; cv=none; b=Fg5M1GBxgOWclf2JUQIOmud7uf0cVfELXYCwpXtaomyS5LR82MQHry1QUiKEw7ExNJnspvPeUdBPLDCU0RFiE+ookYS57By/NHUM5Jn0P1LFeSAMkkxyWN1Y6d2EfQ3k0Rzq661R0g4mJxGYYGX8tFrizySL89Il0gt981a6h3E=
+	t=1786372552; cv=none; b=ZqCvphjCC8no2InKTMx28Nkn5KATN0C+sJd+wOsjAFaBAuk8ZfziBKi3TWSzMg4i0xo8R7ue5E0Iwoj0zdL7bjtAbF21M9T8ud47wBpRbHU+7ver9fhlPapN5Qnv1OLdqCwC+Ea07kB189VDxQtiDuydMxSJylV5owA2eMma9a4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786370877; c=relaxed/simple;
-	bh=l/l2H3T3xXRxtAlEmVxkMBjt3GQq1sSw4qqDUaZjjxc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=UKGbfacET3tpSIWa3qhAkYMtjlhal7Ec01mIFFl3P3gzOmWXrdT2Qd5UMKws0zutMxJ4E2TFn9Sjfqx5CBn/vIAFJxldBM0zJ8FxWzDsUV7/gTr+q7mxwC8BYrcz7qccspIsTIFOUSyhDivlMZX3GQOCUZs7a/Qfed8fSVtLago=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=VDMFqS+F; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+	s=arc-20240116; t=1786372552; c=relaxed/simple;
+	bh=ROdmKiaV9iGKDp79NOZRVZIrvApp0XCjbQbUx4mjZ0Y=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=WJch2Z+gagT8+r83yfq+wZCCqDoWqEVivGkQscbqNoe7UOy88yX+xc/hICNwvfSdCnJQsCh5nVNIeHoEbDuDdZ+tzxqVOkczkmUFZXRODBiaL7/9pGqrCocWTyxJA6DZMc5KMPc0MgrA6WW8TlZ7JCQUmYy+4wQrjSjozlrSuJk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mokf2unt; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="VDMFqS+F"
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 745021516;
-	Mon, 10 Aug 2026 07:07:50 -0700 (PDT)
-Received: from [10.57.5.211] (unknown [10.57.5.211])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id A0B0D3F86F;
-	Mon, 10 Aug 2026 07:07:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1786370874; bh=l/l2H3T3xXRxtAlEmVxkMBjt3GQq1sSw4qqDUaZjjxc=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=VDMFqS+FI7dztumWUIj0YSzO03RhoFJUBQIQzYUdFvqVl9cEv8Iw/mDKNo7PN1C6X
-	 1VHMihPE5KmCMT17k5n8XBwRp9N9Pbg9cGBMMV/3LzWSgApFGs1tQxNrK6u2zmk9z2
-	 n2fKbvDMQjaTvkmApv2yhkGVWehw0StqDsKzTy6c=
-Message-ID: <efd52893-bf66-40cc-a53d-980b89cee448@arm.com>
-Date: Mon, 10 Aug 2026 16:07:41 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mokf2unt"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B9C2A1F00A3A
+	for <linux-efi@vger.kernel.org>; Mon, 10 Aug 2026 14:35:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1786372550;
+	bh=5rrAvPgRrohANHyT7hdY7z+O8aQ4K1pdWWyNquNpNJ8=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc;
+	b=mokf2untmLnI3fXVkZl9R1TO+I3D6j3AGjfvZwlTjVihK2ebOho2oQYup6uW9rOtJ
+	 ImXvrtxVu0Xd4nsZKmwB6BqLwDEpy7Rl/+PPEzC4UFFM+NUR0ljJB9JsFTVCvsSZKf
+	 cVNj8v6IBepszhYaAdBd7rrMrYOUeqJOZdB4pBHj5VPk2FaMAsepKXFAPYgBQKtTv1
+	 kvMMNBdFm54k5NusUJR9CltM7nilqfNZ0Y6bjhbdu0ttPM5ZAo5TMeSqd+qZyTPRjM
+	 Yjw9y/j2HOh6NyXhEDTPUV3kda3hc3Z63LKyCZRgDia2v6J6v/nAMSC8FBzsMaagHq
+	 cW4vCyK8OiTPw==
+Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-69fab5a852cso2498797a12.0
+        for <linux-efi@vger.kernel.org>; Mon, 10 Aug 2026 07:35:50 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AHgh+RowiLhdNmRvVKRZdoW5PXJQMr6at84WYhSRE+bb0jnNOBQz/wAR68T9sx7K0Dl2eS99QxsktTvcSUY=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyub8eCa5rt/Wta9kJVnFI0qBLMg8WL3Vf6JwycBLlRTLaluOw9
+	KRtuuCEYNB58QgmbQqZBoFgHHkEdEictt4TKMhqIV9Rjn3gCTglyRCfNsZ3KNAgJKtlhcM7uMvD
+	Ae6kPHAWzBO1jg53CyAjcAU/exajXf7s=
+X-Received: by 2002:a05:6402:190b:b0:697:e953:d14d with SMTP id
+ 4fb4d7f45d1cf-6a1b4b9a7c9mr14019689a12.17.1786372549348; Mon, 10 Aug 2026
+ 07:35:49 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 03/22] mm: introduce MMF_KERNEL flag and set it for
- init_mm
-To: "David Hildenbrand (Arm)" <david@kernel.org>,
- "Christophe Leroy (CS GROUP)" <chleroy@kernel.org>, linux-mm@kvack.org
-Cc: Andrew Morton <akpm@linux-foundation.org>,
- Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>,
- Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>,
- Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>,
- Pasha Tatashin <pasha.tatashin@soleen.com>,
- Russell King <linux@armlinux.org.uk>,
- Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
- Ryan Roberts <ryan.roberts@arm.com>, linux-arm-kernel@lists.infradead.org,
- Huacai Chen <chenhuacai@kernel.org>, loongarch@lists.linux.dev,
- "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
- Helge Deller <deller@gmx.de>, linux-parisc@vger.kernel.org,
- Madhavan Srinivasan <maddy@linux.ibm.com>,
- Michael Ellerman <mpe@ellerman.id.au>, linuxppc-dev@lists.ozlabs.org,
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
- Albert Ou <aou@eecs.berkeley.edu>, linux-riscv@lists.infradead.org,
- Heiko Carstens <hca@linux.ibm.com>, Vasily Gorbik <gor@linux.ibm.com>,
- Alexander Gordeev <agordeev@linux.ibm.com>,
- Gerald Schaefer <gerald.schaefer@linux.ibm.com>, linux-s390@vger.kernel.org,
- "David S. Miller" <davem@davemloft.net>,
- Andreas Larsson <andreas@gaisler.com>, sparclinux@vger.kernel.org,
- Richard Weinberger <richard@nod.at>,
- Anton Ivanov <anton.ivanov@cambridgegreys.com>,
- Johannes Berg <johannes@sipsolutions.net>, linux-um@lists.infradead.org,
- Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
- Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
- "H. Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>,
- Peter Zijlstra <peterz@infradead.org>, Ning Sun <ning.sun@intel.com>,
- x86@kernel.org, tboot-devel@lists.sourceforge.net,
- Ard Biesheuvel <ardb@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
- Vishal Moola <vishal.moola@gmail.com>, Alistair Popple <apopple@nvidia.com>,
- "Matthew Wilcox (Oracle)" <willy@infradead.org>,
- linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
-References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
- <20260714-remove_pgtable_cdtor-v1-3-44be8a7685d7@arm.com>
- <01f07ea2-8bdd-4450-8a49-548f8b646cfd@kernel.org>
- <33fc9d31-2866-4315-9510-0004deb93994@kernel.org>
-From: Kevin Brodsky <kevin.brodsky@arm.com>
-Content-Language: en-GB
-In-Reply-To: <33fc9d31-2866-4315-9510-0004deb93994@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20260807103714.33074-1-dongtai.guo@linux.dev> <20260807103714.33074-2-dongtai.guo@linux.dev>
+ <CAAhV-H4xxPXVRNXP42CBtMdVXbBZ4E6A997jZmw7HpEUSFAj9g@mail.gmail.com> <96bd0e57-b517-4008-905f-9860661afaf2@app.fastmail.com>
+In-Reply-To: <96bd0e57-b517-4008-905f-9860661afaf2@app.fastmail.com>
+From: Huacai Chen <chenhuacai@kernel.org>
+Date: Mon, 10 Aug 2026 22:35:37 +0800
+X-Gmail-Original-Message-ID: <CAAhV-H6UufWevaCds851xSxEMLeLcq+8wpoWq8OyeXib25GEUQ@mail.gmail.com>
+X-Gm-Features: AUfX_mx7myO5n6AdZGyKWT1euUf6zZnDQmB3Nd8fohz-ozaccG8I_T8jUbfMATo
+Message-ID: <CAAhV-H6UufWevaCds851xSxEMLeLcq+8wpoWq8OyeXib25GEUQ@mail.gmail.com>
+Subject: Re: [PATCH v4 1/4] efi: add a KHO configuration table GUID
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: George Guo <dongtai.guo@linux.dev>, Mike Rapoport <rppt@kernel.org>, pasha.tatashin@soleen.com, 
+	pratyush@kernel.org, shuah@kernel.org, guodongtai@kylinos.cn, 
+	WANG Xuerui <kernel@xen0n.name>, graf@amazon.com, loongarch@lists.linux.dev, 
+	linux-kernel@vger.kernel.org, kexec@lists.infradead.org, linux-mm@kvack.org, 
+	linux-kselftest@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 05/08/2026 14:07, David Hildenbrand (Arm) wrote:
-> On 8/3/26 15:59, Christophe Leroy (CS GROUP) wrote:
->> Le 14/07/2026 à 16:03, Kevin Brodsky a écrit :
->>> mm code often needs to know whether some mm represents a kernel or
->>> user address space. This is currently done by comparing the mm
->>> pointer with &init_mm; besides not being particularly elegant, this
->>> ignores the fact that other mm's (e.g. efi_mm) may also represent
->>> parts of the kernel address space.
->>>
->>> Introduce a new mm flag MMF_KERNEL and set it for init_mm.
->>> Subsequent patches will use this flag to replace comparisons with
->>> &init_mm. No functional change is introduced for now.
->> Did you consider performance impact ? This test is usually done in quite
->> critical memory handling functions.
->>
->> init_mm is known at link time. Before your patch 08/22 there is just a
->> comparison of mm (r3) with a constant (loaded in r10):
->>
->> c0014048 <assert_pte_locked>:
->> c0014048:    3d 40 c1 09     lis     r10,-16119
->> c001404c:    39 4a 03 98     addi    r10,r10,920
->> c0014050:    7c 03 50 00     cmpw    r3,r10
->> c0014054:    4d 82 00 20     beqlr
->> ...
->>
->> After patch 08/22 we have, it first checks that mm is not 0, then it loads the
->> word located at mm+528 then AND it with 0x1. This load might be costly.
->>
->> c0014048 <assert_pte_locked>:
->> c0014048:    2c 03 00 00     cmpwi   r3,0
->> c001404c:    7c 85 23 78     mr      r5,r4
->> c0014050:    41 82 00 10     beq     c0014060 <assert_pte_locked+0x18>
->> c0014054:    81 23 02 10     lwz     r9,528(r3)
->> c0014058:    71 29 00 01     andi.   r9,r9,1
->> c001405c:    4c 82 00 20     bnelr
-> Is that a real problem, though?
+On Mon, Aug 10, 2026 at 9:14=E2=80=AFPM Ard Biesheuvel <ardb@kernel.org> wr=
+ote:
+>
+>
+>
+> On Sun, 9 Aug 2026, at 06:18, Huacai Chen wrote:
+> > Hi, George,
+> >
+> > On Fri, Aug 7, 2026 at 6:38=E2=80=AFPM George Guo <dongtai.guo@linux.de=
+v> wrote:
+> >>
+> >> From: George Guo <guodongtai@kylinos.cn>
+> >>
+> >> Kexec Handover (KHO) passes the address of its state FDT and of its
+> >> scratch area from the current kernel to the next one.  On architecture=
+s
+> >> that boot with a device tree, the current kernel writes the
+> >> linux,kho-fdt and linux,kho-scratch properties into /chosen, and the n=
+ext
+> >> kernel reads them back in early_init_dt_check_kho().
+> >>
+> >> Architectures that boot through EFI without a device tree have no such
+> >> channel.  LoongArch is one of them: its efistub passes the EFI system
+> >> table and the command line to the core kernel directly and never creat=
+es
+> >> an FDT.  x86 has the same problem and carries the state out of band
+> >> instead, in a struct kho_data in the setup_data chain of its boot
+> >> protocol.
+> >>
+> >> Add an out-of-band channel for EFI: a LINUX_EFI_KHO_TABLE_GUID
+> >> configuration table entry, under a randomly generated GUID, pointing a=
+t a
+> >> struct linux_efi_kho_data.  The
+> >> current kernel loads the structure and an extended configuration table=
+ as
+> >> kexec segments, then switches the EFI system table to the new table
+> >> before jumping.  The next kernel finds the entry by GUID and calls
+> >> kho_populate().
+> >>
+> >> The structure carries no version field.  An incompatible change to the
+> >> layout must use a new GUID, which is the usual rule for EFI configurat=
+ion
+> >> tables.  The handover payload itself is versioned separately, by the
+> >> compatible string of the KHO state FDT that kho_populate() checks.
+> >>
+> >> This patch adds the definitions only.  LoongArch is the first user; an=
+y
+> >> other EFI architecture without a boot FDT can use the same channel.
+> >>
+> >> Signed-off-by: George Guo <guodongtai@kylinos.cn>
+> >> ---
+> >>  include/linux/efi.h | 24 ++++++++++++++++++++++++
+> >>  1 file changed, 24 insertions(+)
+> >>
+> >> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> >> index ccbc35479684..789ab9e4312a 100644
+> >> --- a/include/linux/efi.h
+> >> +++ b/include/linux/efi.h
+> >> @@ -422,6 +422,7 @@ void efi_native_runtime_setup(void);
+> >>  #define LINUX_EFI_COCO_SECRET_AREA_GUID                EFI_GUID(0xadf=
+956ad, 0xe98c, 0x484c,  0xae, 0x11, 0xb5, 0x1c, 0x7d, 0x33, 0x64, 0x47)
+> >>  #define LINUX_EFI_BOOT_MEMMAP_GUID             EFI_GUID(0x800f683f, 0=
+xd08b, 0x423a,  0xa2, 0x93, 0x96, 0x5c, 0x3c, 0x6f, 0xe2, 0xb4)
+> >>  #define LINUX_EFI_UNACCEPTED_MEM_TABLE_GUID    EFI_GUID(0xd5d1de3c, 0=
+x105c, 0x44f9,  0x9e, 0xa9, 0xbc, 0xef, 0x98, 0x12, 0x00, 0x31)
+> >> +#define LINUX_EFI_KHO_TABLE_GUID               EFI_GUID(0xc941b6c7, 0=
+x7b3f, 0x4af6,  0x9e, 0x50, 0xfc, 0xb3, 0xa8, 0x86, 0x8a, 0x17)
+> > I don't know whether it is allowed to define a new TABLE ID while
+> > doesn't touch the UEFI SPEC.
+> >
+>
+> That is fine in principle: the whole reason for using GUIDs as identifier=
+s
+> in UEFI is that everyone can invent their own, and the risk of conflicts =
+is
+> negligible.
+>
+> All LINUX_EFI_* GUIDs are Linux inventions, and are not mentioned in the
+> UEFI spec at all.
+OK, then I think the direction of this series is correct now, and I
+hope there will be more archs share this GUID.
 
-I doubt it, this is a load from a fixed address and therefore highly
-cacheable/predictable. At worst we're keeping an extra cache line
-allocated, but I'd expect init_mm to be already in the cache most of the
-time.
+BTW, I think LINUX_EFI_KEXEC_HANDOVER_GUID may be a little better than
+LINUX_EFI_KHO_TABLE_GUID.
 
-> What we could do is to just keep the == &init_mm check internally on configs
-> where we know that there is only a single such MM context.
-
-Sure, if this provides a clear performance benefit on powerpc or other
-architectures/configs that don't have an efi_mm we could do that.
-
-- Kevin
+Huacai
+>
