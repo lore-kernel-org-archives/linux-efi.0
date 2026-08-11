@@ -1,223 +1,186 @@
-Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com [209.85.221.51])
+Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F096F2F3C18
-	for <linux-efi@vger.kernel.org>; Tue, 11 Aug 2026 00:51:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.51
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786409492; cv=pass; b=fRENh/hywHkVBIreoD3t2HA6AKGdZrWCMEoVSz/ggXsyoB20KCAISkxZUrTcxa4x8H/73e+jsN1ORQIODN5uMRW60DP/lR9Vq+wZhy5r9UcUme+aCjiA9Udp3WIcJLYIX9ECqLq0hhrCh2eyp/RnY6o4bdPj7ObtqcDH83J1dLA=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786409492; c=relaxed/simple;
-	bh=CRzFbVwmJ8kRC2gMZZ9OCRPLmKb0rwiRryrioE9kWw4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=OdGHQ+CtWUECl3b/jI5MGbJETsVvRyIjGC5IsoeWn3tW2JWUEGtcadSmuTpWslg1IOoXXP6iEaj9H5i4HKI5sIybk7gGS/zUjjpG2aHqG6O4u5Ti9eEoQGzRo9uSpHXYQEPLPgOeaQShXJwAp9gJvJD/sJfbPPXOdfQwmqX4xtg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bourg.net; spf=pass smtp.mailfrom=bourg.net; dkim=pass (1024-bit key) header.d=bourg.net header.i=@bourg.net header.b=IsamSwuE; arc=pass smtp.client-ip=209.85.221.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bourg.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bourg.net
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87527411661
+	for <linux-efi@vger.kernel.org>; Tue, 11 Aug 2026 08:10:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786435823; cv=none; b=AUZpwGw3rR6HGiTbdq6YFehnc2M4FjQOLf5nLSMpSx/EXPvlM5E3etcFQ+hmbb5RxRiWC7xbG3I0ZgdjGa0+Y4/sPzEoHyZYOywDXLTgOIQxYV+F0Iz9UhU2xvmobEgj7Mv6Q+CgLOkvJRMKpDLiw6SYiKsTvWYeJuzv8d4TXoo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786435823; c=relaxed/simple;
+	bh=G1i7Hmp3x4MyiNkQbU9uiF4+QFCGLyrU0CXxtzNpVh0=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=eJ6g+njkUizzFcYaNeCfFGZc5Y5810h44rcGFwijVmFWr1IQPJlvK1AuPLOOMSkCfl8yEeCkhHtILyJt6xT+b6hilcAyCJD2bVSdLR5ulyUpRJblYLQ6VQDwSdqzkb1L40zd5XuYGhHdqzw3CASYSZxS5MyomiXWEoj3WHt/cr4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DTKbOcyD; arc=none smtp.client-ip=209.85.128.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=bourg.net header.i=@bourg.net header.b="IsamSwuE"
-Received: by mail-wr1-f51.google.com with SMTP id ffacd0b85a97d-47f92e3c14bso2149642f8f.0
-        for <linux-efi@vger.kernel.org>; Mon, 10 Aug 2026 17:51:29 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786409488; cv=none;
-        d=google.com; s=arc-20260327;
-        b=ie2KIySAlxo+s3Wdb2wQLs4amVRrmXX5UZ2kir6mmj7UolRMvbgxkJ2fsdcA7ZL26W
-         Uom0pSbC1fHAsR8z6rXTmdTL0aOyZC1iT8iaID3fxaQjVHQPuh9pgeEthR6TSb4nKdVm
-         RW3WVXwOtrTyPZVD62uVqREEySwQDFWy4wDCWtdw01vduxqKTIUAkOBn2qxvLURUNrT/
-         eNJljn/5Wpy7XVPhemD1z95Gx1ojExkb0UMOB/im9zF9WQ7/telBWDpGvTOf3qCHB9Mk
-         L2eyCUCKqYNB7BREN0IwzRhgKrtEoXymOsqaAZOhrS1liCnr1kBm3aLcl19uNOG8g+ms
-         YjHg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=TU+gUe471oYilrCT6YTzzByDjScHGGMPSU9HnUH7Czo=;
-        fh=VgV0Wyv4wqD+sfqQJ2lQ9oa7Z+9XYLWEAZyhe9cNvbM=;
-        b=RviFyIrYNLah02UK9bA29ee9B2vR8LqKLrE2Z9YVFK70hJPoNuYW6gcR1fLp/Rrll+
-         ODK9iNnp9kpq322lOpiJ5qnO4fffAvQuVzDXfOQOSLUGDUXr/Dbf9Gvn0HHWE8U/6PZx
-         9fKk8VYGyRy0KkYFXjLrQaKuBf/mO79yDYkbBeMQfKiawz93lgmK04oJP8MdbuSRSOQT
-         uepWE4UmMrdEEOkIEoSK+VcqRoUjL/2xat5jCdkiaqKLkEWVY3gSVOKNEYxsKC+x7JZF
-         quvm9m/qdieZa2LwaAMV9cI2ZIllvPHSsfsIwMA3i7mPoPHMa0YSZcVgHkbg9iEvb7hI
-         f3+A==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DTKbOcyD"
+Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4995b0343c1so24575385e9.3
+        for <linux-efi@vger.kernel.org>; Tue, 11 Aug 2026 01:10:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bourg.net; s=google; t=1786409488; x=1787014288; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+        d=gmail.com; s=20251104; t=1786435819; x=1787040619; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:subject:cc:to:from:date:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=TU+gUe471oYilrCT6YTzzByDjScHGGMPSU9HnUH7Czo=;
-        b=IsamSwuEZGskLN6CdZByVP5E1eE6HbFQj9/cogQzbF0nxFmtiDzCUjag0xFALS7SrO
-         WvXCGp3DxbOvl6N1lZz21PWXInQ7NhRU5+VYmXpeBb17QPNz/WPIdT0UpQYq3EAJYMw+
-         9gy8T77cPshjaQJ3wfMv+KFrhPSYEtb3BvUlc=
+        bh=kRDEH2ssIQhIkVPOR6PkKFR0aBPP8ALbaUyGO3LvVVE=;
+        b=DTKbOcyDMWHb4HoKjhv/LiJSlKcwrGHUJk+pyU3g9T7LB4SHddJnam+zm/RVr4OHVi
+         JmRza0TF3LeijHjPurRsnhis019jAxqy914rzb79tBPQiPUFYYVcQhIVfEjMhLnahSP9
+         QdoYf4FK0tiz9lQ66/pwZR3SjMyaDMXLAF3lr85IiCDuJ64jysV3XJUjsKMVPp3yT9Su
+         lzVuFGzCT/VFdQ0LCb7YMDBF7SnSGYxmBxYUtkVggOlQrMmpkjX0Vo6KyQ/xil3uxyVI
+         e/kugHsi4X7tcVITCTGS2Ap7GVzZ1FJ2dIUx4oSDR74XtpjavFlQRlL+zGHCLTFdrbHs
+         BrvQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786409488; x=1787014288;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
+        d=1e100.net; s=20251104; t=1786435819; x=1787040619;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:subject:cc:to:from:date:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=TU+gUe471oYilrCT6YTzzByDjScHGGMPSU9HnUH7Czo=;
-        b=Dh1yd/JrZWqfZVxQBmZQYGg6SZej6bUKt3J0kNcV/kql+YVLN/nt96O/usClBv0KWs
-         zX1iSNIcNAHAj0WFbk0LhcQKsIkfG3BKhhhb7/w0laZZPq8IoItQQKMVC1XTZP3fsGoF
-         jPJlTStIXa1dtqiiu9VCjhIr+ZcKUIFc8EEzN44YmivmaYsvbmqJGtC6dcjKyJaRKj1M
-         LVtE/QwWRnBErCo7V7YG7R0k7tIz8h30orKM0GektEencInG56mqwA/xFHScBZ6Pipiv
-         4vH12G48QUOXgSlKmBbagb85jijZ+7hy0WnWaUwZRm+dGtQUWhS+DyaKMOWdTbFSuJNW
-         yEiw==
-X-Forwarded-Encrypted: i=1; AHgh+RrTrhV84p0wM3JJiPvQm40ZKa2MelmYbGxYr519DyhmzHCN5grPIAvrbSW/TFOJgT3gCmaVnzhHwKw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzrq7Bg1zVXI0GxvTm1gn/gwNNqg/e5q0w7OIVnn6BIIqSw/Cd4
-	Wr3RJG5sazzP/sj6O+VNFB0zHKNF4mAQzGVx/v3YVLlJNMyC7i2iJyDvnC/GYTppvQz7tQhPopg
-	5eysSpwLhX77lumqFSOp3+6u1VOTv/XmQ2e7n0TRcAQ==
-X-Gm-Gg: AR+sD10AEiWGk0oTN0YwM9SKTv4Wl09p1pWtdBYcHITB5vj4Fy+X7FuRHELAmNCCL10
-	4GRE3N0Wq3Dju8IIfIBA88Cedb7yqyGcBghkgqK5K0SR4+QVkIUbi9vH64IqmQkWlT+O/dJSEVJ
-	WYvCyFwp37UbwT2THSu1X4zBT3rxhAVI8nki0Y6JYSc1IRVP+KSH1WZUBD70w7zcXni1tGLjeGy
-	pSQulGDCgJzkNBUOaMAskLdoJDr2wZgx/b0YWSNfGbsboqKnGW8TQkzJCz9PUeenTVyMpceO9i4
-	S2k6O5CrNp68HKWcVjffM7YU8xsUFUSa/Tx6lUEXk/1GZggswJM+iG8TgiC8+6a/FNtBBmZ3gCo
-	+
-X-Received: by 2002:a05:6000:25f5:b0:47f:8810:cc64 with SMTP id
- ffacd0b85a97d-48130ee5cafmr34643521f8f.19.1786409488054; Mon, 10 Aug 2026
- 17:51:28 -0700 (PDT)
+        bh=kRDEH2ssIQhIkVPOR6PkKFR0aBPP8ALbaUyGO3LvVVE=;
+        b=E7c9fte0N6gDgCnAmj2rohTotIT6KHOtH6YDHCa20LYzTyIvNN1dd+kZzamFZRVyc8
+         Qk59enB9gox6PB0LTlot6EXiXrw56Z7vkvvSCqka9FKVCN2/MQqIDYX+lFLBRK8xjTwG
+         dEzcggiMl7CWpgoavN1wG5ZnwINRaqxQIL/0ISwNBknFNtankU+8OSa37pLTNlJ6wVTt
+         Nw6BoFe4tWuZKA3+c5EzhSkVSqPA28hzLDyRIcFkwvQRnP+CafnLGaOzj8a4Jdr3Fzij
+         9+lZ91BmWWBghOWsOFLd4e2wvv/TanWdv2m2jbwWJNRRGHRm8LnY/z3Ho0FpiclZ0AxM
+         kQFw==
+X-Forwarded-Encrypted: i=1; AHgh+RqT8uA/D62V0N9NxPASdI5RIrVLkysa0mlzGkbRN5CmzsPMJZysElPSHfoShW2seqCpbmZvCMgDuCg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyQfQUuQD5SHMznfzLwb/o45XK/ZvHziyGeEniP/zxWEDcZtTRG
+	IzinrwP0NLp91IytXZQhg54riNnkOH6sGxn7CMRQlq9mhq7fGW0/KEAS
+X-Gm-Gg: AR+sD136BPHUnhNaCzORH9ksm2tD+lPBjfB/t1JaL7qkJDOnj2uaftXEeSfeL9JDiic
+	TbszhmLvhsngOIZcxyTPeNnHr+N0xPwjxiBBfese7T7XbJyo254Cbf3UtFR307s91cLwMIBXY0C
+	LiInfa+H1IVO5wa4bLfdyfOAUVFNgR8abS6W/i5Z7D3dxyB/UFK0oxhUoLsk7ha8VuifpwGlDzS
+	VPYxfBK2UIdgX4y9nEQIJodmR5SNzDNefRVZeyiGyypepEuER4HOJTctco5RbqPy8ZoETObjNaA
+	rdohgocyJWP/YVXL1op+kezgtOHMfQV8laU1G4FB+LDnIM9C9k+Es1pKl6pfiNS2gm5cpEgDkpY
+	1jr9f8kVtvbtR1k4Z6HIYzeIC/4gq4OY/SFuHoW5Xre58Y1qXHzm+4WbBKeIo2bwms8mc6tY5rM
+	5ELDsXhHfemJhPeokFmuoGbEr+11Vx6ZZrzlsR3hTmGQYLUAImu7e6BgguotfaoHD9xQOWaRhBr
+	G06niNuEr78vzAms918Zst1n8sQSHevNwU=
+X-Received: by 2002:a05:600c:821b:b0:499:6a92:fff1 with SMTP id 5b1f17b1804b1-4997847e9b5mr25827975e9.18.1786435818734;
+        Tue, 11 Aug 2026 01:10:18 -0700 (PDT)
+Received: from pumpkin (82-69-66-36.dsl.in-addr.zen.co.uk. [82.69.66.36])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4814a5ac6e6sm2454288f8f.6.2026.08.11.01.10.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 11 Aug 2026 01:10:18 -0700 (PDT)
+Date: Tue, 11 Aug 2026 09:10:16 +0100
+From: David Laight <david.laight.linux@gmail.com>
+To: "David Hildenbrand (Arm)" <david@kernel.org>
+Cc: "Christophe Leroy (CS GROUP)" <chleroy@kernel.org>, Kevin Brodsky
+ <kevin.brodsky@arm.com>, linux-mm@kvack.org, Andrew Morton
+ <akpm@linux-foundation.org>, Lorenzo Stoakes <ljs@kernel.org>, "Liam R.
+ Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>, Mike
+ Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>, Michal
+ Hocko <mhocko@suse.com>, Pasha Tatashin <pasha.tatashin@soleen.com>,
+ Russell King <linux@armlinux.org.uk>, Catalin Marinas
+ <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Ryan Roberts
+ <ryan.roberts@arm.com>, linux-arm-kernel@lists.infradead.org, Huacai Chen
+ <chenhuacai@kernel.org>, loongarch@lists.linux.dev, "James E.J. Bottomley"
+ <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>,
+ linux-parisc@vger.kernel.org, Madhavan Srinivasan <maddy@linux.ibm.com>,
+ Michael Ellerman <mpe@ellerman.id.au>, linuxppc-dev@lists.ozlabs.org, Paul
+ Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou
+ <aou@eecs.berkeley.edu>, linux-riscv@lists.infradead.org, Heiko Carstens
+ <hca@linux.ibm.com>, Vasily Gorbik <gor@linux.ibm.com>, Alexander Gordeev
+ <agordeev@linux.ibm.com>, Gerald Schaefer <gerald.schaefer@linux.ibm.com>,
+ linux-s390@vger.kernel.org, "David S. Miller" <davem@davemloft.net>,
+ Andreas Larsson <andreas@gaisler.com>, sparclinux@vger.kernel.org, Richard
+ Weinberger <richard@nod.at>, Anton Ivanov
+ <anton.ivanov@cambridgegreys.com>, Johannes Berg
+ <johannes@sipsolutions.net>, linux-um@lists.infradead.org, Thomas Gleixner
+ <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov
+ <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, "H. Peter Anvin"
+ <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Peter Zijlstra
+ <peterz@infradead.org>, Ning Sun <ning.sun@intel.com>, x86@kernel.org,
+ tboot-devel@lists.sourceforge.net, Ard Biesheuvel <ardb@kernel.org>, Ilias
+ Apalodimas <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org, Vishal
+ Moola <vishal.moola@gmail.com>, Alistair Popple <apopple@nvidia.com>,
+ "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+ linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
+Subject: Re: [PATCH 03/22] mm: introduce MMF_KERNEL flag and set it for
+ init_mm
+Message-ID: <20260811091016.5ca67143@pumpkin>
+In-Reply-To: <33fc9d31-2866-4315-9510-0004deb93994@kernel.org>
+References: <20260714-remove_pgtable_cdtor-v1-0-44be8a7685d7@arm.com>
+	<20260714-remove_pgtable_cdtor-v1-3-44be8a7685d7@arm.com>
+	<01f07ea2-8bdd-4450-8a49-548f8b646cfd@kernel.org>
+	<33fc9d31-2866-4315-9510-0004deb93994@kernel.org>
+X-Mailer: Claws Mail 4.1.1 (GTK 3.24.38; arm-unknown-linux-gnueabihf)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260806000144.3388823-1-gus@bourg.net> <anXMug2_-vZl_pZ7@willie-the-truck>
- <30c5499e-8041-4e39-933b-c5220d53be77@app.fastmail.com> <anmwTDnFR2cgxkqR@willie-the-truck>
-In-Reply-To: <anmwTDnFR2cgxkqR@willie-the-truck>
-From: Gus Bourg <gus@bourg.net>
-Date: Mon, 10 Aug 2026 17:51:16 -0700
-X-Gm-Features: AUfX_mwbCQk-FDI59ImICq7SHb4tBkCUGzUKvFPt1wRrD1_jDiCNvRoPevXtuBc
-Message-ID: <CAKL=SEpvBqMjw2Ts4ODYHCJz0K1axwmtrUGKQEJeb_rvuAQk0A@mail.gmail.com>
-Subject: Re: [PATCH] arm64/efi: Do not call EFI runtime services preemptibly
- under SW PAN
-To: Will Deacon <will@kernel.org>
-Cc: Ard Biesheuvel <ardb@kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
-	stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Aug 10, 2026 at 4:04=E2=80=AFAM Will Deacon <will@kernel.org> wrote=
-:
->
-> On Fri, Aug 07, 2026 at 04:56:00PM +0300, Ard Biesheuvel wrote:
-> >
-> >
-> > On Fri, 7 Aug 2026, at 15:16, Will Deacon wrote:
-> > > On Wed, Aug 05, 2026 at 05:01:44PM -0700, gus bourg wrote:
-> > >> From: Gus Bourg <gus@bourg.net>
-> > >>
-> > >> When PAN is emulated by switching TTBR0_EL1, arch_efi_call_virt_setu=
-p()
-> > >> installs the EFI mm into TTBR0_EL1 via uaccess_ttbr0_enable(), and o=
-nly a
-> > >> return from exception ever puts it back: check_and_switch_context() =
-skips
-> > >> the register write by design ("Defer TTBR0_EL1 setting for user thre=
-ads to
-> > >> uaccess_enable() when emulating PAN"), and __switch_to() does not to=
-uch it
-> > >> either. switch_mm() updates only thread_info->ttbr0.
-> > >>
-> > >> Since commit a5baf582f4c0 ("arm64/efi: Call EFI runtime services wit=
-hout
-> > >> disabling preemption") the runtime call is preemptible, so the EFI w=
-orker
-> > >> can now be scheduled out inside that window. An involuntary preempti=
-on is
-> > >> harmless, because __swpan_entry_el1()/__swpan_exit_el1() save and re=
-store
-> > >> the state around the exception. A voluntary reschedule is not: it pe=
-rforms
-> > >> no return from exception, so the worker resumes with another task's
-> > >> TTBR0_EL1 - or reserved_pg_dir - and the next efi_mm access takes a =
-level 0
-> > >> translation fault.
-> > >>
-> > >> There is such a preemption point in arch_efi_call_virt_setup() itsel=
-f,
-> > >> immediately after the TTBR0 install: __efi_fpsimd_begin() ->
-> > >> kernel_neon_begin() -> put_cpu_fpsimd_context() -> local_bh_enable()=
- ->
-> > >> preempt_check_resched().
-> > >
-> > > Hmm, can we move the ttbr0 toggling until after __efi_fpsimd_begin() =
-so
-> > > that this preemption point doesn't interfere?
-> > >
-> >
-> > Either that, or tweak the logic so that the switch is done eagerly in
-> > this particular case (untested):
-> >
-> > --- a/arch/arm64/mm/context.c
-> > +++ b/arch/arm64/mm/context.c
-> > @@ -266,7 +266,7 @@
-> >          * Defer TTBR0_EL1 setting for user threads to uaccess_enable()=
- when
-> >          * emulating PAN.
-> >          */
-> > -       if (!system_uses_ttbr0_pan())
-> > +       if (!system_uses_ttbr0_pan() || mm_is_efi(mm))
-> >                 cpu_switch_mm(mm->pgd, mm);
-> >  }
->
-> I think I'd prefer to avoid special-casing this, if we can. I was just
-> thinking of the diff below.
->
-> Will
+On Wed, 5 Aug 2026 14:07:01 +0200
+"David Hildenbrand (Arm)" <david@kernel.org> wrote:
 
-Tested the v2 approach (__efi_fpsimd_begin() before
-uaccess_ttbr0_enable()) on the board that originally reproduced the
-oops: Khadas VIM3, Amlogic A311D (4x Cortex-A73 + 2x Cortex-A53, no
-FEAT_PAN, so CONFIG_ARM64_SW_TTBR0_PAN is in use), EDK2-based UEFI
-firmware, v7.0.12 plus this change alone (my prior workaround removed).
+> On 8/3/26 15:59, Christophe Leroy (CS GROUP) wrote:
+> >=20
+> >=20
+> > Le 14/07/2026 =C3=A0 16:03, Kevin Brodsky a =C3=A9crit=C2=A0: =20
+> >> mm code often needs to know whether some mm represents a kernel or
+> >> user address space. This is currently done by comparing the mm
+> >> pointer with &init_mm; besides not being particularly elegant, this
+> >> ignores the fact that other mm's (e.g. efi_mm) may also represent
+> >> parts of the kernel address space.
+> >>
+> >> Introduce a new mm flag MMF_KERNEL and set it for init_mm.
+> >> Subsequent patches will use this flag to replace comparisons with
+> >> &init_mm. No functional change is introduced for now. =20
+> >=20
+> > Did you consider performance impact ? This test is usually done in quite
+> > critical memory handling functions.
+> >=20
+> > init_mm is known at link time. Before your patch 08/22 there is just a
+> > comparison of mm (r3) with a constant (loaded in r10):
+> >=20
+> > c0014048 <assert_pte_locked>:
+> > c0014048:=C2=A0=C2=A0=C2=A0 3d 40 c1 09=C2=A0=C2=A0=C2=A0=C2=A0 lis=C2=
+=A0=C2=A0=C2=A0=C2=A0 r10,-16119
+> > c001404c:=C2=A0=C2=A0=C2=A0 39 4a 03 98=C2=A0=C2=A0=C2=A0=C2=A0 addi=C2=
+=A0=C2=A0=C2=A0 r10,r10,920
+> > c0014050:=C2=A0=C2=A0=C2=A0 7c 03 50 00=C2=A0=C2=A0=C2=A0=C2=A0 cmpw=C2=
+=A0=C2=A0=C2=A0 r3,r10
+> > c0014054:=C2=A0=C2=A0=C2=A0 4d 82 00 20=C2=A0=C2=A0=C2=A0=C2=A0 beqlr
+> > ...
+> >=20
+> > After patch 08/22 we have, it first checks that mm is not 0, then it lo=
+ads the
+> > word located at mm+528 then AND it with 0x1. This load might be costly.
+> >=20
+> > c0014048 <assert_pte_locked>:
+> > c0014048:=C2=A0=C2=A0=C2=A0 2c 03 00 00=C2=A0=C2=A0=C2=A0=C2=A0 cmpwi=
+=C2=A0=C2=A0 r3,0
+> > c001404c:=C2=A0=C2=A0=C2=A0 7c 85 23 78=C2=A0=C2=A0=C2=A0=C2=A0 mr=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0 r5,r4
+> > c0014050:=C2=A0=C2=A0=C2=A0 41 82 00 10=C2=A0=C2=A0=C2=A0=C2=A0 beq=C2=
+=A0=C2=A0=C2=A0=C2=A0 c0014060 <assert_pte_locked+0x18>
+> > c0014054:=C2=A0=C2=A0=C2=A0 81 23 02 10=C2=A0=C2=A0=C2=A0=C2=A0 lwz=C2=
+=A0=C2=A0=C2=A0=C2=A0 r9,528(r3)
+> > c0014058:=C2=A0=C2=A0=C2=A0 71 29 00 01=C2=A0=C2=A0=C2=A0=C2=A0 andi.=
+=C2=A0=C2=A0 r9,r9,1
+> > c001405c:=C2=A0=C2=A0=C2=A0 4c 82 00 20=C2=A0=C2=A0=C2=A0=C2=A0 bnelr =
+=20
+>=20
+> Is that a real problem, though?
 
-Both firmware description modes were exercised (DeviceTree and ACPI
-boots of the same system):
+The cost of the read is likely to matter most if the branch gets mispredict=
+ed.
+I'd also guess the mm isn't usually NULL - so that branch needs to statical=
+ly
+predicted correctly as well.
+I'd also not assume that the mm is in the cache (unless the surrounding code
+has already accessed it), the L1 data caches are small.
 
-  - 3,000,000 GetVariable calls (three concurrent readers) plus
-    200,000 GetTime calls per mode, under sustained CPU contention
-    (busy-loop load on half the cores to force scheduling in the call
-    window) - i.e. 6.4M calls total across the ACPI and DeviceTree
-    boots of the same system
-  - SetVariable create/write/delete round-trips in both modes
-  - ~15 reboots/power cycles (ResetSystem) and clean shutdowns across
-    the session
-
-Zero efi_call_rts faults and zero "Unable to handle kernel access to
-user memory" events; efivars and the EFI RTC remained functional
-throughout, and poweroff/reboot stayed clean. Under the unpatched
-preemptible path the same board faulted within thousands of calls with
-comparable contention, so this comfortably clears the reproduction
-threshold.
-
-Tested-by: gus bourg <gus@bourg.net>
+	David
 
 
->
-> --->8
->
-> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> index 30cd7f804398..0ec90fd1754e 100644
-> --- a/arch/arm64/kernel/efi.c
-> +++ b/arch/arm64/kernel/efi.c
-> @@ -184,6 +184,8 @@ void arch_efi_call_virt_setup(void)
->                 efi_virtmap_load();
->         }
->
-> +       __efi_fpsimd_begin();
-> +
->         /*
->          * Enable access to the valid TTBR0_EL1 and invoke the errata
->          * workaround directly since there is no return from exception wh=
-en
-> @@ -191,8 +193,6 @@ void arch_efi_call_virt_setup(void)
->          */
->         uaccess_ttbr0_enable();
->         post_ttbr_update_workaround();
-> -
-> -       __efi_fpsimd_begin();
->  }
->
->  void arch_efi_call_virt_teardown(void)
->
+>=20
+> What we could do is to just keep the =3D=3D &init_mm check internally on =
+configs
+> where we know that there is only a single such MM context.
+>=20
+> Just a thought.
+>=20
+
