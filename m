@@ -1,30 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 647733C943F;
-	Tue, 11 Aug 2026 16:26:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 115983FCB32;
+	Tue, 11 Aug 2026 16:27:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786465620; cv=none; b=mWT6KdC9C3e/5chDsJgEXoB+RzzcshRbOAE2TggtV7D7BB2QFpqFFdm+HQ4harmOvRrz3KzmjC/3V6DQUF3WTzJ8aUfEuIvy1EQ8ngaS3d7krx/EvwYquvLavB3RLtjvyXqDMxgYmJVGK+Lh2xYWykfh9Hf74cIqfkawjyJkziY=
+	t=1786465626; cv=none; b=lIxovFcv/+F810b6wtbSe/URKVJ//sL/NxqYnqi81rwnm3HroQGjsgZ6fN7+/tYF3aBLAEpQF1hZ7gC83Rck1UHKFXqbfa+njT89HTJQJ9bdTMloYJjFMqlG8Jm4hdVaxN4IRZo8uNeHWI4qY9gutz1pqB/s+4nWOJQu6WKw6dY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786465620; c=relaxed/simple;
-	bh=I6d+eizEjlogofcYFWbdr4115/9b0npktQTk2UE5jRM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=BMxR2KiXbxl5yNL1dEr18I8PlLHNQzY6R4ggL/480DgFpXLMDKoCz2H/+WCxYxzxa7SykvpyiRfA81krpRZ0NHMXmzwNqzIcWOfGkT2mOWxRbau64nWJIB9puo746RB168gnG72tHEv8BsNNESYH4bTI5uOvTs5cFkwWCpDl/nA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Kc0kfLnP; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1786465626; c=relaxed/simple;
+	bh=A/Q1igBL85VsYHeA3f+iHKzogdE6M3Zo3VQDz4KkgMs=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=T8+aCUZFVYr1rhp2YmeYfTQrkFXcMdOzsR/2dFmvX/KcxSlPswoS5jnsNoT3OwK/MD5x7wEvDTyeekBGFUtjIRFtJh/RORypHA75mWKCpWREKfWOF1rV52cChX77gMDeyTrKQ599nqCteuzseaMt2zkZcUcC/FDv6fV6XRWTVMg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WB6oAKSj; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Kc0kfLnP"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A986B1F000E9;
-	Tue, 11 Aug 2026 16:26:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WB6oAKSj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 306711F00A3F;
+	Tue, 11 Aug 2026 16:26:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1786465615;
-	bh=OGvQP4rTfDtqzEoXAJvcK2bQDBmijHAZnmypqO/G+ig=;
-	h=From:To:Cc:Subject:Date;
-	b=Kc0kfLnPcphAgE8pEpNIHiPSnSgqFFYu15OAJQ7689fKkqv0uf1xN82X5BlruxAb1
-	 +QVheRnjiKkms31uMeLjbXRXjCDUv1b9wMj7Jc4/37XsdoPzk0PpeWcKnzFsCskDad
-	 3M5L/b1LIofah7chZsD+zQsUXHu1kuet+PjZNkK9Me6xjUHa2eJdBQqflG1+XMsM3j
-	 XE5e/yHWpgYWKrwLBhPnIIRraVzU2xdL8C8PKw9C6Ij+qaXpn2jUUQZJeIczgziF9s
-	 ElLR4CbM64NIqFwOnGyZ/9M+nVw8Iv9jKkhYqH0wffo9OJu96GCbogJE95ESCBYFOT
-	 vJQeGUOX5+yVA==
+	s=k20260515; t=1786465621;
+	bh=cCTSbjH+AbQqxolqBee1+aQwt0omi5VUnJSkZiGnZF8=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References;
+	b=WB6oAKSjESjeGTBWIaFg2Vz80ThcWdcNc2PPEL6VBsod2UdMjfrko6q/E0sjykUte
+	 6mD7MLWnhAzolIHI2EbfKgajXhMSmsgDGKMmBRj88tvW+HM+cdnIOs62Pn7/DR2TOe
+	 Nb0ECAbcH6l9mJhl3ShiWdATBjF2TyWlC7CWORVjG7Ha4BNLkjmPTwUea0YDbx1vHG
+	 useowan7Pb0zS0OkHo1eI+YGo9ig9bp1J2XQYhBM1D3OQTiMjCG94Y9tzAMZdtwH1B
+	 FOxdzs6svGvf7QDDWxH10dF9KyiZ/qcp2LdSdfbCPX4RKhk4wcGc6be/CyndAfnZXO
+	 JD4H3Pot+cLjA==
 From: Pratyush Yadav <pratyush@kernel.org>
 To: Jonathan Corbet <corbet@lwn.net>,
 	Shuah Khan <skhan@linuxfoundation.org>,
@@ -58,10 +59,12 @@ Cc: x86@kernel.org,
 	linux-efi@vger.kernel.org,
 	devicetree@vger.kernel.org,
 	linux-arch@vger.kernel.org
-Subject: [PATCH 0/4] kho: rename "scratch" to "bootmem"
-Date: Tue, 11 Aug 2026 18:26:36 +0200
-Message-ID: <20260811162642.3504565-1-pratyush@kernel.org>
+Subject: [PATCH 1/4] memblock: get rid of CONFIG_MEMBLOCK_KHO_SCRATCH
+Date: Tue, 11 Aug 2026 18:26:37 +0200
+Message-ID: <20260811162642.3504565-2-pratyush@kernel.org>
 X-Mailer: git-send-email 2.55.0.679.g6767b8d81c-goog
+In-Reply-To: <20260811162642.3504565-1-pratyush@kernel.org>
+References: <20260811162642.3504565-1-pratyush@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -72,63 +75,80 @@ Content-Transfer-Encoding: 8bit
 
 From: "Pratyush Yadav (Google)" <pratyush@kernel.org>
 
-The term "KHO scratch" is vague and overloaded. It does not accurately
-describe what the memory is for. This was discussed previously at [0].
-The conclusion was to rename "KHO scratch" to "KHO bootmem", since this
-is memory passed by the previous kernel for early boot allocations.
+This config is only a proxy for CONFIG_KEXEC_HANDOVER. It is only
+enabled by KHO. No point in the indirection. Use CONFIG_KEXEC_HANDOVER
+directly.
 
-In addition, memblock does not care about the provenance of the memory.
-It cares more about how it should use it. Use MEMBLOCK_KHO_NOPRSRV,
-instead of MEMBLOCK_KHO_SCRATCH, to describe this memory to memblock.
+Signed-off-by: Pratyush Yadav (Google) <pratyush@kernel.org>
+---
+ include/linux/memblock.h  | 2 +-
+ kernel/liveupdate/Kconfig | 1 -
+ mm/Kconfig                | 4 ----
+ mm/memblock.c             | 4 ++--
+ 4 files changed, 3 insertions(+), 8 deletions(-)
 
-This series does the renames. It also gets rid of a redundant Kconfig.
-
-While the diffstat is big and scary, most of the changes are mechanical.
-The most interesting functional change is in patch 4.
-
-This series touches a lot of files across a lot of trees. But since all
-of that is purely KHO-related code, I would like to collect ACKs from
-the maintainers and take it via the liveupdate tree.
-
-Ideally we should queue it in liveupdate/next early in the v7.4 cycle
-since it will cause a lot of conflicts with other patches throughout the
-KHO tree.
-
-[0] https://lore.kernel.org/kexec/agHGOxSnP_VraH1M@kernel.org/T/#u
-
-Pratyush Yadav (Google) (4):
-  memblock: get rid of CONFIG_MEMBLOCK_KHO_SCRATCH
-  memblock: rename KHO_SCRATCH to KHO_NOPRSRV
-  kho: rename KHO scratch to KHO bootmem
-  kho: rename kho_scratch= commandline parameter to kho_bootmem=
-
- .../admin-guide/kernel-parameters.txt         |  15 +-
- Documentation/admin-guide/mm/kho.rst          |  18 +-
- Documentation/core-api/kho/index.rst          |  36 +-
- arch/x86/boot/compressed/kaslr.c              |  12 +-
- arch/x86/include/uapi/asm/setup_data.h        |   4 +-
- arch/x86/kernel/e820.c                        |   2 +-
- arch/x86/kernel/kexec-bzimage64.c             |   6 +-
- arch/x86/kernel/setup.c                       |   2 +-
- arch/x86/realmode/init.c                      |   2 +-
- drivers/firmware/efi/efi-init.c               |   6 +-
- drivers/of/kexec.c                            |  16 +-
- include/asm-generic/kexec_handover.h          |   2 +-
- include/linux/kexec.h                         |   2 +-
- include/linux/kexec_handover.h                |  16 +-
- include/linux/memblock.h                      |  30 +-
- kernel/liveupdate/Kconfig                     |   1 -
- kernel/liveupdate/kexec_handover.c            | 340 +++++++++---------
- kernel/liveupdate/kexec_handover_debugfs.c    |  24 +-
- kernel/liveupdate/kexec_handover_internal.h   |   4 +-
- mm/Kconfig                                    |   4 -
- mm/memblock.c                                 |  56 +--
- mm/mm_init.c                                  |   6 +-
- tools/testing/memblock/internal.h             |   2 +-
- 23 files changed, 302 insertions(+), 304 deletions(-)
-
-
-base-commit: 352ebb57013a08679788bc18c7f9af90903db256
+diff --git a/include/linux/memblock.h b/include/linux/memblock.h
+index d62db9e776cf..db3b106c6335 100644
+--- a/include/linux/memblock.h
++++ b/include/linux/memblock.h
+@@ -614,7 +614,7 @@ static inline void early_memtest(phys_addr_t start, phys_addr_t end) { }
+ static inline void memtest_report_meminfo(struct seq_file *m) { }
+ #endif
+ 
+-#ifdef CONFIG_MEMBLOCK_KHO_SCRATCH
++#ifdef CONFIG_KEXEC_HANDOVER
+ void memblock_set_kho_scratch_only(void);
+ void memblock_clear_kho_scratch_only(void);
+ #else
+diff --git a/kernel/liveupdate/Kconfig b/kernel/liveupdate/Kconfig
+index c13af38ba23a..f50daee8eff0 100644
+--- a/kernel/liveupdate/Kconfig
++++ b/kernel/liveupdate/Kconfig
+@@ -5,7 +5,6 @@ menu "Live Update and Kexec HandOver"
+ config KEXEC_HANDOVER
+ 	bool "kexec handover"
+ 	depends on ARCH_SUPPORTS_KEXEC_HANDOVER && ARCH_SUPPORTS_KEXEC_FILE
+-	select MEMBLOCK_KHO_SCRATCH
+ 	select KEXEC_FILE
+ 	select LIBFDT
+ 	select CMA
+diff --git a/mm/Kconfig b/mm/Kconfig
+index 9e0ca4824905..5415e0b38b5d 100644
+--- a/mm/Kconfig
++++ b/mm/Kconfig
+@@ -485,10 +485,6 @@ config HAVE_GUP_FAST
+ 	depends on MMU
+ 	bool
+ 
+-# Enable memblock support for scratch memory which is needed for kexec handover
+-config MEMBLOCK_KHO_SCRATCH
+-	bool
+-
+ # Don't discard allocated memory used to track "memory" and "reserved" memblocks
+ # after early boot, so it can still be used to test for validity of memory.
+ # Also, memblocks are updated with memory hot(un)plug.
+diff --git a/mm/memblock.c b/mm/memblock.c
+index 37e06e70c1d0..8e425791ad66 100644
+--- a/mm/memblock.c
++++ b/mm/memblock.c
+@@ -112,7 +112,7 @@ unsigned long min_low_pfn;
+ unsigned long max_pfn;
+ unsigned long long max_possible_pfn;
+ 
+-#ifdef CONFIG_MEMBLOCK_KHO_SCRATCH
++#ifdef CONFIG_KEXEC_HANDOVER
+ /* When set to true, only allocate from MEMBLOCK_KHO_SCRATCH ranges */
+ static bool kho_scratch_only;
+ #else
+@@ -2597,7 +2597,7 @@ int reserve_mem_release_by_name(const char *name)
+ 	return 1;
+ }
+ 
+-#ifdef CONFIG_MEMBLOCK_KHO_SCRATCH
++#ifdef CONFIG_KEXEC_HANDOVER
+ __init void memblock_set_kho_scratch_only(void)
+ {
+ 	kho_scratch_only = true;
 -- 
 2.55.0.679.g6767b8d81c-goog
 
