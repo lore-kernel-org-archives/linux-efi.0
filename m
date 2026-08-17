@@ -1,190 +1,312 @@
-Received: from mail-lf1-f48.google.com (mail-lf1-f48.google.com [209.85.167.48])
+Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B310F81ACD
-	for <linux-efi@vger.kernel.org>; Sat, 15 Aug 2026 12:57:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E27342253FC
+	for <linux-efi@vger.kernel.org>; Mon, 17 Aug 2026 05:02:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.54
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786798642; cv=pass; b=a8kVN2U4zqNVcd6toXc/l0Zgfk8l8sVSHDop8xI2Km3V153oyuh5Dwv4xreVCF5pJiZsd5CE+kKq+G9g+lXMV0SEWVLUvn1YncxcjNgf9/8gD1zKstk8JpLWvcQaRa62ROlLxa+FmIe3uJTtfApnf1xG0aRNikrpRmxxGTlN/fo=
+	t=1786942956; cv=pass; b=Q6iwIsPRxk9/OoyukEkV+hG21P2S+gg3GErR1nISmBpa7EXGdhInf9kNAx6nLMibNlvzJdpIe/ly6AG57rTZLSB6edww2AcR3drk27GPTN0opdicJg2ZJ2dvyizPVlhDHm6Ubr2TmenOyfX3bf9hcm0mBBpBk63uFqGkVOzyF7Y=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786798642; c=relaxed/simple;
-	bh=sP6F2/uvrWLFbh29XDtUYXxtW6F0qI7CNC27ZF/fQkU=;
-	h=MIME-Version:From:Date:Message-ID:Subject:To:Content-Type; b=nZBmbdCahoEka2Z/7935PwKkymPLBYAFeNFt+p8RsT63PUmYy39Ew0mwRqdBZpfM9NFAsyEYRaC8ybfUEqjHvjJChuhdHOyEqeIm5AYdIrlsReUIsloEGOOD/vShR+Mitiql9jzABd0JTJithzcqfmXyeJxkeJJdT6bGQe9FsyI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=IzKh8RFp; arc=pass smtp.client-ip=209.85.167.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1786942956; c=relaxed/simple;
+	bh=/vnlXw1vg51WClqglYSoXDRtRgD3/bNrYVr/0IH3+kY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=rg3admtmd19B6c2YzYLvC+21RKbGF3J+WXfo3xtDTvceTkmFPXwKRo6aKhG5ptsibMhkoiOQWr3ylse46yTeHFhSiHTjaGRpNoYNc7lOhFPsKFq2lHzkJ1Un3QPHZg9QgxRHfVckUmma2F5req+ir6iQTH1BrGZGD+yol694N00=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=brainfault.org; spf=none smtp.mailfrom=brainfault.org; dkim=pass (2048-bit key) header.d=brainfault.org header.i=@brainfault.org header.b=IDXII/hI; arc=pass smtp.client-ip=209.85.221.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=brainfault.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=brainfault.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IzKh8RFp"
-Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-5b013084dc2so1442796e87.0
-        for <linux-efi@vger.kernel.org>; Sat, 15 Aug 2026 05:57:20 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786798639; cv=none;
+	dkim=pass (2048-bit key) header.d=brainfault.org header.i=@brainfault.org header.b="IDXII/hI"
+Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-47fe89fb333so1722314f8f.3
+        for <linux-efi@vger.kernel.org>; Sun, 16 Aug 2026 22:02:34 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786942953; cv=none;
         d=google.com; s=arc-20260327;
-        b=lIayga+1+zOTpT7Tis5J4Qi297PyKrkYvQ/QEUU7GFEnTgBafWmeEcfwo6kd1Srzqp
-         6Qy2ZW+5QcbDSkHZt3Yymgfo0oJyr67nFAV23IedLRJfPqPe8rAlfBtZoeHteOPI23O4
-         B0J6xF89qe5cK4j5EG4vTV+Co4xRXO4PqF7U6Kw8W0VkP5rpDZ8dm7JxhwAo+51SGpFT
-         viE5c9FiNrhQxPxztrIAcf+WpP+AWxayBFRG4IBnCc3mPWdf1PLKHMEX5bT3idwl6Mys
-         lXLsVmzjIX5K5u3g/yChzQ1mkgU78NlpE4HHnB0yOcd4auGFnmkzLX4U4dEKhGlfES8s
-         oyGQ==
+        b=QqYPjeHY+zoOuwtKaUHlu58bK89xgEeUtwS+gbCbqdkWXaWpyATwLe1AEWBkdnRCos
+         TWy3RwABCVv3DP/9nnQxKjH+VO9A1U8a6kin+uapee2p0Dbd2gN1hb0F+AqYa/ilJGuL
+         JvCxM12poySJjjKuoFYbFq8Et4Gph1ywvbWIRQn/y44EL+bfBOFchUfxxWGn6LmrdhhI
+         ozFFC08radWza1mumEoSsVz5rysmPe4yTVsCTibsTlc0yBoIZ5dSYEq6e5sBSxY7GrmS
+         /mdkg8osjBw+l1C59Q8wDtnE01obrlMSHrNsSIY7s+76lWkbBeNnGHJHw0YDKZ/BM9YU
+         1JLg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=to:subject:message-id:date:from:mime-version:dkim-signature;
-        bh=Y7HfCIGKUZw6VxvnNnghQLfKVuncFGEPj5RNGPs9KK4=;
-        fh=94EFkkp172E/1i+Wpm9h/Ox8pQQX4ycSSRDgd/4xIuo=;
-        b=BdC0GX/lG8URAe3q3aB5KI+AzF2zY6bYvY7jt8fxC5MFnPmVGgl3UIaXSnjbz+ie1X
-         woA1/poCOuoprW3B5ZpxGkUJP4X0a3EGqMlgJcswZJspH/9WfggrloBqm3FfmtIutQ3e
-         Hs6kV8WKjV7p6rbeDyaRpW/wv4E0FEo3ZuKQJ+Tardtf2sauNUBZDLoyC7+WY7TiurVl
-         1q75S/ui+6igl7384k+YXFLAKmPwZ9F/Ww1Ctckv7g1ZrONuL+6KxfRmCnnMFju4UBEf
-         s/6esngGpkYQ59opfe5zhcIJX2R8dVrwSDP/S0A3r42slh0lbh4kQ/e8MEEEcKv/9/0j
-         hHPQ==;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=qoYi18RDSR4LawRHK5O3loQLaPLqT9tLcA3hUir4WQY=;
+        fh=K8tV7dmEcjfzk9aF7Jzu4jgp1/wLoiUQjvC6lDQGkOk=;
+        b=bpHE2UnLvtJQaKNnlujhsxGyOTA8nNnWvbYup3zco56hRIBVyOAtoOeg33Sqgv5lg+
+         ILGSj/g4RzkZoUz1NvOIavRY9HVQaX+ekNuKQFrQG+UrOOyRWAHfZNcCd24lsJhxcvSd
+         OPK0NL0OMxsKZaHEufnea/71TsDsXd5Ae+hwQQ/0N4mdFfiZ6ma9b6NzvYGDnRW85mOk
+         R7AnJdsm2B2ANRXUV+2Sm+y8WleSo5QWOvesl6VxPPL5YYF7bVCZ+pdRN432ZxH/p/ih
+         0cpQmcbtaoswzuaPBNvkakbkej5wyEvVDg1mbj7GGaoeNA4Q7yz+nBlhW/M0bOZP0zJH
+         HQKg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786798639; x=1787403439; darn=vger.kernel.org;
-        h=content-type:to:subject:message-id:date:from:mime-version:from:to
-         :cc:subject:date:message-id:reply-to:content-type;
-        bh=Y7HfCIGKUZw6VxvnNnghQLfKVuncFGEPj5RNGPs9KK4=;
-        b=IzKh8RFpcvgfsXI3GkIIc1PPpF0gAB+4lz8tBQcC17lZJVSrFcZg9rUxoGaNYgrR9S
-         i5gwc8no1iMEoFQ6O8Y2xgz+5UmVggTKa4jlAMDGJFMl2G1eoFLHfdCITIGfIaDx3nkH
-         E8y5+Y/2VRfOQylQjiujLJe/BOQxvJw1NrAKdwuHPhTM6B5BlK0AHCr4w7OT2+3WH9mY
-         mYADglIokP6GOR1ewfyNPGIKQgOvOywrJFcXggVWduStgCICssy3ejo7AbsaCRa6zP+U
-         k6mnjS1E7ElWCrsj0wOr0NIFpN60LPpgFckCyksiI8OMB2qqF6chiRd83w6xV9o+2sG+
-         OQTg==
+        d=brainfault.org; s=google; t=1786942953; x=1787547753; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=qoYi18RDSR4LawRHK5O3loQLaPLqT9tLcA3hUir4WQY=;
+        b=IDXII/hIrYYNBEUqAQ2HC0Sbt6lU1ITMF0ql3R60uq1nSjPl7hmz20sUPdyfLWeiLn
+         ga5t0BXPdBLBbOZGwK0mCGzgFKlq53rPIH3PCZe42gAjWRaTFSCJsVKy20+Q/QCOIfDa
+         v2AMV4efAPXN1kno3XC3lVW1XPifC4sSDMc1GcXC0G41IEwZMY2azfyuFWi4MABKWVV9
+         YkCWkq9z3YGnb3qa4ch41VHOMO5EuY+h/Vd9k/cwf/NKpV22ry5QFS6lMJiltBrCnNp8
+         Cq0W6tC6oSp709e9/hRzZr161A+Qd4InYbkuXr7RFXN6BUaed/WeJRfJLz1+yFK/uCav
+         6YTg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786798639; x=1787403439;
-        h=content-type:to:subject:message-id:date:from:mime-version:x-gm-gg
+        d=1e100.net; s=20251104; t=1786942953; x=1787547753;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=Y7HfCIGKUZw6VxvnNnghQLfKVuncFGEPj5RNGPs9KK4=;
-        b=b+owAEF1e87KtH/uyrnV74iOpTr335qSyOvShu1PsJW0N+N7VLNxcyOtxsIrSBYeg5
-         SMwr0vXwu7o0U0M5nHNLhFfTpHKKpGsaao5QFO3QPSYr1IIIanwFV13MQUlyJmAWHW9w
-         DZkp+TPzJh490OegH8ggigNtdaNaPI4IuAcJUz/NaMUrMg3pAbqp3RATQdTaNXu3dDZT
-         MjgpDQ5etXNm/7zUkmszsLX57BXbyAvczjMpmhHl/hdSvl8x5DqkYTHR0bIui99opGS0
-         Nt1GcdnOVHmgb8DrFHTR+sHPZoGNgcZBPEHSTe7BrzgKggMSQglNXK7BVmHb8VvEQJQo
-         8OYg==
-X-Gm-Message-State: AOJu0YwL5TIV5vSJOFfBQ+kXSUJozUDYVLFG531wAMi37O2VWXmf0Qsj
-	Ezqa8i9O3NOWDaI0YWP1HPY7/FTKdHYO8ooe3BK4uVWOOyX+Js5/+Ov5Fdvk64WbqvF6oBTXolN
-	ANdJhPPVf3kmXaG9jyHzg2ggvJc/gHCNLANjr
-X-Gm-Gg: AR+sD10siMlIkbb3R8PIKhwtxMxbLhxtWk7sJAFcDVx5DqQ+071c4yB7K5EJCklHvYr
-	26OFOwTie50GOWIv6dGmEJklxzEYae5Sb2NMhRUAskYmSbz78bo7nywUU6gHZau+04t/5tVKyTI
-	KRKO2yTnGKmPkoreYDcq+whbmREfky5FhCFMJt4GugeM8jsePlNxKN+UZ3ZIV6uWEANQ5llXgBE
-	tE8tEEz4yn+G70Ud58d9wMFREyQ3YP0D6B6WtJDzUk95K1MVNsS+AefuKenO8n+5XbviFVcdMAm
-	fiLpOiy96vtUoAVlYILrNo/Op9pyb3bdgSeAvMoitJq0IzdOVsBK+hFrzYobe4BhqGHX6olNQMo
-	CjQA=
-X-Received: by 2002:a05:6512:110a:b0:5b0:12e1:4846 with SMTP id
- 2adb3069b0e04-5b459182852mr1731479e87.29.1786798638522; Sat, 15 Aug 2026
- 05:57:18 -0700 (PDT)
+        bh=qoYi18RDSR4LawRHK5O3loQLaPLqT9tLcA3hUir4WQY=;
+        b=nxeJQOgnhdjExqdMQ8/UUhCaybpccL+CSoqqM/v6ywB7PMNVsfobocF5W8ivBvRzAO
+         //tSqhdXSxDBtkUZEX1Lx5cIlrbrWWQSOI1pmkY1wPJTcfs3pbyvlRNS9Gq1jRLyYiAC
+         DPpZQsTSkmMe4wvqkU7zAUGH3d8BuYrqLa2L2hWbLRVaCUYWSwUbXqtA+AD2d7dfXt9t
+         0Lg1ecKOippE55M1ysrPOCryLpuAnVYkbw9j48S/M7xheoPTR9EQrncQ/PiCovcnjIM4
+         0Qs0s4n9B6ImNPJA4HQquQaRZLIGLB3oOSFTMhwkUswEcmkwtWJ4pOitKC0DQnd04y+n
+         Gkvg==
+X-Forwarded-Encrypted: i=1; AHgh+Rr6VB4gDMNa5R5rr8mRGHoViWtp4lT+LEQkVKrld7SltgUke3Pko0Eemb4x797l6q1kP2neLmTzi1w=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwKTv94DTL98dcunPH61JZ2Mo+JL5XACu6oAD/pboyC+uCFxXBx
+	SUNXrPfyF5FYnjWQFHhL9MDHnrKok1Vx4bYTqcCXZvzwXR/oMUr01Mb3/gMkVfED+kx2zBzZVVI
+	ttMTNUAhJmHFB1on6oI/P2u3RoJRflXNGW0XC5NU9Hw==
+X-Gm-Gg: AR+sD13KBzIjh6+KBf2FHFmk3uLeQGNoTaOOjimQDxPEtlIxUSfopy2IYu5XjzeTDQ0
+	XD7njfsIEL2RrVAk5pwdAXgEbAeFco9PPvSAscqnuE/dIUiEWrIycRZ/MYxzQoW/heD7eqr4yfO
+	yCQZEcn6DLY+Ys4j0dmB8wkwKThz8NQLIkqel8Ck0E/5sjERabu9O4ipR+M9GlZGjlGVioOnfmf
+	HXIIQDcGHVoGIwmSo5YFeCo2ybeKb8wcsuq8eGnyCOptsToZvx49vQeFngUhtyQXJ/qQ4XcZq77
+	m4ZL++2IUo2ATeNfVA5x80DJFSzyNqhcDkjNdAIL92WWisrSXMpaApZgWdc8CK8wtqK7CbvqkJv
+	KE6AGnplGHClvHaffLqK9c5gZYSlEmrZSNMoh6tFbC/DsOikDYtzapuTp0eR6Itc=
+X-Received: by 2002:a05:6000:2588:b0:47f:97f6:d39a with SMTP id
+ ffacd0b85a97d-48160799ccemr36697191f8f.17.1786942952631; Sun, 16 Aug 2026
+ 22:02:32 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: Brian Heise <bnheise@gmail.com>
-Date: Sat, 15 Aug 2026 22:03:28 +0900
-X-Gm-Features: AUfX_mxRHnm7wjtTc494fxDJBqBJ6PcbvHnWmHr35fMLvPaxG68pd1je8OiSNeg
-Message-ID: <CAMSzGnHQMvZ9h27Fkcy-xVW8C6oH1DJMd4z+R4LkWeDJJUH+Cg@mail.gmail.com>
-Subject: [PATCH] efi/x86: early EFI poweroff quirk for Clevo/MouseComputer V650AU
-To: linux-efi@vger.kernel.org
-Content-Type: multipart/mixed; boundary="0000000000002282d70659157a6f"
-
---0000000000002282d70659157a6f
-Content-Type: multipart/alternative; boundary="0000000000002282d60659157a6d"
-
---0000000000002282d60659157a6d
+References: <20260513084325.2176952-1-himanshu.chauhan@oss.qualcomm.com> <20260513084325.2176952-9-himanshu.chauhan@oss.qualcomm.com>
+In-Reply-To: <20260513084325.2176952-9-himanshu.chauhan@oss.qualcomm.com>
+From: Anup Patel <anup@brainfault.org>
+Date: Mon, 17 Aug 2026 10:32:21 +0530
+X-Gm-Features: AcwNN1WIHMlsMJLB7hUwYKC927a3ggaJ6kZFcGlSqz813vIhEHmZTD8KTFxo-cU
+Message-ID: <CAAhSdy2LkwC_FBFWP3M66X-mY8WwpSHiOCOKf=e4Fri=gkt27Q@mail.gmail.com>
+Subject: Re: [PATCH v4 08/10] riscv: Introduce HEST SSE notification handlers
+To: Himanshu Chauhan <himanshu.chauhan@oss.qualcomm.com>
+Cc: linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, 
+	acpica-devel@lists.linux.dev, paul.walmsley@sifive.com, palmer@dabbelt.com, 
+	lenb@kernel.org, james.morse@arm.com, tony.luck@intel.com, ardb@kernel.org, 
+	conor@kernel.org, cleger@rivosinc.com, robert.moore@intel.com, 
+	sunilvl@oss.qualcomm.com, anup.patel@oss.qualcomm.com
 Content-Type: text/plain; charset="UTF-8"
-
-Hello,
-
-On MouseComputer/Clevo V650AU (Insyde 1.07.12rRUN), systemctl poweroff
-completes OS shutdown but the machine stays powered (LED on; long-press
-needed). Reboot works.
-
-ACPI S5 and late EFI_RESET_SHUTDOWN (sys-off after device_shutdown) both
-fail. Early EFI_RESET_SHUTDOWN before device_shutdown fully cuts power
-(validated with a probe module, then with this quirk).
-
-This registers a DMI-gated reboot notifier (DMI_BOARD_NAME "V650AU") that
-issues EFI_RESET_SHUTDOWN on SYS_POWER_OFF.
-
-*AI use disclosure.*
-
-I have no experience in kernel development.
-I own a MouseComputer/Clevo V650AU (Insyde 1.07.12rRUN) and have
-experienced this problem.
-I solved the issue using an AI agent, but have verified that the solution
-works on my own machine.
-
-Best regards,
-Brian N. Heise
-
---0000000000002282d60659157a6d
-Content-Type: text/html; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-<div dir=3D"ltr">Hello,<br><br>On MouseComputer/Clevo V650AU (Insyde 1.07.1=
-2rRUN), systemctl poweroff<br>completes OS shutdown but the machine stays p=
-owered (LED on; long-press<br>needed). Reboot works.<br><br>ACPI S5 and lat=
-e EFI_RESET_SHUTDOWN (sys-off after device_shutdown) both<br>fail. Early EF=
-I_RESET_SHUTDOWN before device_shutdown fully cuts power<br>(validated with=
- a probe module, then with this quirk).<br><br>This registers a DMI-gated r=
-eboot notifier (DMI_BOARD_NAME &quot;V650AU&quot;) that<br>issues EFI_RESET=
-_SHUTDOWN on SYS_POWER_OFF.<br><br><b>AI use=C2=A0disclosure.</b><br><br>I =
-have no experience in kernel development.<br>I own a MouseComputer/Clevo V6=
-50AU (Insyde 1.07.12rRUN) and have experienced this problem.<br>I solved th=
-e issue using an AI agent, but have verified that the solution works on my =
-own machine.<br><br>Best regards,<br>Brian N. Heise</div>
+On Wed, May 13, 2026 at 2:18=E2=80=AFPM Himanshu Chauhan
+<himanshu.chauhan@oss.qualcomm.com> wrote:
+>
+> Add config option to enable SSE in APEI. When it is enabled, functions
+> to register/unregister a ghes entry with SSE are avilable along with
+> low and high priority event handers. If a SSE notification type is
+> determined, a ghes common handler to handle an error event is registered.
+>
+> Signed-off-by: Himanshu Chauhan <himanshu.chauhan@oss.qualcomm.com>
+> ---
+>  drivers/acpi/apei/Kconfig |  5 ++
+>  drivers/acpi/apei/ghes.c  | 99 ++++++++++++++++++++++++++++++++++-----
+>  2 files changed, 93 insertions(+), 11 deletions(-)
+>
+> diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
+> index 428458c623f0..895a843d0e36 100644
+> --- a/drivers/acpi/apei/Kconfig
+> +++ b/drivers/acpi/apei/Kconfig
+> @@ -46,6 +46,11 @@ config ACPI_APEI_SEA
+>         depends on ARM64 && ACPI_APEI_GHES
+>         default y
+>
+> +config ACPI_APEI_SSE
+> +       bool
+> +       depends on RISCV && RISCV_SBI_SSE && ACPI_APEI_GHES
+> +       default y
+> +
+>  config ACPI_APEI_MEMORY_FAILURE
+>         bool "APEI memory error recovering support"
+>         depends on ACPI_APEI && MEMORY_FAILURE
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 8edc2c8db1bb..1baa8ddd10ea 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -17,6 +17,8 @@
+>   *   Author: Huang Ying <ying.huang@intel.com>
+>   */
+>
+> +#include <linux/err.h>
+> +#include <linux/riscv_sbi_sse.h>
+>  #include <linux/arm_sdei.h>
+>  #include <linux/kernel.h>
+>  #include <linux/moduleparam.h>
+> @@ -100,6 +102,11 @@
+>  #define FIX_APEI_GHES_SDEI_CRITICAL    __end_of_fixed_addresses
+>  #endif
+>
+> +#ifndef CONFIG_RISCV_SBI_SSE
+> +#define FIX_APEI_GHES_SSE_LOW_PRIORITY __end_of_fixed_addresses
+> +#define FIX_APEI_GHES_SSE_HIGH_PRIORITY        __end_of_fixed_addresses
+> +#endif
+> +
+>  static ATOMIC_NOTIFIER_HEAD(ghes_report_chain);
+>
+>  static inline bool is_hest_type_generic_v2(struct ghes *ghes)
+> @@ -1662,6 +1669,63 @@ static int apei_sdei_unregister_ghes(struct ghes *=
+ghes)
+>         return sdei_unregister_ghes(ghes);
+>  }
+>
+> +#if defined(CONFIG_ACPI_APEI_SSE)
+> +/* SSE Handlers */
+> +static int __ghes_sse_callback(struct ghes *ghes,
+> +                              enum fixed_addresses fixmap_idx)
+> +{
+> +       if (!ghes_in_nmi_queue_one_entry(ghes, fixmap_idx)) {
+> +               irq_work_queue(&ghes_proc_irq_work);
+> +
+> +               return 0;
+> +       }
+> +
+> +       return -ENOENT;
+> +}
+> +
+> +/* Low priority */
+> +static int ghes_sse_lo_callback(u32 event_num, void *arg, struct pt_regs=
+ *regs)
+> +{
+> +       static DEFINE_RAW_SPINLOCK(ghes_notify_lock_sse_lo);
+> +       struct ghes *ghes =3D arg;
+> +       int err;
+> +
+> +       raw_spin_lock(&ghes_notify_lock_sse_lo);
+> +       err =3D __ghes_sse_callback(ghes, FIX_APEI_GHES_SSE_LOW_PRIORITY)=
+;
+> +       raw_spin_unlock(&ghes_notify_lock_sse_lo);
+> +
+> +       return err;
+> +}
+> +
+> +/* High priority */
+> +static int ghes_sse_hi_callback(u32 event_num, void *arg, struct pt_regs=
+ *regs)
+> +{
+> +       static DEFINE_RAW_SPINLOCK(ghes_notify_lock_sse_hi);
+> +       struct ghes *ghes =3D arg;
+> +       int err;
+> +
+> +       raw_spin_lock(&ghes_notify_lock_sse_hi);
+> +       err =3D __ghes_sse_callback(ghes, FIX_APEI_GHES_SSE_HIGH_PRIORITY=
+);
+> +       raw_spin_unlock(&ghes_notify_lock_sse_hi);
+> +
+> +       return err;
+> +}
+> +
+> +static int apei_sse_register_ghes(struct ghes *ghes)
+> +{
+> +       return sse_register_ghes(ghes, ghes_sse_lo_callback,
+> +                                ghes_sse_hi_callback);
+> +}
+> +
+> +static int apei_sse_unregister_ghes(struct ghes *ghes)
+> +{
+> +       return sse_unregister_ghes(ghes);
+> +}
+> +#else /* CONFIG_ACPI_APEI_SSE */
+> +static int apei_sse_register_ghes(struct ghes *ghes) { return -EOPNOTSUP=
+P; }
+> +static int apei_sse_unregister_ghes(struct ghes *ghes) { return -EOPNOTS=
+UPP; }
+> +#endif
+> +
+>  static int ghes_probe(struct platform_device *ghes_dev)
+>  {
+>         struct acpi_hest_generic *generic;
+> @@ -1708,6 +1772,14 @@ static int ghes_probe(struct platform_device *ghes=
+_dev)
+>                 pr_warn(GHES_PFX "Generic hardware error source: %d notif=
+ied via local interrupt is not supported!\n",
+>                         generic->header.source_id);
+>                 goto err;
+> +       case ACPI_HEST_NOTIFY_SSE:
+> +               if (!IS_ENABLED(CONFIG_ACPI_APEI_SSE)) {
+> +                       pr_warn(GHES_PFX "Generic hardware error source: =
+%d notified via SSE is not supported\n",
+> +                               generic->header.source_id);
+> +                       rc =3D -EOPNOTSUPP;
+> +                       goto err;
+> +               }
+> +               break;
+>         default:
+>                 pr_warn(FW_WARN GHES_PFX "Unknown notification type: %u f=
+or generic hardware error source: %d\n",
+>                         generic->notify.type, generic->header.source_id);
+> @@ -1775,6 +1847,17 @@ static int ghes_probe(struct platform_device *ghes=
+_dev)
+>                 if (rc)
+>                         goto err;
+>                 break;
+> +
+> +       case ACPI_HEST_NOTIFY_SSE:
+> +               rc =3D apei_sse_register_ghes(ghes);
+> +               if (rc) {
+> +                       pr_err(GHES_PFX "Failed to register for SSE notif=
+ication on vector %d\n",
+> +                              generic->notify.vector);
+> +                       goto err;
+> +               }
+> +               pr_err(GHES_PFX "Registered SSE notification on vector %d=
+\n",
+> +                      generic->notify.vector);
 
---0000000000002282d60659157a6d--
---0000000000002282d70659157a6f
-Content-Type: text/x-patch; charset="US-ASCII"; 
-	name="0001-efi-x86-early-EFI-poweroff-quirk-for-Clevo-MouseComp.patch"
-Content-Disposition: attachment; 
-	filename="0001-efi-x86-early-EFI-poweroff-quirk-for-Clevo-MouseComp.patch"
-Content-Transfer-Encoding: base64
-Content-ID: <f_msudwjhh0>
-X-Attachment-Id: f_msudwjhh0
+This needs to be pr_info() instead of pr_err().
 
-RnJvbSBkN2Y1Y2VkOThlZDg1YjI0YjQ1OTI3ZjY1YjI5ZDJjZTU5YmY4MTBhIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBCcmlhbiBIZWlzZSA8Ym5oZWlzZUBnbWFpbC5jb20+CkRhdGU6
-IFNhdCwgMTUgQXVnIDIwMjYgMjE6NDM6NDUgKzA5MDAKU3ViamVjdDogW1BBVENIXSBlZmkveDg2
-OiBlYXJseSBFRkkgcG93ZXJvZmYgcXVpcmsgZm9yIENsZXZvL01vdXNlQ29tcHV0ZXIKIFY2NTBB
-VQoKQUNQSSBTNSBhbmQgbGF0ZSBFRkkgUmVzZXRTeXN0ZW0oU0hVVERPV04pIChhZnRlciBkZXZp
-Y2Vfc2h1dGRvd24pCmxlYXZlIHRoaXMgSW5zeWRlIGZpcm13YXJlIHBvd2VyZWQgb24uIENhbGxp
-bmcgRUZJX1JFU0VUX1NIVVRET1dOIGZyb20KYSByZWJvb3Qgbm90aWZpZXIsIGJlZm9yZSBkZXZp
-Y2Vfc2h1dGRvd24sIGZ1bGx5IGN1dHMgcG93ZXIuIE1hdGNoIG9uCkRNSV9CT0FSRF9OQU1FIFY2
-NTBBVSBzbyBNb3VzZUNvbXB1dGVyIGFuZCBvdGhlciBDbGV2byB3aGl0ZS1sYWJlbHMKYXJlIGNv
-dmVyZWQuCgotLS0KIGFyY2gveDg2L3BsYXRmb3JtL2VmaS9xdWlya3MuYyB8IDQ1ICsrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysKIDEgZmlsZSBjaGFuZ2VkLCA0NSBpbnNlcnRpb25z
-KCspCgpkaWZmIC0tZ2l0IGEvYXJjaC94ODYvcGxhdGZvcm0vZWZpL3F1aXJrcy5jIGIvYXJjaC94
-ODYvcGxhdGZvcm0vZWZpL3F1aXJrcy5jCmluZGV4IDkwYTA2NWZjYi4uNmM0MjI2ZDU2IDEwMDY0
-NAotLS0gYS9hcmNoL3g4Ni9wbGF0Zm9ybS9lZmkvcXVpcmtzLmMKKysrIGIvYXJjaC94ODYvcGxh
-dGZvcm0vZWZpL3F1aXJrcy5jCkBAIC0xMSw2ICsxMSw3IEBACiAjaW5jbHVkZSA8bGludXgvbWVt
-YmxvY2suaD4KICNpbmNsdWRlIDxsaW51eC9hY3BpLmg+CiAjaW5jbHVkZSA8bGludXgvZG1pLmg+
-CisjaW5jbHVkZSA8bGludXgvcmVib290Lmg+CiAKICNpbmNsdWRlIDxhc20vZTgyMC9hcGkuaD4K
-ICNpbmNsdWRlIDxhc20vZWZpLmg+CkBAIC02NjAsNiArNjYxLDUwIEBAIGJvb2wgZWZpX3Bvd2Vy
-b2ZmX3JlcXVpcmVkKHZvaWQpCiAJcmV0dXJuIGFjcGlfZ2JsX3JlZHVjZWRfaGFyZHdhcmUgfHwg
-YWNwaV9ub19zNTsKIH0KIAorLyoKKyAqIE1vdXNlQ29tcHV0ZXIvQ2xldm8gVjY1MEFVIChJbnN5
-ZGUpOiBBQ1BJIFM1IGFuZCBFRkkgUmVzZXRTeXN0ZW0gYWZ0ZXIKKyAqIGRldmljZV9zaHV0ZG93
-bigpIGxlYXZlIHRoZSBzeXN0ZW0gcG93ZXJlZCBvbi4gRUZJX1JFU0VUX1NIVVRET1dOIHdvcmtz
-CisgKiB3aGVuIGludm9rZWQgZnJvbSBhIHJlYm9vdCBub3RpZmllciwgd2hpY2ggcnVucyBiZWZv
-cmUgZGV2aWNlX3NodXRkb3duKCkuCisgKi8KK3N0YXRpYyBjb25zdCBzdHJ1Y3QgZG1pX3N5c3Rl
-bV9pZCBlZmlfZWFybHlfcG93ZXJvZmZfZG1pX3RhYmxlW10gX19pbml0Y29uc3QgPSB7CisJewor
-CQkubWF0Y2hlcyA9IHsKKwkJCURNSV9NQVRDSChETUlfQk9BUkRfTkFNRSwgIlY2NTBBVSIpLAor
-CQl9LAorCX0sCisJeyB9Cit9OworCitzdGF0aWMgaW50IGVmaV9lYXJseV9wb3dlcm9mZl9ub3Rp
-Znkoc3RydWN0IG5vdGlmaWVyX2Jsb2NrICpuYiwKKwkJCQkgICAgdW5zaWduZWQgbG9uZyBtb2Rl
-LCB2b2lkICp1bnVzZWQpCit7CisJaWYgKG1vZGUgIT0gU1lTX1BPV0VSX09GRikKKwkJcmV0dXJu
-IE5PVElGWV9ET05FOworCisJaWYgKCFlZmlfcnRfc2VydmljZXNfc3VwcG9ydGVkKEVGSV9SVF9T
-VVBQT1JURURfUkVTRVRfU1lTVEVNKSkKKwkJcmV0dXJuIE5PVElGWV9ET05FOworCisJcHJfaW5m
-bygiVjY1MEFVOiBFRkkgUmVzZXRTeXN0ZW0oU0hVVERPV04pIGJlZm9yZSBkZXZpY2Ugc2h1dGRv
-d25cbiIpOworCWVmaS5yZXNldF9zeXN0ZW0oRUZJX1JFU0VUX1NIVVRET1dOLCBFRklfU1VDQ0VT
-UywgMCwgTlVMTCk7CisKKwlyZXR1cm4gTk9USUZZX0RPTkU7Cit9CisKK3N0YXRpYyBzdHJ1Y3Qg
-bm90aWZpZXJfYmxvY2sgZWZpX2Vhcmx5X3Bvd2Vyb2ZmX25iID0geworCS5ub3RpZmllcl9jYWxs
-ID0gZWZpX2Vhcmx5X3Bvd2Vyb2ZmX25vdGlmeSwKK307CisKK3N0YXRpYyBpbnQgX19pbml0IGVm
-aV9lYXJseV9wb3dlcm9mZl9xdWlyayh2b2lkKQoreworCWlmICghZG1pX2NoZWNrX3N5c3RlbShl
-ZmlfZWFybHlfcG93ZXJvZmZfZG1pX3RhYmxlKSkKKwkJcmV0dXJuIDA7CisKKwlyZWdpc3Rlcl9y
-ZWJvb3Rfbm90aWZpZXIoJmVmaV9lYXJseV9wb3dlcm9mZl9uYik7CisJcHJfaW5mbygiVjY1MEFV
-OiByZWdpc3RlcmVkIGVhcmx5IEVGSSBwb3dlci1vZmYgcXVpcmtcbiIpOworCXJldHVybiAwOwor
-fQorbGF0ZV9pbml0Y2FsbChlZmlfZWFybHlfcG93ZXJvZmZfcXVpcmspOworCiAjaWZkZWYgQ09O
-RklHX0VGSV9DQVBTVUxFX1FVSVJLX1FVQVJLX0NTSAogCiBzdGF0aWMgaW50IHFya19jYXBzdWxl
-X3NldHVwX2luZm8oc3RydWN0IGNhcHN1bGVfaW5mbyAqY2FwX2luZm8sIHZvaWQgKipwa2J1ZmYs
-Ci0tIAoyLjU1LjAKCg==
---0000000000002282d70659157a6f--
+> +               break;
+>         default:
+>                 BUG();
+>         }
+> @@ -1804,7 +1887,6 @@ static int ghes_probe(struct platform_device *ghes_=
+dev)
+>
+>  static void ghes_remove(struct platform_device *ghes_dev)
+>  {
+> -       int rc;
+>         struct ghes *ghes;
+>         struct acpi_hest_generic *generic;
+>
+> @@ -1838,16 +1920,11 @@ static void ghes_remove(struct platform_device *g=
+hes_dev)
+>                 ghes_nmi_remove(ghes);
+>                 break;
+>         case ACPI_HEST_NOTIFY_SOFTWARE_DELEGATED:
+> -               rc =3D apei_sdei_unregister_ghes(ghes);
+> -               if (rc) {
+> -                       /*
+> -                        * Returning early results in a resource leak, bu=
+t we're
+> -                        * only here if stopping the hardware failed.
+> -                        */
+> -                       dev_err(&ghes_dev->dev, "Failed to unregister ghe=
+s (%pe)\n",
+> -                               ERR_PTR(rc));
+> -                       return;
+> -               }
+> +               apei_sdei_unregister_ghes(ghes);
+> +               break;
+> +
+> +       case ACPI_HEST_NOTIFY_SSE:
+> +               apei_sse_unregister_ghes(ghes);
+>                 break;
+>         default:
+>                 BUG();
+> --
+> 2.43.0
+>
+>
+
+Regards,
+Anup
