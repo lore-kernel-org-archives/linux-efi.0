@@ -1,312 +1,278 @@
-Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E27342253FC
-	for <linux-efi@vger.kernel.org>; Mon, 17 Aug 2026 05:02:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.54
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786942956; cv=pass; b=Q6iwIsPRxk9/OoyukEkV+hG21P2S+gg3GErR1nISmBpa7EXGdhInf9kNAx6nLMibNlvzJdpIe/ly6AG57rTZLSB6edww2AcR3drk27GPTN0opdicJg2ZJ2dvyizPVlhDHm6Ubr2TmenOyfX3bf9hcm0mBBpBk63uFqGkVOzyF7Y=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786942956; c=relaxed/simple;
-	bh=/vnlXw1vg51WClqglYSoXDRtRgD3/bNrYVr/0IH3+kY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=rg3admtmd19B6c2YzYLvC+21RKbGF3J+WXfo3xtDTvceTkmFPXwKRo6aKhG5ptsibMhkoiOQWr3ylse46yTeHFhSiHTjaGRpNoYNc7lOhFPsKFq2lHzkJ1Un3QPHZg9QgxRHfVckUmma2F5req+ir6iQTH1BrGZGD+yol694N00=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=brainfault.org; spf=none smtp.mailfrom=brainfault.org; dkim=pass (2048-bit key) header.d=brainfault.org header.i=@brainfault.org header.b=IDXII/hI; arc=pass smtp.client-ip=209.85.221.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=brainfault.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=brainfault.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 890F23B6356
+	for <linux-efi@vger.kernel.org>; Mon, 17 Aug 2026 08:42:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786956139; cv=none; b=uFhhCnxcTCmpoq9lJqTm+GvuMIGitooD5zxvcdQ1qUek7GOHE12ZMDkdsgrNohTC/SuqMU/9P0OhrWFRrFAXd9p3FVoHWkLjgdz5M/y14aWtfs6B8Ee9NtrLQzPUuPY6q7LhtzvXRyUcsfYFtTiRH5IIjdaKAh5QXDYHStA2TRM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786956139; c=relaxed/simple;
+	bh=ItV4OzCRJMxPZyizd0dxik85ucTFHr0ZOTbd+3j+No4=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=FktWAfR4NdbGYkbL0j3FjuFjGwgJi3dhMq/aPyGDNZFJqCpt1FmXZr75TjUFA+2ZGwryew92oV4XjMvw9JXAuX1AHaPpNjan7NkfoqEfBZ8Pfzu8ev1tf2jkX9j8vS4G61YEp8tZBtJO5LX/LZXJ30ElR0OJ/UHYRWvqueiSS8o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WIbWipfl; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=brainfault.org header.i=@brainfault.org header.b="IDXII/hI"
-Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-47fe89fb333so1722314f8f.3
-        for <linux-efi@vger.kernel.org>; Sun, 16 Aug 2026 22:02:34 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786942953; cv=none;
-        d=google.com; s=arc-20260327;
-        b=QqYPjeHY+zoOuwtKaUHlu58bK89xgEeUtwS+gbCbqdkWXaWpyATwLe1AEWBkdnRCos
-         TWy3RwABCVv3DP/9nnQxKjH+VO9A1U8a6kin+uapee2p0Dbd2gN1hb0F+AqYa/ilJGuL
-         JvCxM12poySJjjKuoFYbFq8Et4Gph1ywvbWIRQn/y44EL+bfBOFchUfxxWGn6LmrdhhI
-         ozFFC08radWza1mumEoSsVz5rysmPe4yTVsCTibsTlc0yBoIZ5dSYEq6e5sBSxY7GrmS
-         /mdkg8osjBw+l1C59Q8wDtnE01obrlMSHrNsSIY7s+76lWkbBeNnGHJHw0YDKZ/BM9YU
-         1JLg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=qoYi18RDSR4LawRHK5O3loQLaPLqT9tLcA3hUir4WQY=;
-        fh=K8tV7dmEcjfzk9aF7Jzu4jgp1/wLoiUQjvC6lDQGkOk=;
-        b=bpHE2UnLvtJQaKNnlujhsxGyOTA8nNnWvbYup3zco56hRIBVyOAtoOeg33Sqgv5lg+
-         ILGSj/g4RzkZoUz1NvOIavRY9HVQaX+ekNuKQFrQG+UrOOyRWAHfZNcCd24lsJhxcvSd
-         OPK0NL0OMxsKZaHEufnea/71TsDsXd5Ae+hwQQ/0N4mdFfiZ6ma9b6NzvYGDnRW85mOk
-         R7AnJdsm2B2ANRXUV+2Sm+y8WleSo5QWOvesl6VxPPL5YYF7bVCZ+pdRN432ZxH/p/ih
-         0cpQmcbtaoswzuaPBNvkakbkej5wyEvVDg1mbj7GGaoeNA4Q7yz+nBlhW/M0bOZP0zJH
-         HQKg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=brainfault.org; s=google; t=1786942953; x=1787547753; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=qoYi18RDSR4LawRHK5O3loQLaPLqT9tLcA3hUir4WQY=;
-        b=IDXII/hIrYYNBEUqAQ2HC0Sbt6lU1ITMF0ql3R60uq1nSjPl7hmz20sUPdyfLWeiLn
-         ga5t0BXPdBLBbOZGwK0mCGzgFKlq53rPIH3PCZe42gAjWRaTFSCJsVKy20+Q/QCOIfDa
-         v2AMV4efAPXN1kno3XC3lVW1XPifC4sSDMc1GcXC0G41IEwZMY2azfyuFWi4MABKWVV9
-         YkCWkq9z3YGnb3qa4ch41VHOMO5EuY+h/Vd9k/cwf/NKpV22ry5QFS6lMJiltBrCnNp8
-         Cq0W6tC6oSp709e9/hRzZr161A+Qd4InYbkuXr7RFXN6BUaed/WeJRfJLz1+yFK/uCav
-         6YTg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786942953; x=1787547753;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=qoYi18RDSR4LawRHK5O3loQLaPLqT9tLcA3hUir4WQY=;
-        b=nxeJQOgnhdjExqdMQ8/UUhCaybpccL+CSoqqM/v6ywB7PMNVsfobocF5W8ivBvRzAO
-         //tSqhdXSxDBtkUZEX1Lx5cIlrbrWWQSOI1pmkY1wPJTcfs3pbyvlRNS9Gq1jRLyYiAC
-         DPpZQsTSkmMe4wvqkU7zAUGH3d8BuYrqLa2L2hWbLRVaCUYWSwUbXqtA+AD2d7dfXt9t
-         0Lg1ecKOippE55M1ysrPOCryLpuAnVYkbw9j48S/M7xheoPTR9EQrncQ/PiCovcnjIM4
-         0Qs0s4n9B6ImNPJA4HQquQaRZLIGLB3oOSFTMhwkUswEcmkwtWJ4pOitKC0DQnd04y+n
-         Gkvg==
-X-Forwarded-Encrypted: i=1; AHgh+Rr6VB4gDMNa5R5rr8mRGHoViWtp4lT+LEQkVKrld7SltgUke3Pko0Eemb4x797l6q1kP2neLmTzi1w=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwKTv94DTL98dcunPH61JZ2Mo+JL5XACu6oAD/pboyC+uCFxXBx
-	SUNXrPfyF5FYnjWQFHhL9MDHnrKok1Vx4bYTqcCXZvzwXR/oMUr01Mb3/gMkVfED+kx2zBzZVVI
-	ttMTNUAhJmHFB1on6oI/P2u3RoJRflXNGW0XC5NU9Hw==
-X-Gm-Gg: AR+sD13KBzIjh6+KBf2FHFmk3uLeQGNoTaOOjimQDxPEtlIxUSfopy2IYu5XjzeTDQ0
-	XD7njfsIEL2RrVAk5pwdAXgEbAeFco9PPvSAscqnuE/dIUiEWrIycRZ/MYxzQoW/heD7eqr4yfO
-	yCQZEcn6DLY+Ys4j0dmB8wkwKThz8NQLIkqel8Ck0E/5sjERabu9O4ipR+M9GlZGjlGVioOnfmf
-	HXIIQDcGHVoGIwmSo5YFeCo2ybeKb8wcsuq8eGnyCOptsToZvx49vQeFngUhtyQXJ/qQ4XcZq77
-	m4ZL++2IUo2ATeNfVA5x80DJFSzyNqhcDkjNdAIL92WWisrSXMpaApZgWdc8CK8wtqK7CbvqkJv
-	KE6AGnplGHClvHaffLqK9c5gZYSlEmrZSNMoh6tFbC/DsOikDYtzapuTp0eR6Itc=
-X-Received: by 2002:a05:6000:2588:b0:47f:97f6:d39a with SMTP id
- ffacd0b85a97d-48160799ccemr36697191f8f.17.1786942952631; Sun, 16 Aug 2026
- 22:02:32 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WIbWipfl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B30971F00A3D;
+	Mon, 17 Aug 2026 08:42:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1786956138;
+	bh=ri4gnJzdgtbwijutHFkiBovuKwGB55QNnr5MBC0/7fs=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=WIbWipflzvqkALL8MHsg/pt9fGqGve5KsP3jw3A3TepgPImQzJ6Cj0FElbO3t08rX
+	 Zq7AckRc1FcoSN7MCHHINL30iG0Ly7Hm5WZEJTAgverrowrEsg7y28q6YsykSKZIlI
+	 W2iZ1SArcrsPaBeBUb2byLkomqvn0dp0i6ftykfPr6x44I+ybzW2zgEa0g0xpLf8/L
+	 SnNoQobxAtMmsDAdU2xENo05Ozgnrnu+vxOKE7zBOHb1e7R8CFqE0gB8aBFelzYt4g
+	 6KM0e3jVZV/b7fmTS8R3DftsOBUHWlfPVTeu1XCOdIqud6GS/4t/w9m405uyxukbd9
+	 f0q5oG4knJIFw==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 4BB9D1980052;
+	Mon, 17 Aug 2026 04:42:16 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Mon, 17 Aug 2026 04:42:16 -0400
+X-ME-Sender: <xms:ZcmCaqJRi71k3mjGH9Cla1A5sVb_PU_2-QKTuz8-9-qq9bvYi72Cfw>
+    <xme:ZcmCas8hkHjvNlv0IFtaHd3tE67F-tCxxR82c2pWBhnx6J4PnZ6u2FsMIaIaKUjtv
+    AUS73w0DXV-Jn5NFw3Rl6Hq37ZK-BSy-Qx7YxahcFCW6UQHdGj3hmXE>
+X-ME-Proxy-Cause: dmFkZTGALACgPRXbsmw4UDAcAPrv/ildNadA/tMoTacndsXYRrCyKJ8GplQuvicmAIJHP1
+    KTyoK2GFTmRqUMQPHAEpZpILciSEvLStMZbHw1VoQASIsR8rNVL4jFjE/LrK9oFRm+yKo7
+    VLsyCV8F8waGLR+S/YqD9HET5YJUcgdzq91D8hbzA6S3UYcl3nAFOxEromznTJqx3FpX25
+    vo6/Hd9Vc4N9gU7tNU+60lAAO6+rboZ8FOvcVd9PUgI+6XF1GsaOjxVrTvlMMyj2mF32yQ
+    UtfsNEd10wrUUGwsbymE8heJbZEGOu8x4NvHNkHLzZND2dwv2ff5OYe96lBZ/XUYJZiIfG
+    Zl6ep9iOi+H/Z9kDO/qlefIK9BOFpkNQhwlkWkSzcXbI2f+z21D0G4EAe9oWGFMFnt4TTL
+    kSAS8QYKdKytUiE+3MX0GLi+wGZqLHr6Qfud3PIR4MRm8mFN7EKRZBW2qBPXteb0CBPSNb
+    Loh/6sHnPDTd4bt1Q5OqqnRK65wnh2JlAwPg4czfP8/MwqRlk5adZ2BXXMjBAL5T7xCt/5
+    Ucf2zsXGmKuDGzHrOW2fuHGkdAp4TlzBb4jdGhVjiLZ1jkgY76ASMOZeQX3Yne+DrWdC5M
+    X9YD8neVbIlZQhgkHW79zmgs0+xYZ/HctkaZF9sh3/kBokn+fVcULw3+fvNw
+X-ME-Proxy: <xmx:aMmCamAAgoERI3vtkAG_TzrKeeN0W3Tt_gTqc8S4hADpxIluul4rVQ>
+    <xmx:aMmCahPX3xdiEuGusAEub_QuNcTn_0Z0iWJCQyQ86l_fNNSOIBoYTQ>
+    <xmx:aMmCanx5wkx27wI-whqLTwatVZhs9cRwRimNeC2a0rIvUD3ZpsS0eA>
+    <xmx:aMmCapWBkEA5Xg732XtTnA6YzS5_Gvczaz3bOGWWHcNI6Nx8-4JQVA>
+    <xmx:aMmCahNmKXFUXCFLzbckPrbEh_rgqf1xjbRGac7CZaHR1gLXqIe8zjSS>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id DB124F80070; Mon, 17 Aug 2026 04:42:13 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260513084325.2176952-1-himanshu.chauhan@oss.qualcomm.com> <20260513084325.2176952-9-himanshu.chauhan@oss.qualcomm.com>
-In-Reply-To: <20260513084325.2176952-9-himanshu.chauhan@oss.qualcomm.com>
-From: Anup Patel <anup@brainfault.org>
-Date: Mon, 17 Aug 2026 10:32:21 +0530
-X-Gm-Features: AcwNN1WIHMlsMJLB7hUwYKC927a3ggaJ6kZFcGlSqz813vIhEHmZTD8KTFxo-cU
-Message-ID: <CAAhSdy2LkwC_FBFWP3M66X-mY8WwpSHiOCOKf=e4Fri=gkt27Q@mail.gmail.com>
-Subject: Re: [PATCH v4 08/10] riscv: Introduce HEST SSE notification handlers
-To: Himanshu Chauhan <himanshu.chauhan@oss.qualcomm.com>
-Cc: linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org, 
-	linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, 
-	acpica-devel@lists.linux.dev, paul.walmsley@sifive.com, palmer@dabbelt.com, 
-	lenb@kernel.org, james.morse@arm.com, tony.luck@intel.com, ardb@kernel.org, 
-	conor@kernel.org, cleger@rivosinc.com, robert.moore@intel.com, 
-	sunilvl@oss.qualcomm.com, anup.patel@oss.qualcomm.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Date: Mon, 17 Aug 2026 11:41:51 +0300
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Leif Lindholm" <leif.lindholm@oss.qualcomm.com>
+Cc: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ "Huacai Chen" <chenhuacai@kernel.org>, "WANG Xuerui" <kernel@xen0n.name>,
+ loongarch@lists.linux.dev
+Message-Id: <a0d10b63-bf9a-4ad7-a9d8-ab748a9c0c2c@app.fastmail.com>
+In-Reply-To: <an8xTBiCy_PEuwZi@leviathan>
+References: <20260813074506.643472-5-ardb@kernel.org>
+ <20260813074506.643472-7-ardb@kernel.org> <an8xTBiCy_PEuwZi@leviathan>
+Subject: Re: [PATCH 2/3] efi: Pass EFI boot memmap struct address to core kernel
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Wed, May 13, 2026 at 2:18=E2=80=AFPM Himanshu Chauhan
-<himanshu.chauhan@oss.qualcomm.com> wrote:
->
-> Add config option to enable SSE in APEI. When it is enabled, functions
-> to register/unregister a ghes entry with SSE are avilable along with
-> low and high priority event handers. If a SSE notification type is
-> determined, a ghes common handler to handle an error event is registered.
->
-> Signed-off-by: Himanshu Chauhan <himanshu.chauhan@oss.qualcomm.com>
-> ---
->  drivers/acpi/apei/Kconfig |  5 ++
->  drivers/acpi/apei/ghes.c  | 99 ++++++++++++++++++++++++++++++++++-----
->  2 files changed, 93 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
-> index 428458c623f0..895a843d0e36 100644
-> --- a/drivers/acpi/apei/Kconfig
-> +++ b/drivers/acpi/apei/Kconfig
-> @@ -46,6 +46,11 @@ config ACPI_APEI_SEA
->         depends on ARM64 && ACPI_APEI_GHES
->         default y
->
-> +config ACPI_APEI_SSE
-> +       bool
-> +       depends on RISCV && RISCV_SBI_SSE && ACPI_APEI_GHES
-> +       default y
-> +
->  config ACPI_APEI_MEMORY_FAILURE
->         bool "APEI memory error recovering support"
->         depends on ACPI_APEI && MEMORY_FAILURE
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 8edc2c8db1bb..1baa8ddd10ea 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -17,6 +17,8 @@
->   *   Author: Huang Ying <ying.huang@intel.com>
->   */
->
-> +#include <linux/err.h>
-> +#include <linux/riscv_sbi_sse.h>
->  #include <linux/arm_sdei.h>
->  #include <linux/kernel.h>
->  #include <linux/moduleparam.h>
-> @@ -100,6 +102,11 @@
->  #define FIX_APEI_GHES_SDEI_CRITICAL    __end_of_fixed_addresses
->  #endif
->
-> +#ifndef CONFIG_RISCV_SBI_SSE
-> +#define FIX_APEI_GHES_SSE_LOW_PRIORITY __end_of_fixed_addresses
-> +#define FIX_APEI_GHES_SSE_HIGH_PRIORITY        __end_of_fixed_addresses
-> +#endif
-> +
->  static ATOMIC_NOTIFIER_HEAD(ghes_report_chain);
->
->  static inline bool is_hest_type_generic_v2(struct ghes *ghes)
-> @@ -1662,6 +1669,63 @@ static int apei_sdei_unregister_ghes(struct ghes *=
-ghes)
->         return sdei_unregister_ghes(ghes);
->  }
->
-> +#if defined(CONFIG_ACPI_APEI_SSE)
-> +/* SSE Handlers */
-> +static int __ghes_sse_callback(struct ghes *ghes,
-> +                              enum fixed_addresses fixmap_idx)
-> +{
-> +       if (!ghes_in_nmi_queue_one_entry(ghes, fixmap_idx)) {
-> +               irq_work_queue(&ghes_proc_irq_work);
-> +
-> +               return 0;
-> +       }
-> +
-> +       return -ENOENT;
-> +}
-> +
-> +/* Low priority */
-> +static int ghes_sse_lo_callback(u32 event_num, void *arg, struct pt_regs=
- *regs)
-> +{
-> +       static DEFINE_RAW_SPINLOCK(ghes_notify_lock_sse_lo);
-> +       struct ghes *ghes =3D arg;
-> +       int err;
-> +
-> +       raw_spin_lock(&ghes_notify_lock_sse_lo);
-> +       err =3D __ghes_sse_callback(ghes, FIX_APEI_GHES_SSE_LOW_PRIORITY)=
-;
-> +       raw_spin_unlock(&ghes_notify_lock_sse_lo);
-> +
-> +       return err;
-> +}
-> +
-> +/* High priority */
-> +static int ghes_sse_hi_callback(u32 event_num, void *arg, struct pt_regs=
- *regs)
-> +{
-> +       static DEFINE_RAW_SPINLOCK(ghes_notify_lock_sse_hi);
-> +       struct ghes *ghes =3D arg;
-> +       int err;
-> +
-> +       raw_spin_lock(&ghes_notify_lock_sse_hi);
-> +       err =3D __ghes_sse_callback(ghes, FIX_APEI_GHES_SSE_HIGH_PRIORITY=
-);
-> +       raw_spin_unlock(&ghes_notify_lock_sse_hi);
-> +
-> +       return err;
-> +}
-> +
-> +static int apei_sse_register_ghes(struct ghes *ghes)
-> +{
-> +       return sse_register_ghes(ghes, ghes_sse_lo_callback,
-> +                                ghes_sse_hi_callback);
-> +}
-> +
-> +static int apei_sse_unregister_ghes(struct ghes *ghes)
-> +{
-> +       return sse_unregister_ghes(ghes);
-> +}
-> +#else /* CONFIG_ACPI_APEI_SSE */
-> +static int apei_sse_register_ghes(struct ghes *ghes) { return -EOPNOTSUP=
-P; }
-> +static int apei_sse_unregister_ghes(struct ghes *ghes) { return -EOPNOTS=
-UPP; }
-> +#endif
-> +
->  static int ghes_probe(struct platform_device *ghes_dev)
->  {
->         struct acpi_hest_generic *generic;
-> @@ -1708,6 +1772,14 @@ static int ghes_probe(struct platform_device *ghes=
-_dev)
->                 pr_warn(GHES_PFX "Generic hardware error source: %d notif=
-ied via local interrupt is not supported!\n",
->                         generic->header.source_id);
->                 goto err;
-> +       case ACPI_HEST_NOTIFY_SSE:
-> +               if (!IS_ENABLED(CONFIG_ACPI_APEI_SSE)) {
-> +                       pr_warn(GHES_PFX "Generic hardware error source: =
-%d notified via SSE is not supported\n",
-> +                               generic->header.source_id);
-> +                       rc =3D -EOPNOTSUPP;
-> +                       goto err;
-> +               }
-> +               break;
->         default:
->                 pr_warn(FW_WARN GHES_PFX "Unknown notification type: %u f=
-or generic hardware error source: %d\n",
->                         generic->notify.type, generic->header.source_id);
-> @@ -1775,6 +1847,17 @@ static int ghes_probe(struct platform_device *ghes=
-_dev)
->                 if (rc)
->                         goto err;
->                 break;
-> +
-> +       case ACPI_HEST_NOTIFY_SSE:
-> +               rc =3D apei_sse_register_ghes(ghes);
-> +               if (rc) {
-> +                       pr_err(GHES_PFX "Failed to register for SSE notif=
-ication on vector %d\n",
-> +                              generic->notify.vector);
-> +                       goto err;
-> +               }
-> +               pr_err(GHES_PFX "Registered SSE notification on vector %d=
-\n",
-> +                      generic->notify.vector);
 
-This needs to be pr_info() instead of pr_err().
-
-> +               break;
->         default:
->                 BUG();
->         }
-> @@ -1804,7 +1887,6 @@ static int ghes_probe(struct platform_device *ghes_=
-dev)
+On Fri, 14 Aug 2026, at 18:16, Leif Lindholm wrote:
+> On Thu, Aug 13, 2026 at 09:45:09 +0200, Ard Biesheuvel wrote:
+>> The EFI stub already passes a struct efi_boot_memmap populated with the
+>> information of the EFI memory map as a configuration table, and so
+>> passing the physical address, size, descriptor size and descriptor
+>> version via 4 different DT properties is kind of redundant.
+>> 
+>> Instead, pass the physical address of this struct in memory so that the
+>> kernel can just retrieve the values directly.
+>> 
+>> Unfortunately, the scheme with four separate properties is boot ABI for
+>> Xen, and so this needs to remain supported.
 >
->  static void ghes_remove(struct platform_device *ghes_dev)
->  {
-> -       int rc;
->         struct ghes *ghes;
->         struct acpi_hest_generic *generic;
->
-> @@ -1838,16 +1920,11 @@ static void ghes_remove(struct platform_device *g=
-hes_dev)
->                 ghes_nmi_remove(ghes);
->                 break;
->         case ACPI_HEST_NOTIFY_SOFTWARE_DELEGATED:
-> -               rc =3D apei_sdei_unregister_ghes(ghes);
-> -               if (rc) {
-> -                       /*
-> -                        * Returning early results in a resource leak, bu=
-t we're
-> -                        * only here if stopping the hardware failed.
-> -                        */
-> -                       dev_err(&ghes_dev->dev, "Failed to unregister ghe=
-s (%pe)\n",
-> -                               ERR_PTR(rc));
-> -                       return;
-> -               }
-> +               apei_sdei_unregister_ghes(ghes);
-> +               break;
-> +
-> +       case ACPI_HEST_NOTIFY_SSE:
-> +               apei_sse_unregister_ghes(ghes);
->                 break;
->         default:
->                 BUG();
-> --
-> 2.43.0
->
+> To clarify, you mean boot ABI when running under Xen?
 >
 
-Regards,
-Anup
+Yes. We've allowed Xen dom0 to omit the EFI stub entirely, and boot the
+kernel proper in EFI mode, passing the EFI system table and memory map
+addresses via these special DT properties.
+
+>> But for the EFI stub itself,
+>> this is just an internal ABI that can be modified.
+>
+> Hmm...
+>
+> So this leaves only three properties that cannot be derived from the
+> System Table:
+> - The System Table address itself
+> - kaslr-seed
+> - bootargs
+>
+> The latter two could also be given the config table treatment.
+>
+
+The latter two are generic boot ABI for the arm64 kernel, and there
+is no need to treat them differently for EFI boot. Note that we also
+support passing the initrd directly via DT when doing EFI boot, rather
+than via the EFI specific device path.
+
+> Is it time to update the boot ABI to say x0 will hold the physical
+> address of "device tree blob (dtb) or EFI System Table in system RAM"?
+> They can be distinguished by 0xd00dfeed / "IBI SYST".
+>
+
+Let's avoid 'boot ABI' here, given that we are talking about an internal
+interface between the EFI stub and the kernel proper.
+
+This internal interface uses DT under the hood, even on ACPI platforms,
+because it simplifies the early boot code. I don't think we should change
+this.
+
+Also, the DT provided by the bootloader (if any) may differ from the one
+passed by the EFI stub, and so discovering the DT from the EFI system
+table is not straight-forward - they are not the same, and making them
+the same may have unintended side effects.
+ 
+> The use of a generated DT when none was provided by firmware has led
+> to both confusion and shenanigans, and might be nice to get rid of?
+>
+
+I don't disagree with that. But that would imply adding new code to the
+early startup code doing command line parsing and KASLR randomization to
+reason about whether these assets are passed via DT or via some other means.
+
+What would make sense imo is to pass the EFI system table address via X1
+when doing EFI boot, so we don't have to get anything at all from the DT.
+
+> Either way, it would be nice to get rid of all four of the
+> linux,uefi-mmap nodes if they're now completely redundant.
+>
+
+Indeed.
+
+> Minor bikeshedding below.
+>
+>> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+>> ---
+>>  Documentation/arch/arm/uefi.rst    | 10 +----
+>>  drivers/firmware/efi/fdtparams.c   | 39 ++++++++++++++++---
+>>  drivers/firmware/efi/libstub/fdt.c | 40 ++------------------
+>>  3 files changed, 37 insertions(+), 52 deletions(-)
+>> 
+>> diff --git a/Documentation/arch/arm/uefi.rst b/Documentation/arch/arm/uefi.rst
+>> index 2b7ad9bd7cd2..c19cf3720f27 100644
+>> --- a/Documentation/arch/arm/uefi.rst
+>> +++ b/Documentation/arch/arm/uefi.rst
+>> @@ -54,17 +54,9 @@ Name                        Type     Description
+>>  ==========================  ======   ===========================================
+>>  linux,uefi-system-table     64-bit   Physical address of the UEFI System Table.
+>>  
+>> -linux,uefi-mmap-start       64-bit   Physical address of the UEFI memory map,
+>> +linux,uefi-boot-memmap      64-bit   Physical address of a struct efi_boot_memmap
+>>                                       populated by the UEFI GetMemoryMap() call.
+>>  
+>> -linux,uefi-mmap-size        32-bit   Size in bytes of the UEFI memory map
+>> -                                     pointed to in previous entry.
+>> -
+>> -linux,uefi-mmap-desc-size   32-bit   Size in bytes of each entry in the UEFI
+>> -                                     memory map.
+>> -
+>> -linux,uefi-mmap-desc-ver    32-bit   Version of the mmap descriptor format.
+>> -
+>>  kaslr-seed                  64-bit   Entropy used to randomize the kernel image
+>>                                       base address location.
+>>  
+>> diff --git a/drivers/firmware/efi/fdtparams.c b/drivers/firmware/efi/fdtparams.c
+>> index b815d2a754ee..a54a76a6aaeb 100644
+>> --- a/drivers/firmware/efi/fdtparams.c
+>> +++ b/drivers/firmware/efi/fdtparams.c
+>> @@ -10,22 +10,30 @@
+>>  
+>>  #include <linux/unaligned.h>
+>>  
+>> +#include <asm/early_ioremap.h>
+>> +
+>>  enum {
+>>  	SYSTAB,
+>> +	MEMMAP,
+>> +#ifdef CONFIG_XEN
+>>  	MMBASE,
+>>  	MMSIZE,
+>>  	DCSIZE,
+>>  	DCVERS,
+>> +#endif
+>>  
+>>  	PARAMCOUNT
+>>  };
+>>  
+>>  static __initconst const char name[][22] = {
+>>  	[SYSTAB] = "System Table         ",
+>> +	[MEMMAP] = "Boot Memory Map      ",
+>> +#ifdef CONFIG_XEN
+>>  	[MMBASE] = "MemMap Address       ",
+>>  	[MMSIZE] = "MemMap Size          ",
+>>  	[DCSIZE] = "MemMap Desc. Size    ",
+>>  	[DCVERS] = "MemMap Desc. Version ",
+>> +#endif
+>>  };
+>>  
+>>  static __initconst const struct {
+>> @@ -49,10 +57,7 @@ static __initconst const struct {
+>>  		.path = "/chosen",
+>>  		.params = {	//  <-----------26----------->
+>>  			[SYSTAB] = "linux,uefi-system-table",
+>> -			[MMBASE] = "linux,uefi-mmap-start",
+>> -			[MMSIZE] = "linux,uefi-mmap-size",
+>> -			[DCSIZE] = "linux,uefi-mmap-desc-size",
+>> -			[DCVERS] = "linux,uefi-mmap-desc-ver",
+>> +			[MEMMAP] = "linux,uefi-boot-memmap",
+>>  		}
+>>  	}
+>>  };
+>> @@ -84,17 +89,20 @@ static int __init efi_get_fdt_prop(const void *fdt, int node, const char *pname,
+>>  u64 __init efi_get_fdt_params(struct efi_memory_map_data *mm)
+>>  {
+>>  	const void *fdt = initial_boot_params;
+>> -	unsigned long systab;
+>> +	unsigned long systab, memmap;
+>>  	int i, j, node;
+>>  	struct {
+>>  		void	*var;
+>>  		int	size;
+>>  	} target[] = {
+>>  		[SYSTAB] = { &systab,		sizeof(systab) },
+>> +		[MEMMAP] = { &memmap,		sizeof(memmap) },
+>> +#ifdef CONFIG_XEN
+>>  		[MMBASE] = { &mm->phys_map,	sizeof(mm->phys_map) },
+>>  		[MMSIZE] = { &mm->size,		sizeof(mm->size) },
+>>  		[DCSIZE] = { &mm->desc_size,	sizeof(mm->desc_size) },
+>>  		[DCVERS] = { &mm->desc_version,	sizeof(mm->desc_version) },
+>> +#endif
+>>  	};
+>>  
+>>  	BUILD_BUG_ON(ARRAY_SIZE(target) != ARRAY_SIZE(name));
+>> @@ -115,6 +123,9 @@ u64 __init efi_get_fdt_params(struct efi_memory_map_data *mm)
+>>  		for (j = 0; j < ARRAY_SIZE(target); j++) {
+>>  			const char *pname = dt_params[i].params[j];
+>>  
+>> +			if (pname[0] == '\0')
+>> +				continue;
+>> +
+>>  			if (!efi_get_fdt_prop(fdt, node, pname, name[j],
+>>  					      target[j].var, target[j].size))
+>>  				continue;
+>> @@ -123,8 +134,24 @@ u64 __init efi_get_fdt_params(struct efi_memory_map_data *mm)
+>>  			pr_err("Can't find property '%s' in DT!\n", pname);
+>>  			return 0;
+>>  		}
+>> -		if (dt_params[i].paravirt)
+>> +		if (IS_ENABLED(CONFIG_XEN) && dt_params[i].paravirt) {
+>>  			set_bit(EFI_PARAVIRT, &efi.flags);
+>> +		} else {
+>
+> This condition branch doesn't in fact have anything to do with the fdt.
+> Should it still live in fdtparams.c?
+>
+
+I don't follow. The EFI_PARAVIRT flag is set based on whether we are 
+using the generic or the Xen-specific set of DT properties. What would
+be a better place to decide this?
+
+
