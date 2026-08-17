@@ -1,109 +1,200 @@
-Received: from mail-qk1-f181.google.com (mail-qk1-f181.google.com [209.85.222.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1FDB442B32
-	for <linux-efi@vger.kernel.org>; Mon, 17 Aug 2026 15:15:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7EEDB3F4DD6
+	for <linux-efi@vger.kernel.org>; Mon, 17 Aug 2026 16:59:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786979754; cv=none; b=tSXWDyQOU6xFriB76xgBBjfpgelqK34kN3UnfvJ7MaCBAkE1g+HFhKQNgTRniq9bIB7Mx3pIGuhMLvOseuqhpCMCoiglzynEoeceMfj1r+WvIi7kt8b3nJoPY5COjj8aFDUYLlp9v2KK0UHr8l2EYkkGFQXAkEGyKDBM8aulkmk=
+	t=1786985973; cv=none; b=PtpG0U1yZZp7vpzesWqI7C3HvTB8UKZfkairiCK1zhzeRZeG3d8bPtuIkJ8syrvu7gcJTjpT0f6Ml9AWIjqKXUS7cDH5LaYWOlb1sMimYdDLuGwvDh+oHG+oWEk/yOf5mt56GPQK7vZgvrAXe18FdevN4yUFAyPu+OImNVVrtKw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786979754; c=relaxed/simple;
-	bh=/9zL4j7bvEzNHZe+2GnRD64ks0ouO6ge/iHUhPBHSpY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=O17LmfllVPPv4LQfrd4kwONXYZ35jfw2xlxUJzUvbH/7MQMwa1DcTl8fcSaIkfdqHMNu9OU9xZZbxnLpVbQA9Cbb8htQWZ3q2RdyMMq03jKBXIFADAZJ6pVsprnFI46GGOM33ih2O3haWPE3RroE7Gx1kNekVzNDebzWdQKkw/8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net; spf=pass smtp.mailfrom=gourry.net; dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b=nURkaZkS; arc=none smtp.client-ip=209.85.222.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gourry.net
+	s=arc-20240116; t=1786985973; c=relaxed/simple;
+	bh=I9DTOyheYyPBwAxvgQtljKt2grxTR66OUmiIZz1Fnzk=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=usgGr1N1ARiqyaIRHvpWdAa09xVPcDuxPXbU9VG0t1BeH6nGlZK+P0VZNYcm1Q9hVW+Eyi/iHlMkVOAXz8e+C1h77EeCgK69kbEqitinV5tJzHcnGyO0CqjfX66a2RV7y+kUsFXVRzrjpIxBB+FkQl2ibSi9Pvx/PT6yz2SKUDs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mnBw6EIW; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b="nURkaZkS"
-Received: by mail-qk1-f181.google.com with SMTP id af79cd13be357-93695893ac1so246207885a.0
-        for <linux-efi@vger.kernel.org>; Mon, 17 Aug 2026 08:15:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gourry.net; s=google; t=1786979752; x=1787584552; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=LkIXCvEaOBZrdi7ChK3r5JFweXwKUKZFGDYp1HFtFrY=;
-        b=nURkaZkSS1bFk0F9xKIrydT+A4Tbczk/jA4xGpqFU4pBJoP+aZ/Skuc1oMLRGSGl9r
-         WO0OCIEPs5emafGVagWsIGAbiNCLo2cD1/eMeFIfqB8+t4q/zD/TDCoqsli6ywNXD7jk
-         Y52TD7Gj5oOWKx70Rb/gd3KPYsGMVa5CvRyBZCrCOes71OqXN30YMfzRB/abf0M6fp0o
-         RHAAh9MmrqRaY6+gNTqPp2RwexWzHoe5pzaLKR10S7s4rMlr+OwlMWDIEQTYtyNMIH5p
-         WdjfJ4csOa+UWGleBQRIlc/r+l79t4gZDgnlScbxETCUATW9YHfV9bP5SHTRagD8YyFG
-         m3+A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786979752; x=1787584552;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=LkIXCvEaOBZrdi7ChK3r5JFweXwKUKZFGDYp1HFtFrY=;
-        b=PviytdGZF7s6XWEOcCx1BeCi+H5+l6Ha4BFR9if2f5qzuAapRvAypYdq1tGV4Na8GP
-         WR/ohIkBtygfPd433K0DtHiUy45y1Rmycvi3CTcdKqbbczXfL3clF0vsVAqKFwf34H4G
-         fMbsxnFKT92wRSviAPjp/GbxDsGGLMwoE057wjIiONHydrJf/jYR5YjH+QPhA/guSBrM
-         1Fr6N5x19ySFh4+ES/OwVoQpD8DeOR5xw5QdGJ+GnBbpKLob/MFOZcgal/nIQR0UHis3
-         i2f0xOjKOjx6yxi2NunOJHdMsSU3RNQ2EhM5f+ErFhzcoLmowUFCaa6tv5KwBBEYyogi
-         bkDw==
-X-Forwarded-Encrypted: i=1; AHgh+RpNWBgqTKaOONsFI326qbQ9dQukea94UZemaiKsWGCIKbK4a6yxMGFYOBJAi7oK+TbZ6ikQr/tHsRg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxLkOEpPXWGiYSN5CF+IJIdEc0K+w0EMg8BYpMK30nSW/i0silQ
-	z98Y8ieEoHDVg0bbJRgyXp6uiBuvNtAID4ZEPTR7y3HiDztrdDmxNR6UtNkSJFUsEXA=
-X-Gm-Gg: AR+sD11HkmWSW7TPGW8n3CUWaS8TV5FSk+hv28A4fSPgO+4+j3+tyn2xOpw0Zki+VXh
-	A9K7N/IFMmjUyM7UnpmwiRFwZhsr/FKpavd1XTHhSQTKx6gTsg1AkVoE5XQ50rOg1Sn4nSqFcz3
-	eq0qUawDY9i3srOLBTVUcPf5bNwDkwFjeXMD1KD1HjHn4wIQrNCQla/4UDs5guy19cJZfyOxEnN
-	SFbHTm/+5BwIpnTxTFEFS+lND0qzvrcdYK4GPhSTGc+88ZLoQEJC7CpiR23hgKrmqRLwRQhjMhk
-	LL8ZuB2tiM9zg5zO8llYuj9B6VixqRXxGxC+NAldnetnblJUdkA2x35TycC4dfxWQTNWN/MehVu
-	bj4ZsjZVB+lC8YTqX1cl4iYNcQj11KnbpNJ0YHDaDYgXd4/ojE2Mi5jEz2VoUftLgPwN8YG3S9z
-	VKdp/sRLoW3SplpY6EVeoN2XYjco7MmdKTtNHfvqw4CMtPBr4hNlSy66W/d0tjiOw//eJhV7LB6
-	O8FxDimPh9xgS1oErVVQb8ldXD7xGfRd/3SLtbV8ZC6
-X-Received: by 2002:a05:620a:f06:b0:92e:7d53:8e8d with SMTP id af79cd13be357-93704b7d4dfmr142017785a.27.1786979751821;
-        Mon, 17 Aug 2026 08:15:51 -0700 (PDT)
-Received: from gourry-fedora-PF4VCD3F (pool-173-79-60-52.washdc.fios.verizon.net. [173.79.60.52])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-937033d2ccdsm67050085a.30.2026.08.17.08.15.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 Aug 2026 08:15:51 -0700 (PDT)
-Date: Mon, 17 Aug 2026 11:15:49 -0400
-From: Gregory Price <gourry@gourry.net>
-To: Rob Herring <robh@kernel.org>
-Cc: Pratyush Yadav <pratyush@kernel.org>, Jonathan Corbet <corbet@lwn.net>, 
-	Shuah Khan <skhan@linuxfoundation.org>, Mike Rapoport <rppt@kernel.org>, 
-	Pasha Tatashin <pasha.tatashin@soleen.com>, Alexander Graf <graf@amazon.com>, 
-	Andrew Morton <akpm@linux-foundation.org>, David Hildenbrand <david@kernel.org>, 
-	Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>, 
-	Vlastimil Babka <vbabka@kernel.org>, Suren Baghdasaryan <surenb@google.com>, 
-	Michal Hocko <mhocko@suse.com>, Thomas Gleixner <tglx@kernel.org>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, "H. Peter Anvin" <hpa@zytor.com>, 
-	Ard Biesheuvel <ardb@kernel.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
-	Saravana Kannan <saravanak@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Baoquan He <baoquan.he@linux.dev>, 
-	x86@kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	kexec@lists.infradead.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-arch@vger.kernel.org
-Subject: Re: [PATCH 0/4] kho: rename "scratch" to "bootmem"
-Message-ID: <aoMlXHFTvcpwOv8W@gourry-fedora-PF4VCD3F>
-References: <20260811162642.3504565-1-pratyush@kernel.org>
- <aoMdJ7hpr1GonLz8@gourry-fedora-PF4VCD3F>
- <20260817145231.GA579285-robh@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mnBw6EIW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F5491F000E9;
+	Mon, 17 Aug 2026 16:59:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1786985967;
+	bh=3llulX3328L3Ek3yxprc6vIvWXNUGeLhpBQoQq6NfSI=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=mnBw6EIWGNULVx0W8kvE/NLBA5bt3cfsKbMg12I2bZiOg0VYkksZvlnG53qFDLK/8
+	 rOlB9Oy/Lf22hL6rGJeu34lRvCh4Iyi0OP9c7PSMDgL7Tlqk1i+MM+5cyxe+JFwuIa
+	 8gdO1hQueYZ8IveAlXulQOSIIkJ09hHJRD8EfSbbFKknUkWGNyyOqOYSVJcx3QT+gT
+	 4r6V2cp6ugQANfoXV5CqvtPuqzaLRqvHupw0rBfjoHcxdv+3hGtnJLTO4hL3c6WA/H
+	 pQqhxMBd8h1vnaSwDEzwfBz4Hq1Nv479ulAyPlxO8jOY2YswIvXIGzhutpNseh7A4M
+	 gtlvYZ0B6a7Ew==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id F2635198005A;
+	Mon, 17 Aug 2026 12:59:24 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Mon, 17 Aug 2026 12:59:24 -0400
+X-ME-Sender: <xms:6j2DajBLqUlsCMxiWpJVM57j4vDzsqoGdXqibdORWyEbL__RQA2yxw>
+    <xme:6j2DakX3cEIQiTkFEKIs2Hsw0opViKFDAnoFQis8ch5YRH--a5IadIO8fp9wXHiU8
+    3S0J5J-hhzVzp64TbCIgVNK8RQ8SFHf0q9W20G32plG7GZ0UT0IWXGR>
+X-ME-Proxy-Cause: dmFkZTGWu6WDxCMnrRb1S3oKmk5iStRE3JaOXC54KSBpqPeipijwwR2HrCmeM/GVeLZWSt
+    s/eB1469nVCVVflUTjbd+qswpbrqXXrhXA4ApuQS8LI2sKJzb8PHg/IImzC7JB/jP1Sytq
+    cReM4bk+nka73PAkzlFdd6UuaZaoz8JkNOhc7QqtpOuETM92JuVHOyJ7x7rTLP/wjCqjqY
+    9NyiJTlNHR0yJSfrSmL0vKxlP8oqqrzRKDlcVeYleOsVAfmnEgS3XmwJLrM/Z3kHOIJUpM
+    5+zA3bJtqp0uSdxO1KgwkeojQQEBxJnqtg2GqfHtQc+U7qpYO4ejNX5oomUoRv1XEqugFP
+    Lv0luHj88B6zo+rCCZvzIOUniSLQRL3ra1LLYQ/i/1RmW/dLvPc1wfhSo2nh0lnJecyffB
+    pgODSi+jzRs4nYeUbEHmgmnXH3b/fufoFdl/hcoQ6CcoRwoSDJwhXJwybouSvxVxA3zOrv
+    fyF2YwAYT3YQSyopA34B5JfBXsFMgx0M2jDPf209xPrH097NrNVsl0Ns34RTUI1yp4hiqH
+    n0fl2t0KRiyPRwnn7Vkyb44OePTmrmPN5SGUs18qYiojQAWmgDa+DDwvYAi4FV6ylkQRXf
+    c5bm2Eh0GkegawCm9g/SXOuBjEvPzfeF6xIElleYhtChO24izz/HiASSKI0Q
+X-ME-Proxy: <xmx:7D2Daj5q29beGjnbsbtA93utKnpj9jmj2wsgLPILJ8Cyuy4WuNVhCA>
+    <xmx:7D2Daplet-CiwwBZf6VZIRWLwcDLoDccMe7H2E08akQqO74c4x7fpQ>
+    <xmx:7D2DaoqR0ZcLFyx5S2nxSP0eUbVjvcFiyk6hgmnWPYLugRXHbo7NDg>
+    <xmx:7D2DaotTgha0tXeupLxmjBoNAs4--vN6aS7WieJPHzMFJ5mJTYSlSQ>
+    <xmx:7D2DatHPiq5B-tvkrlgYrlZ6-RrGWxOM-WUeyM0ssjBfIP7Vu-5t0RKY>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id C4C4EF80071; Mon, 17 Aug 2026 12:59:22 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260817145231.GA579285-robh@kernel.org>
+Date: Mon, 17 Aug 2026 19:59:02 +0300
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Leif Lindholm" <leif.lindholm@oss.qualcomm.com>
+Cc: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ "Huacai Chen" <chenhuacai@kernel.org>, "WANG Xuerui" <kernel@xen0n.name>,
+ loongarch@lists.linux.dev
+Message-Id: <c3cd6952-87fd-442b-8d54-13c814b8d5f2@app.fastmail.com>
+In-Reply-To: <aoMV3TX0hgTsj3_m@leviathan>
+References: <20260813074506.643472-5-ardb@kernel.org>
+ <20260813074506.643472-7-ardb@kernel.org> <an8xTBiCy_PEuwZi@leviathan>
+ <a0d10b63-bf9a-4ad7-a9d8-ab748a9c0c2c@app.fastmail.com>
+ <aoLR9BPGt4Kzbr3y@leviathan>
+ <92baff04-d30b-4174-b5f5-87b24e6a1cc0@app.fastmail.com>
+ <aoMV3TX0hgTsj3_m@leviathan>
+Subject: Re: [PATCH 2/3] efi: Pass EFI boot memmap struct address to core kernel
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Mon, Aug 17, 2026 at 09:52:31AM -0500, Rob Herring wrote:
-> On Mon, Aug 17, 2026 at 10:42:00AM -0400, Gregory Price wrote:
-> > 
-> > Is there a non-verbiage reason to justify these changes?  Living with
-> > "scratch" seems better than potentially breaking folks.
-> 
-> I don't think these are the first breaking changes. And if the changes 
-> are fine, then that means more breaking changes are fine, too. So why is 
-> this upstream at all until the design is settled?
-> 
 
-Surely we should not break deployments for the sake of renaming
-something that is very arguably already aptly named?
 
-~Gregory
+On Mon, 17 Aug 2026, at 17:08, Leif Lindholm wrote:
+> On Mon, Aug 17, 2026 at 14:00:16 +0300, Ard Biesheuvel wrote:
+>> >> > Is it time to update the boot ABI to say x0 will hold the physical
+>> >> > address of "device tree blob (dtb) or EFI System Table in system RAM"?
+>> >> > They can be distinguished by 0xd00dfeed / "IBI SYST".
+>> >> 
+>> >> Let's avoid 'boot ABI' here, given that we are talking about an internal
+>> >> interface between the EFI stub and the kernel proper.
+>> >
+>> > It's an internal business in the topic under discussion, but if we
+>> > were to change it, that would mean updating booting.rst, which I
+>> > consider an ABI.
+>> >
+>> 
+>> But not an external ABI. It documents specifically how the EFI stub
+>> interfaces with the kernel proper. This might change at any point,
+>> without any obligation whatsoever to remain compatible with the
+>> previous method.
+>
+> So you're saying if the kernel proper decides to use x1 for something
+> else, we'll move to x2?
+>
+> I agree that in the context of how the stub calls the kernel proper,
+> this is not ABI, but x1 is one of the registers currently marked as
+> "reserved for future use" in booting.rst. So it feels weird for me to
+> allocate one of those registers for this internal use then not mention
+> it.
+>
+
+Whether we mention it or not is irrelevant: the only thing that matters
+is that this allocation is not something that OS loaders other than the
+EFI stub are able to rely upon, given that EFI boot on arm64 requires
+booting via the stub (except for Xen dom0).
+
+> In that case, couldn't we instead pick a register outside of the
+> reserved ones?
+>
+
+It has to be a reserved one, given that the state of other registers is
+unspecified at boot. Otherwise, we'd have to reason about whether a non-zero
+value is accidental, or represents a physical address that we can map and
+dereference, which is needed even to check the system table's magin
+
+>> ...
+>> >> > Minor bikeshedding below.
+>> >> >
+>> >> >> @@ -123,8 +134,24 @@ u64 __init efi_get_fdt_params(struct efi_memory_map_data *mm)
+>> >> >>  			pr_err("Can't find property '%s' in DT!\n", pname);
+>> >> >>  			return 0;
+>> >> >>  		}
+>> >> >> -		if (dt_params[i].paravirt)
+>> >> >> +		if (IS_ENABLED(CONFIG_XEN) && dt_params[i].paravirt) {
+>> >> >>  			set_bit(EFI_PARAVIRT, &efi.flags);
+>> >> >> +		} else {
+>> >> >
+>> >> > This condition branch doesn't in fact have anything to do with the fdt.
+>> >> > Should it still live in fdtparams.c?
+>> >> >
+>> >> 
+>> >> I don't follow. The EFI_PARAVIRT flag is set based on whether we are 
+>> >> using the generic or the Xen-specific set of DT properties. What would
+>> >> be a better place to decide this?
+>> >
+>> > Apologies, I may have commented confusingly - my comment was about the
+>> > else branch:
+>> >
+>> > +
+>> > +                       bm = early_memremap_ro(memmap, sizeof(*bm));
+>> > +                       if (!bm) {
+>> > +                               pr_err("Cannot remap EFI boot memory map\n");
+>> > +                               return 0;
+>> > +                       }
+>> > +
+>> > +                       mm->phys_map            = memmap + sizeof(*bm);
+>> > +                       mm->size                = bm->map_size;
+>> > +                       mm->desc_size           = bm->desc_size;
+>> > +                       mm->desc_version        = bm->desc_ver;
+>> > +
+>> > +                       early_memunmap(bm, sizeof(*bm));
+>> >
+>> > So to restate - this function is called from efi_init():
+>> > ---
+>> >         /* Grab UEFI information placed in FDT by stub */
+>> >         efi_system_table = efi_get_fdt_params(&data);
+>> >         if (!efi_system_table)
+>> >                 return;
+>> > ---
+>> >
+>> > Before this set, this function called get_fdt_params() indeed gets
+>> > "params" from a device tree. After this set, this function gets params
+>> > from a device tree in some instances, and not in others.
+>> > Which feels suboptimal.
+>> >
+>> > We could rename the function, but then there's still DT-unrelated
+>> > code held in fdtparams.c.
+>> >
+>> > If we go down the route of passing the system table in x1 on boot,
+>> > then I guess the effect of assigning efi_system_table will already be
+>> > broken out. But should we then split the mm struct initialisation into
+>> > separate DT and config table helper functions?
+>> >
+>> 
+>> Not disagreeing but I think it is fine to leave it as I suggested at this
+>> point.
+>> 
+>> Some additional work is needed to get rid of linux,uefi-boot-memmap
+>> entirely, and until that happens, passing the EFI system table via
+>> X1 and linux,uefi-boot-memmap via DT is not a huge improvement.
+>> 
+>> linux,uefi-boot-memmap is needed when SetVirtualAddressMap() is called
+>> [with a non-1:1 mapping], as the EFI system table contains a remapped
+>> address of the config table array in that case.
+>
+> Of course, the devil on my shoulder suggests the stub could always
+> add an address fixup handler for the config table too...
+>
+
+What is an address fixup handler? We cannot change this value back,
+as that might break the runtime services.
