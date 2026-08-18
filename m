@@ -1,131 +1,114 @@
-Received: from mail-qk1-f177.google.com (mail-qk1-f177.google.com [209.85.222.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A76A947607E
-	for <linux-efi@vger.kernel.org>; Tue, 18 Aug 2026 13:00:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2ACF347884B;
+	Tue, 18 Aug 2026 14:11:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787058003; cv=none; b=SFfH2pRWmhIqx4d3JnVgNJWLl+ydha1L2ZVWgCCRtciIafPCiz/ZnOEbfTLAXe7VXjBTZuOm+Hq+/4aMhev4b9uSGO1lHnFlokQo9wYi4A9q84gLnsOrmPFvI/QAxJuyFmp3JgT2bLcs60hE4FqQFT3jjrpdxppQtJvx5WIWeBk=
+	t=1787062319; cv=none; b=hxMoGxlzwSyUp9LNkxLOgxZRFtUPGLTLOI2mHcm8lhUyZhbFcMG9MnRpuiKlX4EPEFCoxdWQdRVuscfzk1Xz929wLH9x7WiyzLC8g5V7wicpH2078463ExnjuY0DMG390e/shO0dDN4ySCKkirLam/IJ4c264QpWHSzdLZLJGwQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787058003; c=relaxed/simple;
-	bh=LvNfSK8pg0K/+mDojw7aH+VyzTbWSAq378RBV3TsZO8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uQxCnqjbc7ZZw+BHVcVTe5Py3gg8QLq3PrdOZuziFt2It5dQia60pCTJT+vE5wioXzP5lBkVB5U9axTlbbEL3y09x9KSQl7aMkDEiLC/0og5sczEg1AVBboUOWKLTKYtlccmSVCS8uibGwqUu9+iWCWOC6SbNvyd996p5/qfqWM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net; spf=pass smtp.mailfrom=gourry.net; dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b=t2WLE4sO; arc=none smtp.client-ip=209.85.222.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gourry.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gourry.net
+	s=arc-20240116; t=1787062319; c=relaxed/simple;
+	bh=fIoIqPbUubodBIIxSD+L6GhMDg5Wc4I1XqdQbaERO5U=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=JfqWERrHAPMuJhX4bff4+CEGTNB+/kmI1YWkD+Kjwr8EhCLHs5uLYdyi1Glg1rEcQxIYlsmXUr4oiOrm2KlBJMXXR29ctbO9CKqcJOSmBNb6Bc+6dYdgcPqYH8qBigf+A/zBXiSaSOr60CdICoEZy2VlRczX4kED1MwIbH+TmI4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nLQdp0mA; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gourry.net header.i=@gourry.net header.b="t2WLE4sO"
-Received: by mail-qk1-f177.google.com with SMTP id af79cd13be357-936e393176fso157947085a.0
-        for <linux-efi@vger.kernel.org>; Tue, 18 Aug 2026 06:00:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gourry.net; s=google; t=1787058000; x=1787662800; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=wmgOUbj8BHDXCzIhBSspWfV30kk7RcENm70SlJA8E7U=;
-        b=t2WLE4sOpoenct34gRpdtiZclR9xG30lSngO+niAHYZTDmgzsUo/WsJqcVMjLWypym
-         cvbS0GxKG9XRzUTZPhVCK986KZs2poZE+oJOHrzReebYFZRwU42l7TKvDMg+64dsgEx/
-         16b3JAiOIOWbmtVhDjUOpEJV80Ujr0oTA0a//OcGM04nuUuX9ckXxZD+QuJJbQGa0h9v
-         d2ikHHRxatqfAtckPmvB9Jkxy5T2sjviMlLOiT/H0BcdamcHERMJonH+MiXrukYvpCbS
-         N3h8ou++8cAHdaNSpmXK7r4p0lC71ImcBHoPZUvLbyYfJzNWs/OPxrArhTC6IWwAS7uw
-         0+/w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787058000; x=1787662800;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=wmgOUbj8BHDXCzIhBSspWfV30kk7RcENm70SlJA8E7U=;
-        b=daPy+zPuGegTUL9ZT8iI/wZPpgbVRy2HHBVIIe3PjJDUYdjMawScgrdzhrwOetoHgs
-         UZwxnp2nHb10FokkVzJ2MeVlFwh5sEHB+1rAwoJM15fdaf+IHAy3CfYsaenFGs9dtnnA
-         Z/zxEKzPprg1XSflhTjZ79Atbyu/oKkR7NxsKyVFEsnnmlYIDSnXdYkGpSUQEbocbgnB
-         Rs1VLoOIJYOvPbT3thUV0ew3n8rSLhUWLXONgeGPkmsjPa36mKAuZJcRLC87ivtgF1tM
-         PoEQfIAlcq1noxRJg0BSU4jTUSwy8ZEORkvpjqZKok93JXVKhoNVdjADY0i2Bs50ktpC
-         70Yg==
-X-Forwarded-Encrypted: i=1; AHgh+Rqed6RFWHxRxynh+bScUFAEfsRzIWTVkH3oOQDGRZptRXoq4LF2JQ3QUvZ09qE0m7pmImf1CrUUYCo=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzAvGiFDrIZohYyTpOecZ0x4OIN5zRahNOiupllfYFEGCH0RCM2
-	eeEXnP/IquKS2yCowHCi1luHR3kL9bdxEZC7bMkDP6xKYZmot4I+9vLJkgIxBEp0v1Y=
-X-Gm-Gg: AR+sD13bBendwRJGSGnNktf9kMMP5T9Rr2RK1XejU5qlt5/AKJLgCBH53FLZol44Tv+
-	DGNvOS8mas3ePS+Z3S0SLDtTaihyq6r6zRuMkTKM1p8gdIyp4zKplbaFj/nWIEDJWza4aXtg4H5
-	KKOLJAYD1CUZS4qZ93VN4zk6DRbU+ee2nb2hQjuep1JEF31tJMXgrnSVsQnBAxhBfn7ty13M2zo
-	IkzHah2VUw/YH3RTXDga5frQNu3uA1yRgjCIQVA8rMtz2fwwgbE5Bu4UCbvxakSDX0FvtpXjGrL
-	OiqEkHZ9p63IzG0A+UkvOjnMKin+ikeDRlriJYGuAZsAqLkDi6bibk27CEzjKXcPr9qPh2P5ooT
-	XechvolT0ZAU2MFzWkEC3yoXagwxH0I1d7Mmd1flLFY1Bow6sh7c2P1VHcw9aAnu6dcEkvokg3e
-	dJ4FhUF1O3Gei1rmZH55xUbQ86kGoPSIhcY/ZZ/wsYUsSZhTfcqyFn7jhlp2vTKtCf6REUDpPpi
-	M6VmxYwV6G/BnWhjQhi+0/T2JyB8eMbcoKPoGnmtngV+r5Sp84YPc8=
-X-Received: by 2002:a05:620a:22e9:b0:92e:6637:d98 with SMTP id af79cd13be357-936d2286961mr2640903285a.18.1787058000487;
-        Tue, 18 Aug 2026 06:00:00 -0700 (PDT)
-Received: from gourry-fedora-PF4VCD3F (pool-173-79-60-52.washdc.fios.verizon.net. [173.79.60.52])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-93703432242sm286024285a.46.2026.08.18.05.59.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Aug 2026 06:00:00 -0700 (PDT)
-Date: Tue, 18 Aug 2026 08:59:58 -0400
-From: Gregory Price <gourry@gourry.net>
-To: Pratyush Yadav <pratyush@kernel.org>
-Cc: Rob Herring <robh@kernel.org>, Jonathan Corbet <corbet@lwn.net>, 
-	Shuah Khan <skhan@linuxfoundation.org>, Mike Rapoport <rppt@kernel.org>, 
-	Pasha Tatashin <pasha.tatashin@soleen.com>, Alexander Graf <graf@amazon.com>, 
-	Andrew Morton <akpm@linux-foundation.org>, David Hildenbrand <david@kernel.org>, 
-	Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>, 
-	Vlastimil Babka <vbabka@kernel.org>, Suren Baghdasaryan <surenb@google.com>, 
-	Michal Hocko <mhocko@suse.com>, Thomas Gleixner <tglx@kernel.org>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, "H. Peter Anvin" <hpa@zytor.com>, 
-	Ard Biesheuvel <ardb@kernel.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
-	Saravana Kannan <saravanak@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Baoquan He <baoquan.he@linux.dev>, 
-	x86@kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	kexec@lists.infradead.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-arch@vger.kernel.org
-Subject: Re: [PATCH 0/4] kho: rename "scratch" to "bootmem"
-Message-ID: <aoRV7vF3v8DqGoyv@gourry-fedora-PF4VCD3F>
-References: <20260811162642.3504565-1-pratyush@kernel.org>
- <aoMdJ7hpr1GonLz8@gourry-fedora-PF4VCD3F>
- <20260817145231.GA579285-robh@kernel.org>
- <2vxz4igr1yq8.fsf@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nLQdp0mA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 78C621F00A3A;
+	Tue, 18 Aug 2026 14:11:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1787062317;
+	bh=y+3JbKoCLfb4aCv0jX3F9Hhn4V179wBGNgJrcmUx5QI=;
+	h=From:To:Cc:Subject:Date;
+	b=nLQdp0mA5zuEIbbOIdRaTKIua/sgtNPIedaKGFdO7ZH2BGlUg6IhTBjhvmlS0NNjz
+	 Gdvu5gZ+WILpJP0TmLN5N7//fwbFxxPrYD8t6dNvmCyNe9w5DFYyHnfq++IhKnmM2Z
+	 0XXxFgbWC/QImJvXXf/02tys51AzRa/kqZEn1rAcZ6f8NDBtab5OsKca26bnWUyutP
+	 9MQ9oPs3vWNaASajYDbqsul8VKKBJVb9X9AYLbYnI9m6fSxtbrOpnZqqrlOI36AiTI
+	 Ur2pOkFrc2ltMQ0YNwXHDd45vx88hQuSMcoevte3M7tFTwfdBv1RiaURjFQGeyimMa
+	 S/4k7t7ubkCkQ==
+From: Ard Biesheuvel <ardb@kernel.org>
+To: linux-efi@vger.kernel.org
+Cc: x86@kernel.org,
+	Ard Biesheuvel <ardb@kernel.org>,
+	stable@vger.kernel.org,
+	Anisse Astier <anisse@astier.eu>,
+	Ravi Bangoria <ravi.bangoria@amd.com>
+Subject: [PATCH] efivarfs: Rate limit statfs() handler
+Date: Tue, 18 Aug 2026 16:11:50 +0200
+Message-ID: <20260818141150.905336-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <2vxz4igr1yq8.fsf@kernel.org>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Aug 18, 2026 at 12:58:55PM +0200, Pratyush Yadav wrote:
-> On Mon, Aug 17 2026, Rob Herring wrote:
-> 
-> For patch 3, I am honestly surprised at how large it ended up being. But
-> I am in principle opposed to the idea that we should not do any
-> housekeeping because it might cause "churn". So I think if the end
-> result is better then churn shouldn't stop us.
->
+Ravi reports that statfs() may be called by unprivileged users on the
+efivarfs mount point, which may result in a flood of calls to the
+QueryVariableInfo() runtime service. These calls are disproportionately
+costly on x86 systems where the variable store is backed by SMM, as each
+SMM entry requires a rendez-vous of all the CPUs.
 
-Not really concerned about churn itself, just that I didn't fully see
-the value in moving from Scratch to NoPreserve - these things sort of
-read the same to me.  The additional context you've provided is
-reasonable, thank you for helping me understand better.
+So rate limit the calls to QueryVariableInfo() at twice per second, and
+return the most recently obtained values for calls that are elided.
 
-> 
-> I renamed the commandline option because similar things have been done
-> in the past for other options too.
-> 
-> See commit c5bfece2d612 ("nohz: Switch from "extended nohz" to "full
-> nohz" based naming") for example. It renamed "nohz_extended" to
-> "nohz_full" because it is "a bit opaque and vague".
->
+Cc: <stable@vger.kernel.org>
+Cc: Anisse Astier <anisse@astier.eu>
+Reported-by: Ravi Bangoria <ravi.bangoria@amd.com>
+Fixes: d86ff3333cb1 ("efivarfs: expose used and total size")
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+This supersedes [0], which had some issues, the main one being that a
+cache that requires explicit invalidation may go out of sync due to
+direct calls to SetVariable() made by other drivers.
 
-Also not opposed to the rename, just worth the question since it will
-break existing users. I know boot args don't have ABI guarantees, but
-some are used more than others :].
+[0] https://lore.kernel.org/all/20260801144258.15977-2-ardb@kernel.org/
 
->
-> That said, I am not opposed to keeping backwards compatibility if
-> someone _does_ complain.
-> 
+ fs/efivarfs/super.c | 30 ++++++++++++++++----
+ 1 file changed, 24 insertions(+), 6 deletions(-)
 
-I think you've made the case well enough here, I appreciate the help in
-understanding.
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index 733c19571f1c..8d33f11db2a1 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -89,12 +89,30 @@ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
+ 	/* Some UEFI firmware does not implement QueryVariableInfo() */
+ 	storage_space = remaining_space = 0;
+ 	if (efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
+-		status = efivar_query_variable_info(attr, &storage_space,
+-						    &remaining_space,
+-						    &max_variable_size);
+-		if (status != EFI_SUCCESS && status != EFI_UNSUPPORTED)
+-			pr_warn_ratelimited("query_variable_info() failed: 0x%lx\n",
+-					    status);
++		static DEFINE_RATELIMIT_STATE(_rs, 2 * HZ, 5);
++		static u64 storage, remaining;
++		static DEFINE_SPINLOCK(lock);
++
++		if (!__ratelimit(&_rs)) {
++			ratelimit_set_flags(&_rs, RATELIMIT_MSG_ON_RELEASE);
++
++			spin_lock(&lock);
++			storage_space = storage;
++			remaining_space = remaining;
++			spin_unlock(&lock);
++		} else {
++			status = efivar_query_variable_info(attr, &storage_space,
++							    &remaining_space,
++							    &max_variable_size);
++			if (status != EFI_SUCCESS && status != EFI_UNSUPPORTED)
++				pr_warn("query_variable_info() failed: 0x%lx\n",
++					status);
++
++			spin_lock(&lock);
++			storage = storage_space;
++			remaining = remaining_space;
++			spin_unlock(&lock);
++		}
+ 	}
+ 
+ 	/*
+-- 
+2.55.0.699.gb54405d56f-goog
 
-~Gregory
