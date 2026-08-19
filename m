@@ -1,112 +1,108 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from fhigh-b5-smtp.messagingengine.com (fhigh-b5-smtp.messagingengine.com [202.12.124.156])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC6AE30274D
-	for <linux-efi@vger.kernel.org>; Wed, 19 Aug 2026 12:51:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F019489861;
+	Wed, 19 Aug 2026 16:30:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.156
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787143870; cv=none; b=jRzj0L5YEseGzt3gz8LbyS0p4bk/6tM92cvPzXMO81rMrbTesRfqoH4B8YjfB+keHGKS1vWKGXDQLF8apCtv1/RiRi2iWDaisF4QzV2QWSNVvbgg4jq9j40omdV7MWKZ22Tg+xoT15Eo60I/24eRCKtj4/wPE/p4HOaANJ7Caxw=
+	t=1787157037; cv=none; b=SYZMCFyN5gRZL/t5fVCH+nMfnqMNkGnpkLqxvl05lHtcZ9GwWTOc2C4uYV7KJ7/Lek5q1/b9CfND8KOwjqbIeomJGErUSEY04HCjx5/75GofJ32o1oaHM/DGpeejJZuo1OXGDTFTab4ZmlDC+7CI2WDoE/Blje0s5pUR/ijiREc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787143870; c=relaxed/simple;
-	bh=bW4qoXZuZdVvn3IHXwlnimORX+YXH8TLCJ57aT5HivQ=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=FYwC2BKDJQBDBPiZ0s+7ZC3pjKbM77AHLySuDVp0Rx8D8HsVMnoELiiE6h7Q5fVYsbcrrrFFQUa8CEUSSJP/V9XJ/FZ6lEi+z5EEtUFFxLOe3rEPAq4Jkuxz9E31WiT2WsadBLbKXaV/k87RXY06RuCuNXRbmBu+aOo56uUmgd4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VskvlA5R; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1787157037; c=relaxed/simple;
+	bh=k6v3SaglDUCewteuFXVt6DG1RzLNMb4XdvCSAQj3l2o=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=LzCtysO+6mCOdGSNvmbP9nWNtyukJvB6EQmFFe79t3g2u6GvhAIZw4UiWM0mptPMN41wNoY5H37m5TwAfMcGvjMsSUt4srU/xo1d/ClAGwuRkXK27S9ii8XWrfTpwTPX9vtvwb/m6mLYk8KLiMmxwLEoax0av9M4uKo52uv8D2o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=astier.eu; spf=pass smtp.mailfrom=astier.eu; dkim=pass (2048-bit key) header.d=astier.eu header.i=@astier.eu header.b=bXsVS9j1; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=PVOuqDA+; arc=none smtp.client-ip=202.12.124.156
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=astier.eu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=astier.eu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VskvlA5R"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D7EF41F00A3E;
-	Wed, 19 Aug 2026 12:51:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787143869;
-	bh=w6/NlsucFgi8NXxtT/cnsL/H0uuYre8Be7OcGNSScLQ=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=VskvlA5Re4Y3nq82XMu7MS6uMz9IEs050OmPu0naTb0CRCO1umKT7sy6rXUJ4ln9Z
-	 q4ReKIxYmjQVXq6c6/286fSAt8RcjMruIaPS38K9VAC/weDk2Qs3sElbEtLTgwgbrW
-	 LuXPchIqYf3Xwby3QQsq3xQQdnWlHa8/BgeiGtEkE/sAP+i5xje0Fv48G77M4ocOVf
-	 R4So6hiQf1TNHdVfRUuq0bpkzabMhaWCGaYjg6KjjDbp9OEToavfDvPksqIDXCvL5+
-	 fmqa4J/oR4IwRMGLwIxFyfJa8sGfl7ASIJtuIEcP0LjRypvRcm75vpyaUMCUn1MUQS
-	 0LZNX3LUWU0gw==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 78CC01980074;
-	Wed, 19 Aug 2026 08:51:07 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Wed, 19 Aug 2026 08:51:07 -0400
-X-ME-Sender: <xms:tqaFapfztTxZraTVJgeMKudg47tZzSHV3haWPjgzuHZhVUVRc4jQqQ>
-    <xme:tqaFaiA1Fa_EJkm4WnNF6LISWTOhSNrocm4nzJm4FKIEP0taufLvgXDD0jeoMY-29
-    _yDOts41hO27896oTt6yOhBtmTrWq9cd361eT2S2uEOFOYYENsCjai9>
-X-ME-Proxy-Cause: dmFkZTE6PQORpasiR9yaTgVv34fsNGh5YEX5MV9cmE7q73w8Jxt7C7qRIockF7+k3uOYAO
-    9m4mw7nTfnpaFu+7PINnykuaO3iSQiaebf/rwomXc/v/Cr1WBn833nKxBiGuxH8Cu7ynqE
-    tTiVnxeYul7J+EBsCezZpQ9AEC+l3NKkIsgFCxD9qFBzDjhJ+9rLgMRHPyUR/iIoZkLS3t
-    oqQXZPPf+SIIDgHPgpf6GEJ80yIPc1NUp7eavnOwD3zGVPrR1629JycUwi9iEGVzgkOKV3
-    a6vFIONKPqKI5mjIndDWcaG77ASHquSIJfTOM+WIB51JtFsBccUv/yTj0VqN0GfGc7K8SV
-    1o7RJEj0c1aLZm/AuYxI39DGhf2I0I4fpGyfSJj3u8lTN9VPGPMdY4P2U9q/Or6Q+5TNc+
-    nPZF+KxU9NTgjH5LGiqN1s9pagN1ovSvfj/v0Qs49tyEa6g3sDvRgGQ/8oBavRM+kd89bx
-    NQIwAS7rlfrNe9MvGko0r8w4JEZwGG0jYEAl2Y875+X9IAmMXpllBlszDLF42b2pENZXJh
-    SdC8Yc+eDKyX7J4zDJsch7/1D1VVQiFmIb7JLSYAYHVlnZGE8mXueXX5bWbbbcMgIdf4bw
-    13QvZZrG1/A/II8oQ7thl6IQDupVm/nu5v1GnDXgPJAdKqutyiWS5HvOlC+g
-X-ME-Proxy: <xmx:u6aFauvcH9uHi364SoIC1u7xo46uQ3QSPzQM7EBYAtk1i8aWNAucEg>
-    <xmx:u6aFasgnH7mHZdn058zJ7ri9wZfRpPU-Aqpar2g14rBquq3UY1l0Og>
-    <xmx:u6aFai39zfDVzZaV493JZB1r4YQG22day2V_kBBKwrBI1F3I50P3og>
-    <xmx:u6aFak-5iSW9HSzr3t6hwxHjge2k9jyPTrhAoSpikWIhXLtWJyjLlw>
-    <xmx:u6aFaoPnzGW4Qkjhefz7ozY6azMXJcNnu7FeRybGuX02HOL6YBGBNJJq>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id D7315F80070; Wed, 19 Aug 2026 08:51:02 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=astier.eu header.i=@astier.eu header.b="bXsVS9j1";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="PVOuqDA+"
+Received: from phl-compute-03.internal (phl-compute-03.internal [10.202.2.43])
+	by mailfhigh.stl.internal (Postfix) with ESMTP id 88BD27A0105;
+	Wed, 19 Aug 2026 12:30:34 -0400 (EDT)
+Received: from phl-frontend-03 ([10.202.2.162])
+  by phl-compute-03.internal (MEProxy); Wed, 19 Aug 2026 12:30:34 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=astier.eu; h=cc
+	:cc:content-type:content-type:date:date:from:from:in-reply-to
+	:in-reply-to:message-id:mime-version:references:reply-to:subject
+	:subject:to:to; s=fm3; t=1787157034; x=1787243434; bh=LB3LEC2789
+	H9F6ctczT5CnNl4kze8bV2MjpmR+VQNo8=; b=bXsVS9j1bJYZIH+AMis6yzkqjK
+	mZ0op4lcg029P+QU+YRoAA9DQtR84Kn5iC8/dTuSW0UcncCZvg6Rv5+SzBp43bry
+	3NMiBtHDeyQyyYJpbptfe4JqqHOEIoE6qRlPiiV3mJe3VYkSifK03glR1bonhjcL
+	W35jYRZP9MfjInov8HfGAUMHlhO4P3rtEf0/b9NerAL/jhuu/DsTh7lJkR9AJ191
+	6GkowoYWdcnhwt6UUsG8wm6J6aMLdH5m0bnQjMMJFnzzgp7jq7H2gzyhy912OGFk
+	CIHoVqlklhd/gOrgrklhQ9y0K9htW7NoSagmukN4j/N5T9JtsfTljSpd2+wQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-type:content-type:date:date
+	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+	:message-id:mime-version:references:reply-to:subject:subject:to
+	:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=
+	1787157034; x=1787243434; bh=LB3LEC2789H9F6ctczT5CnNl4kze8bV2Mjp
+	mR+VQNo8=; b=PVOuqDA+ZUMH5T7nzEC4tTN65OhF2iM3bs1bDtRpotDe7qrbLmD
+	UovBm6O3IWMJTU5pophMQcvArsZFgm2lKFmf0W5rRbtP4B9QIV8saotXeWFdLOAx
+	5aEmz+xatlr0T60/oRgK3P6x0Q652gKLfhAWw8dt6VxJoo64zZ1z9XXOEkbiXEQN
+	IfTSK3ii9hbmn4RYKgxNIcEudz1ptzncV+/DrV4wfjIubv45GZGRPsHZiyI+gpIF
+	sY7afZ0oo6ocDpxj6PBCCOY6clXW+REDrrENOIQY7t9bxnMbKNhcNVuCTFSJWZe1
+	0wmWw7q63i58yOI5Ci6HyEj2uw4dnwLn+0Q==
+X-ME-Sender: <xms:KtqFaqXhr_DbHVFZd8HOGlrFM6AmRPrk0e5Z7BRq0zGAqUTurlo19Q>
+    <xme:KtqFaoF7Wh_1NaR8RPKlvwtBk5UJoQymCXgDtZPLvaZbW0aa1nns7kzYA1r4ISHdQ
+    enkVR81g426hZFqdEYPkcbK9WER5p5_cP1laddxHL-VENcKzHBvrw>
+X-ME-Received: <xmr:KtqFauc4fpKem4fFCPHwgV2zxc1B_Af0cEMoOfBit28voLUgG_JV_VNfo_5r4_rnLan1jaUmtdw6Ik9MbbViNF7n6fEUB_67W5hxmVKv>
+X-ME-Proxy-Cause: dmFkZTFsj9NIgBuR6iJa4VFFAlbKVoABCIV0mkCBM5PDdMqMI9XJ7JFRL1XmbKEQNHYyG6
+    UQjkFQBOgzznIbtfTxsCsFUo2lV8caIHHoWn67BxV01gtR52KmYtfdrCtmrD0jFd4y/hSM
+    oQTBDSBA9FU01x9+Bkqp56Z8lTx6u5ZVWoYJ0mHQNrJZY16isfAGkVPQJt+lGveRGkL1ga
+    H3sZZGNDzHXO0FDy67Mf/zvZa++XH2ft9dEUXWrG6qoJRVXjasKmxL3kkngtxsm3bies5s
+    OjV2pcbEGHGafNvRXSfXJMuoM7JelHnnTGb858fSXfIFQE0VgKqV1YgEekO+ogAXYlQ0oH
+    QPo5vJDxjnUYq3ldKnCBsffH1aVde2i481zAjd4n00uD7fKrp69RdfWeqXMz41TJ79h3VQ
+    IHkDRdFlORdpqX1jEgVqtOLVKmX/bWb3ijOvb8Pen70sWCw9nRwptaO3u7/sq4HVJKciLa
+    kU0RqHL+0om7JsJiI8WWZYzu/PPVvuKMOWoL3grrzwOhjE8/HJrjZP28uf00L7ORLAPiag
+    v3/KasRKa1jpLjFKLVEvAqvg/OuWF96m7zW9tAxEYZ4RqMyMXXcmGGzW7CahQH4/XKE9UC
+    O2cvm6CHk40+vsQwAOawlCqTd3RFzotksW5Ea+a02FcrmSyw3jqa5LwdMyXg
+X-ME-Proxy: <xmx:KtqFahIezpHklumOxypxulN7p_9IKrn_y_imwC7DJTTXf2PBG13Crg>
+    <xmx:KtqFarFBmO5uRogQN_VcS1U1t_Nacpni0V5xxGw0wKZS4Xv_OZJFrQ>
+    <xmx:KtqFasA_dmbf-OFPqbdeo2mdWECXIbH2MqrSPwEh7nyueiyz8iY4wg>
+    <xmx:KtqFam__YmvQYkFFBWwHGZ7SSu6AfUOUxqyCT-zNVSGDS2eLa-5yXA>
+    <xmx:KtqFauDIk7P4SnERXvKJAYgn2uRfKxIncAaXX9DR5AEdAZMkLSNjW704>
+Feedback-ID: iccec46d4:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
+ 19 Aug 2026 12:30:11 -0400 (EDT)
+Date: Wed, 19 Aug 2026 18:29:35 +0200
+From: Anisse Astier <anisse@astier.eu>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: linux-efi@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org,
+	Ravi Bangoria <ravi.bangoria@amd.com>
+Subject: Re: [PATCH] efivarfs: Rate limit statfs() handler
+Message-ID: <aoXZ7xBT546YKdOY@kanto>
+References: <20260818141150.905336-1-ardb@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Wed, 19 Aug 2026 15:50:42 +0300
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Jarkko Sakkinen" <jarkko@kernel.org>,
- "Ross Philipson" <ross.philipson@gmail.com>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org,
- linux-integrity@vger.kernel.org, linux-crypto@vger.kernel.org,
- linux-efi@vger.kernel.org, "Daniel P. Smith" <dpsmith@apertussolutions.com>,
- "Thomas Gleixner" <tglx@linutronix.de>, "Ingo Molnar" <mingo@redhat.com>,
- "Borislav Petkov" <bp@alien8.de>, "H . Peter Anvin" <hpa@zytor.com>,
- dave.hansen@linux.intel.com, "Matthew Garrett" <mjg59@srcf.ucam.org>,
- "James Bottomley" <James.Bottomley@hansenpartnership.com>, peterhuewe@gmx.de,
- "Andy Lutomirski" <luto@amacapital.net>,
- "Herbert Xu" <herbert@gondor.apana.org.au>, davem@davemloft.net,
- "Jonathan Corbet" <corbet@lwn.net>, kanth.ghatraju@oracle.com,
- daniel.kiper@oracle.com, "Andrew Cooper" <andrew.cooper3@citrix.com>,
- trenchboot-devel@googlegroups.com
-Message-Id: <f85782ed-efb3-4045-9d37-2ed4847e1500@app.fastmail.com>
-In-Reply-To: <alKI9mUBTOCjPbbG@kernel.org>
-References: <20260711160110.267780-1-ross.philipson@gmail.com>
- <20260711160110.267780-11-ross.philipson@gmail.com>
- <alKI9mUBTOCjPbbG@kernel.org>
-Subject: Re: [PATCH v2 10/10] tpm-buf: Add TPM buffer support header for standalone
- reuse
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260818141150.905336-1-ardb@kernel.org>
 
+Hi Ard,
 
+I like the new approach, it's much simpler and easier to understand
 
-On Sat, 11 Jul 2026, at 21:18, Jarkko Sakkinen wrote:
-> On Sat, Jul 11, 2026 at 09:01:10AM -0700, Ross Philipson wrote:
->> Extract all the functions and definitions for TPM buffer handling
->> and separate them into their own header.
->> 
->> Signed-off-by: Ross Philipson <ross.philipson@gmail.com>
->> ---
->>  drivers/char/tpm/tpm-buf.c |  3 +-
->>  include/linux/tpm.h        | 34 +--------------------
->>  include/linux/tpm_buf.h    | 60 ++++++++++++++++++++++++++++++++++++++
->>  3 files changed, 63 insertions(+), 34 deletions(-)
->>  create mode 100644 include/linux/tpm_buf.h
->> 
-...
->
-> I would probably ack them all as I've seen these many times and
-> there's not much anything new. Just waiting for additional
-> feedback before applying them.
->
+On Tue, Aug 18, 2026 at 04:11:50PM +0200, Ard Biesheuvel wrote:
+> Ravi reports that statfs() may be called by unprivileged users on the
+> efivarfs mount point, which may result in a flood of calls to the
+> QueryVariableInfo() runtime service. These calls are disproportionately
+> costly on x86 systems where the variable store is backed by SMM, as each
+> SMM entry requires a rendez-vous of all the CPUs.
+> 
+> So rate limit the calls to QueryVariableInfo() at twice per second, and
 
-Will these be going into v7.3 then?
+It's already a high-rate in performance sensitive environment. I'd have
+gone higher at once per 10 seconds for example. But really, this is
+minor, so please consider this:
 
+Reviewed-by: <anisse@astier.eu>
 
+Regards,
+
+Anisse
