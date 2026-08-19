@@ -1,114 +1,112 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2ACF347884B;
-	Tue, 18 Aug 2026 14:11:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC6AE30274D
+	for <linux-efi@vger.kernel.org>; Wed, 19 Aug 2026 12:51:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787062319; cv=none; b=hxMoGxlzwSyUp9LNkxLOgxZRFtUPGLTLOI2mHcm8lhUyZhbFcMG9MnRpuiKlX4EPEFCoxdWQdRVuscfzk1Xz929wLH9x7WiyzLC8g5V7wicpH2078463ExnjuY0DMG390e/shO0dDN4ySCKkirLam/IJ4c264QpWHSzdLZLJGwQ=
+	t=1787143870; cv=none; b=jRzj0L5YEseGzt3gz8LbyS0p4bk/6tM92cvPzXMO81rMrbTesRfqoH4B8YjfB+keHGKS1vWKGXDQLF8apCtv1/RiRi2iWDaisF4QzV2QWSNVvbgg4jq9j40omdV7MWKZ22Tg+xoT15Eo60I/24eRCKtj4/wPE/p4HOaANJ7Caxw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787062319; c=relaxed/simple;
-	bh=fIoIqPbUubodBIIxSD+L6GhMDg5Wc4I1XqdQbaERO5U=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=JfqWERrHAPMuJhX4bff4+CEGTNB+/kmI1YWkD+Kjwr8EhCLHs5uLYdyi1Glg1rEcQxIYlsmXUr4oiOrm2KlBJMXXR29ctbO9CKqcJOSmBNb6Bc+6dYdgcPqYH8qBigf+A/zBXiSaSOr60CdICoEZy2VlRczX4kED1MwIbH+TmI4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nLQdp0mA; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1787143870; c=relaxed/simple;
+	bh=bW4qoXZuZdVvn3IHXwlnimORX+YXH8TLCJ57aT5HivQ=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=FYwC2BKDJQBDBPiZ0s+7ZC3pjKbM77AHLySuDVp0Rx8D8HsVMnoELiiE6h7Q5fVYsbcrrrFFQUa8CEUSSJP/V9XJ/FZ6lEi+z5EEtUFFxLOe3rEPAq4Jkuxz9E31WiT2WsadBLbKXaV/k87RXY06RuCuNXRbmBu+aOo56uUmgd4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VskvlA5R; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nLQdp0mA"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 78C621F00A3A;
-	Tue, 18 Aug 2026 14:11:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VskvlA5R"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D7EF41F00A3E;
+	Wed, 19 Aug 2026 12:51:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787062317;
-	bh=y+3JbKoCLfb4aCv0jX3F9Hhn4V179wBGNgJrcmUx5QI=;
-	h=From:To:Cc:Subject:Date;
-	b=nLQdp0mA5zuEIbbOIdRaTKIua/sgtNPIedaKGFdO7ZH2BGlUg6IhTBjhvmlS0NNjz
-	 Gdvu5gZ+WILpJP0TmLN5N7//fwbFxxPrYD8t6dNvmCyNe9w5DFYyHnfq++IhKnmM2Z
-	 0XXxFgbWC/QImJvXXf/02tys51AzRa/kqZEn1rAcZ6f8NDBtab5OsKca26bnWUyutP
-	 9MQ9oPs3vWNaASajYDbqsul8VKKBJVb9X9AYLbYnI9m6fSxtbrOpnZqqrlOI36AiTI
-	 Ur2pOkFrc2ltMQ0YNwXHDd45vx88hQuSMcoevte3M7tFTwfdBv1RiaURjFQGeyimMa
-	 S/4k7t7ubkCkQ==
-From: Ard Biesheuvel <ardb@kernel.org>
-To: linux-efi@vger.kernel.org
-Cc: x86@kernel.org,
-	Ard Biesheuvel <ardb@kernel.org>,
-	stable@vger.kernel.org,
-	Anisse Astier <anisse@astier.eu>,
-	Ravi Bangoria <ravi.bangoria@amd.com>
-Subject: [PATCH] efivarfs: Rate limit statfs() handler
-Date: Tue, 18 Aug 2026 16:11:50 +0200
-Message-ID: <20260818141150.905336-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.47.3
+	s=k20260515; t=1787143869;
+	bh=w6/NlsucFgi8NXxtT/cnsL/H0uuYre8Be7OcGNSScLQ=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=VskvlA5Re4Y3nq82XMu7MS6uMz9IEs050OmPu0naTb0CRCO1umKT7sy6rXUJ4ln9Z
+	 q4ReKIxYmjQVXq6c6/286fSAt8RcjMruIaPS38K9VAC/weDk2Qs3sElbEtLTgwgbrW
+	 LuXPchIqYf3Xwby3QQsq3xQQdnWlHa8/BgeiGtEkE/sAP+i5xje0Fv48G77M4ocOVf
+	 R4So6hiQf1TNHdVfRUuq0bpkzabMhaWCGaYjg6KjjDbp9OEToavfDvPksqIDXCvL5+
+	 fmqa4J/oR4IwRMGLwIxFyfJa8sGfl7ASIJtuIEcP0LjRypvRcm75vpyaUMCUn1MUQS
+	 0LZNX3LUWU0gw==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 78CC01980074;
+	Wed, 19 Aug 2026 08:51:07 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Wed, 19 Aug 2026 08:51:07 -0400
+X-ME-Sender: <xms:tqaFapfztTxZraTVJgeMKudg47tZzSHV3haWPjgzuHZhVUVRc4jQqQ>
+    <xme:tqaFaiA1Fa_EJkm4WnNF6LISWTOhSNrocm4nzJm4FKIEP0taufLvgXDD0jeoMY-29
+    _yDOts41hO27896oTt6yOhBtmTrWq9cd361eT2S2uEOFOYYENsCjai9>
+X-ME-Proxy-Cause: dmFkZTE6PQORpasiR9yaTgVv34fsNGh5YEX5MV9cmE7q73w8Jxt7C7qRIockF7+k3uOYAO
+    9m4mw7nTfnpaFu+7PINnykuaO3iSQiaebf/rwomXc/v/Cr1WBn833nKxBiGuxH8Cu7ynqE
+    tTiVnxeYul7J+EBsCezZpQ9AEC+l3NKkIsgFCxD9qFBzDjhJ+9rLgMRHPyUR/iIoZkLS3t
+    oqQXZPPf+SIIDgHPgpf6GEJ80yIPc1NUp7eavnOwD3zGVPrR1629JycUwi9iEGVzgkOKV3
+    a6vFIONKPqKI5mjIndDWcaG77ASHquSIJfTOM+WIB51JtFsBccUv/yTj0VqN0GfGc7K8SV
+    1o7RJEj0c1aLZm/AuYxI39DGhf2I0I4fpGyfSJj3u8lTN9VPGPMdY4P2U9q/Or6Q+5TNc+
+    nPZF+KxU9NTgjH5LGiqN1s9pagN1ovSvfj/v0Qs49tyEa6g3sDvRgGQ/8oBavRM+kd89bx
+    NQIwAS7rlfrNe9MvGko0r8w4JEZwGG0jYEAl2Y875+X9IAmMXpllBlszDLF42b2pENZXJh
+    SdC8Yc+eDKyX7J4zDJsch7/1D1VVQiFmIb7JLSYAYHVlnZGE8mXueXX5bWbbbcMgIdf4bw
+    13QvZZrG1/A/II8oQ7thl6IQDupVm/nu5v1GnDXgPJAdKqutyiWS5HvOlC+g
+X-ME-Proxy: <xmx:u6aFauvcH9uHi364SoIC1u7xo46uQ3QSPzQM7EBYAtk1i8aWNAucEg>
+    <xmx:u6aFasgnH7mHZdn058zJ7ri9wZfRpPU-Aqpar2g14rBquq3UY1l0Og>
+    <xmx:u6aFai39zfDVzZaV493JZB1r4YQG22day2V_kBBKwrBI1F3I50P3og>
+    <xmx:u6aFak-5iSW9HSzr3t6hwxHjge2k9jyPTrhAoSpikWIhXLtWJyjLlw>
+    <xmx:u6aFaoPnzGW4Qkjhefz7ozY6azMXJcNnu7FeRybGuX02HOL6YBGBNJJq>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id D7315F80070; Wed, 19 Aug 2026 08:51:02 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Date: Wed, 19 Aug 2026 15:50:42 +0300
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Jarkko Sakkinen" <jarkko@kernel.org>,
+ "Ross Philipson" <ross.philipson@gmail.com>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org,
+ linux-integrity@vger.kernel.org, linux-crypto@vger.kernel.org,
+ linux-efi@vger.kernel.org, "Daniel P. Smith" <dpsmith@apertussolutions.com>,
+ "Thomas Gleixner" <tglx@linutronix.de>, "Ingo Molnar" <mingo@redhat.com>,
+ "Borislav Petkov" <bp@alien8.de>, "H . Peter Anvin" <hpa@zytor.com>,
+ dave.hansen@linux.intel.com, "Matthew Garrett" <mjg59@srcf.ucam.org>,
+ "James Bottomley" <James.Bottomley@hansenpartnership.com>, peterhuewe@gmx.de,
+ "Andy Lutomirski" <luto@amacapital.net>,
+ "Herbert Xu" <herbert@gondor.apana.org.au>, davem@davemloft.net,
+ "Jonathan Corbet" <corbet@lwn.net>, kanth.ghatraju@oracle.com,
+ daniel.kiper@oracle.com, "Andrew Cooper" <andrew.cooper3@citrix.com>,
+ trenchboot-devel@googlegroups.com
+Message-Id: <f85782ed-efb3-4045-9d37-2ed4847e1500@app.fastmail.com>
+In-Reply-To: <alKI9mUBTOCjPbbG@kernel.org>
+References: <20260711160110.267780-1-ross.philipson@gmail.com>
+ <20260711160110.267780-11-ross.philipson@gmail.com>
+ <alKI9mUBTOCjPbbG@kernel.org>
+Subject: Re: [PATCH v2 10/10] tpm-buf: Add TPM buffer support header for standalone
+ reuse
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-Ravi reports that statfs() may be called by unprivileged users on the
-efivarfs mount point, which may result in a flood of calls to the
-QueryVariableInfo() runtime service. These calls are disproportionately
-costly on x86 systems where the variable store is backed by SMM, as each
-SMM entry requires a rendez-vous of all the CPUs.
 
-So rate limit the calls to QueryVariableInfo() at twice per second, and
-return the most recently obtained values for calls that are elided.
 
-Cc: <stable@vger.kernel.org>
-Cc: Anisse Astier <anisse@astier.eu>
-Reported-by: Ravi Bangoria <ravi.bangoria@amd.com>
-Fixes: d86ff3333cb1 ("efivarfs: expose used and total size")
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
-This supersedes [0], which had some issues, the main one being that a
-cache that requires explicit invalidation may go out of sync due to
-direct calls to SetVariable() made by other drivers.
+On Sat, 11 Jul 2026, at 21:18, Jarkko Sakkinen wrote:
+> On Sat, Jul 11, 2026 at 09:01:10AM -0700, Ross Philipson wrote:
+>> Extract all the functions and definitions for TPM buffer handling
+>> and separate them into their own header.
+>> 
+>> Signed-off-by: Ross Philipson <ross.philipson@gmail.com>
+>> ---
+>>  drivers/char/tpm/tpm-buf.c |  3 +-
+>>  include/linux/tpm.h        | 34 +--------------------
+>>  include/linux/tpm_buf.h    | 60 ++++++++++++++++++++++++++++++++++++++
+>>  3 files changed, 63 insertions(+), 34 deletions(-)
+>>  create mode 100644 include/linux/tpm_buf.h
+>> 
+...
+>
+> I would probably ack them all as I've seen these many times and
+> there's not much anything new. Just waiting for additional
+> feedback before applying them.
+>
 
-[0] https://lore.kernel.org/all/20260801144258.15977-2-ardb@kernel.org/
+Will these be going into v7.3 then?
 
- fs/efivarfs/super.c | 30 ++++++++++++++++----
- 1 file changed, 24 insertions(+), 6 deletions(-)
-
-diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-index 733c19571f1c..8d33f11db2a1 100644
---- a/fs/efivarfs/super.c
-+++ b/fs/efivarfs/super.c
-@@ -89,12 +89,30 @@ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
- 	/* Some UEFI firmware does not implement QueryVariableInfo() */
- 	storage_space = remaining_space = 0;
- 	if (efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
--		status = efivar_query_variable_info(attr, &storage_space,
--						    &remaining_space,
--						    &max_variable_size);
--		if (status != EFI_SUCCESS && status != EFI_UNSUPPORTED)
--			pr_warn_ratelimited("query_variable_info() failed: 0x%lx\n",
--					    status);
-+		static DEFINE_RATELIMIT_STATE(_rs, 2 * HZ, 5);
-+		static u64 storage, remaining;
-+		static DEFINE_SPINLOCK(lock);
-+
-+		if (!__ratelimit(&_rs)) {
-+			ratelimit_set_flags(&_rs, RATELIMIT_MSG_ON_RELEASE);
-+
-+			spin_lock(&lock);
-+			storage_space = storage;
-+			remaining_space = remaining;
-+			spin_unlock(&lock);
-+		} else {
-+			status = efivar_query_variable_info(attr, &storage_space,
-+							    &remaining_space,
-+							    &max_variable_size);
-+			if (status != EFI_SUCCESS && status != EFI_UNSUPPORTED)
-+				pr_warn("query_variable_info() failed: 0x%lx\n",
-+					status);
-+
-+			spin_lock(&lock);
-+			storage = storage_space;
-+			remaining = remaining_space;
-+			spin_unlock(&lock);
-+		}
- 	}
- 
- 	/*
--- 
-2.55.0.699.gb54405d56f-goog
 
