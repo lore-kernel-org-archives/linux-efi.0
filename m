@@ -1,114 +1,155 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8400842C4E6
-	for <linux-efi@vger.kernel.org>; Thu, 20 Aug 2026 11:49:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 90CF93E169B
+	for <linux-efi@vger.kernel.org>; Thu, 20 Aug 2026 13:17:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787226597; cv=none; b=UFcAwo8pz67tEfFgjiwnI5+WDIw+QjZsUIKPJM3aBGdTstjNtnGQZO3yuz0aIxm011jrftFRPj3XtHF5faxj1AugUxtSjyGiSIeSp2UEuQYvrzQ622F8QQa4+0Tia+u/vWNDnJVb5mPO/40OgwcD7yU0/h8wTYlRAS/x/CszTQc=
+	t=1787231828; cv=none; b=BSW2i+Zuq7gOlWVOXDvBAu3ZZHsdfQQ7k3vyhLhe4DdHtOGqBPeEGs6IzpNMWC6IMnev7u58OBXGeA7wJdFkaAbG/K6zubYwJdPX3q2RtuJYSB9Kv4N8PaAeCOIn3Pr6Q0WL6deFLqX7L1Cvezvfp692WEaQZN9zkyntHV1qwsE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787226597; c=relaxed/simple;
-	bh=FXjFw1aRdhlI3HJKqQHmH9CVzMHJZtaDCNKVDmNfgpU=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=mg85qGuC47Ze7Sb9m7Pq2s4UilP6L9a+OkHxjMij3iJpVI+aiwaT44KHGNVwqyxtqT8WsBbhD57tCunxOH9h6N8XqsQ+5G4/hCAL49BgLLS7tQE6MwSfcLFIeI0rNMUTDgGNEpqLGT2KJEP46Y/LDd1W9Z/2AbBDGJkvU5U9mH4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=T0LWmFsb; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1787231828; c=relaxed/simple;
+	bh=Sy2cw8POdJ2lBi4KnfpGDYZklAX0myLUoFb3VFDKJeQ=;
+	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fKD2cL0mdyw7GjWwixWC5y/fFFqq77TdXno5aG06fZfb7/BcV5NlKtLndZklBHxriEb0f9+cnZxWLb67gHGdVVUuGggWmg7hoqsS2JjSnpQdvSxu60gN0KAzFpzM3q4MH3WtgTV8GdH4DwERcj3W9MPJzD0S78OY/OnjqZg+JBw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=WOQEggLa; arc=none smtp.client-ip=209.85.128.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="T0LWmFsb"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B3C791F000E9;
-	Thu, 20 Aug 2026 11:49:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787226596;
-	bh=oCSHTk6Vsbud/jueL72abX4npLKH+zeCjs+1JynVlxw=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=T0LWmFsbSRdM0k26BDUjqEgHUmH2D4Rgq6AyogSCaPqNbgtXde7vQXcxZhgyHFErC
-	 OqiENtD+tVSLf6jhZAZNW9DuQn1RzUrJsp3EQxQVWJDnhbPZw2xFJ5QTZh2MvOOHe/
-	 achDb4+ohr5JnAntWhd6kI2MmR6/3h4SaIZWXt6StenyFfF7VGO2mVsEuU4AH7tBk4
-	 wUYT5pwLyyUSyJ8Do229ztXR4kruOj/CP55tLWY+y8Zs9mYtnkgLfbIyMB2CWSj47g
-	 m8oHyoPfle+jmY/KASUtMym7uXwjN1tMIcV7jl/JmIroEGKenu7TjoOLu+Dr16f/FN
-	 K85d0r4mBOGBw==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 38BA01980060;
-	Thu, 20 Aug 2026 07:49:54 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Thu, 20 Aug 2026 07:49:54 -0400
-X-ME-Sender: <xms:4OmGas2GMOgfnkr9X60ukDM5N4kmfidX29N6NOrFOVTKwkKsiucGQA>
-    <xme:4OmGah5nUFwR3oXqQTUp0aVaBSayqBYvi0vdVRU1BteVVGsuhEW_QeB4YXCsMgSlW
-    MyzkN8-DxmWaB-2NNO0rlu8qNqub1U3Ne58Dr_MaD6F7PYUU8_vvAU>
-X-ME-Proxy-Cause: dmFkZTErGxiZH4DToEZ8yEt2lqI/2xdiVHFGjifXFSp0g6M1aGCl0MKBj2Hk9md9b04jPt
-    v2GLPzSVbPpHYbWYM25VoPzQ3caxIoLw2Cbq4M4pQtyhci0K/O7FmroW1kO2QBajnXuzoc
-    kb0q460EQqXOUY/1fIoYkplMU8JsHHyc3iWo5U/WXkN7ssTTytGrGXD9fW4TSfjOETorQZ
-    ByujXJaREYPqKZhlUNuac6Vhh8cO8efds0Vyv+zvTu1gHTlX32E83SEPgQhxMU8o80WZbT
-    Ny20LV5FbIkKvsU0qTAspSwmNFTO8Mq0q6bGspd9L3IWLcnd7lxyA8jit1jBI49Y7FRrQB
-    jguGpsThJCkQlHiGWIjsmF3TzkyOnU2daKjS2aOiOtwT4vrLzbK1ZwfTeIty3n4NG88puG
-    boUqiHcn+ZcBqPimC7UAxwQevoBqNbBRZqUT0504sI0TWbks48wk5yZkoXaxPuuKlGoCvW
-    QL4UBsyzl/d9tmJXRumTjVdVQV4syLOAm759+ruUAjOqyxO54r6bLGHbNnR0jmmGuBWame
-    uJaY5mmujS/wXM2/tAnrLMC+PSQuVi8FXmGiY0biYGeoyUWB+xJwclCzgR6raYdRgyZuFw
-    YNgMhhnk53RFY0btoTF2Aeac6NaP3Jfzi6Ep2nvPGyRqBz4vbR9z70NbsckQ
-X-ME-Proxy: <xmx:4umGauegS_hSA3j-LNUKCRyAj4C1CeQSI7d3K0in0kUcqFREldMlJA>
-    <xmx:4umGaiRsBKRdolaqbQ4JEth2pxi63h-i4sv7NyjVSaxmsKHbObtq3Q>
-    <xmx:4umGava-FCwJ75tO9s--3p1EAWxjo0_6X2rMXpasHTbzT6wzcPwNNA>
-    <xmx:4umGatdNl1UfsFc8eFr2_9tfIIAEQLmNLJ9mmiK2tA7zqPoipWcSfw>
-    <xmx:4umGaoIMHCnzYql_SPqz-o0wNO3GqsQf79RIJDZJAX9y2Dqa-RCaJC7z>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 0CA7DF80070; Thu, 20 Aug 2026 07:49:52 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="WOQEggLa"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-498028b3d5eso26802605e9.1
+        for <linux-efi@vger.kernel.org>; Thu, 20 Aug 2026 06:17:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1787231825; x=1787836625; darn=vger.kernel.org;
+        h=user-agent:in-reply-to:content-disposition:content-type
+         :mime-version:references:message-id:subject:cc:to:date:from:from:to
+         :cc:subject:date:message-id:reply-to:content-type;
+        bh=irm8GSnQflsbzEKogo4Qk5ku/XY4gPUwlR5IzkAY5qU=;
+        b=WOQEggLaDovH2O1EAVY6GbZgEthWgjo9Y9PLoFsl4p+ZcqJxZ5xAZkKmKl9iI/79re
+         I8coEGtfTlEublk2TNJl4mBcsbGluy+ISCYciPIt+AGc1XXBh7p5kfUX48YfHvb05eQ2
+         D6Po5NTDkflZtYSS6r371+few/r6F9mJXB6Wxl5ghiyYyjNYRoOzu+0+NAqy3ZiUy0S6
+         RLjvQdwu4Km1YZ/PTI7S1t1dqTy63UZUlULnClqEUdqfh2O6mM20U4EAx+vrPuj/87zI
+         hAZbcdA6g6sTlrnGhFuaUTrdPLFqQGFPG9sQ+jAKJLIsxT3/ldYwoXxeJO74ib+v+/fd
+         lG/g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787231825; x=1787836625;
+        h=user-agent:in-reply-to:content-disposition:content-type
+         :mime-version:references:message-id:subject:cc:to:date:from:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=irm8GSnQflsbzEKogo4Qk5ku/XY4gPUwlR5IzkAY5qU=;
+        b=gsLHfAPDG+24Ge/LivOzXCH9Fx6n2w/7K9AVQ3M08QxaB2BE/yG7WPcmx9mT/b2k1g
+         40Ybeh35m5ZpwIhV9IcvfbMYGXB2bXYr8rpYwqEbF2RD5yTK35U8/Ltp+XEqTFIyfJc7
+         8CHTRzB+AMZVDJl6J7++yBUYmML9BhUEiEHET8hXN5iKaxuboxkT8Xkp2I44E8LTG9bp
+         UNG+ByTJghhzFuSZ5hfYsOLxV4iT6P+dSCGDsatV5yT/ojjdNd5uomF0IcVHqaYLxJRb
+         bpCZI+szc9u9+9fiTnvRg/u6V7bUnLHKgbqcLjAgZ4y/cELYijZ3aoR3uUKN2XfE6SAk
+         QBAg==
+X-Gm-Message-State: AOJu0YzWV9wn1XgnOU+HYxGIF7gGK9qfxYcDqXCHCza6gmUDSnaYtP4S
+	P+lIZhiRBR32SD4VLVr9STRgBZRECWosFcmI4qWMzbrWEw3jv/xXD3noeF2G8NW/gts6bCh5Mdh
+	bC3kKf9o=
+X-Gm-Gg: AR+sD10C97nRtH4BY38pv7MKi7yH1cTDiiu9m33gyqXc7E8bQ5bEH25mxeY79YqnVge
+	afbfr48FadtEneBa5shgB9b6Hv4ckmtOJzM6oArmMSFKvEngkQKXauUT93r5SQxMMpZ1rB531cA
+	XXGetUbMOPAbuS9hQaXcwWEKWIWWX0XWyNEW3bdNceAvj6hYbvYgmX7QKi56EKfeZwmTs0g2KS/
+	cFmXm6lN+HPIrntkuu4b4hr/IkfTE64N7zM0KdzHAusXcY6ami1jFs2ntTSRvsMbpt5QQA4bXWF
+	imak7hlSOgHSGlnu5gQDdOH+EXxm+HHPYPBM5Cy0XZ35yKdmA5x3yzsyswnOsAC4bWbeABW/cXA
+	2YVthdgtReSGVDGSf4xWIk8xR55uhMWlvFgSf3U+uL6pARR92UFI1VfdxjWCYOyA3J1VmlgdGbA
+	j5IDxaeMpzWaarLCGJx5ExX+n7we0InYmju6uyWXX9s2cuJw4kyYVlvYaDQi6get5E9deNJEaUh
+	2acOx3NFOxr1W8VZYMcBm3uOQCB/MqnhLn6ZJM=
+X-Received: by 2002:a05:600c:34d3:b0:497:ff73:68d5 with SMTP id 5b1f17b1804b1-499aa110a3bmr246765525e9.0.1787231824637;
+        Thu, 20 Aug 2026 06:17:04 -0700 (PDT)
+Received: from r1chard (1-164-84-97.dynamic-ip.hinet.net. [1.164.84.97])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-499aa09b199sm126570585e9.0.2026.08.20.06.17.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 20 Aug 2026 06:17:04 -0700 (PDT)
+From: Richard Lyu <richard.lyu@suse.com>
+X-Google-Original-From: Richard Lyu <r1chard@r1chard>
+Date: Thu, 20 Aug 2026 21:16:55 +0800
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: linux-efi@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org,
+	Anisse Astier <anisse@astier.eu>,
+	Ravi Bangoria <ravi.bangoria@amd.com>
+Subject: Re: [PATCH] efivarfs: Rate limit statfs() handler
+Message-ID: <aob-R-ULD6S38waw@r1chard>
+References: <20260818141150.905336-1-ardb@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Thu, 20 Aug 2026 14:49:31 +0300
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Theodore Tucker" <theodore@tti0.net>, linux-kernel@vger.kernel.org
-Cc: linux-efi@vger.kernel.org, "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
- "Tony Luck" <tony.luck@intel.com>, "Kees Cook" <kees@kernel.org>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>
-Message-Id: <55870f62-ee17-4aed-850e-790517f68eee@app.fastmail.com>
-In-Reply-To: <6ecd6385-37c6-4ae8-8413-53a6e8602635@app.fastmail.com>
-References: <20260625171214.8058-1-theodore@tti0.net>
- <6ecd6385-37c6-4ae8-8413-53a6e8602635@app.fastmail.com>
-Subject: Re: [PATCH] efi: Make EFI_VARS_PSTORE depend on EFIVAR_FS
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Disposition: inline
+In-Reply-To: <20260818141150.905336-1-ardb@kernel.org>
+User-Agent: Mutt/2.2.16 (2025-11-22)
 
-
-
-On Thu, 23 Jul 2026, at 09:39, Ard Biesheuvel wrote:
-> On Thu, 25 Jun 2026, at 19:12, Theodore Tucker wrote:
->> The efivars backend to pstore will not register if the efivarfs is
->> not available. The efivars sysfs interface was removed in Linux 6.0,
->> meaning efivarfs is now the only way pstore can write into EFI
->> variables. Making the dependency on the efivarfs explicit removes
->> a stumbling block when configuring a kernel with pstore.
->>
->> Signed-off-by: Theodore Tucker <theodore@tti0.net>
->> ---
->>  drivers/firmware/efi/Kconfig | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
+On 2026/08/18 16:11, Ard Biesheuvel wrote:
+>Ravi reports that statfs() may be called by unprivileged users on the
+>efivarfs mount point, which may result in a flood of calls to the
+>QueryVariableInfo() runtime service. These calls are disproportionately
+>costly on x86 systems where the variable store is backed by SMM, as each
+>SMM entry requires a rendez-vous of all the CPUs.
 >
-> Applied, thanks.
+>So rate limit the calls to QueryVariableInfo() at twice per second, and
+>return the most recently obtained values for calls that are elided.
+>
+>Cc: <stable@vger.kernel.org>
+>Cc: Anisse Astier <anisse@astier.eu>
+>Reported-by: Ravi Bangoria <ravi.bangoria@amd.com>
+>Fixes: d86ff3333cb1 ("efivarfs: expose used and total size")
+>Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+>---
+>This supersedes [0], which had some issues, the main one being that a
+>cache that requires explicit invalidation may go out of sync due to
+>direct calls to SetVariable() made by other drivers.
+>
+>[0] https://lore.kernel.org/all/20260801144258.15977-2-ardb@kernel.org/
+>
+> fs/efivarfs/super.c | 30 ++++++++++++++++----
+> 1 file changed, 24 insertions(+), 6 deletions(-)
+>
+>diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+>index 733c19571f1c..8d33f11db2a1 100644
+>--- a/fs/efivarfs/super.c
+>+++ b/fs/efivarfs/super.c
+>@@ -89,12 +89,30 @@ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
+> 	/* Some UEFI firmware does not implement QueryVariableInfo() */
+> 	storage_space = remaining_space = 0;
+> 	if (efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
+>-		status = efivar_query_variable_info(attr, &storage_space,
+>-						    &remaining_space,
+>-						    &max_variable_size);
+>-		if (status != EFI_SUCCESS && status != EFI_UNSUPPORTED)
+>-			pr_warn_ratelimited("query_variable_info() failed: 0x%lx\n",
+>-					    status);
+>+		static DEFINE_RATELIMIT_STATE(_rs, 2 * HZ, 5);
+>+		static u64 storage, remaining;
+>+		static DEFINE_SPINLOCK(lock);
+>+
+>+		if (!__ratelimit(&_rs)) {
+>+			ratelimit_set_flags(&_rs, RATELIMIT_MSG_ON_RELEASE);
+>+
+>+			spin_lock(&lock);
+>+			storage_space = storage;
+>+			remaining_space = remaining;
+>+			spin_unlock(&lock);
+>+		} else {
+>+			status = efivar_query_variable_info(attr, &storage_space,
+>+							    &remaining_space,
+>+							    &max_variable_size);
+>+			if (status != EFI_SUCCESS && status != EFI_UNSUPPORTED)
+>+				pr_warn("query_variable_info() failed: 0x%lx\n",
+>+					status);
+>+
+>+			spin_lock(&lock);
+>+			storage = storage_space;
+>+			remaining = remaining_space;
+>+			spin_unlock(&lock);
+>+		}
+> 	}
+>
+> 	/*
+>-- 
+>2.55.0.699.gb54405d56f-goog
+>
 >
 
-Actually, EFI pstore does not depend on efivarfs, it only depends on
-the efivars layer.
-
-Why do you think it needs to depend on EFIVAR_FS?
-
->> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
->> index 29e0729299f5..8dfd21e7a8e4 100644
->> --- a/drivers/firmware/efi/Kconfig
->> +++ b/drivers/firmware/efi/Kconfig
->> @@ -9,7 +9,7 @@ config EFI_ESRT
->> 
->>  config EFI_VARS_PSTORE
->>  	tristate "Register efivars backend for pstore"
->> -	depends on PSTORE
->> +	depends on PSTORE && EFIVAR_FS
->>  	select UCS2_STRING
->>  	default y
->>  	help
->> -- 
->> 2.47.3
+Reviewed-by: Richard Lyu <richard.lyu@suse.com>
