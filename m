@@ -1,57 +1,57 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A54052E542C;
-	Fri, 21 Aug 2026 06:31:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFE3925228C
+	for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2026 07:19:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787293913; cv=none; b=q17AuRvA2aHRhZgRk/ZRSO45vGpETdTQmlES+8dMfYnidOp4YU5JJgLc2ShqK6Z94/06QHtXWG4RVAc5Am9PngRtkXbnljNapBZ9uNl2jKL6e4nT3aLYANudR0Jc0VaGU3wLAEa0wbwb8iT+ikI7L6+53n8tGCoGQUovRmW2wWM=
+	t=1787296755; cv=none; b=KVpkcSv/DN31TXQ4RgBnxq9p1DH+BRqTkcRSa3BSt0czdOnHIiDfSsU+B3ZUm/FcrRrphxlOEEIxfVMlUTg1irJoNnRwt+rbDPmo43RFHwDvGV83kRyDz/azzikDkb/PhynGe+mtUu6RJUb/hzXrLGpiFpkTYWqWYLCwnQ04h+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787293913; c=relaxed/simple;
-	bh=1Xc7hI67sI71WReYGmfXmfCn6UOYtNv0NbXwkdNGkYM=;
+	s=arc-20240116; t=1787296755; c=relaxed/simple;
+	bh=xNbeQvAC0iHgJQjIzRpxPYT58n1Q8bbUEXvX26y/908=;
 	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=U4ViUua14GiIvKMJeJJ2RhIXOGktAWcBnHgZL1CKJltDTz9zlQWv88o8eN/ZA+SZlTHfV/jz3fhObPT890T0R9BOZphoTQ9eLgd2psILhZGhPmbxJj/b6PqXvCEKrG1NCOiBFhzvt8bejTBn79LgG8zCwONnww/p9hxnYENM2I4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MK5Qp4xt; arc=none smtp.client-ip=100.103.45.18
+	 Subject:Content-Type; b=umHeWtOgTJOnO2ctjSgUDAxZ7DWIXimlxPXM62jUuhYsZ+f7jdclBDRHrNelhMYN44IQw8YMsRZlSbEjnjJCyM2S5g/zdRNoX7g1CO5SSGgmdSeAnw2nX1W3yreKo8nYdSt1f3MqyGjTdKwDDJIJLd/x9IyDiI1saO8u/NFgZDc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ow3ur4eW; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MK5Qp4xt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 176941F00A3D;
-	Fri, 21 Aug 2026 06:31:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ow3ur4eW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 24B9B1F000E9
+	for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2026 07:19:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787293912;
-	bh=ppsjk/QD+0Fm+sLdI0cG3ucKcpsc989E2jEalJiaUSs=;
+	s=k20260515; t=1787296754;
+	bh=M2IdRUn9RG5Rxt3E7ICZpCrekKoDcaVSTD4ItT6VP6A=;
 	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=MK5Qp4xtcyGbQ06m2FeNz8F+E/deGwt2Ji4AyGLSdZYtiD07v3Xq2yTwY5OWyJWGY
-	 iYwIsV3YtQB7y7dvA8LXqNm5RzqwQDbXboD9r1vdQtDQZaMJv1Hxnij+zMOEOmVOZN
-	 X6Dcqx5t302ZNxI4oLcJJY96A51tHgZ6cHrljYLZay2dFWEr9IGCJcNkce/4tHEDLm
-	 7xjMz3DNxDh9lPvSSEKGvMy/SszyaH2aBtaOlwvO2cFQp3hYdMt/BJ2fBADQdJ10Rc
-	 67boQqQy+78iNViyLq9B5+i0uRaE2zMjaeXrjm/wteNE9V76hw+sDAH0Hv3U/IJA14
-	 60iD8h50rOwMw==
+	b=Ow3ur4eWEd5N3Am4aOdFSluoragxWQ3sMCRz+nPJP1l3fYJqvWFRHA/F/M1MSlaK6
+	 VMeCCsV4jMVf9ChMXQv5DH9G1GEjcuqaRE0hEBQZrzOE131kZcYVbdSqn1P4UtBisd
+	 ZgBH26ZoWd6DtIewojaF0fPHdCqxykXO+K/NxU4J6LC3/XynQpSDUdO3T+OwvnPoND
+	 4mLCA6WJqEaRO7ikAJxyYWL+3dSr6gvj4VJNUdxPTlXTbdkkzalsasnaBnuyLll+wt
+	 LPJle0/tFQOMu7cO8feiOHFUGcpAP0eSoib8ZMHzGTNuFDiXsZn3zc1aO5beCDdvhx
+	 UxTLOV5PIUt0A==
 Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 925B0198004A;
-	Fri, 21 Aug 2026 02:31:49 -0400 (EDT)
+	by mailfauth.ams.internal (Postfix) with ESMTP id 780DE1980060;
+	Fri, 21 Aug 2026 03:19:12 -0400 (EDT)
 Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Fri, 21 Aug 2026 02:31:49 -0400
-X-ME-Sender: <xms:0fCHagY_X6UpRM7sKWnIebaAIUnN5BY5WYrZJFVCJ9AvSF90-qQTNw>
-    <xme:0fCHamMNRCVz9azBZjdMhmUrRrbYPG6sMY0F4SorfKLWE-qPVKPmqwdRJb32AoBDq
-    ZGUS51KgDoLdgCkwg4AvXg20ecd1g3DHyK4Opbmim2Xlhjw2runO0cG>
-X-ME-Proxy-Cause: dmFkZTFfpIZVewL7aRfCoF2sy93oDdmvtvw2VIVShU369Z6Og8JrO0UEQSkC6cEqU6y+wC
-    uZrk00tA5vGIdl/8FMBBnxx/LanT2oyl65ruo36dhNeij2MjJWoqFiT8cr+l0ZDC3nMg1b
-    ndwS/qdoPGDxpQYyg8Rm0F0nDZ91SSe5N/LYidq21rqwa0Bs7qhGzwfgtdqPu7MTMuLK4y
-    Az4Fb4Xyh8qKcrnzBfkW39LHDfn5QG1+l1AF2g/WU9Ny5Wv3EhCeGEmPQHQJ4cIMgsGbn2
-    gpoEfwqj5AQ2RCAYG3IrWfuQM3Ulv79siPeZxLH+5txzgSZyquSU8HQXHk9lQJ0D9JE8TO
-    GNy+1WVqfZFE+HADDVVKZrz2HllqE+fiMt4vd5ZU8PYQE9GeOYj6+3aK/Caz5agBmFlPxH
-    PRjH7PNKuqMt3V0Bmvn7kGCVu8F5sjqK9b3J68yabf0p1xBtxs08vD5jJVd4tQZXPIVJz2
-    /oiCh1HUcG7O9hth/RW7O/ynTCD4rEgrMRw2CYgH6mgtcU6gZNrNsrNbwisNDvbwWuRZeY
-    BDEfnDfE5nCJWmEXpZIcgSwsYkrxEKVhWK4SxGftf4xNkpK3kiE2wIhJC7okFCwoYlsopR
-    Wkr99IrzbLDVdWu1W6t4qOOY59N0ZLXExHRcVyLWdjK57vBOhZJbZA9za3MQ
-X-ME-Proxy: <xmx:1fCHasO4zq7V4rrU6fO72Ek-SEspFy0kBcvCDr2GobtVORZUWqSrjg>
-    <xmx:1fCHagw6NJqmnnfwS-1nYNFf0zYhTwPRnXDnrC5S50L5yjYM3plhLQ>
-    <xmx:1fCHakL-VaAUk7I21L5wfl1eHYBcwLJe94Q9QqxRivMsQzDie0ApBg>
-    <xmx:1fCHavqUvH6Q3xJGl5DnNeXIZ640Ib1ogUMJKfLOZkabQo2o6WkxDA>
-    <xmx:1fCHaqvBTG6ALjzYoi4CLh1Vb0aBIZ9on-RD0AnYEpJ0BKGILVVm1Pj8>
+  by ams-compute-02.internal (MEProxy); Fri, 21 Aug 2026 03:19:12 -0400
+X-ME-Sender: <xms:7vuHamQx29p-sXdZ9KVUkQx0EfyXSVCWSU0uVrBuhKljLbBZKGbH3A>
+    <xme:7vuHammzcjl6Hrt2d4VgNKmdPQEp2e48EutyNy1ElwSA8l4nuzO8yUZmm8BriXLgN
+    SbAGJ1EHpipTw6OIFREZA1-brp3vxDD4M3xvANzbhkqEjm7VqmaAOw>
+X-ME-Proxy-Cause: dmFkZTFQteDxwU6oZkM5DHA5hBbB5MEhl30d76igv8rNsoV6LpXHtD+V7O4D/vgwCLBWNQ
+    1iZ1+WVPQoFde7koNjVZD9nYmDM5v6KTiQAWq0uAF/ndX9cTc84kkH0QlTocjx3QKDUmU5
+    dEhL5zyE/TLN5kkW3AVXUp8KuDHWWdE0qaHQoq+uv3qeaAKK7hzmX61hasGVvW5JYgAbsw
+    V/Ek8QiLDRNTK8M/S3KXn1zQMKKdsUQuhcN6FOfCZgY3SjLTnOAltDClM6qdWrxCb0QD+k
+    upcOfYucXMGQtg8zQhd3JPc6d8Y5PMQE5CfMm2K2IDGeNBT+7Gcnl/5TdH6SFdEVJlXxPg
+    szM5vn/iBatHNdkPehCyHoS7DM04njRk/GMPC8fADaH+uid/nVTSdSrROef/4EpVJ1IEwG
+    TZrcGCn4FUWahedWGBhnT3TOB9ZKIBAz+Hir3vF/+A/lWF/qnBuw+pSGVCjvY5PT3zBZE2
+    YVL8tv43orMZ8Bf3azbKpP0Izx1beyIPHuV5c479vkPZE2K11EEn+iFPL3ECxXE4ET7Mk3
+    yD6MRnxtyMXugyYza+/VWpr1h4we+eUyDE3WX8GW5ByaMhHoBGS+sFZLtyv5IXQIuSbEye
+    6/5Gn3VmcCjEl2RLpqv6geiX9wZX8P0ZiuIexI8ksebjJX+rJih39JY/dDQg
+X-ME-Proxy: <xmx:8PuHar4WC8HRrp-kUcdRzo66C3k3bZqzdRXjEiIfYjgiitIzuWvFCA>
+    <xmx:8PuHaq_CnDWjcQIZ3GwGsADKiyDba8ogsc-81gaW94gg-pzBXC3Qpw>
+    <xmx:8PuHaiV61llS1d__qjftxkLa7PpqZdVpEwUPIshAJp3wQSA2L-0_fw>
+    <xmx:8PuHato6lDCIPfFk_WUdNiTjJNFptcH8oWOrwu5eTT-HzQG9Kyb6WQ>
+    <xmx:8PuHasmogbw4XpdjbyCvxk-Js0F611CV3gVY6v8lebpfTLOL3bcNzkhJ>
 Feedback-ID: ice86485a:Fastmail
 Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 1AFCFF80070; Fri, 21 Aug 2026 02:31:45 -0400 (EDT)
+	id 3984AF80071; Fri, 21 Aug 2026 03:19:10 -0400 (EDT)
 X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -59,71 +59,61 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Fri, 21 Aug 2026 09:31:23 +0300
+Date: Fri, 21 Aug 2026 10:18:48 +0300
 From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Jarkko Sakkinen" <jarkko@kernel.org>
-Cc: "Ross Philipson" <ross.philipson@gmail.com>, linux-kernel@vger.kernel.org,
- x86@kernel.org, linux-integrity@vger.kernel.org,
- linux-crypto@vger.kernel.org, linux-efi@vger.kernel.org,
- "Daniel P. Smith" <dpsmith@apertussolutions.com>,
- "Thomas Gleixner" <tglx@linutronix.de>, "Ingo Molnar" <mingo@redhat.com>,
- "Borislav Petkov" <bp@alien8.de>, "H . Peter Anvin" <hpa@zytor.com>,
- dave.hansen@linux.intel.com, "Matthew Garrett" <mjg59@srcf.ucam.org>,
- "James Bottomley" <James.Bottomley@hansenpartnership.com>, peterhuewe@gmx.de,
- "Andy Lutomirski" <luto@amacapital.net>,
- "Herbert Xu" <herbert@gondor.apana.org.au>, davem@davemloft.net,
- "Jonathan Corbet" <corbet@lwn.net>, kanth.ghatraju@oracle.com,
- daniel.kiper@oracle.com, "Andrew Cooper" <andrew.cooper3@citrix.com>,
- trenchboot-devel@googlegroups.com
-Message-Id: <d853a1aa-49b6-46ae-87e6-62ec038c648a@app.fastmail.com>
-In-Reply-To: <aoevs3z1EnTNg2vJ@kernel.org>
-References: <20260711160110.267780-1-ross.philipson@gmail.com>
- <20260711160110.267780-11-ross.philipson@gmail.com>
- <alKI9mUBTOCjPbbG@kernel.org>
- <f85782ed-efb3-4045-9d37-2ed4847e1500@app.fastmail.com>
- <aoen10sB5zflLFRw@kernel.org> <aoevs3z1EnTNg2vJ@kernel.org>
-Subject: Re: [PATCH v2 10/10] tpm-buf: Add TPM buffer support header for standalone
- reuse
+To: "Theodore Tucker" <theodore@tti0.net>, linux-kernel@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+ "Tony Luck" <tony.luck@intel.com>, "Kees Cook" <kees@kernel.org>,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>
+Message-Id: <4068dc87-df3b-4c08-b4e7-ee8746861d52@app.fastmail.com>
+In-Reply-To: <04e11e34-1b3f-4892-adc5-ae2ea040c004@tti0.net>
+References: <20260625171214.8058-1-theodore@tti0.net>
+ <6ecd6385-37c6-4ae8-8413-53a6e8602635@app.fastmail.com>
+ <55870f62-ee17-4aed-850e-790517f68eee@app.fastmail.com>
+ <04e11e34-1b3f-4892-adc5-ae2ea040c004@tti0.net>
+Subject: Re: [PATCH] efi: Make EFI_VARS_PSTORE depend on EFIVAR_FS
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 
 
-On Fri, 21 Aug 2026, at 04:53, Jarkko Sakkinen wrote:
-> On Fri, Aug 21, 2026 at 04:20:27AM +0300, Jarkko Sakkinen wrote:
->> On Wed, Aug 19, 2026 at 03:50:42PM +0300, Ard Biesheuvel wrote:
->> > 
->> > 
->> > On Sat, 11 Jul 2026, at 21:18, Jarkko Sakkinen wrote:
->> > > On Sat, Jul 11, 2026 at 09:01:10AM -0700, Ross Philipson wrote:
->> > >> Extract all the functions and definitions for TPM buffer handling
->> > >> and separate them into their own header.
->> > >> 
->> > >> Signed-off-by: Ross Philipson <ross.philipson@gmail.com>
->> > >> ---
->> > >>  drivers/char/tpm/tpm-buf.c |  3 +-
->> > >>  include/linux/tpm.h        | 34 +--------------------
->> > >>  include/linux/tpm_buf.h    | 60 ++++++++++++++++++++++++++++++++++++++
->> > >>  3 files changed, 63 insertions(+), 34 deletions(-)
->> > >>  create mode 100644 include/linux/tpm_buf.h
->> > >> 
->> > ...
->> > >
->> > > I would probably ack them all as I've seen these many times and
->> > > there's not much anything new. Just waiting for additional
->> > > feedback before applying them.
->> > >
->> > 
->> > Will these be going into v7.3 then?
->> > 
->> > 
+
+On Thu, 20 Aug 2026, at 20:54, Theodore Tucker wrote:
+> Hi,
+>
+> On 20/08/2026 12:49, Ard Biesheuvel wrote:
 >> 
->> I can piggyback them with to my PR and see what Linus thinks.
+>> Actually, EFI pstore does not depend on efivarfs, it only depends on
+>> the efivars layer.
+>> 
+>> Why do you think it needs to depend on EFIVAR_FS?
 >
-> Added:
+> When building a 7.0 kernel for x86 with `make alldefconfig` and then 
+> enabling CONFIG_EFI, CONFIG_PSTORE, and CONFIG_EFI_VARS_PSTORE, I found 
+> that the EFI pstore backend failed to register 
+> (/sys/module/pstore/parameters/backend was empty after boot) unless 
+> CONFIG_EFIVAR_FS had also been enabled explicitly.
 >
-> https://git.kernel.org/pub/scm/linux/kernel/git/jarkko/linux-tpmdd.git/log/?h=for-next-tpm
->
-> I'll send v7.3 PR once these show up in -next.
+> I can see now that EFI pstore code should not need the efivarfs, and 
+> neither should userspace, since it gets access to any logs through 
+> /sys/fs/pstore. So I do appreciate that my patch may not be the right 
+> fix here, and I proposed it not as an expert on the internals of EFI 
+> pstore, but from experimentation as a user. Sorry for the noise.
 >
 
-Thanks Jarkko
+No worries.
+
+> I eventually ended up using the ramoops pstore backend so unfortunately 
+> no longer have the exact kernel configurations I used when this tripped 
+> me up.
+>
+> Thanks and kind regards,
+>
+
+Thanks for the context. I've dropped your patch from the queue.
+
+It would be nice to understand what exactly went wrong in your case,
+but I agree it is probably not worth your time (or mine) to try and
+reproduce the exact conditions under which it occurred.
+
+-- 
+Ard.
