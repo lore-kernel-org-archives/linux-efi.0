@@ -1,248 +1,111 @@
-Received: from mail-pj1-f53.google.com (mail-pj1-f53.google.com [209.85.216.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23CA22C3257
-	for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2026 07:24:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 249513BE155;
+	Fri, 21 Aug 2026 08:52:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787297048; cv=none; b=Lgcg7rFZVnhnXmq6byndye9ZRtEDubOPTIrzfFuUMv5ylUdvcSRva96RTNyZvu2hkHuVcN2RPTdFXMio6woOs3/dWV/qJXKIjJC3h89a8W/uEOMU5RltEK6EpKECefuMC/IS7m6g4n9wHcM3YzXSwUtwpd7RF0Vu1ysDNSB/KeQ=
+	t=1787302335; cv=none; b=AQ7dgRIN6afN2NV8XRXgOuuG2y9y6RB1EowPLx9yfB6N54sPdl/mGLq9YMKYZW885og7bf0L+9EkVvO/voD1Xeo2rC9PUHbrnhI6813bjW22uK0BvgjlD3/ieJd/cv31TBmWLAHo/Gtg05h4TaRJOyrniZjtKbE1w4Jq0eJpGJQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787297048; c=relaxed/simple;
-	bh=HJ+KOl/z62h9nc+ENRR4I1onjWaqSyUg5sCbCNs8DWk=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=F5gZsIlkPM1SicMXzRosvbyrQaIeHefih76YXoKeYjS9YxNz9uuSgTUN+1kQtdvjgX3ikkxUTFQXBz8CwRzYTkjU71WqcqyMFGNPts7RMonL2IcjkYXPyrt/jDNwWutWCbb3mrOTsDHIzqN9HivA5fqFl8MK0MpOElJsoZDrVrs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fbxfOV3j; arc=none smtp.client-ip=209.85.216.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1787302335; c=relaxed/simple;
+	bh=0kYolRfjhfBL7Kcx86cYGYpBiaWwgF97poYMRwYFUA8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=N1l+qedl70qpZu3mJHe49ctGogfCw60Oynv//tjtJswYvQrwztefF4xS4DuUuJoSwlpUPNgOZMeCMVu3a99PUm6takM3y+AjUKiBQadCQokRxPOzIJ0IvGx+WeDXabB61rL2Pp9oMmkMxTWJ7HXNu1FT9wMn37vcGp5RRTpszoQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EWC4oHmz; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fbxfOV3j"
-Received: by mail-pj1-f53.google.com with SMTP id 98e67ed59e1d1-38e041ea211so635108a91.0
-        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2026 00:24:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1787297046; x=1787901846; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=eQFxRmlnw8HmCpfmtAekPjcWF4+b8s8z2XwbA4bbArA=;
-        b=fbxfOV3jXXQa6rlejlwAMfr+hs027maIzLWaxJ37fLNUUKWtIoTjQF1GHo005UKQr7
-         45wed3nWXJkv0BgO5c8FapmyY9zy+vf54a+7gv4KL/KCxJ1jSsJFfJVye+6yQC5eEqgs
-         XJ574MrHgOH0/jtd67DKRB2zyzxEDfZ2jquqy6F31nrRZeaoq7sYNA/ZYR2+SYNiW9wK
-         UhB/VkVWULWpz+NJnt3nRHTrt5YeqXSoCnD5eLdF3eYURUX81pBxSUHTyJZlqGN5xSoP
-         tQ6UdLCpgH3Bxixufdm9+Ugw7DapyCccKCUseS4y8Q/rb4n8k88LsradJvM4VfXDJAlW
-         8vBQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787297046; x=1787901846;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=eQFxRmlnw8HmCpfmtAekPjcWF4+b8s8z2XwbA4bbArA=;
-        b=tKvvJyIu452O8NOOQytGJ7c4ext7DXL04yitLsdYUWj+7mlEWJp6qzs+0AVcolpvzY
-         Qr8bLG+TCtEZVVoJ8pdiINFfAuN4fHfDYk3tcIFfK8Ufs3cFwrK9YSyS4eDh+qpD6SEF
-         H04fEnBc+f4f6ppQhkSgYbXt0ibdZGmHRqHbArQGxKvD4RmfkPi226MBmHx+08BrN0K+
-         zE22EGuEtVOm9RcdhDHuJjpHLDhBFpGYH3gy0Xb2/HNiOMkntLEi5xnqaPCsJhwxYyjs
-         m3NeyGnXPktssZNe8nndK64nAEZCX5CqzrFppqlkldm71+Kys59/jC3gY4IPOIaCXuPH
-         dWWw==
-X-Forwarded-Encrypted: i=1; AHgh+Rq8ctKEa+z+6wM9DgmHxMGa/TVcMpb8fw4XpYx2MVEvv2aq56i721/8ziOAL0kh7qX4CvYQ66jB4Ak=@vger.kernel.org
-X-Gm-Message-State: AFuF++nhGtRulxw7cuoXHmWctXKAnihFk15jpsHMSW0i9LWe9QyDslRz
-	7AVC9HRWfz25JYXsLcCLtENSfO6hlJWHl2RGsI9gA64iyFBatxFqHf3sVaKyC3p7
-X-Gm-Gg: AR+sD125SVzXEB07DeQrXE7ZIfEuHwDo0ycD7wkqjynWCKy92BI5MIdkjn3fjHmnRmc
-	agxov175FolAZUBZ83ODMk7lkxOf+8gM3rUph0RCWMM/BK8OrTmsKgqYignO/6k28I+/OtrKEuM
-	7gGiD5/NlFPbk33GF3FAn3ttrIdHLwiRMK7alyPgi3iXV1wdCLhbweZJOO0lMHPvKuyi+EZejBq
-	yywxhsSHegH+1XdcFD6YXihfW9nAIbf1Rb1DBFRXhuhQTP78XrLPyq+r3X0XfSsit8puRSbjhxH
-	8bx6dMf7shBKepQcTubgH/mcuRvz50hsgz2lQYOCcle86G3wp/bty2JFiGkIEGJlWcgtIbVU0+z
-	cNPoF1ORgBLFAh3+Sg0shIoYWAmbogRZhMYTgaGqs7dx5AcL0H/G9WV8Wk2Xux+6JWK3s86dvpn
-	xdbzs3UME6ESVvNhUAcHWeQn+aA2LfMz4H2sCBQXeO6bWqv47cMaDtogps2G7g4eORzAaMxH1q
-X-Received: by 2002:a17:90b:1e0d:b0:395:4e0d:bc60 with SMTP id 98e67ed59e1d1-395c354d7ebmr7329239a91.9.1787297046224;
-        Fri, 21 Aug 2026 00:24:06 -0700 (PDT)
-Received: from osman.mioffice.cn ([43.224.245.178])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-395c467d907sm2025485a91.7.2026.08.21.00.24.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 21 Aug 2026 00:24:05 -0700 (PDT)
-From: Zhan Xusheng <zhanxusheng1024@gmail.com>
-X-Google-Original-From: Zhan Xusheng <zhanxusheng@xiaomi.com>
-To: Davidlohr Bueso <dave@stgolabs.net>
-Cc: Jens Axboe <axboe@kernel.dk>,
-	linux-efi@vger.kernel.org,
-	linux-block@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	zhanxusheng@xiaomi.com,
-	Zhan Xusheng <zhanxusheng1024@gmail.com>
-Subject: [PATCH 2/2] block: partitions: efi: print GPT LBAs as unsigned
-Date: Fri, 21 Aug 2026 15:23:55 +0800
-Message-ID: <20260821072355.2006771-2-zhanxusheng@xiaomi.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260821072355.2006771-1-zhanxusheng@xiaomi.com>
-References: <20260821072355.2006771-1-zhanxusheng@xiaomi.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EWC4oHmz"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 4BCCB1F00A3A;
+	Fri, 21 Aug 2026 08:52:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1787302333;
+	bh=XoHUqrSeOP/PVEAYqp4D6liGUEiEi36cwId27AAG5sI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=EWC4oHmzR5Su8pEEdQ1fxgybBz2JMe+f/cmQDUKK1KZP84f3jUojRiPb1IPlPpVZD
+	 DE2yiMUSuE9M/Sa1zSOHoE0jHzvx5Jy0dYJQZUU2DKdCxjm5jqK9y21k4JqvfD3rc/
+	 ZUmDDfB+XSl2jmOaZhC3eY3XrrN6YHbwnaVz70YTOHc5+es4lPr1+1y+XMW9u0wlke
+	 +ETiS1Z+BRKBxZ7cfENqt+Qmfjan6eFrAQ93lPoywHO0kFEGnBY3qu5aCrw9f+9eeK
+	 bBI/gavUCZiryO6cf7kprPJy5YSFbQJw69KwubrkORIAoLf9Wua9+qcX7o+rlEkukh
+	 /PqM3tGma7odA==
+Date: Fri, 21 Aug 2026 11:52:09 +0300
+From: Jarkko Sakkinen <jarkko@kernel.org>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: Ross Philipson <ross.philipson@gmail.com>, linux-kernel@vger.kernel.org,
+	x86@kernel.org, linux-integrity@vger.kernel.org,
+	linux-crypto@vger.kernel.org, linux-efi@vger.kernel.org,
+	"Daniel P. Smith" <dpsmith@apertussolutions.com>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+	"H . Peter Anvin" <hpa@zytor.com>, dave.hansen@linux.intel.com,
+	Matthew Garrett <mjg59@srcf.ucam.org>,
+	James Bottomley <James.Bottomley@hansenpartnership.com>,
+	peterhuewe@gmx.de, Andy Lutomirski <luto@amacapital.net>,
+	Herbert Xu <herbert@gondor.apana.org.au>, davem@davemloft.net,
+	Jonathan Corbet <corbet@lwn.net>, kanth.ghatraju@oracle.com,
+	daniel.kiper@oracle.com, Andrew Cooper <andrew.cooper3@citrix.com>,
+	trenchboot-devel@googlegroups.com
+Subject: Re: [PATCH v2 10/10] tpm-buf: Add TPM buffer support header for
+ standalone reuse
+Message-ID: <aogRuZJhIZblfUXw@kernel.org>
+References: <20260711160110.267780-1-ross.philipson@gmail.com>
+ <20260711160110.267780-11-ross.philipson@gmail.com>
+ <alKI9mUBTOCjPbbG@kernel.org>
+ <f85782ed-efb3-4045-9d37-2ed4847e1500@app.fastmail.com>
+ <aoen10sB5zflLFRw@kernel.org>
+ <aoevs3z1EnTNg2vJ@kernel.org>
+ <d853a1aa-49b6-46ae-87e6-62ec038c648a@app.fastmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <d853a1aa-49b6-46ae-87e6-62ec038c648a@app.fastmail.com>
 
-From: Zhan Xusheng <zhanxusheng1024@gmail.com>
+On Fri, Aug 21, 2026 at 09:31:23AM +0300, Ard Biesheuvel wrote:
+> 
+> On Fri, 21 Aug 2026, at 04:53, Jarkko Sakkinen wrote:
+> > On Fri, Aug 21, 2026 at 04:20:27AM +0300, Jarkko Sakkinen wrote:
+> >> On Wed, Aug 19, 2026 at 03:50:42PM +0300, Ard Biesheuvel wrote:
+> >> > 
+> >> > 
+> >> > On Sat, 11 Jul 2026, at 21:18, Jarkko Sakkinen wrote:
+> >> > > On Sat, Jul 11, 2026 at 09:01:10AM -0700, Ross Philipson wrote:
+> >> > >> Extract all the functions and definitions for TPM buffer handling
+> >> > >> and separate them into their own header.
+> >> > >> 
+> >> > >> Signed-off-by: Ross Philipson <ross.philipson@gmail.com>
+> >> > >> ---
+> >> > >>  drivers/char/tpm/tpm-buf.c |  3 +-
+> >> > >>  include/linux/tpm.h        | 34 +--------------------
+> >> > >>  include/linux/tpm_buf.h    | 60 ++++++++++++++++++++++++++++++++++++++
+> >> > >>  3 files changed, 63 insertions(+), 34 deletions(-)
+> >> > >>  create mode 100644 include/linux/tpm_buf.h
+> >> > >> 
+> >> > ...
+> >> > >
+> >> > > I would probably ack them all as I've seen these many times and
+> >> > > there's not much anything new. Just waiting for additional
+> >> > > feedback before applying them.
+> >> > >
+> >> > 
+> >> > Will these be going into v7.3 then?
+> >> > 
+> >> > 
+> >> 
+> >> I can piggyback them with to my PR and see what Linus thinks.
+> >
+> > Added:
+> >
+> > https://git.kernel.org/pub/scm/linux/kernel/git/jarkko/linux-tpmdd.git/log/?h=for-next-tpm
+> >
+> > I'll send v7.3 PR once these show up in -next.
+> >
+> 
+> Thanks Jarkko
 
-From: Zhan Xusheng <zhanxusheng@xiaomi.com>
+Seriously: thank you. Had a blank spot and I would have failed
+this with 100% certainty otherwise.
 
-These values are read from the on-disk header, and the messages exist to
-report the ones that are out of range, so a value with the top bit set is
-exactly what they are asked to print.  %lld renders it as a negative
-number: a my_lba of 0xffffffffffffffff is reported as -1.
-
-The compiler does not catch it, since a signed/unsigned mismatch between
-two types of the same width needs -Wformat-signedness, which the kernel
-does not enable.
-
-Drop the (unsigned long long) casts along with it.  alpha, mips and
-powerpc select int-l64.h for userspace only, so in-kernel u64 is
-unsigned long long everywhere and le64_to_cpu() already yields it.
-
-Signed-off-by: Zhan Xusheng <zhanxusheng@xiaomi.com>
----
- block/partitions/efi.c | 69 +++++++++++++++++++++---------------------
- 1 file changed, 34 insertions(+), 35 deletions(-)
-
-diff --git a/block/partitions/efi.c b/block/partitions/efi.c
-index 76994d3edd1a..54c595db12e8 100644
---- a/block/partitions/efi.c
-+++ b/block/partitions/efi.c
-@@ -344,10 +344,9 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- 
- 	/* Check the GUID Partition Table signature */
- 	if (le64_to_cpu((*gpt)->signature) != GPT_HEADER_SIGNATURE) {
--		pr_debug("GUID Partition Table Header signature is wrong:"
--			 "%lld != %lld\n",
--			 (unsigned long long)le64_to_cpu((*gpt)->signature),
--			 (unsigned long long)GPT_HEADER_SIGNATURE);
-+		pr_debug("GUID Partition Table Header signature is wrong: %llu != %llu\n",
-+			 le64_to_cpu((*gpt)->signature),
-+			 GPT_HEADER_SIGNATURE);
- 		goto fail;
- 	}
- 
-@@ -383,9 +382,9 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- 	/* Check that the my_lba entry points to the LBA that contains
- 	 * the GUID Partition Table */
- 	if (le64_to_cpu((*gpt)->my_lba) != lba) {
--		pr_debug("GPT my_lba incorrect: %lld != %lld\n",
--			 (unsigned long long)le64_to_cpu((*gpt)->my_lba),
--			 (unsigned long long)lba);
-+		pr_debug("GPT my_lba incorrect: %llu != %llu\n",
-+			 le64_to_cpu((*gpt)->my_lba),
-+			 lba);
- 		goto fail;
- 	}
- 
-@@ -394,21 +393,21 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- 	 */
- 	lastlba = last_lba(state->disk);
- 	if (le64_to_cpu((*gpt)->first_usable_lba) > lastlba) {
--		pr_debug("GPT: first_usable_lba incorrect: %lld > %lld\n",
--			 (unsigned long long)le64_to_cpu((*gpt)->first_usable_lba),
--			 (unsigned long long)lastlba);
-+		pr_debug("GPT: first_usable_lba incorrect: %llu > %llu\n",
-+			 le64_to_cpu((*gpt)->first_usable_lba),
-+			 lastlba);
- 		goto fail;
- 	}
- 	if (le64_to_cpu((*gpt)->last_usable_lba) > lastlba) {
--		pr_debug("GPT: last_usable_lba incorrect: %lld > %lld\n",
--			 (unsigned long long)le64_to_cpu((*gpt)->last_usable_lba),
--			 (unsigned long long)lastlba);
-+		pr_debug("GPT: last_usable_lba incorrect: %llu > %llu\n",
-+			 le64_to_cpu((*gpt)->last_usable_lba),
-+			 lastlba);
- 		goto fail;
- 	}
- 	if (le64_to_cpu((*gpt)->last_usable_lba) < le64_to_cpu((*gpt)->first_usable_lba)) {
--		pr_debug("GPT: last_usable_lba incorrect: %lld < %lld\n",
--			 (unsigned long long)le64_to_cpu((*gpt)->last_usable_lba),
--			 (unsigned long long)le64_to_cpu((*gpt)->first_usable_lba));
-+		pr_debug("GPT: last_usable_lba incorrect: %llu < %llu\n",
-+			 le64_to_cpu((*gpt)->last_usable_lba),
-+			 le64_to_cpu((*gpt)->first_usable_lba));
- 		goto fail;
- 	}
- 	/* Check that sizeof_partition_entry has the correct value */
-@@ -422,7 +421,7 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- 		le32_to_cpu((*gpt)->sizeof_partition_entry);
- 	if (pt_size > KMALLOC_MAX_SIZE) {
- 		pr_debug("GUID Partition Table is too large: %llu > %lu bytes\n",
--			 (unsigned long long)pt_size, KMALLOC_MAX_SIZE);
-+			 pt_size, KMALLOC_MAX_SIZE);
- 		goto fail;
- 	}
- 
-@@ -484,32 +483,32 @@ compare_gpts(gpt_header *pgpt, gpt_header *agpt, u64 lastlba)
- 		return;
- 	if (le64_to_cpu(pgpt->my_lba) != le64_to_cpu(agpt->alternate_lba)) {
- 		pr_warn("GPT:Primary header LBA != Alt. header alternate_lba\n");
--		pr_warn("GPT:%lld != %lld\n",
--		       (unsigned long long)le64_to_cpu(pgpt->my_lba),
--                       (unsigned long long)le64_to_cpu(agpt->alternate_lba));
-+		pr_warn("GPT:%llu != %llu\n",
-+			le64_to_cpu(pgpt->my_lba),
-+			le64_to_cpu(agpt->alternate_lba));
- 		error_found++;
- 	}
- 	if (le64_to_cpu(pgpt->alternate_lba) != le64_to_cpu(agpt->my_lba)) {
- 		pr_warn("GPT:Primary header alternate_lba != Alt. header my_lba\n");
--		pr_warn("GPT:%lld != %lld\n",
--		       (unsigned long long)le64_to_cpu(pgpt->alternate_lba),
--                       (unsigned long long)le64_to_cpu(agpt->my_lba));
-+		pr_warn("GPT:%llu != %llu\n",
-+			le64_to_cpu(pgpt->alternate_lba),
-+			le64_to_cpu(agpt->my_lba));
- 		error_found++;
- 	}
- 	if (le64_to_cpu(pgpt->first_usable_lba) !=
-             le64_to_cpu(agpt->first_usable_lba)) {
- 		pr_warn("GPT:first_usable_lbas don't match.\n");
--		pr_warn("GPT:%lld != %lld\n",
--		       (unsigned long long)le64_to_cpu(pgpt->first_usable_lba),
--                       (unsigned long long)le64_to_cpu(agpt->first_usable_lba));
-+		pr_warn("GPT:%llu != %llu\n",
-+			le64_to_cpu(pgpt->first_usable_lba),
-+			le64_to_cpu(agpt->first_usable_lba));
- 		error_found++;
- 	}
- 	if (le64_to_cpu(pgpt->last_usable_lba) !=
-             le64_to_cpu(agpt->last_usable_lba)) {
- 		pr_warn("GPT:last_usable_lbas don't match.\n");
--		pr_warn("GPT:%lld != %lld\n",
--		       (unsigned long long)le64_to_cpu(pgpt->last_usable_lba),
--                       (unsigned long long)le64_to_cpu(agpt->last_usable_lba));
-+		pr_warn("GPT:%llu != %llu\n",
-+			le64_to_cpu(pgpt->last_usable_lba),
-+			le64_to_cpu(agpt->last_usable_lba));
- 		error_found++;
- 	}
- 	if (efi_guidcmp(pgpt->disk_guid, agpt->disk_guid)) {
-@@ -542,17 +541,17 @@ compare_gpts(gpt_header *pgpt, gpt_header *agpt, u64 lastlba)
- 	}
- 	if (le64_to_cpu(pgpt->alternate_lba) != lastlba) {
- 		pr_warn("GPT:Primary header thinks Alt. header is not at the end of the disk.\n");
--		pr_warn("GPT:%lld != %lld\n",
--			(unsigned long long)le64_to_cpu(pgpt->alternate_lba),
--			(unsigned long long)lastlba);
-+		pr_warn("GPT:%llu != %llu\n",
-+			le64_to_cpu(pgpt->alternate_lba),
-+			lastlba);
- 		error_found++;
- 	}
- 
- 	if (le64_to_cpu(agpt->my_lba) != lastlba) {
- 		pr_warn("GPT:Alternate GPT header not at the end of the disk.\n");
--		pr_warn("GPT:%lld != %lld\n",
--			(unsigned long long)le64_to_cpu(agpt->my_lba),
--			(unsigned long long)lastlba);
-+		pr_warn("GPT:%llu != %llu\n",
-+			le64_to_cpu(agpt->my_lba),
-+			lastlba);
- 		error_found++;
- 	}
- 
--- 
-2.43.0
-
+BR, Jarkko
