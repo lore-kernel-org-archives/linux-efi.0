@@ -1,217 +1,95 @@
-Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71EDC474258;
-	Fri, 21 Aug 2026 10:07:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 578633BFE33;
+	Fri, 21 Aug 2026 10:29:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787306835; cv=none; b=AuLk+f8+mkYXfsaw451LeQM0hqju7JXStEoFR8+B3TvWg0Pu7LG8tPBihuIBo12oA6YN9M/E1v9SZLiIU3XOmRl6jmNaDkCa0T0IMlzSVYNiKmfhXWCYrrHFC+qjJlZWxtDqpoIGSmsyUvxDt3Mg50QgEZbUWWouvFybQ5EqExg=
+	t=1787308196; cv=none; b=CgjZvxkdcn8Miyfr6nMLyQQgUnYzXvYDzfUFFjGC97MAK1tdQ9PukE+xU7lhNTbsLiQpDiuIYuMdrVDX/JY9v8UV2T4/kx2zBA0xo0viOdICjYcoBpV8mjpvWSJtrXwhNhYsBJcsKnsJ5DAElTb2cudjctob02U6n2hEPd6MKlo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787306835; c=relaxed/simple;
-	bh=Xsp5t/AjlrO67qweZEiBvofZ/A1yR4ej/H2a8cEi3f8=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=CmXwtbPkOGHAueGMCByDJ8DUyS6OHZhISAlquo9VYRtDtUwq5nz1PMdXOLN6zdxcp2o576R0/RXVDTC2n8KNwrlbh7LKMWmg9Cwy/QvPldVlrzxPwWQfyMID9oHhU7BsKmfXGe3y6BKKzHrEsF0tblUR0HUZBwpKa2vHWQkBBJw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=MlayavnH; arc=none smtp.client-ip=82.195.75.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
+	s=arc-20240116; t=1787308196; c=relaxed/simple;
+	bh=zmll+Abyt86M8oSmAMWOkIQhuvX28rSWFvURizsLwdI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=cOzksMQr12N1cV11COpYv9raRJGah8XTeHb3Voyqz+tJQh2RDkSsyE2nsEmfpZjKBY/F711PHllBQJwz3rTDWPjZccH3HfD+a9yplmrQkCUwyRcRBAWEs9QBhF8wRrTifpPNtG+u/B2HZ7qsU4BgTN74WzTJNLBJ7AN4BMpLREc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ixUI3kRs; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="MlayavnH"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
-	s=smtpauto.stravinsky; h=X-Debian-User:Cc:To:In-Reply-To:References:
-	Message-Id:Content-Transfer-Encoding:Content-Type:MIME-Version:Subject:Date:
-	From:Reply-To:Content-ID:Content-Description;
-	bh=clgEu5ocwrJ3/2sMRprXhyjnlGpexA9HwN+YHsN7hWE=; b=MlayavnHGn93lBnpvs956q0XXD
-	CVT+1RGs2pahyXBKzbABxG5K9HCaqueKoaMRMlRJlxoYTruWY+ViP9hC9ggDwSa7p/xp6CVXfiYBF
-	Vkb/5h/+iGhZ0SMb/usYLoXRqfu8B/Uv5ZRg4+wIA5XCYg/Moojlgz9XZyHEOHSQzTYImSZLRx0gp
-	ndgIoMz1pVbt7Q/NTZCvVtwgLmRdkToCfEc3gneLx1YnsXyu7jJvSRBwaA80QVPm4VIZeECOFIYgV
-	6D5EmSzBV7DP1LTe+NSG1FAB2NfipYX1D4LlenITVvl8Y97FvZBFlyDnkEvEVhayB86P05bQZwG0D
-	tPbmeQvQ==;
-Received: from authenticated-user
-	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
-	(Exim 4.96)
-	(envelope-from <leitao@debian.org>)
-	id 1wxM9C-00BGCh-0e;
-	Fri, 21 Aug 2026 10:06:50 +0000
-From: Breno Leitao <leitao@debian.org>
-Date: Fri, 21 Aug 2026 03:06:06 -0700
-Subject: [PATCH v2 6/6] efi: respect the poisoned pages coming from
- previous kernel
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ixUI3kRs"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 929BD1F00A3E;
+	Fri, 21 Aug 2026 10:29:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1787308183;
+	bh=APGED5YlpOpMPxOSsAuKA6X7ShEtj4fbflQDOHFgkgs=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=ixUI3kRsD8NoUTtmkjyJfa4wlDS1R4IthffH+JxKoU6cmU1lGAaG4clXL287xuHh1
+	 FzXDa/qYuq72kJG0jgYnXPTUntW8HTxORTjZ9zMtzU2H76m9/ZwKxWBR8g7VqYAuva
+	 kgQFavADAJwi0NRufxA8l8j/zT3OVVcMAxgx1gl2+e85rIVJR64+x6g9/HBkUVYvVx
+	 kCH7LrYn2BlvwyddOASSf0J2KMGbkAaRPTHlkFbYif7VFRWytKOhy+T2rQDtkoB01E
+	 Od3baF8witTx31YqfSZSFnCFr4BovvmI0G+CDmqrfhlwEDpZqh6I3Ig2QOF85lHa94
+	 BNRaFCMkdKWqg==
+Received: from phl-compute-04.internal (phl-compute-04.internal [10.202.2.44])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 2926B1980052;
+	Fri, 21 Aug 2026 06:29:39 -0400 (EDT)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-04.internal (MEProxy); Fri, 21 Aug 2026 06:29:41 -0400
+X-ME-Sender: <xms:kiiIarVzSmx1y-aArkHdOBg6_uN2EF6kmHm7eYV3kLj8d1ZetYmTnQ>
+    <xme:kiiIarad1L4afhIQcR9TpUON9bZV2_aFZEy-RJGSw_E5CZfR8pB7srH9uie3fSiuB
+    dePAuvZWbvXhhgkEl6OfcEL-YeY89S6pgIr0B7jnImbXdTXQ6RL2xCu>
+X-ME-Received: <xmr:kiiIaixDRegUN-DZiVZpoNH_w4V-cSHrk9NAzrk7u6EdWuZo3aVYGcDscRg>
+X-ME-Proxy-Cause: dmFkZTGP4bL3rkkhiaU+LYYEJklVw3I4bCV0bLo9Xe/rEgNWD79Kg2qnSiGX6a0LzPvrT3
+    wfkn1QSVsDXoCCou0Ai4CQZtSMXEfYR7TcfJrEs2qA5nuREzR/25/SXv5FHUVnpahHF5rZ
+    sKtXsan+W3eHdPeJRne/qiXwfCfCb10WRvmLB30Ci3uaIEVL5D3olIiiOSnObxq8C6IPWE
+    CaoBiOtHyQu+B9nz7YFtvwuilTaX0/jGLK4wKrha13aK2nLIfCvV4FGU476zMpcM2zcLB4
+    bT9trOvY0ulRdAD+iw9eIBoGr0FK47s7WRgK6yQyBMu7G61oTI+YvMopiv4VSl18lOJ5Z3
+    PFVi+866/3m3g5aFzO7xOv7m6vuXzMUw4Lv+jO9gfxTn5uM0B+j96kCvw/jt8I+huXrLkU
+    wKkJaFlospdKLrCQDk16EZ8+PTysacY1zlTDsV2ACyFg8I0wjizXHCfA4iRjksBttHwcTY
+    wvEmk9ehfcuSKoQI7pMdYMnnya1y9zVIko1YRNEGK1ERHWn8XNmEmOW7aegRM9a2hLgBF2
+    fUrsAB+TJNQlwN/Ob1VoLupB9GoBMoq4ahvuVHXxmmOnPY+KATnU/KnrCbrHVXlRRWx6En
+    75CalTn5X3AfHuDh0QqtF9FFmIT9W6QxvSkRgXvqsKl4lNvEtZYrfgg/K2hA
+X-ME-Proxy: <xmx:kiiIagJ6K1_IhTU6mwLPUNctDqMy9YCXitJsDYeigc3ethIccfkWKg>
+    <xmx:kiiIapfwVryqGlX_G8FBQ-G81dMyuek2WOwFvDgVQNTkC2pFWFIxZw>
+    <xmx:kiiIaouDMVQjpMMhVDXhzsvSFoiQl94RJjkg-M1USLW9qB4i-AysmA>
+    <xmx:kiiIanFDd2c0gVRX9E4XBv2diwz95NhoIw-LxCwp5NSInmTPRSGErw>
+    <xmx:kiiIaifnfAIs5050IA3B1i7QlIb-FxA2CFT7Ar6PadIGJ8yF-mjmyIVy>
+Feedback-ID: i10464835:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
+ 21 Aug 2026 06:29:38 -0400 (EDT)
+Date: Fri, 21 Aug 2026 11:29:36 +0100
+From: Kiryl Shutsemau <kas@kernel.org>
+To: Breno Leitao <leitao@debian.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Miaohe Lin <linmiaohe@huawei.com>, 
+	Naoya Horiguchi <nao.horiguchi@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, 
+	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, 
+	rmikey@meta.com, riel@surriel.com, kexec@lists.infradead.org, 
+	kernel-team@meta.com
+Subject: Re: [PATCH v2 0/6] efi: mm/memory-failure: keep hardware-poisoned
+ pages out of the next kexec
+Message-ID: <aognoSPb8vbkR3U8@thinkstation>
+References: <20260821-hwpoison-kho-v2-0-5743791e48e6@debian.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260821-hwpoison-kho-v2-6-5743791e48e6@debian.org>
-References: <20260821-hwpoison-kho-v2-0-5743791e48e6@debian.org>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <20260821-hwpoison-kho-v2-0-5743791e48e6@debian.org>
-To: Ard Biesheuvel <ardb@kernel.org>, 
- Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
- Miaohe Lin <linmiaohe@huawei.com>, 
- Naoya Horiguchi <nao.horiguchi@gmail.com>, 
- Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
- linux-mm@kvack.org, rmikey@meta.com, kas@kernel.org, riel@surriel.com, 
- kexec@lists.infradead.org, Breno Leitao <leitao@debian.org>, 
- kernel-team@meta.com
-X-Mailer: b4 0.16-dev-f8e9d
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4736; i=leitao@debian.org;
- h=from:subject:message-id; bh=Xsp5t/AjlrO67qweZEiBvofZ/A1yR4ej/H2a8cEi3f8=;
- b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqiCMaLD0gMUB4x31WYY7Fkyu5rCsTlY48ZbsVw
- Nj6u6XVr3uJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCaogjGgAKCRA1o5Of/Hh3
- bX8cD/kBHVlSr41tBzDeV+jCDztGEjkDtT4IWUNxuOkogpCQezn/v6qS40A8wDFiNHJFSXDbAKx
- rtgqpRfApNGBuCI3kw6A1v/hmQGPaqdIo7Z4qSwy0ThsszkBZ2I2TBvDwL8C/eEEV9NklYeiF0y
- Jaav/ViHoSnLsaq77+gX3G1vLYYA8BhkRFazDF9imjYp8+vT+WTEIblxYzXG2B/a0ptHQaLn2VB
- ig/KL/jhwH7ncyfMig0bC0z/LbmQa7s0JdTXUSM7amzpllpgNW5yiV/CBIJ2xxcJtJnnRceU9dG
- BeInri9f9Ph27Zhyw2kRB7vVC/7uDGw/s1r6RjAUrCTeamf5sB2vdGl3Zg2xJ8bpYBXHkyBNFb8
- sGmmVIRJw+aZNplMEtGSUMceZoWGFXnrmaOCi3TUNxUfGtuZMF8Zc6ZrJBOpJ6fYW6/WqmRrKBA
- uqIsr0cE4uNUxBWSzO5YsTeuutpBfJYmulEBwIQSZjQAbeoNHjtIZLuMSAzAgPeJMdxOEaVLalc
- IzWFCsG0L/dTguYbx7Jxm9sWwP4krI3vzqYy/yKaLtwTCFg26qY8oJKydmVGZWNgapQsXjyj/cL
- blpYLbmyzaDkOL8RomhW5VZxKMKR079hL+ZT0EklfZwjKhv1vLLVsoLfc8nr05AY6n8KZemvcaD
- G5RQ0RnqrD7GxtQ==
-X-Developer-Key: i=leitao@debian.org; a=openpgp;
- fpr=AC8539A6E8F46702CA4A439B35A3939FFC78776D
-X-Debian-User: leitao
 
-On kexec next kernel, walk the LINUX_EFI_POISONED_MEMORY bitmap during
-EFI init -- before memblock hands memory to the buddy allocator -- and
-memblock_reserve() every unit whose bit is set. So a frame poisoned
-under a previous kernel is never handed back out across a kexec.
+On Fri, Aug 21, 2026 at 03:06:00AM -0700, Breno Leitao wrote:
+> The allocation is capped at 1MB, which covers 16TB at 2MB per bit. Past
+> that the stub doubles the unit rather than growing the table, so the
+> table stays bounded on any machine.
 
-This runs from efi_config_parse_tables(), early enough to keep the
-frames out of memblock and the buddy allocator.
+For unaccepted memory I didn't capped it. On x86, architectural maximum
+is 4PB which would cost 256MB in the bitmap. It should be okay for the
+scale.
 
-Signed-off-by: Breno Leitao <leitao@debian.org>
----
- drivers/firmware/efi/efi.c    |  2 ++
- drivers/firmware/efi/poison.c | 71 +++++++++++++++++++++++++++++++++++++++++--
- include/linux/efi.h           |  2 ++
- 3 files changed, 73 insertions(+), 2 deletions(-)
+> Memory hot-added after boot is not covered either: the bitmap spans the
+> RAM the EFI memory map describes, and a frame outside it is silently not
+> recorded.
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 111e60479211a..7474eeebb0add 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -812,6 +812,8 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
- 		}
- 	}
- 
-+	efi_reserve_poisoned_memory();
-+
- 	if (rt_prop != EFI_INVALID_TABLE_ADDR) {
- 		efi_rt_properties_table_t *tbl;
- 
-diff --git a/drivers/firmware/efi/poison.c b/drivers/firmware/efi/poison.c
-index 2f47293a4e45f..e418c6b3aab81 100644
---- a/drivers/firmware/efi/poison.c
-+++ b/drivers/firmware/efi/poison.c
-@@ -3,8 +3,9 @@
-  * Runtime handling for the LINUX_EFI_POISONED_MEMORY configuration table: a
-  * bitmap with one bit per EFI_POISON_UNIT_SIZE of physical memory that records
-  * hardware-poisoned frames so the next kexec kernel can keep them out of its
-- * allocator. The stub installs the (empty) bitmap; this kernel sets bits at
-- * runtime.
-+ * allocator. The stub allocates and installs the (empty) bitmap; this kernel
-+ * sets bits at runtime; the next kernel reserves the set units before the
-+ * allocator comes up.
-  *
-  * Copyright (c) 2026 Meta Platforms, Inc. and affiliates.
-  * Copyright (c) 2026 Breno Leitao <leitao@debian.org>
-@@ -16,6 +17,8 @@
- #include <linux/efi.h>
- #include <linux/io.h>
- #include <linux/log2.h>
-+#include <linux/memblock.h>
-+#include <linux/minmax.h>
- #include <linux/mm.h>
- #include <linux/overflow.h>
- 
-@@ -128,3 +131,67 @@ void efi_hwpoison_record_pfn(unsigned long pfn)
- 
- 	set_bit(unit, efi_poison->bitmap);
- }
-+
-+void __init efi_reserve_poisoned_memory(void)
-+{
-+	u64 ppm = efi.poisoned_memory, phys_base, unit_size, bitmap_size, off;
-+	struct linux_efi_poisoned_memory *pm;
-+	unsigned int nr_units = 0;
-+
-+	if (ppm == EFI_INVALID_TABLE_ADDR)
-+		return;
-+
-+	pm = early_memremap(ppm, sizeof(*pm));
-+	if (!pm) {
-+		pr_warn("Could not map poisoned-memory table\n");
-+		return;
-+	}
-+
-+	if (!efi_poison_table_valid(pm)) {
-+		/* Keep the runtime side off a table this pass rejected. */
-+		efi.poisoned_memory = EFI_INVALID_TABLE_ADDR;
-+		early_memunmap(pm, sizeof(*pm));
-+		return;
-+	}
-+
-+	phys_base = pm->phys_base;
-+	unit_size = pm->unit_size;
-+	bitmap_size = pm->size;
-+
-+	early_memunmap(pm, sizeof(*pm));
-+
-+	/* Reserve the table itself so it survives a further kexec. */
-+	memblock_reserve(PAGE_ALIGN_DOWN(ppm),
-+			 PAGE_ALIGN(ppm + sizeof(*pm) + bitmap_size) -
-+			 PAGE_ALIGN_DOWN(ppm));
-+
-+	/*
-+	 * Walk the bitmap a page at a time and reserve each poisoned unit.
-+	 * memblock.memory is not populated this early, so memblock_remove()
-+	 * and memblock_mark_nomap() would be no-ops; a reservation is what
-+	 * keeps the units away from the allocator.
-+	 */
-+	for (off = 0; off < bitmap_size; off += PAGE_SIZE) {
-+		u64 chunk = min_t(u64, PAGE_SIZE, bitmap_size - off);
-+		unsigned long bit, nbits = chunk * BITS_PER_BYTE;
-+		unsigned long *map;
-+
-+		map = early_memremap(ppm + offsetof(struct linux_efi_poisoned_memory,
-+						    bitmap) + off, chunk);
-+		if (!map) {
-+			pr_warn("Could not map poisoned-memory bitmap\n");
-+			return;
-+		}
-+		for_each_set_bit(bit, map, nbits) {
-+			u64 unit = off * BITS_PER_BYTE + bit;
-+
-+			memblock_reserve(phys_base + unit * unit_size, unit_size);
-+			nr_units++;
-+		}
-+		early_memunmap(map, chunk);
-+	}
-+
-+	if (nr_units)
-+		pr_info("reserved %u poisoned unit(s) (%lluK each) inherited across kexec\n",
-+			nr_units, unit_size >> 10);
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index f03b1bb576133..350a3cb0babdd 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1285,8 +1285,10 @@ struct linux_efi_poisoned_memory {
- #define EFI_POISON_UNIT_SIZE	SZ_2M
- 
- #ifdef CONFIG_EFI_POISONED_MEMORY
-+void efi_reserve_poisoned_memory(void);
- void efi_hwpoison_record_pfn(unsigned long pfn);
- #else
-+static inline void efi_reserve_poisoned_memory(void) { }
- static inline void efi_hwpoison_record_pfn(unsigned long pfn) { }
- #endif
- 
+We might update it if/when it gets solved for unaccepted memory.
 
 -- 
-2.53.0-Meta
-
+  Kiryl Shutsemau / Kirill A. Shutemov
