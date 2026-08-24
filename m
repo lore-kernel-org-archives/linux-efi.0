@@ -1,40 +1,61 @@
-Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2457A41F347;
-	Mon, 24 Aug 2026 13:03:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67EE036AB77
+	for <linux-efi@vger.kernel.org>; Mon, 24 Aug 2026 15:19:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787576607; cv=none; b=s/YKhWLdmA7w46cQXtAQn+e+h0578nOwwKHJXlqNLELTClzPL7C0GVaf/oLkAYtCnBUD5URhv5LtFRypewm7aZU94E8ZnxXpH+6zmdPap0+b1R5HhJl2DIBfTzwoKUaDt1MjsiMjZcgUHsH/7/7AqhbGCOO2JtA7olAN9W6Fahc=
+	t=1787584778; cv=none; b=BlkQ4T2cGWG9KCAremQIcB7x4deAECawmvL5knsdXSzNmRitxKv4TRjBqWq9OjoZTK64Sl0PeMJm317e3YNs1XSk88OpsFklBdHElAwSYu/X5UQF99bbN46ljYFgQIvtzxZglQWUk+t5s/ut3NR9D5FKTR489XDoQoQjPGdoL2s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787576607; c=relaxed/simple;
-	bh=f2E1nNMDZmb0cz+v7IjRYcKyCW23fV9BtqdWi46vznY=;
+	s=arc-20240116; t=1787584778; c=relaxed/simple;
+	bh=C5l4dokbwqZu1vI6GZJkZkycmcftzDznQp6+gSr1zIQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qIJwhVMMlF7Oyp8vVt+D/FBIxmnbcAAHF/VIzpU5CI7pG/dzmWAHM3D6+A3UG0BjmkLU00taNla1VhgBRK9idTYHvGuGbg3dewxZ6gvOJjVAdSIA7CIWvDriJwaVeo7d9TYifG03YjgZNc2j8bD2xYr8JPVd72TTV5C7r5eKYAo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=PRPwI+mH; arc=none smtp.client-ip=82.195.75.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=miffyriuBpTSoi05rBbWYemmoiR3Ekg8bihWzWJ+EfQHK1IS9Qot97EG5Wo9LXHRLyThx1lKJ14cDaQHnNBbe22IJ1v3Q/BjXYE7H8D2OP9R+7d9Z2Pwacs39FHxA3V26LkbH0YktBUytsZkiNCRqqreDLbq5ZnCm/pSkrXGkps=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LC36phps; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="PRPwI+mH"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
-	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=O2Scpyty4GH+eqGEvARQTzFRBjvGNIS26XjXcBDeF/Q=; b=PRPwI+mHCGcb2sHUsdpeaL+JJu
-	X3E4qrt0g1rrtHtkSflkI1EemlwQRZ8iOqWSvqBogthUK9dhLZogyMr0jo+ItJbTizL89gETEgzuG
-	13nVdZUvGjF8Z5eSjawkUQnXJTsPV6x4TZGUE5LGoBQi3Rhr7WCV+kpjXmKl0OMh6g04nAr7eOeg2
-	Y5CUxEqpoQSOVIoqbbCw1+PeRZUIb+M+Zv6r6UztlHIE8ye/dwTGLkruOj8UbGdI+rgE8Lc9wgbaD
-	RjSKX9Y9usd0EAi2ip5o4l/8WMxB1XLzMKBu66AoOcL0VznfvBary2dneWvHkOqGwsd1lBYpwnmuC
-	y6uoGmlQ==;
-Received: from authenticated-user
-	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
-	(Exim 4.96)
-	(envelope-from <leitao@debian.org>)
-	id 1wyUKV-00DgAo-09;
-	Mon, 24 Aug 2026 13:03:11 +0000
-Date: Mon, 24 Aug 2026 06:03:05 -0700
-From: Breno Leitao <leitao@debian.org>
-To: Kiryl Shutsemau <kas@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LC36phps"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9B65A1F00A3D;
+	Mon, 24 Aug 2026 15:19:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1787584777;
+	bh=KhObASzU+IfR0vAcTNmjdJh1v1AW8fzRga8XEXTHVUA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=LC36phpszc3Om6N/zbMxn3qMAaW69FAFVObEdERNIgzHvNnwi6kqgufIEU7/UIWsY
+	 krth0vZ8KBkoVR2jhi20myZTjDkhMfwj0bh8fKkFO6Cq9jtg6P6nCbqcFUV5jB7MMH
+	 Atx4872f1nd1YEddLkLsnZfeA38+HMzpmURbmib3a6OO3LnOhDaSE6pNJTv9+0hTPy
+	 Bjrgk9LvrsETUGXLygWv5zpQuxjCVbMH3s6RiwLjTKFOe+Ay7EtwFS2q3XS1NpfRKm
+	 8Z0HQsSlyzqvXZSW1e+1oD5IZQqNP9BmPLOW+iaXG9B3F2Jb6iX1rSTgDIYMg+P6Xp
+	 8/2udBbC4RLrw==
+Received: from phl-compute-06.internal (phl-compute-06.internal [10.202.2.46])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 2CABF1980064;
+	Mon, 24 Aug 2026 11:19:33 -0400 (EDT)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-06.internal (MEProxy); Mon, 24 Aug 2026 11:19:35 -0400
+X-ME-Sender: <xms:BGGMatyGyn3hvJEAL0fFVjsBYh6gFUw65lsJrw_6381KetY-a1qxIg>
+    <xme:BGGMalHPhb2XHbU2FL6zGJT2A6yE8C808HEMrw-XsTFRzBkkDK8YaH-6SScXzeiTF
+    cj3wzC4PcJqjEIF5c2m5qGUfrfw6Yyhf-ybFPELzuLx8ScJvRHuino9>
+X-ME-Received: <xmr:BGGMaiukLLHf90eQribcfkvQllhnvFKo9aofwwJhz8uPgwNUtUoji80uTlc>
+X-ME-Proxy-Cause: dmFkZTGmehEwlTpaGnlMoJpjXQ7nDLGKNpzYXa2GqgT7N6wq+ruWxFOqugBXByk4sBfObp
+    8DXKoBbmhM2FrtuaF9WZfWUm/XSEbXQJrXuwkZA4vndDzrBzxGCewc1r+D79yU3xB5jMSa
+    B+LVxfNdjqdsuQZAIZKPCnVgEizP998OPUYROmwf7705WA1lsJP0FTniXw+j+FTLaPgO0N
+    pd/+oAYahWf/yETAcvBK1S8P36SGEYc0d+vgfJCIyGHc08xJ91rRcqKCNPSEZn0qz0TbQ4
+    K8qMxtX4Mw5iXxoWJmcxU6EWREGiIjkBV6LuhbNuw0VpdhCn2mkDjHa2YQj/22JhnN6oEm
+    4gxVYethYAkikekOYpmmy2wE+3KgV9l0KZncUeQMPVLxTPopcHk7B/t0+PqwsnOycNBrd8
+    vq6icxUXHj7Jja6KFHTxcBoUZDXTm8d53gqsszOR2pEv5+etleh6hqokwfs/29Ugy955AD
+    ofBgQAbcPGVZP95X6cOumcWEZoV4/S7+8hr5oxlRtC2g5pwOGUXxs6/iwmqb4/tH9V25nL
+    73WPOd3sIE52G6iY59hh2iDy+8Xk/ff8vm/m/EawJVtYutWKH2BHuPh7Vw9D8veAMwYHqW
+    IEoiv74acRu1a4kH5h9pzMzAk3ntTtdu3nf9xvRv3t3no9eU5wynopTneZKw
+X-ME-Proxy: <xmx:BGGMapXg6FcpXm7Cm04GaXfUrtCknQ9pxDcfaUReND3l7ZNV_Ah3sA>
+    <xmx:BGGMai6vp9i2vWDcbOdl3gqXrclWdmYwbf4bGbwOm_kT_osDA1thtA>
+    <xmx:BGGMatZTApO_0kD9vDLGKSJP-KmLtAz0lFDL5oYGcOjIy26EW-hXaA>
+    <xmx:BGGMamBVp9A3SqBBtHKv3fZdBI1PIl_5cHBIM1ar4qVw-wYmajWJfA>
+    <xmx:BGGMaupDZcb_xUq5ERgNzieAYNoVrTFRpliEkJTvATSIEQPawMJm24EX>
+Feedback-ID: i10464835:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
+ 24 Aug 2026 11:19:32 -0400 (EDT)
+Date: Mon, 24 Aug 2026 16:19:31 +0100
+From: Kiryl Shutsemau <kas@kernel.org>
+To: Breno Leitao <leitao@debian.org>
 Cc: Ard Biesheuvel <ardb@kernel.org>, 
 	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Miaohe Lin <linmiaohe@huawei.com>, 
 	Naoya Horiguchi <nao.horiguchi@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, 
@@ -43,7 +64,7 @@ Cc: Ard Biesheuvel <ardb@kernel.org>,
 	kernel-team@meta.com
 Subject: Re: [PATCH v2 6/6] efi: respect the poisoned pages coming from
  previous kernel
-Message-ID: <aow_bfUQWZWh7Kxb@gmail.com>
+Message-ID: <aoxgwbsdy0H1OSBm@thinkstation>
 References: <20260821-hwpoison-kho-v2-0-5743791e48e6@debian.org>
  <20260821-hwpoison-kho-v2-6-5743791e48e6@debian.org>
  <aog_uH5fTsJzXjjx@thinkstation>
@@ -51,6 +72,7 @@ References: <20260821-hwpoison-kho-v2-0-5743791e48e6@debian.org>
  <aohldTtzE2GJ76md@thinkstation>
  <aoh-3XJw82O8SmsA@gmail.com>
  <aowcYuXEeqdfHmn6@thinkstation>
+ <aow_bfUQWZWh7Kxb@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -59,58 +81,13 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aowcYuXEeqdfHmn6@thinkstation>
-X-Debian-User: leitao
+In-Reply-To: <aow_bfUQWZWh7Kxb@gmail.com>
 
-On Mon, Aug 24, 2026 at 11:32:35AM +0100, Kiryl Shutsemau wrote:
-> I wounder if the fix would be to make page allocator consume the table
-> and not do memblock_reserve() here? So we would allocate struct pages
-> for the memory and poison them on init. And your fix by the link below
-> would do the rest.
+On Mon, Aug 24, 2026 at 06:03:05AM -0700, Breno Leitao wrote:
+> Yea, this seems better in fact. Let me know if that matches what you
+> had in mind.
 
-Makes sense. Probably dropping memblock_reserve() altogether, for the
-units and the table, and poisoning the recorded frames at
-mm_core_init(), right after memblock_free_all().
+Yes!
 
-Roughly what I have in mind:
-
-        memblock_free_all();
-        hwpoison_init_boot();
-        mem_init();
-
-and hwpoison_init_boot() drives it from the table, walking the bitmap on
-the EFI side where the geometry lives:
-
-        for_each_set_bit(bit, map, nbits) {
-                u64 unit = off * BITS_PER_BYTE + bit;
-                unsigned long pfn, i;
-
-                pfn = PHYS_PFN(phys_base + unit * unit_size);
-                for (i = 0; i < unit_size >> PAGE_SHIFT; i++)
-                        hwpoison_boot_pfn(pfn + i);
-        }
-
-mm/memory-failure.c gets the per page primitive:
-
-        bool __init hwpoison_boot_pfn(unsigned long pfn)
-        {
-                struct page *page = pfn_to_online_page(pfn);
-
-                if (!page || PageHWPoison(page))
-                        return false;
-
-                if (!is_free_buddy_page(page) || !take_page_off_buddy(page))
-                        return false;
-
-                SetPageHWPoison(page);
-                page_ref_inc(page);
-                atomic_long_inc(&num_poisoned_pages);
-
-                return true;
-        }
-
-Yea, this seems better in fact. Let me know if that matches what you
-had in mind.
-
-Thanks!
---breno
+-- 
+  Kiryl Shutsemau / Kirill A. Shutemov
