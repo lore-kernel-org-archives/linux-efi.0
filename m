@@ -1,41 +1,41 @@
 Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 82AB53B27C3;
-	Wed, 26 Aug 2026 12:04:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF83926ED3D;
+	Wed, 26 Aug 2026 12:04:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787745890; cv=none; b=dpsPSNPNF5w8pGv2qoRWwH2RV1x35BT/tTEI9VgCs++bqbCZy0o/vTJ2OH9l0QT+YniPvL0+dC21qciyTVuEK9bRDYPFQAeLnPM7xJ8JgtkazXkxTW5vTlwcQYRiO3aeF+QStc9X3wqktp8HpbY4AfkozwL1JK/FUd/hMQL7a2I=
+	t=1787745896; cv=none; b=fwmzHGoAdAjklqKe1jycE5d4LpnkFIbJh04XMssIQx+c8EdchNLEZQi9RLggeq1BZxNBXwi6C4t1fN+W3Sakdx8bgfg5y+TLG2/GtlwdMBzDvl8FrrmU0/mp2CXsK5AG2j8PaFaQS1gzuv7Y6guktJ9OlytG23ADjlJuG321Vzw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787745890; c=relaxed/simple;
-	bh=Z8b00DBJDYmFMxDESa/wECCjyj43cNByhLt+GnEMGjE=;
+	s=arc-20240116; t=1787745896; c=relaxed/simple;
+	bh=S2cKpA7kUQ+R7GBTrg8fm7myqPM0I7wx+hvjWQ9x6z4=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=JRyX4x6hlFlkvGzo6ftyXaS/R3LxFgktLIXyfsvkaopXYur52fkZ39+/SbyGJ3awcy/5TnrZzgS2EnXQPF0+nlDRuXOCRNpB2P/pVGMaTz3+P3QWbAoy4DAVCEPukHOcyjLJa1rDqWlP2sKtYF21yqc59XPlGYc1W+gX8SX3NuY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=cZ0z3oge; arc=none smtp.client-ip=82.195.75.108
+	 In-Reply-To:To:Cc; b=GYPz3rgx721TVuajNimP0rtUScdPHylwOFf2cXzaAi/ewTzTafmp3wdB3Z2lxE7BA1Npt3xarUdPdM5OrvSTWgTBHsCDLIXyHap8wydlM60jNafdaP3edFxtEvaRkEEYbfK+5y+veIxI6nalBXVqWsp7fPB9OGikSEFo3OxD5GE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=fAkhlHRO; arc=none smtp.client-ip=82.195.75.108
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="cZ0z3oge"
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="fAkhlHRO"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
 	s=smtpauto.stravinsky; h=X-Debian-User:Cc:To:In-Reply-To:References:
 	Message-Id:Content-Transfer-Encoding:Content-Type:MIME-Version:Subject:Date:
 	From:Reply-To:Content-ID:Content-Description;
-	bh=SbhxHAltudSE0Y7J28CXSXgoY/4tm3ypaV92q+OPD6w=; b=cZ0z3ogevdcXQzQ5GhLC05zUwp
-	M+5wDzf9EsLcy4LYngVhl89EkZq1EaPRSYy1/U9V6MJLBPspg93eLTBCnN54vrNDP0bMvrcKYj4f5
-	Sl8ZQ7M8kJWInXTLznOQczUcDhXA5l1BwxJa/ZvKLde36p/XJZOjP1cGZDCeS6BlUcn7eVfLE4gdl
-	WNhHwWRoaX1J5zzCjfFMOSa2brMeTYTBUVv4SNpy9ittK9K3X7h7Eyuc/IKpUTQ3vy0VIZghn+aTg
-	k+9mYbvHt2vWGPdOI6fadMm3BqnmI91y9Va1A1FkVHqwZhoAlUDlz1S18zY/62HgnxSyHkpc4Z2m0
-	GuhUaVSQ==;
+	bh=gNmGsxm7/3k+LNhJKR8mNefNQdIE2fnt5a+0XM15yqM=; b=fAkhlHRO91Pu1CJ21hYPfrNbTS
+	dX16DffjA5WDOzEjg5E+3Kp8rpQt76YYGHNZsVVqx96im6zNoAucLD8fDa7TvlWYYvXjCsqTBkGqu
+	KIjEXpGFtP3Rt+xDZV9Fd9jJXI8m6v5Yljquu+P5fgtW9r6/x0TiKFytQbQRntWaDUP4Dk12xb7qd
+	xl7t2ETg2rARMtzSUt5KHlN8nKuCip71AF1AFV28fNQN/JK1L836Z7aPzogEpS0y8mMpzlIpX14Ag
+	iZzMIZa+UisUJ1xtOAC2g9VuTQEdkU+jABoNCCRIKn5xlCOANiN/k/kyYydl1hL7QXzoXzqWOBR7i
+	QneAkv8Q==;
 Received: from authenticated-user
 	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
 	(Exim 4.96)
 	(envelope-from <leitao@debian.org>)
-	id 1wzCN2-00FCX7-0W;
-	Wed, 26 Aug 2026 12:04:44 +0000
+	id 1wzCN7-00FCXJ-26;
+	Wed, 26 Aug 2026 12:04:50 +0000
 From: Breno Leitao <leitao@debian.org>
-Date: Wed, 26 Aug 2026 05:03:53 -0700
-Subject: [PATCH v3 2/5] mm/memory-failure: libstub: install the
- poisoned-memory EFI table
+Date: Wed, 26 Aug 2026 05:03:54 -0700
+Subject: [PATCH v3 3/5] mm/memory-failure: efi: record hardware-poisoned
+ frames into the poisoned-memory table
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -44,7 +44,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260826-hwpoison-kho-v3-2-6f79c4b605bc@debian.org>
+Message-Id: <20260826-hwpoison-kho-v3-3-6f79c4b605bc@debian.org>
 References: <20260826-hwpoison-kho-v3-0-6f79c4b605bc@debian.org>
 In-Reply-To: <20260826-hwpoison-kho-v3-0-6f79c4b605bc@debian.org>
 To: Ard Biesheuvel <ardb@kernel.org>, 
@@ -60,220 +60,233 @@ Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-mm@kvack.org, rmikey@meta.com, riel@surriel.com, 
  Breno Leitao <leitao@debian.org>, kernel-team@meta.com
 X-Mailer: b4 0.16-dev-f8e9d
-X-Developer-Signature: v=1; a=openpgp-sha256; l=6932; i=leitao@debian.org;
- h=from:subject:message-id; bh=Z8b00DBJDYmFMxDESa/wECCjyj43cNByhLt+GnEMGjE=;
- b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqjtZKCfXr+dnXUwLgGGNeFWUmXAQhZ+kSTWYJA
- Hzxms8X/JCJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCao7WSgAKCRA1o5Of/Hh3
- be/zEACHP8bvz1QjTQwWBaPet8gNeZG1+KYIya8WM1+MgshAC5+ey7drOS8BCpNxrysa3F5fkf4
- LdifpMwKwcvWpCS/sfge65xHAa0pXw0HuZSfRZRYs3W0aJiecqi8VnSBcnvWqZMC4YmzL4pSAJT
- eJtIV9KPHpkSosP5uWNVt5zUmoRkPkW0xabbHeT6a58/EhrWCHbMECL9h1FQe8cgi9i2SFOO01w
- YoWawYBXm5yHibTA51AdSYv0ECDNBkkkWCcYq2+8fCYdT8NvJlvZN+mf+qvdKIuHimuY1gIhXnn
- JHxcL7ydriKL0s+iG0TjR28UUFtue+27taHs0LTcdyzshGXFcUIqEHC5SUz3s9R800igEJ+qruo
- AwPLy1ksEHFiSMx3WAYfzlZaJwCbB6E12NF53/lSm9egtUvOaC6M8HQeDYM9gUhWuAIa8CeXucH
- suA1ZOmv2IWK2/81u53OpinphIrC6lgjyYQHhQhrUazMBCI89Wc2K56zZn5IYQLVbyaHGnlQ+sw
- /8TmSweReLtzOhr4C4HA63UGKykv3+ToyEmgSmCUqBnA6DPqSzcyJIMn6IfLY7lEEfbxGS3IV1F
- BYM/epE4dzBB/KYas4VRhdb6sNDzNs8yI7msKFbFckPofKxc6p63TY6maeu/1pTNWjZahl2o0fo
- 38kI/QCzNEBAGEw==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=6496; i=leitao@debian.org;
+ h=from:subject:message-id; bh=S2cKpA7kUQ+R7GBTrg8fm7myqPM0I7wx+hvjWQ9x6z4=;
+ b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqjtZK9sTBgNQCxBfhvQIZobnXmKdgrZidzrOiy
+ C1uL+pXY42JAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCao7WSgAKCRA1o5Of/Hh3
+ bTreEACYtvZAq+YqtwgWUmjn0XVJ0TqEgbYc10cKuFOW7pLckNCImqjBauSLq7RMmrkgP0wJGL9
+ GSKMAAwwjDZnNYxMAEqUCsAe4y1XrUK0LzXWS6R54MOd3WQSYrVrda3NOcuBDQNfawa6C27fuMZ
+ U2avXXwj8ynCp/kRC+1yziS1wbbUMdj/56D2NkbgWUO4EzcOtlwsaxQnKQKZN6QeEcwOsCaV1Ze
+ +RgiW+3PcwQugvLNj8Vqz7PvK47tRVJmBrK5/fNR62cK9RDYBXLjJQ7t9HbeHQreDbcy8MdNmy7
+ XdqKVMU1A+QB5rlgI/Ir/NunyfUqdkD+zR7t8WHqpzLnkWr3GEmpS6iTQXlPAY3WwiNTiWLqNn2
+ mTZLpuSjbYhoBuSXN4W9J/ktPV2i6t0KVo/8ystypLHt/LDbdCDwYAJmXnv2ohjvWA0+DnefZ5c
+ OCCt5slyt0NG+tSP+l73uTSRnrs33NHRyVDn5RPVYIN9gcEz3V4SHrsCPMNvctstjspp/wLQq+g
+ +WKTLS/0u0MosGwRV+e6SA3pPqZU4CjFJjohFuMZ7fcew7f6a2XglFT0E2JXrAy91cfk2vjgFVT
+ Z1IuYXANBBTkF+vdL60csjfJWITDaCHIVTLBnCYL2gwE1jGDaibXCXKcVOLxoXtGonk4box8nJ6
+ pnHPgLTxCFRVd+g==
 X-Developer-Key: i=leitao@debian.org; a=openpgp;
  fpr=AC8539A6E8F46702CA4A439B35A3939FFC78776D
 X-Debian-User: leitao
 
-A EFI config table can only be installed while boot services are still
-up, so the stub has to create it; the running kernel can only flip bits
-in a table that already exists.
+action_result() is where memory_failure() reports the outcome of a hard
+offline, so hook it to set the frame's bit in the
+LINUX_EFI_POISONED_MEMORY bitmap.
 
-Size the bitmap from the top of usable RAM, which efi_get_ram_top()
-works out by walking the UEFI memory map, since the stub has no max_pfn.
-Bit N covers unit N counting from address 0, so the table tracks
-max_pfn. Memory the firmware hot-adds later sits above it and is not
-carried across a kexec.
+Soft-offlined pages reach num_poisoned_pages_inc() through
+page_handle_poison() and are deliberately left out: they are still
+functional and were offlined predictively, so recording them would turn
+a prediction into a permanent loss for every kernel further down the
+kexec chain.
 
-One table has to serve every architecture, so efi_get_ram_top() takes
-the union of the memory types they turn into RAM: what setup_e820() maps
-to E820_TYPE_RAM on x86, plus the EFI_ACPI_RECLAIM_MEMORY and
-EFI_PERSISTENT_MEMORY that is_usable_memory() accepts on arm64. Sizing
-wide only costs bitmap bytes; sizing narrow silently drops the records
-for every frame above the top.
+A bit is only ever set, never cleared, given that multiple pages can set
+the same bit, and it is not trivial to decide if the bit should be unset
+when a page is unrecorded.
 
-At one bit per 2M that is 64K per TiB, and 256M at the 4PB x86
-architectural maximum. The 2M granule is called "unit" here, and the
-table carries it so the granule can change later without breaking the
-kernels already reading it.
+Unpoisoning a frame therefore does not hand its unit back to the next
+kernel. That is a known limitation.
 
-Allocate it as EFI_ACPI_RECLAIM_MEMORY so the next kernel does not take
-it for free RAM, and install it empty.
+memory_failure() has already taken the frame out of this kernel's
+allocator, so only the cross-kexec record happens here.
 
-A table installed by an earlier boot rides the system table across kexec
-and is reused as-is.
-
-x86 does not go through efi_stub_common(), so the generic stub and the
-x86 stub each need the call; on x86 it has to come before exit_boot(),
-which is the last point a configuration table can be installed.
-
+Suggested-by: Kiryl Shutsemau <kas@kernel.org>
 Signed-off-by: Breno Leitao <leitao@debian.org>
 ---
- drivers/firmware/efi/libstub/efi-stub-helper.c | 106 +++++++++++++++++++++++++
- drivers/firmware/efi/libstub/efi-stub.c        |   1 +
- drivers/firmware/efi/libstub/efistub.h         |   6 ++
- drivers/firmware/efi/libstub/x86-stub.c        |   2 +
- 4 files changed, 115 insertions(+)
+ drivers/firmware/efi/Makefile |   1 +
+ drivers/firmware/efi/poison.c | 126 ++++++++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h           |   6 ++
+ mm/memory-failure.c           |   3 +
+ 4 files changed, 136 insertions(+)
 
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index f27f2e1f00199..b8b80846239d0 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -774,3 +774,109 @@ void efi_remap_image(unsigned long image_base, unsigned alloc_size,
- 			efi_warn("Failed to remap data region non-executable\n");
- 	}
- }
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 8efbcf699e4ff..05d0a490923e5 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -43,4 +43,5 @@ obj-$(CONFIG_EFI_EARLYCON)		+= earlycon.o
+ obj-$(CONFIG_UEFI_CPER_ARM)		+= cper-arm.o
+ obj-$(CONFIG_UEFI_CPER_X86)		+= cper-x86.o
+ obj-$(CONFIG_UNACCEPTED_MEMORY)		+= unaccepted_memory.o
++obj-$(CONFIG_EFI_POISONED_MEMORY)	+= poison.o
+ obj-$(CONFIG_TEE_STMM_EFI)		+= stmm/tee_stmm_efi.o
+diff --git a/drivers/firmware/efi/poison.c b/drivers/firmware/efi/poison.c
+new file mode 100644
+index 0000000000000..d6855e712832c
+--- /dev/null
++++ b/drivers/firmware/efi/poison.c
+@@ -0,0 +1,126 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Runtime side of the LINUX_EFI_POISONED_MEMORY table: one bit per
++ * EFI_POISON_UNIT_SIZE, set here as frames go bad, honored by the next kernel.
++ *
++ * Copyright (c) 2026 Meta Platforms, Inc. and affiliates.
++ * Copyright (c) 2026 Breno Leitao <leitao@debian.org>
++ */
 +
-+#ifdef CONFIG_EFI_POISONED_MEMORY
-+/* Erring wide only costs bitmap bytes, so the type list is permissive. */
-+static efi_status_t efi_get_ram_top(u64 *top)
++#define pr_fmt(fmt) "efi: " fmt
++
++#include <linux/bitmap.h>
++#include <linux/efi.h>
++#include <linux/io.h>
++#include <linux/log2.h>
++#include <linux/memblock.h>
++#include <linux/mm.h>
++#include <linux/overflow.h>
++
++static struct linux_efi_poisoned_memory *efi_poison __ro_after_init;
++static u64 efi_poison_nbits __ro_after_init;
++
++static u64 __init
++efi_poison_usable_size(const struct linux_efi_poisoned_memory *pm)
 +{
-+	struct efi_boot_memmap *map __free(efi_pool) = NULL;
-+	efi_status_t status;
-+	u64 ram_top = 0;
-+	int i, nr_desc;
++	u64 nr_units = DIV_ROUND_UP(PFN_PHYS(max_pfn), pm->unit_size);
++	u64 bytes = DIV_ROUND_UP(nr_units, BITS_PER_BYTE);
 +
-+	status = efi_get_memory_map(&map, false);
-+	if (status != EFI_SUCCESS)
-+		return status;
++	/* Whole words: the bitmap is reached an unsigned long at a time. */
++	return min(round_up(bytes, sizeof(unsigned long)), pm->size);
++}
 +
-+	nr_desc = map->map_size / map->desc_size;
-+	for (i = 0; i < nr_desc; i++) {
-+		efi_memory_desc_t *d;
++static bool __init
++efi_poison_geometry_valid(const struct linux_efi_poisoned_memory *pm)
++{
++	if (!pm->size || !IS_ALIGNED(pm->size, sizeof(unsigned long)))
++		return false;
 +
-+		d = efi_memdesc_ptr((unsigned long)map->map, map->desc_size, i);
-+		switch (d->type) {
-+		case EFI_LOADER_CODE:
-+		case EFI_LOADER_DATA:
-+		case EFI_BOOT_SERVICES_CODE:
-+		case EFI_BOOT_SERVICES_DATA:
-+		case EFI_CONVENTIONAL_MEMORY:
-+		case EFI_UNACCEPTED_MEMORY:
-+		case EFI_ACPI_RECLAIM_MEMORY:
-+		case EFI_PERSISTENT_MEMORY:
-+			ram_top = max(ram_top,
-+				      d->phys_addr + d->num_pages * EFI_PAGE_SIZE);
-+			break;
-+		default:
-+			break;
-+		}
++	return pm->unit_size >= PAGE_SIZE && is_power_of_2(pm->unit_size);
++}
++
++static bool __init
++efi_poison_range_valid(const struct linux_efi_poisoned_memory *pm)
++{
++	u64 nbits, span;
++
++	if (check_mul_overflow(pm->size, (u64)BITS_PER_BYTE, &nbits))
++		return false;
++
++	return !check_mul_overflow(nbits, (u64)pm->unit_size, &span);
++}
++
++/* The table may come from an earlier kernel, so vet it before using it. */
++static bool __init
++efi_poison_table_valid(const struct linux_efi_poisoned_memory *pm)
++{
++	if (pm->version != 1) {
++		pr_warn("Ignoring poisoned-memory table with version %u\n",
++			pm->version);
++		return false;
 +	}
-+	if (!ram_top)
-+		return EFI_NOT_FOUND;
 +
-+	*top = ram_top;
-+	return EFI_SUCCESS;
++	if (!efi_poison_geometry_valid(pm) || !efi_poison_range_valid(pm)) {
++		pr_warn("Ignoring malformed poisoned-memory table\n");
++		return false;
++	}
++
++	return true;
 +}
 +
-+/* Whole words: the kernel reaches the bitmap with set_bit(). */
-+static u64 efi_poison_bitmap_size(u64 ram_top)
-+{
-+	u64 bytes = DIV_ROUND_UP(DIV_ROUND_UP(ram_top, EFI_POISON_UNIT_SIZE),
-+				 BITS_PER_BYTE);
-+
-+	return round_up(bytes, sizeof(unsigned long));
-+}
-+
-+/* ACPI reclaim memory, so the next kernel does not treat it as free RAM. */
-+static struct linux_efi_poisoned_memory *efi_poison_alloc(u64 bitmap_size)
++static int __init efi_poison_init(void)
 +{
 +	struct linux_efi_poisoned_memory *pm;
-+	efi_status_t status;
++	u64 size;
 +
-+	status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
-+			     sizeof(*pm) + bitmap_size, (void **)&pm);
-+	if (status != EFI_SUCCESS)
-+		return NULL;
++	if (efi.poisoned_memory == EFI_INVALID_TABLE_ADDR)
++		return 0;
 +
-+	pm->version = 1;
-+	pm->unit_size = EFI_POISON_UNIT_SIZE;
-+	pm->size = bitmap_size;
-+	memset(pm->bitmap, 0, bitmap_size);
++	pm = memremap(efi.poisoned_memory, sizeof(*pm), MEMREMAP_WB);
++	if (WARN_ON_ONCE(!pm))
++		return 0;
++	if (!efi_poison_table_valid(pm)) {
++		memunmap(pm);
++		return 0;
++	}
++	size = efi_poison_usable_size(pm);
++	memunmap(pm);
++	if (!size)
++		return 0;
 +
-+	return pm;
++	efi_poison = memremap(efi.poisoned_memory, sizeof(*pm) + size,
++			      MEMREMAP_WB);
++	if (WARN_ON_ONCE(!efi_poison))
++		return 0;
++
++	efi_poison_nbits = size * BITS_PER_BYTE;
++	return 0;
 +}
++early_initcall(efi_poison_init);
 +
-+void install_poisoned_memory_table(void)
++static long efi_poison_unit(unsigned long pfn)
 +{
-+	efi_guid_t poisoned_memory_table_guid = LINUX_EFI_POISONED_MEMORY_TABLE_GUID;
-+	struct linux_efi_poisoned_memory *pm;
-+	u64 ram_top, bitmap_size;
-+	efi_status_t status;
++	u64 unit = PFN_PHYS(pfn) / efi_poison->unit_size;
 +
-+	/* A table installed by an earlier boot rides the system table across kexec. */
-+	pm = get_efi_config_table(poisoned_memory_table_guid);
-+	if (pm) {
-+		if (pm->version != 1)
-+			efi_err("Unknown version of poisoned-memory table\n");
-+		return;
-+	}
-+
-+	if (efi_get_ram_top(&ram_top) != EFI_SUCCESS) {
-+		efi_err("Failed to size the poisoned-memory table!\n");
-+		return;
-+	}
-+
-+	bitmap_size = efi_poison_bitmap_size(ram_top);
-+
-+	pm = efi_poison_alloc(bitmap_size);
-+	if (!pm) {
-+		efi_err("Failed to allocate poisoned-memory table!\n");
-+		return;
-+	}
-+
-+	status = efi_bs_call(install_configuration_table,
-+			     &poisoned_memory_table_guid, pm);
-+	if (status != EFI_SUCCESS) {
-+		efi_bs_call(free_pool, pm);
-+		efi_err("Failed to install poisoned-memory config table!\n");
-+	}
++	if (unit >= efi_poison_nbits)
++		return -1;
++	return unit;
 +}
-+#endif
-diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
-index 42d6073bcd062..008635eb5027a 100644
---- a/drivers/firmware/efi/libstub/efi-stub.c
-+++ b/drivers/firmware/efi/libstub/efi-stub.c
-@@ -179,6 +179,7 @@ efi_status_t efi_stub_common(efi_handle_t handle,
- 			 EFI_RT_SUPPORTED_SET_VIRTUAL_ADDRESS_MAP);
++
++/*
++ * A bit is never cleared: it stands for a whole EFI_POISON_UNIT_SIZE, so an
++ * unpoison cannot tell whether the unit as a whole is good again.
++ */
++void efi_hwpoison_record_pfn(unsigned long pfn)
++{
++	long unit;
++
++	if (!efi_poison)
++		return;
++
++	unit = efi_poison_unit(pfn);
++	if (unit < 0)
++		return;
++
++	set_bit(unit, efi_poison->bitmap);
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index c7b4a37f760ec..d579d75372248 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1284,6 +1284,12 @@ struct linux_efi_poisoned_memory {
  
- 	install_memreserve_table();
-+	install_poisoned_memory_table();
- 
- 	status = efi_boot_kernel(handle, image, image_addr, cmdline_ptr);
- 
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index fd91fc15ec810..44436869c4efe 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -1169,6 +1169,12 @@ efi_enable_reset_attack_mitigation(void) { }
- 
- void efi_retrieve_eventlog(void);
+ #define EFI_POISON_UNIT_SIZE	SZ_2M
  
 +#ifdef CONFIG_EFI_POISONED_MEMORY
-+void install_poisoned_memory_table(void);
++void efi_hwpoison_record_pfn(unsigned long pfn);
 +#else
-+static inline void install_poisoned_memory_table(void) { }
++static inline void efi_hwpoison_record_pfn(unsigned long pfn) { }
 +#endif
 +
- struct sysfb_display_info *alloc_primary_display(void);
- struct sysfb_display_info *__alloc_primary_display(void);
- void free_primary_display(struct sysfb_display_info *dpy);
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index cef32e2c82d8f..f90de11bc8855 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -1023,6 +1023,8 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
+ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size);
  
- 	setup_unaccepted_memory();
+ /*
+diff --git a/mm/memory-failure.c b/mm/memory-failure.c
+index aaf14608b30e2..357a72ffda625 100644
+--- a/mm/memory-failure.c
++++ b/mm/memory-failure.c
+@@ -43,6 +43,7 @@
+ #include <linux/sched/signal.h>
+ #include <linux/sched/task.h>
+ #include <linux/dax.h>
++#include <linux/efi.h>
+ #include <linux/ksm.h>
+ #include <linux/rmap.h>
+ #include <linux/export.h>
+@@ -1286,6 +1287,8 @@ static int action_result(unsigned long pfn, enum mf_action_page_type type,
+ 	if (type != MF_MSG_ALREADY_POISONED && type != MF_MSG_PFN_MAP) {
+ 		num_poisoned_pages_inc(pfn);
+ 		update_per_node_mf_stats(pfn, result);
++		/* Only hard offlines are carried over to the next kernel. */
++		efi_hwpoison_record_pfn(pfn);
+ 	}
  
-+	install_poisoned_memory_table();
-+
- 	status = exit_boot(boot_params, handle);
- 	if (status != EFI_SUCCESS) {
- 		efi_err("exit_boot() failed!\n");
+ 	pr_err("%#lx: recovery action for %s: %s\n",
 
 -- 
 2.53.0-Meta
