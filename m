@@ -1,125 +1,157 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3222261B8D
-	for <linux-efi@vger.kernel.org>; Thu, 27 Aug 2026 01:15:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97FFA37C92B
+	for <linux-efi@vger.kernel.org>; Thu, 27 Aug 2026 14:09:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787793318; cv=none; b=MLZVs2qvHg8y2ds32fF6Dmb5FrnvsjeOvg4UeI5DxQquRdbYrY7b9WaebBsWsJjVDmBSPoJ1TG0kXjpJIXKC2q6Asjy8dqjMXpLYkXHNA9e9PzY+EF/setYsSqLfIVFgW4GGuBJAQ1fXEpGW11gcOKuecoTtD4rUzBx2iOvPpHE=
+	t=1787839749; cv=none; b=HxuxxSJPM6hbN0uMu+7ZeiJpQaKW8Hn/oFduFtEX9rmP/VVDr24D6GoBIb7qlUmJ29f+gEDKMJsThhyUB4MOBqb4PUg+YYmsjSX2Abj/Vv6iygxH3B0K9CbAVNl/LYbyuK4CxK/q1LOYvilkDGH2ENp1pD8ydLiT8g8bPhmCb48=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787793318; c=relaxed/simple;
-	bh=YpygBDzERm5er5rhJaN8G01AxohG9gaiN7EZ7yRhYYk=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=ii0RrdqkrvTHVZwz4waALVzYn02oUgE/M1LDsMjEjEflpfGhRS4N9YRGeTYzvkS46OYi00Jt1HFEbu/+rPgafGoe9tiUKXfriIV/nbTf+bRyB1DtgJEC3P9Hgsf/Bz82n05LDEvIKCX91xO7Q7fj/zbL9G7eUqhzn6UNVCWgnrc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=GBVZtYw5; arc=none smtp.client-ip=192.198.163.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1787839749; c=relaxed/simple;
+	bh=Ca3PoKBt5YojbmsMUD2c3cCKZKqgHo2oirWHwI+0DAU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Bt3A1PHYlMkuhqX8Cs8o459RSqY7bQlENSm7WVRajhK1ZA2cXk535WMIMy9nV5myhi6blY1fgxxsu0WOdqc3Qr7pTFiHOBgthDSeDmsrbmOd1B2po/LrOCqXKFJ9e7kjUIw362ww/p5Yec8USMkedFepA9CA5Dz/4HjEsJ87UVs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=scWtY0Mp; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=7QnZuwy7; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=J7e/mTEp; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=NzSRZ1CL; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="GBVZtYw5"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1787793317; x=1819329317;
-  h=date:from:to:cc:subject:message-id:mime-version:
-   content-transfer-encoding;
-  bh=YpygBDzERm5er5rhJaN8G01AxohG9gaiN7EZ7yRhYYk=;
-  b=GBVZtYw5bwsQqPLLO9hX6SMEeeeuVTVu4Ow6xMIgyxBCwGUZCEUyguKJ
-   UBeZ+Yilg/lyPKatvNXKs1KypoBZiqW0DA0Yn/arC7I01eWiefSbENx5z
-   cEG98JPEDlI5zIikKlUHU0onzqqMCuxhLVvJlDsxK8iL0cDuHggBS1zho
-   0hw5rHGR1xDBeUJ+TtjmrKnD5CUr2wT/C7H6EVpDODWZ37lPSkxgg0Fbe
-   SSE8q6PJOG0GBVZxGNSN0TBimxHJw9eJ26YuPPjKHtRlfB6gzT+X7xZ25
-   qzM2/l1/Xg6R24TUZEVqkuQV8fjsbJ+mmfw0t38WH6imQmwjGhVX/6qKH
-   Q==;
-X-CSE-ConnectionGUID: +9Qdw8DERuCOcRdXVTFctA==
-X-CSE-MsgGUID: ZQhcOckMQOm4l6ra+zdsOQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11887"; a="75829061"
-X-IronPort-AV: E=Sophos;i="6.25,245,1779174000"; 
-   d="scan'208";a="75829061"
-Received: from fmviesa009.fm.intel.com ([10.60.135.149])
-  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2026 18:15:16 -0700
-X-CSE-ConnectionGUID: dIvPERJIQWCDJ6cZfza5hg==
-X-CSE-MsgGUID: jov9iflmTgmF9carM5clGw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,245,1779174000"; 
-   d="scan'208";a="261587091"
-Received: from ly-workstation.sh.intel.com (HELO ly-workstation) ([10.239.182.64])
-  by fmviesa009-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2026 18:15:15 -0700
-Date: Thu, 27 Aug 2026 09:15:11 +0800
-From: kernel test rebot <yi1.lai@intel.com>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: oe-lkp@lists.linux.dev, lkp@intel.com,
-	Ravi Bangoria <ravi.bangoria@amd.com>, linux-efi@vger.kernel.org,
-	yi1.lai@intel.com
-Subject: [ardb:efi-arm-memmap-dtprop] [efivarfs]  eaa4abe54e:
- stress-ng.get.ops_per_sec 2915.8% improvement
-Message-ID: <202608270836.4a9957c0-lkp@intel.com>
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="scWtY0Mp";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="7QnZuwy7";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="J7e/mTEp";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="NzSRZ1CL"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 7D0E61F841;
+	Thu, 27 Aug 2026 14:07:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1787839656; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=inMzVHiVBcCLJ2+S7e7paRJRrABOr+WAxBkmBAGotf4=;
+	b=scWtY0MpjphaXr5P2UwQzhPVGTt/ohsX2XliSbhDuh8Mf5u6M3Mq/VpJjVTdNrDm4S+BLM
+	6DbhQHVRojnY29OVlcuXdTvXDEnVlOwQVuUUCL6CsBfsMaVsMzMCwgvg+vpFNJKGWTJdEj
+	fk/fo9rba7NPOFgZRtB50HdavfkFySc=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1787839656;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=inMzVHiVBcCLJ2+S7e7paRJRrABOr+WAxBkmBAGotf4=;
+	b=7QnZuwy71biK55TMmHsWTEMR7zuvwfpCEzIIfTzWcMXPxmQiYaqctwrnjiEONxOQ36trwm
+	1wVh7OOPOwr+sgDQ==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b="J7e/mTEp";
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=NzSRZ1CL
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1787839652; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=inMzVHiVBcCLJ2+S7e7paRJRrABOr+WAxBkmBAGotf4=;
+	b=J7e/mTEpZoVKw2gNUopxUmZ18igpsEGpQHffTL+N4eZkXgN4r2qA72tuKA+TKOb/UzG5Bz
+	aSXN+IqBeqmVTshzKNbn+i2A4lLDP3xXp6A0XFmKFnDNxd3VG8WmVHPgnAzFRPv7iZRarR
+	OoiGLV7k0kIyeUUIhYIOv91uKGJSMKk=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1787839652;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=inMzVHiVBcCLJ2+S7e7paRJRrABOr+WAxBkmBAGotf4=;
+	b=NzSRZ1CLtTPRBUTERgxjWFBgcSKrDBCGBai0ax2S+IMOHCab/pGcICbEimCAkpVrqfVIl2
+	EtW7PiAxnUI7ZpCQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E5EC91352C;
+	Thu, 27 Aug 2026 14:07:31 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id xG6WNqNEkGp0FQAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Thu, 27 Aug 2026 14:07:31 +0000
+From: Thomas Zimmermann <tzimmermann@suse.de>
+To: javierm@redhat.com,
+	ardb@kernel.org,
+	ilias.apalodimas@linaro.org,
+	jani.nikula@linux.intel.com,
+	maarten.lankhorst@linux.intel.com,
+	mripard@kernel.org,
+	simona@ffwll.ch,
+	airlied@gmail.com
+Cc: dri-devel@lists.freedesktop.org,
+	linux-efi@vger.kernel.org,
+	sashiko-reviews@lists.linux.dev,
+	Thomas Zimmermann <tzimmermann@suse.de>
+Subject: [PATCH 0/3] sysfb: Fix display output on Lenovo D330 (and others)
+Date: Thu, 27 Aug 2026 16:01:36 +0200
+Message-ID: <20260827140726.420734-1-tzimmermann@suse.de>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+X-Spam-Score: -3.51
+X-Rspamd-Queue-Id: 7D0E61F841
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Spam-Level: 
+X-Rspamd-Action: no action
+X-Spamd-Result: default: False [-3.51 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	ARC_NA(0.00)[];
+	FREEMAIL_TO(0.00)[redhat.com,kernel.org,linaro.org,linux.intel.com,ffwll.ch,gmail.com];
+	RCPT_COUNT_TWELVE(0.00)[12];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	RCVD_TLS_ALL(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:dkim,suse.de:mid,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	DKIM_TRACE(0.00)[suse.de:+]
+X-Spam-Flag: NO
+
+The kernel mis-interprets the display geometry given by the Lenovo
+D330 as incorrect. The values are correct, but the display output
+is rotated by 90Â°. With the kernel's firmware quirk applied the output
+is garbled.
+
+Remove the firmware quirk for the Lenovo D330 and let DRM's sysfb
+drivers set the correct panel orientation instead. To make this work
+for any display mode, use the panel size for looking up the correct
+orientation.
+
+Tested on a Lenovo D330-10IGM IdeaPad.
+
+Thomas Zimmermann (3):
+  drm/edid: Add drm_edid_get_preferred_size()
+  drm/sysfb: Use preferred panel size for panel orientation quirks
+  firmware/sysfb: Remove rotation quirk for Lenovo D330
+
+ drivers/firmware/efi/sysfb_efi.c |  9 -------
+ drivers/gpu/drm/drm_edid.c       | 40 ++++++++++++++++++++++++++++++++
+ drivers/gpu/drm/sysfb/efidrm.c   | 17 +++++++++++++-
+ drivers/gpu/drm/sysfb/ofdrm.c    | 16 ++++++++++++-
+ drivers/gpu/drm/sysfb/vesadrm.c  | 17 +++++++++++++-
+ include/drm/drm_edid.h           |  2 ++
+ 6 files changed, 89 insertions(+), 12 deletions(-)
 
 
-
-Hello,
-
-kernel test robot noticed a 2915.8% improvement of stress-ng.get.ops_per_sec on:
-
-
-commit: eaa4abe54eb5de1ee002aa2e4f88fc49156f2fdb ("efivarfs: Cache occupied and available space") https://git.kernel.org/cgit/linux/kernel/git/ardb/linux.git efi-arm-memmap-dtprop
-
-testcase: stress-ng
-config: x86_64-rhel-9.4
-compiler: gcc-14
-test machine: 256 threads 2 sockets Intel(R) Xeon(R) 6768P  CPU @ 2.4GHz (Granite Rapids) with 64G memory
-parameters:
-
-	nr_threads: 100%
-	testtime: 60s
-	test: get
-	cpufreq_governor: performance
-
-
-Details are as below:
--------------------------------------------------------------------------------------------------->
-
-
-The kernel config and materials to reproduce are available at:
-https://download.01.org/0day-ci/archive/20260827/202608270836.4a9957c0-lkp@intel.com
-
-=========================================================================================
-compiler/cpufreq_governor/kconfig/nr_threads/rootfs/tbox_group/test/testcase/testtime:
-  gcc-14/performance/x86_64-rhel-9.4/100%/debian-13-x86_64-20250902.cgz/lkp-gnr-2sp4/get/stress-ng/60s
-
-commit: 
-  44e4ec1a80 ("efi: apple-properties: validate setup data header length")
-  eaa4abe54e ("efivarfs: Cache occupied and available space")
-
-44e4ec1a802d2078 eaa4abe54eb5de1ee002aa2e4f8
----------------- --------------------------- 
-         %stddev     %change         %stddev
-             \          |                \  
-  15418287         +2912.1%  4.644e+08        stress-ng.get.ops
-    256967         +2915.8%    7749645        stress-ng.get.ops_per_sec
-    554.00 ±  4%  +11739.5%      65591        stress-ng.time.involuntary_context_switches
-     69114 ± 17%     -52.8%      32593 ±  2%  stress-ng.time.minor_page_faults
-    209.30        +12040.1%      25409        stress-ng.time.percent_of_cpu_this_job_got
-    120.05        +12557.5%      15195        stress-ng.time.system_time
-      6.51         +1095.1%      77.76        stress-ng.time.user_time
-     97296           -41.8%      56610 ± 14%  stress-ng.time.voluntary_context_switches
-
-
-Disclaimer:
-Results have been estimated based on internal Intel analysis and are provided
-for informational purposes only. Any difference in system hardware or software
-design or configuration may affect actual performance.
-
-
+base-commit: dc462ab791b686c48545c160ecc81be64f77a846
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
-
+2.55.0
 
