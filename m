@@ -1,59 +1,59 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A0EF44E656;
-	Fri, 28 Aug 2026 13:47:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B9F346D09A
+	for <linux-efi@vger.kernel.org>; Fri, 28 Aug 2026 13:59:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787924869; cv=none; b=qTtfeyTWAtAKLvkwAM87TfmzBWpw/PE1vZLeii98HRBSxwRbwn6t9Eo5gJDb/cJP4L8w3tIKLsZJXhdZlbtTYUNWyrIOQQVQL76CNHfFIJkfcltMCplQaHlir7yjTCvJljoVsFCUqf9U3P0Up6yAW4EUojVFI5155RdSrjO7cVI=
+	t=1787925592; cv=none; b=TbPml6B4AayfG4dT8wlHaud2VAQE3vWz1jtqbV4YACtxlN38yiLV/9/Lsx4brrV9fH8swrHBhp/paN/KMGlywnAm2VRuV/TUdLke8XiBW4sPXVhteKoEb9NiTmRjBrbdKzMJQ00CuOOpwHAHSwgd/wJiZ9EM9FUpNtpeWWOEueE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787924869; c=relaxed/simple;
-	bh=FZYJ0tPscJpqy0ej6dIgc6vwpc6PMpAaDv2fyLX/PAQ=;
+	s=arc-20240116; t=1787925592; c=relaxed/simple;
+	bh=sySEeVbrbCmBslxSfBPjwbOWGmobkRhzLZzR/OdbRLQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=MOw6DlJgTaIJ+m3QBmUmq+gJLDB7H4ezAQCMpLeM9J+SkV+nYV/AaOrb+m0P3H0q8FFKpCzRU+s3ilYRCt316mMKuHR2PDK2WdSEjfQzKf91pIEF2VWa6/Ipy6vswyxEGVoc/Gp1bzP91zuNyPu/ahFd0JBMvfIL2tWoTMCvjSY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=B8OVBi4t; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=YtmQCZ0HaXfPLRP05Hn+ri5wSpx/9rY5I68OLyDLI9fYbJT3NH8eDLs9FcBJrIOTIgW/+x358M4a6TI8A0uUa6zEQhRc7glpVIIapbh0do3xP9WjrpvZE4fnujMpkEeVYh8mx3eu6OoaubjMPmU1zYUBiUW9PgY3p0LGZUcYfmg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lDLgEYHx; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="B8OVBi4t"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9A9A71F000E9;
-	Fri, 28 Aug 2026 13:47:46 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lDLgEYHx"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 122FC1F00A3A;
+	Fri, 28 Aug 2026 13:59:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787924867;
-	bh=q0eNhqvMX0/iJyiBrToLKqr6Y2gSqCXGI85V9zCEwnI=;
+	s=k20260515; t=1787925591;
+	bh=GMsq4s9H5sslOOoHpaDnzK693uMuIdL+zLKvHUgSCOw=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=B8OVBi4twqUHT/S7twyHkWKJvi0Xty50bWZLsgLdUjH3nHQVyiaBK1AsPVPty6GY3
-	 CpLNAUUkFEyJ4+w/M1poxHibGE1QkZfvatu0qnlUkyLZ6sB5cRTVmGrT8v0XQDQITu
-	 o7t7HCrfJFnRBBj0/q5rE0t6eS5wSCG83cu/ZDFcV2U7x4JtmHAL9mKoaktAxwvPaI
-	 NYDwT5qjwRAZkfmmJP8yyRlSIRCkU31HEHBsdlYCRbUSD2/lsmL6OFuAYMqddqUtCz
-	 9e4DAviAQYM8qfJvDF2KYmTB4Efky7gFx9GpzI6j0wCr4ltT6ZBU9rIarIEnjsNY8r
-	 4KeEra8xa2S/Q==
-Received: from phl-compute-02.internal (phl-compute-02.internal [10.202.2.42])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 407C8198005A;
-	Fri, 28 Aug 2026 09:47:42 -0400 (EDT)
-Received: from phl-frontend-04 ([10.202.2.163])
-  by phl-compute-02.internal (MEProxy); Fri, 28 Aug 2026 09:47:45 -0400
-X-ME-Sender: <xms:fZGRajO8tbszWQe3PiKqVvkxLMsSZjlif2S9uYt-vjmJEpeOFvfHCw>
-    <xme:fZGRahH2nr9VObEBXt262phMqxEp4YMB8N3cIZaF2OTvfKvZa1goN1Mt3jlO2MLhR
-    XRBGh-yo1OqJZU_2scto5I2lWzjToiY8e-T_Jdwf5V-V1qBqKdNia54>
-X-ME-Received: <xmr:fZGRavucriFI5JGLOyzGMK7DHAHpqFqJWaIRUP3Pm9cs-8ugBLWe2PJg7Ws>
-X-ME-Proxy-Cause: dmFkZTGhuVEzINoxJX9iq+sBnTJn/YGfvUD4BbjHGtjEf0PAh/o/tXr2vuzbX9U8fMq0zF
-    J5YoWoO47NsZs3vKY4l9KIcKbSS0+BRZwuTUJ9JEu04yQDq/7Q2T0DrqDQ14+GS1y4+Kii
-    qbLumtOCdeF31VVkfQ15zMW49EJKPf9ai0w8NgPevT7/2tBdBdQF+5JevWefJ8gD9CFyC6
-    vy8t6c7nt9Z81+VYeNx6xVt0oCjgXOQEQ8R1XTjNdsxXQezprFGSM7EVxQoC61FUFtMtjl
-    j14I5/V5nIn5meZ617TWS99yg4QSmnCPaVaojmBd58z3obTWdBXUPQx6YOwdozC1RPkake
-    b7CQo7h8uFUrdwxo+a+KEEZRo+rgnaAsXWTX3FZp40gpI88PBF5pdoEJQoYaVNDsOYdDLv
-    nnOn00p8Mp1YDklKa5PNmImiyNBrjQq3pWispVkCYL/vHtE6rX0yKfGG/mSXj2CxL8wv4i
-    r0y0+WYSXNM3YyKgzh/zanZGTQ8dGkGWLsvQDqq9bBRVJpv+ELs7/2/XXATJ4u91Jmv4mc
-    tIbaJNv5r4NMz9B8LAhg6+b4cg8ASkvBonDuNoJuQ96vXhlmquzGIh0JUSLqN/uz6B0edi
-    gEefM8IBWm9PYMz+eSfeOcqLTGPPyW08nMQUgJOuQmELSCPiO+sNgH26i5Kg
-X-ME-Proxy: <xmx:fZGRasTX6KiaE4c_cg9PXtcf5lFwklOXMwCMJ8S4HpMKKGNHaatHcQ>
-    <xmx:fZGRaqEkizgCxDrFfZWtyhjb-WQ1yjdKVnYNxlNWXltvS36zBr81og>
-    <xmx:fZGRahciHnap5NePGxNCROZtKGgBB-XszR-01EHbjJXxOf2TXxTKDA>
-    <xmx:fZGRaqrf2oas2ahHPRsmyNxb7N__Av5_rVQJm6K2AU3sMslJ7AlTcQ>
-    <xmx:fZGRauGMdH0cmV4-9-yzqayTn6Pm4Cv2Uey5kNm71uwNCdeE6SiHXVPU>
+	b=lDLgEYHxqyMExx7XGHQ1jMOssFVfuXXHoEzbBFpy5flN3Ib4Bd3XgGWIWJMp6arLJ
+	 uQVbfv7J5ZyA4dhS8/bZdYE+uBBMnrDV8e0fo5PloBITeSUDghfkfYw1D9c5wdWYwu
+	 XZQit9lHQy1bSrPTtaQxgXbGCzJ7ybYZKFJ2vKJmyZ3gfcQ9S9Zux7MV4EHTe8WKIF
+	 cQvwZk10zsIwVNSeF02O73cQgZkIW8VKvcKbmR4S3FO1bWytcWw/EKysYqo2DV0DeN
+	 8tK1MPeAD1ya67qILgrYnKWGC/cyVNaPzFTPrj302CK1H26FHwBHo62CzeDmiZRHiZ
+	 FnDhPRSM8Ictw==
+Received: from phl-compute-09.internal (phl-compute-09.internal [10.202.2.49])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 8F1C61980045;
+	Fri, 28 Aug 2026 09:59:45 -0400 (EDT)
+Received: from phl-frontend-03 ([10.202.2.162])
+  by phl-compute-09.internal (MEProxy); Fri, 28 Aug 2026 09:59:48 -0400
+X-ME-Sender: <xms:UZSRapkyHK92xpfCc7gC34L_khXR3QDyMijHbidWAs220sKQ8lkFUg>
+    <xme:UZSRan8Dpwoy1eVqQ6ejwtpK5aDyWpuAHSF3GZvcF9ux2kRifDcfxgdrhN5UbMiT2
+    kcCkZeB7jDWyXr2cnergQkITcqHPmjzoSUgbqYkVaV59rMStIDBniI>
+X-ME-Received: <xmr:UZSRatEolRX4Ox6wFQ1OGkjYzS9-u6dOHl9Sw-ITv6dXf-KAx_Tttsv0TF8>
+X-ME-Proxy-Cause: dmFkZTFllgFcBPPxWyh7H7Ya97cPF2z+CaYPZAeFHJRUEOI7iP7NbK/RD+h7m0XG7mWy16
+    fIZCnkd80l4AcUG6PCl7E90y1FlqRmxxmociQ31S8wZQTE+r/ShOn2X3FGZoq2J0Vdf97p
+    nuFw4AqeM/WomfxoyRgLOaOyXPCImUEPhxoNz4O6fJf9J9swOyN5utIVT2r0XabJbA4HxF
+    oILQMURKy3DfTYUUGeeYdtTqPn4upMBcTfKSGqNc5c6xt9AM949lwP1kFNdph86l+6pYNc
+    RLrozyUVEmo7eSsWX5/dVPnhXM37BJYxN8ROLEVvUcuC0Xxxx2BGLKc00OiMUuXhlN+6X0
+    1vEX6V9DH/wtIWZy7pT2JUHc34pYq9bNE1mhzx6gPcCLaoh6ZOIx6UPo5fsw2jPVelT/oM
+    +RkCwxR1y6cCiBY7aJLTWgDUQPbYSswR7CrwcwhuhPYs7IJmoS7+ghC4sDkXaU/AkAnIJc
+    Gu0NQkXGvpCFrPL0K1sJJ0/HBEE6GTdYLrk1kEZpfjVXn0h1VASbWIyC8kJ92dmWrjl1FK
+    b/EgQHbOIgf+5hE5GMQ3LfKop5IEUj8L2oPdH4UNTLw/ZUAu52OAWj7ERMa3mq8u4Fpfvf
+    n43K7EzhAX+ZsBpBswrS7KKCqwtaiiqzNVHDXonWeXfntyQUnXrftzSFTLNg
+X-ME-Proxy: <xmx:UZSRauKl_CC_sQ4ifO52hn5UJgg2-F_7akOIxsy_CfM2VI_jq2wh2w>
+    <xmx:UZSRamfb0Cvb9NxgQOQKnEarX-NxrqGf7K4MrHcRGhmLSPArbpa-Mg>
+    <xmx:UZSRamXYit9R7Sub6lx6kW99a3nAu5AU_EaeCy2263Rn6OZWl3cyFA>
+    <xmx:UZSRauCS1sl_ngYBSDZMZE-MXPsW_dD3EDJf5Eky0u9G8cqeVWsMZA>
+    <xmx:UZSRat9eai9o-Upb0C9Q7D893HN4Q13Z1LausSAOpkC8N-eK7DnIl2aI>
 Feedback-ID: i10464835:Fastmail
 Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
- 28 Aug 2026 09:47:40 -0400 (EDT)
-Date: Fri, 28 Aug 2026 14:47:39 +0100
+ 28 Aug 2026 09:59:44 -0400 (EDT)
+Date: Fri, 28 Aug 2026 14:59:43 +0100
 From: Kiryl Shutsemau <kas@kernel.org>
 To: Breno Leitao <leitao@debian.org>
 Cc: Ard Biesheuvel <ardb@kernel.org>, 
@@ -65,11 +65,11 @@ Cc: Ard Biesheuvel <ardb@kernel.org>,
 	Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>, linux-efi@vger.kernel.org, 
 	linux-kernel@vger.kernel.org, linux-mm@kvack.org, rmikey@meta.com, riel@surriel.com, 
 	kernel-team@meta.com
-Subject: Re: [PATCH v3 1/5] mm/memory-failure: efi: add the
- LINUX_EFI_POISONED_MEMORY configuration table
-Message-ID: <apGOr0BAFc1DMQe6@thinkstation>
+Subject: Re: [PATCH v3 2/5] mm/memory-failure: libstub: install the
+ poisoned-memory EFI table
+Message-ID: <apGSy78NoCov0MWr@thinkstation>
 References: <20260826-hwpoison-kho-v3-0-6f79c4b605bc@debian.org>
- <20260826-hwpoison-kho-v3-1-6f79c4b605bc@debian.org>
+ <20260826-hwpoison-kho-v3-2-6f79c4b605bc@debian.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -78,28 +78,32 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260826-hwpoison-kho-v3-1-6f79c4b605bc@debian.org>
+In-Reply-To: <20260826-hwpoison-kho-v3-2-6f79c4b605bc@debian.org>
 
-On Wed, Aug 26, 2026 at 05:03:52AM -0700, Breno Leitao wrote:
-> @@ -1271,6 +1274,16 @@ struct linux_efi_memreserve {
->  #define EFI_MEMRESERVE_COUNT(size) (((size) - sizeof(struct linux_efi_memreserve)) \
->  	/ sizeof_field(struct linux_efi_memreserve, entry[0]))
->  
-> +/* Bit N covers unit N of physical address space, counting from address 0. */
-> +struct linux_efi_poisoned_memory {
-> +	u32		version;
-> +	u32		unit_size;	/* bytes of phys space per bitmap bit */
-> +	u64		size;		/* bitmap size in bytes */
-> +	unsigned long	bitmap[];
-> +};
+On Wed, Aug 26, 2026 at 05:03:53AM -0700, Breno Leitao wrote:
+> A EFI config table can only be installed while boot services are still
+> up, so the stub has to create it; the running kernel can only flip bits
+> in a table that already exists.
+> 
+> Size the bitmap from the top of usable RAM, which efi_get_ram_top()
+> works out by walking the UEFI memory map, since the stub has no max_pfn.
+> Bit N covers unit N counting from address 0, so the table tracks
+> max_pfn. Memory the firmware hot-adds later sits above it and is not
+> carried across a kexec.
+> 
+> One table has to serve every architecture, so efi_get_ram_top() takes
+> the union of the memory types they turn into RAM: what setup_e820() maps
+> to E820_TYPE_RAM on x86, plus the EFI_ACPI_RECLAIM_MEMORY and
+> EFI_PERSISTENT_MEMORY that is_usable_memory() accepts on arm64. Sizing
+> wide only costs bitmap bytes; sizing narrow silently drops the records
+> for every frame above the top.
 
-struct efi_unaccepted_memory has 'phys_base'. Do we want it here too?
+x86 and ARM doesn't seem to agree what RAM is. On x86 it is by ->type
+and on ARM it is by ->attribute (anything WB/WC/WT).
 
-It can be helpful if physical memory starts very high for some reason.
-I believe it is common for risc-v.
-
-Tenstorrent Blackhole card has 4G of RAM based at 0x400030000000.
-Counting from address 0 that is a 4M bitmap for 4G of RAM. :-/
+is_usable_memory() only decides nomap. Everything is_memory() lets in
+lands in memblock.memory, and max_pfn is PFN_DOWN(memblock_end_of_DRAM()),
+so the top of RAM there can be a type that is not on your list.
 
 -- 
   Kiryl Shutsemau / Kirill A. Shutemov
