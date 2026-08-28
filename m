@@ -1,59 +1,59 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6EE652D592C
-	for <linux-efi@vger.kernel.org>; Fri, 28 Aug 2026 14:11:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2ABF91F16B
+	for <linux-efi@vger.kernel.org>; Fri, 28 Aug 2026 14:35:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787926282; cv=none; b=e564UapHI1n7xPpXu6xiaBdrs7kgOBJBk07OM9Qt4SVGkmt0yJEpaS/G9DaOYBcgv1DWdUkqTDdEltlkiUBxUAjyY6gkWnq58SZTN6CMtUsgCeNxeW6reTWuVAHewif1Oy49BjsoWIUui1HqGjlgiLDG+3zIV3IYN9lKVAsK81s=
+	t=1787927711; cv=none; b=W62ki8mlDuAZEujmcqEUcGPWvJ0GqA1bmxrwF0H8Z9NaTnmN/MiRtv2fI2if2IXaaQfcX62ECRqDhJ+5QWMevOtiqsVJxC5lV/5D90kxu0oq5nbPCS4zjupllSEmkF7g7ZLvlOFw7DUwArhv2GNIGzCCE0UlyH+1eEbDe5g6bZo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787926282; c=relaxed/simple;
-	bh=zx3nsKWTltY3MFKuLkPckkA8gWREFpd2w76hoQ5jIcc=;
+	s=arc-20240116; t=1787927711; c=relaxed/simple;
+	bh=4vLhgOAWJfhHB9C5k+hA8EmZVp3gB6NlTS87ovCpJAw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WfQNLUuZ05kUPAa75BUo5tXEBKrXC7I1rep3GU2oeGUmlQe+LWkvRMn0Hy2NYGGZVj6z31a2TtRnvZxzc0cgfKmsf+0iD6E52c4RmkZ1zuZlbc1z0EeaNARmCt+FkXuh28j4H3YjWqxTLgUDVncYZmIEkio83ilCTRqbBnU+AcY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=URfLviro; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=kNiv/XvmvqUQw1i5RyH3beOAKptT0ZeKyWub/HtMqAUPUagxtuVO1mY0Or2yfQBdprudiW1Rp5EGG5px1uPB6LH6Iryc8LPoCBSNcM0hKfkDmjnk4lC5Ek+xfXT2n/3dRl6n8uxkIIqq2X7ZOmy/9Q0dmfvjuhY08eXxQ2xkCuw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ttw3JWgq; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="URfLviro"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 706C41F00A3A;
-	Fri, 28 Aug 2026 14:11:18 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ttw3JWgq"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D50901F00A3A;
+	Fri, 28 Aug 2026 14:35:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787926279;
-	bh=U7b6NXuQpbm+Bpwe770MpMgWC/+r6IvbVv/YGtdtPR8=;
+	s=k20260515; t=1787927710;
+	bh=X98NIGQPKg+8BL1yOqDNFmiYvUCnib2Cgl3Keq8DNq8=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=URfLviro2w0VdJ4YO8neeZvUxtIdNwrPWpvPo48fNJ8y84NnI1SrupmK5IKxoSOny
-	 n+fC7M1OrWiec6Ar1qgigzfapw4D/MkkurtVnFwnp8FqLyTa5wd76JTmA+0klf8cx7
-	 I12MgxdC88orwWRC/waMtG3j6M5KsSimDuLC9jWVROYPDlF9kZ3Ib6yI3++Eg4yzl7
-	 m7fcdj1sN25g+P9JHwJF3gDCGg49Bpl5+94pckjbqGHpaKSvWDa9F+BQpv5O9GUZHM
-	 MdSKP7Cvh7/nBMkuA4W5AXbbiT5Y6lzR+bBK2JFFLQBJLP6Jr13EBYRjt8Yi+KAFet
-	 pKbM60O03S71w==
-Received: from phl-compute-07.internal (phl-compute-07.internal [10.202.2.47])
-	by mailfauth.ams.internal (Postfix) with ESMTP id E6CB4198003A;
-	Fri, 28 Aug 2026 10:11:12 -0400 (EDT)
+	b=Ttw3JWgqNYV5trlA+T4J+dIMw+PPccTmFDjHPtV5ldhV352Ou+iRwpxOzR/YnVN2n
+	 PZrQkRwOzfU8qQcXj/0pJkyLp09ydZFYrDCgaPhl+W7Twuz4qVnBqnmIFVEfb11ghg
+	 UcIOreweXmta4MnUHvisAL6p3gRuw3M8yAHK+qWsCwNkZaPmcDVtZvyJvFTPwPWjmS
+	 umL7X2ZOXGi8oZsKB4keyN+jztq0Qy6/FKsy6xUyyf4z5e6qP7N+Nwtq3ZBQS8Zj91
+	 SNCZo1oft6Ret6h/p7cdcV5Apubb1yBX8gbIxOxL0cAIPQH2N4CXEN1s1+tJVcfXa3
+	 oEMGw4VX292yw==
+Received: from phl-compute-02.internal (phl-compute-02.internal [10.202.2.42])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 52C35198008C;
+	Fri, 28 Aug 2026 10:35:04 -0400 (EDT)
 Received: from phl-frontend-04 ([10.202.2.163])
-  by phl-compute-07.internal (MEProxy); Fri, 28 Aug 2026 10:11:16 -0400
-X-ME-Sender: <xms:AJeRas1aZk9opjMSiGX5jElAqjZ4yIFj2k79pkjQWBBDs2rRAZz-GQ>
-    <xme:AJeRaqPZSBLSs0GN8Ma9LdPe9x3z3EXOw3X4xZZ3t6AdjbQEFNUAw03QHcz8KE-4c
-    gfOnZTcW8a2Jq_e4kyjWntEV2vEZ231XWkT4_Qb_6D4Pub9gbb2G14>
-X-ME-Received: <xmr:AJeRaiWuEV238jidr06ojGeBuk6qzsjid56OXlDDKuTMiedxTLZPhL_oZmY>
-X-ME-Proxy-Cause: dmFkZTGfMEtIdxK9TZhqZLeRbfNvLYXlwoNy36VBDoEf9Mft6xswYTLKr5+mL4ccPtdqIJ
-    +vUC/Jlk/xplE2julyVEiux1aCh0eTADY2ObZjiUqkrKT5Ef1K/Qc+X4X0h0mCPmpbKqPL
-    AjDnxuLaEDPB4g2sNEZHXSXz0it2PYy7eaS5EAF/3j8NDfbb1e2T+8R6ZWYLnhBvUGl17y
-    1sAzCDfz5CMOQDgVGhn24L+BZer5Uyqd71kfJ6/xMXI3m8JiQIMTFF4KPRsN79kPqDCBAY
-    w1NnkXoPPSuNed5UOjneSlrXRudTr2DT8EOVI2Rn2XM0JKcyccE5oUSCd89xeQcNPWIMqW
-    2o/KtmRCeONuaV8kcZ3bSQ9t3OqJhmCbPkO1VXJO6s3+D7dlY6dmU9D3tPPOqBhNvdtKTK
-    OlaIZTh4bSsVAY/aKs93BhArFKW2i3ZdUkEb81t3r9qa1ONHeB9sHjOY0dXWaLTARhkva4
-    vIi3zi/TNm4LExcwt8SOAO0b1TWucerQhHfZrj1XTyd44r1NHzSJG1WmyL7CUUMDkVGO6H
-    SpcvpmXTUDEpUJJ5+nx0UJxYbn1u7Wz+yOACY9/dhRipLWlz+rP1JSLvg/ZlrszAEwRUbV
-    tDHQCBk21ZXc2A2ldQQ9t4qy/RXSjvgl7kAflQd5gF1SRV3DvYJUOlXmZruw
-X-ME-Proxy: <xmx:AJeRaqbiOjLtG_O770h2bh6BHEdo4Bfr0xoea3h137RsTu7NgBpFug>
-    <xmx:AJeRatvSmGpff_pBo8O3gYONJARpaii_gjMdzsVD37p2L3pNXZ5jqw>
-    <xmx:AJeRasls8flkBSEysMaaYuVugCPUBY3Vj4AGw7dHVBnplXF-iqOgAw>
-    <xmx:AJeRanSZBbWnVQE4lXp4-_7P4acsvBKQPgaH-3fdXqdmG9QsGgIrXg>
-    <xmx:AJeRauMjyfqAE17oyt7EQXafma_xxc_kKuxVOfPciLs7NHoGagJ_eI5B>
+  by phl-compute-02.internal (MEProxy); Fri, 28 Aug 2026 10:35:07 -0400
+X-ME-Sender: <xms:l5yRarcPRM80BNt_5aHC1xO0r_gvBz4bDVyiZHDXrDOiNDgIzur_hg>
+    <xme:l5yRakUd8Wc6NL_qZ5h8G6qBbE30XTs-Jt7ReT9ovn-mkInkh7AURYX8am8VDxAl8
+    ZDfPV6aC7zhs2ZP4ismfFfJUf037nclNuqiOOskXlVyROGnx0ocNAci>
+X-ME-Received: <xmr:l5yRah8G0tfniwzDLxB8WVU8F3Jgy7vppsnErh2NSXLdQXRf-L5DUyKDUSE>
+X-ME-Proxy-Cause: dmFkZTFr1ErFwYp/sqUKdif/sqW6Wb/VLBv2jg+httKCJi0/AiJZkNFzvc+y4ea1xp/ZET
+    2BvSs8QnzsnCXfGgp2ktatqoulkesBfNz9bNdfY+uqmeKUm8+9HL7ZW9s56lkxowNkQHlS
+    AjzdH/bRfIsBF/KnwpBnDG36NrdV3UW7HS6CG5RjSJMhSI4bpm8wI9kR6EVyq816yX8vGf
+    mRUeK7k3IA6El8JHfKpYwDBMH4psiZovq5zMI+LxcFqzE9+a0akPdGqZRuIJ7dGqwZ5MQT
+    +9kkWrZXPfiDaAA8/1kCqtOBnBva6b1YGyBkk9gQTnzIMyRZEGeSRoa5mI+ZJTmrtyq3dC
+    /nUCEZPuQ2cFYPEkbhCQN9LmCZisqrhzK1YHzoItQBRLyPB6dljqFRiGftTCfOXdrevsNL
+    H0bBBZUB01hFRlOT4YV67+KOI1zTNOR+HuxbIbNLC40+7/gUg9TU4jihypkbo6PjhwQgwJ
+    DfLZcSVXiNu/PpssEtSApwapZhxvgFGbop+tHpV7Md0Q5kViZBZxlKAahyhRpEfPEP74Fz
+    83Le96qvmhI69sQIroizEz1uSe/5KwR/x+dml0NZFHXTBMwGCbvSVOJpRktkFUUtp0EpBk
+    yVnh1glRHSqB+gOxq4DTr+wtKmcZNouvSfDPqte9/hIi/8Ifqb0rO/pcQAEQ
+X-ME-Proxy: <xmx:l5yRahj0oiv-fevYFaXsx6GjkNiVTBgYAQT8083bvNLeZRlJ8nwY0Q>
+    <xmx:l5yRamWsrAxPFiBPUGrV0oMHaTPO5PyClkuGdJUCYV2qoX9nSwnG5g>
+    <xmx:l5yRaosIDwkm7IkEIS2Qd8I-3tdOeCQ-wyHH6czifFXyMseGWt9fpA>
+    <xmx:l5yRag43aZFdWKQ_Ki5udhyfQo96KqOf14aWRhL9ZC-sWkfos0KWwQ>
+    <xmx:l5yRanWawyaciE_RzQ8QiinNDbBWtMHmM3KINcLCwMwmX3zAXRQIdG-T>
 Feedback-ID: i10464835:Fastmail
 Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
- 28 Aug 2026 10:11:11 -0400 (EDT)
-Date: Fri, 28 Aug 2026 15:11:10 +0100
+ 28 Aug 2026 10:35:02 -0400 (EDT)
+Date: Fri, 28 Aug 2026 15:35:01 +0100
 From: Kiryl Shutsemau <kas@kernel.org>
 To: Breno Leitao <leitao@debian.org>
 Cc: Ard Biesheuvel <ardb@kernel.org>, 
@@ -65,11 +65,11 @@ Cc: Ard Biesheuvel <ardb@kernel.org>,
 	Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>, linux-efi@vger.kernel.org, 
 	linux-kernel@vger.kernel.org, linux-mm@kvack.org, rmikey@meta.com, riel@surriel.com, 
 	kernel-team@meta.com
-Subject: Re: [PATCH v3 3/5] mm/memory-failure: efi: record hardware-poisoned
- frames into the poisoned-memory table
-Message-ID: <apGWUWi5-RbhFHpe@thinkstation>
+Subject: Re: [PATCH v3 5/5] mm/memory-failure: efi: replay the poisioned page
+ in the next kernel
+Message-ID: <apGbDOnPm5VXP5ez@thinkstation>
 References: <20260826-hwpoison-kho-v3-0-6f79c4b605bc@debian.org>
- <20260826-hwpoison-kho-v3-3-6f79c4b605bc@debian.org>
+ <20260826-hwpoison-kho-v3-5-6f79c4b605bc@debian.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -78,54 +78,42 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260826-hwpoison-kho-v3-3-6f79c4b605bc@debian.org>
+In-Reply-To: <20260826-hwpoison-kho-v3-5-6f79c4b605bc@debian.org>
 
-On Wed, Aug 26, 2026 at 05:03:54AM -0700, Breno Leitao wrote:
-> diff --git a/drivers/firmware/efi/poison.c b/drivers/firmware/efi/poison.c
-> new file mode 100644
-> index 0000000000000..d6855e712832c
-> --- /dev/null
-> +++ b/drivers/firmware/efi/poison.c
-> @@ -0,0 +1,126 @@
-> +// SPDX-License-Identifier: GPL-2.0-only
-> +/*
-> + * Runtime side of the LINUX_EFI_POISONED_MEMORY table: one bit per
-> + * EFI_POISON_UNIT_SIZE, set here as frames go bad, honored by the next kernel.
-> + *
-> + * Copyright (c) 2026 Meta Platforms, Inc. and affiliates.
-> + * Copyright (c) 2026 Breno Leitao <leitao@debian.org>
-> + */
-> +
-> +#define pr_fmt(fmt) "efi: " fmt
-> +
-> +#include <linux/bitmap.h>
-> +#include <linux/efi.h>
-> +#include <linux/io.h>
-> +#include <linux/log2.h>
-> +#include <linux/memblock.h>
+On Wed, Aug 26, 2026 at 05:03:56AM -0700, Breno Leitao wrote:
+> diff --git a/mm/mm_init.c b/mm/mm_init.c
+> index ddda9d6837f32..f94fa221da0b8 100644
+> --- a/mm/mm_init.c
+> +++ b/mm/mm_init.c
+> @@ -2667,6 +2667,7 @@ void __init mm_core_init(void)
+>  	kho_memory_init();
+>  
+>  	memblock_free_all();
+> +	hwpoison_init_boot();
+>  	mem_init();
+>  	kmem_cache_init();
+>  	/*
 
-Is it leftover? I don't see any memblock usage.
+I don't think it works with deferred page init.
 
-> +#include <linux/mm.h>
-> +#include <linux/overflow.h>
-> +
-> +static struct linux_efi_poisoned_memory *efi_poison __ro_after_init;
-> +static u64 efi_poison_nbits __ro_after_init;
-> +
-> +static u64 __init
-> +efi_poison_usable_size(const struct linux_efi_poisoned_memory *pm)
-> +{
-> +	u64 nr_units = DIV_ROUND_UP(PFN_PHYS(max_pfn), pm->unit_size);
-> +	u64 bytes = DIV_ROUND_UP(nr_units, BITS_PER_BYTE);
-> +
-> +	/* Whole words: the bitmap is reached an unsigned long at a time. */
-> +	return min(round_up(bytes, sizeof(unsigned long)), pm->size);
+With CONFIG_DEFERRED_STRUCT_PAGE_INIT the struct pages above
+first_deferred_pfn are not initialized here. memmap_init_range() breaks
+out at defer_init() and the rest is done by page_alloc_init_late(), way
+past this point.
 
-Hm. Why bother to clamp to max_pfn? What's what's wrong with just using
-pm->size directly?
+But I think the shape is wrong here, not just the placement. We should
+flag poisoned pages on the first add to buddy, not after the buddy is
+initialized.
 
-> +}
-> +
+__free_pages_core() already consults the unaccepted table. Adding youre
+case there seems logical. And all three paths -- memblock_free_pages(),
+deferred_free_pages() and generic_online_page() -- gets there.
+No need in special-casing for deferred page init.
+
+It also closes the window where the page allocator is live before the
+frames are taken out of it.
+
+And patch 4 seems to be redundant in such shape.
 
 -- 
   Kiryl Shutsemau / Kirill A. Shutemov
