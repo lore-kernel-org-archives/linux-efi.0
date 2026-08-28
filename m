@@ -1,104 +1,123 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from TYPPR03CU001.outbound.protection.outlook.com (mail-japaneastazon11022077.outbound.protection.outlook.com [52.101.126.77])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 305044315F
-	for <linux-efi@vger.kernel.org>; Fri, 28 Aug 2026 07:27:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787902031; cv=none; b=NF8JHS6me95KzW3osLDqdA1C6FMm2yqjyv7L6qbdG5yxCgDqCRlcUFJHK8xkErsaerm3eBTc8chiotJXtfhyEz/J3pP6cx/6M5UUdx6pXPCXp1RQgbHAEU83UanlmZbZasKMh3UO7RprnLQr1n1ZwqjllilNHWXWkVpnloF/66o=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787902031; c=relaxed/simple;
-	bh=YOaIooRmfC3FPrSaNswv8niRo3TmeCLk0mVieo8uMrg=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=WtuzLu0Jlfx3qauLeC7IMxAu/3rIZy6PbAf1iT+//BBqf2Hrw20T7peowv3Sty8zlA9sqJpzi/K28zfwBgmCUIAgGvT5y54ucKj9S5VyRXyJuRVN7dp9QPBgaHVnuFMD1Vis68501FbSxYlzZrGbcEdAVtskeDt4oERNfqbvDwQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UCZXgkRk; arc=none smtp.client-ip=100.103.45.18
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UCZXgkRk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7A5481F00A3D;
-	Fri, 28 Aug 2026 07:27:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787902030;
-	bh=k2vBzac2CbGqM8xG3fuwgDkMdJk6+vPRFv4ESM0iG2E=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=UCZXgkRkaVoCKi6cqhTTht5sj4zu9m4OQOFWX2DoWgC0qg1gkwXIaCSGH+2fyzP+7
-	 3s/x5NoMx5k5/gC8MJReFfTF311TTKDP5zVAkbJaRWDVHeOHGVyneejjJ7IPn+tXVB
-	 Da5fdWmd9wD1vI99E3DEQc4HN/Hmeqr1Op2jBDacl8mpE9a8WSxvkPQO7JJOzLsRVo
-	 ENAz2ZO28XfjrJKy44m6TlcuXwfWAIsCZCzfvzvddc/TLP62rarcJgTjsNh97tKEZh
-	 A9g35DyrU+Oy2Ub9WxIbnL1Yqi2FLjGk6O2Uq3NzPSRaZtnaz5YRzznU3C3vDDqCCW
-	 cDgMXXp+3XZ6A==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id D230C1980064;
-	Fri, 28 Aug 2026 03:27:07 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Fri, 28 Aug 2026 03:27:07 -0400
-X-ME-Sender: <xms:STiRaia9Ciez7K4pbTqGUVwLHqU_BF33HqNYPdYeHXfZjiht_CTozQ>
-    <xme:STiRagOBGXQQ5SRiZyoswm-pBOz1TE_qYBaYD0YCOfxSuyZle5PSOGkcEbkomF7Ey
-    gPqJk-7ZsNAYPNktBnXclxgbHMVdL_NiPzwb4dt8gyTAb3eTdKMDttr>
-X-ME-Proxy-Cause: dmFkZTGKC7MJVsVhwe7apdyGUvleWgqZguDJI/SNNS1FzJ8hsWOiVRzxWnmF1rq8Soikfy
-    7XeSva86wvoFj9ysLgkIXIHOStH/wOg2Qtg6/mFUw+KMM0kXNfbmQd69Hg54MJpR6RDrNM
-    vevQjW+cPRY83Rgxqpf9OXBIqmVIz9jO8n1uR0PbB3o3NT4kdH7SRMIOcbVlVAPKpetbTb
-    1pDIlJU+36zzvnRN83CTlYVuENfUI9AumZk5Q9NTZQmngHrB8hzBaYIshl3qtl660SqHsc
-    Q688sfFJAx4XoQq1ej0WiN9ft6VgIgTq4pohWiJ54KHagKZE/dHFvzRtZUeOg0uX35lmoV
-    /09Tzt/Eof5BGhbi+ri6wdOx26pZutZrjBwFIfwK+v3+FzVcjgLwQB4lWRMujVjmDa8Xhx
-    mtE87RcmGaOsNdd3n0gZi7+mKPk5zrbMEbSvFMqWLp6H7QkKI09EK7bWWfL6qwvAWWOkCe
-    EXx2u3cWnckVPjYU61rfm10XSFIAun7OFox3eeSiib9fmJIszqznWyNus+9v/B96Uu9scZ
-    zdtwOX0GIBBGObYfvjqHbi48YWYPebOofCETaw1dQa1KwS/+6BJdhgjnU8O8VFU99MrzdB
-    +5jErgjGqngQwyJOzIHrg14MHt9n0mWY5bYNkDYeLHGxxls6wK15SnGBD4LA
-X-ME-Proxy: <xmx:SziRat52uZT2BCr3C9JgVfiDWACDjBoSbGZ7aJ2BOBMNPkDFxSK6ug>
-    <xmx:SziRat8R4Dy_GetnS5wUUESZFg35g_bdiQgZJX8gZgAx4Gr0p9nO6A>
-    <xmx:SziRavHNJ3M-C-ORrA84t3bd7hkLiidTKkuIvNkjrnQR39ZqPcmUTw>
-    <xmx:SziRaiWtJ3yRDFOwVAdaiH57LWDbBgcAq9wiEABtXxoPQX3BDUj4-w>
-    <xmx:SziRar9fUMrXh-pahspJ38xn5qi0RxWTqMyCEfPVxuCU80gr0o70gQ5A>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id A8123F8007B; Fri, 28 Aug 2026 03:27:05 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 558E92848BE;
+	Fri, 28 Aug 2026 08:23:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.126.77
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1787905405; cv=fail; b=lvbqK3aOHl3u7npvpwFWJpdlJsyYJ8PHKUNWmaPdqi+EcmLBsNkcW+0ObnIDjTn9IrVSLTMcoVDGl90LSTwtA0hrH90ddCUlNFfqm+AI6XIJePpLq93JIklpFOMtdQ4bSV6zPom8lj2L16sg4U7of8Dmb42N81y6+cSZDnFEUtg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1787905405; c=relaxed/simple;
+	bh=CiPPPAm7OtgvhmObg/IOKJp5MM5PH3yZQuqIdyXXtik=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=mWZNkKm6cW0KfO7jJ+ORy3IoLy/kW2mxVrzRQSW7fWjrMW0wN4G2Y76kF3AF5rSQtlgmpZzx14vOH7VvAu8ErY1+iLJduH5hR+ffJWWEePwXzT7gEUCIoOIhgmcIV6+l4Bu/wmv5L6xOQcl7Tr6e2x7jZ1C6uV2D9Wxr6/yWWWI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=cixtech.com; spf=pass smtp.mailfrom=cixtech.com; arc=fail smtp.client-ip=52.101.126.77
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=cixtech.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cixtech.com
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=BdAfOYiUCyqLoTyyMK3GsZtOjIKc9UgPmucu9wTo8opj0Duc/tG9jqX5e/CRsg2fC3eafZhtzPKoJKVcv+LUfyGIU2YL3lCVj2l/T6+N/LiIyDTCdlj/rRX6b0exrO+qXCRzLu846/5EwoFclAT9AMgbJHWcpwr5Hy40h+jkJzxZd5Ugm/XGm0ghfzxTf2UR6IL0qtx75xGtwtYZH5aWG4Pt4+J2x1yWfpIWBcvLuThJthTheSuapBbsHBEPVF1F0/ryhSIpFyxKMy/15YLGfUxVvwhN8SbBu+Gpts1HZhTQ2MoCM0e14onwnWfLQtSyd82xveV10Zg/RLpv+iLVwg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=X/EaGOKB0xkSpfFrRufmb70DOEMHWLnnS6GZksjjGNI=;
+ b=iqmPvdleGVh9B/nKYQuukijCYC5v/2GeNDxzM8MSMijPQcvFTZyY2yHrIiwDG9IU3A7C3Jo/sB1eZG5tNnEIa7l+dsiEigYC8sH088khzCXL5asKKX86WWCENpXRS2Lx62N15P2sSq3qRt9DK/jnU6ioaKVXVi6wsh1k016HYF7b4OO66fLoGHenj254jZjV5MDHYt3sYRiwgqD41uQhYlGCtZ5Hka+LJXbJkDXiASOne2WvR1v3/q/p0I/MsVYmp0fQh2FnnEEhUw02c3XxYKBN4awohM5jRNM0Hawo1ULtdVHgmHvGvbk3jPCtXA+I8JGkZ+/s1Of84Spfy6JaEg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 222.71.101.198) smtp.rcpttodomain=cixtech.com smtp.mailfrom=cixtech.com;
+ dmarc=bestguesspass action=none header.from=cixtech.com; dkim=none (message
+ not signed); arc=none (0)
+Received: from PUVP216CA0015.KORP216.PROD.OUTLOOK.COM (2603:1096:301:16e::11)
+ by TYQPR06MB8009.apcprd06.prod.outlook.com (2603:1096:405:2fe::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.10; Fri, 28 Aug
+ 2026 08:23:18 +0000
+Received: from TY2PEPF0000AB87.apcprd03.prod.outlook.com
+ (2603:1096:301:16e:cafe::8b) by PUVP216CA0015.outlook.office365.com
+ (2603:1096:301:16e::11) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.21.360.10 via Frontend Transport; Fri,
+ 28 Aug 2026 08:23:18 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 222.71.101.198)
+ smtp.mailfrom=cixtech.com; dkim=none (message not signed)
+ header.d=none;dmarc=bestguesspass action=none header.from=cixtech.com;
+Received-SPF: Pass (protection.outlook.com: domain of cixtech.com designates
+ 222.71.101.198 as permitted sender) receiver=protection.outlook.com;
+ client-ip=222.71.101.198; helo=smtprelay.cixcomputing.com; pr=C
+Received: from smtprelay.cixcomputing.com (222.71.101.198) by
+ TY2PEPF0000AB87.mail.protection.outlook.com (10.167.253.6) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.21.382.8 via Frontend Transport; Fri, 28 Aug 2026 08:23:17 +0000
+Received: from JohnnyFan (unknown [172.21.64.24])
+	by smtprelay.cixcomputing.com (Postfix) with ESMTPSA id 61507427CEE3;
+	Fri, 28 Aug 2026 16:23:16 +0800 (CST)
+Date: Fri, 28 Aug 2026 16:23:05 +0800
+From: Johnny Fan <johnny.fan@cixtech.com>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: linux-rtc@vger.kernel.org, Feng Tang <feng.tang@linux.alibaba.com>,
+	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+	cix-kernel-upstream <cix-kernel-upstream@cixtech.com>,
+	Bob Zhang <bob.zhang@cixtech.com>, Jie Fu <jie.fu@cixtech.com>
+Subject: Re: [PATCH] rtc: efi: restore alarm support with runtime capability
+ probe
+Message-ID: <apFFaaJr4xlcp4mo@JohnnyFan>
+References: <20260828031519.2749354-1-johnny.fan@cixtech.com>
+ <549999fa-4b1a-4f53-872a-9036a377f8cf@app.fastmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Fri, 28 Aug 2026 09:26:42 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Johnny.Fan" <johnny.fan@cixtech.com>,
- "Alexandre Belloni" <alexandre.belloni@bootlin.com>,
- linux-rtc@vger.kernel.org
-Cc: "Feng Tang" <feng.tang@linux.alibaba.com>, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org, cix-kernel-upstream@cixtech.com,
- bob.zhang@cixtech.com, jie.fu@cixtech.com
-Message-Id: <549999fa-4b1a-4f53-872a-9036a377f8cf@app.fastmail.com>
-In-Reply-To: <20260828031519.2749354-1-johnny.fan@cixtech.com>
-References: <20260828031519.2749354-1-johnny.fan@cixtech.com>
-Subject: Re: [PATCH] rtc: efi: restore alarm support with runtime capability probe
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <549999fa-4b1a-4f53-872a-9036a377f8cf@app.fastmail.com>
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: TY2PEPF0000AB87:EE_|TYQPR06MB8009:EE_
+X-MS-Office365-Filtering-Correlation-Id: 31915680-0af5-4f35-3bed-08df04dd9d17
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|376014|36860700016|82310400026|1800799024|23010399003|10067099003|4143699003|6133799003|56012099006|22082099003|18002099003;
+X-Microsoft-Antispam-Message-Info:
+	7qDEnPd9vGeo6661llbrDWYxmms8mT/lVnjCqcKX0BaXl+o5iw1cs5AkUXYLt96H4JpL39av1mLK+BDCG3y8uelvksQsye3VzdG/nM+JxJAPB5AF3p9DT86cBADTtMJ20kb/bmuMNmKpA7JfYSBAB2LuQwhXi+gWfuac3x4r8zR4NdwnSFNfWG73O3X0r1U5s7zME+kUfjeavAtJTl/MuTUd3cpEoD0yIt9N2wcb/yQY43Uz2BU1J8fTxTimFvYo0Ubgk27ZyCtcL3ovmFIbpCF1LB3KbYeuLFCofjJdtMYZ2EJkq1LLO6NJtwGu+XHRrFZXafsuUTDzlbF+G/ro375zQFSbZxGxkEBVj4yxnWlhg+pj4Emp9ED0i1lCj0HIXKrwiYN5fojnRUW81vmvXUGyKLuoLe/h7v5m9onoyIX14BkC2tmpvNi0Qw70BfYEQspAk9Qy2G2l+c5AGlf+5F9TgMHQKe/EdkiPe0BXB15ycQlPgIZ13xyzTd5h1+rH1Ub2qjU0r+uB8XCqbyXe+UFMYx0SPYJ5rNBI21tOkNuY6K73c9B5NtTlTFs9Kb7tXpaXQ9C88KTQlzB6lAFW1JGhzYy//3jPPRKf57579a57WUBTQs7OEKOllblgtLoH1e6cBwOeTs0e5uih09/iN+CvAaQ8RhaX/DN6rzl1+CNG2bZkPB0spLryVr2T0znF76XYkjIk3OOfji2jfOp9cg==
+X-Forefront-Antispam-Report:
+	CIP:222.71.101.198;CTRY:CN;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:smtprelay.cixcomputing.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(376014)(36860700016)(82310400026)(1800799024)(23010399003)(10067099003)(4143699003)(6133799003)(56012099006)(22082099003)(18002099003);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	fh8GxBCT460lb2U1a48I5X3QiXee/F92s4rYTI0NeBcl8680ynQU80eK0NgJDbeBimWI5R8cr5eJSKWcjme75QXrKUYFOrWw7l66Ph8yM3naBxSxs8d3u0eEhioBkMRtD9Q+2wzKCc1ymY5aN92wjfCIb++ugiRZ5yuW2SB8kys2SNt1bCFWBteDzm0txiuCekQXOGuSMT21oHiA7PwcYihT3214LMZ+tQVPA0VE9/wos+w00qiqdblPLOVXISI7nG1riNmvwAUXYFHq9Kc0oFprbSTiOi8k5bKkZsmtmvls6Qi7F3kTO3w2c94uYRxKXApvshX+rbaeQ6ibGX7vE8D4c6wkZPjgriquYmIO5L2t41flAVeHw1/eTn9aCsMODszHt/v1BQbUWdqsOVDPzdSVdpBtz9DIGoreDI99Mao7GCJo1sCopvCYYeL3bem4
+X-OriginatorOrg: cixtech.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Aug 2026 08:23:17.7155
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 31915680-0af5-4f35-3bed-08df04dd9d17
+X-MS-Exchange-CrossTenant-Id: 0409f77a-e53d-4d23-943e-ccade7cb4811
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=0409f77a-e53d-4d23-943e-ccade7cb4811;Ip=[222.71.101.198];Helo=[smtprelay.cixcomputing.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	TY2PEPF0000AB87.apcprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYQPR06MB8009
 
-Hello Johnny,
+On Fri, Aug 28, 2026 at 09:26:42AM +0200, Ard Biesheuvel wrote:
+> Why does it need working alarm/wakeup support?
+> 
+> I'm not saying we shouldn't bring it back, but this deserves a bit of
+> motivation, no?
 
-On Fri, 28 Aug 2026, at 05:15, Johnny.Fan wrote:
-> From: "Johnny.Fan" <Johnny.Fan@cixtech.com>
->
-> Restore the EFI RTC alarm functionality (read_alarm/set_alarm and
-> procfs output) that was removed by commit 18a3510bc87d ("rtc: efi:
-> Remove wakeup functionality").
->
-> The removal was motivated by the observation that many EFI platforms
-> lack RTC wakeup support while also omitting the RT_PROP table, causing
-> the wakeup capability to be incorrectly advertised.  While that is
-> true, removing the feature entirely also breaks platforms where the
-> wakeup runtime service actually works.
->
-> On CIX SoCs with an I2C-connected RTC, the firmware owns the RTC and
-> exposes it via EFI runtime services.  Using the native I2C RTC driver
-> under Linux breaks Windows, which relies on EFI runtime services to
-> access the RTC.  rtc-efi is therefore the only viable option for
-> shared RTC access across operating systems, and it needs working
-> alarm/wakeup support.
->
+Hi Ard,
 
-Why does it need working alarm/wakeup support?
+Thanks for the review.
 
-I'm not saying we shouldn't bring it back, but this deserves a bit of
-motivation, no?
+The reason is wakeup: on CIX platforms, the RTC is an I2C device
+owned by firmware, and in the ACPI boot configuration the bus is
+not exposed to the OS, so the EFI runtime services are the only
+way Linux can program the RTC alarm at all. With it removed,
+'rtcwake' fails for both suspend-to-RAM and power-off wakeup --
+Linux simply has no other path to set an alarm on this platform.
 
+It is also a cross-OS consistency thing: Windows programs the
+same alarm through the same runtime services, so a shared
+interface that is time-only on the Linux side is asymmetric.
+
+I'll extend the commit message with this motivation in v2.
+
+Thanks,
+Johnny 
