@@ -1,44 +1,39 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EDA0B364052;
-	Sat, 29 Aug 2026 21:20:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 508632C21E6;
+	Sun, 30 Aug 2026 10:30:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788038456; cv=none; b=cNSK7pjkfTCvSb8PjnhhE8e7yDuP2xQ/VaP0ApWqKuN7qd3pGfraPXpx9lpVwdS+WVGSXgqOU+FMAQF+plRAVR7emIH15/GNFM2ZKnSV0iz74juJBtWPweIfMxPXtjFnDpz/hhO56+1KuYFoYyIEmWAbR5iZE2TmpKWy72oD5RA=
+	t=1788085846; cv=none; b=Ob+J8jQR49unhkh4lJYQGPE517SuAUbl6tOQ1JSxCQUwS/jKAYqUW2Z0sMeVr1uyvyZ04VtBkKWyisRJ5tPyX/d4iKVwJWtsZY2sFWAM0Twx99WgSDh0yp/iSnk3nQRfsUBOpnwymPP87cAS0WtcoZpFda9w7vfucygnfnV74ow=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788038456; c=relaxed/simple;
-	bh=7+AKVSCv81q3zwE5ABq4d4psS2kgIpKN5OfukAqKhSo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=nudYM4W9fRXOpDA9FQhkWpjVE8z1WN2qU4SBCbzIuhf+SM5pUc3YnS0MhjeoTduX97/nBiyq9yCmD6vh/lh5Rp3ZA9tQWcRa5j7LQKX0wiT3wyMm6K07GO8F89H0Jb5fyCiXsoEa5l7y3PfPfsF2sbUp3ut176rHoYU2xHZnEhM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CWhIPwuG; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788085846; c=relaxed/simple;
+	bh=ZgRPq/+Sgrc4sC2VvTD9OYI608yY7/+Yn6GVoll+1rk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=lQVRFNK6lvwqTvrYQ3tOcX2K2Ih4Irlvnnlnpw1rTmluNCpayr9hAjN6HsmVyI3TYRCQbPThvBmYo7ZV6sTFwAjNDDid8kyJn3VulJK/Gfy44StwegFcGLtqrtBcI4hmhZSE4F+Uq5MbI1ZS6nSoOK4IvJ2GXhHRRQolhgxtllc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HSITmhqz; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CWhIPwuG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 35A0A1F000E9;
-	Sat, 29 Aug 2026 21:20:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HSITmhqz"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 578771F000E9;
+	Sun, 30 Aug 2026 10:30:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788038454;
-	bh=OMVXHLa1HmQu4uo8XsSIwn4sntIQRJHfffEiJUyFrKo=;
+	s=k20260515; t=1788085844;
+	bh=ZtIhcUXB3xuMc2+u5/0ciofob1WH7dnuRdwdSoLIXNI=;
 	h=From:To:Cc:Subject:Date;
-	b=CWhIPwuGtVzyGHppN0Joo/2AdlhLp/vqnNVoNG2z7dePN67VW057cO3gxb7eU19pq
-	 Vg64bqjWkmPicDWMpzaKbsYWnTsYOtfmimRIeIAITk23hnWkwUydvyez7RjiCX1uju
-	 lVeeOQ/ZuPsyqiEuUHYcOGtU7a9oOCkqSol26PsoC/so4FwDaFEKty4BwiMYo0q+r7
-	 j5Lv55nzlrUF/KaIsMKW/tIYzY5WvckBbP/Qd4LImt9XWQP0cLxlO3oY3PMk8P0nCC
-	 V52f7AOKHszRoq6J9MAij7n08Ipf6nbfh6Bqm6k+04KNq89whCcIdZquBXDXgFAGqt
-	 7/PNWoq3CgI7Q==
+	b=HSITmhqzVs1cgdcklkR1v/Z9h6SYz5AB+dTogKAAj/40DXgg1H6Kh3KH8VzqakIkX
+	 Ux1omdAWxC5bWa6l+hOGN1Y0IKw2gm1RyjuCgtTTb37KbyaEPrkyMLqJPCClTNGgW9
+	 exgs8e7tSLMpQfNfZhpfuV1INAAwZapd5J5MSePtiY8vKr54CFZYXf6Xf1E3Rf907p
+	 s7lA+UuR4comFg9rOsHbw64tn56U1wBEw/mwf9vE/Rac8bE6Ye4O98BIXlpQPQMYpj
+	 fJP9oEUKRhVS5gdlM5GTIaH6/DRfTsugO9TY5S2oVrVz2wwykYF5Jr0LMdJ28xEgF/
+	 TmvO1AVf+WjOQ==
 From: Thorsten Blum <blum@kernel.org>
 To: Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Javier Martinez Canillas <javierm@redhat.com>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	Lenny Szubowicz <lszubowi@redhat.com>,
-	"Borislav Petkov (AMD)" <bp@alien8.de>,
-	Francesco Pompo <francescopompo2@gmail.com>
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>
 Cc: Thorsten Blum <blum@kernel.org>,
 	linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH] efistub/x86: Use struct boot_e820_entry for size calculations
-Date: Sat, 29 Aug 2026 23:20:35 +0200
-Message-ID: <20260829212037.335569-2-blum@kernel.org>
+Subject: [PATCH 1/2] efi/libstub: Simplify check_image_region()
+Date: Sun, 30 Aug 2026 12:29:09 +0200
+Message-ID: <20260830102911.345357-3-blum@kernel.org>
 X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -46,40 +41,47 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1334; i=blum@kernel.org; h=from:subject; bh=7+AKVSCv81q3zwE5ABq4d4psS2kgIpKN5OfukAqKhSo=; b=owGbwMvMwCUWt7pQ4caZUj3G02pJDFmTfVWfznmQ/yJV6dcC69kNlu5R3UEpnpyed1co6ETNn 1/GpPizo5SFQYyLQVZMkeXBrB8zfEtrKjeZROyEmcPKBDKEgYtTACay6xDD/+Cf8y4r5s3zS2Re 2mBbcrlF/G/3CemLIs+0lta8dtBvv8bwP/zP9/MPYtKFyjTjCn1E+NmVOGNrXyd89ug1aO2S1tj DDwA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1268; i=blum@kernel.org; h=from:subject; bh=ZgRPq/+Sgrc4sC2VvTD9OYI608yY7/+Yn6GVoll+1rk=; b=owGbwMvMwCUWt7pQ4caZUj3G02pJDFlTWL+X3FZtrG+ckrzvR103Q/8SW2/1mz9Ds9Ymbn04y en3keQ9HaUsDGJcDLJiiiwPZv2Y4VtaU7nJJGInzBxWJpAhDFycAjARP21GhlvtHm+vNq+zfnZU T4Z9ut2CKeHflt67MWPCwjkdD1YePOXPyHDf12uNRqvtHa5A/4gFB46sfaT95fzPb1erXm61C7M 8/JkDAA==
 X-Developer-Key: i=blum@kernel.org; a=openpgp; fpr=1D60735E8AEF3BE473B69D84733678FD8DFEEAD4
 Content-Transfer-Encoding: 8bit
 
-alloc_e820ext() and setup_e820() use sizeof(struct e820_entry) when
-calculating the sizes of boot_e820_entry structures.
-
-Even though struct e820_entry and struct boot_e820_entry have the same
-size, use sizeof(struct boot_e820_entry) for consistency instead.
+Drop the local ret variable and the break statement by returning the
+result directly. Also use unsigned long for map_offset, since map_size
+and desc_size are both unsigned long.
 
 Signed-off-by: Thorsten Blum <blum@kernel.org>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/libstub/kaslr.c | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index cef32e2c82d8..ae2481f8a4c3 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -648,7 +648,7 @@ setup_e820(struct boot_params *params, struct setup_data *e820ext, u32 e820ext_s
- 		}
+diff --git a/drivers/firmware/efi/libstub/kaslr.c b/drivers/firmware/efi/libstub/kaslr.c
+index 4bc963e999eb..17549bf3dc3e 100644
+--- a/drivers/firmware/efi/libstub/kaslr.c
++++ b/drivers/firmware/efi/libstub/kaslr.c
+@@ -59,8 +59,7 @@ static bool check_image_region(u64 base, u64 size)
+ {
+ 	struct efi_boot_memmap *map __free(efi_pool) = NULL;
+ 	efi_status_t status;
+-	bool ret = false;
+-	int map_offset;
++	unsigned long map_offset;
  
- 		if (nr_entries == ARRAY_SIZE(params->e820_table)) {
--			u32 need = (nr_desc - i) * sizeof(struct e820_entry) +
-+			u32 need = (nr_desc - i) * sizeof(struct boot_e820_entry) +
- 				   sizeof(struct setup_data);
+ 	status = efi_get_memory_map(&map, false);
+ 	if (status != EFI_SUCCESS)
+@@ -74,13 +73,11 @@ static bool check_image_region(u64 base, u64 size)
+ 		 * Find the region that covers base, and return whether
+ 		 * it covers base+size bytes.
+ 		 */
+-		if (base >= md->phys_addr && base < end) {
+-			ret = (base + size) <= end;
+-			break;
+-		}
++		if (base >= md->phys_addr && base < end)
++			return (base + size) <= end;
+ 	}
  
- 			if (!e820ext || e820ext_size < need)
-@@ -684,7 +684,7 @@ static efi_status_t alloc_e820ext(u32 nr_desc, struct setup_data **e820ext,
- 	unsigned long size;
+-	return ret;
++	return false;
+ }
  
- 	size = sizeof(struct setup_data) +
--		sizeof(struct e820_entry) * nr_desc;
-+		sizeof(struct boot_e820_entry) * nr_desc;
- 
- 	if (*e820ext) {
- 		efi_bs_call(free_pool, *e820ext);
+ /**
