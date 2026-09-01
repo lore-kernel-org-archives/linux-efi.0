@@ -1,183 +1,201 @@
-Received: from mail-pg1-f174.google.com (mail-pg1-f174.google.com [209.85.215.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B96B41A929
-	for <linux-efi@vger.kernel.org>; Tue,  1 Sep 2026 02:34:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33FFD2931D9;
+	Tue,  1 Sep 2026 07:46:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788230099; cv=none; b=lfatKg9eob4+/TJgusFr4KBv08u/TQyOCdErB/fA6XPyQAS/KThi4JKg6oI5wWZid6Zm+FJGnsnLrcglV/oAgNrt+telUgeLP488U/xsBXQEiNU1ZyB/7jEgHYssdhbgRE9cAMMBPybgIG3V3CMOlxtPLwhtGwNHreHY1aQ1g9s=
+	t=1788248802; cv=none; b=e4nj+Y8LM04GXw4TEDvy3KeELKnLQMhQfIkBi5+HZTjaIlkW00va1SWd5/Fp1hJ7JFKt6hv+NnN5eHCNdfuYXWKUrwct04IlyzQSmcaQB+TBzrNC8tppgOVqGPpRVvNnaucQHC75vbrOceSgFsHaoluFwSYsYcZcHYFAGpLCNHs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788230099; c=relaxed/simple;
-	bh=WSuygwuenKYyDNYkB3/gILx/6xVlqM45WcQUtu7W8Xc=;
-	h=Mime-Version:Content-Type:Date:Message-Id:From:To:Cc:Subject; b=temErbokIVCFIePs9Eg64sf4J+xk1JSWUtUjxfGfZ6SXeeTU/5uDV4iJmwjixNGaboFkKhGBUFRrU5JyJ6gqh5KUbyr31MNVAj/UX/y1v6Q1o9jSIf91iJoByicf/F78KAKUcROlqvoJNfHFkMAP5eIpNYIfAg0LxJN/aPOewuk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=HapO5ZnE; arc=none smtp.client-ip=209.85.215.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1788248802; c=relaxed/simple;
+	bh=v/An2BC5S8oN8RkfExWXcae0xF52oIum1YsykNv7Tb0=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=aexywJ5cFJYLEFlUYUkpsSzRFESGaQq3HGCv6zUiT5uTtFtpZP9IxC0tWg6cctFnqZxdZssLUeOhnzR1m6YXpyYr5YB2NLnUijTLwwUI2O/HTNIl3RhmZYPieiYs8E/kPWAdHDx8p7dmDb6xURQbkk8l28M64vf6PtuOIQTjvAA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JcV1y/Hp; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HapO5ZnE"
-Received: by mail-pg1-f174.google.com with SMTP id 41be03b00d2f7-cbe6295f05bso420486a12.1
-        for <linux-efi@vger.kernel.org>; Mon, 31 Aug 2026 19:34:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1788230097; x=1788834897; darn=vger.kernel.org;
-        h=subject:cc:to:from:message-id:date:content-type
-         :content-transfer-encoding:mime-version:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=QUkCmam3KYaf5BWg4fF5DYvGM2RIW9lYFsGi+vWehOk=;
-        b=HapO5ZnEmdA+4OcbINZyizLeJWh//jHLNhbjb9IdtEYT+doF8A+FM2F8NsvLJC0753
-         q4eeTXJwmCs3tGaW2dHDzarz5q0/AvRqhdRdQHAwxztMLhwOJUvfx1ts3ihmc/B8cszX
-         oMXWQiUb16n2lNjbMTFThoiAVRcuKokr92TtcBaLZKX3v6462qvPBT7HYsODKM2MBVjz
-         tDHoUbvU+uEKJLX2/KNTYIvI+bKdsommh2jkfWvrjJowK/kKaSWwGPo+e/r3rFNgTmc4
-         woVc7U/M0QtK9GoIL11y3upi4YU6TAp6l0Rcg3jTfOPM039jeIByIQORbhgsEnbg2znc
-         DWSw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788230097; x=1788834897;
-        h=subject:cc:to:from:message-id:date:content-type
-         :content-transfer-encoding:mime-version:x-gm-gg:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=QUkCmam3KYaf5BWg4fF5DYvGM2RIW9lYFsGi+vWehOk=;
-        b=htMrWk4x50JcyL99hOKe2wzkPgro4Zzv4gkhI4u8DH/sabfYv1Iva3wieECj11x6qi
-         NzUoQ4HvAdiQuN4CoWEHrrxJS0/3AkNwE87UM6AMwwTJeeU4npsZIAo9sAXcg+RUs3Ca
-         tOBuglsgM+rpoxrhhGrvkygfBL7BfCbdZky8HUMGFT97r82pgLaCQD3okALy+7fnNUZn
-         rsFyahhzemXL1mpP3NA53nFhtTnP1kuln+HMSKKgjz9yVtw7lqSOeT70h2VpxByTRjDe
-         rv8oEGzN6eRWNuq/vLyWIgp8BUuRgNtTU2Mrm0IJ4uxQjhqL4e/T/Hys8X809MALuodb
-         zKdA==
-X-Forwarded-Encrypted: i=1; AKwUvByi00HQ0i8kfzy8t6uCOy//RWreGhwEkiHzexk/NQ6wsZtznpxiRUG44zHZljNgWIFcEgBfuwN4Udo=@vger.kernel.org
-X-Gm-Message-State: AFuF++m2GSv3JDJbteQ0QuqqXI2dMj3ajJNZ1QtKCQIOHBFB7nYH96uL
-	GHMeBxEl/yxRgQiTqxqf8s0uUZllqSmVw11b3h3Mw7Q5MZF6fQdioqOB
-X-Gm-Gg: AYBFou3CUPdc9ZgK6RFsbMEnWkpW9SpamneBvVzuQxMtmQ3fFjjzBjNNsKWZ42dwHAs
-	aIAeoNHnUDG16ZZd2mF7BVOf4z17X48AXZNhu5797585RrJ2O7qBKfxYC7JIJZ279nrH2sv6bKy
-	G+UuYo2VPoi2ZobeczxU2TNFi84g15GYsA431O5hl0Cv89HC8q8nPpFoBj0U9yIX+z2FcTZ3qUj
-	zAkEyuU0tF1cjzEbjFZ5EMcwAOpCjw1IibAKtwaH6xVK2iPnPLHyYrOeVv0cxlO3gZThweKb1T4
-	v08HPABAL9Ae5S0QnfsWmVET8fBi0eNIJH0gCbYtJGZGpMW65dSocVdpys7mkA4lJsXMbpqdtAu
-	HzrOKlYWkyET5WOQeLx3jNDGdtbaJFFZmvnkfZY75Xeq/XTleyxWNtihL958bZ8tn0MsK7eJ22a
-	dPexc2tiAX/4Wb7PSoM8hIMUVo666EUQ5YaU9mn0M2+8oFvuEYeH30BOctHSmMS5bq
-X-Received: by 2002:a17:90b:2247:b0:37f:a913:1554 with SMTP id 98e67ed59e1d1-3990f890861mr2217999a91.16.1788230096670;
-        Mon, 31 Aug 2026 19:34:56 -0700 (PDT)
-Received: from localhost ([69.196.42.8])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-142e0bf8a13sm47875463c88.0.2026.08.31.19.34.55
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 31 Aug 2026 19:34:56 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JcV1y/Hp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4CCF71F0155A;
+	Tue,  1 Sep 2026 07:46:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788248800;
+	bh=tycthEubAVEPDTzKZ89ZW92uoSczdcYfRgozoAn/gcg=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=JcV1y/HpE7fnhx8ZQKxJw2Pki5mUdYLn/gBk7n1+//kTzN8FDdB6o+lXkcs3TVwpB
+	 0HFGFujJozZM76n4CxtHOr2YS4SAyzTbtlO6rbyR45f/HDBvlinwtepHgVBgaqBAm0
+	 BpYv+UoJtaSIQWHZb4BIrUreswFemFliu/CxdPWoB6V/KNG+bveJl53yBG7JbdqD1T
+	 L8PcpCrgfFor9oF4o3pTzqPIOx5e54laQFtCRsgDpc74IrpNlMcf9bow0ACConiYl1
+	 yh3hkaPx/F0orj4/UpKVgHzDd73JPUkJM+OK+3FcSt0fFEHDeL0QICjbpQHG/nzjNB
+	 armZ2M2WP8UxQ==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id C77A41980047;
+	Tue,  1 Sep 2026 03:46:38 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Tue, 01 Sep 2026 03:46:38 -0400
+X-ME-Sender: <xms:3IKWas-USWresrMBg_PjOEdBx_HUyglt4r0LEguzDwkhzlJL5mk5cw>
+    <xme:3IKWavgpaenlWlDWVB7O1hAtAeuS5clTy_HBc-Bi1ah2PIoL5BE7-Tfod_Bh1AJfB
+    LS2UzSGJCW5NA8wzHBvvmJScLm0dI8kwttwvEZ5ygS-BMEX_m2rLHk>
+X-ME-Proxy-Cause: dmFkZTGdeAAZd7nm8BQbk45gyvcsKSuHH3+WyvCBBHysyzB+JWpO7OakyersasOOFw5t9S
+    aUuVlHng9R84S/5OCYhOO+wfvnnhXcJJ2p5Bh2Tn82X5ZmruMpgQwj9Z6sGjYym0dcHLGh
+    KkrItYKblSDXQKbIGDMSBAR1y5Z8K249b4ohzJ2NptXTpNoY+Mi7hpBO7OFSlGEN44hl8l
+    mxcatjydrVncNWw+WyqcBYlvMtJdgrItIRcqNEzlsuoZ2LrsE25YHuwFhpwDDan4I/p23M
+    nLI1GMzO48M7MR5Xo0d2eGNqdUboHxsgiku6fLWrA+eNiced+pk8sLoNGl+BjZxalBC0cr
+    iXWZr8nwxqpZulxZgtxL2kAXoH7P7JUspKC1qtDYFclVQKwoJBkVZTWi6oF5bNekU4bRx4
+    oMDm0fjSUmMt1g1qOFB+1b8wtWsrsO9J/CbZiQD3+RP2nY7087Zs9PUa72EHtizQah1zui
+    YiKomU2yCxxtYkJuXa1y7NtX6MJ9yhX2e1lsxF0XF3hpU6gwMuVBMBZsxNOz7AV6F1e/xb
+    LVCmE7rSGLMA2M94inPldXnoQ82R2U5GddkAFd2qxopGjlqtyIgXNQyb7jUv6vctnU/cUR
+    vBI4pR/uyEgg1HKqSb/PcHJnGnbg/Baio9fgZ0v53f3NeuKjLP0W+5vz2UQg
+X-ME-Proxy: <xmx:3oKWau-0p-UJxzfC5c-r2Qqga0PdhDyGngIJneCSWmj_wvlMjw_bFg>
+    <xmx:3oKWarSqFvssmjfZoaI-v0VElUd_zgMIiA35rxPjMni7SnUYXdAKZQ>
+    <xmx:3oKWaoefmi8dxYmF7h8P9eBr7JF0wEvzkoFNMApWr8legZpvkEQvYQ>
+    <xmx:3oKWatQ3EoNlMekDdaFJPAeqlwoxk2tQxv54eeVPiBgXJxvvtOTpcQ>
+    <xmx:3oKWakIVeNiheVTKvvPgoEn1xPBydzwLR5OVd2TYMBk_tP7TOsflqk-Z>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id AC032F8007A; Tue,  1 Sep 2026 03:46:36 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
-Date: Mon, 31 Aug 2026 19:34:55 -0700
-Message-Id: <DL3MNWW4VEBR.K3K6A92WMHUY@gmail.com>
-From: "Jasmeet (Jazz) Bhatia" <jasmeet.bhatia.us@gmail.com>
-To: <ardb@kernel.org>, <rafael@kernel.org>
-Cc: <ilias.apalodimas@linaro.org>, <pavel@kernel.org>,
- <linux-efi@vger.kernel.org>, <linux-pm@vger.kernel.org>, <x86@kernel.org>,
- <linux-kernel@vger.kernel.org>
-Subject: [RFC] efi/tpm: ACPI reclaim event log allocation breaks x86
- hibernation
-X-Mailer: aerc 0.21.0-0-g5549850facc2
+MIME-Version: 1.0
+Date: Tue, 01 Sep 2026 09:46:16 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Jasmeet (Jazz) Bhatia" <jasmeet.bhatia.us@gmail.com>,
+ "Rafael J . Wysocki" <rafael@kernel.org>
+Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "Pavel Machek" <pavel@kernel.org>, linux-efi@vger.kernel.org,
+ linux-pm@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org,
+ "Breno Leitao" <leitao@debian.org>
+Message-Id: <52b1567c-522a-4e93-a5c4-0a37af688d76@app.fastmail.com>
+In-Reply-To: <DL3MNWW4VEBR.K3K6A92WMHUY@gmail.com>
+References: <DL3MNWW4VEBR.K3K6A92WMHUY@gmail.com>
+Subject: Re: [RFC] efi/tpm: ACPI reclaim event log allocation breaks x86 hibernation
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-Hello,
+(cc Breno)
 
-This is my first mail to the Linux mailing lists, so apologies
-if I've missed any conventions.
+Hi Jazz,
 
-I have been investigating a reproducible x86 hibernation resume
-failure and have traced it to the EFI stub's TPM event log allocation.
+On Tue, 1 Sep 2026, at 04:34, Jasmeet (Jazz) Bhatia wrote:
+> Hello,
+>
+> This is my first mail to the Linux mailing lists, so apologies
+> if I've missed any conventions.
+>
+> I have been investigating a reproducible x86 hibernation resume
+> failure and have traced it to the EFI stub's TPM event log allocation.
+>
+> The system is a Framework Laptop 16 (AMD Ryzen AI 300 Series), using
+> Insyde UEFI 2.9 / Framework BIOS 04.01.
+>
+> On resume, the hibernation image is found, but x86 eventually rejects
+> it because the firmware E820 map does not match:
+>
+>     PM: Image signature found, resuming
+>     PM: hibernation: resume from hibernation
+>     ...
+>     PM: Loading and decompressing image data (4198398 pages)...
+>     Hibernate inconsistent memory map detected!
+>     PM: hibernation: Image mismatch: architecture specific data
+>     PM: Error -1 resuming
+>     PM: hibernation: Failed to load image, recovering.
+>     PM: hibernation: resume failed (-1)
+>
+> I compared the E820 map across repeated ordinary boots and found a
+> 48 KiB ACPI data region whose address changes from boot to boot. Its
+> base always corresponds to the TPMEventLog EFI configuration table
+> address (the table pointer is base + 0x18).
+>
+> For example, across five ordinary boots:
+>
+>     E820 ACPI data region          TPMEventLog
+>     678da000-678e5fff              678da018
+>     678db000-678e6fff              678db018
+>     678d1000-678dcfff              678d1018
+>     678d6000-678e1fff              678d6018
+>     678d8000-678e3fff              678d8018
+>
+> This occurs on normal reboots as well, so it doesn't seem to be
+> specific to an S4 firmware path.
+>
+> drivers/firmware/efi/libstub/tpm.c currently allocates the copied TPM
+> event log using EFI_ACPI_RECLAIM_MEMORY:
+>
+>     status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
+>                          sizeof(*log_tbl) + log_size,
+>                          (void **)&log_tbl);
+>
+> As a diagnostic experiment, I changed only the memory type back to
+> EFI_LOADER_DATA:
+>
+> -   status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
+> +   status = efi_bs_call(allocate_pool, EFI_LOADER_DATA,
+>                          sizeof(*log_tbl) + log_size,
+>                          (void **)&log_tbl);
+>
+> With that change, TPMEventLog continues to move between boots, e.g.
+>
+>     boot 1: TPMEventLog=0x678d8018
+>     boot 2: TPMEventLog=0x678d5018
+>
+> but the BIOS-e820 entries are identical across those boots. The
+> 48 KiB ACPI data island around TPMEventLog is no longer present.
+>
+> Most importantly, Linux 7.2.0 with only this one-line diagnostic
+> change successfully hibernates and resumes, whereas the unmodified
+> 7.2.0 kernel fails to resume.
+>
+> Despite that, I don't think simply reverting to EFI_LOADER_DATA is a
+> good fix. Looking back, I noticed commit 77d48d39e991
+> ("efistub/tpm: Use ACPI reclaim memory for event log to avoid
+> corruption") intentionally moved away from this allocation to prevent
+> the TPM event log from appearing as unreserved RAM to an incoming
+> kexec kernel.
+>
 
-The system is a Framework Laptop 16 (AMD Ryzen AI 300 Series), using
-Insyde UEFI 2.9 / Framework BIOS 04.01.
+There might be other ways to protect this memory from being clobbered
+by kexec.
 
-On resume, the hibernation image is found, but x86 eventually rejects
-it because the firmware E820 map does not match:
+Or even better, given that both hibernate and kexec invalidate the
+TPM attestation trail anyway, perhaps it would be better to simply
+find a way for kexec to ignore this table altogether. That way, we
+could use EFI_LOADER_DATA for the region, and your issue goes away.
 
-    PM: Image signature found, resuming
-    PM: hibernation: resume from hibernation
-    ...
-    PM: Loading and decompressing image data (4198398 pages)...
-    Hibernate inconsistent memory map detected!
-    PM: hibernation: Image mismatch: architecture specific data
-    PM: Error -1 resuming
-    PM: hibernation: Failed to load image, recovering.
-    PM: hibernation: resume failed (-1)
+-- 
+Ard.
 
-I compared the E820 map across repeated ordinary boots and found a
-48 KiB ACPI data region whose address changes from boot to boot. Its
-base always corresponds to the TPMEventLog EFI configuration table
-address (the table pointer is base + 0x18).
 
-For example, across five ordinary boots:
+(leaving untrimmed below)
 
-    E820 ACPI data region          TPMEventLog
-    678da000-678e5fff              678da018
-    678db000-678e6fff              678db018
-    678d1000-678dcfff              678d1018
-    678d6000-678e1fff              678d6018
-    678d8000-678e3fff              678d8018
-
-This occurs on normal reboots as well, so it doesn't seem to be
-specific to an S4 firmware path.
-
-drivers/firmware/efi/libstub/tpm.c currently allocates the copied TPM
-event log using EFI_ACPI_RECLAIM_MEMORY:
-
-    status =3D efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
-                         sizeof(*log_tbl) + log_size,
-                         (void **)&log_tbl);
-
-As a diagnostic experiment, I changed only the memory type back to
-EFI_LOADER_DATA:
-
--   status =3D efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
-+   status =3D efi_bs_call(allocate_pool, EFI_LOADER_DATA,
-                         sizeof(*log_tbl) + log_size,
-                         (void **)&log_tbl);
-
-With that change, TPMEventLog continues to move between boots, e.g.
-
-    boot 1: TPMEventLog=3D0x678d8018
-    boot 2: TPMEventLog=3D0x678d5018
-
-but the BIOS-e820 entries are identical across those boots. The
-48 KiB ACPI data island around TPMEventLog is no longer present.
-
-Most importantly, Linux 7.2.0 with only this one-line diagnostic
-change successfully hibernates and resumes, whereas the unmodified
-7.2.0 kernel fails to resume.
-
-Despite that, I don't think simply reverting to EFI_LOADER_DATA is a
-good fix. Looking back, I noticed commit 77d48d39e991
-("efistub/tpm: Use ACPI reclaim memory for event log to avoid
-corruption") intentionally moved away from this allocation to prevent
-the TPM event log from appearing as unreserved RAM to an incoming
-kexec kernel.
-
-I tried retaining EFI_LOADER_DATA while registering the TPM log with
-efi_mem_reserve_persistent(). The ordinary memblock reservation
-protects it in the running kernel, and I hoped the persistent EFI
-reservation could provide the kexec protection without changing E820.
-
-On x86, however, efi_mem_reserve_persistent() returned -ENODEV:
-
-    Failed to persistently reserve TPM Event Log: -19
-
-Looking at current mainline, the Linux EFI MEMRESERVE root is installed
-by install_memreserve_table() via efi_stub_common(), while x86 uses its
-own stub path. Current master (abdf623dd) also still allocates the TPM
-event log as EFI_ACPI_RECLAIM_MEMORY.
-
-At this point I'm a little unsure what the correct approach to fixing
-this is, so I would appreciate guidance on where the fix should live.
-
-Should the TPM event log remain EFI_ACPI_RECLAIM_MEMORY and x86
-hibernation account for this Linux-created, boot-dependent E820 entry?
-
-Or is there an existing/preferred x86 mechanism for preserving an
-EFI_LOADER_DATA TPM event log across kexec without making the transient
-allocation part of the firmware E820 topology?
-
-I have the full failed-resume dmesg, before/after E820 maps, five
-ordinary-boot maps, and the successful diagnostic hibernation logs,
-and I can provide any additional testing that would be useful.
-
-Thanks,
-Jasmeet Bhatia
+> I tried retaining EFI_LOADER_DATA while registering the TPM log with
+> efi_mem_reserve_persistent(). The ordinary memblock reservation
+> protects it in the running kernel, and I hoped the persistent EFI
+> reservation could provide the kexec protection without changing E820.
+>
+> On x86, however, efi_mem_reserve_persistent() returned -ENODEV:
+>
+>     Failed to persistently reserve TPM Event Log: -19
+>
+> Looking at current mainline, the Linux EFI MEMRESERVE root is installed
+> by install_memreserve_table() via efi_stub_common(), while x86 uses its
+> own stub path. Current master (abdf623dd) also still allocates the TPM
+> event log as EFI_ACPI_RECLAIM_MEMORY.
+>
+> At this point I'm a little unsure what the correct approach to fixing
+> this is, so I would appreciate guidance on where the fix should live.
+>
+> Should the TPM event log remain EFI_ACPI_RECLAIM_MEMORY and x86
+> hibernation account for this Linux-created, boot-dependent E820 entry?
+>
+> Or is there an existing/preferred x86 mechanism for preserving an
+> EFI_LOADER_DATA TPM event log across kexec without making the transient
+> allocation part of the firmware E820 topology?
+>
+> I have the full failed-resume dmesg, before/after E820 maps, five
+> ordinary-boot maps, and the successful diagnostic hibernation logs,
+> and I can provide any additional testing that would be useful.
+>
+> Thanks,
+> Jasmeet Bhatia
