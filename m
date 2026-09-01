@@ -1,29 +1,29 @@
 Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 29F5A48423C;
-	Tue,  1 Sep 2026 16:57:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 6DDE34854E9;
+	Tue,  1 Sep 2026 16:57:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788281853; cv=none; b=kPcSCXk0YJAdb6+yzFA/Kmm8Kn7vFoPuMQnIrG2+JmExwfXyLsCRmUpPTEqW08IAMyZ/2Ffk947La3ILiXfDkkFZ09msRd+y64XsgKEVsz7qtqBsxv81/QaRwI1jLyEIxeTaAqsoBOmhDtUh/uXPZwNimtByUoHqS5Lf9uFhYC4=
+	t=1788281854; cv=none; b=q05X5U8I0aO8bh5DZCf2fXiq7pjmBz8xQ/Sol/leNNkQ6R+1tn8OCQFeUzcT2DcV0O5YF7AXao/jcKwOQPKZnBHhcMtlwg3avhS7otfcFc80H8i2QCqECJrMRs271EVDbskgDR9spNU+gSA1asXUK9HOEslkErsx81L7PE+sflo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788281853; c=relaxed/simple;
-	bh=UC7muPYjZo5J/xb153yhcYG5E3DgOZ0no9RdPqpZqWc=;
+	s=arc-20240116; t=1788281854; c=relaxed/simple;
+	bh=S2Dt3VCKZlPDBnXFbLzMG+pmQmPlj2Atkjq5lqR6CWQ=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=TGuKviewYsvgNQX2vCU5a477B9NU3AqCgM7ZVxLBvtvTQmcU/KpNy6G28sTXOI9ndwaVFliA8PD9ZwuDzJsYTdLaSYMKLVVnQXDG7tZ81IZ5k4xUlKiPNvcGZST5F8n+OvnDHf6rrKKURRfoD1k+FhlTbOVGzJhay9pSVm3uInE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=jDDXZ2IT; arc=none smtp.client-ip=13.77.154.182
+	 MIME-Version; b=ZPYSqctWPDL99JqdhtZ7vSwP1xu6N7VrqSQHfMNGEqTFz0XbQVr0s0zQOlwPW3nC4jTGHh6cUGTEJNe3PlxB9NljWgR0DuEtj85laW8OLHCQINlDCst5vV4IQ0q1LLMJYz7v5G//Df9yGqe7NMA9qkwFE5OoTAqfRpTiFuDHALA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=QL94u6KX; arc=none smtp.client-ip=13.77.154.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="jDDXZ2IT"
+	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="QL94u6KX"
 Received: by linux.microsoft.com (Postfix, from userid 1130)
-	id D85B220B712D; Tue,  1 Sep 2026 09:56:54 -0700 (PDT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com D85B220B712D
+	id E579F20B7136; Tue,  1 Sep 2026 09:56:54 -0700 (PDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com E579F20B7136
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
 	s=default; t=1788281814;
-	bh=NvO9e9mumccyws0coxVvMyj99Z4bKsTR9JTNrI1NFvc=;
+	bh=Hpw3uP2WjGzMTwKeoL5pQcN469geeudvRdcHZ29vy1I=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=jDDXZ2ITtpv5GYabGjv77s2J+7jYX73uPwezcaV7C8n6uEPdA9GC75QX2k+VZ2sXN
-	 c1izd+301KjNhG3IE0qHtaBnxSts2Xg8ROPnZ3RP4F1/qKRSejLsdIaNPPGcLhZKTP
-	 XypXtOuRBisuZ1imEByU0P7ZDCUqdhK9G/ZzQtsc=
+	b=QL94u6KX39PrItpwS2B/Qhhi1IIUvys+QiLJMrMnu7W6O1xzlVlxNsw+ptOvZ8/Br
+	 Ux4sYuVzzM2agoyp5t473tqttqq7HtQUrB63B5XctW7CpH1dhurwdoaCxhgogORhOW
+	 7lb6U1j3vAxvG/cNA2se5oqLek1nG4ruDxq+pVgM=
 From: Thara Gopinath <tgopinath@linux.microsoft.com>
 To: kys@microsoft.com,
 	haiyangz@microsoft.com,
@@ -43,9 +43,9 @@ Cc: James.Bottomley@HansenPartnership.com,
 	linux-hyperv@vger.kernel.org, linux-kernel@vger.kernel.org,
 	linux-efi@vger.kernel.org,
 	Thara Gopinath <tgopinath@linux.microsoft.com>
-Subject: [RFC PATCH 04/12] firmware: efi: libstub: x86-stub: Enable VSM awareness in efi os indications variable
-Date: Tue,  1 Sep 2026 09:55:18 -0700
-Message-ID: <20260901165647.3160413-5-tgopinath@linux.microsoft.com>
+Subject: [RFC PATCH 05/12] include: hyperv: hvgdk_mini.h: Add VTL-specific structures and bits
+Date: Tue,  1 Sep 2026 09:55:19 -0700
+Message-ID: <20260901165647.3160413-6-tgopinath@linux.microsoft.com>
 X-Mailer: git-send-email 2.43.7
 In-Reply-To: <20260901165647.3160413-1-tgopinath@linux.microsoft.com>
 References: <20260901165647.3160413-1-tgopinath@linux.microsoft.com>
@@ -57,102 +57,103 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Set bit 0 of the Hyper-V private OsLoaderIndications EFI variable
-during exit_boot() so the bootloader/firmware knows the OS intends
-to enable VTL1. Without this, VTL1 cannot be brought up from the
-Linux kernel.
+Add the definitions needed by the upcoming VSM / VTL1 bring-up code:
 
-The support bit is first checked in OsLoaderIndicationsSupported,
-and the variable is only written when the VSM bit is not already
-set.
+  - HV_ACCESS_VSM and HV_ACCESS_VP_REGS partition privilege bits
+  - HVCALL_ENABLE_PARTITION_VTL and
+    HVCALL_MODIFY_VTL_PROTECTION_MASK hypercall IDs
+  - hv_input_enable_partition_vtl input structure and its flags union
+  - hv_register_vsm_{partition_status,vp_status} register layout unions
+  - HV_REGISTER_VSM_PARTITION_STATUS and
+    HV_REGISTER_VSM_VP_SECURE_CONFIG_VTL0 register names
+
+Definitions taken from the Hyper-V TLFS.
 
 Signed-off-by: Thara Gopinath <tgopinath@linux.microsoft.com>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 57 +++++++++++++++++++++++++
- 1 file changed, 57 insertions(+)
+ include/hyperv/hvgdk_mini.h | 46 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 46 insertions(+)
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index cef32e2c82d8f..ab3cd4fe36599 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -21,6 +21,17 @@
- #include "efistub.h"
- #include "x86-stub.h"
+diff --git a/include/hyperv/hvgdk_mini.h b/include/hyperv/hvgdk_mini.h
+index 6a4e8b9d570fd..a50af532fc7f9 100644
+--- a/include/hyperv/hvgdk_mini.h
++++ b/include/hyperv/hvgdk_mini.h
+@@ -303,6 +303,8 @@ union hv_hypervisor_version_info {
+ #define HV_ACCESS_STATS					BIT(8)
+ #define HV_DEBUGGING					BIT(11)
+ #define HV_CPU_MANAGEMENT				BIT(12)
++#define HV_ACCESS_VSM					BIT(16)
++#define HV_ACCESS_VP_REGS				BIT(17)
+ #define HV_ENABLE_EXTENDED_HYPERCALLS			BIT(20)
+ #define HV_ISOLATION					BIT(22)
  
-+#ifdef CONFIG_HYPERV_VSM
-+#define HYPERV_PRIVATE_EFI_NAMESPACE_GUID \
-+	EFI_GUID(0x610b9e98, 0xc6f6, 0x47f8, 0x8b, 0x47, 0x2d, 0x2d, 0xa0, 0xd5, 0x2a, 0x91)
-+
-+static const efi_char16_t efi_HvPrivOsloaderIndications_name[] = L"OsLoaderIndications";
-+static const efi_char16_t efi_HvPrivOsloaderIndicationsSupported_name[] =
-+	L"OsLoaderIndicationsSupported";
-+#define HV_OSLOADER_INDICATION_VSM  BIT(0)
-+
-+#endif
-+
- extern char _bss[], _ebss[];
+@@ -438,6 +440,8 @@ union hv_vp_assist_msr_contents {	 /* HV_REGISTER_VP_ASSIST_PAGE */
+ #define HVCALL_GET_LOGICAL_PROCESSOR_RUN_TIME		0x0004
+ #define HVCALL_NOTIFY_LONG_SPIN_WAIT			0x0008
+ #define HVCALL_SEND_IPI					0x000b
++#define HVCALL_MODIFY_VTL_PROTECTION_MASK		0x000c
++#define HVCALL_ENABLE_PARTITION_VTL			0x000d
+ #define HVCALL_ENABLE_VP_VTL				0x000f
+ #define HVCALL_FLUSH_VIRTUAL_ADDRESS_SPACE_EX		0x0013
+ #define HVCALL_FLUSH_VIRTUAL_ADDRESS_LIST_EX		0x0014
+@@ -878,6 +882,46 @@ struct hv_init_vp_context {
+ 	u64 msr_cr_pat;
+ } __packed;
  
- const efi_system_table_t *efi_system_table;
-@@ -754,6 +765,47 @@ static efi_status_t exit_boot_func(struct efi_boot_memmap *map,
- 	return EFI_SUCCESS;
- }
++union hv_enable_partition_vtl_flags {
++	u8 as_uint8;
++	struct {
++		u8 enable_mbec:1;
++		u8 enable_supervisor_shadow_stack:1;
++		u8 enable_hardware_hvpt:1;
++		u8 reserved:5;
++	};
++} __packed;
++
++struct hv_input_enable_partition_vtl {
++	u64					partition_id;
++	union hv_input_vtl			target_vtl;
++	union hv_enable_partition_vtl_flags	flags;
++	u16					rsvd_z16;
++	u32					rsvd_z32;
++} __packed;
++
++union hv_register_vsm_partition_status {
++	u64 as_uint64;
++	struct {
++		u64 enabled_vtl_set : 16;
++		u64 max_vtl : 4;
++		u64 mbec_enabled_vtl_set: 16;
++		u64 supervisor_shadow_stack_enabled_vtl_set : 4;
++		u64 reserved : 24;
++	};
++} __packed;
++
++union hv_register_vsm_vp_status {
++	u64 as_uint64;
++	struct {
++		u64 active_vtl : 4;
++		u64 active_mbec_enabled : 1;
++		u64 reserved_z0 : 11;
++		u64 enabled_vtl_set : 16;
++		u64 reserved_z1 : 32;
++	};
++} __packed;
++
+ struct hv_enable_vp_vtl {
+ 	u64				partition_id;
+ 	u32				vp_index;
+@@ -1061,8 +1105,10 @@ enum hv_register_name {
  
-+#ifdef CONFIG_HYPERV_VSM
-+static void efi_set_hv_os_indications(void)
-+{
-+	efi_guid_t guid = HYPERV_PRIVATE_EFI_NAMESPACE_GUID;
-+	efi_status_t status;
-+	unsigned long size;
-+	u32 attr, val;
-+
-+	size = sizeof(val);
-+	status = get_efi_var(efi_HvPrivOsloaderIndicationsSupported_name,
-+			     &guid, &attr, &size, &val);
-+	if (status != EFI_SUCCESS) {
-+		efi_err("Could not read Hyper-V OsloaderIndicationsSupported\n");
-+		return;
-+	}
-+
-+	if (!(val & HV_OSLOADER_INDICATION_VSM)) {
-+		efi_info("Hyper-V does not support VSM in OsloaderIndicationsSupported\n");
-+		return;
-+	}
-+
-+	size = sizeof(val);
-+	status = get_efi_var(efi_HvPrivOsloaderIndications_name, &guid, &attr, &size, &val);
-+	if (status != EFI_SUCCESS) {
-+		efi_err("Could not read Hyper-V OsLoaderIndications\n");
-+		return;
-+	}
-+
-+	if (val & HV_OSLOADER_INDICATION_VSM) {
-+		efi_info("VSM is already supported in OsLoaderIndications.");
-+		return;
-+	}
-+
-+	val |= HV_OSLOADER_INDICATION_VSM;
-+	size = sizeof(val);
-+	status = set_efi_var(efi_HvPrivOsloaderIndications_name, &guid, attr, size, &val);
-+	if (status != EFI_SUCCESS)
-+		efi_err("Could not set Hyper-V OsLoaderIndications to indicate VSM support\n");
-+}
-+#endif
-+
- static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
- {
- 	struct setup_data *e820ext = NULL;
-@@ -768,6 +820,11 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
- 	if (status != EFI_SUCCESS)
- 		return status;
+ 	/* Synthetic VSM registers */
+ 	HV_REGISTER_VSM_CODE_PAGE_OFFSETS	= 0x000D0002,
++	HV_REGISTER_VSM_PARTITION_STATUS	= 0x000D0004,
+ 	HV_REGISTER_VSM_CAPABILITIES		= 0x000D0006,
+ 	HV_REGISTER_VSM_PARTITION_CONFIG	= 0x000D0007,
++	HV_REGISTER_VSM_VP_SECURE_CONFIG_VTL0	= 0x000D0010,
  
-+#ifdef CONFIG_HYPERV_VSM
-+	/* Indicate to bootloader that we will be enabling VTL1 before exiting boot services */
-+	efi_set_hv_os_indications();
-+#endif
-+
- 	/* Might as well exit boot services now */
- 	status = efi_exit_boot_services(handle, &priv, exit_boot_func);
- 	if (status != EFI_SUCCESS)
+ #if defined(CONFIG_X86)
+ 	/* X64 Debug Registers */
 -- 
 2.34.1
 
