@@ -1,29 +1,29 @@
 Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 29D5F484239;
-	Tue,  1 Sep 2026 16:57:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 6DCBB484254;
+	Tue,  1 Sep 2026 16:57:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788281854; cv=none; b=knq5RGPLwVqEroSniBn2k901utUPCau0EtAoThLBmLJVlbibvJjNSiZ2og2ccZIIi3czDvT+ZVPkxjw3BZhmPl6Jg0F9aYITkGuUyc+FB0fbyVzZNLQ2Yq80Fz6i5AeUUVVNx5oHJxrivBtWePqXHxkgbslK8VBswmcinzd7Gsc=
+	t=1788281854; cv=none; b=UYbQDcEBoLV2hz2kmE4hKZuM8LSYfCjfckNtWha4YX7csNfKPbFsZUjzmArWWzy2dwWWZIHgFFJvG9YOiUZeMrBnFEiMFpIA8y7p/ZNUYC0qOOp7O5QvctpggYtzlb1bZX2UYlJYUBqJL9VzIg1C2akO3ZQQ1/8Ftgo4iw+nO9g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1788281854; c=relaxed/simple;
-	bh=Iqe6izHv2sjvSqP3sRxw8kvU2zTeZp9vlAzd2EYirTg=;
+	bh=5Dk+oy/IIAwKk745x2+ohPD/deYS0xe5TOjqlDR5Dww=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=TWRpM5BnHLYA/L2WLPYqQHiFmzg3UjN64/F5ybilyNjbvazCkpRhs7VmeH5L8eUgSGkm0c4eid2g9eu15Bbf1pwPRa39u5133HwhFU9ycUKsHQigQ30n10NlpwmKUuezDTjaoxR8gGzneDPe0mhBgi4jHyXRGQ51FENeHYx3T0w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=Uyfr1+RQ; arc=none smtp.client-ip=13.77.154.182
+	 MIME-Version; b=X5Ama2Jd7xOuuvVVj0cEvzMAaGKpN4ATL1+agEuEbdayUFSd6fpU6tbfA5ZpA4RP4OkU81/A/DIqOwSYVtd+oBrAg3Gkna5HjoZZqJK4o6V8p9L5NJqTc/tnPNfZ3Jv2qj3Eoej6iDbvHzSSR1PtbnephdQN74g7ouZfQGuSrJM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=Wj22b+m8; arc=none smtp.client-ip=13.77.154.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="Uyfr1+RQ"
+	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="Wj22b+m8"
 Received: by linux.microsoft.com (Postfix, from userid 1130)
-	id CAFDF20B712B; Tue,  1 Sep 2026 09:56:54 -0700 (PDT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com CAFDF20B712B
+	id F35C020B7138; Tue,  1 Sep 2026 09:56:54 -0700 (PDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com F35C020B7138
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
-	s=default; t=1788281814;
-	bh=w84MF6kutcf25MX1Bag58CHWArSB1QOCs7TafbfwmXw=;
+	s=default; t=1788281815;
+	bh=rHauQ5CkArRSzF2IDix3yMncTDgrieA1wSxwg8lpu9I=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=Uyfr1+RQ3QeKLT9GhHlFhdpLb0xn6vXYmdZrajpZ3mUJVPfgtXdNC1wPiJ6wK/Jwe
-	 oDqBXJXQiua4AAlMwSaUgvYhuwVDktKOqWb9nsK9tXFvQf1HJyddVJqlB+Q0Cwh2YH
-	 8obBRFKr9SF0oI1qbAqmUF6+otceT5J/S4VL27ak=
+	b=Wj22b+m8qm572Qpmlptkc0JlsqJpsl68325zL87knXkvhdUbwK9kxttE53+ZZI+oK
+	 XaVFsyfTKyFnAHlqnOs0SW70gsItL3Hgdy03+b9UwArCXKEvv8TFSVExYV4zsppKFk
+	 FvxiX9S/gFjnzkxyXOWZes5iF9cR6wVvA/SDKy9I=
 From: Thara Gopinath <tgopinath@linux.microsoft.com>
 To: kys@microsoft.com,
 	haiyangz@microsoft.com,
@@ -42,11 +42,10 @@ Cc: James.Bottomley@HansenPartnership.com,
 	tgopinath@microsoft.com, x86@kernel.org,
 	linux-hyperv@vger.kernel.org, linux-kernel@vger.kernel.org,
 	linux-efi@vger.kernel.org,
-	Thara Gopinath <tgopinath@linux.microsoft.com>,
-	Anna Trikalinou <atrikalinou@microsoft.com>
-Subject: [RFC PATCH 03/12] drivers: hv: Reserve memory for VSM secure kernel during early boot
-Date: Tue,  1 Sep 2026 09:55:17 -0700
-Message-ID: <20260901165647.3160413-4-tgopinath@linux.microsoft.com>
+	Thara Gopinath <tgopinath@linux.microsoft.com>
+Subject: [RFC PATCH 06/12] drivers: hv: Add VSM boot driver and enable VTL1 at the partition level
+Date: Tue,  1 Sep 2026 09:55:20 -0700
+Message-ID: <20260901165647.3160413-7-tgopinath@linux.microsoft.com>
 X-Mailer: git-send-email 2.43.7
 In-Reply-To: <20260901165647.3160413-1-tgopinath@linux.microsoft.com>
 References: <20260901165647.3160413-1-tgopinath@linux.microsoft.com>
@@ -56,244 +55,231 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-The VSM secure kernel runs in VTL1 and cannot use the normal Linux
-kernel memory allocators — its memory must be reserved before the
-general-purpose allocator takes ownership of the physical address space.
+Linux VBS (LVBS) uses Hyper-V's Virtual Secure Mode to run a small
+trusted kernel in VTL1 alongside the regular VTL0 kernel, so that
+security-sensitive state (e.g. hypervisor-enforced code integrity,
+credential isolation) can live behind a higher-privilege boundary
+that VTL0 compromise cannot cross. Bringing that up from Linux
+requires the VTL0 kernel to drive the VSM setup itself.
 
-Add hv_vsm_securekernel.c to handle this early boot reservation. The
-driver parses a new "securekernel=<size>[K|M|G][@<addr>]" kernel command
-line argument to allow explicit control over the reserved region's size
-and base address. If the argument is absent or specifies a region smaller
-than the computed minimum, the driver falls back to an automatic
-allocation.
+Add drivers/hv/hv_vsm_boot.c as the entry point for that sequence.
+This first step handles partition-level VTL1 enable only:
 
-The minimum reservation is calculated as:
+  - Probe VSM / VP-register privileges and SynIC availability before
+    doing anything.
+  - Pin init to the VTL0 boot CPU so VTL1 comes up on the same CPU
+    (later patches rely on this).
+  - Read HV_REGISTER_VSM_PARTITION_STATUS, and if VTL1 is not already
+    enabled, issue HVCALL_ENABLE_PARTITION_VTL with MBEC and confirm
+    by re-reading the register.
 
-  16 MB (base) + (num_possible_cpus * 4 MB per-CPU)
-
-Memory is reserved via memblock_phys_alloc_range() with 2 MB alignment
-(SECKERNEL_ALIGN) and registered as an IORESOURCE_SYSTEM_RAM entry named
-"vsm" in the iomem resource tree so it is visible in /proc/iomem and
-protected from reuse.
-
-The reservation is skipped if sk_res.start is already set, preventing
-duplicate reservations if the setup hook is called more than once.
-
-Co-developed-by: Anna Trikalinou <atrikalinou@microsoft.com>
-Signed-off-by: Anna Trikalinou <atrikalinou@microsoft.com>
 Signed-off-by: Thara Gopinath <tgopinath@linux.microsoft.com>
 ---
- drivers/hv/Makefile              |   1 +
- drivers/hv/hv_vsm_securekernel.c | 188 +++++++++++++++++++++++++++++++
- 2 files changed, 189 insertions(+)
- create mode 100644 drivers/hv/hv_vsm_securekernel.c
+ drivers/hv/Makefile      |   4 +-
+ drivers/hv/hv_vsm_boot.c | 178 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 180 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/hv/hv_vsm_boot.c
 
 diff --git a/drivers/hv/Makefile b/drivers/hv/Makefile
-index 888a748cc7cb9..880c570832381 100644
+index 880c570832381..563ebc36d2700 100644
 --- a/drivers/hv/Makefile
 +++ b/drivers/hv/Makefile
-@@ -25,3 +25,4 @@ obj-$(subst m,y,$(CONFIG_MSHV_ROOT)) += hv_proc.o
- ifneq ($(CONFIG_MSHV_ROOT)$(CONFIG_MSHV_VTL),)
+@@ -22,7 +22,7 @@ mshv_vtl-y := mshv_vtl_main.o
+ # Code that must be built-in
+ obj-$(CONFIG_HYPERV) += hv_common.o
+ obj-$(subst m,y,$(CONFIG_MSHV_ROOT)) += hv_proc.o
+-ifneq ($(CONFIG_MSHV_ROOT)$(CONFIG_MSHV_VTL),)
++ifneq ($(CONFIG_MSHV_ROOT)$(CONFIG_MSHV_VTL)$(CONFIG_HYPERV_VSM),)
  	obj-y += mshv_common.o
  endif
-+obj-$(subst m,y,$(CONFIG_HYPERV_VSM)) += hv_vsm_securekernel.o
-diff --git a/drivers/hv/hv_vsm_securekernel.c b/drivers/hv/hv_vsm_securekernel.c
+-obj-$(subst m,y,$(CONFIG_HYPERV_VSM)) += hv_vsm_securekernel.o
++obj-$(subst m,y,$(CONFIG_HYPERV_VSM)) += hv_vsm_securekernel.o hv_vsm_boot.o
+diff --git a/drivers/hv/hv_vsm_boot.c b/drivers/hv/hv_vsm_boot.c
 new file mode 100644
-index 0000000000000..f90f6204b4d18
+index 0000000000000..99e4dc8695837
 --- /dev/null
-+++ b/drivers/hv/hv_vsm_securekernel.c
-@@ -0,0 +1,188 @@
++++ b/drivers/hv/hv_vsm_boot.c
+@@ -0,0 +1,178 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
-+ * Copyright (c) 2024, Microsoft Corporation.
++ * VSM boot framework that enables VTL1, loads secure kernel
++ * and boots VTL1.
 + *
-+ * Authors:
-+ *   Anna Trikalinou <atrikalinou@microsoft.com>
-+ *   Thara Gopinath <tgopinath@linux.microsoft.com>
++ * Copyright (c) 2023-2025, Microsoft Corporation.
++ *
++ * Author: Thara Gopinath <tgopinath@linux.microsoft.com>
++ *
 + */
 +
-+#include <linux/memblock.h>
++#define pr_fmt(fmt) "vsm: " fmt
 +
-+/* Define Memory Reservation for Secure Kernel */
-+#define SECKERNEL_ALIGN			SZ_2M
-+#define SECKERNEL_ADDR_MAX		(max_low_pfn_mapped << PAGE_SHIFT)
-+/* Secure kernel map (16MB minimum)
-+ * Region		Offset		Size
-+ * VSM PAGES		0		< 2MB
-+ * SKERNEL		?(ELF)		16MB+ (based on config)
-+ */
-+#define SECKERNEL_BASE_SIZE		(16 * 1024 * 1024)
-+#define SECKERNEL_PERCPU_SIZE		(4 * 1024 * 1024)
++#include <linux/hyperv.h>
++#include <linux/cpumask.h>
++#include <asm/mshyperv.h>
++#include "mshv.h"
 +
-+/* Estimate amount of memory needed for Secure Kernel */
-+#define SECKERNEL_MIN_SIZE (SECKERNEL_BASE_SIZE + num_possible_cpus() * SECKERNEL_PERCPU_SIZE)
++#define HV_VTL1_ENABLE_BIT	BIT(1)
 +
-+struct resource sk_res = {
-+	.name  = "vsm",
-+	.start = 0,
-+	.end   = 0,
-+	.flags = IORESOURCE_BUSY | IORESOURCE_SYSTEM_RAM,
-+	.desc  = IORES_DESC_RESERVED
-+};
-+
-+/*
-+ * That function parses "simple" securekernel command lines like
-+ *
-+ *	securekernel=size[@offset]
-+ *
-+ * It returns 0 on success and -EINVAL on failure.
-+ */
-+static int __init parse_securekernel_simple(char *cmdline,
-+					    unsigned long long *securekernel_size,
-+					    unsigned long long *securekernel_base)
++static int hv_vsm_get_register(u32 reg_name, u64 *result)
 +{
-+	char *cur = cmdline;
++	struct hv_register_assoc reg = {
++		.name = reg_name,
++	};
++	union hv_input_vtl input_vtl = {
++		.as_uint8 = 0,
++	};
++	int ret;
 +
-+	*securekernel_size = memparse(cmdline, &cur);
-+	if (cmdline == cur) {
-+		pr_warn("securekernel: memory value expected\n");
-+		return -EINVAL;
-+	}
++	ret = hv_call_get_vp_registers(HV_VP_INDEX_SELF,
++				       HV_PARTITION_ID_SELF,
++				       1, input_vtl, &reg);
++	if (ret)
++		return ret;
 +
-+	if (*cur == '@') {
-+		*securekernel_base = memparse(cur + 1, &cur);
-+	} else if (*cur != ' ' && *cur != '\0') {
-+		pr_warn("securekernel: unrecognized char: %c\n", *cur);
-+		return -EINVAL;
-+	}
-+
++	*result = reg.value.reg64;
 +	return 0;
 +}
 +
-+static __init char *get_last_securekernel(char *cmdline, const char *name)
++static int __init hv_vsm_enable_partition_vtl(void)
 +{
-+	char *p = cmdline, *sk_cmdline = NULL;
++	u64 status = 0;
++	unsigned long flags;
++	struct hv_input_enable_partition_vtl *hvin = NULL;
 +
-+	/* find securekernel and use the last one if there are more */
-+	p = strstr(p, name);
-+	while (p) {
-+		sk_cmdline = p;
-+		p = strstr(p + 1, name);
-+	}
++	local_irq_save(flags);
 +
-+	if (!sk_cmdline)
-+		return NULL;
++	hvin = *this_cpu_ptr(hyperv_pcpu_input_arg);
++	memset(hvin, 0, sizeof(*hvin));
 +
-+	return sk_cmdline;
++	hvin->partition_id = HV_PARTITION_ID_SELF;
++	hvin->target_vtl.as_uint8 = 1;
++	hvin->flags.enable_mbec = 1;
++
++	status = hv_do_hypercall(HVCALL_ENABLE_PARTITION_VTL, hvin, NULL);
++	if (hv_result(status))
++		pr_err("Enable Partition VTL failed. status=0x%x\n",
++		       hv_result(status));
++
++	local_irq_restore(flags);
++
++	return hv_result(status);
 +}
 +
-+static int __init __parse_securekernel(char *cmdline,
-+				       unsigned long long *securekernel_size,
-+				       unsigned long long *securekernel_base,
-+				       const char *name)
++static int __init hv_vsm_get_partition_status(u16 *enabled_vtl_set, u8 *max_vtl,
++					      u16 *mbec_enabled_vtl_set)
 +{
-+	char *sk_cmdline;
++	u64 result;
++	int ret;
++	union hv_register_vsm_partition_status vsm_partition_status = { 0 };
 +
-+	if (!securekernel_size || !securekernel_base)
-+		return -EINVAL;
++	ret = hv_vsm_get_register(HV_REGISTER_VSM_PARTITION_STATUS, &result);
++	if (ret)
++		return ret;
 +
-+	*securekernel_size = 0;
-+	*securekernel_base = 0;
-+
-+	sk_cmdline = get_last_securekernel(cmdline, name);
-+
-+	if (!sk_cmdline)
-+		return -EINVAL;
-+
-+	sk_cmdline += strlen(name);
-+
-+	return parse_securekernel_simple(sk_cmdline, securekernel_size, securekernel_base);
++	vsm_partition_status = (union hv_register_vsm_partition_status)result;
++	*enabled_vtl_set = vsm_partition_status.enabled_vtl_set;
++	*max_vtl = vsm_partition_status.max_vtl;
++	*mbec_enabled_vtl_set = vsm_partition_status.mbec_enabled_vtl_set;
++	return 0;
 +}
 +
-+/*
-+ * That function is the entry point for command line parsing and should be
-+ * called from the arch-specific code.
-+ */
-+static int __init parse_securekernel(char *cmdline,
-+				     unsigned long long *securekernel_size,
-+				     unsigned long long *securekernel_base)
++static int __init hv_vsm_bootstrap_vtl(void)
 +{
-+	return __parse_securekernel(cmdline, securekernel_size, securekernel_base,
-+					"securekernel=");
-+}
-+
-+static int __init hv_vsm_seckernel_mem_init(char *__unused)
-+{
-+	unsigned long long securekernel_size = 0, securekernel_base = 0;
++	u16 partition_enabled_vtl_set = 0, partition_mbec_enabled_vtl_set = 0;
++	u8 partition_max_vtl;
 +	int ret;
 +
-+	/* Secure Kernel memory is already reserved. Avoid duplicate reservation */
-+	if (sk_res.start)
-+		return 0;
-+	/*
-+	 * Reserve Secure Kernel memory.
-+	 * Check command line first, if secure kernel memory was defined
-+	 */
-+	ret = parse_securekernel(boot_command_line, &securekernel_size,
-+				 &securekernel_base);
++	/* Check and enable VTL1 at the partition level */
++	ret = hv_vsm_get_partition_status(&partition_enabled_vtl_set, &partition_max_vtl,
++					  &partition_mbec_enabled_vtl_set);
++	if (ret)
++		return ret;
 +
-+	if (ret != 0 || securekernel_size < SECKERNEL_MIN_SIZE) {
-+		if (ret != 0)
-+			pr_info("%s: securekernel cmd line not defined. Falling back to default.\n",
-+				__func__);
-+		else if (securekernel_size < SECKERNEL_MIN_SIZE)
-+			pr_info("%s: securekernel cmd line too small. Falling back to default.\n",
-+				__func__);
-+
-+		securekernel_size = SECKERNEL_MIN_SIZE;
-+		securekernel_base = 0;
++	if (partition_max_vtl < HV_VTL_SECURE) {
++		pr_err("VTL1 is not supported by the partition\n");
++		return -EINVAL;
 +	}
 +
-+	/* If securekernel_base was specified from command line,
-+	 * try to reserve memory starting from that address
-+	 */
-+	if (securekernel_base) {
-+		unsigned long long start, end;
-+
-+		end = securekernel_base + securekernel_size;
-+		if (end >  SECKERNEL_ADDR_MAX || end < securekernel_base) {
-+			pr_warn("%s: Invalid Securekernel base address %llx. Falling back to default.\n",
-+				__func__, securekernel_base);
-+			securekernel_base = 0;
-+		} else {
-+			start = memblock_phys_alloc_range(securekernel_size, SECKERNEL_ALIGN,
-+							  securekernel_base,
-+							  securekernel_base + securekernel_size);
-+			if (start != securekernel_base) {
-+				pr_warn("%s: memory reservation @ %llx failed-memory is in use\n",
-+					__func__, securekernel_base);
-+				pr_warn("%s:Falling back to default mem allocation\n", __func__);
-+				securekernel_base = 0;
-+			}
++	if (partition_enabled_vtl_set & HV_VTL1_ENABLE_BIT) {
++		pr_info("Partition VTL1 is already enabled\n");
++	} else {
++		ret = hv_vsm_enable_partition_vtl();
++		if (ret) {
++			pr_err("Enabling Partition VTL1 failed with status 0x%x\n",
++			       ret);
++			return -EINVAL;
 +		}
-+	}
-+	/* Default: Find the base address automatically */
-+	if (!securekernel_base) {
-+		securekernel_base = memblock_phys_alloc_range(securekernel_size, SECKERNEL_ALIGN,
-+							      0, SECKERNEL_ADDR_MAX);
-+		if (!securekernel_base) {
-+			pr_err("%s: Securekernel reservation failed-VSM will not be enabled.\n",
-+			       __func__);
++		ret = hv_vsm_get_partition_status(&partition_enabled_vtl_set, &partition_max_vtl,
++						  &partition_mbec_enabled_vtl_set);
++		if (ret)
++			return ret;
++		if (!(partition_enabled_vtl_set & HV_VTL1_ENABLE_BIT)) {
++			pr_err("Tried Enabling Partition VTL 1 and still failed\n");
++			return -EINVAL;
++		}
++		if (!partition_mbec_enabled_vtl_set) {
++			pr_err("Tried Enabling Partition MBEC and failed\n");
 +			return -EINVAL;
 +		}
 +	}
-+
-+	pr_info("Reserving %ldMB of memory at 0x%llx(%ld MB) for securekernel(System RAM:%ldMB)\n",
-+		(unsigned long)(securekernel_size >> 20),
-+		securekernel_base,
-+		(unsigned long)(securekernel_base >> 20),
-+		(unsigned long)(memblock_phys_mem_size() >> 20));
-+
-+	sk_res.start = securekernel_base;
-+	sk_res.end   = securekernel_base + securekernel_size - 1;
-+	insert_resource(&iomem_resource, &sk_res);
-+
 +	return 0;
 +}
-+__setup("securekernel", hv_vsm_seckernel_mem_init);
++
++static bool __init vsm_arch_has_vsm_access(void)
++{
++	if (!(ms_hyperv.features & HV_MSR_SYNIC_AVAILABLE))
++		return false;
++	if (!(ms_hyperv.priv_high & HV_ACCESS_VSM))
++		return false;
++	if (!(ms_hyperv.priv_high & HV_ACCESS_VP_REGS))
++		return false;
++	return true;
++}
++
++static int __init hv_vsm_boot_init(void)
++{
++	cpumask_var_t mask;
++	unsigned int boot_cpu;
++	int ret;
++
++	if (!vsm_arch_has_vsm_access())
++		return 0;
++
++	/*
++	 * Copy the current cpu mask and pin rest of the running code to boot cpu.
++	 * Important since we want boot cpu of VTL0 to be the boot cpu for VTL1.
++	 * ToDo: Check if copying and restoring current->cpus_mask is enough
++	 * ToDo: Verify the assumption that cpumask_first(cpu_online_mask) is
++	 * the boot cpu
++	 */
++	if (!alloc_cpumask_var(&mask, GFP_KERNEL))
++		panic("Could not allocate cpumask");
++
++	cpumask_copy(mask, &current->cpus_mask);
++	boot_cpu = cpumask_first(cpu_online_mask);
++	set_cpus_allowed_ptr(current, cpumask_of(boot_cpu));
++
++	ret = hv_vsm_bootstrap_vtl();
++	/*
++	 * At this point VTL0 has already advertised VSM support to the
++	 * bootloader/firmware via the Hyper-V OsLoaderIndications EFI
++	 * variable (see the x86-stub change). That signals the platform
++	 * that a trusted VTL1 will be brought up. If we fail to actually
++	 * set VTL1 up here, the partition is left in a state where an
++	 * attacker could race to configure VTL1 themselves and gain a
++	 * higher-privilege foothold than VTL0. Panic rather than continue
++	 * running with that exposure.
++	 */
++	if (ret)
++		panic("VTL1 boot failure caused kernel panic; consult log for more details.\n");
++
++	set_cpus_allowed_ptr(current, mask);
++	free_cpumask_var(mask);
++	return ret;
++}
++device_initcall(hv_vsm_boot_init);
 -- 
 2.34.1
 
