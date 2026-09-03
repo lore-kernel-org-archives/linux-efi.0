@@ -1,192 +1,153 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 32EA5377EB0;
-	Thu,  3 Sep 2026 11:32:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4DBA45D5F5;
+	Thu,  3 Sep 2026 11:35:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788435171; cv=none; b=ed4QCEf3FXRkUUb5xEP/MQFSoLpOqz+AzcIq4/mEawsXTt569Nh4MOjdNffcHf+B8JAr/gfKDEb29G8efIpmm4CVCxu6VBXTAfsEykn8I/zuvHZH1nT5WbFUaQNYb2UJU4VkydKTTWaN89zt+e4gVYRqOiHfdaGj1oDhaEGcSso=
+	t=1788435333; cv=none; b=DBfYZZPl7FGPsBmSx7hD5TY9MTG8LIRZ4j5Ph4DoSgfuU//sY2Nm9zYNsYbQmQqyvZxyLGFspzwvP9c2KYwyD9gJE3pwWDO7xTANVv8K8KAf92aCkIRLxkB+vAikg2zkiKNX51W+hAnGl9NkWs+SBtWGnaDdxCBF/AIrVFB+9s0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788435171; c=relaxed/simple;
-	bh=ekfr9ze8xbBrKnpLVQLWiWIaYz8ipeTXJlHkB2y+Q6k=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=aRb7bZ8BuTIsyvrchPCyllvXAPwuOjvv3hkm19sMLfv8CWyQhmFb/yBRpE6yv+H9tFOTTaAY6bAUmEqOuRPy9EvKOlUC3Ajor6tqnL9kEc5SwI5jvaftOz5ZvJkzR8padjOgNxiFihtM0InSXNHO0d5MAawQTBitLAPJ48Gdfpo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=YkzbecWV; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+	s=arc-20240116; t=1788435333; c=relaxed/simple;
+	bh=WNhBU4gBRi7n5E2RV+yY1aQmqX5dEeo2lb8vnV0Klcc=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=DsBp5lFa1yIjItdlFwmYCMo/13uLPk0oo5zKL6G57EtiEQe/jrWSeVjJMXxvMIbcj6LI2dmsJB5SIe+0ZV+aPLxUISGgY/ROzidXdQbr7q7nm60o206KLj9qkmjey80wviw9svCRYXDxCaGe9PMQNEtzd0fSlS+y3TKG6e84KhI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O2IlCtuM; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="YkzbecWV"
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 8E7B41596;
-	Thu,  3 Sep 2026 04:32:40 -0700 (PDT)
-Received: from e129823.cambridge.arm.com (e129823.arm.com [10.2.213.3])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPA id 583EB3F7D8;
-	Thu,  3 Sep 2026 04:32:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1788435164; bh=ekfr9ze8xbBrKnpLVQLWiWIaYz8ipeTXJlHkB2y+Q6k=;
-	h=From:To:Cc:Subject:Date:From;
-	b=YkzbecWV9DSNRB07zZSFuatW3C87rqB1JW04SrIqvamweMMH3dsorPzqq0eU/NGdB
-	 B8TgUcZ7IgLj9EcU5O1FQetlCmww+gXwJGHsuE1Q1H5ex5+Xz0N47OHvdnyuOyYBRQ
-	 hhdQAIU/B/5wjjQWMp8pdS1/Q0vVkf0moi3suOcA=
-From: Yeoreum Yun <yeoreum.yun@arm.com>
-To: linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: ardb@kernel.org,
-	ilias.apalodimas@linaro.org,
-	leitao@debian.org,
-	Sami.Mujawar@arm.com,
-	Yeoreum Yun <yeoreum.yun@arm.com>
-Subject: [PATCH] firmware: efi: add a separate timeout for UpdateCapsule()
-Date: Thu,  3 Sep 2026 12:32:38 +0100
-Message-ID: <20260903113238.2291844-1-yeoreum.yun@arm.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O2IlCtuM"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 618FE1F00A3D;
+	Thu,  3 Sep 2026 11:35:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788435322;
+	bh=GI67CPM8yi0ZXHmIKGRDTSpV4PxMt/Uk06vuw2OahkI=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=O2IlCtuMNbakoyXY2D31P0E159cHIcVJigxX8w1haBC94Qr6S6epMXjHIa6zRKBcI
+	 OE+3f+rxDwwrGfsAD39fX4eezjvDMWYQsiEBdjcI2ykCvpuYqCZaATkfJtH49cQ18l
+	 krxnRw67DEnZu6K+iHbcYVCl8cpwh6T+2TyVgAZ1f3p50VYIJOnhiW6vlOJB77V4Ko
+	 bG6Ibq/G59tGMPHPCGWYjsKzLdkjHjjnOyo4mBexT8oQGRPZLzX6I9LxqSU40yLiBI
+	 6ioEwGaIon7j50uKjJMCzEfi2pGebyH9VSRHP603iIbFtQsc0r2t+s5gmnlXTPVxsg
+	 JAvkM9kZDFz6A==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id E4DBF1980047;
+	Thu,  3 Sep 2026 07:35:19 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Thu, 03 Sep 2026 07:35:19 -0400
+X-ME-Sender: <xms:dVuZaovR-c4KRU0bTmDyoCGKVMfDysb6kHC1eD5iZo1XHtRzHLg5MA>
+    <xme:dVuZagTuUyST6iT-SQLgc4S5CPheVwCXWPsq_mLPsKpOjysyPxS8RjXzOtmsnJIsE
+    R0PLVOL7-kSEieR9iijT3rSlPzPfP4Uw1qparPP_tnFvwZYqtGYWTHQ>
+X-ME-Proxy-Cause: dmFkZTE35Cj2o9w6o+pggtHOOqOz+sFl03EWpmd0tgzo6J4wCd8a6EDhiYd49BIPNtsWXQ
+    0iMYBwpT31vuwS1JR8RCBFTjzAOhlfyq3ma8jZDDtkEvhBXicIKS9OZnuxqiHsod5f97xV
+    J8FuqC6e1eFexwdHQ5OjGxcGDKBn7IryT10wtxIaC4dZKH5cEiidOl7qSUhty7IyZid1Fl
+    fJ0P/6Mj3V5MrBQ8WAroV/0glwDye2vhVcP3ViBaNekQHcc/o76j8jjKJ02MtH+5zbHJSw
+    +wpKAV5qAtjs+NgZNC3uSWYGjXjfwAGnlPYRQsAVCbM4H1PPFRNi5pfmReEaN61S6yq6m/
+    m2p+KCzk8ukGUj/kpko5dgEeh1qnctYJ9br2Pae92FQF+tYhovlKnfL2iqeYktjPnfAk/m
+    QjD5Bzno//eaVQPd+UzOzdmPZgjpenScHoY+Trtdb2FKlTvt0XEgWaQ5kDNUaGo1qGjiwo
+    nlswmSKj5eQT7TsC7UUKNsL+u8qbVBS/QO6Ds8ZwXRRCiIlcAfYe+la8gV/Tovgl2NjQOO
+    dweU/H5/dm2ZtkVoyH71W94LMdRNNDu5RgOWguqkAVYgC4NDPF2qmjcSI6JU9aBDfc5FPQ
+    nhqY/ZXhVMXQQ6ujvQfC/dRftD41+DoPW3t84Fqh1lJN4xRWiI6VMF5Jrbwg
+X-ME-Proxy: <xmx:d1uZalmMn24bZvw6ZcLzuvbcrJAKUgXdzzzS8Ud0C6nXYA5EVSPc0Q>
+    <xmx:d1uZariQuCSm2xXM69lE3G6vkzqSsl66MJ4aSRGJ0xZNmHI3CWwIlg>
+    <xmx:d1uZaiSh-nrRtvN90zTY6qN6k34XEQY-5mUsY52qudIhz0_2VpP38g>
+    <xmx:d1uZagiQ1esEatnM-Y_IcDnASzPxDyVKHWkMTHuTWVtpIJAbsM8j7g>
+    <xmx:d1uZauiiVEu2LLn_6b5rQDBKimEFB2v8DRx7K80_-fufnxKLOWw9oQim>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 12337F8007A; Thu,  3 Sep 2026 07:35:17 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Date: Thu, 03 Sep 2026 13:34:56 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Sven Peter" <sven@kernel.org>, "Mark Rutland" <mark.rutland@arm.com>,
+ "Lorenzo Pieralisi" <lpieralisi@kernel.org>, "Rob Herring" <robh@kernel.org>,
+ "Krzysztof Kozlowski" <krzk+dt@kernel.org>,
+ "Conor Dooley" <conor+dt@kernel.org>,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "Catalin Marinas" <catalin.marinas@arm.com>, "Will Deacon" <will@kernel.org>,
+ "Sudeep Holla" <sudeep.holla@kernel.org>, "Janne Grunau" <j@jannau.net>,
+ "Neal Gompa" <neal@gompa.dev>
+Cc: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+ asahi@lists.linux.dev
+Message-Id: <9c53cfd7-e193-4441-83ca-7710060225b7@app.fastmail.com>
+In-Reply-To: <20260708-efi-psci-v1-0-9efb3abf0e4c@kernel.org>
+References: <20260708-efi-psci-v1-0-9efb3abf0e4c@kernel.org>
+Subject: Re: [PATCH RFC 0/6] PSCI-via-EFI to support firmware and kernel sharing EL2
+ for Apple Silicon
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On platforms that allows to update firmware in runtime, UpdateCapsule()
-may immediately write a firmware image to persistent storage.
-This operation can take longer than EFI_RTS_TIMEOUT.
+Hi Sven,
 
-Use a separate timeout for the UpdateCapsule() runtime service. By
-default, wait indefinitely to avoid interrupting an ongoing firmware
-update. Administrators may configure an appropriate timeout, in seconds,
-through /sys/firmware/efi/capsule_update_timeout.
+On Wed, 8 Jul 2026, at 09:15, Sven Peter wrote:
+> Hi,
+>
+> Usually, idle and sleep state are implemented in firmware running in
+> e.g. EL3 with the kernel trapping into that from EL2. Unfortunately,
+> there's no EL3 on Apple Silicon machines and we'd rather not run the
+> kernel in EL1 since this would result in losing KVM support.
+>
+> While the shallower states could be implemented inside a custom cpuidle
+> driver (like we do downstream, see [1]) the deeper states result in a
+> complete loss of state and require bootstraping the cores again which is
+> quite involved. So instead we need some way to call back into our
+> open-source firmware to be able to handle that. This is even more
+> important for M4+ which don't even support the architectural wfi anymore
+> and always lose state when that instruction is executed.
+>
+> Luckily, EFI runtime services provide much of scaffolding we need,
+> namely a way to keep some code and data mapped and the ability to jump
+> into there from inside the kernel.
+>
+> This series adds a custom EFI table that points to a PSCI entry point
+> (plus some other stuff that has to be available before EFI runtime
+> services are set up) and adds support for this new conduit to the psci
+> code. We can't directly use the normal EFI runtime path because that one
+> takes a sleeping lock and we need to be able to call into PSCI from
+> atomic context during e.g. cpu bringup or during idle.
+> It also adds support for specifying the specific MAIR attributes for EFI
+> runtime mappings as defined in the latest UEFI spec since Apple Silicon
+> is rather allergic to using Device-nGnRnE vs. Device-nGnRE for its MMIO.
+>
+> This all results in a surprisingly small diffstat. I believe this
+> approach was originally suggested in some IRC discussion years ago,
+> possibly by Ard, but I can't find the old logs anymore.
+> Happy to add a Suggested-by tag though if anyone remembers.
+>
+> The firmware implementation I used for testing can be found at [2] and
+> the full kernel tree with this series applied at [3].
+>
+> Best,
+>
+> Sven
+>
+> [1] 
+> https://github.com/AsahiLinux/linux/blob/asahi/drivers/cpuidle/cpuidle-apple.c
+> [2] https://github.com/AsahiLinux/m1n1/tree/psci-via-efi
+> [3] 
+> https://git.kernel.org/pub/scm/linux/kernel/git/sven/linux.git/log/?h=efi-psci
+>
+> Signed-off-by: Sven Peter <sven@kernel.org>
+> ---
+> Sven Peter (6):
+>       dt-bindings: arm: psci: Add EFI conduit
+>       arm64/efi: Add and parse custom PSCI EFI configuration table
+>       efi: Add EFI_MEMORY_ISA_{MASK,VALID}
+>       arm64/efi: Honor EFI_MEMORY_ISA_MASK for Device-nGnRnE vs -nGnRE
+>       firmware/psci: Add EFI runtime conduit
+>       arm64: dts: apple: t8103: Add PSCI and CPU idle states
+>
 
-Signed-off-by: Yeoreum Yun <yeoreum.yun@arm.com>
----
- drivers/firmware/efi/efi.c              | 41 +++++++++++++++++++++++++
- drivers/firmware/efi/runtime-wrappers.c | 14 +++------
- include/linux/efi.h                     | 10 ++++++
- 3 files changed, 55 insertions(+), 10 deletions(-)
+I've picked up patches #3 and #4, which are useful in their own right.
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 0327a39d31fa..aef0ba170e3c 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -63,6 +63,18 @@ static unsigned long __initdata mem_reserve = EFI_INVALID_TABLE_ADDR;
- static unsigned long __initdata rt_prop = EFI_INVALID_TABLE_ADDR;
- static unsigned long __initdata initrd = EFI_INVALID_TABLE_ADDR;
- 
-+/*
-+ * Depending on the platform, UpdateCapsule() may update the firmware
-+ * immediately if the platform allows to update the firmware while in runtime.
-+ * In this case, writing the image to firmware storage may take longer than
-+ * EFI_RTS_TIMEOUT (120 seconds).
-+ *
-+ * To handle this, use a separate timeout for the UpdateCapsule() runtime
-+ * service. Wait indefinitely by default, and allow administrators to set
-+ * an appropriate timeout in seconds through /sys/firmware/efi/capsule_update_timeout.
-+ */
-+unsigned long efi_capsule_update_timeout = MAX_SCHEDULE_TIMEOUT;
-+
- extern unsigned long primary_display_table;
- 
- struct mm_struct efi_mm = {
-@@ -163,15 +175,44 @@ static ssize_t fw_platform_size_show(struct kobject *kobj,
- 	return sprintf(buf, "%d\n", efi_enabled(EFI_64BIT) ? 64 : 32);
- }
- 
-+static ssize_t capsule_update_timeout_show(struct kobject *kobj,
-+					   struct kobj_attribute *attr, char *buf)
-+{
-+	return sysfs_emit(buf, "%lu\n", efi_capsule_update_timeout / HZ);
-+}
-+
-+static ssize_t capsule_update_timeout_store(struct kobject *kobj,
-+					    struct kobj_attribute *attr,
-+					    const char *buf, size_t count)
-+{
-+	int ret;
-+	unsigned long secs, timeout;
-+
-+	ret = kstrtoul(buf, 0, &secs);
-+	if (ret)
-+		return ret;
-+	if (check_mul_overflow(secs, HZ, &timeout))
-+		timeout = MAX_SCHEDULE_TIMEOUT;
-+	if (timeout < EFI_RTS_TIMEOUT)
-+		timeout = EFI_RTS_TIMEOUT;
-+
-+	efi_capsule_update_timeout = timeout;
-+
-+	return count;
-+}
-+
- extern __weak struct kobj_attribute efi_attr_fw_vendor;
- extern __weak struct kobj_attribute efi_attr_runtime;
- extern __weak struct kobj_attribute efi_attr_config_table;
- static struct kobj_attribute efi_attr_fw_platform_size =
- 	__ATTR_RO(fw_platform_size);
-+static struct kobj_attribute efi_attr_capsule_update_timeout =
-+	__ATTR_RW_MODE(capsule_update_timeout, 0600);
- 
- static struct attribute *efi_subsys_attrs[] = {
- 	&efi_attr_systab.attr,
- 	&efi_attr_fw_platform_size.attr,
-+	&efi_attr_capsule_update_timeout.attr,
- 	&efi_attr_fw_vendor.attr,
- 	&efi_attr_runtime.attr,
- 	&efi_attr_config_table.attr,
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 2344b9d1e81f..b0f867f828c1 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -118,14 +118,6 @@ union efi_rts_args {
- 
- struct efi_runtime_work efi_rts_work;
- 
--/*
-- * Upper bound on how long we wait for a single EFI runtime service
-- * call to finish before declaring firmware wedged. Chosen to be longer
-- * than any plausible legitimate call (including UpdateCapsule on slow
-- * SPI-NOR) while still bounding userspace wait time.
-- */
--#define EFI_RTS_TIMEOUT		(120 * HZ)
--
- /*
-  * efi_queue_work:	Queue EFI runtime service call and wait for completion
-  * @_rts:		EFI runtime service function identifier
-@@ -347,6 +339,8 @@ static void __nocfi efi_call_rts(struct work_struct *work)
- static efi_status_t __efi_queue_work(enum efi_rts_ids id,
- 				     union efi_rts_args *args)
- {
-+	unsigned long timeout;
-+
- 	if (!efi_enabled(EFI_RUNTIME_SERVICES)) {
- 		pr_warn_once("EFI Runtime Services are disabled!\n");
- 		return EFI_DEVICE_ERROR;
-@@ -369,8 +363,8 @@ static efi_status_t __efi_queue_work(enum efi_rts_ids id,
- 		goto exit;
- 	}
- 
--	if (!wait_for_completion_timeout(&efi_rts_work.efi_rts_comp,
--					 EFI_RTS_TIMEOUT)) {
-+	timeout = (id == EFI_UPDATE_CAPSULE) ? efi_capsule_update_timeout : EFI_RTS_TIMEOUT;
-+	if (!wait_for_completion_timeout(&efi_rts_work.efi_rts_comp, timeout)) {
- 		pr_err("EFI runtime service %d wedged in firmware; disabling EFI runtime services\n",
- 		       id);
- 		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index aa15ff88539b..8e14ca5e57de 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1345,4 +1345,14 @@ extern struct blocking_notifier_head efivar_ops_nh;
- void efivars_generic_ops_register(void);
- void efivars_generic_ops_unregister(void);
- 
-+/*
-+ * Upper bound on how long we wait for a single EFI runtime service
-+ * call to finish before declaring firmware wedged. Chosen to be longer
-+ * than any plausible legitimate call (excluding UpdateCapsule() while
-+ * still bounding userspace wait time.
-+ */
-+#define EFI_RTS_TIMEOUT		(120 * HZ)
-+
-+extern unsigned long efi_capsule_update_timeout;
-+
- #endif /* _LINUX_EFI_H */
--- 
-LEVI:{C3F47F37-75D8-414A-A8BA-3980EC8A46D7}
+I'm not sure if the arm64 maintainers will want to consider this, but
+I think it's a reasonable compromise, as it puts the abstraction in
+the right place.
+
+I take it this will be contributed to u-boot if it gets accepted here?
+
+
 
