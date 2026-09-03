@@ -1,57 +1,57 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F171D3F4859
-	for <linux-efi@vger.kernel.org>; Thu,  3 Sep 2026 09:27:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 208743F5BD7
+	for <linux-efi@vger.kernel.org>; Thu,  3 Sep 2026 09:55:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788427662; cv=none; b=MKGMQr3M2YddldkkNPnUhbUCFfLdlvCjlCdFCyfjpVmwzeGeCKIRi544ggEL8FrKB/ap94KOvhX50wTVHphhquPhQgnl39RdsA/xfvSSq1gtWvhUYHGw3XLeiTKn9wOdrm54PLnbBCuAJ1G1u0C5u1LwQt5LWbHtgRcX+YRugek=
+	t=1788429331; cv=none; b=rO50q6Cb+oHO3UL524LA21DHCJ+HRxnbwsZeVhxLZ6LIxTZhfRFdQcTr4oOZwRz1Vca3hyncqktGUtsdZmVgGgm58zGs9+oPCmguAZVVfp/E5Zlb+EnAJI9auapqvvZ5246s9eveOKdu+GATqlHI5fs9hsvhEgM722dQ1woTmrA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788427662; c=relaxed/simple;
-	bh=XibIeOSWpX+DZUMfWBL2ZIv7odIeN1k1W89wv0bX3pw=;
+	s=arc-20240116; t=1788429331; c=relaxed/simple;
+	bh=5D5RioOePvVVVpqlzVLVZzhRBSmcrL+ZmJ7BWotiz0g=;
 	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=GBF5Kp7rcXOTctGCGMzC/h8veke8mBt2EQmwr3K1dMDJa/DLS//nW4jhxK8AOv30TfNouQ7DawcNGxuyxYjkxMMoTfYQOdq8CjlqzhjQvg4SvSgWkxQ7GiNBy9xO7qarHoUd6htXmPyIHtaKgSxIaSOKmCOWLhwbAnWjP86x0CQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jENeiXHj; arc=none smtp.client-ip=100.103.45.18
+	 Subject:Content-Type; b=XdCEDMtEMNfhQmkDL2j4CbtDPlUXoBdogHzQscSWKR17N+Kje75rv3QtPNonA2khEPIfBTlLziypbeVagVSNsgP7ftP1rqUlYOYkPK/Oh34FkbBerw1LQ+aLG1gk+5RFuJlO7bRmNwENJVgq73kFPzw1eCLF5pGJTDkCTW6RlWs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PhVSO4Tp; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jENeiXHj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BE12F1F000E9
-	for <linux-efi@vger.kernel.org>; Thu,  3 Sep 2026 09:27:30 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PhVSO4Tp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5442F1F00A3A;
+	Thu,  3 Sep 2026 09:55:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788427651;
-	bh=BtmkQEYIOFuzftiSvZas/3kbN1nxqaqnvOyXFVrkfVc=;
+	s=k20260515; t=1788429329;
+	bh=edAs9iwUUkB+qKwn4NBrCpSSruEg/xQFdmG7j35BHQY=;
 	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=jENeiXHj3DRFXgl2ZRELy7afmPNeyo3DjhxNjP5wd9qs3fLE/D6Inu4GshZqSnFrw
-	 HdrPU9HDW5Lj6Nj5X5NcUsVNwcaz46Yjjb+j7U8WZQhXo1bgYQ0NTdNN1RXJIO072t
-	 XzZqPYDi9N4s0GqVendIoC/r/WahKFEOzRUBy3NWaPBcVPKPApae5L0UeIZJM9EbSG
-	 vIctsKjq2/KxsBmF34xQFVj6ZNCYnC4svk2cHTkXwP8YWIXolsnEo0+J3pdaoXcyVV
-	 VZt2IYppZbLB5yjM531pD4lSFKHD+BeqZsfBYzUoGlxfgU1O947kQAGIgOPzlz08iP
-	 rAyObY9Y8L82Q==
+	b=PhVSO4TpalnfcAeBc6GvXbNTICbMv6rJ8Bv591egbWVVVMz4a70BVRj9OchwvAg2/
+	 vf3Ce0LhtWa5sbrCmHOluaU8+WmM61eM7XIEo4GaE+nqIXQB1K3YyHhXFV1fl2fZkB
+	 PzG3oGB2Sw4YyExzJt/iltwPiw1pMK/CdmO5Bkhu0bbTWD/aVTJ0Ebhzfkz1sYjB9W
+	 7po05NFz9WVhLhNzMbLs0Qhc5FbJCtiJSDHsKmMDFeh3q5OlCe5Nn+83Yw0wWJ1EYS
+	 uxj5A4KYqPQL5fBhgXeSEHhWhEqH+ir+jK/ERnEcwX+NBKdg2gFKv5vHaSXTSGR2nI
+	 MuDp32JP5IIhA==
 Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 16595198003A;
-	Thu,  3 Sep 2026 05:27:29 -0400 (EDT)
+	by mailfauth.ams.internal (Postfix) with ESMTP id 07D6A198004A;
+	Thu,  3 Sep 2026 05:55:28 -0400 (EDT)
 Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Thu, 03 Sep 2026 05:27:29 -0400
-X-ME-Sender: <xms:fz2Zau7MWLhU9XB3n9-UCZyIngv3xEW9_rMPD06pOh66gUt_pdKkCQ>
-    <xme:fz2Zaivp43AO6UhHwHM7cdQsmV6dbhRiRtY-0Zz3zqAmr5Gw_hBFLS0piY4S65Sly
-    A9wdnAdiSG7IXsUK9D7zpwbucAsukQ-Xd__h3hE9b_7Zls3OvHceAVm>
-X-ME-Proxy-Cause: dmFkZTEjoeUZn9fs8BThQtUPV37JxisngAiNk6D5zfV44WDVNbk+riElQkXZd2JYz4S3aY
-    tUjah9ZGtx8NSjfrokXlqZ43Stah8G10G33xApL4B2WDsUQ43jbwMUQG2haAv+mGjXhAau
-    def5Ce0/cX5RMLvrV51ucR5OADHlBKx9Ng0//XIv/ZwpAMlNmK0du/XzsXG62v2aO6sB3A
-    C6go7/sSLyHzd/8oehO/dthvXAqvriTyN0jhPIvUzC7Nu/oZc8FYbcnqQ1LRGk+8RUswdt
-    2ejftr4LCrlRXRJqofvyhl5hkoloUxkQ+5TL8xj5DOXTjL7GsLwNzRGZZQLwiU0jzpwwrk
-    3l3qh6lCp5w7guupLDOKQkUq+dMJqwYlCHvGFHo2rKBYqSMBwAw2HJNz2xAQnB/AbDWh9k
-    lX5G75adOotT7jPnDstNBJRjbIFMOFVscKp5zX1XsK/iRM04ZBcV5WxTwlET+I/BmMHwPq
-    Xja4Znh2lYwBQlgXT1fqSXZ6ytOdb+2bo8QN3d5uTIxAOVRUS/wwC0TW5pEPyqcJVHTy2S
-    HvuDisdTyMtb3GB2Xnxoqm+Om960+2CkPHj81bCjqG5DTiIInjR9rWzNZUzfTmrLLFTwxO
-    WNTIVza/Tz1u2cG+/7uxxjnq7QAaiwuT52MgXq8h1rQ1OiqgTutB1G4/dS7g
-X-ME-Proxy: <xmx:gT2ZaljFHd4K5eTf7k3R2Kh7oh8Jj7kUe_BWMrED4GVRai207x3ovQ>
-    <xmx:gT2ZaldksN2XN3sEZYsgZxbJ-r4HckkFpsNqXrzy4LrjzaH-G3NegQ>
-    <xmx:gT2Zaon2X1hE6gMx3EIhK-R_wMpuD7S9BqB7UZG445I_0KeA6ultsw>
-    <xmx:gT2Zauv00wdwnpkrTlVUuH_zT162ZzewTN7VAJv-ri2LyevIed75-g>
-    <xmx:gT2Zau_8APnDvDTk_x_tSdoygSpDI1e1idRCwXfGPh_QLWGYdAYtqmBu>
+  by ams-compute-02.internal (MEProxy); Thu, 03 Sep 2026 05:55:28 -0400
+X-ME-Sender: <xms:DkSZaio7-YJd86itkj7QUc4k3lrLiCRTKakONjHctj7PXdpL48d4QQ>
+    <xme:DkSZarfAjIHe8AmCSxGy0titkHAULOAUNlzit1MfWR_YsFSZWk8Jqtw4OfyFupal6
+    9IB0iGGznF6XOqysnvBodivsyuIQp3Obwm71eoQhrbHst5eYI8BXlTG>
+X-ME-Proxy-Cause: dmFkZTFXvIm2nLWDRS+GlxQzSpTVvLiNwldFZ85yC5hu3iZ+vpblvux6xymJ1M3oKFaNOZ
+    awHr8IIr+s0sORHGVgpgqxqnGSf7Gh0ruBCsoQPQoTdF6+miGXAqFRenrQzzM3gHiw6JfG
+    O20ZG4FzPkhxBacIInOb9tg7WAtc/ofXx7lkuFJBljjs+3frJVNPRS3/enZhOtlTZDE6fx
+    sH4gVSpobS8sUjZjlGmasQDxSLLsYgn7hzhg9uSxBJtuZ/xkK89cu6APGOzFueM7OqHDel
+    vpSeoey1vI+LHdzduGfdONUb/HGa86ZqPikoWYqTLBSSYhigyIFOGoHOjxsFg90sza3gCV
+    +OU0Lr6hi1UZ4ZVcQDDpF1PmOBQOO7SdWrPUFEpVozSTIh34R4qN7WFM368vZO+D5iCnAt
+    g8/tshrpujT/FuhDk9176OxgKgilxUmBamu6Oc2e0uhVGCWCueUgYw/vC8lLrl0eaHP5Bz
+    57aVE1TJ79FwLuNFziESn8YEWSOi1eFuJLF+Z5XWCLpW5LijH4xlSDgxjC02zfS7MLTrwu
+    IlR1pQOTPwCbBsVfqt9qDP6QrDNiQz9igTXUokfefQ4/OpPU7mLCe6+uX7Uu7msVY260Om
+    0Rv0j0+50fa3TnrBTTbDOI/Rp763JeYYfDeHbKjg9pQUY6dyJ8Dcga+sCnhw
+X-ME-Proxy: <xmx:EESZaioBkv0kWLyCO1mBfRPyAj5A2d2kGufuI3Te9hYx2EmD4pIZhQ>
+    <xmx:EESZaso4poOahvOib_qybRi6RLjyJmTQ1RGWey9TJ6gxNOY1k2lUpg>
+    <xmx:EESZapb6xm1NtpwJ0xC57Pes3W-0SnHso8CCiSpuYUcmq1Mr4HjIVA>
+    <xmx:EESZai9W18uBhwjZVk0uRI06eFtbQXpszuU9A9F-806ta-pkAKUWyQ>
+    <xmx:EESZavnAj_66rpFJ-hKSfGVTo7gGGCrg9fswTwbmfIrgsYix4UtiX0xi>
 Feedback-ID: ice86485a:Fastmail
 Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id C7C14F8007B; Thu,  3 Sep 2026 05:27:27 -0400 (EDT)
+	id 2DB08F8007B; Thu,  3 Sep 2026 05:55:26 -0400 (EDT)
 X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -59,39 +59,115 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Thu, 03 Sep 2026 11:27:06 +0200
+Date: Thu, 03 Sep 2026 11:55:06 +0200
 From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Danish Khateeb" <danishkhateeb03@gmail.com>
-Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Message-Id: <5c68db64-0647-40f3-b0ad-60aa24246b9b@app.fastmail.com>
-In-Reply-To: <20260902201340.70189-1-danishkhateeb03@gmail.com>
-References: <20260902201340.70189-1-danishkhateeb03@gmail.com>
-Subject: Re: [PATCH] efi/capsule: Replace kmap_atomic() with kmap_local_page()
+To: "Jonggeun Park" <jakejgpark@gmail.com>, "Jeremy Kerr" <jk@ozlabs.org>
+Cc: "Kees Cook" <kees@kernel.org>, "Tony Luck" <tony.luck@intel.com>,
+ "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+Message-Id: <b567665e-9792-42e1-a37a-3ea245ccf9bd@app.fastmail.com>
+In-Reply-To: <20260815074844.1330-1-jakejgpark@gmail.com>
+References: <20260815074844.1330-1-jakejgpark@gmail.com>
+Subject: Re: [PATCH] efi: vars: commonize the 512-byte name buffer quirk
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 
+Hello Jonggeun,
 
 
-On Wed, 2 Sep 2026, at 22:13, Danish Khateeb wrote:
-> kmap_atomic() is deprecated in favour of kmap_local_page(), as described
-> in Documentation/mm/highmem.rst.
+On Sat, 15 Aug 2026, at 09:48, Jonggeun Park wrote:
+> Some old UEFI implementations reject GetNextVariableName() calls with
+> a name buffer size larger than 512 bytes. Both efivar_init() and
+> efi_pstore_read() open-code the same workaround of resetting the size
+> to 512 on every iteration.
 >
-> The conversion is safe here: the mapping is created and torn down within a
-> single iteration of the sg_count loop, preserving the strict stack-based
-> ordering that kmap_local_page() requires, and the mapped region is only
-> written to, so neither pagefault_disable() nor preempt_disable() is needed.
-> The surrounding code already sleeps (it allocates the pages with
-> alloc_page(GFP_KERNEL) and later takes capsule_mutex), so there is no
-> atomic context to preserve.
+> Introduce efivar_get_next_variable_safe() which keeps this quirk in a
+> single place, resolving the TODO in efi-pstore.c.
 >
-> Build-tested only.
+> No functional change intended.
 >
-> Assisted-by: LLM sparse
-> Signed-off-by: Danish Khateeb <danishkhateeb03@gmail.com>
+> Signed-off-by: Jonggeun Park <jakejgpark@gmail.com>
 > ---
->  drivers/firmware/efi/capsule.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/firmware/efi/efi-pstore.c | 16 +++++-----------
+>  drivers/firmware/efi/vars.c       | 21 +++++++++++++++++++++
+>  fs/efivarfs/vars.c                |  4 +---
+>  include/linux/efi.h               |  4 ++++
+>  4 files changed, 31 insertions(+), 14 deletions(-)
 >
+> diff --git a/drivers/firmware/efi/efi-pstore.c 
+> b/drivers/firmware/efi/efi-pstore.c
+> index a5db3534f..a135d6e2f 100644
+> --- a/drivers/firmware/efi/efi-pstore.c
+> +++ b/drivers/firmware/efi/efi-pstore.c
+> @@ -164,16 +164,6 @@ static ssize_t efi_pstore_read(struct 
+> pstore_record *record)
+>  	efi_status_t status;
+> 
+>  	for (;;) {
+> -		/*
+> -		 * A small set of old UEFI implementations reject sizes
+> -		 * above a certain threshold, the lowest seen in the wild
+> -		 * is 512.
+> -		 *
+> -		 * TODO: Commonize with the iteration implementation in
+> -		 *       fs/efivarfs to keep all the quirks in one place.
+> -		 */
+> -		varname_size = 512;
+> -
+>  		/*
+>  		 * If this is the first read() call in the pstore enumeration,
+>  		 * varname will be the empty string, and the GetNextVariable()
+> @@ -185,8 +175,12 @@ static ssize_t efi_pstore_read(struct 
+> pstore_record *record)
+>  		 * store varname in record->psi->data. Given that we only
+>  		 * enumerate variables with the efi-pstore GUID, there is no
+>  		 * need to record the guid return value.
+> +		 *
+> +		 * The 512-byte name buffer quirk is handled inside
+> +		 * efivar_get_next_variable_safe().
+>  		 */
+> -		status = efivar_get_next_variable(&varname_size, varname, &guid);
+> +		status = efivar_get_next_variable_safe(&varname_size, varname,
+> +						       &guid);
+>  		if (status == EFI_NOT_FOUND)
+>  			return 0;
+> 
+> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+> index 3700e9869..8e69f3632 100644
+> --- a/drivers/firmware/efi/vars.c
+> +++ b/drivers/firmware/efi/vars.c
+> @@ -265,3 +265,24 @@ efi_status_t efivar_query_variable_info(u32 attr,
+>  			remaining_space, max_variable_size);
+>  }
+>  EXPORT_SYMBOL_NS_GPL(efivar_query_variable_info, "EFIVAR");
+> +
+> +/*
+> + * efivar_get_next_variable_safe() - enumerate the next name/vendor 
+> pair
+> + *
+> + * Wrapper around efivar_get_next_variable() that keeps the 512-byte 
+> name
+> + * buffer quirk in one place. Some old UEFI implementations reject 
+> name buffer
+> + * sizes larger than 512 bytes (the lowest seen in the wild), so this 
+> always
+> + * requests 512 bytes; callers must provide a buffer of at least that 
+> size.
+> + *
+> + * Must be called with efivars_lock held.
+> + */
+> +efi_status_t efivar_get_next_variable_safe(unsigned long *name_size,
+> +					   efi_char16_t *name,
+> +					   efi_guid_t *vendor)
+> +{
+> +	BUILD_BUG_ON(EFI_VAR_NAME_LEN < 512);
+> +	*name_size = 512;
+> +
+> +	return efivar_get_next_variable(name_size, name, vendor);
+> +}
+> +EXPORT_SYMBOL_NS_GPL(efivar_get_next_variable_safe, "EFIVAR");
 
-Queued up in efi/next - thanks
+Don't add a new function here - just move the logic into the existing
+efivar_get_next_variable(), which has only two callers.
+
