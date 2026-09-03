@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE219367B95;
-	Thu,  3 Sep 2026 21:25:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 411F34EE849;
+	Thu,  3 Sep 2026 21:25:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788470738; cv=none; b=mbqENYngQchcDlasIqNDtmYKZ8fgxuVeodTFf63vn5BBY7aHiIM0J35JU8C1Z4Ux6qG3ps++sJ8BImYYl+C3e2X8vprsd+Zz+mEFcTsg1nw3TNF3N1jwH9C/T81f7WjMlC4/8HodpiAfovSm0tQJBLdV5GzPegJSuce7CHEABog=
+	t=1788470739; cv=none; b=k6PSWL+Z/mL1QC1BWOJdXoiKReXEIDvSOcInKhAQKAnqrOFHwRTIWif3BrWgtm4VdGyGe056l3ocv80etA96qwfqgPcFZIZII3FYhYzMqOJD7lyvtcMAjhb5BO9JLqTKThPtgVXugpXo+I8n53SmKc0MWaeWPzlzEfQDizB9yNs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788470738; c=relaxed/simple;
-	bh=O/d0k5vb/4vfw2tz9k6hUR4UR4r/Dd163rVQQDA8zh4=;
+	s=arc-20240116; t=1788470739; c=relaxed/simple;
+	bh=VKodwoGsqZqFfJZ9ZPLgVu/Y5p034Al6RJg5ytdgpwg=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=oZlTobPiV2MKb+M+ZH/5xwfrpW36Gu+vTotpqFmfSbC6hhc9NdOpPPRmZHh7nwDAJg20Vw9iVpzjzAxbGs6XkOQUVEuODbrikQS3IjMF658QHLVGWxLzDWh2cCiaT7iVUi6jDNfMe+NKOWkBBRFAxfyuj9xJ9JkmCCN1XQKZ6dw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kalVpSdS; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=BeFRj/wF6bzkVV4mvyP8OLupj5X7fpwLOrUhl7dL7Ajn31NHQUNfF6GUryBYhZHVBIiHgKVTvNCx2I71RKpRQFUL4jb4JNQCI6O0QORO0PVcObov7Ph3hf+o4RzDAyEIXygEQNzuXtToretiz6PSQdkn22DCkwwnF3xjNrXryY8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=G4bnJqzG; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kalVpSdS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2491D1F000E9;
-	Thu,  3 Sep 2026 21:25:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="G4bnJqzG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C1551F00A3E;
+	Thu,  3 Sep 2026 21:25:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788470734;
-	bh=DSKFXFhbIojXkdFpJL1K3sNDjK0tlWgOIOwmwEHJp8g=;
+	s=k20260515; t=1788470736;
+	bh=JfAREg5nSpMGCnYkfgXywqxm+il2UeJxz2xj/ulmNA0=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=kalVpSdSgCP0iao9gq19Zsw2CnBC8rdGeU7hXgx+EbSbWvGRjq7hNbnjq76rogC5V
-	 4nhWQJUiFi+/DndXUn4/cHFbZHd6lO12/4HoqUJcF3dLdDRBqQZWAOXBGdTyo4OJCo
-	 yLFKeUfv3/pLnPeW8y2R7QWadVTJ4CamWPqal16ulxCf5ILN9bKjz8rN2cL5JfjWFM
-	 UP0cA7/QIJqiVaqwL0iC8r7qOVvHIifIC4erY7MIuLdXs8kftt+QfQBYxAqNtIRiM9
-	 ApgaZzH1AaWD1EJxB/FdFa4KrGEWgBSvCxNVnsNrtKKrksvFOgd0LVQEx4JAd+X/2l
-	 4lK2+Pb13+U4w==
+	b=G4bnJqzGJVVsoTgpfQfHQvBHT39z7YN58I9Ludvkl8B1l0qa3wYGsKLAfHpqWjWSB
+	 yfTgjTHtNk1j306lvj0qdrYm2+I1Hxpd4RdW2xLuHdqLbmvGpUqODpJg6BmTF2WIDI
+	 PGr+HvjxhAYJ2boRlbehrOAG5qKebTWqV5N00K6/C7U7phWk8dndVfJ1/M2g1ulYM9
+	 N0BxhGN/3AAAXOh0ane9jCst9YZhnwr7gum2+7K1OKSV/a7GlnWNH7XSPmOMGzsLxb
+	 4djzuAo1CZS2Xr8ny3zr7ye1Ed93t4nXYUAA/kwkhYxXvJa5XIXbYdM2aO3y3hlumM
+	 VoJyV233ASTCg==
 From: Vincent Mailhol <mailhol@kernel.org>
-Date: Thu, 03 Sep 2026 23:25:16 +0200
-Subject: [PATCH 2/3] efi/libstub: make local GUID variables static
+Date: Thu, 03 Sep 2026 23:25:17 +0200
+Subject: [PATCH 3/3] efi/libstub: factor shared static GUID variables
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +37,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260903-libstub_guid_cleanup-v1-2-06fcb6216975@kernel.org>
+Message-Id: <20260903-libstub_guid_cleanup-v1-3-06fcb6216975@kernel.org>
 References: <20260903-libstub_guid_cleanup-v1-0-06fcb6216975@kernel.org>
 In-Reply-To: <20260903-libstub_guid_cleanup-v1-0-06fcb6216975@kernel.org>
 To: Ard Biesheuvel <ardb@kernel.org>, 
@@ -45,380 +45,124 @@ To: Ard Biesheuvel <ardb@kernel.org>,
 Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
  Vincent Mailhol <mailhol@kernel.org>
 X-Mailer: b4 0.16.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=16758; i=mailhol@kernel.org;
- h=from:subject:message-id; bh=O/d0k5vb/4vfw2tz9k6hUR4UR4r/Dd163rVQQDA8zh4=;
- b=owGbwMvMwCV2McXO4Xp97WbG02pJDFkzn57IEfmvXBx5bPK/L14nuNc4V3uGfwpkWj01dMWry
- aJOPHVGHRNZGMS4GCzFFFmWlXNyK3QUeocd+msJM4eVCWSItEgDAxCwMPDlJuaVGukY6ZlqG+oZ
- Ahk6RgxcnAIw1UpnGRmahJYkt+3d9ljDTnje4Zsee73C/Ew++m7m7ogV/yZ/ON+C4X/st30hsSr
- ncx2OPW3SXy+3/M4E6xaJ9Y9C53B9/r1nfjMDAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4558; i=mailhol@kernel.org;
+ h=from:subject:message-id; bh=VKodwoGsqZqFfJZ9ZPLgVu/Y5p034Al6RJg5ytdgpwg=;
+ b=owGbwMvMwCV2McXO4Xp97WbG02pJDFkzn57wSnlfs+H+Lb1JC99Ie1+KfPfhxtGfaxr2d/avu
+ 7r/0q5+hY6JLAxiXAyWYoosy8o5uRU6Cr3DDv21hJnDygQyRFqkgQEIWBj4chPzSo10jPRMtQ31
+ DIEMHSMGLk4BuK3nGf4X7nXNyu/V/O3Sz67M+VPvtcoOxfcn6/Oddj7YzKFZ097O8L9obkdz33k
+ 9m+Vfdr04rFlU8Uv+Er+mzpp8H2PNgo6QKgYA
 X-Developer-Key: i=mailhol@kernel.org; a=openpgp;
  fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
 
-Local efi_guid_t variables with automatic storage produce assembly
-similar to passing the address of the GUID macro directly. For the same
-reason, make these GUID variables static.
+Some GUIDs are used several times in the same translation unit.
 
-Put the static declarations first in their local declaration block to
-visually separate them from the automatic variables.
+Factor the duplicated EFI_FILE_SYSTEM_GUID, EFI_RNG_PROTOCOL_GUID and
+EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID objects at file scope within their
+translation units. Leave the single-use GUID objects at function scope.
 
 For an x86_64 build with gcc 15.3.0, bloat-o-meter reports:
 
-  add/remove: 15/0 grow/shrink: 0/10 up/down: 336/-742 (-406)
+  add/remove: 0/0 grow/shrink: 0/3 up/down: 0/-48 (-48)
   Function                                     old     new   delta
-  tbl_guid                                       -      32     +32
-  rng_proto                                      -      32     +32
-  pci_proto                                      -      32     +32
-  guid                                           -      32     +32
-  fs_proto                                       -      32     +32
-  cc_guid                                        -      32     +32
-  tpm2_guid                                      -      16     +16
-  text_to_dp_guid                                -      16     +16
-  tcg2_guid                                      -      16     +16
-  rng_table_guid                                 -      16     +16
-  rng_algo_raw                                   -      16     +16
-  proto                                          -      16     +16
-  linux_eventlog_guid                            -      16     +16
-  lf2_proto_guid                                 -      16     +16
-  info_guid                                      -      16     +16
-  efi_get_memory_map                           707     696     -11
-  efi_pci_disable_bridge_busmaster            1199    1184     -15
-  efi_get_random_bytes                         216     188     -28
-  efi_remap_image                              357     328     -29
-  efi_load_initrd                             1113    1065     -48
-  efi_random_get_seed                         1368    1297     -71
-  efi_measure_tagged_event                     935     854     -81
-  efi_retrieve_eventlog                       1686    1570    -116
-  handle_cmdline_files                        2501    2341    -160
-  efi_stub_entry                              4136    3953    -183
-  Total: Before=28877, After=28471, chg -1.41%
+  rng_proto                                     32      16     -16
+  graphics_output_guid                          32      16     -16
+  fs_proto                                      32      16     -16
+  Total: Before=28471, After=28423, chg -0.17%
 
 Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
 ---
- drivers/firmware/efi/libstub/efi-stub-entry.c    |  2 +-
- drivers/firmware/efi/libstub/efi-stub-helper.c   | 10 +++++-----
- drivers/firmware/efi/libstub/efi-stub.c          |  2 +-
- drivers/firmware/efi/libstub/file.c              |  8 ++++----
- drivers/firmware/efi/libstub/kaslr.c             |  2 +-
- drivers/firmware/efi/libstub/mem.c               |  2 +-
- drivers/firmware/efi/libstub/pci.c               |  2 +-
- drivers/firmware/efi/libstub/random.c            |  8 ++++----
- drivers/firmware/efi/libstub/riscv.c             |  2 +-
- drivers/firmware/efi/libstub/tpm.c               |  8 ++++----
- drivers/firmware/efi/libstub/unaccepted_memory.c |  2 +-
- drivers/firmware/efi/libstub/x86-stub.c          | 10 +++++-----
- 12 files changed, 29 insertions(+), 29 deletions(-)
+ drivers/firmware/efi/libstub/file.c   | 4 ++--
+ drivers/firmware/efi/libstub/gop.c    | 4 ++--
+ drivers/firmware/efi/libstub/random.c | 4 ++--
+ 3 files changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/efi-stub-entry.c b/drivers/firmware/efi/libstub/efi-stub-entry.c
-index aa85e910fe59..8ecd8cd72561 100644
---- a/drivers/firmware/efi/libstub/efi-stub-entry.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-entry.c
-@@ -35,13 +35,13 @@ struct sysfb_display_info *alloc_primary_display(void)
- efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 				   efi_system_table_t *systab)
- {
-+	static efi_guid_t loaded_image_proto = LOADED_IMAGE_PROTOCOL_GUID;
- 	efi_loaded_image_t *image;
- 	efi_status_t status;
- 	unsigned long image_addr;
- 	unsigned long image_size = 0;
- 	/* addr/point and size pairs for memory management*/
- 	char *cmdline_ptr = NULL;
--	efi_guid_t loaded_image_proto = LOADED_IMAGE_PROTOCOL_GUID;
- 	unsigned long reserve_addr = 0;
- 	unsigned long reserve_size = 0;
- 
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index f27f2e1f0019..48f93f7758e9 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -248,6 +248,7 @@ static efi_status_t efi_measure_tagged_event(unsigned long load_addr,
- 					     unsigned long load_size,
- 					     enum efistub_event_type event)
- {
-+	static efi_guid_t tcg2_guid = EFI_TCG2_PROTOCOL_GUID;
- 	union {
- 		efi_status_t
- 		(__efiapi *hash_log_extend_event)(void *, u64, efi_physical_addr_t,
-@@ -257,7 +258,6 @@ static efi_status_t efi_measure_tagged_event(unsigned long load_addr,
- 	struct efistub_measured_event *evt __free(efi_pool) = NULL;
- 	int size = struct_size(evt, tagged_event.tagged_event_data,
- 			       events[event].event_data_len);
--	efi_guid_t tcg2_guid = EFI_TCG2_PROTOCOL_GUID;
- 	efi_tcg2_protocol_t *tcg2 = NULL;
- 	union efistub_event ev;
- 	efi_status_t status;
-@@ -276,7 +276,7 @@ static efi_status_t efi_measure_tagged_event(unsigned long load_addr,
- 		method.hash_log_extend_event =
- 			(void *)efi_table_attr(tcg2, hash_log_extend_event);
- 	} else {
--		efi_guid_t cc_guid = EFI_CC_MEASUREMENT_PROTOCOL_GUID;
-+		static efi_guid_t cc_guid = EFI_CC_MEASUREMENT_PROTOCOL_GUID;
- 		efi_cc_protocol_t *cc = NULL;
- 
- 		efi_bs_call(locate_protocol, &cc_guid, NULL, (void **)&cc);
-@@ -552,7 +552,7 @@ static
- efi_status_t efi_load_initrd_dev_path(struct linux_efi_initrd *initrd,
- 				      unsigned long max)
- {
--	efi_guid_t lf2_proto_guid = EFI_LOAD_FILE2_PROTOCOL_GUID;
-+	static efi_guid_t lf2_proto_guid = EFI_LOAD_FILE2_PROTOCOL_GUID;
- 	efi_device_path_protocol_t *dp;
- 	efi_load_file2_protocol_t *lf2;
- 	efi_handle_t handle;
-@@ -614,7 +614,7 @@ efi_status_t efi_load_initrd(efi_loaded_image_t *image,
- 			     unsigned long hard_limit,
- 			     const struct linux_efi_initrd **out)
- {
--	efi_guid_t tbl_guid = LINUX_EFI_INITRD_MEDIA_GUID;
-+	static efi_guid_t tbl_guid = LINUX_EFI_INITRD_MEDIA_GUID;
- 	efi_status_t status = EFI_SUCCESS;
- 	struct linux_efi_initrd initrd, *tbl;
- 
-@@ -725,7 +725,7 @@ efi_status_t efi_wait_for_key(unsigned long usec, efi_input_key_t *key)
- void efi_remap_image(unsigned long image_base, unsigned alloc_size,
- 		     unsigned long code_size)
- {
--	efi_guid_t guid = EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID;
-+	static efi_guid_t guid = EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID;
- 	efi_memory_attribute_protocol_t *memattr;
- 	efi_status_t status;
- 	u64 attr;
-diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
-index 42d6073bcd06..235c9738da2d 100644
---- a/drivers/firmware/efi/libstub/efi-stub.c
-+++ b/drivers/firmware/efi/libstub/efi-stub.c
-@@ -79,8 +79,8 @@ static struct sysfb_display_info *setup_primary_display(void)
- 
- static void install_memreserve_table(void)
- {
-+	static efi_guid_t memreserve_table_guid = LINUX_EFI_MEMRESERVE_TABLE_GUID;
- 	struct linux_efi_memreserve *rsv;
--	efi_guid_t memreserve_table_guid = LINUX_EFI_MEMRESERVE_TABLE_GUID;
- 	efi_status_t status;
- 
- 	status = efi_bs_call(allocate_pool, EFI_LOADER_DATA, sizeof(*rsv),
 diff --git a/drivers/firmware/efi/libstub/file.c b/drivers/firmware/efi/libstub/file.c
-index bd626d55dcbc..0dff9e08d49e 100644
+index 0dff9e08d49e..b2601e284695 100644
 --- a/drivers/firmware/efi/libstub/file.c
 +++ b/drivers/firmware/efi/libstub/file.c
-@@ -39,7 +39,7 @@ static efi_status_t efi_open_file(efi_file_protocol_t *volume,
- 				  efi_file_protocol_t **handle,
- 				  unsigned long *file_size)
- {
--	efi_guid_t info_guid = EFI_FILE_INFO_ID;
-+	static efi_guid_t info_guid = EFI_FILE_INFO_ID;
- 	efi_file_protocol_t *fh;
- 	unsigned long info_sz;
- 	efi_status_t status;
-@@ -74,7 +74,7 @@ static efi_status_t efi_open_file(efi_file_protocol_t *volume,
+@@ -29,6 +29,8 @@
+  */
+ #define EFI_READ_CHUNK_SIZE	SZ_1M
+ 
++static efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
++
+ struct finfo {
+ 	efi_file_info_t info;
+ 	efi_char16_t	filename[MAX_FILENAME_SIZE];
+@@ -74,7 +76,6 @@ static efi_status_t efi_open_file(efi_file_protocol_t *volume,
  static efi_status_t efi_open_volume(efi_loaded_image_t *image,
  				    efi_file_protocol_t **fh)
  {
--	efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
-+	static efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
+-	static efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
  	efi_simple_file_system_protocol_t *io;
  	efi_status_t status;
  
-@@ -128,9 +128,9 @@ static int find_file_option(const efi_char16_t *cmdline, int cmdline_len,
- static efi_status_t efi_open_device_path(efi_file_protocol_t **volume,
+@@ -129,7 +130,6 @@ static efi_status_t efi_open_device_path(efi_file_protocol_t **volume,
  					 struct finfo *fi)
  {
--	efi_guid_t text_to_dp_guid = EFI_DEVICE_PATH_FROM_TEXT_PROTOCOL_GUID;
-+	static efi_guid_t text_to_dp_guid = EFI_DEVICE_PATH_FROM_TEXT_PROTOCOL_GUID;
-+	static efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
+ 	static efi_guid_t text_to_dp_guid = EFI_DEVICE_PATH_FROM_TEXT_PROTOCOL_GUID;
+-	static efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
  	static efi_device_path_from_text_protocol_t *text_to_dp = NULL;
--	efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
  	efi_device_path_protocol_t *initrd_dp;
  	efi_simple_file_system_protocol_t *io;
- 	struct efi_file_path_dev_path *fpath;
-diff --git a/drivers/firmware/efi/libstub/kaslr.c b/drivers/firmware/efi/libstub/kaslr.c
-index 4bc963e999eb..f5074656457a 100644
---- a/drivers/firmware/efi/libstub/kaslr.c
-+++ b/drivers/firmware/efi/libstub/kaslr.c
-@@ -18,7 +18,7 @@
-  */
- u32 efi_kaslr_get_phys_seed(efi_handle_t image_handle)
- {
--	efi_guid_t li_fixed_proto = LINUX_EFI_LOADED_IMAGE_FIXED_GUID;
-+	static efi_guid_t li_fixed_proto = LINUX_EFI_LOADED_IMAGE_FIXED_GUID;
- 	void *p;
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index acc2827ba4d7..fa324d4abcaa 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -24,6 +24,8 @@ enum efi_cmdline_option {
+ 	EFI_CMDLINE_LIST
+ };
  
- 	if (!IS_ENABLED(CONFIG_RANDOMIZE_BASE))
-diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
-index 59f3f83de50c..fec561e3a792 100644
---- a/drivers/firmware/efi/libstub/mem.c
-+++ b/drivers/firmware/efi/libstub/mem.c
-@@ -20,10 +20,10 @@
- efi_status_t efi_get_memory_map(struct efi_boot_memmap **map,
- 				bool install_cfg_tbl)
++static efi_guid_t graphics_output_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
++
+ static struct {
+ 	enum efi_cmdline_option option;
+ 	union {
+@@ -425,7 +427,6 @@ static void setup_edid_info(struct edid_info *edid, u32 gop_size_of_edid, u8 *go
+ static efi_handle_t find_handle_with_primary_gop(unsigned long num, const efi_handle_t handles[],
+ 						 efi_graphics_output_protocol_t **found_gop)
  {
-+	static efi_guid_t tbl_guid = LINUX_EFI_BOOT_MEMMAP_GUID;
- 	struct efi_boot_memmap tmp, *m __free(efi_pool) = NULL;
- 	int memtype = install_cfg_tbl ? EFI_ACPI_RECLAIM_MEMORY
- 				      : EFI_LOADER_DATA;
--	efi_guid_t tbl_guid = LINUX_EFI_BOOT_MEMMAP_GUID;
- 	efi_status_t status;
- 	unsigned long size;
+-	static efi_guid_t graphics_output_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+ 	static efi_guid_t console_out_device_guid = EFI_CONSOLE_OUT_DEVICE_GUID;
+ 	efi_graphics_output_protocol_t *first_gop;
+ 	efi_handle_t h, first_gop_handle;
+@@ -481,7 +482,6 @@ static efi_handle_t find_handle_with_primary_gop(unsigned long num, const efi_ha
  
-diff --git a/drivers/firmware/efi/libstub/pci.c b/drivers/firmware/efi/libstub/pci.c
-index 1dccf77958d3..5daa7a0a0e87 100644
---- a/drivers/firmware/efi/libstub/pci.c
-+++ b/drivers/firmware/efi/libstub/pci.c
-@@ -15,7 +15,7 @@
- 
- void efi_pci_disable_bridge_busmaster(void)
+ efi_status_t efi_setup_graphics(struct screen_info *si, struct edid_info *edid)
  {
--	efi_guid_t pci_proto = EFI_PCI_IO_PROTOCOL_GUID;
-+	static efi_guid_t pci_proto = EFI_PCI_IO_PROTOCOL_GUID;
- 	efi_handle_t *pci_handle __free(efi_pool) = NULL;
- 	unsigned long pci_handle_num;
- 	efi_handle_t handle;
+-	static efi_guid_t graphics_output_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+ 	static efi_guid_t edid_active_guid = EFI_EDID_ACTIVE_PROTOCOL_GUID;
+ 	static efi_guid_t edid_discovered_guid = EFI_EDID_DISCOVERED_PROTOCOL_GUID;
+ 	efi_handle_t *handles __free(efi_pool) = NULL;
 diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 7109b8a2dcba..3ca230fa7aa3 100644
+index 3ca230fa7aa3..d63262d36e47 100644
 --- a/drivers/firmware/efi/libstub/random.c
 +++ b/drivers/firmware/efi/libstub/random.c
-@@ -38,7 +38,7 @@ union efi_rng_protocol {
+@@ -8,6 +8,8 @@
+ 
+ #include "efistub.h"
+ 
++static efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
++
+ typedef union efi_rng_protocol efi_rng_protocol_t;
+ 
+ union efi_rng_protocol {
+@@ -38,7 +40,6 @@ union efi_rng_protocol {
   */
  efi_status_t efi_get_random_bytes(unsigned long size, u8 *out)
  {
--	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
-+	static efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
+-	static efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
  	efi_status_t status;
  	efi_rng_protocol_t *rng = NULL;
  
-@@ -64,9 +64,9 @@ efi_status_t efi_get_random_bytes(unsigned long size, u8 *out)
+@@ -64,7 +65,6 @@ efi_status_t efi_get_random_bytes(unsigned long size, u8 *out)
   */
  efi_status_t efi_random_get_seed(void)
  {
--	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
--	efi_guid_t rng_algo_raw = EFI_RNG_ALGORITHM_RAW;
--	efi_guid_t rng_table_guid = LINUX_EFI_RANDOM_SEED_TABLE_GUID;
-+	static efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
-+	static efi_guid_t rng_algo_raw = EFI_RNG_ALGORITHM_RAW;
-+	static efi_guid_t rng_table_guid = LINUX_EFI_RANDOM_SEED_TABLE_GUID;
+-	static efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
+ 	static efi_guid_t rng_algo_raw = EFI_RNG_ALGORITHM_RAW;
+ 	static efi_guid_t rng_table_guid = LINUX_EFI_RANDOM_SEED_TABLE_GUID;
  	struct linux_efi_random_seed *prev_seed, *seed = NULL;
- 	int prev_seed_size = 0, seed_size = EFI_RANDOM_SEED_SIZE;
- 	unsigned long nv_seed_size = 0, offset = 0;
-diff --git a/drivers/firmware/efi/libstub/riscv.c b/drivers/firmware/efi/libstub/riscv.c
-index f66f33ceb99e..49db47c05bfe 100644
---- a/drivers/firmware/efi/libstub/riscv.c
-+++ b/drivers/firmware/efi/libstub/riscv.c
-@@ -45,7 +45,7 @@ static int get_boot_hartid_from_fdt(void)
- 
- static efi_status_t get_boot_hartid_from_efi(void)
- {
--	efi_guid_t boot_protocol_guid = RISCV_EFI_BOOT_PROTOCOL_GUID;
-+	static efi_guid_t boot_protocol_guid = RISCV_EFI_BOOT_PROTOCOL_GUID;
- 	struct riscv_efi_boot_protocol *boot_protocol;
- 	efi_status_t status;
- 
-diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
-index a5c6c4f163fc..73f001114732 100644
---- a/drivers/firmware/efi/libstub/tpm.c
-+++ b/drivers/firmware/efi/libstub/tpm.c
-@@ -28,8 +28,8 @@ static const efi_char16_t efi_MemoryOverWriteRequest_name[] =
-  */
- void efi_enable_reset_attack_mitigation(void)
- {
-+	static efi_guid_t var_guid = MEMORY_ONLY_RESET_CONTROL_GUID;
- 	u8 val = 1;
--	efi_guid_t var_guid = MEMORY_ONLY_RESET_CONTROL_GUID;
- 	efi_status_t status;
- 	unsigned long datasize = 0;
- 
-@@ -52,7 +52,7 @@ static void efi_retrieve_tcg2_eventlog(int version, efi_physical_addr_t log_loca
- 				       efi_bool_t truncated,
- 				       struct efi_tcg2_final_events_table *final_events_table)
- {
--	efi_guid_t linux_eventlog_guid = LINUX_EFI_TPM_EVENT_LOG_GUID;
-+	static efi_guid_t linux_eventlog_guid = LINUX_EFI_TPM_EVENT_LOG_GUID;
- 	efi_status_t status;
- 	struct linux_efi_tpm_eventlog *log_tbl = NULL;
- 	unsigned long first_entry_addr, last_entry_addr;
-@@ -150,9 +150,9 @@ static void efi_retrieve_tcg2_eventlog(int version, efi_physical_addr_t log_loca
- 
- void efi_retrieve_eventlog(void)
- {
-+	static efi_guid_t tpm2_guid = EFI_TCG2_PROTOCOL_GUID;
- 	struct efi_tcg2_final_events_table *final_events_table = NULL;
- 	efi_physical_addr_t log_location = 0, log_last_entry = 0;
--	efi_guid_t tpm2_guid = EFI_TCG2_PROTOCOL_GUID;
- 	int version = EFI_TCG2_EVENT_LOG_FORMAT_TCG_2;
- 	efi_tcg2_protocol_t *tpm2 = NULL;
- 	efi_bool_t truncated;
-@@ -173,7 +173,7 @@ void efi_retrieve_eventlog(void)
- 				get_efi_config_table(EFI_TCG2_FINAL_EVENTS_TABLE_GUID);
- 		}
- 	} else {
--		efi_guid_t cc_guid = EFI_CC_MEASUREMENT_PROTOCOL_GUID;
-+		static efi_guid_t cc_guid = EFI_CC_MEASUREMENT_PROTOCOL_GUID;
- 		efi_cc_protocol_t *cc = NULL;
- 
- 		status = efi_bs_call(locate_protocol, &cc_guid, NULL, (void **)&cc);
-diff --git a/drivers/firmware/efi/libstub/unaccepted_memory.c b/drivers/firmware/efi/libstub/unaccepted_memory.c
-index 757dbe734a47..2a7eac7fef86 100644
---- a/drivers/firmware/efi/libstub/unaccepted_memory.c
-+++ b/drivers/firmware/efi/libstub/unaccepted_memory.c
-@@ -9,7 +9,7 @@ struct efi_unaccepted_memory *unaccepted_table;
- efi_status_t allocate_unaccepted_bitmap(__u32 nr_desc,
- 					struct efi_boot_memmap *map)
- {
--	efi_guid_t unaccepted_table_guid = LINUX_EFI_UNACCEPTED_MEM_TABLE_GUID;
-+	static efi_guid_t unaccepted_table_guid = LINUX_EFI_UNACCEPTED_MEM_TABLE_GUID;
- 	u64 unaccepted_start = ULLONG_MAX, unaccepted_end = 0, bitmap_size;
- 	efi_status_t status;
- 	int i;
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index cb0abe13a6c4..0bae0f06b676 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -114,9 +114,9 @@ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
-  */
- static void setup_efi_pci(struct boot_params *params)
- {
-+	static efi_guid_t pci_proto = EFI_PCI_IO_PROTOCOL_GUID;
- 	efi_status_t status;
- 	efi_handle_t *pci_handle __free(efi_pool) = NULL;
--	efi_guid_t pci_proto = EFI_PCI_IO_PROTOCOL_GUID;
- 	struct setup_data *data;
- 	unsigned long num;
- 	efi_handle_t h;
-@@ -155,7 +155,7 @@ static void setup_efi_pci(struct boot_params *params)
- 
- static void retrieve_apple_device_properties(struct boot_params *boot_params)
- {
--	efi_guid_t guid = APPLE_PROPERTIES_PROTOCOL_GUID;
-+	static efi_guid_t guid = APPLE_PROPERTIES_PROTOCOL_GUID;
- 	struct setup_data *data, *new;
- 	efi_status_t status;
- 	u32 size = 0;
-@@ -445,7 +445,7 @@ efi_status_t efi_adjust_memory_range_protection(unsigned long start,
- 
- static void setup_unaccepted_memory(void)
- {
--	efi_guid_t mem_acceptance_proto = OVMF_SEV_MEMORY_ACCEPTANCE_PROTOCOL_GUID;
-+	static efi_guid_t mem_acceptance_proto = OVMF_SEV_MEMORY_ACCEPTANCE_PROTOCOL_GUID;
- 	sev_memory_acceptance_protocol_t *proto;
- 	efi_status_t status;
- 
-@@ -508,7 +508,7 @@ static void __noreturn efi_exit(efi_handle_t handle, efi_status_t status)
- static efi_status_t efi_allocate_bootparams(efi_handle_t handle,
- 					    struct boot_params **bp)
- {
--	efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
-+	static efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
- 	struct boot_params *boot_params;
- 	struct setup_header *hdr;
- 	efi_status_t status;
-@@ -915,7 +915,7 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- 			       struct boot_params *boot_params)
- 
- {
--	efi_guid_t guid = EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID;
-+	static efi_guid_t guid = EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID;
- 	const struct linux_efi_initrd *initrd = NULL;
- 	unsigned long kernel_entry;
- 	struct setup_header *hdr;
 
 -- 
 2.55.0
