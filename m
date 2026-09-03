@@ -1,110 +1,142 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 251054B049C;
-	Thu,  3 Sep 2026 14:35:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06161348C6E;
+	Thu,  3 Sep 2026 16:26:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788446129; cv=none; b=ZVtrcBgGeZV6lxby3sQdoYXbNwV/VZS6Def2XYw4d0X4Cn5k4eicPczrD00C4gmtpVuFlXOU7bEhQY4bFrFw1Ep7A8fO5SBPIxRu5+7WGLhPm9BNOxefuDBfueyVrAwKr7IMV9dMGMIm+7x2mnUEXV37ozQC6lE+gGxhmqXZ7zY=
+	t=1788452785; cv=none; b=gGGzKn6P7MClAEcEvBXF+2oyOEgiVqr4V8Hj1hcIm4dGzEdhZXoQHLQPAlU5kr5Wj/mVmyGKB2tbNapyNXLzuUvOnAkXWlHKrPsqquErMhUNmx066StSDzvtbckn9ncD79o1o/tKL9hzoOEEHUYd6UWCmN8eWN52XxCEbdBxdK0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788446129; c=relaxed/simple;
-	bh=zW5X/BlVew3gtfkgd5wsBqPi9i4JuzpFq61XhHXYaC8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=a2JUN0H55XujtdgiAu6PpQcnV7QyhaBpyk453uPeAs+v454FVmIlyxjiKpfLDv1VYPhrZ2viasFI8ZakPj4II8VKCFMBTkiZQHJfx6by+XqKlCUOGu06T54QwQJXJ2jA+Y1Clsh6dLsVrLGFxhkGvI4H0bnlt8HbbsQaFToinfI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=LtKb0+Tz; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+	s=arc-20240116; t=1788452785; c=relaxed/simple;
+	bh=FTN85+wh6Pdn0k0De7Y3v0wgVKMDrH7hi/h5YG7U70A=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=ltUGxtXgUM1bN13f2ylaO/HwN7ey7kdWQ6EvKaz6d9ZNrtZYCstKxzXVLNVDPCDtwFs3m8PM1xvsDm/JDoE7IrRYxTGpZZMv9HgaJOoV3haAXFbebVMecr9ogj07FW37qkYnPOuVbgW1S0WdIOI4Bn9hEJOy36PN/85XAMFcWXM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BesfQ5/m; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="LtKb0+Tz"
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 3FD451596;
-	Thu,  3 Sep 2026 07:35:17 -0700 (PDT)
-Received: from e129823.arm.com (e129823.arm.com [10.2.213.3])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id C549B3F673;
-	Thu,  3 Sep 2026 07:35:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1788446121; bh=zW5X/BlVew3gtfkgd5wsBqPi9i4JuzpFq61XhHXYaC8=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=LtKb0+Tzhm19dgk0V5d3SADRfaHjnLN4CAyIIsVgP2jMB1EejyikYV3Ry6KxjvxEu
-	 Pr/x5BuJvbzBqk4qDR0mo3p1rx7Zy0HlGNgg+81ZGXI7R8iXErFPLx1sBP4jAc3+f0
-	 LZzBTWS3Vy+Q7OlWE1iPSChRXtPWRcadAdjDON3A=
-Date: Thu, 3 Sep 2026 15:35:17 +0100
-From: Yeoreum Yun <yeoreum.yun@arm.com>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: Yeoreum Yun <yeoreum.yun@arm.com>, linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Breno Leitao <leitao@debian.org>,
-	"sami.mujawar@arm.com" <Sami.Mujawar@arm.com>
-Subject: Re: [PATCH] firmware: efi: add a separate timeout for UpdateCapsule()
-Message-ID: <apmFpUvkRBgMdOH2@e129823.arm.com>
-References: <20260903113238.2291844-1-yeoreum.yun@arm.com>
- <960e985e-b338-4648-a29b-1f8a31e00599@app.fastmail.com>
- <apl_29t7Jxr2mv9C@e129823.arm.com>
- <44097058-9fdc-4e9f-a277-d63e3876b035@app.fastmail.com>
- <23ce2fb0-1002-409f-bb84-f592db9d0b89@app.fastmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BesfQ5/m"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 269911F000E9;
+	Thu,  3 Sep 2026 16:26:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788452783;
+	bh=Yklku70u8AEdfLgrIe06VUjsn48xfAtvDjV3kRMaOPc=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=BesfQ5/mUpvGx3f+5eEtnewfGkXq60IW2E7K8lGAqDntWpvphQ+1dpFUL1T4N7ZLw
+	 WtmmxSkCKv5vuExm2oFDDjhbgBaBFNGh8Msdb9AwAAl6dz9CNM8wmycJpaCFB2CohK
+	 B9/N5m+Ti5EigTEERBbSnH9jqMuwM82/6d7qcxDuUDX9eYOudRJIPzU2c8SVwel+2D
+	 0phIgmgO88ljgkKMm2xbXd2DkKS2ROPqORhMlx6xfgUn0q4pAIcNQqWpIEi79K4n1R
+	 X/nXhmP9qwHJllhWSBTSTUvREa+Coq8wP6pWSCp8iSybho7RIquD9R2XYNbEJ22Ktm
+	 5zU3fmtRl8eDw==
+Message-ID: <acdf2acc-a1a7-4a02-8924-4605e0d929b0@kernel.org>
+Date: Thu, 3 Sep 2026 18:26:18 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <23ce2fb0-1002-409f-bb84-f592db9d0b89@app.fastmail.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH RFC 0/6] PSCI-via-EFI to support firmware and kernel
+ sharing EL2 for Apple Silicon
+To: Ard Biesheuvel <ardb@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
+ Lorenzo Pieralisi <lpieralisi@kernel.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
+ Sudeep Holla <sudeep.holla@kernel.org>, Janne Grunau <j@jannau.net>,
+ Neal Gompa <neal@gompa.dev>
+Cc: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+ asahi@lists.linux.dev
+References: <20260708-efi-psci-v1-0-9efb3abf0e4c@kernel.org>
+ <9c53cfd7-e193-4441-83ca-7710060225b7@app.fastmail.com>
+Content-Language: en-US
+From: Sven Peter <sven@kernel.org>
+In-Reply-To: <9c53cfd7-e193-4441-83ca-7710060225b7@app.fastmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-> On Thu, 3 Sep 2026, at 16:29, Ard Biesheuvel wrote:
-> > On Thu, 3 Sep 2026, at 16:10, Yeoreum Yun wrote:
-> >> Hi Ard,
-> >>
-> >>> Hello Yeoreum Yun,
-> >>> 
-> >>> On Thu, 3 Sep 2026, at 13:32, Yeoreum Yun wrote:
-> >>> > On platforms that allows to update firmware in runtime, UpdateCapsule()
-> >>> > may immediately write a firmware image to persistent storage.
-> >>> > This operation can take longer than EFI_RTS_TIMEOUT.
-> >>> >
-> >>> > Use a separate timeout for the UpdateCapsule() runtime service. By
-> >>> > default, wait indefinitely to avoid interrupting an ongoing firmware
-> >>> > update. Administrators may configure an appropriate timeout, in seconds,
-> >>> > through /sys/firmware/efi/capsule_update_timeout.
-> >>> >
-> >>> > Signed-off-by: Yeoreum Yun <yeoreum.yun@arm.com>
-> >>> > ---
-> >>> >  drivers/firmware/efi/efi.c              | 41 +++++++++++++++++++++++++
-> >>> >  drivers/firmware/efi/runtime-wrappers.c | 14 +++------
-> >>> >  include/linux/efi.h                     | 10 ++++++
-> >>> >  3 files changed, 55 insertions(+), 10 deletions(-)
-> >>> >
-> >>> 
-> >>> Given that UpdateCapsule() is rarely used these days at runtime, I
-> >>> wonder if we should just call it synchronously instead of via the
-> >>> EFI workqueue.
-> >>> 
-> >>> I assume that would also solve the timeout issue?
-> >>
-> >> Might be. But it would make *non-preemptible* for UpdateCapsule().
-> >> AFAIK the purpose of running runtime service with efi_queue to
-> >> run it in indepdent context and to be preemtible in case of arm64.
-> >>
-> >
-> > No.
-> >
-> >> Since most of UpdateCapsule() will be called via capsule-loader's misc
-> >> device, if UpdateCaspule() is called synchronously, It would be
-> >> non-preemtible in arm64 platform.
-> >>
-> >> But, some platform could be preemptible while updating firmware so
-> >> I think it would be better that it would be called via EFI workqueue.
-> >>
-> >
-> > EFI runtime service invocations are preemptible on arm64, so this is
-> > not a problem.
+Hi Ard,
+
+On 03.09.26 13:34, Ard Biesheuvel wrote:
+> Hi Sven,
 > 
-> Ah wait - you're right, they are only preemptible when invoked from the
-> work queue.
+> On Wed, 8 Jul 2026, at 09:15, Sven Peter wrote:
+>> Hi,
+>>
+>> Usually, idle and sleep state are implemented in firmware running in
+>> e.g. EL3 with the kernel trapping into that from EL2. Unfortunately,
+>> there's no EL3 on Apple Silicon machines and we'd rather not run the
+>> kernel in EL1 since this would result in losing KVM support.
+>>
+>> While the shallower states could be implemented inside a custom cpuidle
+>> driver (like we do downstream, see [1]) the deeper states result in a
+>> complete loss of state and require bootstraping the cores again which is
+>> quite involved. So instead we need some way to call back into our
+>> open-source firmware to be able to handle that. This is even more
+>> important for M4+ which don't even support the architectural wfi anymore
+>> and always lose state when that instruction is executed.
+>>
+>> Luckily, EFI runtime services provide much of scaffolding we need,
+>> namely a way to keep some code and data mapped and the ability to jump
+>> into there from inside the kernel.
+>>
+>> This series adds a custom EFI table that points to a PSCI entry point
+>> (plus some other stuff that has to be available before EFI runtime
+>> services are set up) and adds support for this new conduit to the psci
+>> code. We can't directly use the normal EFI runtime path because that one
+>> takes a sleeping lock and we need to be able to call into PSCI from
+>> atomic context during e.g. cpu bringup or during idle.
+>> It also adds support for specifying the specific MAIR attributes for EFI
+>> runtime mappings as defined in the latest UEFI spec since Apple Silicon
+>> is rather allergic to using Device-nGnRnE vs. Device-nGnRE for its MMIO.
+>>
+>> This all results in a surprisingly small diffstat. I believe this
+>> approach was originally suggested in some IRC discussion years ago,
+>> possibly by Ard, but I can't find the old logs anymore.
+>> Happy to add a Suggested-by tag though if anyone remembers.
+>>
+>> The firmware implementation I used for testing can be found at [2] and
+>> the full kernel tree with this series applied at [3].
+>>
+>> Best,
+>>
+>> Sven
+>>
+>> [1]
+>> https://github.com/AsahiLinux/linux/blob/asahi/drivers/cpuidle/cpuidle-apple.c
+>> [2] https://github.com/AsahiLinux/m1n1/tree/psci-via-efi
+>> [3]
+>> https://git.kernel.org/pub/scm/linux/kernel/git/sven/linux.git/log/?h=efi-psci
+>>
+>> Signed-off-by: Sven Peter <sven@kernel.org>
+>> ---
+>> Sven Peter (6):
+>>        dt-bindings: arm: psci: Add EFI conduit
+>>        arm64/efi: Add and parse custom PSCI EFI configuration table
+>>        efi: Add EFI_MEMORY_ISA_{MASK,VALID}
+>>        arm64/efi: Honor EFI_MEMORY_ISA_MASK for Device-nGnRnE vs -nGnRE
+>>        firmware/psci: Add EFI runtime conduit
+>>        arm64: dts: apple: t8103: Add PSCI and CPU idle states
+>>
+> 
+> I've picked up patches #3 and #4, which are useful in their own right.
 
-Yes. That's why I think it would be better to call via EFI workqueue
-when I see arch_efi_call_virt_setup().
+thanks, I think i had a fixup for one of those in my local v2. I'll 
+check and send it as a separate patch if it was important.
 
--- 
-Sincerely,
-Yeoreum Yun
+> 
+> I'm not sure if the arm64 maintainers will want to consider this, but
+> I think it's a reasonable compromise, as it puts the abstraction in
+> the right place.
+> 
+> I take it this will be contributed to u-boot if it gets accepted here?
+
+Yeah, that was my plan: First agree on something that can be accepted 
+into the kernel and then work on the rest of the boot chain. The current 
+code in m1n1 that sets up bare bones EFI tables is just a hack to proof 
+this all actually works.
+
+
+Sven
+
+
