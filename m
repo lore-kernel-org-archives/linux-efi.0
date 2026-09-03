@@ -1,169 +1,205 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 411F34EE849;
-	Thu,  3 Sep 2026 21:25:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF588448BB6
+	for <linux-efi@vger.kernel.org>; Thu,  3 Sep 2026 21:28:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788470739; cv=none; b=k6PSWL+Z/mL1QC1BWOJdXoiKReXEIDvSOcInKhAQKAnqrOFHwRTIWif3BrWgtm4VdGyGe056l3ocv80etA96qwfqgPcFZIZII3FYhYzMqOJD7lyvtcMAjhb5BO9JLqTKThPtgVXugpXo+I8n53SmKc0MWaeWPzlzEfQDizB9yNs=
+	t=1788470916; cv=none; b=Cfi2sLZLrJtM4yosuQ5xuEqF96oAEvNc1IwtexyvnZtK3DnTY+UkWS9aLsi72XDHq2rTwQP+Z5ch2i1bb6rMW4JO8HDDgupyoibZKs9UoRKQSndiZHdLWfONbUXqvpcukVHF1Tpu7bvZ4byZafTWQ0I/IY5LkSb2xhSP0cb5syI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788470739; c=relaxed/simple;
-	bh=VKodwoGsqZqFfJZ9ZPLgVu/Y5p034Al6RJg5ytdgpwg=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=BeFRj/wF6bzkVV4mvyP8OLupj5X7fpwLOrUhl7dL7Ajn31NHQUNfF6GUryBYhZHVBIiHgKVTvNCx2I71RKpRQFUL4jb4JNQCI6O0QORO0PVcObov7Ph3hf+o4RzDAyEIXygEQNzuXtToretiz6PSQdkn22DCkwwnF3xjNrXryY8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=G4bnJqzG; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788470916; c=relaxed/simple;
+	bh=nok8G7oxwUEBJDJKwyMkjMRptrnZ4yc3CBKyB4ujpZE=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=hFI1eKdf6XvXy8B0Hxz3mS9jGF+K/MSIFHt8CMXLRWMFxudp8zRaUC5knTVGgFcs7CnE6ruUxO+EV42ZCtmcx/BgJAq5obXEHGfXn1gYjSBPZf6+Grmr1Uk4d1TGWjq4oPs5UI5vvuBzsqcoZKayJB2Q3Y2+UJ5/COCXKFYL9/Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=epaPrEld; arc=none smtp.client-ip=209.85.128.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="G4bnJqzG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C1551F00A3E;
-	Thu,  3 Sep 2026 21:25:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788470736;
-	bh=JfAREg5nSpMGCnYkfgXywqxm+il2UeJxz2xj/ulmNA0=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=G4bnJqzGJVVsoTgpfQfHQvBHT39z7YN58I9Ludvkl8B1l0qa3wYGsKLAfHpqWjWSB
-	 yfTgjTHtNk1j306lvj0qdrYm2+I1Hxpd4RdW2xLuHdqLbmvGpUqODpJg6BmTF2WIDI
-	 PGr+HvjxhAYJ2boRlbehrOAG5qKebTWqV5N00K6/C7U7phWk8dndVfJ1/M2g1ulYM9
-	 N0BxhGN/3AAAXOh0ane9jCst9YZhnwr7gum2+7K1OKSV/a7GlnWNH7XSPmOMGzsLxb
-	 4djzuAo1CZS2Xr8ny3zr7ye1Ed93t4nXYUAA/kwkhYxXvJa5XIXbYdM2aO3y3hlumM
-	 VoJyV233ASTCg==
-From: Vincent Mailhol <mailhol@kernel.org>
-Date: Thu, 03 Sep 2026 23:25:17 +0200
-Subject: [PATCH 3/3] efi/libstub: factor shared static GUID variables
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="epaPrEld"
+Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-49b8ce9b733so3209925e9.1
+        for <linux-efi@vger.kernel.org>; Thu, 03 Sep 2026 14:28:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1788470913; x=1789075713; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:subject:cc:to:from:date:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=dWXttQx2iDCjHaH8p4UqIGs6d00YewL+6MGN7cegYBM=;
+        b=epaPrEldT9/kEWJ58yENBYKJmgWSMjhAA0ohEvKvodrR5MOWPdRmhrpDFlE0J5GzaS
+         dYPpkKy4KVc84KQq8q1AoVVZrXsorAPr1KNJNP8I6/zzeqXKnI69c9JuQVIUQ/oiSDsl
+         h996WkiQ3BdLEbwyifXy8+L655Vao1OS5HGSfjkthb7rkEhhXgOLrovuaHiTiO6hGtMV
+         9c9EuYi7NiS/WYpAimA59Z/BNtWeMeihqUNL2AnBDszkdebbEE5705n/gGHOH0wCzWcM
+         dPxP48YwiqFSmqfoy1tZtggSfRH01Fb8QlBtF848NVel3fRSLswlSRMo+KW0EovowSYZ
+         cX0w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788470913; x=1789075713;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=dWXttQx2iDCjHaH8p4UqIGs6d00YewL+6MGN7cegYBM=;
+        b=pHI7eMxODIKy0HLvsvZ16i/GagR45LkYn51xYXoSvXLwW/hrSuK5s4YyKjftgPoH91
+         3ud9ta3zZGFmhZ6KPB7uU030TQIYG+0Zh36DgJ1OnTOhJ07X6FbcjF71ufbODfe4q2cq
+         mqXbUzB8QkyfDF4hr6qGlQRAvmgLgcb1IvH1ZEIkEq4SShYqjVo4xF+oyjBfBmNtMdaF
+         FEYK9EDoNJCiz2DRkFbwJaPhCL5fw8pt61pzkm7k+wm625bRTN8ybyls3QIIJHoP9Q2a
+         dMrB5gmnmX0BcZGCvIZ+3KouzyoFlfaHLgbNlbJNgt7KHNRX8Bv+aqL0JhLTKK7Kh96f
+         NIOw==
+X-Forwarded-Encrypted: i=1; AKwUvBwac9nkz4ls5rvssojGgg/wnBmVNFmJPBvPcgAXZUI7vevL4Lrd0HJ003n6+MvLi+tiEjbVpKs7JNU=@vger.kernel.org
+X-Gm-Message-State: AFuF++mF0EWiQRL8/qAknhT/w9KOjDsBBeDwelrT9QuOgL8q3tXqbFtT
+	aKhstIsEvokaS5eySvSiANvuPqYscNIezwJx6pyGvSwCW3YLfCnJ4Whz
+X-Gm-Gg: AYBFou0awfZeyxW60reUAxUY9DrZpd+RDKDJBxBe2EtcYg48GL1+F04ncSw3X+QHJ4D
+	y9tOHhmV56WfXaTpMALa5tbO9p+61MUbGbOptQ/Nh2VoYjscwHPv7Oc/bouPdNZSquSmrP3PkDE
+	Kbidcgvn5uUiUsP1rYZGMQkvjzSAjxtgpWd5Fdq0Td60fMLExDdT3piCiHm+yTbr/6w6RgaY6kT
+	34KxIZtzBUHdsXKn6U9KqXse2ook/5qxiQO87kgN1zCDbflVmM1FEbyON7j46m69z81mpEYNord
+	3gArcRk5t6EHROxW/2+VKIXIMLWu7LF3OJOcKTwDqRns9b2C3FohCIReLa48Vr3shxK4c6EjQhp
+	v36lywmr0fpTsH6sISVWG0OGB18ETQQAnbPg2nNC5r6T3/8hBFNOPxiv/6BTpXF0y41P+/fYaqU
+	OXn5d72kFhDNl6JzjohA1D/8NWO+6pZ3GpVeiEJtaetVdNmj2zgmlnZcNvHJvKQjllIYuqEy17M
+	tTMgPIuuQUlFIYyMgvHclAhKqjyGgy6EyeNqjOKT4SWOZ/P
+X-Received: by 2002:a05:600c:3115:b0:49c:e1b5:b2bf with SMTP id 5b1f17b1804b1-49cf7f48645mr14077965e9.0.1788470912493;
+        Thu, 03 Sep 2026 14:28:32 -0700 (PDT)
+Received: from pumpkin (82-69-66-36.dsl.in-addr.zen.co.uk. [82.69.66.36])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49cee6023d6sm100551075e9.8.2026.09.03.14.28.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 03 Sep 2026 14:28:32 -0700 (PDT)
+Date: Thu, 3 Sep 2026 22:28:30 +0100
+From: David Laight <david.laight.linux@gmail.com>
+To: "Ard Biesheuvel" <ardb@kernel.org>
+Cc: "Jonggeun Park" <jakejgpark@gmail.com>, "Jeremy Kerr" <jk@ozlabs.org>,
+ "Kees Cook" <kees@kernel.org>, "Tony Luck" <tony.luck@intel.com>,
+ "Guilherme G. Piccoli" <gpiccoli@igalia.com>, "Ilias Apalodimas"
+ <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] efi: vars: commonize the 512-byte name buffer quirk
+Message-ID: <20260903222830.213089de@pumpkin>
+In-Reply-To: <5b13119c-105a-4197-8f5c-711acc47ac0c@app.fastmail.com>
+References: <20260815074844.1330-1-jakejgpark@gmail.com>
+	<20260903115516.32495-1-jakejgpark@gmail.com>
+	<5b13119c-105a-4197-8f5c-711acc47ac0c@app.fastmail.com>
+X-Mailer: Claws Mail 4.1.1 (GTK 3.24.38; arm-unknown-linux-gnueabihf)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260903-libstub_guid_cleanup-v1-3-06fcb6216975@kernel.org>
-References: <20260903-libstub_guid_cleanup-v1-0-06fcb6216975@kernel.org>
-In-Reply-To: <20260903-libstub_guid_cleanup-v1-0-06fcb6216975@kernel.org>
-To: Ard Biesheuvel <ardb@kernel.org>, 
- Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Vincent Mailhol <mailhol@kernel.org>
-X-Mailer: b4 0.16.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4558; i=mailhol@kernel.org;
- h=from:subject:message-id; bh=VKodwoGsqZqFfJZ9ZPLgVu/Y5p034Al6RJg5ytdgpwg=;
- b=owGbwMvMwCV2McXO4Xp97WbG02pJDFkzn57wSnlfs+H+Lb1JC99Ie1+KfPfhxtGfaxr2d/avu
- 7r/0q5+hY6JLAxiXAyWYoosy8o5uRU6Cr3DDv21hJnDygQyRFqkgQEIWBj4chPzSo10jPRMtQ31
- DIEMHSMGLk4BuK3nGf4X7nXNyu/V/O3Sz67M+VPvtcoOxfcn6/Oddj7YzKFZ097O8L9obkdz33k
- 9m+Vfdr04rFlU8Uv+Er+mzpp8H2PNgo6QKgYA
-X-Developer-Key: i=mailhol@kernel.org; a=openpgp;
- fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
 
-Some GUIDs are used several times in the same translation unit.
+On Thu, 03 Sep 2026 22:03:18 +0200
+"Ard Biesheuvel" <ardb@kernel.org> wrote:
 
-Factor the duplicated EFI_FILE_SYSTEM_GUID, EFI_RNG_PROTOCOL_GUID and
-EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID objects at file scope within their
-translation units. Leave the single-use GUID objects at function scope.
+> Thanks for respinning this.
+> 
+> Some additional thoughts below.
+> 
+> On Thu, 3 Sep 2026, at 13:55, Jonggeun Park wrote:
+> > Some old UEFI implementations reject GetNextVariableName() calls with
+> > a name buffer size larger than 512 bytes. Both efivar_init() and
+> > efi_pstore_read() open-code the same workaround of resetting the size
+> > to 512 on every iteration.
+> >
+> > Move this workaround into efivar_get_next_variable(), which keeps this
+> > quirk in one place, resolving the TODO in efi-pstore.c.
+> >
+> > No functional change intended.
+> >
+> > Signed-off-by: Jonggeun Park <jakejgpark@gmail.com>
+> > ---
+> > v2:
+> > - Move the workaround into the existing efivar_get_next_variable().
+> > ---
+> >  drivers/firmware/efi/efi-pstore.c | 10 ----------
+> >  drivers/firmware/efi/vars.c       |  7 +++++++
+> >  fs/efivarfs/vars.c                | 12 +-----------
+> >  3 files changed, 8 insertions(+), 21 deletions(-)
+> >
+> > diff --git a/drivers/firmware/efi/efi-pstore.c 
+> > b/drivers/firmware/efi/efi-pstore.c
+> > index a5db3534f..4f2594d08 100644
+> > --- a/drivers/firmware/efi/efi-pstore.c
+> > +++ b/drivers/firmware/efi/efi-pstore.c
+> > @@ -164,16 +164,6 @@ static ssize_t efi_pstore_read(struct 
+> > pstore_record *record)
+> >  	efi_status_t status;
+> > 
+> >  	for (;;) {
+> > -		/*
+> > -		 * A small set of old UEFI implementations reject sizes
+> > -		 * above a certain threshold, the lowest seen in the wild
+> > -		 * is 512.
+> > -		 *
+> > -		 * TODO: Commonize with the iteration implementation in
+> > -		 *       fs/efivarfs to keep all the quirks in one place.
+> > -		 */
+> > -		varname_size = 512;
+> > -
+> >  		/*
+> >  		 * If this is the first read() call in the pstore enumeration,
+> >  		 * varname will be the empty string, and the GetNextVariable()
+> > diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+> > index 3700e9869..0f95fc60d 100644
+> > --- a/drivers/firmware/efi/vars.c
+> > +++ b/drivers/firmware/efi/vars.c
+> > @@ -191,11 +191,18 @@ EXPORT_SYMBOL_NS_GPL(efivar_get_variable, 
+> > "EFIVAR");
+> >  /*
+> >   * efivar_get_next_variable() - enumerate the next name/vendor pair
+> >   *
+> > + * A small set of old UEFI implementations reject sizes above a certain
+> > + * threshold, the lowest seen in the wild is 512. Set the name buffer 
+> > size
+> > + * to 512 on each call.
+> > + *
+> >   * Must be called with efivars_lock held.
+> >   */
+> >  efi_status_t efivar_get_next_variable(unsigned long *name_size,
+> >  				      efi_char16_t *name, efi_guid_t *vendor)
+> >  {
+> > +	BUILD_BUG_ON(EFI_VAR_NAME_LEN < 512);
+> > +	*name_size = 512;
+> > +  
+> 
+> This should really be
+> 
+>   *name_size = min(*name_size, 512UL);
 
-For an x86_64 build with gcc 15.3.0, bloat-o-meter reports:
+You don't need the UL suffix.
 
-  add/remove: 0/0 grow/shrink: 0/3 up/down: 0/-48 (-48)
-  Function                                     old     new   delta
-  rng_proto                                     32      16     -16
-  graphics_output_guid                          32      16     -16
-  fs_proto                                      32      16     -16
-  Total: Before=28471, After=28423, chg -0.17%
-
-Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
----
- drivers/firmware/efi/libstub/file.c   | 4 ++--
- drivers/firmware/efi/libstub/gop.c    | 4 ++--
- drivers/firmware/efi/libstub/random.c | 4 ++--
- 3 files changed, 6 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/firmware/efi/libstub/file.c b/drivers/firmware/efi/libstub/file.c
-index 0dff9e08d49e..b2601e284695 100644
---- a/drivers/firmware/efi/libstub/file.c
-+++ b/drivers/firmware/efi/libstub/file.c
-@@ -29,6 +29,8 @@
-  */
- #define EFI_READ_CHUNK_SIZE	SZ_1M
- 
-+static efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
-+
- struct finfo {
- 	efi_file_info_t info;
- 	efi_char16_t	filename[MAX_FILENAME_SIZE];
-@@ -74,7 +76,6 @@ static efi_status_t efi_open_file(efi_file_protocol_t *volume,
- static efi_status_t efi_open_volume(efi_loaded_image_t *image,
- 				    efi_file_protocol_t **fh)
- {
--	static efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
- 	efi_simple_file_system_protocol_t *io;
- 	efi_status_t status;
- 
-@@ -129,7 +130,6 @@ static efi_status_t efi_open_device_path(efi_file_protocol_t **volume,
- 					 struct finfo *fi)
- {
- 	static efi_guid_t text_to_dp_guid = EFI_DEVICE_PATH_FROM_TEXT_PROTOCOL_GUID;
--	static efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
- 	static efi_device_path_from_text_protocol_t *text_to_dp = NULL;
- 	efi_device_path_protocol_t *initrd_dp;
- 	efi_simple_file_system_protocol_t *io;
-diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index acc2827ba4d7..fa324d4abcaa 100644
---- a/drivers/firmware/efi/libstub/gop.c
-+++ b/drivers/firmware/efi/libstub/gop.c
-@@ -24,6 +24,8 @@ enum efi_cmdline_option {
- 	EFI_CMDLINE_LIST
- };
- 
-+static efi_guid_t graphics_output_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
-+
- static struct {
- 	enum efi_cmdline_option option;
- 	union {
-@@ -425,7 +427,6 @@ static void setup_edid_info(struct edid_info *edid, u32 gop_size_of_edid, u8 *go
- static efi_handle_t find_handle_with_primary_gop(unsigned long num, const efi_handle_t handles[],
- 						 efi_graphics_output_protocol_t **found_gop)
- {
--	static efi_guid_t graphics_output_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
- 	static efi_guid_t console_out_device_guid = EFI_CONSOLE_OUT_DEVICE_GUID;
- 	efi_graphics_output_protocol_t *first_gop;
- 	efi_handle_t h, first_gop_handle;
-@@ -481,7 +482,6 @@ static efi_handle_t find_handle_with_primary_gop(unsigned long num, const efi_ha
- 
- efi_status_t efi_setup_graphics(struct screen_info *si, struct edid_info *edid)
- {
--	static efi_guid_t graphics_output_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
- 	static efi_guid_t edid_active_guid = EFI_EDID_ACTIVE_PROTOCOL_GUID;
- 	static efi_guid_t edid_discovered_guid = EFI_EDID_DISCOVERED_PROTOCOL_GUID;
- 	efi_handle_t *handles __free(efi_pool) = NULL;
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 3ca230fa7aa3..d63262d36e47 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -8,6 +8,8 @@
- 
- #include "efistub.h"
- 
-+static efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
-+
- typedef union efi_rng_protocol efi_rng_protocol_t;
- 
- union efi_rng_protocol {
-@@ -38,7 +40,6 @@ union efi_rng_protocol {
-  */
- efi_status_t efi_get_random_bytes(unsigned long size, u8 *out)
- {
--	static efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
- 	efi_status_t status;
- 	efi_rng_protocol_t *rng = NULL;
- 
-@@ -64,7 +65,6 @@ efi_status_t efi_get_random_bytes(unsigned long size, u8 *out)
-  */
- efi_status_t efi_random_get_seed(void)
- {
--	static efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
- 	static efi_guid_t rng_algo_raw = EFI_RNG_ALGORITHM_RAW;
- 	static efi_guid_t rng_table_guid = LINUX_EFI_RANDOM_SEED_TABLE_GUID;
- 	struct linux_efi_random_seed *prev_seed, *seed = NULL;
-
--- 
-2.55.0
+> 
+> so that a smaller buffer size provided by the caller is respected.
+> 
+> That also removes the need for the BUILD_BUG_ON().
+> 
+> No need to send a v3, I can fix that up when applying.
+> 
+> >  	return __efivars->ops->get_next_variable(name_size, name, vendor);
+> >  }
+> >  EXPORT_SYMBOL_NS_GPL(efivar_get_next_variable, "EFIVAR");
+> > diff --git a/fs/efivarfs/vars.c b/fs/efivarfs/vars.c
+> > index 6833c3d24..5a01833a6 100644
+> > --- a/fs/efivarfs/vars.c
+> > +++ b/fs/efivarfs/vars.c
+> > @@ -391,18 +391,8 @@ int efivar_init(int (*func)(efi_char16_t *, 
+> > efi_guid_t, unsigned long, void *),
+> >  	if (err)
+> >  		goto free;
+> > 
+> > -	/*
+> > -	 * A small set of old UEFI implementations reject sizes
+> > -	 * above a certain threshold, the lowest seen in the wild
+> > -	 * is 512.
+> > -	 */
+> > -
+> >  	do {
+> > -		variable_name_size = 512;
+> > -		BUILD_BUG_ON(EFI_VAR_NAME_LEN < 512);
+> > -
+> > -		status = efivar_get_next_variable(&variable_name_size,
+> > -						  variable_name,
+> > +		status = efivar_get_next_variable(&variable_name_size, variable_name,
+> >  						  &vendor_guid);
+> >  		switch (status) {
+> >  		case EFI_SUCCESS:
+> > -- 
+> > 2.43.0  
+> 
 
