@@ -1,137 +1,97 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D94143F0B0;
-	Wed,  2 Sep 2026 22:58:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F171D3F4859
+	for <linux-efi@vger.kernel.org>; Thu,  3 Sep 2026 09:27:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788389926; cv=none; b=rX7MqKm5fmAl+DIpMve6QDK48Rh2B8kDnsYpnplTwgfVm4UezE7fY+sQXNT/EfIRlzs+7hXU+p+q4H25oc2q5Vxsy0Xw3oKPV/i/SefYtB1YjUhSD7nPCBhRkkH6exT3NlXCL+RYAMgncY9FtNkXpYMtcuBKHDyxLAkSlpFT3HM=
+	t=1788427662; cv=none; b=MKGMQr3M2YddldkkNPnUhbUCFfLdlvCjlCdFCyfjpVmwzeGeCKIRi544ggEL8FrKB/ap94KOvhX50wTVHphhquPhQgnl39RdsA/xfvSSq1gtWvhUYHGw3XLeiTKn9wOdrm54PLnbBCuAJ1G1u0C5u1LwQt5LWbHtgRcX+YRugek=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788389926; c=relaxed/simple;
-	bh=NGROKAGJRcPSkbTlZMu6Ec3q9VqyOJY69b9PTEkaVgo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iercNTvZS7Uwnjw8Qk7Hr8Fwt+gkFd6ghcnKibwym+yn1jvULFBp70GzbBXKu1jB/cZM3b5hG02vWVpmaFRbROk0ByACqL/0GZV9VsSbdAa0uFlAsy5rsNukNBniKPv/VkzvRRjw5v8p8et72ib8UmglD3rnCLWYYJ68jECj/dc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ot0qqSw/; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788427662; c=relaxed/simple;
+	bh=XibIeOSWpX+DZUMfWBL2ZIv7odIeN1k1W89wv0bX3pw=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=GBF5Kp7rcXOTctGCGMzC/h8veke8mBt2EQmwr3K1dMDJa/DLS//nW4jhxK8AOv30TfNouQ7DawcNGxuyxYjkxMMoTfYQOdq8CjlqzhjQvg4SvSgWkxQ7GiNBy9xO7qarHoUd6htXmPyIHtaKgSxIaSOKmCOWLhwbAnWjP86x0CQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jENeiXHj; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ot0qqSw/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DAB21F00A3A;
-	Wed,  2 Sep 2026 22:58:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jENeiXHj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BE12F1F000E9
+	for <linux-efi@vger.kernel.org>; Thu,  3 Sep 2026 09:27:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788389917;
-	bh=aHfkXpE6IZqb/J2m9EKFTMgu8Bwmhk+NyTMlMZHfuZA=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=Ot0qqSw/9dHcLGTsrnMh0VD1VOJwhuy6KRdhSb4GZojS5Ky+r6X9feMjk2OT/JVns
-	 yoeGuvp0ooqgdqkO4kxcrArRhNi5NV8Z2qN3NA2neoOWex5T3/Q1o/TFVEgO6a6AAW
-	 zFt79XbqOLKpSRs/4LlH7k+QqxVhD7oPvxYyd2cAt+q0ONoKD62sxcbzUISnwSmQ/7
-	 t+k2y2qdZ1cB0qJy3WZBPczHb3n+cwF8NvTC2vWIID0c1U0vADE1dhV2Zyl1oqheFk
-	 kdDxMs5R4+UJGEbk6JEkb3z4d6RQr5seHMqBtwlEFJDV247OTQfESuqd3/yM4cUWit
-	 JWpF4km0oF5ig==
-Date: Wed, 2 Sep 2026 15:58:35 -0700
-From: Wei Liu <wei.liu@kernel.org>
-To: Thara Gopinath <tgopinath@linux.microsoft.com>
-Cc: Wei Liu <wei.liu@kernel.org>, kys@microsoft.com, haiyangz@microsoft.com,
-	decui@microsoft.com, tglx@kernel.org, mingo@redhat.com,
-	bp@alien8.de, dave.hansen@linux.intel.com, hpa@zytor.com,
-	ardb@kernel.org, ilias.apalodimas@linaro.org,
-	James.Bottomley@hansenpartnership.com, javierm@redhat.com,
-	lszubowi@redhat.com, francescopompo2@gmail.com,
-	tgopinath@microsoft.com, x86@kernel.org,
-	linux-hyperv@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-efi@vger.kernel.org,
-	Stanislav Kinsburskii <skinsburskii@linux.microsoft.com>
-Subject: Re: [RFC PATCH 07/12] drivers: hv: hv_vsm_boot: load secure kernel
- image from firmware
-Message-ID: <20260902225835.GA2896046@liuwe-devbox-debian-v2.local>
-References: <20260901165647.3160413-1-tgopinath@linux.microsoft.com>
- <20260901165647.3160413-8-tgopinath@linux.microsoft.com>
- <20260902043732.GF2583463@liuwe-devbox-debian-v2.local>
- <4d876bd8-3885-4d65-a272-d846ae0d7d3d@linux.microsoft.com>
+	s=k20260515; t=1788427651;
+	bh=BtmkQEYIOFuzftiSvZas/3kbN1nxqaqnvOyXFVrkfVc=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=jENeiXHj3DRFXgl2ZRELy7afmPNeyo3DjhxNjP5wd9qs3fLE/D6Inu4GshZqSnFrw
+	 HdrPU9HDW5Lj6Nj5X5NcUsVNwcaz46Yjjb+j7U8WZQhXo1bgYQ0NTdNN1RXJIO072t
+	 XzZqPYDi9N4s0GqVendIoC/r/WahKFEOzRUBy3NWaPBcVPKPApae5L0UeIZJM9EbSG
+	 vIctsKjq2/KxsBmF34xQFVj6ZNCYnC4svk2cHTkXwP8YWIXolsnEo0+J3pdaoXcyVV
+	 VZt2IYppZbLB5yjM531pD4lSFKHD+BeqZsfBYzUoGlxfgU1O947kQAGIgOPzlz08iP
+	 rAyObY9Y8L82Q==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 16595198003A;
+	Thu,  3 Sep 2026 05:27:29 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Thu, 03 Sep 2026 05:27:29 -0400
+X-ME-Sender: <xms:fz2Zau7MWLhU9XB3n9-UCZyIngv3xEW9_rMPD06pOh66gUt_pdKkCQ>
+    <xme:fz2Zaivp43AO6UhHwHM7cdQsmV6dbhRiRtY-0Zz3zqAmr5Gw_hBFLS0piY4S65Sly
+    A9wdnAdiSG7IXsUK9D7zpwbucAsukQ-Xd__h3hE9b_7Zls3OvHceAVm>
+X-ME-Proxy-Cause: dmFkZTEjoeUZn9fs8BThQtUPV37JxisngAiNk6D5zfV44WDVNbk+riElQkXZd2JYz4S3aY
+    tUjah9ZGtx8NSjfrokXlqZ43Stah8G10G33xApL4B2WDsUQ43jbwMUQG2haAv+mGjXhAau
+    def5Ce0/cX5RMLvrV51ucR5OADHlBKx9Ng0//XIv/ZwpAMlNmK0du/XzsXG62v2aO6sB3A
+    C6go7/sSLyHzd/8oehO/dthvXAqvriTyN0jhPIvUzC7Nu/oZc8FYbcnqQ1LRGk+8RUswdt
+    2ejftr4LCrlRXRJqofvyhl5hkoloUxkQ+5TL8xj5DOXTjL7GsLwNzRGZZQLwiU0jzpwwrk
+    3l3qh6lCp5w7guupLDOKQkUq+dMJqwYlCHvGFHo2rKBYqSMBwAw2HJNz2xAQnB/AbDWh9k
+    lX5G75adOotT7jPnDstNBJRjbIFMOFVscKp5zX1XsK/iRM04ZBcV5WxTwlET+I/BmMHwPq
+    Xja4Znh2lYwBQlgXT1fqSXZ6ytOdb+2bo8QN3d5uTIxAOVRUS/wwC0TW5pEPyqcJVHTy2S
+    HvuDisdTyMtb3GB2Xnxoqm+Om960+2CkPHj81bCjqG5DTiIInjR9rWzNZUzfTmrLLFTwxO
+    WNTIVza/Tz1u2cG+/7uxxjnq7QAaiwuT52MgXq8h1rQ1OiqgTutB1G4/dS7g
+X-ME-Proxy: <xmx:gT2ZaljFHd4K5eTf7k3R2Kh7oh8Jj7kUe_BWMrED4GVRai207x3ovQ>
+    <xmx:gT2ZaldksN2XN3sEZYsgZxbJ-r4HckkFpsNqXrzy4LrjzaH-G3NegQ>
+    <xmx:gT2Zaon2X1hE6gMx3EIhK-R_wMpuD7S9BqB7UZG445I_0KeA6ultsw>
+    <xmx:gT2Zauv00wdwnpkrTlVUuH_zT162ZzewTN7VAJv-ri2LyevIed75-g>
+    <xmx:gT2Zau_8APnDvDTk_x_tSdoygSpDI1e1idRCwXfGPh_QLWGYdAYtqmBu>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id C7C14F8007B; Thu,  3 Sep 2026 05:27:27 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <4d876bd8-3885-4d65-a272-d846ae0d7d3d@linux.microsoft.com>
+Date: Thu, 03 Sep 2026 11:27:06 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Danish Khateeb" <danishkhateeb03@gmail.com>
+Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Message-Id: <5c68db64-0647-40f3-b0ad-60aa24246b9b@app.fastmail.com>
+In-Reply-To: <20260902201340.70189-1-danishkhateeb03@gmail.com>
+References: <20260902201340.70189-1-danishkhateeb03@gmail.com>
+Subject: Re: [PATCH] efi/capsule: Replace kmap_atomic() with kmap_local_page()
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Wed, Sep 02, 2026 at 12:22:37PM -0400, Thara Gopinath wrote:
-> 
-> 
-> On 9/2/2026 12:37 AM, Wei Liu wrote:
-> > On Tue, Sep 01, 2026 at 09:55:21AM -0700, Thara Gopinath wrote:
-> >> LVBS bring-up requires loading a secure kernel image into VTL1 before
-> >> starting it. Add the VTL0-side loader that stages the image in the
-> >> memory region reserved by hv_vsm_securekernel, in preparation for the
-> >> VTL1 bring-up.
-> >>
-> >> The image is a 64-bit ELF fetched via request_firmware("vsm_sk"). It
-> >> is expected to ship inside the signed UKI/initramfs so it is
-> >> authenticated end-to-end via Secure Boot before the loader consumes
-> >> it; sourcing it from an unauthenticated location would break the LVBS
-> >> trust model.
-> >>
-> >> The loader validates the ELF header, stages the PT_LOAD segments into
-> >> the reserved region and records the entry point as a physical address
-> >> for use at VTL1 start time.
-> >>
-> >> If VSM support has been advertised to the hypervisor but no secure
-> >> kernel region was reserved on the command line, panic: LVBS bring-up
-> >> is committed at this point and there is no safe way to continue.
-> > 
-> > This conflicts with the memory reservation patch, in which there is an
-> > automatic allocation when no kernel command line is specified.
-> 
-> Ah no.. So securekernel= has to be specified in the command line for
-> __setup() to be invoked . It can be left blank without parameters like
-> securekernel= or with parameters like securekernel=256M@0x80000000. The
-> reservation logic will take care of reserving the correct memory if there
-> are no parameters but if there is no command line specified __setup will
-> not be  called. The other way of solving this and invoking the reservations
-> unconditionally will be to call it from setup_arch like how reserve_crashkernel
-> is invoked. I am not sure if we want to do that now ?? What do you think ?
-> 
 
-I see. No need to do that now. Let's see if others have opinions.
 
-Wei
+On Wed, 2 Sep 2026, at 22:13, Danish Khateeb wrote:
+> kmap_atomic() is deprecated in favour of kmap_local_page(), as described
+> in Documentation/mm/highmem.rst.
+>
+> The conversion is safe here: the mapping is created and torn down within a
+> single iteration of the sg_count loop, preserving the strict stack-based
+> ordering that kmap_local_page() requires, and the mapped region is only
+> written to, so neither pagefault_disable() nor preempt_disable() is needed.
+> The surrounding code already sleeps (it allocates the pages with
+> alloc_page(GFP_KERNEL) and later takes capsule_mutex), so there is no
+> atomic context to preserve.
+>
+> Build-tested only.
+>
+> Assisted-by: LLM sparse
+> Signed-off-by: Danish Khateeb <danishkhateeb03@gmail.com>
+> ---
+>  drivers/firmware/efi/capsule.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
 
-> But I will reword this and state that the panic happens if there is no
-> securekernel memory allocated (either because securekernel= was not
-> specified or because memory reservation itself failed)
-> 
-> > 
-> >>
-> >> Signed-off-by: Stanislav Kinsburskii <skinsburskii@linux.microsoft.com>
-> >> Signed-off-by: Thara Gopinath <tgopinath@linux.microsoft.com>
-> >> ---
-> >>  drivers/hv/hv_vsm.h      |  17 ++++
-> >>  drivers/hv/hv_vsm_boot.c | 201 ++++++++++++++++++++++++++++++++++++++-
-> >>  include/hyperv/vsm.h     |  21 ++++
-> >>  3 files changed, 238 insertions(+), 1 deletion(-)
-> >>  create mode 100644 drivers/hv/hv_vsm.h
-> >>  create mode 100644 include/hyperv/vsm.h
-> > [...]
-> >> +
-> >> +static void __init hv_vsm_get_sk_mem(void)
-> >> +{
-> >> +	/*
-> >> +	 * The reserved secure kernel region is mandatory once VSM support has
-> >> +	 * been advertised. Without it we cannot load the secure kernel and
-> >> +	 * bringing up VTL1 is impossible, so fail hard rather than continuing
-> >> +	 * in an unusable state.
-> >> +	 */
-> >> +	if (!sk_res.start)
-> >> +		panic("No memory reserved in cmdline for secure kernel");
-> >> +
-> > 
-> > This log line is wrong.
-> 
-> I will fix this 
-> 
-> Warm Regards
-> Thara
-> > 
-> > Wei
-> 
+Queued up in efi/next - thanks
