@@ -1,38 +1,38 @@
-Received: from mta0.migadu.com (out-86.mta0.migadu.com [91.218.175.86])
+Received: from mta0.migadu.com (out-122.mta0.migadu.com [91.218.175.122])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91C12281532
-	for <linux-efi@vger.kernel.org>; Fri,  4 Sep 2026 01:19:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.86
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF0E1254AFF
+	for <linux-efi@vger.kernel.org>; Fri,  4 Sep 2026 01:19:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.122
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788484742; cv=none; b=mwKenAq8wyy+3PPmI7dLTzfVP6sWQukMJk/k8MqwZEJwXqIdhTLUDiP3y4J+H5ALk43ERXEE29CQBa4vTRvjLY9hMwgAfd5wUrUY7wOBsX1f4FPA3e0MI3Zp4YGeLNp7/MOaoj1TweSQGwstltiVqS9FJRiICrybcT8zVyEWdbI=
+	t=1788484756; cv=none; b=Mqp0XjNypdWC0y5/It+miOHurr2uXS/zbN3OjqPtUN659nC/7Xxx7rCxHME3dN7snEN5X7Tsy2xlLsQiP1d1sBILrGHNjyAqcgpKQnA5oWmLWTVipOf6jU9M8dbOWrvGxRAjZGqC8TyQTqnCnryobkx/MO2rZN6qLRH0gCLG3fc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788484742; c=relaxed/simple;
-	bh=pX4mprltnCki1qpdruO6HrE63FIOiVDHWjIkL4K12d4=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=Ik5qSz1kepZVmom4YCDYe3w5//xbmxhoqfmwUDK+tSbtMCrI6u0zyltkHYpJ3uNv/YMbSrSAS2gbYBNL3L3aW9R1s5paMZAzrT3fiGDgfHarkhLTXiz4AJ1e+HXozO1iux+0Bb2LlRGoy2InhiVuOZyJeR4ZQ/Tf8BtTM8LODgQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=BEK4pVEd; arc=none smtp.client-ip=91.218.175.86
+	s=arc-20240116; t=1788484756; c=relaxed/simple;
+	bh=uVjDr7dZL7yoKSrQjhePnAihc0cTtyYDH0m68MNyVco=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=lZeHMJf4x7xlYC1OFo1x82GmCaH14NgAGT9JQkFXFnaS2ZB9PmP7bCSe9uEdLJmg+93UPcwLOr4G6VHvRn0XjEmCrbGKo5HX5tRqvO1JKajX/rwM71vBZfCPtnvO1iO/gv/L/BOmqQW4mgy19WvDqQ97fApqldrEFcyY+ydxy0E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=TCM+NeT2; arc=none smtp.client-ip=91.218.175.122
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="BEK4pVEd"
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="TCM+NeT2"
 X-Envelope-To: linux-efi@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=pX4mprltnCki1qpdruO6HrE63FIOiVDHWjIkL4K12d4=;
+DKIM-Signature: a=rsa-sha256; bh=uVjDr7dZL7yoKSrQjhePnAihc0cTtyYDH0m68MNyVco=;
  c=simple/simple; d=linux.dev;
  h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1788484738; v=1; x=1789089538;
- b=BEK4pVEdJDUrUtMGA2bmPS1aDXpdyB6cF0pmS3rHUNwetXLTOV/rFKmPG1K1DSyAbHzheowG
- 9jcFf3BxLQCrmy7/j86K7b+De6U3JSRHoTQme0kW0uW/or1eUEwWU5c7NPIaCms4FmCIG5MsLX0
- hQKu9vW/H4SQIXauQ0QA+NNk=
+ t=1788484752; v=1; x=1789089552;
+ b=TCM+NeT2+KyWgDd/U4By2gfp/3/qVfWDnP4DWVbRhS66XX7GA2k28Pgk1DEHru8egdLQLPU+
+ 0omXg/e6u16phqDsmNLUKV8PegxjXZNq3M6OjXo/8yxFBvz+WrOhGwkBnMWpUjCvEvGi9Rplc+G
+ +ICdQGlY1HecaonN+0RHIxEs=
 X-Envelope-To: linux-efi@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id 36c46a2b2cd0163d;
-	Fri, 04 Sep 2026 01:18:48 +0000
-X-Mizu-Trace-ID: 36c46a2b2cd0163d
+Received: by smtp.migadu.com with ESMTPS id ce60cf1ee74e60ff;
+	Fri, 04 Sep 2026 01:19:12 +0000
+X-Mizu-Trace-ID: ce60cf1ee74e60ff
 X-Migadu-Flow: FLOW_OUT
 From: "Jose Fernandez (Anthropic)" <jose.fernandez@linux.dev>
-Subject: [PATCH RFC 0/8] arm64: ftrace: support CALL_OPS on kernels built
- with kCFI
-Date: Fri, 04 Sep 2026 01:18:32 +0000
-Message-Id: <20260904-b4-arm64-callops-kcfi-v1-0-ce6687739b0c@linux.dev>
+Date: Fri, 04 Sep 2026 01:18:34 +0000
+Subject: [PATCH RFC 2/8] scripts/sorttable: Make the arm64 before_func
+ offset configurable
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -41,11 +41,9 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAGgcmmoC/2WNwQrCMBBEf6Xs2aVpCQG9Cn6A1+IhSTd2NaYhU
- RFK/92kHj3OY+bNApkSU4ZDs0CiN2eeQwndrgE76XAl5LFk6EWvxF5INBJ1eiiJVns/x4x36xi
- lEJ0iGqUzAso2JnL82bwDnE9HuPxgfpkb2Wc11prRmdAkHexUkY+tke0G/z9gXb90wKFvrgAAA
- A==
-X-Change-ID: 20260904-b4-arm64-callops-kcfi-40016eed4fb0
+Message-Id: <20260904-b4-arm64-callops-kcfi-v1-2-ce6687739b0c@linux.dev>
+References: <20260904-b4-arm64-callops-kcfi-v1-0-ce6687739b0c@linux.dev>
+In-Reply-To: <20260904-b4-arm64-callops-kcfi-v1-0-ce6687739b0c@linux.dev>
 To: Steven Rostedt <rostedt@goodmis.org>, 
  Masami Hiramatsu <mhiramat@kernel.org>, Mark Rutland <mark.rutland@arm.com>, 
  Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
@@ -85,104 +83,60 @@ Cc: Leon Hwang <leon.hwang@linux.dev>,
  "Jose Fernandez (Anthropic)" <jose.fernandez@linux.dev>
 X-Mailer: b4 0.15.2
 
-CALL_OPS and kCFI have been mutually exclusive on arm64 since commit
-baaf553d3bc3 ("arm64: Implement HAVE_DYNAMIC_FTRACE_WITH_CALL_OPS").
-kCFI checks the type hash at a fixed offset before the entry point, so
-every function needs the same number of prefix NOPs. Before clang 21 the
-compiler could not emit prefix NOPs without also adding the function to
-ftrace's table. Since commit 9315e22b0c0a ("arm64: ftrace: allow
-DIRECT_CALLS without CALL_OPS") a kCFI kernel can attach BPF
-trampolines. A trampoline out of BL range is reached through
-ftrace_caller. That path costs ~10 ns more per call than on a CALL_OPS
-kernel, plus ~4 ns for every extra ftrace_ops registered. Clang 21 takes
-a section name as a third argument of -fpatchable-function-entry [1].
-This series uses it to give every function three prefix NOPs while
-keeping untraced functions out of ftrace's table, and enables CALL_OPS
-under kCFI. The per-call cost drops by ~10 ns and stops growing with the
-number of ftrace_ops registered.
+sorttable hardcodes before_func to 8 bytes on arm64 (two prefix NOPs).
+Make it configurable from CONFIG_ARM64_FUNCTION_PREFIX_NOPS instead.
+kCFI kernels with CALL_OPS need three NOPs. The symbol does not exist
+yet, so no functional change.
 
-Patch 1 lets core ftrace skip a patch site the architecture rejects,
-which patch 4 relies on. Patch 2 takes the sorttable entry offset from
-Kconfig. Patch 3 lets notrace keep the prefix NOPs. Patch 4 makes the
-arm64 prefix layout configurable and refuses patch sites that do not
-fit. Patch 5 applies the prefix count where the type hash is emitted or
-read by hand. Patch 6 adds the compiler probe and enables CALL_OPS
-under CFI. Patch 7 uses five NOPs on ThinLTO kernels with BTI. Patch 8
-gives Rust functions the same prefix NOPs.
-
-The cost is text size, 4.8% of .text on a defconfig-based build with
-CFI and 7.4% with ThinLTO and BTI. CALL_OPS under CFI needs clang 21 or
-later, and Rust 1.98 or later with RUST=y. Commit d3359af21fc9e ("arm64:
-bti: Disable in-kernel BTI with recent versions of Clang") turns BTI
-off on clang 21 or later, so a mainline build has one or the other
-today. A module must be built with the same prefix count as its kernel,
-since vermagic does not carry the count.
-
-Numbers below are from a KVM guest on a Graviton4 host, v7.3-rc1 with
-and without this series, clang 21.1.4. Cost of a fentry program on a
-syscall, per call, the call with the program attached minus the call
-without it:
-
-  Kernel            | Trampoline   | Extra      || Per-call cost (ns)
-                    | vs. BL range | ftrace_ops || Median | Min  | Max
-  ==================+==============+============++========+======+======
-  kCFI, base        | out of range |          0 ||   32.9 | 32.6 | 33.4
-  kCFI, base        | out of range |         16 ||   92.6 | 92.4 | 96.3
-  kCFI, base        | in range     |          0 ||   21.3 | 21.0 | 21.8
-  ------------------+--------------+------------++--------+------+------
-  kCFI, this series | out of range |          0 ||   22.7 | 22.0 | 22.9
-  kCFI, this series | out of range |         16 ||   22.1 | 21.9 | 22.4
-  kCFI, this series | in range     |          0 ||   22.4 | 22.1 | 22.6
-  ------------------+--------------+------------++--------+------+------
-
-Mark Rutland discussed the uniform prefix with a section for untraced
-entries in 2022 [2]. His review of the DIRECT_CALLS series raised the
-cost of the ftrace_caller path [3]. Josh Poimboeuf's objtool support
-for arm64 livepatch [4] detects the prefix by the CALL_OPS layout and
-treats kCFI and CALL_OPS as never meeting, which this series changes.
-
-This is an RFC because it moves the kCFI type hash relative to the entry
-point on arm64 and every function carries the prefix NOPs. We would like
-the arm64 and CFI maintainers' view on that layout.
-
-[1] https://github.com/llvm/llvm-project/pull/131230
-[2] https://lore.kernel.org/all/Y1LBGZPMfCZ8A1bl@FVFF77S0Q05N/
-[3] https://lore.kernel.org/all/amjnf5gz0xP5PTSB@J2N7QTR9R3/
-[4] https://lore.kernel.org/all/cover.1786230311.git.jpoimboe@kernel.org/
-
+Reviewed-by: Ben Cressey <ben@cressey.dev>
+Reviewed-by: Florent Revest (Anthropic) <florent.revest@linux.dev>
+Assisted-by: LLM
+Signed-off-by: Jose Fernandez (Anthropic) <jose.fernandez@linux.dev>
 ---
-Jose Fernandez (Anthropic) (8):
-      ftrace: Let ftrace_call_adjust() reject a patch site
-      scripts/sorttable: Make the arm64 before_func offset configurable
-      compiler_types: Let notrace keep the function prefix NOPs
-      arm64: ftrace: Make the CALL_OPS prefix layout configurable
-      arm64: cfi: Use CONFIG_ARM64_FUNCTION_PREFIX_NOPS for the type hash offset
-      arm64: ftrace: Support CALL_OPS on kernels built with kCFI
-      arm64: ftrace: Use five prefix NOPs on ThinLTO kernels with BTI
-      arm64: ftrace: Allow CALL_OPS on kCFI kernels built with Rust
+ scripts/Makefile    | 3 +++
+ scripts/sorttable.c | 7 ++++++-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
 
- arch/arm64/Kconfig                    |  27 +++++++-
- arch/arm64/Makefile                   |  15 ++++-
- arch/arm64/include/asm/cfi.h          |   8 +++
- arch/arm64/include/asm/ftrace.h       |  16 +++++
- arch/arm64/include/asm/linkage.h      |  11 ++++
- arch/arm64/kernel/entry-ftrace.S      |  16 ++---
- arch/arm64/kernel/ftrace.c            | 120 +++++++++++++++++++---------------
- arch/arm64/kernel/pi/Makefile         |   2 +
- arch/arm64/kernel/vdso/Makefile       |   2 +-
- arch/arm64/net/bpf_jit_comp.c         |   8 ++-
- drivers/firmware/efi/libstub/Makefile |   2 +-
- include/linux/compiler_types.h        |   6 ++
- kernel/trace/ftrace.c                 |   4 ++
- rust/Makefile                         |   5 +-
- scripts/Makefile                      |   3 +
- scripts/sorttable.c                   |   7 +-
- 16 files changed, 185 insertions(+), 67 deletions(-)
----
-base-commit: cee9395acd8043be0644b25c34bfa86623f2b935
-change-id: 20260904-b4-arm64-callops-kcfi-40016eed4fb0
+diff --git a/scripts/Makefile b/scripts/Makefile
+index 3434a82a119f0..366c6a35141a6 100644
+--- a/scripts/Makefile
++++ b/scripts/Makefile
+@@ -51,6 +51,9 @@ endif
+ 
+ ifdef CONFIG_BUILDTIME_MCOUNT_SORT
+ HOSTCFLAGS_sorttable.o += -DMCOUNT_SORT_ENABLED
++ifneq ($(filter-out 0,$(CONFIG_ARM64_FUNCTION_PREFIX_NOPS)),)
++HOSTCFLAGS_sorttable.o += -DFUNCTION_PREFIX_BYTES=$(shell expr 4 \* $(CONFIG_ARM64_FUNCTION_PREFIX_NOPS))
++endif
+ endif
+ 
+ # The following programs are only built on demand
+diff --git a/scripts/sorttable.c b/scripts/sorttable.c
+index d8dc2a1b7c312..925382bb23dcc 100644
+--- a/scripts/sorttable.c
++++ b/scripts/sorttable.c
+@@ -281,6 +281,11 @@ static int add_field(uint64_t addr, uint64_t size)
+ /* Used for when mcount/fentry is before the function entry */
+ static int before_func;
+ 
++/* How far before the function entry a patchable entry may be recorded */
++#ifndef FUNCTION_PREFIX_BYTES
++#define FUNCTION_PREFIX_BYTES	8
++#endif
++
+ /* Only return match if the address lies inside the function size */
+ static int cmp_func_addr(const void *K, const void *A)
+ {
+@@ -899,7 +904,7 @@ static int do_file(char const *const fname, void *addr)
+ 		/* fallthrough */
+ 	case EM_RISCV:
+ 		/* arm64 and RISC-V place patchable entries before the function. */
+-		before_func = 8;
++		before_func = FUNCTION_PREFIX_BYTES;
+ #else
+ 	case EM_AARCH64:
+ 	case EM_RISCV:
 
-Best regards,
---  
-Jose Fernandez (Anthropic) <jose.fernandez@linux.dev>
+-- 
+2.52.0
 
