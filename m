@@ -1,33 +1,33 @@
-Received: from mta0.migadu.com (out-111.mta0.migadu.com [91.218.175.111])
+Received: from mta1.migadu.com (out-109.mta1.migadu.com [95.215.58.109])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1632A455604
-	for <linux-efi@vger.kernel.org>; Fri,  4 Sep 2026 10:10:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.111
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7314E455637
+	for <linux-efi@vger.kernel.org>; Fri,  4 Sep 2026 10:10:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.109
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788516637; cv=none; b=oTgEaMKbDfgTwvmsCCgCABos/bbM4B3Kp3TDpr2CALwErUrBRYhNHs0xztsuYuyIzdVSv05rRFPjohQHK9Jc+Je5Xj7pQLUU9YcGRvP9lbJEPEH9W2tGCDO1e1nlMxpR2LkgZY1dPQAYVH9tVTeEHz3Ww2ci1olRAVqGVQY8cXE=
+	t=1788516643; cv=none; b=nL8DTv03CA51z0JHtGoUI0DS3Du4yJ4WrAJVF9Tkv5SMjuPczv9yzvbiM9hnCTNPSqVic7WDfueaL8De3hl4TarEfrgg+1g8u+so2drnj0OImV+VslRQTDCRjSfqwubscJUeFxsgDhkuLpv7VCHr2b51EnOAMRxNOR429LBVQC4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788516637; c=relaxed/simple;
-	bh=PHW2ypkolV+36MeBrIflBY2kZtvuYhFSqnZa7Us0mSc=;
+	s=arc-20240116; t=1788516643; c=relaxed/simple;
+	bh=9aOZu5joPDLJyi4gz7dO0f9aMIY13LvVV/UJCIG+uIA=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=B7KT9JsTI5JyQozKteVAuDPgvLAlfbHdiZi18Xcw9LDir0+Y+iZuyRSVRtqKThRrRudqk8U8GImTjTkfcd7LT5fxWpF8ANONxIPiYWzYLXDyxHzAhAHk0HMYemKjHmquiNwvs6uz7r/YSFFbgCnimGO4/RNWbtqeRRGrJhXo/qM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=AYLzmbE/; arc=none smtp.client-ip=91.218.175.111
+	 MIME-Version; b=YLUfFnCgBxKj5JgpYxecANz3uU2EOxxQUqShDtHntP5R+o3SSn5lU5tZQXpipo0826dzoOZ4yXYehUCkCOytJpUqkYlkhhNtqiXcKQXOvsEyXZr6PnVRKAF/IMARHmnvZ7V3d/S6EQ+Dy5jkH4/Fck42ugIEIbVew1k+FQVu6JY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=OMDA5LLr; arc=none smtp.client-ip=95.215.58.109
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="AYLzmbE/"
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="OMDA5LLr"
 X-Envelope-To: linux-efi@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=PHW2ypkolV+36MeBrIflBY2kZtvuYhFSqnZa7Us0mSc=;
+DKIM-Signature: a=rsa-sha256; bh=9aOZu5joPDLJyi4gz7dO0f9aMIY13LvVV/UJCIG+uIA=;
  c=simple/simple; d=linux.dev;
  h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1788516628; v=1; x=1789121428;
- b=AYLzmbE/FGIjqb/RxtzTS+DUSvR0jYavfFzcCkRfshJdUEgZgXhn6WTPep8DaP7n2XdwA43l
- uF6FXivTRhc2Veyw3OUozQ88pX6+XXgimDqqKGuzCl31nBpIXGaWjqwr5rDTl/jKg7ZwV6Mlk3I
- WUckN/ZCqvqkYLWdPEYlL8+o=
+ t=1788516633; v=1; x=1789121433;
+ b=OMDA5LLrG8KDrfPVcchlsXbhmMDk865MrwFysRUs9ECTzubH+1uug4zwb1SxLQgRgJp9sDPU
+ pfj7iDyCFWimdOIUFY3t2hkpZQ+W6CkKvuoIsdKvaRe8pZJdifYCaEboSCRwYEXnZxlVV+TDQUq
+ IZXhR/Swxia4qtJDty0ZJ7oE=
 X-Envelope-To: linux-efi@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id b181acf3ff0b524f;
-	Fri, 04 Sep 2026 10:10:27 +0000
-X-Mizu-Trace-ID: b181acf3ff0b524f
+Received: by smtp.migadu.com with ESMTPS id 94f18b2629cbbf22;
+	Fri, 04 Sep 2026 10:10:33 +0000
+X-Mizu-Trace-ID: 94f18b2629cbbf22
 X-Migadu-Flow: FLOW_OUT
 From: George Guo <dongtai.guo@linux.dev>
 To: rppt@kernel.org,
@@ -50,9 +50,9 @@ Cc: ilias.apalodimas@linaro.org,
 	linux-mm@kvack.org,
 	linux-kselftest@vger.kernel.org,
 	linux-efi@vger.kernel.org
-Subject: [PATCH v5 2/5] liveupdate: synchronize EFI KHO channel at execution
-Date: Fri,  4 Sep 2026 18:08:49 +0800
-Message-ID: <20260904100852.26006-3-dongtai.guo@linux.dev>
+Subject: [PATCH v5 3/5] liveupdate: kho_block: include linux/mm.h for virt/phys translation
+Date: Fri,  4 Sep 2026 18:08:50 +0800
+Message-ID: <20260904100852.26006-4-dongtai.guo@linux.dev>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260904100852.26006-1-dongtai.guo@linux.dev>
 References: <20260904100852.26006-1-dongtai.guo@linux.dev>
@@ -66,128 +66,44 @@ Content-Transfer-Encoding: 8bit
 
 From: George Guo <guodongtai@kylinos.cn>
 
-The EFI KHO configuration table is a global channel. Updating it while
-a candidate kexec image is still being loaded can leave the channel
-pointing at the failed candidate even though the previous image remains
-installed. Synchronize it instead from the image selected for execution.
+kho_block.c calls virt_to_phys() and phys_to_virt(). On LoongArch with
+CONFIG_KFENCE=y, these macros (in arch/loongarch/include/asm/io.h) expand
+to offset_in_page() and page_address(), both declared in <linux/mm.h>.
 
-Use the actual scratch payload size rather than its page-aligned segment
-size, and propagate update failures before live-update serialization.
-Keep clearing the channel for cold and crash images best-effort.
+Since kho_block.c does not include <linux/mm.h>, the translation unit
+fails to build with CONFIG_KFENCE=y:
 
+  asm/io.h: error: implicit declaration of function 'offset_in_page'
+  asm/io.h: error: implicit declaration of function 'page_address'
+
+Add the missing include to fix these build errors.
+
+This is the same root cause as the luo_session.c build fix previously
+acked by Mike Rapoport [1]; the virt_to_phys()/phys_to_virt() calls have
+since been refactored from luo_session.c into kho_block.c, so the fix
+moves with it.
+
+[1] https://lore.kernel.org/r/ai5nYlbERQBXRHSp@kernel.org/
+
+Co-developed-by: Kexin Liu <liukexin@kylinos.cn>
+Signed-off-by: Kexin Liu <liukexin@kylinos.cn>
 Signed-off-by: George Guo <guodongtai@kylinos.cn>
 ---
- kernel/crash_core.c                |  7 +++++++
- kernel/kexec_core.c                |  5 +++++
- kernel/kexec_internal.h            |  3 +++
- kernel/liveupdate/kexec_handover.c | 33 ++++++++++++++++++++++++++++++
- 4 files changed, 48 insertions(+)
+ kernel/liveupdate/kho_block.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/kernel/crash_core.c b/kernel/crash_core.c
-index 2b36aa9fade0..6166ce4203d3 100644
---- a/kernel/crash_core.c
-+++ b/kernel/crash_core.c
-@@ -138,6 +138,13 @@ void __noclone __crash_kexec(struct pt_regs *regs)
- 		if (kexec_crash_image) {
- 			struct pt_regs fixed_regs;
+diff --git a/kernel/liveupdate/kho_block.c b/kernel/liveupdate/kho_block.c
+index 0d2a342ef422..0d56891b2f4c 100644
+--- a/kernel/liveupdate/kho_block.c
++++ b/kernel/liveupdate/kho_block.c
+@@ -25,6 +25,7 @@
+ #include <linux/kho/abi/block.h>
+ #include <linux/kho_block.h>
+ #include <linux/slab.h>
++#include <linux/mm.h>
  
-+			/*
-+			 * A crash image carries no KHO state: clear the
-+			 * transport so the crash kernel boots cold instead
-+			 * of reviving from stale state.
-+			 */
-+			(void)kho_sync_channel(kexec_crash_image);
-+
- 			crash_setup_regs(&fixed_regs, regs);
- 			crash_save_vmcoreinfo();
- 			machine_crash_shutdown(&fixed_regs);
-diff --git a/kernel/kexec_core.c b/kernel/kexec_core.c
-index dc770b9a6d05..147f5b5b23d4 100644
---- a/kernel/kexec_core.c
-+++ b/kernel/kexec_core.c
-@@ -1146,6 +1146,11 @@ int kernel_kexec(void)
- 		goto Unlock;
- 	}
- 
-+	/* Synchronize the handover transport with the image being executed. */
-+	error = kho_sync_channel(kexec_image);
-+	if (error)
-+		goto Unlock;
-+
- 	if (!kexec_image->preserve_context) {
- 		error = liveupdate_reboot();
- 		if (error)
-diff --git a/kernel/kexec_internal.h b/kernel/kexec_internal.h
-index 228bb88c018b..4d4c2290e85c 100644
---- a/kernel/kexec_internal.h
-+++ b/kernel/kexec_internal.h
-@@ -46,6 +46,7 @@ struct kexec_buf;
- int kho_locate_mem_hole(struct kexec_buf *kbuf,
- 			int (*func)(struct resource *, void *));
- int kho_fill_kimage(struct kimage *image);
-+int kho_sync_channel(struct kimage *image);
- #else
- static inline int kho_locate_mem_hole(struct kexec_buf *kbuf,
- 				      int (*func)(struct resource *, void *))
-@@ -54,5 +55,7 @@ static inline int kho_locate_mem_hole(struct kexec_buf *kbuf,
- }
- 
- static inline int kho_fill_kimage(struct kimage *image) { return 0; }
-+
-+static inline int kho_sync_channel(struct kimage *image) { return 0; }
- #endif /* CONFIG_KEXEC_HANDOVER */
- #endif /* LINUX_KEXEC_INTERNAL_H */
-diff --git a/kernel/liveupdate/kexec_handover.c b/kernel/liveupdate/kexec_handover.c
-index 39f489a258d9..3aa5c66dfc6d 100644
---- a/kernel/liveupdate/kexec_handover.c
-+++ b/kernel/liveupdate/kexec_handover.c
-@@ -14,6 +14,7 @@
- #include <linux/cma.h>
- #include <linux/kmemleak.h>
- #include <linux/count_zeros.h>
-+#include <linux/efi.h>
- #include <linux/kasan.h>
- #include <linux/kexec.h>
- #include <linux/kexec_handover.h>
-@@ -2074,6 +2075,38 @@ int kho_fill_kimage(struct kimage *image)
- 	return 0;
- }
- 
-+/*
-+ * Synchronize the handover transport with the image that is about to be
-+ * executed.  The EFI config table channel is global, while kexec keeps
-+ * separate images for a normal reboot and for crash.  Write the state of the
-+ * selected image immediately before it is executed, rather than while a
-+ * candidate image is being loaded, so a failed replacement cannot leave the
-+ * channel pointing at that failed image.
-+ *
-+ * An image loaded through the legacy kexec_load() syscall, a crash image, or
-+ * an image loaded while KHO is disabled carries no handover state.  Clear the
-+ * channel for those images so the next kernel boots cold instead of reviving
-+ * from stale state.  Clearing is best-effort because an absent channel cannot
-+ * affect a cold boot.
-+ */
-+int kho_sync_channel(struct kimage *image)
-+{
-+	int err;
-+
-+	if (!image->kho.fdt || !image->kho.scratch) {
-+		efi_kho_update(0, 0, 0, 0);
-+		return 0;
-+	}
-+
-+	err = efi_kho_update(image->kho.fdt, PAGE_SIZE,
-+			     image->kho.scratch->mem,
-+			     image->kho.scratch->bufsz);
-+	if (err)
-+		pr_warn("failed to update EFI config table: %d\n", err);
-+
-+	return err;
-+}
-+
- static int kho_walk_scratch(struct kexec_buf *kbuf,
- 			    int (*func)(struct resource *, void *))
- {
+ /*
+  * Safeguard limit for the number of serialization blocks. This is used to
 -- 
 2.53.0
 
