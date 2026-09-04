@@ -1,99 +1,146 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63E3F501F49;
-	Fri,  4 Sep 2026 16:31:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D6D850AC28
+	for <linux-efi@vger.kernel.org>; Fri,  4 Sep 2026 16:31:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788539481; cv=none; b=dMhvo0l0tZlCGkkrpXrfgSOd412hyRh2Ic4tKz6aKW0By3jyRRqHBaeM5fVCoF8jClGUVrAD2/fF/malkNCAMxEZpj6ZnCU0NX9IzdHxGTPAyCP7av151ZlUgXc3iaxdgfsaFhVhQRWLGG5jJMa5C1YbiTOhbhjUnnWq29lRjl4=
+	t=1788539487; cv=none; b=ej5QhaOMQc7sd9lvRgQ8gi4AW1zhS6aJ76FiL7vfmWeosSfHXUOhK0aFyANrR2hfE/QBxsy6u/tf68gGZEuDbF35c2pqeq3P+ZUIJl/Rig4XEs/4Wjg3xIhbD3+fHLlhfsyEXamnuDEUi3soH/kt7uFQFr1m8qDm2lLKuUvfv5c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788539481; c=relaxed/simple;
-	bh=LCxqDWzx6b7SR6fAu1Va6niGlyfQOLIgAToWHVaDNPY=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=XMHrKlRKfgLS6Vra/MirOpUtFsReCEq9UdywQ95PgJBSRBSgGY5IAQqDH0BV1fuPmX6SjR4iyAlBjuhYJQgG3eR25woHpS3uOme5EXsiYRzc5uUKgjpVxAfYaCIhaUVwmOYAK50CpbTJeNdT8CLS+xXiSSd2ZHWr6fdx7F+nowM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RSemKsnr; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788539487; c=relaxed/simple;
+	bh=kJLKJWWt0nc7qEZWEWXx433/3B2kAD/lhNkZwiynbUM=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=SfkqO0iriubDPpVCo7Z/0ODSzpblDuaB6Qx/c+mHWC+VSEpAXrvu+ecGGssMYEeZLreBfF65UyhJ6PLfdZUVMRJ0HQ2k6LFtV6F6CDoJM/sZsjMw9oK8UGgEkGE3LBbCkSFkjaK1eHtwRvyrSjE65GCltTElbpCI0GUizueEklM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Jfou5Uxw; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RSemKsnr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA9101F00A3D;
-	Fri,  4 Sep 2026 16:31:16 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Jfou5Uxw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A41F61F00A3F
+	for <linux-efi@vger.kernel.org>; Fri,  4 Sep 2026 16:31:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788539479;
-	bh=j2r0KoKgq2hanpcV5bTU2teAuvBMeSQzSfhGhjq68n4=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date;
-	b=RSemKsnrj3pHIuCVbsnDLx/wt1VFKGCe9P1UdS6sS6D04rgIzeYeog59OxZ2EqvG3
-	 4AoaR2OnVKDz1Co0MgXRuABNi4x2XQX+ZYdHLu3iM/VWdythmpqCdnMLx6+XYGm1BO
-	 JNO8PsqwfVAFpnfg/FhSD3yh990j6d+v+ucSzEtu7vyOBpUTIkni94ouoUaJMs6CVv
-	 a49FcY6Et2SNenPmkKiozk8+UywCqZhX49cOrgY6YA8Lg+7pgnuKd6A0jjpme3RJzw
-	 ZqIwYCT6BiFXcFWD/D7XByQ+oYxuP1mxJrw4CLvt9wIQONyOE2XdEcb6gcq0wPPzhF
-	 1hAhD7grQ0peA==
-From: Pratyush Yadav <pratyush@kernel.org>
-To: George Guo <dongtai.guo@linux.dev>
-Cc: chenhuacai@kernel.org,  rppt@kernel.org,  pasha.tatashin@soleen.com,
-  pratyush@kernel.org,  shuah@kernel.org,  ardb@kernel.org,
-  guodongtai@kylinos.cn,  kernel@xen0n.name,  graf@amazon.com,
-  liukexin@kylinos.cn,  loongarch@lists.linux.dev,
-  linux-kernel@vger.kernel.org,  kexec@lists.infradead.org,
-  linux-mm@kvack.org,  linux-kselftest@vger.kernel.org,
-  linux-efi@vger.kernel.org, Sourabh Jain <sourabhjain@linux.ibm.com>
-Subject: Re: [PATCH v4 4/4] selftests/kho: add LoongArch vmtest support
-In-Reply-To: <20260904031108.11986-1-dongtai.guo@linux.dev> (George Guo's
-	message of "Fri, 4 Sep 2026 11:11:08 +0800")
-References: <20260807103714.33074-5-dongtai.guo@linux.dev>
-	<20260904031108.11986-1-dongtai.guo@linux.dev>
-Date: Fri, 04 Sep 2026 18:31:15 +0200
-Message-ID: <2vxzpkytvuzw.fsf@kernel.org>
-User-Agent: Gnus/5.13 (Gnus v5.13)
+	s=k20260515; t=1788539484;
+	bh=0aWW926hJVH/ZOwFSJUpmN4BxO65BaD35avdvMr3hSQ=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=Jfou5UxwPS4LU93z01wc/qzl0O+iRylhoopAR3rYWya2dSwugtHcrsU69rsc3YJAP
+	 W/YnnO2NCCthVv6FRlRtrWF4SfVoPNTHQGQ+08QypQnH2QiHPZ4H+7Rf2ZBeooVcIx
+	 a2vVK1b5URlmrBrOB/KRiEVT5ULDTw9/6pUiE0vtlYZeYcyOyKXpR8GvQZyRoYhsoZ
+	 7otyaBAcEkzQclMBbNga0qvmOpdyCnN2Gkt3kCzskPhU0uJG7o9RuXmbA5/Dk9ba26
+	 Kim+XN9VWp4qDV67YsklY6P3BzTkgQlx4IjSbfsDudFV9HPUyJOJjabAowUJlOaGgM
+	 dLDibrgwPiYuQ==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 055F6198003A;
+	Fri,  4 Sep 2026 12:31:23 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Fri, 04 Sep 2026 12:31:23 -0400
+X-ME-Sender: <xms:WfKaag3V5AQvcG1mpcUW3YeBSH9qCrS0Bfg3abuIueLsp3KHgY5fyw>
+    <xme:WfKaal44YzY5WqljM_fkJrFuemOJaNw-bqFEzTilHIT5ZeOJ581EsLynCWveixEjW
+    ypnDZyHPALSTG488mVNZ0qf2gYN3vZCbQh-CzGu05-t-BpLKntfozQ>
+X-ME-Proxy-Cause: dmFkZTGGBLagMzMIH7QIs9EGCczydtxEyv4jDoIaComNfnOlxiZqomq+gR2gIsw5Ry+bHr
+    gjzV9/IZUXvlnubmWdiijerPyzLhj7lUr5hkUGE1tFcdbUIORMtAIhrMq9jySceGr+VE89
+    FQqtugOSiUH6D3ou4PpylS/vHktSbye+iASmqiFl8OHi7JuL0GVeV5T6PlWMyrYvZ5IRjh
+    Ja6OvXuz7VN/ii4CEFZLTrEeItTDEt5RtWSM1w3HvT+smyUn8GSJKY11/7mIkrj3WLd7wD
+    S+WxQdIjKep607llb3Lt9n0UKcaOE4M53ShOYmbPsZjZ7yY50RxxVA8ITkV26tU4puYvqh
+    x1l6SMD83iHRustPzvclga9jUSMmaK5S19+Ar03SsjBKndmHW0bni4ppZl7DkyZ8nDtg68
+    619R8VD5hB/tYq2rOdFtORJ5CsSq+W0kN7EwsPKyzBHklQQJrtIKjzQVaebmxLup6aiQUb
+    gpUnRsGcME6iYXufPFRFHf/E1pZll/MDmSdwIP+QLcO/YkXaON+eqtnUFTzFW06wcvylE6
+    GtDfQMXU15qAURdhgPu388eamqZ5VPpkhoOv7pLFrG9+s89gTjkU3Qouqt9hh7pWrHSamy
+    5LG5GTCq8bpdfgV3+/Dveqv2TA7lDiqgNb+s3IVrioXASTNpgI4IV5DbmWWA
+X-ME-Proxy: <xmx:WvKaah9SyilSgwq9Bd28gTlpQGbkGGKbFVQT_j7O_hPRbkWWefsYfg>
+    <xmx:WvKaahIfF3ar1iDi1IZEmqKeX3FKsXjxc7lbvti04JXr5gNL2LUXsg>
+    <xmx:WvKaaih6RdZB1NA2S1JH17sDqST9Lq1z-TXus2g954QbkRXHAromKA>
+    <xmx:WvKaap7ZYQ8muRmjRGdqARqO8-M1Vn8oBSUSjZXmDHPUVGpOQCQOpg>
+    <xmx:WvKaaiYv6LqbNMYhOkBCDTMB9A4JYJWyam4ffNgzkLSNNRLiRHI1LvCl>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id AECA9F8007A; Fri,  4 Sep 2026 12:31:21 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Date: Fri, 04 Sep 2026 18:31:01 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Vincent Mailhol" <mailhol@kernel.org>,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Message-Id: <a3367987-7e21-42e2-853c-df64449af9a9@app.fastmail.com>
+In-Reply-To: <20260903-libstub_guid_cleanup-v1-0-06fcb6216975@kernel.org>
+References: <20260903-libstub_guid_cleanup-v1-0-06fcb6216975@kernel.org>
+Subject: Re: [PATCH 0/3] efi/libstub: reduce size by optimizing GUID storage
 Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Fri, Sep 04 2026, George Guo wrote:
 
-> Hi,
+
+On Thu, 3 Sep 2026, at 23:25, Vincent Mailhol wrote:
+> The EFI stub is size-sensitive. Several call sites currently pass GUID
+> macro addresses directly, or keep GUID objects as automatic local
+> variables. With gcc, this materializes the GUID at the call site,
+> resulting in several assembly instructions. Using static storage instead
+> emits 16 bytes of GUID data and only one instruction to pass its
+> address.
 >
-> While preparing v5, I retested the LoongArch vmtest without the explicit
-> `kho_scratch=16M,16M,16M` setting. That setting was masking a pre-existing
-> bug in the generic percentage-based KHO scratch sizing.
+> The first two patches convert direct GUID references and automatic GUID
+> variables to static storage. The last patch factors GUID objects that
+> are shared within the same translation unit.
 >
-> The percentage heuristic itself is reasonable, but the old implementation
-> calculated each per-node baseline after allocating the lowmem and global
-> scratch areas. Since memblock allocations are marked MEMBLOCK_RSRV_KERN,
-> those scratch areas were counted as new kernel demand and scaled again.
+> For the full series, on an x86_64 build with gcc 15.3.0, bloat-o-meter
+> reports:
 >
-> On the 1 GiB LoongArch guest, the 98.45 MiB reservation baseline and 32 MiB
-> alignment made the old ordering request 224 MiB of lowmem scratch followed
-> by 672 MiB for node 0. The node allocation failed and disabled KHO. I sent
-> a separate generic fix here:
+>   add/remove: 21/0 grow/shrink: 0/12 up/down: 400/-1200 (-800)
+>   Function                                     old     new   delta
+>   tbl_guid                                       -      32     +32
+>   pci_proto                                      -      32     +32
+>   guid                                           -      32     +32
+>   cc_guid                                        -      32     +32
+>   tpm2_guid                                      -      16     +16
+>   text_to_dp_guid                                -      16     +16
+>   tcg2_guid                                      -      16     +16
+>   smbios_guid                                    -      16     +16
+>   rng_table_guid                                 -      16     +16
+>   rng_proto                                      -      16     +16
+>   rng_algo_raw                                   -      16     +16
+>   proto                                          -      16     +16
+>   linux_eventlog_guid                            -      16     +16
+>   lf2_proto_guid                                 -      16     +16
+>   info_guid                                      -      16     +16
+>   graphics_output_guid                           -      16     +16
+>   fs_proto                                       -      16     +16
+>   edid_discovered_guid                           -      16     +16
+>   edid_active_guid                               -      16     +16
+>   console_out_device_guid                        -      16     +16
+>   apple_set_os_guid                              -      16     +16
+>   efi_get_memory_map                           707     696     -11
+>   efi_pci_disable_bridge_busmaster            1199    1184     -15
+>   efi_get_random_bytes                         216     188     -28
+>   efi_remap_image                              357     328     -29
+>   efi_load_initrd                             1113    1065     -48
+>   efi_get_smbios_record                        283     226     -57
+>   efi_random_get_seed                         1368    1297     -71
+>   efi_measure_tagged_event                     935     854     -81
+>   efi_retrieve_eventlog                       1686    1570    -116
+>   handle_cmdline_files                        2501    2341    -160
+>   efi_stub_entry                              4180    3953    -227
+>   efi_setup_graphics                          2210    1853    -357
+>   Total: Before=29223, After=28423, chg -2.74%
 >
->   https://lore.kernel.org/loongarch/20260904025101.9959-1-dongtai.guo@linux.dev
-
-Oh, cool! Nice find. I just wrote Sourabh (+Cc) an email [0] about this
-too.
-
-I think there is other wonky stuff going on with scratch sizing, like
-global scratch being inflated. See my email [0] about that.
-
-Let me go review that patch, since this seems to be causing a lot of
-pain.
-
-[0] https://lore.kernel.org/kexec/20260821105609.983622-1-sourabhjain@linux.ibm.com/T/#t
-
+> See this as my penitence for adding the BLI feature: I am giving you
+> back the bytes that I consumed, and even more.
 >
-> With that fix, the total aligned request is 448 MiB and the LoongArch
-> vmtest passes using the default percentage-based sizing. I also ran the x86
-> KHO vmtest with the fix; it passes as well.
->
-> Therefore, I will remove `kho_scratch=16M,16M,16M` from loongarch.conf in
-> v5 so that it tests the default sizing path, matching the existing x86
-> selftest behavior.
->
-> Thanks,
-> George
 
--- 
-Regards,
-Pratyush Yadav
+Thanks :-)
+
+It would be nice if we could rely on SHF_MERGE sections here, but that
+doesn't seem tractable in the context of the stub.
+
+
+> Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
+> ---
+> Vincent Mailhol (3):
+>       efi/libstub: move direct GUID references to static storage
+>       efi/libstub: make local GUID variables static
+>       efi/libstub: factor shared static GUID variables
+>
+
+Applied to efi/next
