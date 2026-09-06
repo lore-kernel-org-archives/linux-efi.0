@@ -1,40 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9AD43CCFD2;
-	Sun,  6 Sep 2026 13:08:45 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5030B3CF20C;
+	Sun,  6 Sep 2026 13:08:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788700128; cv=none; b=hqXcMchQNPb12/SiUHO/ASCtkNOSKOMaD5aE3/8eHaOfPhaMIH2G24UJTOWage2ZuAMERoc5/qzXy+sV1Jg3v3KcFbqWRzoBDYcBAPs/yX5OWBirTyMP204jRmGCKrgj5VpSwFfQNaIluzksa0uTowIaa/IGqLOqUEvertYCEcI=
+	t=1788700129; cv=none; b=sdxw6d1Cztxezjm2Q3iIFUTarvvoYSVLAwQHyxgFpA907Yqrw72uBV2lUbTPmWmOasuVNHbxVXUDjBQ7HKMw+wx4OJKw+7yiWTlrtq4JKYM6EwQ8hIeFX6mg8a1L/b/0eOStXvwrlJz0eoly1V69FObrpkWb6Z2YY5fFhoSPduo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788700128; c=relaxed/simple;
-	bh=uaC1WgWvXsjlrDW1h2SQSTAdv5SZYBB92Q2bmEIYDMs=;
+	s=arc-20240116; t=1788700129; c=relaxed/simple;
+	bh=iboO10g3Ee6nqq95gXfzyoo/IppyePzufMy4zEa754I=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=fNqANonn0Pr9oaR13i6Vll0PiAmNhEISFxvyVLtaFc5AKcQY5E38G+/Ykm7vxbe+snU/4ZnAIlXbSJrzY2RFuRhy/+908/Dqlqgye8F6BuzQDf/n7upahpllYlB88pTI+6DTLAp+IfIQYd4WdhlGOCTCas8Jbz5dntPJipo4pqM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CNKYN93K; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version; b=No2nLnllnXmfteyuZGJIJ2YpZhPH5jvbGpgr/1H8mCDLYVW+EtlkRnDbeHmIBolV+h7Ka03FiMf5AmJJ7mTZ42qj5qL1JNiOiVUwji43FVHnZheE/50L2oLDF+GkIuk2AXK7a7OVySbBwhg+PyTrCv8lpOHS9QGBxPVBFzF1ukI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OhAav7vB; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CNKYN93K"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 976701F00A3A;
-	Sun,  6 Sep 2026 13:08:44 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OhAav7vB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1FB641F00A3D;
+	Sun,  6 Sep 2026 13:08:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788700125;
-	bh=BG7Q/C2K5vK3m3pC+ZGYD64g5zvWsaUSPh5Sz0kyUbw=;
+	s=k20260515; t=1788700127;
+	bh=ypS4GaCWPY2eWch613jft148kE4UGIa+o3+eY6E2KWk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=CNKYN93KOTPggdtdSIQktE9piOJLT8+RrfqU6gBpOEmMZHqiD2dvsUHqVazug+aTj
-	 hE6+B9g8D+u1VkZN9vwo1LG6qCoKcT6s9iXTziui7/elgmuO7KPeVJRttzNxvSaTfc
-	 p4RkE/a8ggyrV1LGmL+9tUKh8xjKZqhEaYlb639lZ7N5nU/x/iEggcT4AT4n5AWZRV
-	 CUOp+Cqu1AyhtdVIPatj4qcv8QOdousQel6aNMEjSRbFNE7cCCE4trW3H+vcaey6Qv
-	 6OP2oZKQeZEqelu5ADJ6wkrfGdL6aBRz7dysCvgHsM05h0C01LJp4PZOTXTMrydC1k
-	 GI8P0c3wQX3/A==
+	b=OhAav7vB+QHZXfe2G/+S6Bc84xoSJbFkVup32E0mCjXZwCtRpSCviXTdTKVFauyQQ
+	 Kmu8R3PrrItiyzP7hqL7wNEqywC1l8x4JMN4mdzJ/EIUC7ITBbgughNFEPibEr36jH
+	 DeX3oKAJLalxNSJnXLHBRKoiKzb6McT6s1X1DIEbxX5vZkGMmizdU/Y0rs/Dz/ZLmp
+	 mmXlo6ransHcTamfyfFd8shHkiOiuolt5o5nUDmV/CmikaFZxbMybanhSzcAnlCbAs
+	 rcZOjXMZDhYaeVHceFXHrPfsmAi6+HNxH+KJij6Be9uNGJ/ncok6PpxDcYWImD1Oti
+	 3x3dUaQBptlYA==
 From: Ard Biesheuvel <ardb@kernel.org>
 To: linux-efi@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	Ard Biesheuvel <ardb@kernel.org>,
 	Vincent Mailhol <mailhol@kernel.org>,
 	x86@kernel.org
-Subject: [PATCH 5/7] efi/libstub: Output UTF-16 directly from vsnprintf()
-Date: Sun,  6 Sep 2026 15:08:23 +0200
-Message-ID: <20260906130817.1151961-14-ardb@kernel.org>
+Subject: [PATCH 6/7] efi/libstub: Add support for printing human readable GUIDs
+Date: Sun,  6 Sep 2026 15:08:24 +0200
+Message-ID: <20260906130817.1151961-15-ardb@kernel.org>
 X-Mailer: git-send-email 2.47.3
 In-Reply-To: <20260906130817.1151961-9-ardb@kernel.org>
 References: <20260906130817.1151961-9-ardb@kernel.org>
@@ -44,323 +44,101 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=9424; i=ardb@kernel.org; h=from:subject; bh=uaC1WgWvXsjlrDW1h2SQSTAdv5SZYBB92Q2bmEIYDMs=; b=owGbwMvMwCVmkMcZplerG8N4Wi2JIWtu6plVcaH23FE3/v4Jm7LtPe9DIaGtgpVcb7U5a1xu8 2q/9BPrKGVhEONikBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABO5fZuRYcbjtA1/WvjPMXpr pLzxPeTX7TH5wPudyaIZPCoxew81RjL84a1RFVOU1GCc5qrs/uuFxp5V4mLnO652qyz2FLo+M0a SHQA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2941; i=ardb@kernel.org; h=from:subject; bh=iboO10g3Ee6nqq95gXfzyoo/IppyePzufMy4zEa754I=; b=owGbwMvMwCVmkMcZplerG8N4Wi2JIWtu6rnL7+Z1NZhIzdYsSOqSjYz41nlAQa3nmBfTn/3iC xlXic3oKGVhEONikBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABNpN2NkuF0rO2V1NMvf1GDz 8j7nf0Us+ny75e5JZ5d98VN/pbl+DsNfySi13fu/C39Yp27hIbFMdek2kwrfZ6yTVhW7zDRaeuY zEwA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 
-The only remaining users of vsnprintf() in the EFI stub are the
-diagnostic printk()'s, which are emitted to the console and not recorded
-for posterity.
+Add support for the %pUl printk conversion specifier, which takes a
+pointer to a GUID and prints it in the usual format:
 
-The EFI console uses UTF-16 (or actually, UCS-2) natively, and so all
-non-UTF16 strings that are emitted need to be converted. Given the
-stub's vsnprintf() support for wide strings (using the %ls conversion
-modifier), which uses UTF-16 to UTF-8 conversion internally, the final
-conversion to UTF-16 needs to support not just plain ASCII but UTF-8 as
-well.
+  aaaaaaaa-bbbb-cccc-dddd-dddddddddddd
 
-This is all pointless, of course, and it makes more sense to use UTF-16
-internally. This removes the need for UTF-16 to UTF-8 conversion in
-vsnprintf(), and given that all non-wide string inputs to vsnprintf()
-that exist in the stub today are compile time constant ASCII strings,
-the need to convert UTF-8 to UTF-16 disappears as well.
-
-So implement efi_vsnprintf() taking a const char *fmt as before, but
-outputting a efi_char16_t[] that can be passed to the EFI console
-directly, rather than via efi_puts(), leaving the latter unused and
-therefore removed.
-
-Note that efi_puts() performs LF to CR-LF conversion internally, so add
-this capability to efi_vsnprintf() as well.
-
+Co-developed-by: Vincent Mailhol <mailhol@kernel.org>
+Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/efistub.h  |  5 +-
- drivers/firmware/efi/libstub/printk.c   | 89 ++----------------
- drivers/firmware/efi/libstub/vsprintf.c | 94 +++-----------------
- 3 files changed, 19 insertions(+), 169 deletions(-)
+ drivers/firmware/efi/libstub/vsprintf.c | 40 +++++++++++++++++---
+ 1 file changed, 35 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index fd91fc15ec81..36056c624782 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -1078,9 +1078,10 @@ efi_status_t check_platform_features(void);
- 
- void *get_efi_config_table(efi_guid_t guid);
- 
--/* NOTE: These functions do not print a trailing newline after the string */
- void efi_char16_puts(efi_char16_t *);
--void efi_puts(const char *str);
-+
-+int efi_vsnprintf(efi_char16_t *buf, size_t size, const char *fmt, va_list ap,
-+		  bool crlf);
- 
- __printf(1, 2) int efi_printk(char const *fmt, ...);
- 
-diff --git a/drivers/firmware/efi/libstub/printk.c b/drivers/firmware/efi/libstub/printk.c
-index f36639886d00..09476a6d564e 100644
---- a/drivers/firmware/efi/libstub/printk.c
-+++ b/drivers/firmware/efi/libstub/printk.c
-@@ -23,98 +23,20 @@ void efi_char16_puts(efi_char16_t *str)
- 		       output_string, str);
- }
- 
--static
--u32 utf8_to_utf32(const u8 **s8)
--{
--	u32 c32;
--	u8 c0, cx;
--	size_t clen, i;
--
--	c0 = cx = *(*s8)++;
--	/*
--	 * The position of the most-significant 0 bit gives us the length of
--	 * a multi-octet encoding.
--	 */
--	for (clen = 0; cx & 0x80; ++clen)
--		cx <<= 1;
--	/*
--	 * If the 0 bit is in position 8, this is a valid single-octet
--	 * encoding. If the 0 bit is in position 7 or positions 1-3, the
--	 * encoding is invalid.
--	 * In either case, we just return the first octet.
--	 */
--	if (clen < 2 || clen > 4)
--		return c0;
--	/* Get the bits from the first octet. */
--	c32 = cx >> clen--;
--	for (i = 0; i < clen; ++i) {
--		/* Trailing octets must have 10 in most significant bits. */
--		cx = (*s8)[i] ^ 0x80;
--		if (cx & 0xc0)
--			return c0;
--		c32 = (c32 << 6) | cx;
--	}
--	/*
--	 * Check for validity:
--	 * - The character must be in the Unicode range.
--	 * - It must not be a surrogate.
--	 * - It must be encoded using the correct number of octets.
--	 */
--	if (c32 > 0x10ffff ||
--	    (c32 & 0xf800) == 0xd800 ||
--	    clen != (c32 >= 0x80) + (c32 >= 0x800) + (c32 >= 0x10000))
--		return c0;
--	*s8 += clen;
--	return c32;
--}
--
--/**
-- * efi_puts() - Write a UTF-8 encoded string to the console
-- * @str:	UTF-8 encoded string
-- */
--void efi_puts(const char *str)
--{
--	efi_char16_t buf[128];
--	size_t pos = 0, lim = ARRAY_SIZE(buf);
--	const u8 *s8 = (const u8 *)str;
--	u32 c32;
--
--	while (*s8) {
--		if (*s8 == '\n')
--			buf[pos++] = L'\r';
--		c32 = utf8_to_utf32(&s8);
--		if (c32 < 0x10000) {
--			/* Characters in plane 0 use a single word. */
--			buf[pos++] = c32;
--		} else {
--			/*
--			 * Characters in other planes encode into a surrogate
--			 * pair.
--			 */
--			buf[pos++] = (0xd800 - (0x10000 >> 10)) + (c32 >> 10);
--			buf[pos++] = 0xdc00 + (c32 & 0x3ff);
--		}
--		if (*s8 == '\0' || pos >= lim - 2) {
--			buf[pos] = L'\0';
--			efi_char16_puts(buf);
--			pos = 0;
--		}
--	}
--}
--
- /**
-  * efi_printk() - Print a kernel message
-  * @fmt:	format string
-  *
-  * The first letter of the format string is used to determine the logging level
-  * of the message. If the level is less then the current EFI logging level, the
-- * message is suppressed. The message will be truncated to 255 bytes.
-+ * message is suppressed. The message will be truncated to 255 characters
-+ * (ignoring surrogates).
-  *
-  * Return:	number of printed characters
-  */
- int efi_printk(const char *fmt, ...)
- {
--	char printf_buf[256];
-+	efi_char16_t printf_buf[256];
- 	va_list args;
- 	int printed;
- 	int loglevel = printk_get_level(fmt);
-@@ -141,10 +63,11 @@ int efi_printk(const char *fmt, ...)
- 	fmt = printk_skip_level(fmt);
- 
- 	va_start(args, fmt);
--	printed = vsnprintf(printf_buf, sizeof(printf_buf), fmt, args);
-+	printed = efi_vsnprintf(printf_buf, ARRAY_SIZE(printf_buf), fmt, args,
-+				true);
- 	va_end(args);
- 
--	efi_puts(printf_buf);
-+	efi_char16_puts(printf_buf);
- 	if (printed >= sizeof(printf_buf)) {
- 		efi_char16_puts(L"[Message truncated]\r\n");
- 		return -1;
 diff --git a/drivers/firmware/efi/libstub/vsprintf.c b/drivers/firmware/efi/libstub/vsprintf.c
-index dba136679172..9ac6df268105 100644
+index 9ac6df268105..4c11cee6c722 100644
 --- a/drivers/firmware/efi/libstub/vsprintf.c
 +++ b/drivers/firmware/efi/libstub/vsprintf.c
-@@ -14,10 +14,12 @@
- 
- #include <linux/compiler.h>
- #include <linux/ctype.h>
-+#include <linux/efi.h>
- #include <linux/kernel.h>
- #include <linux/limits.h>
- #include <linux/string.h>
- #include <linux/types.h>
-+#include <linux/ucs2_string.h>
- 
- static
- int skip_atoi(const char **s)
-@@ -239,58 +241,6 @@ char get_sign(long long *num, int flags)
- 	return 0;
+@@ -111,6 +111,9 @@ char *put_dec(char *end, unsigned long long n)
+ 	return p;
  }
  
--static
--size_t utf16s_utf8nlen(const u16 *s16, size_t maxlen)
--{
--	size_t len, clen;
--
--	for (len = 0; len < maxlen && *s16; len += clen) {
--		u16 c0 = *s16++;
--
--		/* First, get the length for a BMP character */
--		clen = 1 + (c0 >= 0x80) + (c0 >= 0x800);
--		if (len + clen > maxlen)
--			break;
--		/*
--		 * If this is a high surrogate, and we're already at maxlen, we
--		 * can't include the character if it's a valid surrogate pair.
--		 * Avoid accessing one extra word just to check if it's valid
--		 * or not.
--		 */
--		if ((c0 & 0xfc00) == 0xd800) {
--			if (len + clen == maxlen)
--				break;
--			if ((*s16 & 0xfc00) == 0xdc00) {
--				++s16;
--				++clen;
--			}
--		}
--	}
--
--	return len;
--}
--
--static
--u32 utf16_to_utf32(const u16 **s16)
--{
--	u16 c0, c1;
--
--	c0 = *(*s16)++;
--	/* not a surrogate */
--	if ((c0 & 0xf800) != 0xd800)
--		return c0;
--	/* invalid: low surrogate instead of high */
--	if (c0 & 0x0400)
--		return 0xfffd;
--	c1 = **s16;
--	/* invalid: missing low surrogate */
--	if ((c1 & 0xfc00) != 0xdc00)
--		return 0xfffd;
--	/* valid surrogate pair */
--	++(*s16);
--	return (0x10000 - (0xd800 << 10) - 0xdc00) + (c0 << 10) + c1;
--}
--
- #define PUTC(c) \
- do {				\
- 	if (pos < size)		\
-@@ -298,7 +248,8 @@ do {				\
- 	++pos;			\
- } while (0);
- 
--int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
-+int efi_vsnprintf(efi_char16_t *buf, size_t size, const char *fmt, va_list ap,
-+		  bool crlf)
++/* we are called with base 8, 10 or 16, only, thus don't need "G..."  */
++static const char digits[16] = "0123456789ABCDEF"; /* "GHIJKLMNOPQRSTUVWXYZ"; */
++
+ static
+ char *number(char *end, unsigned long long num, int base, char locase)
  {
- 	/* The maximum space required is to print a 64-bit number in octal */
- 	char tmp[(sizeof(unsigned long long) * 8 + 2) / 3];
-@@ -336,6 +287,8 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
+@@ -119,9 +122,6 @@ char *number(char *end, unsigned long long num, int base, char locase)
+ 	 * produces same digits or (maybe lowercased) letters
+ 	 */
  
- 	for (pos = 0; *fmt; ++fmt) {
- 		if (*fmt != '%' || *++fmt == '%') {
-+			if (crlf && *fmt == '\n')
-+				PUTC('\r');
- 			PUTC(*fmt);
- 			continue;
- 		}
-@@ -400,7 +353,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
- 			else if (qualifier == 'l') {
- 		wstring:
- 				flags |= WIDE;
--				precision = len = utf16s_utf8nlen((const u16 *)s, precision);
-+				precision = len = ucs2_strnlen((const u16 *)s, precision);
- 				goto output;
- 			}
- 			precision = len = strnlen(s, precision);
-@@ -505,36 +458,9 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
- 		if (flags & WIDE) {
- 			const u16 *ws = (const u16 *)s;
+-	/* we are called with base 8, 10 or 16, only, thus don't need "G..."  */
+-	static const char digits[16] = "0123456789ABCDEF"; /* "GHIJKLMNOPQRSTUVWXYZ"; */
+-
+ 	switch (base) {
+ 	case 10:
+ 		if (num != 0)
+@@ -142,6 +142,29 @@ char *number(char *end, unsigned long long num, int base, char locase)
+ 	return end;
+ }
  
--			while (len-- > 0) {
--				u32 c32 = utf16_to_utf32(&ws);
--				u8 *s8;
--				size_t clen;
--
--				if (c32 < 0x80) {
--					PUTC(c32);
--					continue;
--				}
--
--				/* Number of trailing octets */
--				clen = 1 + (c32 >= 0x800) + (c32 >= 0x10000);
--
--				len -= clen;
--				s8 = (u8 *)&buf[pos];
--
--				/* Avoid writing partial character */
--				PUTC('\0');
--				pos += clen;
--				if (pos >= size)
--					continue;
--
--				/* Set high bits of leading octet */
--				*s8 = (0xf00 >> 1) >> clen;
--				/* Write trailing octets in reverse order */
--				for (s8 += clen; clen; --clen, c32 >>= 6)
--					*s8-- = 0x80 | (c32 & 0x3f);
--				/* Set low bits of leading octet */
--				*s8 |= c32;
--			}
-+			if (pos < size)
-+				ucs2_strscpy(&buf[pos], ws, min(len, size - pos));
-+			pos += len;
- 		} else {
- 			while (len-- > 0)
- 				PUTC(*s++);
++static char *guid_to_str(const efi_guid_t *guid, char *out, char locase)
++{
++	static const u8 guid_index[UUID_SIZE] = {
++		3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15,
++	};
++
++	for (int i = 0, p = 0; i < ARRAY_SIZE(guid_index); i++) {
++		u8 byte = guid->b[guid_index[i]];
++
++		out[p++] = locase | digits[byte >> 4];
++		out[p++] = locase | digits[byte & 0xf];
++
++		switch (i) {
++		case 3:
++		case 5:
++		case 7:
++		case 9:
++			out[p++] = '-';
++		}
++	}
++	return out;
++}
++
+ #define ZEROPAD	1		/* pad with zero */
+ #define SIGN	2		/* unsigned/signed long */
+ #define PLUS	4		/* show plus */
+@@ -251,8 +274,7 @@ do {				\
+ int efi_vsnprintf(efi_char16_t *buf, size_t size, const char *fmt, va_list ap,
+ 		  bool crlf)
+ {
+-	/* The maximum space required is to print a 64-bit number in octal */
+-	char tmp[(sizeof(unsigned long long) * 8 + 2) / 3];
++	char tmp[UUID_STRING_LEN];
+ 	char *tmp_end = &tmp[ARRAY_SIZE(tmp)];
+ 	long long num;
+ 	int base;
+@@ -365,6 +387,14 @@ int efi_vsnprintf(efi_char16_t *buf, size_t size, const char *fmt, va_list ap,
+ 			break;
+ 
+ 		case 'p':
++			if (fmt[1] == 'U' && (fmt[2] | 0x20) == 'l') {
++				flags &= LEFT;
++				s = guid_to_str(va_arg(args, efi_guid_t *), tmp, fmt[2] & 0x20);
++				precision = len = UUID_STRING_LEN;
++				fmt += 2;
++				goto output;
++			}
++
+ 			if (precision < 0)
+ 				precision = 2 * sizeof(void *);
+ 			fallthrough;
 -- 
 2.47.3
 
