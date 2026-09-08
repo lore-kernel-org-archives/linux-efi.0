@@ -1,34 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7A2E3CD8C5;
-	Tue,  8 Sep 2026 20:58:43 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01CE93D0903;
+	Tue,  8 Sep 2026 20:58:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788901125; cv=none; b=mrhbw7rH3eI3kx3QSJMbrpyY9T7Ejty/fFP3ICUgPLHqoYHCzfJTEStBNzWErcNIpUVl+xPwHCyGH+A5ar3+19cYCrfySURlnxQMg6WXqbpRY7oH615V/i/Lga9bsGEvNABRuFTnHyBCeB1mLpsiHvrq/2OgYN7/e0hTM2xAHw4=
+	t=1788901136; cv=none; b=Fbk3SjnwYh9TrNPzggAL0en7s0uI0v8ONfKnK9NEQFYnxfVIcUa6tNJnYkgLgQBi4jfO1QHwhxBuUzhN0NBAUcv0zwQ5QBtC514JZpaJTfUaRcgqyuziDmpa9NUJQ7X/Z02UEHPX/tPe6gPia4lHxFcTh/YYQEz5kjBpZgfXGNI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788901125; c=relaxed/simple;
-	bh=WICQxA7wSs1OjQCOKkZs0RphLh6aY8TzrexzGYQ5YdM=;
+	s=arc-20240116; t=1788901136; c=relaxed/simple;
+	bh=GECroYhAJRtbaOUcpsKGNrj8jn4Rk2wIoJhoCXYcSZk=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Ke5BHrag9u1AkSd0gOFceicMTwuTBFlgN4L55RzbC25I48TCKzXrtGm9DvWMHqOJstsGewTF+MuKmdJST6S80Q/DXRlIBW81F/PRQUU05RqOJUkRy8dNIio1anyuQBr9LFl5J7Tr+aqBcNKRHsrgeO1Tn/ScPXvqkz2lE/PmSm8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=e6lx/od9; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=NPsJRUtrgVpNjgM+0rN3ZkFAh9QHJ65lLKWQSGFmhFfQpLRG965Umh1Hrt1rdAzH0jTtiJzMinfFhvvBUgj0qo/hVeoWFQ3o3XMtadDx2s19h8rGTFrHt8qQIFXmE7g9HUXMFfVkH5QgMZyE4b41/NDzA4H9OxPsg1Ml0qcsGA8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=k8Aa7bte; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="e6lx/od9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DABE81F00A3D;
-	Tue,  8 Sep 2026 20:58:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="k8Aa7bte"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 210C81F00A3E;
+	Tue,  8 Sep 2026 20:58:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788901123;
-	bh=uqBq8a6PBmwcf0p2yuh6c4ut6ERzykBEHjxf3/hGkX8=;
+	s=k20260515; t=1788901134;
+	bh=ZQGcnADkM00DeAcZFfjjVHZiAQFuNA2hTkX5GoWoQQM=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=e6lx/od9mLRaFbj6pD8WjdyUrpu387L5oUbxsS74POQpizvsu2X9B5alOW1uFj8y5
-	 BogpoBtibbPrlFDz4Ec3/AdNz6xfPwZHUB5guwX01WhFo9UMbOB2aUsI9pZsrRRAP4
-	 wLq+X3qQGbQ3EeoOOjm9JR1UCr2lqd+VX4HE/xOvgXCQToYgf4Uq0lu6WcIoU831NT
-	 3Zr0ZWhdRXCFxU99AazeTkyNbDJRABmRLmC5/jK+DX1UXfCtMjxQZsFLerx/2qIlYU
-	 IYr/jQMlMujoHloJcSVIewZGRNZ7u1U02GBUq6x7y5XXIcE7+DXZzJcawr7XnyLaFC
-	 RprAR8YIz6BTg==
+	b=k8Aa7bteYxy8yNnT7VeUUCde2XDQEokJ337k5J8MEZlkCr1wOKQZsT2xgvltQXDcc
+	 nAdeplSUId+0I8KQ1uJFIoI7E5sCdn8TzNXJyZRIV1aq+b95O8Qf2Q3kR/TzSB0Sva
+	 zajxmwDMZA0FlLLKmIwn2Nr4LTeD2wL2lITFUW8axp+TnNRzzcDz9kI+MGNCzXy2sy
+	 bjFdNvBTNzIfGfgcBvV0sp9/MItu+53ZYlQ4JEIHo0/mOIx4veVaRfkRFzIBL4GhG3
+	 jGvxuHZARKucauMaVVoDmx0ijpjCYolmuDJIiDk8mJ3eUCGF7wSfuFeztvJUXwpTzc
+	 sWK04ZyRIrKdw==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Tue, 08 Sep 2026 21:55:17 +0100
-Subject: [PATCH 17/23] modpost: perform srcversion hashing in parallel
+Date: Tue, 08 Sep 2026 21:55:18 +0100
+Subject: [PATCH 18/23] objtool: cache relocations and function dead end
+ state, do less work
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260908-build-speedup-v1-17-5dc1ac01672d@kernel.org>
+Message-Id: <20260908-build-speedup-v1-18-5dc1ac01672d@kernel.org>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 In-Reply-To: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -73,208 +74,461 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=5781; i=ljs@kernel.org;
- h=from:subject:message-id; bh=WICQxA7wSs1OjQCOKkZs0RphLh6aY8TzrexzGYQ5YdM=;
- b=kA0DAAoWz53NioHifxQByyZiAGqgdjiivqgxWMcAzwXiFMjxhapr5eptu4LqrpJHxWdzErhUN
- Yh1BAAWCgAdFiEE5/QXv1IUVp6J0E9Gz53NioHifxQFAmqgdjgACgkQz53NioHifxRJhQD+KkKD
- qLzGPYKtOKR3m+zxpGn6XPTCEmJRgn6E7DzMTooBAIO2t2bh9xq8Miz8ic/o7YF92YFvKDtRCsm
- kxE2EVJsK
+X-Developer-Signature: v=1; a=openpgp-sha256; l=14395; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=GECroYhAJRtbaOUcpsKGNrj8jn4Rk2wIoJhoCXYcSZk=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlFk8TE8Jle2MOLv2Q9HNi2ePeyxwvZe274Oz6zx3s
+ eSpcq3VHaUsDGJcDLJiiizPv4jvDxIJm9d5wd8NZg4rE8gQBi5OAZjI1bkM/z3l02SLuj+lPgo7
+ 7aUxY2354p39c+Ncn9mX5l8sLFny24yR4WvpnB9vmG7VbTDfFLhqlZ3g1oUBxz2uXKqc+lhiy5F
+ bD3gB
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-modpost does a lot of single-threaded work hashing files from each object's
-.cmd file.
+Instruction relocations are looked up by destination in objtool via a hash
+which is keyed on a 16-byte (OFFSET_STRIDE) window within the section being
+walked.
 
-This makes the build slower than it needs to be, so do this work in
-parallel.
+It iterates through each 16-byte window, looking up relocations over
+several passes, before moving on to the next 16-byte window, caching only
+when a relocation is not found saving further lookups in this case.
 
-This is egregious for allmodconfig builds - for instance x86-64 can end up
-opening 200,000 files individually and hashing them all serially.
+Improve upon this by introducing a per-section relocation cache storing the
+first relocation at or after each 64-byte window of data (an empirically
+determined index range), indexed by chunk.
 
-Parallelise this operation by maintaining a thread pool for the hashing
-work.
+The lookup is implemented an array lookup and touches no shared state, so
+can be used from multiple threads.
 
-Combined with the per-file hashing commit this cuts modpost's run time
-nearly in half for an allmodconfig build.
+This relies upon the entries within a section being sorted, which is the
+case for all sections supplied to objtool by the link step during the
+kernel build.
 
-Module.symvers and every *.mod.S are byte for byte the same.
+For cases where sections are supplied out of order or grown one relocation
+at a time (e.g. livepatch), fall back to using the existing hash mechanism.
 
-modpost is on the serial tail of every allmodconfig build, however
-defconfig does not set CONFIG_MODULE_SRCVERSION_ALL and is unchanged.
+DWARF sections are a special case - their relocations are never looked up
+by destination at all and only need to be on their symbol's list for
+elf_update_sym_relocs().
+
+So do not index or hash DWARF relocations at all - however add a mechanism
+such that if one were ever looked up, a linear scan will be used.
+
+This is meaningful in practice as on an x86-64 kernel build with
+CONFIG_DEBUG_INFO set objtool processing of vmlinux.o is dominated by DWARF
+section processing.
+
+For an allmodconfig build ~9 million relocations were hashed, and ~8.2
+million of those were DWARF sections, which added overhead on cache miss
+and pollution of the hash table. This is now eliminated.
+
+The hash, when used, is read-mostly (every jump, call and memory operand)
+and several relocations share a key due to the 16-byte stride, so keep the
+hash sparse by scaling the hash by the number of objects to be hashed.
+
+Another hotspot in objtool processing is determining 'dead end' functions,
+i.e. functions which never return.
+
+Implement a simple boolean per-function cache for this to avoid determining
+this more than once per function.
+
+The output of objtool before and after this change was confirmed to be
+byte-for-byte identical both for x86_64 defconfig and allmodconfig with
+gcc and clang.
+
+objtool on vmlinux.o is on the serial tail of every build that links
+vmlinux, no-op builds are unchanged.
 
 Whole build, 128-thread Threadripper 9980X, best of N runs:
 
                                          before   after     delta
                                          -------------------------------
-  x86 allmodconfig, touch mm/vma.c, gcc    33.4s    30.2s     -3.2s (-10%)
-  x86 allmodconfig, touch mm/vma.c, clang  31.1s    28.1s     -3.0s (-10%)
+  x86 defconfig, touch mm/vma.c, gcc        8.4s     8.1s    -0.28s (-3%)
+  x86 defconfig, touch mm/vma.c, clang      7.5s     7.1s    -0.41s (-5%)
+  x86 defconfig, clean, gcc                27.1s    26.8s    -0.34s (-1%)
+  x86 defconfig, clean, clang              26.6s    26.2s    -0.40s (-1%)
+  x86 allmodconfig, touch mm/vma.c, gcc    30.2s    28.4s     -1.8s (-6%)
+  x86 allmodconfig, touch mm/vma.c, clang  28.1s    26.0s     -2.1s (-7%)
 
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- scripts/mod/Makefile     |  1 +
- scripts/mod/modpost.c    | 72 ++++++++++++++++++++++++++++++++++++++++++++++--
- scripts/mod/modpost.h    |  2 ++
- scripts/mod/sumversion.c |  3 +-
- 4 files changed, 74 insertions(+), 4 deletions(-)
+ tools/objtool/check.c               |  10 +-
+ tools/objtool/elf.c                 | 242 +++++++++++++++++++++++++++++++++---
+ tools/objtool/include/objtool/elf.h |   4 +
+ 3 files changed, 238 insertions(+), 18 deletions(-)
 
-diff --git a/scripts/mod/Makefile b/scripts/mod/Makefile
-index fbd5099e0441..fdd486184f9c 100644
---- a/scripts/mod/Makefile
-+++ b/scripts/mod/Makefile
-@@ -5,6 +5,7 @@ hostprogs-always-y	+= modpost mk_elfconfig
- always-y		+= empty.o
+diff --git a/tools/objtool/check.c b/tools/objtool/check.c
+index 464f6c9d9ff0..2abd41cc3aaf 100644
+--- a/tools/objtool/check.c
++++ b/tools/objtool/check.c
+@@ -305,7 +305,15 @@ static bool __dead_end_function(struct objtool_file *file, struct symbol *func,
  
- modpost-objs	:= modpost.o file2alias.o sumversion.o symsearch.o
-+HOSTLDLIBS_modpost := -lpthread
- 
- devicetable-offsets-file := devicetable-offsets.h
- 
-diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index 550ccd753ed8..882169e51851 100644
---- a/scripts/mod/modpost.c
-+++ b/scripts/mod/modpost.c
-@@ -16,6 +16,7 @@
- #include <fnmatch.h>
- #include <stdio.h>
- #include <ctype.h>
-+#include <pthread.h>
- #include <string.h>
- #include <limits.h>
- #include <stdbool.h>
-@@ -1717,8 +1718,7 @@ static void read_symbols(const char *modname)
- 	if (!mod->is_vmlinux) {
- 		version = get_modinfo(&info, "version");
- 		if (version || all_versions)
--			get_src_version(mod->name, mod->srcversion,
--					sizeof(mod->srcversion) - 1);
-+			mod->need_srcversion = true;
- 	}
- 
- 	parse_elf_finish(&info);
-@@ -1736,6 +1736,72 @@ static void read_symbols(const char *modname)
- 	}
+ static bool dead_end_function(struct objtool_file *file, struct symbol *func)
+ {
+-	return __dead_end_function(file, func, 0);
++	if (!func)
++		return false;
++
++	if (!func->dead_end_known) {
++		func->dead_end = __dead_end_function(file, func, 0);
++		func->dead_end_known = 1;
++	}
++
++	return func->dead_end;
  }
  
-+static struct module **srcversion_mods;
-+static unsigned int nr_srcversion_mods, next_srcversion_mod;
-+
-+static bool get_next_src_version(void)
+ static void init_cfi_state(struct cfi_state *cfi)
+diff --git a/tools/objtool/elf.c b/tools/objtool/elf.c
+index a791f4ea6ec1..13073dc72481 100644
+--- a/tools/objtool/elf.c
++++ b/tools/objtool/elf.c
+@@ -316,18 +316,117 @@ struct symbol *find_global_symbol_by_name(const struct elf *elf, const char *nam
+ 	return NULL;
+ }
+ 
+-/* If there are multiple matches, return the first one in the range */
+-struct reloc *find_reloc_by_dest_range(const struct elf *elf, struct section *sec,
++static bool is_dwarf_section(struct section *sec)
 +{
-+	struct module *mod;
-+	unsigned int idx;
++	return !strncmp(sec->name, ".debug_", 7);
++}
 +
-+	idx = __sync_fetch_and_add(&next_srcversion_mod, 1);
-+	if (idx >= nr_srcversion_mods)
-+		return false;
-+	mod = srcversion_mods[idx];
++/* Cache relocations at a 64 byte granularity. */
++#define RELOC_CACHE_INDEX_SHIFT	6
 +
-+	get_src_version(mod->name, mod->srcversion,
-+			sizeof(mod->srcversion) - 1);
++static unsigned long reloc_cache_index(unsigned long offset)
++{
++	return offset >> RELOC_CACHE_INDEX_SHIFT;
++}
++
++static unsigned int reloc_cache_nr_windows(const struct section *rsec)
++{
++	const unsigned long size = sec_size(rsec->base);
++
++	return (size >> RELOC_CACHE_INDEX_SHIFT) + 1;
++}
++
++static int init_reloc_cache(struct section *rsec)
++{
++	const unsigned int nr_relocs = sec_num_entries(rsec);
++	const unsigned int nr_windows = reloc_cache_nr_windows(rsec);
++	unsigned int reloc_idx, next_cache_idx = 0;
++
++	rsec->reloc_cache = malloc(nr_windows * sizeof(unsigned int));
++	if (!rsec->reloc_cache) {
++		ERROR_GLIBC("malloc");
++		return -1;
++	}
++
++	/* Populate relocation indexes reloc cache index -> reloc index. */
++	for (reloc_idx = 0; reloc_idx < nr_relocs; reloc_idx++) {
++		struct reloc *reloc = &rsec->relocs[reloc_idx];
++		const unsigned long offset = reloc_offset(reloc);
++		const unsigned long cache_idx = reloc_cache_index(offset);
++
++		if (cache_idx >= nr_windows)
++			break;
++
++		while (next_cache_idx <= cache_idx)
++			rsec->reloc_cache[next_cache_idx++] = reloc_idx;
++	}
++
++	while (next_cache_idx < nr_windows)
++		rsec->reloc_cache[next_cache_idx++] = nr_relocs;
++
++	rsec->sorted = true;
++	return 0;
++}
++
++static void free_reloc_cache(struct section *rsec)
++{
++	free(rsec->reloc_cache);
++	rsec->reloc_cache = NULL;
++	rsec->sorted = false;
++}
++
++static struct reloc *find_reloc_sorted(struct section *rsec,
+ 				       unsigned long offset, unsigned int len)
+ {
+-	struct reloc *reloc, *r = NULL;
+-	struct section *rsec;
+-	unsigned long o;
++	struct reloc *relocs = rsec->relocs;
++	const unsigned int nr_relocs = sec_num_entries(rsec);
++	const unsigned long cache_idx = reloc_cache_index(offset);
++	unsigned int reloc_idx, i;
+ 
+-	rsec = sec->rsec;
+-	if (!rsec)
++	if (cache_idx >= reloc_cache_nr_windows(rsec))
++		return NULL;
++
++	reloc_idx = rsec->reloc_cache[cache_idx];
++
++	/*
++	 * Scan through all relocations covered by cache entry to find the
++	 * first at or after offset. Relocations are sorted by offset.
++	 */
++	for (i = reloc_idx; i < nr_relocs; i++) {
++		struct reloc *reloc = &relocs[i];
++		const unsigned long curr_offset = reloc_offset(reloc);
++
++		if (curr_offset >= offset)
++			break;
++
++		reloc_idx++;
++	}
++
++	/* Nothing found, or the first candidate lies beyond the range. */
++	if (reloc_idx >= nr_relocs ||
++	    reloc_offset(&relocs[reloc_idx]) >= offset + len)
+ 		return NULL;
+ 
++	/* If there are duplicate entries, return the last. */
++	for (i = reloc_idx; i < nr_relocs - 1; i++) {
++		struct reloc *reloc = &relocs[i];
++		struct reloc *next_reloc = &relocs[i + 1];
++
++		if (reloc_offset(next_reloc) != reloc_offset(reloc))
++			break;
++		reloc_idx++;
++	}
++
++	return &relocs[reloc_idx];
++}
++
++/* Not indexed, so look it up in the hash. */
++static struct reloc *find_reloc_hash(const struct elf *elf, struct section *rsec,
++				     unsigned long offset, unsigned int len)
++{
++	unsigned long o;
++	struct reloc *reloc, *r = NULL;
++
+ 	for_offset_range(o, offset, offset + len) {
+ 		elf_hash_for_each_possible(elf, reloc, reloc, hash,
+ 					   sec_offset_hash(rsec, o)) {
+@@ -347,14 +446,48 @@ struct reloc *find_reloc_by_dest_range(const struct elf *elf, struct section *se
+ 	return r;
+ }
+ 
+-struct reloc *find_reloc_by_dest(const struct elf *elf, struct section *sec, unsigned long offset)
++/* Should never be invoked, provided as a backstop. */
++static struct reloc *find_reloc_linear(struct section *rsec,
++				       unsigned long offset, unsigned int len)
+ {
+-	return find_reloc_by_dest_range(elf, sec, offset, 1);
++	struct reloc *reloc, *first = NULL;
++
++	WARN("%s: linear scan for sec %s with %u relocs at offset %lu len %u",
++	     __func__, rsec->name, sec_num_entries(rsec), offset, len);
++
++	for_each_reloc(rsec, reloc) {
++		if (reloc_offset(reloc) < offset ||
++		    reloc_offset(reloc) >= offset + len)
++			continue;
++
++		if (!first || reloc_offset(reloc) < reloc_offset(first))
++			first = reloc;
++	}
++
++	return first;
+ }
+ 
+-static bool is_dwarf_section(struct section *sec)
++/* If there are multiple matches, return the first one in the range. */
++struct reloc *find_reloc_by_dest_range(const struct elf *elf, struct section *sec,
++				       unsigned long offset, unsigned int len)
+ {
+-	return !strncmp(sec->name, ".debug_", 7);
++	struct section *rsec = sec->rsec;
++
++	if (!rsec)
++		return NULL;
++
++	if (rsec->sorted)
++		return find_reloc_sorted(rsec, offset, len);
++
++	if (rsec->hashed)
++		return find_reloc_hash(elf, rsec, offset, len);
++
++	return find_reloc_linear(rsec, offset, len);
++}
++
++struct reloc *find_reloc_by_dest(const struct elf *elf, struct section *sec, unsigned long offset)
++{
++	return find_reloc_by_dest_range(elf, sec, offset, 1);
+ }
+ 
+ static int read_sections(struct elf *elf)
+@@ -1071,7 +1204,8 @@ struct reloc *elf_init_reloc(struct elf *elf, struct section *rsec,
+ 	set_reloc_type(elf, reloc, type);
+ 	set_reloc_addend(elf, reloc, addend);
+ 
+-	elf_hash_add(reloc, &reloc->hash, reloc_hash(reloc));
++	if (rsec->hashed)
++		elf_hash_add(reloc, &reloc->hash, reloc_hash(reloc));
+ 	set_sym_next_reloc(reloc, sym->relocs);
+ 	sym->relocs = reloc;
+ 
+@@ -1123,18 +1257,44 @@ struct reloc *elf_init_reloc_data_sym(struct elf *elf, struct section *sec,
+ 			      elf_data_rela_type(elf));
+ }
+ 
++static u64 raw_reloc_offset(const struct section *rsec, unsigned int idx)
++{
++	const void *entry = rsec->data->d_buf + idx * rsec->sh.sh_entsize;
++
++	if (rsec->sh.sh_entsize < sizeof(Elf64_Rel))
++		return ((const Elf32_Rela *)entry)->r_offset;
++
++	return ((const Elf64_Rela *)entry)->r_offset;
++}
++
++static bool reloc_sec_in_order(struct section *rsec)
++{
++	const unsigned int nr_relocs = sec_num_entries(rsec);
++	u64 prev_offset = 0;
++	unsigned int i;
++
++	for (i = 0; i < nr_relocs; i++) {
++		/* Called before relocs exist, so look at raw entry. */
++		const u64 offset = raw_reloc_offset(rsec, i);
++
++		if (offset < prev_offset)
++			return false;
++		prev_offset = offset;
++	}
++
 +	return true;
 +}
 +
-+static void *srcversion_worker(void *arg)
+ static int read_relocs(struct elf *elf)
+ {
+-	unsigned long nr_reloc, max_reloc = 0;
++	unsigned long nr_reloc, max_reloc = 0, nr_hashed = 0;
+ 	struct section *rsec;
+ 	struct reloc *reloc;
+ 	unsigned int symndx;
+ 	struct symbol *sym;
++	bool hashed;
+ 	int i;
+ 
+-	if (!elf_alloc_hash(reloc, elf->num_relocs))
+-		return -1;
+-
+ 	list_for_each_entry(rsec, &elf->sections, list) {
+ 		if (!is_reloc_sec(rsec))
+ 			continue;
+@@ -1147,6 +1307,28 @@ static int read_relocs(struct elf *elf)
+ 
+ 		rsec->base->rsec = rsec;
+ 
++		/* DWARF relocs are never looked up. */
++		if (is_dwarf_section(rsec->base))
++			continue;
++		if (reloc_sec_in_order(rsec)) {
++			rsec->sorted = true;
++			continue;
++		}
++
++		rsec->hashed = true;
++		nr_hashed += sec_num_entries(rsec);
++	}
++
++	/* Read mostly, so avoid collisions and keep the hash sparse. */
++	if (!elf_alloc_hash(reloc, nr_hashed * OFFSET_STRIDE))
++		return -1;
++
++	list_for_each_entry(rsec, &elf->sections, list) {
++		if (!is_reloc_sec(rsec))
++			continue;
++
++		hashed = rsec->hashed;
++
+ 		/* nr_alloc_relocs=0: libelf owns d_buf */
+ 		rsec->nr_alloc_relocs = 0;
+ 
+@@ -1168,18 +1350,23 @@ static int read_relocs(struct elf *elf)
+ 				return -1;
+ 			}
+ 
+-			elf_hash_add(reloc, &reloc->hash, reloc_hash(reloc));
++			if (hashed)
++				elf_hash_add(reloc, &reloc->hash, reloc_hash(reloc));
+ 			set_sym_next_reloc(reloc, sym->relocs);
+ 			sym->relocs = reloc;
+ 
+ 			nr_reloc++;
+ 		}
+ 		max_reloc = max(max_reloc, nr_reloc);
++
++		if (rsec->sorted && init_reloc_cache(rsec))
++			return -1;
+ 	}
+ 
+ 	if (opts.stats) {
+ 		printf("max_reloc: %lu\n", max_reloc);
+ 		printf("num_relocs: %lu\n", elf->num_relocs);
++		printf("num_relocs_hashed: %lu\n", nr_hashed);
+ 		printf("reloc_bits: %d\n", elf->reloc_bits);
+ 	}
+ 
+@@ -1541,6 +1728,26 @@ struct section *elf_create_section(struct elf *elf, const char *name,
+ 	return sec;
+ }
+ 
++/* A relocation was appended, abandon relocation cache and use hash instead. */
++static void copy_reloc_cache_to_hash(struct elf *elf, struct section *rsec,
++				     unsigned int nr_relocs)
 +{
-+	while (get_next_src_version())
-+		;
++	unsigned int i;
 +
-+	return NULL;
-+}
-+
-+static void hash_srcversions(void)
-+{
-+	unsigned int i = 0;
-+	struct module *mod;
-+	pthread_t *threads;
-+	long nr_threads;
-+
-+	list_for_each_entry(mod, &modules, list)
-+		if (mod->need_srcversion)
-+			nr_srcversion_mods++;
-+
-+	if (!nr_srcversion_mods)
++	if (rsec->hashed)
 +		return;
 +
-+	srcversion_mods = xmalloc(nr_srcversion_mods * sizeof(*srcversion_mods));
++	if (rsec->sorted)
++		free_reloc_cache(rsec);
 +
-+	list_for_each_entry(mod, &modules, list)
-+		if (mod->need_srcversion)
-+			srcversion_mods[i++] = mod;
++	for (i = 0; i < nr_relocs; i++) {
++		struct reloc *reloc = &rsec->relocs[i];
 +
-+	nr_threads = sysconf(_SC_NPROCESSORS_ONLN);
-+	nr_threads = nr_threads < 1 ? 1 : nr_threads; /* On error assume 1. */
-+	if (nr_threads > nr_srcversion_mods)
-+		nr_threads = nr_srcversion_mods;
-+
-+	sumversion_init();
-+	threads = xmalloc(nr_threads * sizeof(*threads));
-+	for (i = 0; i < nr_threads; i++) {
-+		if (pthread_create(&threads[i], NULL, srcversion_worker, NULL)) {
-+			perror("pthread_create");
-+			exit(1);
-+		}
++		elf_hash_add(reloc, &reloc->hash, reloc_hash(reloc));
 +	}
-+	for (i = 0; i < nr_threads; i++)
-+		pthread_join(threads[i], NULL);
-+
-+	free(threads);
-+	free(srcversion_mods);
++	rsec->hashed = true;
 +}
 +
- static void read_symbols_from_files(const char *filename)
+ static int elf_alloc_reloc(struct elf *elf, struct section *rsec)
  {
- 	FILE *in = stdin;
-@@ -2729,6 +2795,8 @@ int main(int argc, char **argv)
- 	if (files_source)
- 		read_symbols_from_files(files_source);
- 
-+	hash_srcversions();
-+
- 	list_for_each_entry(mod, &modules, list) {
- 		keep_no_trim_symbols(mod);
- 
-diff --git a/scripts/mod/modpost.h b/scripts/mod/modpost.h
-index d5f6d82837d5..10d5f8f2f293 100644
---- a/scripts/mod/modpost.h
-+++ b/scripts/mod/modpost.h
-@@ -127,6 +127,7 @@ struct module {
- 	bool has_init;
- 	bool has_cleanup;
- 	char	     srcversion[25];
-+	bool need_srcversion;
- 	// Missing namespace dependencies
- 	struct list_head missing_namespaces;
- 	// Actual imported namespaces
-@@ -213,6 +214,7 @@ void handle_moddevtable(struct module *mod, struct elf_info *info,
- 			Elf_Sym *sym, const char *symname);
- 
- /* sumversion.c */
-+void sumversion_init(void);
- void get_src_version(const char *modname, char sum[], unsigned sumlen);
- 
- /* from modpost.c */
-diff --git a/scripts/mod/sumversion.c b/scripts/mod/sumversion.c
-index 5501d6aa0bea..4521b92ef868 100644
---- a/scripts/mod/sumversion.c
-+++ b/scripts/mod/sumversion.c
-@@ -249,7 +249,7 @@ static int parse_comment(const char *file, unsigned long len)
- /* FIXME: Handle .s files differently (eg. # starts comments) --RR */
- static bool stop_char[256];
- 
--static void sumversion_init(void)
-+void sumversion_init(void)
- {
- 	static bool done;
- 	int chr;
-@@ -402,7 +402,6 @@ static int parse_source_files(const char *objfile, struct md4_ctx *md)
- 				     line, strerror(errno));
- 				goto out_file;
- 			}
--
- 		}
- 
+ 	struct reloc *old_relocs, *old_relocs_end, *new_relocs;
+@@ -1592,6 +1799,7 @@ static int elf_alloc_reloc(struct elf *elf, struct section *rsec)
  	}
+ 
+ 	rsec->nr_alloc_relocs = nr_alloc;
++	copy_reloc_cache_to_hash(elf, rsec, nr_relocs_old);
+ 
+ 	old_relocs = rsec->relocs;
+ 	new_relocs = calloc(nr_alloc, sizeof(struct reloc));
+diff --git a/tools/objtool/include/objtool/elf.h b/tools/objtool/include/objtool/elf.h
+index a82517a76a0f..0d61ddfec05f 100644
+--- a/tools/objtool/include/objtool/elf.h
++++ b/tools/objtool/include/objtool/elf.h
+@@ -59,6 +59,8 @@ struct section {
+ 	const char *name;
+ 	int idx;
+ 	bool _changed, text, rodata, noinstr, init, truncate;
++	bool hashed, sorted;
++	unsigned int *reloc_cache;
+ 	struct reloc *relocs;
+ 	unsigned long nr_alloc_relocs;
+ 	struct section *twin;
+@@ -98,6 +100,8 @@ struct symbol {
+ 	u8 klp		     : 1;
+ 	u8 dont_correlate    : 1;
+ 	u8 fake		     : 1;
++	u8 dead_end_known    : 1;
++	u8 dead_end	     : 1;
+ 	struct list_head pv_target;
+ 	struct reloc *relocs;
+ 	struct section *group_sec;
 
 -- 
 2.55.0
