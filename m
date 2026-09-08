@@ -1,34 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B90A3D79E2;
-	Tue,  8 Sep 2026 20:56:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D750F395AE4;
+	Tue,  8 Sep 2026 20:56:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788901001; cv=none; b=urih2cfanEXBMZICvs2QVdTMAT7GF952BMV38WIpG/BbTy0ja1k3IA3TUxggZqbcfW7Ztel36K0GNFJXh9GOaLCCbKIzs+PBrXj6ES58QIHhE+H3uK50BvhM4vRPwfQHAUgzucWV2h2GUid0C58cjxo8ZE984YwjkKuJ89bVPoo=
+	t=1788901013; cv=none; b=u5vFzf5pj3M9ATEj9XxyprDBBo80BtMwYkNTzD5YKtMhvouuDR82vmIOvsAWi2WEPq5OEMINCtACAWRCN9Y560NR2dqiMSB4d45TvENnn/iYs+bTMjY/1Vj6nH+ao4x94YtFzfqbV9zZe9S3NU5uqm6S5TPOtBfcEZWtDTDLwR0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788901001; c=relaxed/simple;
-	bh=N13ZqN50eOU7uY3QR0adbXAgcslOg42oxhOb+TbiiNY=;
+	s=arc-20240116; t=1788901013; c=relaxed/simple;
+	bh=QDaPegKaob+cY6D7aU/vMKnocWM5p0Hu2c7ORW6alF0=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=rDMcDVwPC1AIpulPML4oNvR8Qp+gLWUFgYP8zU2MlExix51BOUummMDKr83W/nT4Iho9I+PehXvOZeqQIzzG9Q0kJs+eMfkkz7GHMY5eCFWvEhrqUYYCqky804haGXLfGvp209SamAah+dVEbk29V4+OWompa4HsXfkdqYx2BpA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ia7otobC; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=QYm/Q6pq3giTgr2uVuuadK0Ct20vtwA0HPmHKbEA48FR7FV1snBDXsUGnG/I/6rm7pyo/xHKzdvUeL9kfLt6ZSedPbjcfmXa7n167PAdJDx1O5B2SYGn90wa3d+pmutlLqeozB5I17/v50Vq0OK/jZR7JVY0LMCEdcCzkCuTU8I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Vh3qWOcs; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ia7otobC"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6D80F1F00A3A;
-	Tue,  8 Sep 2026 20:56:29 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Vh3qWOcs"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DA541F00A3D;
+	Tue,  8 Sep 2026 20:56:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788901000;
-	bh=i4mmShyVZGlgCcDLfFsSbEgGMvI3VWrUjGiN2LoMKxY=;
+	s=k20260515; t=1788901011;
+	bh=CifvSQTpmhSSExkWa1yobxbpugzhtdiAK3RRyWGMh1s=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=Ia7otobCwNkhAtHa/irExbcNB39utNz/W3ids/Ovxn6+xF9yjVuSRttrN3bvH3Q88
-	 eEUZ47xB5oUWgq73QBzX+L5v4SNhDmB8A/tobfOM2Lr2Ctw13MxEcooPf/B9vpxj8S
-	 Co85Z+fqnbnrJIWyihZVcv2KJwi5weDsPwwhfZaANjyYd7nkLmO98km3QVVAIBkz2K
-	 bunSAccE/1l/tzbk6UQMnLrwAFgBjckXWiBugdVPaiP19tJHqEDaYifEUYetj4UK6q
-	 sy0IFHIS+L1yHhDjd62WWvz0/Y0QNHUXwZqBsJJXLEpJ+2RnYopzAk7D70CoL42Gj/
-	 uL3Jpl3v1nl8A==
+	b=Vh3qWOcssUtX3KJbTSlaYmMCCKf+xtwSE2Gk7dMPY+2wjYYmveHn+vU+6RF19TRop
+	 avudRjYQfY66mEvQqBiTS1h1BAyzhK9cU8BzkloYa5wD/Bmu5KRVMfonZTkfBeqNTy
+	 fde3XTAUkIHuaxKBaWqghxhruUZIJka5JS1t/kX9luTYLG0Q2mBew8N9fJaDET3ju4
+	 fCvZQgrE53EBIK9aZxTPCPJiSKG45cCrndZrcrEXAOE2Fn3jlyrK0ixMdD5SXbOh97
+	 DNbCykOGipb28Q8mapJGvagTTnNOgraRpaRIgH5oagmlOIF+UGCbe8RQjO+YRiCvF2
+	 D9mCe4zY3I+dw==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Tue, 08 Sep 2026 21:55:06 +0100
-Subject: [PATCH 06/23] kbuild: only emit vmlinux relocations when required
+Date: Tue, 08 Sep 2026 21:55:07 +0100
+Subject: [PATCH 07/23] elf-parse: add section flags, symbol binding and a
+ read-only mapping
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260908-build-speedup-v1-6-5dc1ac01672d@kernel.org>
+Message-Id: <20260908-build-speedup-v1-7-5dc1ac01672d@kernel.org>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 In-Reply-To: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -73,103 +74,208 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3331; i=ljs@kernel.org;
- h=from:subject:message-id; bh=N13ZqN50eOU7uY3QR0adbXAgcslOg42oxhOb+TbiiNY=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlJkt3xWaebJaeGL+Iy2LKP8PquXzJH3nb+NPU+v7v
- +ri19ncHaUsDGJcDLJiiizPv4jvDxIJm9d5wd8NZg4rE8gQBi5OAZhIVSYjw28ziSzFyOPHLuxN
- d+HOdz7m1O692N/s6NnTf+UL4/Q0VzD8s3+t5hF984P3AqmC154yZ368DXzBtN93Ts1vtiDP7ms
- R/AA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=6366; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=QDaPegKaob+cY6D7aU/vMKnocWM5p0Hu2c7ORW6alF0=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlJkZynmzLLvsX98d/E+QaXdN/Db3T8cl7jTPmS7QX
+ HD8xjvGjlIWBjEuBlkxRZbnX8T3B4mEzeu84O8GM4eVCWQIAxenAEwkdCHDX5HpH+4oTp7/8G9W
+ 3dK1hzJCczzrzG4fZbvvpsJovvu6bQIjw80fp3K+xZ0SOuH6qaTvb3fEurfTPgYzPy8y21VkX6R
+ WzQUA
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-A kernel build consists of more than one linking pass on vmlinux.o and
-vmlinux, at minimum two, and with CONFIG_KALLSYMS and BTF enabled on x86-64
-for example there are 5 such stages.
+Extend elf-parse to be able to read the symbol table of vmlinux in kallyms.
 
-For architectures that build their own relocation tables (x86, riscv, mips,
-s390), vmlinux is linked with the --emit-relocs parameter specified.
+This requires the ability to open ELF files in read-only mode, so provide
+elf_map_ro() to do so.
 
-However, this is only required on the final vmlinux link.
+It also requires accessors for section flags and symbol bindings, so
+provide these via shdr_flags() and sym_bind().
 
-Symbol tables of trial links preceding it don't need it because they
-already check that System.map matches kallsyms symbols on each build.
-
-GNU ld is slow at emitting relocation tables, so this results in a
-reduction in build time.
-
-Whole build, 128-thread Threadripper 9980X, best of N runs:
-
-                                         before   after     delta
-                                         -------------------------------
-  x86 defconfig, touch mm/vma.c, gcc        9.8s     9.4s    -0.43s (-4%)
-  x86 defconfig, clean, gcc                28.6s    28.1s    -0.47s (-2%)
-  x86 allmodconfig, touch mm/vma.c, gcc    44.0s    42.7s     -1.3s (-3%)
-
-Note that this has little impact on LLVM ld which performs this operation
-more efficiently.
+Also, check for the file being an ELF file first in elf_parse(). This is
+the logical thing to check for first, but additionally prevents kallsyms
+from having to check this it self.
 
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- Makefile                 | 4 +++-
- scripts/Makefile.vmlinux | 3 ++-
- scripts/link-vmlinux.sh  | 6 ++++++
- 3 files changed, 11 insertions(+), 2 deletions(-)
+ scripts/elf-parse.c | 48 +++++++++++++++++++++++++++++++++++-------------
+ scripts/elf-parse.h | 19 +++++++++++++++++++
+ 2 files changed, 54 insertions(+), 13 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index 66654fa71655..85eb2fd026cb 100644
---- a/Makefile
-+++ b/Makefile
-@@ -1263,8 +1263,10 @@ LDFLAGS_vmlinux += --orphan-handling=$(CONFIG_LD_ORPHAN_WARN_LEVEL)
- endif
+diff --git a/scripts/elf-parse.c b/scripts/elf-parse.c
+index 99869ff91a8c..87aa95b1e5e1 100644
+--- a/scripts/elf-parse.c
++++ b/scripts/elf-parse.c
+@@ -17,15 +17,21 @@ struct elf_funcs elf_parser;
+  * Get the whole file as a programming convenience in order to avoid
+  * malloc+lseek+read+free of many pieces.  If successful, then mmap
+  * avoids copying unused pieces; else just read the whole file.
+- * Open for both read and write.
++ * Open for both read and write if writable is true, otherwise open
++ * read-only.
+  */
+-static void *map_file(char const *fname, size_t *size)
++static void *map_file(char const *fname, size_t *size, bool writable)
+ {
+-	int fd;
++	int fd, prot = PROT_READ, flags = MAP_PRIVATE;
+ 	struct stat sb;
+ 	void *addr = NULL;
  
- ifneq ($(CONFIG_ARCH_VMLINUX_NEEDS_RELOCS),)
--LDFLAGS_vmlinux	+= --emit-relocs --discard-none
-+LDFLAGS_vmlinux	+= --discard-none
-+LDFLAGS_vmlinux_relocs := --emit-relocs
- endif
-+export LDFLAGS_vmlinux_relocs
- 
- # Align the architecture of userspace programs with the kernel
- USERFLAGS_FROM_KERNEL := --target=%
-diff --git a/scripts/Makefile.vmlinux b/scripts/Makefile.vmlinux
-index fcae1e432d9a..4b54aaeca65d 100644
---- a/scripts/Makefile.vmlinux
-+++ b/scripts/Makefile.vmlinux
-@@ -64,7 +64,8 @@ ARCH_POSTLINK := $(wildcard $(srctree)/arch/$(SRCARCH)/Makefile.postlink)
- 
- # Final link of vmlinux with optional arch pass after final link
- cmd_link_vmlinux =							\
--	$< "$(LD)" "$(KBUILD_LDFLAGS)" "$(LDFLAGS_vmlinux)" "$@";	\
-+	$< "$(LD)" "$(KBUILD_LDFLAGS)" "$(LDFLAGS_vmlinux)" "$@"	\
-+	   "$(LDFLAGS_vmlinux_relocs)";					\
- 	$(if $(ARCH_POSTLINK), $(MAKE) -f $(ARCH_POSTLINK) $@, true)
- 
- targets += vmlinux.unstripped .vmlinux.export.o
-diff --git a/scripts/link-vmlinux.sh b/scripts/link-vmlinux.sh
-index 970ca10f8fa9..09c5222ccb94 100755
---- a/scripts/link-vmlinux.sh
-+++ b/scripts/link-vmlinux.sh
-@@ -32,6 +32,7 @@ LD="$1"
- KBUILD_LDFLAGS="$2"
- LDFLAGS_vmlinux="$3"
- VMLINUX="$4"
-+LDFLAGS_vmlinux_relocs="$5"
- 
- is_enabled() {
- 	grep -q "^$1=y" include/config/auto.conf
-@@ -96,6 +97,11 @@ vmlinux_link()
- 		ldflags="${ldflags} ${wl}--strip-debug"
- 	fi
- 
-+	# Only the final link actually requires the relocations.
-+	if [ "${output}" = "${VMLINUX}" ] && [ -n "${LDFLAGS_vmlinux_relocs}" ]; then
-+		ldflags="${ldflags} ${wl}${LDFLAGS_vmlinux_relocs}"
-+	fi
+-	fd = open(fname, O_RDWR);
++	if (writable) {
++		prot |= PROT_WRITE;
++		flags = MAP_SHARED;
++	}
 +
- 	if [ -n "${generate_map}" ];  then
- 		ldflags="${ldflags} ${wl}-Map=vmlinux.map"
- 	fi
++	fd = open(fname, writable ? O_RDWR : O_RDONLY);
+ 	if (fd < 0) {
+ 		perror(fname);
+ 		return NULL;
+@@ -39,7 +45,7 @@ static void *map_file(char const *fname, size_t *size)
+ 		goto out;
+ 	}
+ 
+-	addr = mmap(0, sb.st_size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
++	addr = mmap(0, sb.st_size, prot, flags, fd, 0);
+ 	if (addr == MAP_FAILED) {
+ 		fprintf(stderr, "Could not mmap file: %s\n", fname);
+ 		goto out;
+@@ -57,6 +63,12 @@ static int elf_parse(const char *fname, void *addr, uint32_t types)
+ 	Elf_Ehdr *ehdr = addr;
+ 	uint16_t type;
+ 
++	if (memcmp(ELFMAG, ehdr->e32.e_ident, SELFMAG) != 0 ||
++	    ehdr->e32.e_ident[EI_VERSION] != EV_CURRENT) {
++		fprintf(stderr, "unrecognized ELF file %s\n", fname);
++		return -1;
++	}
++
+ 	switch (ehdr->e32.e_ident[EI_DATA]) {
+ 	case ELFDATA2LSB:
+ 		elf_parser.r	= rle;
+@@ -78,12 +90,6 @@ static int elf_parse(const char *fname, void *addr, uint32_t types)
+ 		return -1;
+ 	}
+ 
+-	if (memcmp(ELFMAG, ehdr->e32.e_ident, SELFMAG) != 0 ||
+-	    ehdr->e32.e_ident[EI_VERSION] != EV_CURRENT) {
+-		fprintf(stderr, "unrecognized ELF file %s\n", fname);
+-		return -1;
+-	}
+-
+ 	type = elf_parser.r2(&ehdr->e32.e_type);
+ 	if (!((1 << type) & types)) {
+ 		fprintf(stderr, "Invalid ELF type file %s\n", fname);
+@@ -103,7 +109,9 @@ static int elf_parse(const char *fname, void *addr, uint32_t types)
+ 		elf_parser.shdr_name		= shdr32_name;
+ 		elf_parser.shdr_type		= shdr32_type;
+ 		elf_parser.shdr_entsize		= shdr32_entsize;
++		elf_parser.shdr_flags		= shdr32_flags;
+ 		elf_parser.sym_type		= sym32_type;
++		elf_parser.sym_bind		= sym32_bind;
+ 		elf_parser.sym_name		= sym32_name;
+ 		elf_parser.sym_value		= sym32_value;
+ 		elf_parser.sym_shndx		= sym32_shndx;
+@@ -133,7 +141,9 @@ static int elf_parse(const char *fname, void *addr, uint32_t types)
+ 		elf_parser.shdr_name		= shdr64_name;
+ 		elf_parser.shdr_type		= shdr64_type;
+ 		elf_parser.shdr_entsize		= shdr64_entsize;
++		elf_parser.shdr_flags		= shdr64_flags;
+ 		elf_parser.sym_type		= sym64_type;
++		elf_parser.sym_bind		= sym64_bind;
+ 		elf_parser.sym_name		= sym64_name;
+ 		elf_parser.sym_value		= sym64_value;
+ 		elf_parser.sym_shndx		= sym64_shndx;
+@@ -174,12 +184,13 @@ int elf_map_long_size(void *addr)
+ 	return ehdr->e32.e_ident[EI_CLASS] == ELFCLASS32 ? 4 : 8;
+ }
+ 
+-void *elf_map(char const *fname, size_t *size, uint32_t types)
++static void *__elf_map(char const *fname, size_t *size, uint32_t types,
++		       bool writable)
+ {
+ 	void *addr;
+ 	int ret;
+ 
+-	addr = map_file(fname, size);
++	addr = map_file(fname, size, writable);
+ 	if (!addr)
+ 		return NULL;
+ 
+@@ -192,6 +203,17 @@ void *elf_map(char const *fname, size_t *size, uint32_t types)
+ 	return addr;
+ }
+ 
++void *elf_map(char const *fname, size_t *size, uint32_t types)
++{
++	return __elf_map(fname, size, types, true);
++}
++
++/* For tools that only read the file. */
++void *elf_map_ro(char const *fname, size_t *size, uint32_t types)
++{
++	return __elf_map(fname, size, types, false);
++}
++
+ void elf_unmap(void *addr, size_t size)
+ {
+ 	munmap(addr, size);
+diff --git a/scripts/elf-parse.h b/scripts/elf-parse.h
+index f4411e03069d..453286e63032 100644
+--- a/scripts/elf-parse.h
++++ b/scripts/elf-parse.h
+@@ -37,10 +37,12 @@ struct elf_funcs {
+ 	uint64_t (*shdr_offset)(Elf_Shdr *shdr);
+ 	uint64_t (*shdr_size)(Elf_Shdr *shdr);
+ 	uint64_t (*shdr_entsize)(Elf_Shdr *shdr);
++	uint64_t (*shdr_flags)(Elf_Shdr *shdr);
+ 	uint32_t (*shdr_link)(Elf_Shdr *shdr);
+ 	uint32_t (*shdr_name)(Elf_Shdr *shdr);
+ 	uint32_t (*shdr_type)(Elf_Shdr *shdr);
+ 	uint8_t (*sym_type)(Elf_Sym *sym);
++	uint8_t (*sym_bind)(Elf_Sym *sym);
+ 	uint32_t (*sym_name)(Elf_Sym *sym);
+ 	uint64_t (*sym_value)(Elf_Sym *sym);
+ 	uint16_t (*sym_shndx)(Elf_Sym *sym);
+@@ -143,6 +145,7 @@ SHDR_ADDR(addr)
+ SHDR_ADDR(offset)
+ SHDR_ADDR(size)
+ SHDR_ADDR(entsize)
++SHDR_ADDR(flags)
+ 
+ SHDR_WORD(link)
+ SHDR_WORD(name)
+@@ -211,6 +214,21 @@ static inline uint8_t sym_type(Elf_Sym *sym)
+ 	return elf_parser.sym_type(sym);
+ }
+ 
++static inline uint8_t sym64_bind(Elf_Sym *sym)
++{
++	return ELF64_ST_BIND(sym->e64.st_info);
++}
++
++static inline uint8_t sym32_bind(Elf_Sym *sym)
++{
++	return ELF32_ST_BIND(sym->e32.st_info);
++}
++
++static inline uint8_t sym_bind(Elf_Sym *sym)
++{
++	return elf_parser.sym_bind(sym);
++}
++
+ SYM_ADDR(value)
+ SYM_WORD(name)
+ SYM_HALF(shndx)
+@@ -298,6 +316,7 @@ static inline void w8le(uint64_t val, uint64_t *x)
+ }
+ 
+ void *elf_map(char const *fname, size_t *size, uint32_t types);
++void *elf_map_ro(char const *fname, size_t *size, uint32_t types);
+ void elf_unmap(void *addr, size_t size);
+ int elf_map_machine(void *addr);
+ int elf_map_long_size(void *addr);
 
 -- 
 2.55.0
