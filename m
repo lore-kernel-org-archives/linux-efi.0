@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E7B6376A1E;
-	Tue,  8 Sep 2026 20:57:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA6593F327A;
+	Tue,  8 Sep 2026 20:57:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788901069; cv=none; b=l/WSAx7LVdGXUs5Z8D7BAZ7DNPUC8mVmE03j6I62kkV7RrJxtQTGpb+dUiWVVSmHMGd5aYppEhifsZnpf0xBivX66kK14oVVCw6f6dhGZIruwHywCdupKOEsnBGxXni9atqND3toAoh3OTDFtYydxAqOI8yoh7oIkxZDQoMTpjM=
+	t=1788901080; cv=none; b=d3C5ukxRbc6IqmLn9dFn195U/iHzaPfLUoJcXhACa5G300iESyUeqS7acNinLR/Jh4/Ynf5WTcGLgxdCRK9WkgYNfdAd7fsk2TguCndMRer+bKp6IuU/ySDL10mq3yD933U4U6E8ip45RgNneZaHABfyuIApELZ4QtGZYNBcAho=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788901069; c=relaxed/simple;
-	bh=r7VENpndNaAt1k1zEv1dPwhpRhgGzMHgAB3PtXYAN2s=;
+	s=arc-20240116; t=1788901080; c=relaxed/simple;
+	bh=Mu9/3L6JwuoO4qE0B5TB19zN1X+uYA2ATdK9i0ZQjsI=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=ZjLbnTnVJXcsTskvDGPCQknRP6vgqkCxWobce8j7VhhiMFbiZnwOtxDSNv9oWTDJKAAPiJEe5e/iNu4q+sy3zuq9nJ9zWVri+x615W6NixCIgBgq4L29CL94wgMLtY0/j/Rgk6NjFQ+j2BKL9vu41uWFdKQ4xoplkHvpIgzIKV0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iHbGsrn/; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=KWytDAf2QKaf3SyDHbWfm2XuyJaEsXp4p1qu2ybQRYaHNNtC4E9QdNirJLl7V71IMEWvLT96Au852ga0ogwiVyfvUsy1rIiKDH/yHgoJPw6RFRkDquihQ7wKcl71sE7KT4CZTIq4zp34zMntXBG80rG57MNnnJv6croZ9tPkqjU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H7eOezsG; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iHbGsrn/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C1E1D1F00A3A;
-	Tue,  8 Sep 2026 20:57:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H7eOezsG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 018651F00ACA;
+	Tue,  8 Sep 2026 20:57:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788901067;
-	bh=PernGqwpWrFsOgiWh9Bsze8TcH7Js8itUUkLvIDwUOA=;
+	s=k20260515; t=1788901078;
+	bh=o9XBtkaVqNcdBkr0fOqwTDFvihvtpSpEfmr2OcpAjrM=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=iHbGsrn/YzSQmh5Z0FnT8moN1ScmCdpZzO/YQK7yfXBN8SnW8eQG2YNhpuWWPs2sy
-	 XdmDs9mhrc5esMv+8qjenNvsT5oHpCFjYJX3P66VM2Kt1Eq3E3yDiu+NUiMqPMVqYc
-	 U+5SkM0Cj5GIN9/3s0OzMIHzLqp3QxPjOSmweo8Xf/yIgmekZF8dWZhF0/a5NIHlLB
-	 wx0Ht8AebSHq++w2Hr9z6eUJJNupIUkO2H9g7l2/XIsbFT+ymwU3Rg18Y/DHSDHRim
-	 Y6lj8z/4860zEXYEJCUnXJvyUNCLsU4mNbuuHAkSfdGz4RHRlpjpQNiApsoYN0EeN0
-	 CaGkHT4lUr3nQ==
+	b=H7eOezsG/k4L7RnezQlzDmyxYvIW6bywyEUwrvTlZzo4lKh0vtSAfck1wkSXTQ9ev
+	 VmZAJpvkEPwqDX3YHmC2BMJU5vL4+Jp8Qz22aWlTQoLIDTQ8d9YGnPv4v7SZKWJmD5
+	 mTT1ODPotGOg6g/x0H87aTh061dDmL+8/iK+4eYyFoJK4js88YkUgoiBLn7V8GzuoJ
+	 y6i71GmBdFm8MSKvOsDdb2m+Z6GbI99drwRspDJqnv1ylIFlbuxjYAzmCi1oKczYfM
+	 P+rh2C9C8oqjl+1HOSJ9/d0i9kia2cmslDtIwrafGPzwwR1QJoYTXLQFpyVjQtdJ3Y
+	 OpWXnJrOCY06A==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Tue, 08 Sep 2026 21:55:12 +0100
-Subject: [PATCH 12/23] kbuild: avoid re-running compiler and linker probes
+Date: Tue, 08 Sep 2026 21:55:13 +0100
+Subject: [PATCH 13/23] modpost: hash module source per-file, not per-byte
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +37,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260908-build-speedup-v1-12-5dc1ac01672d@kernel.org>
+Message-Id: <20260908-build-speedup-v1-13-5dc1ac01672d@kernel.org>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 In-Reply-To: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -73,444 +73,144 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=19050; i=ljs@kernel.org;
- h=from:subject:message-id; bh=r7VENpndNaAt1k1zEv1dPwhpRhgGzMHgAB3PtXYAN2s=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlJmziVj8j03lLI4t7iplPbZzM6/Em+bzwSfqODqyH
- 5+xlWHqKGVhEONikBVTZHn+RXx/kEjYvM4L/m4wc1iZQIYwcHEKwETEPzP8sw0Tdn17z9g6UOzA
- kTVai7YofZUwnMfgOOPCk2MWAi9cYxgZbgSF+1jG35G4/zfOaHXx2W+SMRHHRYMWP7wgXXV+cX0
- IKwA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3622; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=Mu9/3L6JwuoO4qE0B5TB19zN1X+uYA2ATdK9i0ZQjsI=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlJmrS6scTz06IbNlhe9Px+M2gU853vLcZxboy2Ziz
+ l/vw76so5SFQYyLQVZMkeX5F/H9QSJh8zov+LvBzGFlAhnCwMUpABN5tpbhv1eSsfzRGv+JKq57
+ 9kz547UpXNTouVWchL6z5PO2L/VcTxj+J2n+Wl9knuH4X+q39dVyu90tolvqPb4dUZc0fis89dx
+ TTgA=
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-Each kernel make invocation begins with ~30 compiler and linker runs each
-of which performs duplicate probe for a number of compiler and linker
-options.
+modpost spends a long time md4 hashing module source at a per-byte
+granularity.
 
-This is useless work - the compiler and its version is known, so use these
-to determine which options are available, once.
+Fix this by doing this hashing per-file instead by accumulating a per-file
+buffer in parse_file().
 
-A convention already exists for this - CC_HAS_xxx, LD_HAS_xxx in Kconfig
-files (for example, CC_HAS_COUNTED_BY), so convert these probes to Kconfig
-options where appropriate.
+All 11,189 .mod.c files and Module.symvers were confirmed to be identical
+with this change applied.
 
-With gcc and clang, defconfig and allmodconfig, the recorded command
-lines are unchanged, a build with nothing to do rebuilds nothing and W=1
-continues to function correctly.
-
-Doing this improves all builds, but has a particularly positive impact on
-no-op builds (builds where nothing has changed).
+This is especially impactful for allmodconfig incremental builds (where
+CONFIG_MODULE_SRCVERSION_ALL is set).
 
 Whole build, 128-thread Threadripper 9980X, best of N runs:
 
                                          before   after     delta
                                          -------------------------------
-  x86 defconfig, no-op make, gcc           0.62s    0.46s    -0.17s (-27%)
-  x86 defconfig, no-op make, clang         0.78s    0.53s    -0.25s (-32%)
-  x86 defconfig, touch mm/vma.c, gcc        8.7s     8.5s    -0.17s (-2%)
-  x86 defconfig, touch mm/vma.c, clang      7.9s     7.6s    -0.25s (-3%)
-  x86 defconfig, clean, clang              27.0s    26.8s    -0.26s (-1%)
-  x86 allmodconfig, no-op make, gcc        11.2s    11.0s    -0.18s (-2%)
-  x86 allmodconfig, no-op make, clang      11.9s    11.6s    -0.28s (-2%)
-  x86 allmodconfig, touch mm/vma.c, clang  36.5s    36.2s    -0.31s (-1%)
+  x86 allmodconfig, touch mm/vma.c, gcc    40.6s    38.2s     -2.4s (-6%)
+  x86 allmodconfig, touch mm/vma.c, clang  36.2s    35.0s     -1.2s (-3%)
 
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- Makefile                              | 23 +++++------
- arch/arm64/kernel/pi/Makefile         |  2 +-
- arch/riscv/kernel/pi/Makefile         |  2 +-
- arch/x86/Kconfig                      | 17 ++++++++
- arch/x86/Makefile                     | 12 +++---
- drivers/firmware/efi/libstub/Makefile |  2 +-
- init/Kconfig                          | 77 +++++++++++++++++++++++++++++++++++
- scripts/Makefile.warn                 | 28 ++++++-------
- 8 files changed, 128 insertions(+), 35 deletions(-)
+ scripts/mod/sumversion.c | 56 +++++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 44 insertions(+), 12 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index 56e56bea53c3..088e901f0a72 100644
---- a/Makefile
-+++ b/Makefile
-@@ -946,8 +946,8 @@ KBUILD_RUSTFLAGS += -Coverflow-checks=$(if $(CONFIG_RUST_OVERFLOW_CHECKS),y,n)
- ifdef CONFIG_CC_IS_GCC
- # gcc-10 renamed --param=allow-store-data-races=0 to
- # -fno-allow-store-data-races.
--KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
--KBUILD_CFLAGS	+= $(call cc-option,-fno-allow-store-data-races)
-+KBUILD_CFLAGS	+= $(if $(CONFIG_CC_HAS_ALLOW_STORE_DATA_RACES_PARAM),--param=allow-store-data-races=0)
-+KBUILD_CFLAGS	+= $(if $(CONFIG_CC_HAS_NO_ALLOW_STORE_DATA_RACES),-fno-allow-store-data-races)
- endif
+diff --git a/scripts/mod/sumversion.c b/scripts/mod/sumversion.c
+index 3dd28b4d0099..2cbadd3cd97d 100644
+--- a/scripts/mod/sumversion.c
++++ b/scripts/mod/sumversion.c
+@@ -224,19 +224,11 @@ static void md4_final_ascii(struct md4_ctx *mctx, char *out, unsigned int len)
+ 		 mctx->hash[0], mctx->hash[1], mctx->hash[2], mctx->hash[3]);
+ }
  
- ifdef CONFIG_READABLE_ASM
-@@ -1011,18 +1011,18 @@ endif
- endif
+-static inline void add_char(unsigned char c, struct md4_ctx *md)
+-{
+-	md4_update(md, &c, 1);
+-}
+-
+-static int parse_string(const char *file, unsigned long len,
+-			struct md4_ctx *md)
++static int parse_string(const char *file, unsigned long len)
+ {
+ 	unsigned long i;
  
- # Explicitly clear padding bits during variable initialization
--KBUILD_CFLAGS += $(call cc-option,-fzero-init-padding-bits=all)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_ZERO_INIT_PADDING_BITS),-fzero-init-padding-bits=all)
+-	add_char(file[0], md);
+ 	for (i = 1; i < len; i++) {
+-		add_char(file[i], md);
+ 		if (file[i] == '"' && file[i-1] != '\\')
+ 			break;
+ 	}
+@@ -255,15 +247,44 @@ static int parse_comment(const char *file, unsigned long len)
+ }
  
- # While VLAs have been removed, GCC produces unreachable stack probes
- # for the randomize_kstack_offset feature. Disable it for all compilers.
--KBUILD_CFLAGS	+= $(call cc-option, -fno-stack-clash-protection)
-+KBUILD_CFLAGS	+= $(if $(CONFIG_CC_HAS_NO_STACK_CLASH_PROTECTION),-fno-stack-clash-protection)
- 
- # Get details on warnings generated due to GCC value tracking.
--KBUILD_CFLAGS	+= $(call cc-option, -fdiagnostics-show-context=2)
-+KBUILD_CFLAGS	+= $(if $(CONFIG_CC_HAS_DIAGNOSTICS_SHOW_CONTEXT),-fdiagnostics-show-context=2)
- 
- # Show inlining notes for __attribute__((warning/error)) call chains.
- # GCC supports this unconditionally while Clang 23+ provides a flag.
--KBUILD_CFLAGS	+= $(call cc-option, -fdiagnostics-show-inlining-chain)
-+KBUILD_CFLAGS	+= $(if $(CONFIG_CC_HAS_DIAGNOSTICS_SHOW_INLINING_CHAIN),-fdiagnostics-show-inlining-chain)
- 
- # Clear used registers at func exit (to reduce data lifetime and ROP gadgets).
- ifdef CONFIG_ZERO_CALL_USED_REGS
-@@ -1033,7 +1033,7 @@ ifdef CONFIG_FUNCTION_TRACER
- ifdef CONFIG_FTRACE_MCOUNT_USE_CC
-   CC_FLAGS_FTRACE	+= -mrecord-mcount
-   ifdef CONFIG_HAVE_NOP_MCOUNT
--    ifeq ($(call cc-option-yn, -mnop-mcount),y)
-+    ifdef CONFIG_CC_HAS_MNOP_MCOUNT
-       CC_FLAGS_FTRACE	+= -mnop-mcount
-       CC_FLAGS_USING	+= -DCC_USING_NOP_MCOUNT
-     endif
-@@ -1051,8 +1051,7 @@ ifdef CONFIG_FTRACE_MCOUNT_USE_RECORDMCOUNT
-   endif
- endif
- ifdef CONFIG_HAVE_FENTRY
--  # s390-linux-gnu-gcc did not support -mfentry until gcc-9.
--  ifeq ($(call cc-option-yn, -mfentry),y)
-+  ifdef CONFIG_CC_HAS_MFENTRY
-     CC_FLAGS_FTRACE	+= -mfentry
-     CC_FLAGS_USING	+= -DCC_USING_FENTRY
-   endif
-@@ -1160,7 +1159,7 @@ NOSTDINC_FLAGS += -nostdinc
- # the kernel uses only C99 flexible arrays for dynamically sized trailing
- # arrays. Enforce this for everything that may examine structure sizes and
- # perform bounds checking.
--KBUILD_CFLAGS += $(call cc-option, -fstrict-flex-arrays=3)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_STRICT_FLEX_ARRAYS),-fstrict-flex-arrays=3)
- 
- # disable invalid "can't wrap" optimizations for signed / pointers
- KBUILD_CFLAGS	+= -fno-strict-overflow
-@@ -1240,11 +1239,11 @@ LDFLAGS_vmlinux += --build-id=sha1
- # COMDAT-deduplicated sections. Use --force-group-allocation to resolve these
- # groups when linking modules. The option is available from ld.bfd 2.29 and
- # ld.lld 19.1.0.
--KBUILD_LDFLAGS_MODULE += $(call ld-option,--force-group-allocation)
-+KBUILD_LDFLAGS_MODULE += $(if $(CONFIG_LD_HAS_FORCE_GROUP_ALLOCATION),--force-group-allocation)
- 
- KBUILD_LDFLAGS	+= -z noexecstack
- ifeq ($(CONFIG_LD_IS_BFD),y)
--KBUILD_LDFLAGS	+= $(call ld-option,--no-warn-rwx-segments)
-+KBUILD_LDFLAGS	+= $(if $(CONFIG_LD_HAS_NO_WARN_RWX_SEGMENTS),--no-warn-rwx-segments)
- endif
- 
- ifeq ($(CONFIG_STRIP_ASM_SYMS),y)
-diff --git a/arch/arm64/kernel/pi/Makefile b/arch/arm64/kernel/pi/Makefile
-index be92d73c25b2..5aa8dffe492b 100644
---- a/arch/arm64/kernel/pi/Makefile
-+++ b/arch/arm64/kernel/pi/Makefile
-@@ -9,7 +9,7 @@ KBUILD_CFLAGS	:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) -fpie \
- 		   -include $(srctree)/include/linux/hidden.h \
- 		   -D__DISABLE_EXPORTS -ffreestanding -D__NO_FORTIFY \
- 		   -fno-asynchronous-unwind-tables -fno-unwind-tables \
--		   $(call cc-option,-fno-addrsig)
-+		   $(if $(CONFIG_CC_HAS_NO_ADDRSIG),-fno-addrsig)
- 
- # this code may run with the MMU off so disable unaligned accesses
- CFLAGS_map_range.o += -mstrict-align
-diff --git a/arch/riscv/kernel/pi/Makefile b/arch/riscv/kernel/pi/Makefile
-index bc098edac898..e0ed7ca7e347 100644
---- a/arch/riscv/kernel/pi/Makefile
-+++ b/arch/riscv/kernel/pi/Makefile
-@@ -8,7 +8,7 @@ KBUILD_CFLAGS	:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) -fpie \
- 		   -include $(srctree)/include/linux/hidden.h \
- 		   -D__DISABLE_EXPORTS -ffreestanding \
- 		   -fno-asynchronous-unwind-tables -fno-unwind-tables \
--		   $(call cc-option,-fno-addrsig)
-+		   $(if $(CONFIG_CC_HAS_NO_ADDRSIG),-fno-addrsig)
- 
- # Disable LTO
- KBUILD_CFLAGS	:= $(filter-out $(CC_FLAGS_LTO), $(KBUILD_CFLAGS))
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 15fd9ec5ecac..be0624fee27a 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -2364,6 +2364,23 @@ config CC_HAS_KCFI_ARITY
- 	def_bool $(cc-option,-fsanitize=kcfi -fsanitize-kcfi-arity)
- 	depends on CC_IS_CLANG && !RUST
- 
-+config CC_HAS_INDIRECT_BRANCH_CS_PREFIX
-+	def_bool $(cc-option,-mindirect-branch-cs-prefix)
+ /* FIXME: Handle .s files differently (eg. # starts comments) --RR */
++static bool stop_char[256];
 +
-+config CC_HAS_CF_PROTECTION_NONE
-+	def_bool $(cc-option,-fcf-protection=none)
++static void init_stop_chars(void)
++{
++	static bool done;
++	int chr;
 +
-+# with jump tables off: the compilers use NOTRACK for them, which kernel IBT
-+# does not allow
-+config CC_HAS_CF_PROTECTION_BRANCH
-+	def_bool $(cc-option,-fcf-protection=branch -fno-jump-tables)
++	if (done)
++		return;
 +
-+config CC_HAS_FALIGN_JUMPS
-+	def_bool $(cc-option,-falign-jumps=1)
++	for (chr = 0; chr < 256; chr++)
++		if (chr == '\\' || chr == '"' || chr == '/' || isspace(chr))
++			stop_char[chr] = true;
 +
-+config CC_HAS_FALIGN_LOOPS
-+	def_bool $(cc-option,-falign-loops=1)
++	done = true;
++}
 +
- config FUNCTION_PADDING_CFI
- 	int
- 	default 59 if FUNCTION_ALIGNMENT_64B
-diff --git a/arch/x86/Makefile b/arch/x86/Makefile
-index 598f178102ee..29bb515df9f6 100644
---- a/arch/x86/Makefile
-+++ b/arch/x86/Makefile
-@@ -20,7 +20,7 @@ ifdef CONFIG_CC_IS_CLANG
- RETPOLINE_CFLAGS	:= -mretpoline-external-thunk
- RETPOLINE_VDSO_CFLAGS	:= -mretpoline
- endif
--RETPOLINE_CFLAGS	+= $(call cc-option,-mindirect-branch-cs-prefix)
-+RETPOLINE_CFLAGS	+= $(if $(CONFIG_CC_HAS_INDIRECT_BRANCH_CS_PREFIX),-mindirect-branch-cs-prefix)
+ static int parse_file(const char *fname, struct md4_ctx *md)
+ {
++	unsigned long i, len, n = 0;
++	unsigned char *buf;
+ 	char *file;
+-	unsigned long i, len;
  
- ifdef CONFIG_MITIGATION_RETHUNK
- RETHUNK_CFLAGS		:= -mfunction-return=thunk-extern
-@@ -52,7 +52,7 @@ REALMODE_CFLAGS	:= $(CC_FLAGS_DIALECT) -m16 -g -Os \
- 		   -DDISABLE_BRANCH_PROFILING -D__DISABLE_EXPORTS \
- 		   -Wall -Wstrict-prototypes -march=i386 -mregparm=3 \
- 		   -fno-strict-aliasing -fomit-frame-pointer -fno-pic \
--		   -mno-mmx -mno-sse $(call cc-option,-fcf-protection=none)
-+		   -mno-mmx -mno-sse $(if $(CONFIG_CC_HAS_CF_PROTECTION_NONE),-fcf-protection=none)
+ 	file = read_text_file(fname);
+ 	len = strlen(file);
++	if (!len)
++		goto out_file;
++	init_stop_chars();
++	buf = xmalloc(len); /* File output buffer. */
  
- REALMODE_CFLAGS += -ffreestanding
- REALMODE_CFLAGS += -fno-stack-protector
-@@ -99,10 +99,10 @@ ifeq ($(CONFIG_X86_KERNEL_IBT),y)
- #
- #   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104816
- #
--KBUILD_CFLAGS += $(call cc-option,-fcf-protection=branch -fno-jump-tables)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_CF_PROTECTION_BRANCH),-fcf-protection=branch -fno-jump-tables)
- KBUILD_RUSTFLAGS += -Zcf-protection=branch $(if $(call rustc-min-version,109300),-Cjump-tables=n,-Zno-jump-tables)
- else
--KBUILD_CFLAGS += $(call cc-option,-fcf-protection=none)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_CF_PROTECTION_NONE),-fcf-protection=none)
- endif
+ 	for (i = 0; i < len; i++) {
++		const unsigned char chr = file[i];
++
++		if (!stop_char[chr]) {
++			buf[n++] = file[i];
++			continue;
++		}
++
+ 		/* Collapse and ignore \ and CR. */
+ 		if (file[i] == '\\' && (i+1 < len) && file[i+1] == '\n') {
+ 			i++;
+@@ -276,7 +297,14 @@ static int parse_file(const char *fname, struct md4_ctx *md)
  
- ifeq ($(CONFIG_X86_32),y)
-@@ -138,10 +138,10 @@ else
-         KBUILD_CFLAGS += -m64
+ 		/* Handle strings as whole units */
+ 		if (file[i] == '"') {
+-			i += parse_string(file+i, len - i, md);
++			unsigned long slen = parse_string(file+i, len - i);
++
++			/* Closing quote is included if there is one. */
++			if (slen < len - i)
++				slen++;
++			memcpy(buf + n, file + i, slen);
++			n += slen;
++			i += slen - 1;
+ 			continue;
+ 		}
  
-         # Align jump targets to 1 byte, not the default 16 bytes:
--        KBUILD_CFLAGS += $(call cc-option,-falign-jumps=1)
-+        KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_FALIGN_JUMPS),-falign-jumps=1)
+@@ -286,11 +314,15 @@ static int parse_file(const char *fname, struct md4_ctx *md)
+ 			continue;
+ 		}
  
-         # Pack loops tightly as well:
--        KBUILD_CFLAGS += $(call cc-option,-falign-loops=1)
-+        KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_FALIGN_LOOPS),-falign-loops=1)
- 
-         # Don't autogenerate traditional x87 instructions
-         KBUILD_CFLAGS += -mno-80387
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 77a2b2d74f3f..80058bbddaf5 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -40,7 +40,7 @@ KBUILD_CFLAGS			:= $(subst $(CC_FLAGS_FTRACE),,$(cflags-y)) \
- 				   -D__NO_FORTIFY \
- 				   -ffreestanding \
- 				   -fno-stack-protector \
--				   $(call cc-option,-fno-addrsig) \
-+				   $(if $(CONFIG_CC_HAS_NO_ADDRSIG),-fno-addrsig) \
- 				   -D__DISABLE_EXPORTS
- 
- #
-diff --git a/init/Kconfig b/init/Kconfig
-index 8583d9f06c52..3c92c87254a3 100644
---- a/init/Kconfig
-+++ b/init/Kconfig
-@@ -144,6 +144,44 @@ config CC_HAS_ASSUME
- config CC_HAS_NO_PROFILE_FN_ATTR
- 	def_bool $(success,echo '__attribute__((no_profile_instrument_function)) int x();' | $(CC) -x c - -c -o /dev/null -Werror)
- 
-+config CC_HAS_ZERO_INIT_PADDING_BITS
-+	def_bool $(cc-option,-fzero-init-padding-bits=all)
+-		add_char(file[i], md);
++		buf[n++] = file[i];
+ 	}
++	md4_update(md, buf, n);
++	free(buf);
++out_file:
+ 	free(file);
+ 	return 1;
+ }
 +
-+config CC_HAS_NO_STACK_CLASH_PROTECTION
-+	def_bool $(cc-option,-fno-stack-clash-protection)
-+
-+config CC_HAS_NO_ADDRSIG
-+	def_bool $(cc-option,-fno-addrsig)
-+
-+config CC_HAS_DIAGNOSTICS_SHOW_CONTEXT
-+	def_bool $(cc-option,-fdiagnostics-show-context=2)
-+
-+config CC_HAS_DIAGNOSTICS_SHOW_INLINING_CHAIN
-+	def_bool $(cc-option,-fdiagnostics-show-inlining-chain)
-+
-+config CC_HAS_STRICT_FLEX_ARRAYS
-+	def_bool $(cc-option,-fstrict-flex-arrays=3)
-+
-+# gcc-10 renamed --param=allow-store-data-races=0 to -fno-allow-store-data-races
-+config CC_HAS_ALLOW_STORE_DATA_RACES_PARAM
-+	def_bool CC_IS_GCC && $(cc-option,--param=allow-store-data-races=0)
-+
-+config CC_HAS_NO_ALLOW_STORE_DATA_RACES
-+	def_bool CC_IS_GCC && $(cc-option,-fno-allow-store-data-races)
-+
-+config CC_HAS_MNOP_MCOUNT
-+	def_bool $(cc-option,-mnop-mcount)
-+
-+# s390-linux-gnu-gcc did not support -mfentry until gcc-9.
-+config CC_HAS_MFENTRY
-+	def_bool $(cc-option,-mfentry)
-+
-+config LD_HAS_FORCE_GROUP_ALLOCATION
-+	def_bool $(ld-option,--force-group-allocation)
-+
-+config LD_HAS_NO_WARN_RWX_SEGMENTS
-+	def_bool $(ld-option,--no-warn-rwx-segments)
-+
- config CC_HAS_COUNTED_BY
- 	bool
- 	# clang needs to be at least 20.1.0 to avoid potential crashes
-@@ -1006,6 +1044,45 @@ config CC_STRINGOP_OVERFLOW
- 	bool
- 	default y if CC_IS_GCC && !CC_NO_STRINGOP_OVERFLOW
- 
-+config CC_HAS_WNO_ADDRESS_OF_PACKED_MEMBER
-+	def_bool $(cc-option,-Wno-address-of-packed-member)
-+
-+config CC_HAS_WNO_FORMAT_OVERFLOW_NON_KPRINTF
-+	def_bool CC_IS_CLANG && $(cc-option,-Wno-format-overflow-non-kprintf)
-+
-+config CC_HAS_WNO_FORMAT_TRUNCATION_NON_KPRINTF
-+	def_bool CC_IS_CLANG && $(cc-option,-Wno-format-truncation-non-kprintf)
-+
-+config CC_HAS_WNO_DEFAULT_CONST_INIT_UNSAFE
-+	def_bool CC_IS_CLANG && $(cc-option,-Wno-default-const-init-unsafe)
-+
-+config CC_HAS_WNO_DANGLING_POINTER
-+	def_bool $(cc-option,-Wno-dangling-pointer)
-+
-+config CC_HAS_WVLA_LARGER_THAN
-+	def_bool $(cc-option,-Wvla-larger-than=1)
-+
-+config CC_HAS_WSTRINGOP_OVERFLOW
-+	def_bool $(cc-option,-Wstringop-overflow)
-+
-+config CC_HAS_WNO_UNTERMINATED_STRING_INITIALIZATION
-+	def_bool $(cc-option,-Wno-unterminated-string-initialization)
-+
-+config CC_HAS_WERROR_DESIGNATED_INIT
-+	def_bool $(cc-option,-Werror=designated-init)
-+
-+config CC_HAS_WENUM_CONVERSION
-+	def_bool $(cc-option,-Wenum-conversion)
-+
-+config CC_HAS_WNO_PACKED_NOT_ALIGNED
-+	def_bool $(cc-option,-Wno-packed-not-aligned)
-+
-+config CC_HAS_WNO_FORMAT_OVERFLOW
-+	def_bool $(cc-option,-Wno-format-overflow)
-+
-+config CC_HAS_WNO_STRINGOP_TRUNCATION
-+	def_bool $(cc-option,-Wno-stringop-truncation)
-+
- #
- # For architectures that know their GCC __int128 support is sound
- #
-diff --git a/scripts/Makefile.warn b/scripts/Makefile.warn
-index 35af7d6c6d18..83d274fcbfaf 100644
---- a/scripts/Makefile.warn
-+++ b/scripts/Makefile.warn
-@@ -17,7 +17,7 @@ KBUILD_CFLAGS += -Werror=strict-prototypes
- KBUILD_CFLAGS += -Wno-format-security
- KBUILD_CFLAGS += -Wno-trigraphs
- KBUILD_CFLAGS += -Wno-frame-address
--KBUILD_CFLAGS += $(call cc-option, -Wno-address-of-packed-member)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WNO_ADDRESS_OF_PACKED_MEMBER),-Wno-address-of-packed-member)
- KBUILD_CFLAGS += -Wmissing-declarations
- KBUILD_CFLAGS += -Wmissing-prototypes
- 
-@@ -30,8 +30,8 @@ KBUILD_CFLAGS-$(CONFIG_CC_NO_ARRAY_BOUNDS) += -Wno-array-bounds
- ifdef CONFIG_CC_IS_CLANG
- # Clang checks for overflow/truncation with '%p', while GCC does not:
- # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=111219
--KBUILD_CFLAGS += $(call cc-option, -Wno-format-overflow-non-kprintf)
--KBUILD_CFLAGS += $(call cc-option, -Wno-format-truncation-non-kprintf)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WNO_FORMAT_OVERFLOW_NON_KPRINTF),-Wno-format-overflow-non-kprintf)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WNO_FORMAT_TRUNCATION_NON_KPRINTF),-Wno-format-truncation-non-kprintf)
- 
- # Clang may emit a warning when a const variable, such as the dummy variables
- # in typecheck(), or const member of an aggregate type are not initialized,
-@@ -43,7 +43,7 @@ KBUILD_CFLAGS += $(call cc-option, -Wno-format-truncation-non-kprintf)
- # disabled with this same switch, there should not be too much coverage lost
- # because -Wuninitialized will still flag when an uninitialized const variable
- # is used.
--KBUILD_CFLAGS += $(call cc-option, -Wno-default-const-init-unsafe)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WNO_DEFAULT_CONST_INIT_UNSAFE),-Wno-default-const-init-unsafe)
- else
- 
- # gcc inanely warns about local variables called 'main'
-@@ -54,7 +54,7 @@ endif
- KBUILD_CFLAGS += -Wno-type-limits
- 
- # These result in bogus false positives
--KBUILD_CFLAGS += $(call cc-option, -Wno-dangling-pointer)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WNO_DANGLING_POINTER),-Wno-dangling-pointer)
- 
- # Stack Variable Length Arrays (VLAs) must not be used in the kernel.
- # Function array parameters should, however, be usable, but -Wvla will
-@@ -62,7 +62,7 @@ KBUILD_CFLAGS += $(call cc-option, -Wno-dangling-pointer)
- # types, so depend on GCC for now to keep stack VLAs out of the tree.
- # https://github.com/llvm/llvm-project/issues/57098
- # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98217
--KBUILD_CFLAGS += $(call cc-option,-Wvla-larger-than=1)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WVLA_LARGER_THAN),-Wvla-larger-than=1)
- 
- # disable pointer signed / unsigned warnings in gcc 4.0
- KBUILD_CFLAGS += -Wno-pointer-sign
-@@ -73,11 +73,11 @@ KBUILD_CFLAGS += -Wno-pointer-sign
- KBUILD_CFLAGS += -Wcast-function-type
- 
- # Currently, disable -Wstringop-overflow for GCC 11, globally.
--KBUILD_CFLAGS-$(CONFIG_CC_NO_STRINGOP_OVERFLOW) += $(call cc-option, -Wno-stringop-overflow)
--KBUILD_CFLAGS-$(CONFIG_CC_STRINGOP_OVERFLOW) += $(call cc-option, -Wstringop-overflow)
-+KBUILD_CFLAGS-$(CONFIG_CC_NO_STRINGOP_OVERFLOW) += $(if $(CONFIG_CC_HAS_WSTRINGOP_OVERFLOW),-Wno-stringop-overflow)
-+KBUILD_CFLAGS-$(CONFIG_CC_STRINGOP_OVERFLOW) += $(if $(CONFIG_CC_HAS_WSTRINGOP_OVERFLOW),-Wstringop-overflow)
- 
- # Currently, disable -Wunterminated-string-initialization as broken
--KBUILD_CFLAGS += $(call cc-option, -Wno-unterminated-string-initialization)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WNO_UNTERMINATED_STRING_INITIALIZATION),-Wno-unterminated-string-initialization)
- 
- # The allocators already balk at large sizes, so silence the compiler
- # warnings for bounds checks involving those possible values. While
-@@ -100,10 +100,10 @@ KBUILD_CFLAGS += -Werror=date-time
- KBUILD_CFLAGS += -Werror=incompatible-pointer-types
- 
- # Require designated initializers for all marked structures
--KBUILD_CFLAGS += $(call cc-option,-Werror=designated-init)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WERROR_DESIGNATED_INIT),-Werror=designated-init)
- 
- # Warn if there is an enum types mismatch
--KBUILD_CFLAGS += $(call cc-option,-Wenum-conversion)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WENUM_CONVERSION),-Wenum-conversion)
- 
- KBUILD_CFLAGS += -Wunused
- 
-@@ -125,12 +125,12 @@ else
- # Suppress them by using -Wno... except for W=1.
- KBUILD_CFLAGS += -Wno-unused-but-set-variable
- KBUILD_CFLAGS += -Wno-unused-const-variable
--KBUILD_CFLAGS += $(call cc-option, -Wno-packed-not-aligned)
--KBUILD_CFLAGS += $(call cc-option, -Wno-format-overflow)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WNO_PACKED_NOT_ALIGNED),-Wno-packed-not-aligned)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WNO_FORMAT_OVERFLOW),-Wno-format-overflow)
- ifdef CONFIG_CC_IS_GCC
- KBUILD_CFLAGS += -Wno-format-truncation
- endif
--KBUILD_CFLAGS += $(call cc-option, -Wno-stringop-truncation)
-+KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_WNO_STRINGOP_TRUNCATION),-Wno-stringop-truncation)
- 
- KBUILD_CFLAGS += -Wno-override-init # alias for -Wno-initializer-overrides in clang
- 
+ /* Check whether the file is a static library or not */
+ static bool is_static_library(const char *objfile)
+ {
 
 -- 
 2.55.0
