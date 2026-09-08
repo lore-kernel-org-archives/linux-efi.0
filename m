@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF1733D3D05;
-	Tue,  8 Sep 2026 20:59:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 296F23D811C;
+	Tue,  8 Sep 2026 20:59:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788901171; cv=none; b=M/j49EEdG8viO/5aAa9S4CwU0wfXvxN0TpYzJ+0uRA7g+WJhGezn6zKT17EVInva+QBX4FHfj+l7KhkbzewGrhGPeN0srmURPyidKzPX2f7gpdYlk0QvxqtlDMsG0pfPIyYNW8KNZcVqePe3ISEvxb30IH0CmOyHUB62220c/OI=
+	t=1788901181; cv=none; b=ZW4d5gyQ/TCMoIGSL/TFQenYl+oeH21s9mjGKhKSRGvR8l11YFedrZF4WR95/p9SDE5MY3jgz5e2uijQ/xoZKBDeQBvWE5wu7/Qv5giwAPBPE0nxn+S+sHpxv5l79JsntG7s6Bw++iYkCzvKgASdrD6dHs9aXVrVaD8vsE7QKOk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788901171; c=relaxed/simple;
-	bh=kx145CbsbOZNlrJo3YNnQ6X8zzclemP0tqvdTYAGrNw=;
+	s=arc-20240116; t=1788901181; c=relaxed/simple;
+	bh=XCvCrcK+AhcCVOOFTIEWP4r+MqSjPsV0qg7Bzqs7ge4=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=IlOB2Yh5P2A7mTgi46aiydOfYNgyLzB9R6P5xs0kA0jTL/nAxeE7zjaiKu4UX4EjUJs0klh/M2MN5Xz+cPIB6HpkbGLOk9TBvD7HpU3C16bIrVSif2xKYFovppEHfX2Up+FA4PjaajzUkZ5aNVT0XnqanUhX+Zrl3S0tnCzLgOo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OIpDOBSg; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=dqBBt7DlXpdBDMKkD4SalWUaqxlAz0iIeeUUmL5k9mW64hMfYE/kCwh+tetcpEtw33KODM7zSAXMcW7qggwizUM2E5kB1DPfoFea73I1r+My/8dTsuI+ZRnpdYex5ayiUMDimDdS6RpVjbI7H2RsUqqS9ivzTT4Qxtl6ObYjjJQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cee9VYiY; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OIpDOBSg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 046F01F00A3A;
-	Tue,  8 Sep 2026 20:59:17 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cee9VYiY"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 53A351F00A3D;
+	Tue,  8 Sep 2026 20:59:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788901168;
-	bh=RpyglNkLvgtO+g1zDJNpkY3JopuChXGi3ttcKAuST+8=;
+	s=k20260515; t=1788901180;
+	bh=RQEjHODHdWtfRLaYljXTCOiq1fIwDiQ3ymNC15jt1/U=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=OIpDOBSgJrH76v4qVZGsW50WfuCBkHgvg4YvO+ZN3uJi1EdpWYnqx9/rxijC1G8Y2
-	 VmSITaucbZMwSNTrXt+SWMY3umH2RYhUY9lg8jXa+zDPf6/z26mQyBH6CgVrjNi3NQ
-	 B2IlUKR/DopfAfvqCauFgd0ycxSvLywvK9BKj3UvpoAkW+0BzLMFCXb/P5rNbzhqK/
-	 JomapY4q5gpgznQ6qVwqt0ZH9qq4WWdA8YAfsA0whir9iAxDmqsIfvPFDUxhSBP6v+
-	 MDdFlVH88zzAe38RNflu9HCao15bxZR9oE8mh13QjCKeM/zrvUOJfBkBoNAveTh4ui
-	 c227LJShut05w==
+	b=cee9VYiY+WdzxYhQHHcFgW9cEwCd2qP/qR+XgTI3WUEJ0rbaGMAwBQrVwh6V/pNQN
+	 CpIE2yLM+2TfFktdZCqWhVBBUKNzujLyuCVWJCWVfEBlbUqbm8n9lWw6oPCj5dFDZU
+	 M41dPGXGQ0mGZSLm33uRXCzUEFoO6y/dwB7tkN5ybxYgrObbeLwY5+JKUz/GxN4vgW
+	 UcOlkNW7puN3P38kETgBuAC0BPsD68GMf6ZjU+mY2WDR9zV1NH1UEGbdkKlP9cdoO6
+	 Sl9KTeFOpgl77TNi5rzqQBkJpHbm3c6JghAn0h+pyaui8GDgz6V7T0MnUM0AWIHiwb
+	 zc5K3c0DyX7bw==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Tue, 08 Sep 2026 21:55:21 +0100
-Subject: [PATCH 21/23] rust: make exports.o depend on the headers generated
- for it
+Date: Tue, 08 Sep 2026 21:55:22 +0100
+Subject: [PATCH 22/23] kbuild: build rust crates in parallel with the rest
+ of the build
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -38,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260908-build-speedup-v1-21-5dc1ac01672d@kernel.org>
+Message-Id: <20260908-build-speedup-v1-22-5dc1ac01672d@kernel.org>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 In-Reply-To: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -74,47 +74,120 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1286; i=ljs@kernel.org;
- h=from:subject:message-id; bh=kx145CbsbOZNlrJo3YNnQ6X8zzclemP0tqvdTYAGrNw=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlFmyftt0/rHJ4/XeJ5NNZMp8m66+kNfu9lsnecLy8
- QEXFo2SjlIWBjEuBlkxRZbnX8T3B4mEzeu84O8GM4eVCWQIAxenAEwkPJGRoT+U9y0318zvJ0XM
- dT6t5PNlvlHHN0H8/Wup7seP/9x/r8bI8Hra9b3v2RsWHzq2frJy1QIuIS+b/yHHakRzt3woe77
- sJicA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3754; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=XCvCrcK+AhcCVOOFTIEWP4r+MqSjPsV0qg7Bzqs7ge4=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlFlmvzlQkJt/tI7n6rKpT/ZyLvslHZtgUDXlzhmLG
+ QbK1/LyOkpZGMS4GGTFFFmefxHfHyQSNq/zgr8bzBxWJpAhDFycAjARPj1Ghv+RslWHyrfcvtHy
+ t8lna87BP5svKogr5rrNNdNolvaaZsrwPyHOTVVg1cNbW6XLa+b/z3I8sNfvVs+U3T+agq1m+l7
+ LYgQA
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-rust/exports.c includes the exports_*_generated.h listing the symbols of
-the core, bindings, kernel and helpers objects, but this is not expressed
-in its Makefile.
+When CONFIG_RUST is specified make prepare builds all of the rust
+components before descending into the tree.
 
-This worked previously because the headers are always-y targets, and make
-prepare built all of the rust crates first, which is an implicit
-dependency.
+This means nothing can be done until all of these are compiled, resulting
+in a stall at the start of every clean CONFIG_RUST build.
 
-Fix this as it is a dependency of the subsequent commit.
+This also implicitly slows down every rust-capable LLVM allmodconfig build
+as this enables the CONFIG_RUST option.
+
+Fix this by allowing rust crates to be built alongside the C code.
+
+Remove the rust build from the make prepare step, then establish a
+dependency between rust code located elsewhere in the tree upon rust
+components contained in rust/.
+
+Do this by establishing a top-level list of directories containing rust
+code, KBUILD_RUST_DIRS, upon which the dependency is expressed.
+
+Finally, ensure that no rust code is located elsewhere and fail the build
+if any is found to ensure that nothing is missed in future.
+
+Care is taken to ensure the rust/ dependency is also established for any
+module being built to account for external rust modules which rely upon it.
+
+Every Rust and C object was confirmed to be byte-for-byte identical after
+this change.
+
+Whole build, 128-thread Threadripper 9980X, best of N runs:
+
+                                         before   after     delta
+                                         -------------------------------
+  x86 defconfig+RUST, clean                36.5s    32.6s     -3.9s (-11%)
+  x86 allmodconfig, clean                 297.0s   278.3s    -18.7s (-6%)
 
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- rust/Makefile | 5 +++++
- 1 file changed, 5 insertions(+)
+ Kbuild                 |  5 +++++
+ Makefile               | 11 ++++++++++-
+ scripts/Makefile.build |  5 ++++-
+ 3 files changed, 19 insertions(+), 2 deletions(-)
 
-diff --git a/rust/Makefile b/rust/Makefile
-index da1a7409d984..74d21ae6f383 100644
---- a/rust/Makefile
-+++ b/rust/Makefile
-@@ -728,6 +728,11 @@ endef
- $(obj)/helpers/helpers.o: $(src)/helpers/helpers.c $(recordmcount_source) FORCE
- 	+$(call if_changed_rule,rust_cc_library)
- 
-+# The exported symbol lists are generated from the crates' objects.
-+$(obj)/exports.o: $(obj)/exports_core_generated.h \
-+    $(obj)/exports_bindings_generated.h $(obj)/exports_kernel_generated.h \
-+    $(if $(CONFIG_RUST_INLINE_HELPERS),,$(obj)/exports_helpers_generated.h)
+diff --git a/Kbuild b/Kbuild
+index a6a0192dea08..9670556059dd 100644
+--- a/Kbuild
++++ b/Kbuild
+@@ -115,3 +115,8 @@ obj-$(CONFIG_NET)	+= net/
+ obj-y			+= virt/
+ obj-y			+= $(ARCH_DRIVERS)
+ obj-$(CONFIG_DRM_HEADER_TEST)	+= include/
 +
- # Disable symbol versioning for exports.o to avoid conflicts with the actual
- # symbol versions generated from Rust objects.
- $(obj)/exports.o: private skip_gendwarfksyms = 1
++# Rust code elsewhere in the tree depends upon rust/.
++ifdef CONFIG_RUST
++$(KBUILD_RUST_DIRS): | rust
++endif
+diff --git a/Makefile b/Makefile
+index 7d23d7b64be3..3805f72428cb 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1429,11 +1429,14 @@ prepare0: archprepare
+ 	$(Q)$(MAKE) $(build)=. prepare
+ 	$(Q)$(MAKE) $(build)=scripts/mod
+ 
++ifdef CONFIG_RUST
++export KBUILD_RUST_DIRS := drivers lib mm samples
++endif
++
+ # All the preparing..
+ prepare: prepare0
+ ifdef CONFIG_RUST
+ 	+$(Q)$(CONFIG_SHELL) $(srctree)/scripts/rust_is_available.sh
+-	$(Q)$(MAKE) $(build)=rust
+ endif
+ 
+ PHONY += remove-stale-files
+@@ -1760,6 +1763,12 @@ modules: modules_prepare
+ # Target to prepare building external modules
+ modules_prepare: prepare
+ 	$(Q)$(MAKE) $(build)=scripts scripts/module.lds
++ifdef CONFIG_RUST
++# Ensure rust/ is build before any external rust module which will rely upon it.
++ifeq ($(MAKECMDGOALS),modules_prepare)
++	$(Q)$(MAKE) $(build)=rust
++endif
++endif
+ 
+ endif # CONFIG_MODULES
+ 
+diff --git a/scripts/Makefile.build b/scripts/Makefile.build
+index b9093b39cc2f..77351d6006fa 100644
+--- a/scripts/Makefile.build
++++ b/scripts/Makefile.build
+@@ -360,8 +360,11 @@ quiet_cmd_rustc_o_rs = $(RUSTC_OR_CLIPPY_QUIET) $(quiet_modtag) $@
+ 		$(cmd_ld_single)) \
+ 	$(cmd_objtool)
+ 
++rust-dir-ok = $(or $(KBUILD_EXTMOD),$(filter rust $(KBUILD_RUST_DIRS),$(firstword $(subst /, ,$@))))
++
++# Ensure that any rust code located elsewhere from rust/ is listed in KBUILD_RUST_DIRS.
+ define rule_rustc_o_rs
+-	$(call cmd_and_fixdep,rustc_o_rs)
++	$(if $(rust-dir-ok),,$(error $@: Rust code in a directory not listed in KBUILD_RUST_DIRS, see the top Makefile))$(call cmd_and_fixdep,rustc_o_rs)
+ 	$(call cmd,gen_objtooldep)
+ endef
+ 
 
 -- 
 2.55.0
