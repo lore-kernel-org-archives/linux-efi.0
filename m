@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA6593F327A;
-	Tue,  8 Sep 2026 20:57:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 62CD43BFE5B;
+	Tue,  8 Sep 2026 20:58:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788901080; cv=none; b=d3C5ukxRbc6IqmLn9dFn195U/iHzaPfLUoJcXhACa5G300iESyUeqS7acNinLR/Jh4/Ynf5WTcGLgxdCRK9WkgYNfdAd7fsk2TguCndMRer+bKp6IuU/ySDL10mq3yD933U4U6E8ip45RgNneZaHABfyuIApELZ4QtGZYNBcAho=
+	t=1788901091; cv=none; b=ce5PA00EuyXGMduJHjdf5k2uejyWGp6kU7nBpqloGTZAeLWVBKVB5/An3gFJNpN9wuWG5jxVZrA9xG7r70E2wnt9kN0MOePDmz1CbAo3ihvI/hd+Z/2oTCmXYpaU8Ok/BLi9mJvxRzTFbLsOnQl0jY+ZqYVhfyjA5XNCs2lrc3c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788901080; c=relaxed/simple;
-	bh=Mu9/3L6JwuoO4qE0B5TB19zN1X+uYA2ATdK9i0ZQjsI=;
+	s=arc-20240116; t=1788901091; c=relaxed/simple;
+	bh=BVONI6jQ5HybHDV5xL2pZB9mTVCT/1taKfTC6TZq7QU=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=KWytDAf2QKaf3SyDHbWfm2XuyJaEsXp4p1qu2ybQRYaHNNtC4E9QdNirJLl7V71IMEWvLT96Au852ga0ogwiVyfvUsy1rIiKDH/yHgoJPw6RFRkDquihQ7wKcl71sE7KT4CZTIq4zp34zMntXBG80rG57MNnnJv6croZ9tPkqjU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H7eOezsG; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=VxqQV+U4Lz9RXEsO9QQywqWPD2GavjJk61dgcvBKBuulLb9TF290ULfaGZQq/a0g49UJugdDzAJCii2HINGFZFwuDIpGWpiOdQqd4NZ7/59n75j2N2P15IPvNo8KP4v2HAuTJSIu9thXYr//OWQ0lWtabltkK1dyUBQFFpvDsE0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H6rggv9q; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H7eOezsG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 018651F00ACA;
-	Tue,  8 Sep 2026 20:57:47 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H6rggv9q"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 33E691F00A3A;
+	Tue,  8 Sep 2026 20:57:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788901078;
-	bh=o9XBtkaVqNcdBkr0fOqwTDFvihvtpSpEfmr2OcpAjrM=;
+	s=k20260515; t=1788901089;
+	bh=xaxaPWmODXOjjlSFAfNKSXoU8O/l4eGEkzuqZMX6HWQ=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=H7eOezsG/k4L7RnezQlzDmyxYvIW6bywyEUwrvTlZzo4lKh0vtSAfck1wkSXTQ9ev
-	 VmZAJpvkEPwqDX3YHmC2BMJU5vL4+Jp8Qz22aWlTQoLIDTQ8d9YGnPv4v7SZKWJmD5
-	 mTT1ODPotGOg6g/x0H87aTh061dDmL+8/iK+4eYyFoJK4js88YkUgoiBLn7V8GzuoJ
-	 y6i71GmBdFm8MSKvOsDdb2m+Z6GbI99drwRspDJqnv1ylIFlbuxjYAzmCi1oKczYfM
-	 P+rh2C9C8oqjl+1HOSJ9/d0i9kia2cmslDtIwrafGPzwwR1QJoYTXLQFpyVjQtdJ3Y
-	 OpWXnJrOCY06A==
+	b=H6rggv9q/tqtwuJX+Nwnp4lY2ozHj4VQ5i0Y16GL8w+yU1t76vD0CS6i5+Sr3AVWO
+	 p2ycfVE2VZLJaqXC3Ftc2E/BsDkT7Wtg3NVdblWIC9JoeEZ37amFQwS6p+m1nT+C/K
+	 H0KgY/1eKmvkFYZPZsrvneN68tJph23iQjjz4nk9KBYKbsldKEALwVxxfvRDLtNNJV
+	 kCfMs/aREKAUjAW8bryL2PpEHIsQvMZWmbMnKTo4ezQuAptgrLWsFfjX05vp/GDCc4
+	 /zA6bG1vEOUPHQR2L8uvZ1QI+rAzBcnOSvRhcxhe2X3sr2ZMkE2h39tEpMKcHgfjEm
+	 LmBCKOMgymiLg==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Tue, 08 Sep 2026 21:55:13 +0100
-Subject: [PATCH 13/23] modpost: hash module source per-file, not per-byte
+Date: Tue, 08 Sep 2026 21:55:14 +0100
+Subject: [PATCH 14/23] modpost: cache section relocation mismatch state
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +37,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260908-build-speedup-v1-13-5dc1ac01672d@kernel.org>
+Message-Id: <20260908-build-speedup-v1-14-5dc1ac01672d@kernel.org>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 In-Reply-To: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -73,144 +73,162 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3622; i=ljs@kernel.org;
- h=from:subject:message-id; bh=Mu9/3L6JwuoO4qE0B5TB19zN1X+uYA2ATdK9i0ZQjsI=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlJmrS6scTz06IbNlhe9Px+M2gU853vLcZxboy2Ziz
- l/vw76so5SFQYyLQVZMkeX5F/H9QSJh8zov+LvBzGFlAhnCwMUpABN5tpbhv1eSsfzRGv+JKq57
- 9kz547UpXNTouVWchL6z5PO2L/VcTxj+J2n+Wl9knuH4X+q39dVyu90tolvqPb4dUZc0fis89dx
- TTgA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4714; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=BVONI6jQ5HybHDV5xL2pZB9mTVCT/1taKfTC6TZq7QU=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlJnfNprw8zHn24UTPjhnP3jU/kWvzGSNGNeaBclTs
+ +8k52Z86ChlYRDjYpAVU2R5/kV8f5BI2LzOC/5uMHNYmUCGMHBxCsBEDAoZ/kpoL/yXFnp0nZ1w
+ o/aSTce/NLTou57y6vzx10JSy0Vv7VSGn4zJfzZ6V19S/Zb2wsF+CveRr11reMp+tWm+4BJM8Z5
+ ZwQQA
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-modpost spends a long time md4 hashing module source at a per-byte
-granularity.
+For every relocation modpost invokes check_section_mismatch() to determine
+whether there is any kind of mismatch between the source and destination,
+and if so which classification applies.
 
-Fix this by doing this hashing per-file instead by accumulating a per-file
-buffer in parse_file().
+Each time it does this it invokes section_mismatch() which iterates
+through the sectioncheck[] array every time it's called.
 
-All 11,189 .mod.c files and Module.symvers were confirmed to be identical
-with this change applied.
+When walked a relocation section the source is fixed and there aren't many
+targets, so the same names are looked up over and over again.
 
-This is especially impactful for allmodconfig incremental builds (where
-CONFIG_MODULE_SRCVERSION_ALL is set).
+Therefore cache not only mismatch categorisation but also whether a
+mismatch even exists for a given section and look up the sections in the
+cache.
+
+Special indices (undefined, absolute, common) take the uncached path as
+before.
+
+This results in very significant speed ups for allmodconfig incremental
+builds.
+
+modpost is on the serial tail of every build that links vmlinux.
 
 Whole build, 128-thread Threadripper 9980X, best of N runs:
 
                                          before   after     delta
                                          -------------------------------
-  x86 allmodconfig, touch mm/vma.c, gcc    40.6s    38.2s     -2.4s (-6%)
-  x86 allmodconfig, touch mm/vma.c, clang  36.2s    35.0s     -1.2s (-3%)
+  x86 defconfig, touch mm/vma.c, gcc        8.6s     8.4s    -0.16s (-2%)
+  x86 defconfig, touch mm/vma.c, clang      7.7s     7.5s    -0.15s (-2%)
+  x86 allmodconfig, touch mm/vma.c, gcc    38.2s    33.5s     -4.6s (-12%)
+  x86 allmodconfig, touch mm/vma.c, clang  35.0s    31.1s     -4.0s (-11%)
 
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- scripts/mod/sumversion.c | 56 +++++++++++++++++++++++++++++++++++++-----------
- 1 file changed, 44 insertions(+), 12 deletions(-)
+ scripts/mod/modpost.c | 66 +++++++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 64 insertions(+), 2 deletions(-)
 
-diff --git a/scripts/mod/sumversion.c b/scripts/mod/sumversion.c
-index 3dd28b4d0099..2cbadd3cd97d 100644
---- a/scripts/mod/sumversion.c
-+++ b/scripts/mod/sumversion.c
-@@ -224,19 +224,11 @@ static void md4_final_ascii(struct md4_ctx *mctx, char *out, unsigned int len)
- 		 mctx->hash[0], mctx->hash[1], mctx->hash[2], mctx->hash[3]);
+diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
+index 75374c64b8cc..0fd43c8a89ea 100644
+--- a/scripts/mod/modpost.c
++++ b/scripts/mod/modpost.c
+@@ -1155,12 +1155,67 @@ static void check_export_symbol(struct module *mod, struct elf_info *elf,
+ 			 name);
  }
  
--static inline void add_char(unsigned char c, struct md4_ctx *md)
--{
--	md4_update(md, &c, 1);
--}
--
--static int parse_string(const char *file, unsigned long len,
--			struct md4_ctx *md)
-+static int parse_string(const char *file, unsigned long len)
- {
- 	unsigned long i;
- 
--	add_char(file[0], md);
- 	for (i = 1; i < len; i++) {
--		add_char(file[i], md);
- 		if (file[i] == '"' && file[i-1] != '\\')
- 			break;
- 	}
-@@ -255,15 +247,44 @@ static int parse_comment(const char *file, unsigned long len)
- }
- 
- /* FIXME: Handle .s files differently (eg. # starts comments) --RR */
-+static bool stop_char[256];
++/*
++ * mismatch_cache[section index] ->
++ *   0 - uncached.
++ *  -1 - no mismatch.
++ *  >0 - mismatch index + 1.
++ */
++static int *mismatch_cache;
 +
-+static void init_stop_chars(void)
++static void init_mismatch_cache(unsigned int num_sections)
 +{
-+	static bool done;
-+	int chr;
-+
-+	if (done)
-+		return;
-+
-+	for (chr = 0; chr < 256; chr++)
-+		if (chr == '\\' || chr == '"' || chr == '/' || isspace(chr))
-+			stop_char[chr] = true;
-+
-+	done = true;
++	mismatch_cache = xcalloc(num_sections, sizeof(*mismatch_cache));
 +}
 +
- static int parse_file(const char *fname, struct md4_ctx *md)
++static void reset_mismatch_cache(unsigned int num_sections)
++{
++	memset(mismatch_cache, 0, num_sections * sizeof(*mismatch_cache));
++}
++
++static void free_mismatch_cache(void)
++{
++	free(mismatch_cache);
++	mismatch_cache = NULL;
++}
++
++static const struct sectioncheck
++*cache_mismatch(unsigned int secndx, const struct sectioncheck *mismatch)
++{
++	if (!mismatch) {
++		mismatch_cache[secndx] = -1;
++		return NULL;
++	}
++
++	mismatch_cache[secndx] = (mismatch - sectioncheck) + 1;
++	return mismatch;
++}
++
++static const struct sectioncheck *get_section_mismatch(const char *fromsec,
++		const struct elf_info *elf, unsigned int secndx)
++{
++	int cached;
++
++	if (secndx >= elf->num_sections)
++		return section_mismatch(fromsec, sec_name(elf, secndx));
++
++	cached = mismatch_cache[secndx];
++	if (cached < 0)
++		return NULL;
++	if (cached > 0)
++		return &sectioncheck[cached - 1];
++
++	return cache_mismatch(secndx,
++			      section_mismatch(fromsec, sec_name(elf, secndx)));
++}
++
+ static void check_section_mismatch(struct module *mod, struct elf_info *elf,
+ 				   Elf_Sym *sym,
+ 				   unsigned int fsecndx, const char *fromsec,
+ 				   Elf_Addr faddr, Elf_Addr taddr)
  {
-+	unsigned long i, len, n = 0;
-+	unsigned char *buf;
- 	char *file;
--	unsigned long i, len;
+-	const char *tosec = sec_name(elf, get_secindex(elf, sym));
++	const unsigned int to_secndx = get_secindex(elf, sym);
++	const char *tosec = sec_name(elf, to_secndx);
+ 	const struct sectioncheck *mismatch;
  
- 	file = read_text_file(fname);
- 	len = strlen(file);
-+	if (!len)
-+		goto out_file;
-+	init_stop_chars();
-+	buf = xmalloc(len); /* File output buffer. */
- 
- 	for (i = 0; i < len; i++) {
-+		const unsigned char chr = file[i];
-+
-+		if (!stop_char[chr]) {
-+			buf[n++] = file[i];
-+			continue;
-+		}
-+
- 		/* Collapse and ignore \ and CR. */
- 		if (file[i] == '\\' && (i+1 < len) && file[i+1] == '\n') {
- 			i++;
-@@ -276,7 +297,14 @@ static int parse_file(const char *fname, struct md4_ctx *md)
- 
- 		/* Handle strings as whole units */
- 		if (file[i] == '"') {
--			i += parse_string(file+i, len - i, md);
-+			unsigned long slen = parse_string(file+i, len - i);
-+
-+			/* Closing quote is included if there is one. */
-+			if (slen < len - i)
-+				slen++;
-+			memcpy(buf + n, file + i, slen);
-+			n += slen;
-+			i += slen - 1;
- 			continue;
- 		}
- 
-@@ -286,11 +314,15 @@ static int parse_file(const char *fname, struct md4_ctx *md)
- 			continue;
- 		}
- 
--		add_char(file[i], md);
-+		buf[n++] = file[i];
+ 	if (module_enabled && elf->export_symbol_secndx == fsecndx) {
+@@ -1168,7 +1223,7 @@ static void check_section_mismatch(struct module *mod, struct elf_info *elf,
+ 		return;
  	}
-+	md4_update(md, buf, n);
-+	free(buf);
-+out_file:
- 	free(file);
- 	return 1;
- }
-+
- /* Check whether the file is a static library or not */
- static bool is_static_library(const char *objfile)
+ 
+-	mismatch = section_mismatch(fromsec, tosec);
++	mismatch = get_section_mismatch(fromsec, elf, to_secndx);
+ 	if (!mismatch)
+ 		return;
+ 
+@@ -1445,6 +1500,8 @@ static void check_sec_ref(struct module *mod, struct elf_info *elf)
  {
+ 	int i;
+ 
++	init_mismatch_cache(elf->num_sections);
++
+ 	/* Walk through all sections */
+ 	for (i = 0; i < elf->num_sections; i++) {
+ 		Elf_Shdr *sechdr = &elf->sechdrs[i];
+@@ -1461,6 +1518,9 @@ static void check_sec_ref(struct module *mod, struct elf_info *elf)
+ 			if (match(secname, section_white_list))
+ 				continue;
+ 
++			/* Reset cache per-section. */
++			reset_mismatch_cache(elf->num_sections);
++
+ 			start = sym_get_data_by_offset(elf, i, 0);
+ 			stop = start + sechdr->sh_size;
+ 
+@@ -1472,6 +1532,8 @@ static void check_sec_ref(struct module *mod, struct elf_info *elf)
+ 					    start, stop);
+ 		}
+ 	}
++
++	free_mismatch_cache();
+ }
+ 
+ static char *remove_dot(char *s)
 
 -- 
 2.55.0
