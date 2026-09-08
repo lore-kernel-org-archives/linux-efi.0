@@ -1,143 +1,100 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FE5B598C01;
-	Tue,  8 Sep 2026 18:48:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71CE635C180;
+	Tue,  8 Sep 2026 18:58:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788893301; cv=none; b=RWQUvbSO4AO/L6M0kQPUnSBmFbeWm3m5eRbyjcR9PQoujkrFtiN+kCjwuP6dXlxZtF0FQs/TgANudKkcwZMgtn6r2xQjPUstKYXjpBeFVzabhrxf6xUqs/ahxwkz94OSScnmK++3K6nwHP+1M/5eVDvqJsvWO9blqmI2ArYQ0jc=
+	t=1788893931; cv=none; b=i5WEeE/wK+a5MrmyAui2Hsida4ssYDzOcaZTAhgo04oZhv1LBVqpAzpyL42HAIh32k7dxJZVtMVQLYOHinX8+6t4jsqWMt2kJcqsjgno4z2Zk4I40740XE/2uA4Cwue/ENfu7PuhV7y6zhL+mTeV6eOFipuq2yDi2s+60L0ljkI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788893301; c=relaxed/simple;
-	bh=xoul/AmjbT7mtSArYZ0HfSSRRed34jgm7ikODlj29Aw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=rJgTTbw2oPlac7q9ve05qlTWn6tjHu81QnbBUvpmiWHH/523XzcpwEVl2RdAoe7qDM9r1xX9zFYrfxNH/wBVqvkH37/2kurGiaUZH+yupfCr42F27n7E7l6So50K+gHV1OTvnkNTALj0S5bp+4X6lsQvP7RbxQnJ1NqG0lEqXCI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=m/hlL+/j; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788893931; c=relaxed/simple;
+	bh=YBNUPhK+dSG8Rj+GgFl/0zrJ57AbV8JvJot3uj9k1OU=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=GiN5c4X9x/7K46mUofNwp7bd1Vxh+tpGciVdELPXWlF6+h0fhawvp7TPY3VmWq96e3+tMOqzNZlfw/2zR9xl7mXM9pcXi/5xn+9TTj7AZz4WuY4218s/++OGMkjh6KT1NMK0Bw9qlbozLDEvvPIl1Kd8Rm5kHJF0GCXIrA3mDYE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JhnzMcGd; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="m/hlL+/j"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 824001F00A3D;
-	Tue,  8 Sep 2026 18:48:15 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JhnzMcGd"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9229F1F00A3A;
+	Tue,  8 Sep 2026 18:58:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788893297;
-	bh=KOJV19sSyfmHE3xyj5OINm0nC7ZyBG+yaMvc0SoKxcI=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=m/hlL+/jY1WVC7HznaqXUyCUM53nHVCDIG3rVC8UROlL12KHWSX7Xlk2hPiZPSr7H
-	 9NVr4pwCjNlK2zcXDE6wcrzkdqfsquivyxVYqwqnN1RaqcRpf666vr2jYFDLYcCMEi
-	 KHUvIDtJ/bMMCQaM7XENCF5NiAzeTKlQy187S7oN/58seS02jcPRycWLmuMCaxCXZO
-	 NUTr4gtRZuSdW7Nr2hRdfoqmFATF8Mqo07yHJzCBCDVDmUYaxSK1pPxasOr9DAOuKb
-	 tOUvHm1eYvKIfYQAx9CLLiZu3RlXTd6wng41YeCdcRB5nXrU3aJ/49/02eXWRxPFXw
-	 Klt5/aCWGaUrQ==
-Message-ID: <2c7c1cfe-3ed7-468d-9056-8d7e77d15a5a@kernel.org>
-Date: Tue, 8 Sep 2026 20:48:12 +0200
+	s=k20260515; t=1788893930;
+	bh=7cgAipI1fCRs+j94B3V9v2XQIDOdhYQSv7FLrs5JCAY=;
+	h=From:Date:Subject:To:Cc;
+	b=JhnzMcGdo5B88I00ke3UkNQOidATxO+8bKtleRggm9yHIQlT7LKi0GwEqqTQgIuIL
+	 R27ZPKyuSXLv9IavHDkQT3t/KtWSTqsNIP1EF8PZFnrXiGDWfDAtEcpy0EYI0ThjNK
+	 UFZ76y18WiCVlz747GuC4UVuGmwChjWNO7ILlxCcsWbZJEfXx15lBDhAsu/9tpYOx9
+	 bvVTQB08qrvqi/sCSBCaJLqitV8mkjzUGXUbHu/HeK7YufipaFCLrJuBLoVDMVxc0k
+	 LeCPRXZzofFKCS7epSG3/U2bnkn9dGHzf5y7TPvSwsFvrc9l29O7PISYsVTXUU7ETZ
+	 EKXpaNVkOFQsQ==
+From: Vincent Mailhol <mailhol@kernel.org>
+Date: Tue, 08 Sep 2026 20:58:26 +0200
+Subject: [PATCH RESEND] block: store GPT attributes as a raw value
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3] efi/libstub: add initial Boot Loader Interface support
-To: Ard Biesheuvel <ardb@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
-References: <20260906-efi_stub_bli-v3-1-e7dc0d6b8fcd@kernel.org>
-From: Vincent Mailhol <mailhol@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=mailhol@kernel.org; keydata=
- xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
- JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
- fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
- F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
- 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
- YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
- dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
- zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
-In-Reply-To: <20260906-efi_stub_bli-v3-1-e7dc0d6b8fcd@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260908-fix_gpt_entry_attributes-v1-1-a4dcb417e8fc@kernel.org>
+To: Davidlohr Bueso <dave@stgolabs.net>, Jens Axboe <axboe@kernel.dk>
+Cc: linux-efi@vger.kernel.org, linux-block@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, Vincent Mailhol <mailhol@kernel.org>
+X-Mailer: b4 0.16.0
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1540; i=mailhol@kernel.org;
+ h=from:subject:message-id; bh=YBNUPhK+dSG8Rj+GgFl/0zrJ57AbV8JvJot3uj9k1OU=;
+ b=owGbwMvMwCV2McXO4Xp97WbG02pJDFkLop7anP2VP+O0YM6ZpawlzAWGbifMgjRbXs839GsV5
+ k1x/Di1YyILgxgXg6WYIsuyck5uhY5C77BDfy1h5rAygQyRFmlgAAIWBr7cxLxSIx0jPVNtQz1D
+ IEPHiIGLUwCm+qUCw3+n3pnblvPPnFoU9vWRwgrdTXUZW7feWveC87GH6nP+l+sbGP7XbFHrnv+
+ uyDbrXoXmlf+PIncs5F3MNC9up9T7D6dCs/9wAwA=
+X-Developer-Key: i=mailhol@kernel.org; a=openpgp;
+ fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
 
-On 06/09/2026 at 23:52, Vincent Mailhol wrote:
-> The Boot Loader Interface (BLI) [1] defines EFI variables that expose
-> boot loader state to the running OS. LoaderInfo identifies the boot
-> loader, while LoaderDevicePartUUID records the GPT partition UUID of
-> the partition containing it.
-> 
-> LoaderDevicePartUUID is used, for example, by systemd-gpt-auto-generator
-> [2] to identify the disk the boot loader was launched from and
-> automatically detect and mount partitions on it.
-> 
-> GRUB [3] and systemd-boot [4] populate these variables, but when the
-> kernel is started directly by EFI firmware, there is no conventional
-> external boot loader to provide them. In that case, because the EFI stub
-> performs the boot loader role, it should provide the variables itself.
-> 
-> Use LoaderInfo as a sentinel: if it is already set by an earlier boot
-> stage or cannot be set, bail out. Otherwise, populate the other BLI
-> variables.
-> 
-> Parse the loaded image device path, extract the GUID signature from its
-> GPT HD() node and publish it under the Linux loader entry vendor GUID as
-> the volatile LoaderDevicePartUUID EFI variable.
-> 
-> Install the efi_bli_set_variables() hook in both the generic efi-stub.c
-> path and the x86-specific x86-stub.c path.
-> 
-> [1] The Boot Loader Interface
-> Link: https://systemd.io/BOOT_LOADER_INTERFACE/
-> 
-> [2] systemd-gpt-auto-generator
-> Link: https://www.freedesktop.org/software/systemd/man/latest/systemd-gpt-auto-generator.html
-> 
-> [3] GRUB -- §16.2 bli
-> Link: https://www.gnu.org/software/grub/manual/grub/html_node/bli_005fmodule.html
-> 
-> [4] systemd -- systemd-boot UEFI Boot Manager
-> Link: https://github.com/systemd/systemd/blob/main/docs/BOOT.md?plain=1#L102
-> 
-> Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
-> ---
+struct _gpt_entry_attributes currently models the GPT partition entry
+attributes field with bitfields. This is broken on machines using the
+__BIG_ENDIAN_BITFIELD ABI because GPT always stores the attributes on
+disk as a 64-bit little-endian.
 
-(...)
+No current code consumes individual fields from that structure. So just
+remove struct _gpt_entry_attributes entirely and replace it by an __le64
+value in struct _gpt_entry instead. This lets users apply endian-aware
+masks explicitly when inspecting attribute bits.
 
-> +static void efi_bli_populate_loader_part_uuid(efi_loaded_image_t *image)
-> +{
-> +	static efi_guid_t device_path_guid = EFI_DEVICE_PATH_PROTOCOL_GUID;
-> +	efi_char16_t partuuid[UUID_STRING_LEN + 1];
-> +	const struct efi_hd_dev_path *hd_node;
-> +	const struct efi_dev_path *path;
-> +
-> +	if (efi_bs_call(handle_protocol, efi_table_attr(image, device_handle),
-> +			&device_path_guid, (void **)&path) != EFI_SUCCESS)
-> +		return;
-> +
-> +	hd_node = efi_bli_find_hd_node(path);
-> +	if (!hd_node)
-> +		return;
-> +
-> +	if (efi_snprintf(partuuid, ARRAY_SIZE(partuuid), "%pUl",
-> +			 hd_node->signature.b) != UUID_STRING_LEN)
-                         ^^^^^^^^^^^^^^^^^^^^
-I just realize that there is a small mistake here. Conceptually
-speaking, %pUl expects a pointer to a efi_guid_t. Of course, because of
-the function being variadic, no type enforcement is done and the
-compiler is happy with hd_node->signature.b which is an u8 array.
+Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
+---
+ block/partitions/efi.h | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
 
-But the clean approach is definitely:
+diff --git a/block/partitions/efi.h b/block/partitions/efi.h
+index 84b9f36b9e47..1f56f93b2804 100644
+--- a/block/partitions/efi.h
++++ b/block/partitions/efi.h
+@@ -75,18 +75,12 @@ typedef struct _gpt_header {
+ 	 */
+ } __packed gpt_header;
+ 
+-typedef struct _gpt_entry_attributes {
+-	u64 required_to_function:1;
+-	u64 reserved:47;
+-        u64 type_guid_specific:16;
+-} __packed gpt_entry_attributes;
+-
+ typedef struct _gpt_entry {
+ 	efi_guid_t partition_type_guid;
+ 	efi_guid_t unique_partition_guid;
+ 	__le64 starting_lba;
+ 	__le64 ending_lba;
+-	gpt_entry_attributes attributes;
++	__le64 attributes;
+ 	__le16 partition_name[72/sizeof(__le16)];
+ } __packed gpt_entry;
+ 
 
-	if (efi_snprintf(partuuid, ARRAY_SIZE(partuuid), "%pUl",
-			 &hd_node->signature) != UUID_STRING_LEN)
+---
+base-commit: 1590cf0329716306e948a8fc29f1d3ee87d3989f
+change-id: 20260724-fix_gpt_entry_attributes-e5af9e080ce1
 
-@Ard, do you want me to send a v4, or can you just fix while applying?
-
-> +		return;
-> +
-> +	set_efi_var(L"LoaderDevicePartUUID", &loader_entry_guid,
-> +		    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-> +		    sizeof(partuuid), partuuid);
-> +}
-
-(...)
-
-
-Yours sincerely,
-Vincent Mailhol
+Best regards,
+-- 
+Vincent Mailhol <mailhol@kernel.org>
 
