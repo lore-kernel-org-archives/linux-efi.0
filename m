@@ -1,35 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 296F23D811C;
-	Tue,  8 Sep 2026 20:59:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BE503C4B81;
+	Tue,  8 Sep 2026 20:59:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788901181; cv=none; b=ZW4d5gyQ/TCMoIGSL/TFQenYl+oeH21s9mjGKhKSRGvR8l11YFedrZF4WR95/p9SDE5MY3jgz5e2uijQ/xoZKBDeQBvWE5wu7/Qv5giwAPBPE0nxn+S+sHpxv5l79JsntG7s6Bw++iYkCzvKgASdrD6dHs9aXVrVaD8vsE7QKOk=
+	t=1788901192; cv=none; b=ObBupEnVVERFZVfxYjlOlR7Bz0Guhsn9Mw4rwIJVAnOzupRlY66/+R69XmMlIKoDNNWO9BNex+1ZGlv7hEPQWNmpZMwdWPgC2NIWlvqTNQBPIfdC8i8yF2i6fyenmyCByzhGTh1tN8Ix/vU95FcKZXenVCJ9FjCgULbpvEJVvyg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788901181; c=relaxed/simple;
-	bh=XCvCrcK+AhcCVOOFTIEWP4r+MqSjPsV0qg7Bzqs7ge4=;
+	s=arc-20240116; t=1788901192; c=relaxed/simple;
+	bh=/cGfZoMmr7KpIZ+1dXwGv9v2Wc3LWJWwGs5e7Tz+VNE=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=dqBBt7DlXpdBDMKkD4SalWUaqxlAz0iIeeUUmL5k9mW64hMfYE/kCwh+tetcpEtw33KODM7zSAXMcW7qggwizUM2E5kB1DPfoFea73I1r+My/8dTsuI+ZRnpdYex5ayiUMDimDdS6RpVjbI7H2RsUqqS9ivzTT4Qxtl6ObYjjJQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cee9VYiY; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=d5vsW7b5PpgZyy/q6vQOQmWPRPId1EeCNnpmq+5rJ9+OG+9cE7IDMjx2omfaDATU3N8s+w9hsPyZqaszU8Wp/o4BsunjqU5q9O1QF0CpG2oWOgrpg+2/aSuGJ7GkWLthGNzGJiMszm6zf5stDa2ni+Y0I7GdiU+6AjqZG/8z7Qg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MdO7GGCn; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cee9VYiY"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 53A351F00A3D;
-	Tue,  8 Sep 2026 20:59:29 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MdO7GGCn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8613E1F00A3A;
+	Tue,  8 Sep 2026 20:59:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788901180;
-	bh=RQEjHODHdWtfRLaYljXTCOiq1fIwDiQ3ymNC15jt1/U=;
+	s=k20260515; t=1788901191;
+	bh=8qApsahOXbBIqOceZevDiK3r7godzpGwnSgF9lGt9lA=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=cee9VYiY+WdzxYhQHHcFgW9cEwCd2qP/qR+XgTI3WUEJ0rbaGMAwBQrVwh6V/pNQN
-	 CpIE2yLM+2TfFktdZCqWhVBBUKNzujLyuCVWJCWVfEBlbUqbm8n9lWw6oPCj5dFDZU
-	 M41dPGXGQ0mGZSLm33uRXCzUEFoO6y/dwB7tkN5ybxYgrObbeLwY5+JKUz/GxN4vgW
-	 UcOlkNW7puN3P38kETgBuAC0BPsD68GMf6ZjU+mY2WDR9zV1NH1UEGbdkKlP9cdoO6
-	 Sl9KTeFOpgl77TNi5rzqQBkJpHbm3c6JghAn0h+pyaui8GDgz6V7T0MnUM0AWIHiwb
-	 zc5K3c0DyX7bw==
+	b=MdO7GGCn0+KpMxsISFASdD9dBeQiWmdJV6zH6t4gzZ5v/IkbEVIfcTsiIALXNtNLj
+	 dFKVRsqLpM4VxR9/cgaCaaIM8If6JAXGEv7nzSsfCRev6+enJY4RHrDFyU7NHQ5Qvp
+	 xOoik+kf2au/vKN9QZt/hbZQRAsBSK1fRwamdkGXQIrTgIHSfo5GeIVS91y7sTeNAs
+	 RMryxLxJ9s2KHaRhVjS7PJ7AQyWgKEtnuhencnKFV7WGH+LmQdpFNF0YkmKpDJWnO7
+	 38B+TFNamLP1eHAQtxCYJp3TkHMPKvdowdf0jA/KR6oeDesYCBg+6wnzjzvIKo4VyJ
+	 t9x2EB5VjgNtA==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Tue, 08 Sep 2026 21:55:22 +0100
-Subject: [PATCH 22/23] kbuild: build rust crates in parallel with the rest
- of the build
+Date: Tue, 08 Sep 2026 21:55:23 +0100
+Subject: [PATCH 23/23] kbuild: use pigz for gzip compression if available
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -38,7 +37,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260908-build-speedup-v1-22-5dc1ac01672d@kernel.org>
+Message-Id: <20260908-build-speedup-v1-23-5dc1ac01672d@kernel.org>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 In-Reply-To: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -74,120 +73,132 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3754; i=ljs@kernel.org;
- h=from:subject:message-id; bh=XCvCrcK+AhcCVOOFTIEWP4r+MqSjPsV0qg7Bzqs7ge4=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlFlmvzlQkJt/tI7n6rKpT/ZyLvslHZtgUDXlzhmLG
- QbK1/LyOkpZGMS4GGTFFFmefxHfHyQSNq/zgr8bzBxWJpAhDFycAjARPj1Ghv+RslWHyrfcvtHy
- t8lna87BP5svKogr5rrNNdNolvaaZsrwPyHOTVVg1cNbW6XLa+b/z3I8sNfvVs+U3T+agq1m+l7
- LYgQA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4672; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=/cGfZoMmr7KpIZ+1dXwGv9v2Wc3LWJWwGs5e7Tz+VNE=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlFnOe8Tg5bZ6llWidBaDf//HKzIea68pJ4U1fnOvK
+ UmZvHdqRykLgxgXg6yYIsvzL+L7g0TC5nVe8HeDmcPKBDKEgYtTACZykJuR4eic7LZFB/flfLzG
+ vKvj/Y0bez9vyL3NYrPz78pFPrkRJjoM/x2cp17LlWRaKbL+v5h5m22pf93yr542HzPtHxn9vL9
+ kHisA
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-When CONFIG_RUST is specified make prepare builds all of the rust
-components before descending into the tree.
+The gzip step of a kernel build is very lengthily, especially for larger
+builds such as allmodconfig.
 
-This means nothing can be done until all of these are compiled, resulting
-in a stall at the start of every clean CONFIG_RUST build.
+gzip itself cannot be run in parallel, however an alternative tool exists
+that can, providing the same feature set as gzip itself - pigz - which
+works as a drop-in replacement.
 
-This also implicitly slows down every rust-capable LLVM allmodconfig build
-as this enables the CONFIG_RUST option.
+On a 128-core Threadripper, gzip -9 of a 36 MiB x86-64 vmlinux.bin takes
+1.6s, and with pigz it takes 0.09s, so the performance increase is
+significant.
 
-Fix this by allowing rust crates to be built alongside the C code.
+It is already possible to specify the KGZIP environmental variable to make
+use of pigz, however it seems sensible to make use of pigz if it is
+available.
 
-Remove the rust build from the make prepare step, then establish a
-dependency between rust code located elsewhere in the tree upon rust
-components contained in rust/.
+Therefore default to using pigz if it is available on the system upon which
+the kernel is being built, otherwise fall back to gzip.
 
-Do this by establishing a top-level list of directories containing rust
-code, KBUILD_RUST_DIRS, upon which the dependency is expressed.
+The output is byte-for-byte identical between pigz/gzip invocations, but
+gzip and pigz do not produce the same stream as one another.
 
-Finally, ensure that no rust code is located elsewhere and fail the build
-if any is found to ensure that nothing is missed in future.
+Therefore, for reproducible builds, the same set of tools should be used.
 
-Care is taken to ensure the rust/ dependency is also established for any
-module being built to account for external rust modules which rely upon it.
+This seems to already be an implicit requirement in any case, but update
+the reproducible build documentation to make this clear.
 
-Every Rust and C object was confirmed to be byte-for-byte identical after
-this change.
+Also update the kbuild documentation to reflect the change.
+
+Every x86 build ends with the compression of vmlinux.bin, 36MB for
+defconfig and over 200MB for allmodconfig, no-op builds are unchanged.
 
 Whole build, 128-thread Threadripper 9980X, best of N runs:
 
                                          before   after     delta
                                          -------------------------------
-  x86 defconfig+RUST, clean                36.5s    32.6s     -3.9s (-11%)
-  x86 allmodconfig, clean                 297.0s   278.3s    -18.7s (-6%)
+  x86 defconfig, touch mm/vma.c, gcc        7.4s     5.4s     -2.0s (-27%)
+  x86 defconfig, touch mm/vma.c, clang      6.6s     4.9s     -1.7s (-26%)
+  x86 defconfig, clean, gcc                26.2s    24.4s     -1.8s (-7%)
+  x86 defconfig, clean, clang              25.8s    24.3s     -1.5s (-6%)
+  x86 allmodconfig, touch mm/vma.c, gcc    23.7s    15.3s     -8.4s (-35%)
+  x86 allmodconfig, touch mm/vma.c, clang  22.1s    15.2s     -6.9s (-31%)
+  x86 allmodconfig, clean, gcc            291.4s   275.2s     -16.2s (-6%)
+  x86 allmodconfig, clean, clang          278.3s   265.7s     -12.6s (-5%)
 
+Link: https://zlib.net/pigz/
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- Kbuild                 |  5 +++++
- Makefile               | 11 ++++++++++-
- scripts/Makefile.build |  5 ++++-
- 3 files changed, 19 insertions(+), 2 deletions(-)
+ Documentation/kbuild/kbuild.rst              | 13 +++++++++++++
+ Documentation/kbuild/reproducible-builds.rst | 16 ++++++++++++++++
+ Makefile                                     |  2 +-
+ 3 files changed, 30 insertions(+), 1 deletion(-)
 
-diff --git a/Kbuild b/Kbuild
-index a6a0192dea08..9670556059dd 100644
---- a/Kbuild
-+++ b/Kbuild
-@@ -115,3 +115,8 @@ obj-$(CONFIG_NET)	+= net/
- obj-y			+= virt/
- obj-y			+= $(ARCH_DRIVERS)
- obj-$(CONFIG_DRM_HEADER_TEST)	+= include/
+diff --git a/Documentation/kbuild/kbuild.rst b/Documentation/kbuild/kbuild.rst
+index 5a9013bacfb7..ebfc2319d6da 100644
+--- a/Documentation/kbuild/kbuild.rst
++++ b/Documentation/kbuild/kbuild.rst
+@@ -110,6 +110,19 @@ HOSTLDLIBS
+ ----------
+ Additional libraries to link against when building host programs.
+ 
++KGZIP
++-----
++The gzip compressor used for the compressed kernel image, compressed
++modules and packaging.
 +
-+# Rust code elsewhere in the tree depends upon rust/.
-+ifdef CONFIG_RUST
-+$(KBUILD_RUST_DIRS): | rust
-+endif
++If unset, it defaults to pigz (a parallel implementation of gzip) if available,
++otherwise gzip.
++
++KBZIP2, KLZOP, LZMA, LZ4, XZ, ZSTD
++----------------------------------
++The compressor programs for the other formats. Each defaults to the program
++of the same name.
++
+ .. _userkbuildflags:
+ 
+ USERCFLAGS
+diff --git a/Documentation/kbuild/reproducible-builds.rst b/Documentation/kbuild/reproducible-builds.rst
+index bc1eb82211df..b95586df2cb5 100644
+--- a/Documentation/kbuild/reproducible-builds.rst
++++ b/Documentation/kbuild/reproducible-builds.rst
+@@ -76,6 +76,22 @@ include generated files.  You should ensure the source tree is
+ pristine by running ``make mrproper`` or ``git clean -d -f -x`` before
+ building a source package.
+ 
++Compression tools
++-----------------
++
++The compressed kernel image, compressed modules and packages are produced
++using the binary specified by the environment variable ``KGZIP`` (described
++in Documentation/kbuild/kbuild.rst).
++
++This variable defaults to ``pigz`` if installed (a parallel implementation
++of gzip), or ``gzip`` otherwise.
++
++The generated output between two invocations of identical builds with
++either of the default tools will be byte-for-byte equivalent.
++
++However, for reproducible builds, ensure the same tool is used on all build
++hosts, as different tools may generate different output from one another.
++
+ Module signing
+ --------------
+ 
 diff --git a/Makefile b/Makefile
-index 7d23d7b64be3..3805f72428cb 100644
+index 3805f72428cb..5cb819034372 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -1429,11 +1429,14 @@ prepare0: archprepare
- 	$(Q)$(MAKE) $(build)=. prepare
- 	$(Q)$(MAKE) $(build)=scripts/mod
- 
-+ifdef CONFIG_RUST
-+export KBUILD_RUST_DIRS := drivers lib mm samples
-+endif
-+
- # All the preparing..
- prepare: prepare0
- ifdef CONFIG_RUST
- 	+$(Q)$(CONFIG_SHELL) $(srctree)/scripts/rust_is_available.sh
--	$(Q)$(MAKE) $(build)=rust
- endif
- 
- PHONY += remove-stale-files
-@@ -1760,6 +1763,12 @@ modules: modules_prepare
- # Target to prepare building external modules
- modules_prepare: prepare
- 	$(Q)$(MAKE) $(build)=scripts scripts/module.lds
-+ifdef CONFIG_RUST
-+# Ensure rust/ is build before any external rust module which will rely upon it.
-+ifeq ($(MAKECMDGOALS),modules_prepare)
-+	$(Q)$(MAKE) $(build)=rust
-+endif
-+endif
- 
- endif # CONFIG_MODULES
- 
-diff --git a/scripts/Makefile.build b/scripts/Makefile.build
-index b9093b39cc2f..77351d6006fa 100644
---- a/scripts/Makefile.build
-+++ b/scripts/Makefile.build
-@@ -360,8 +360,11 @@ quiet_cmd_rustc_o_rs = $(RUSTC_OR_CLIPPY_QUIET) $(quiet_modtag) $@
- 		$(cmd_ld_single)) \
- 	$(cmd_objtool)
- 
-+rust-dir-ok = $(or $(KBUILD_EXTMOD),$(filter rust $(KBUILD_RUST_DIRS),$(firstword $(subst /, ,$@))))
-+
-+# Ensure that any rust code located elsewhere from rust/ is listed in KBUILD_RUST_DIRS.
- define rule_rustc_o_rs
--	$(call cmd_and_fixdep,rustc_o_rs)
-+	$(if $(rust-dir-ok),,$(error $@: Rust code in a directory not listed in KBUILD_RUST_DIRS, see the top Makefile))$(call cmd_and_fixdep,rustc_o_rs)
- 	$(call cmd,gen_objtooldep)
- endef
- 
+@@ -561,7 +561,7 @@ PERL		= perl
+ PYTHON3		= python3
+ CHECK		= sparse
+ BASH		= bash
+-KGZIP		= gzip
++KGZIP		:= $(if $(shell command -v pigz 2>/dev/null),pigz,gzip)
+ KBZIP2		= bzip2
+ KLZOP		= lzop
+ LZMA		= lzma
 
 -- 
 2.55.0
