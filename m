@@ -1,34 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D63A83D47C0;
-	Tue,  8 Sep 2026 20:59:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF1733D3D05;
+	Tue,  8 Sep 2026 20:59:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788901159; cv=none; b=M/H3BK7XB0Y+D5ZCVSdmmJGaKlcSbdOXTPHWPw0LjMc5T7bHVFzRJV/8hvev/lUwLKXszEesLx5MLmVZ+90T+48bmFBwmwRmxOC1I7xs9w2pLKmdsTMMCmPYXvPo/YPnT5U5HASWcZuf4NzfLtWvYaxNs58/qKsPnjX27erIya0=
+	t=1788901171; cv=none; b=M/j49EEdG8viO/5aAa9S4CwU0wfXvxN0TpYzJ+0uRA7g+WJhGezn6zKT17EVInva+QBX4FHfj+l7KhkbzewGrhGPeN0srmURPyidKzPX2f7gpdYlk0QvxqtlDMsG0pfPIyYNW8KNZcVqePe3ISEvxb30IH0CmOyHUB62220c/OI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788901159; c=relaxed/simple;
-	bh=LB9T7y9hXziw5kYzoWlATIyn+dzyDLeA+KV1Dtb+tR0=;
+	s=arc-20240116; t=1788901171; c=relaxed/simple;
+	bh=kx145CbsbOZNlrJo3YNnQ6X8zzclemP0tqvdTYAGrNw=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=bZj/C47roIp9DkTGBUzLDYcfCddNpVCA6I5N9O12GXopXwp3uvP0B9eRSDD5zwY5fO0gjV6EZSltQbs2s+wH3ny5W8jAZTaNU7B/28Dm9YMim3+O5w7zbL/a4pXwIJqFWcChik+nyHkaY070g758Jr/WhwUtdCmcIM0g2HrlPRY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=l2H8oEfy; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=IlOB2Yh5P2A7mTgi46aiydOfYNgyLzB9R6P5xs0kA0jTL/nAxeE7zjaiKu4UX4EjUJs0klh/M2MN5Xz+cPIB6HpkbGLOk9TBvD7HpU3C16bIrVSif2xKYFovppEHfX2Up+FA4PjaajzUkZ5aNVT0XnqanUhX+Zrl3S0tnCzLgOo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OIpDOBSg; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="l2H8oEfy"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C1D881F00A3D;
-	Tue,  8 Sep 2026 20:59:06 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OIpDOBSg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 046F01F00A3A;
+	Tue,  8 Sep 2026 20:59:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788901157;
-	bh=KP4DPjtGqjYlZDY/C6oiw5PNNFH4xgYFq5gb3vP/9DM=;
+	s=k20260515; t=1788901168;
+	bh=RpyglNkLvgtO+g1zDJNpkY3JopuChXGi3ttcKAuST+8=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=l2H8oEfyiisTrkmWPXFPkrb9zX+PnNqQLPTWl+vHf3NsuP+fCsXMWBsX7BjXJYlWZ
-	 nqqgTPf7uY55PDIAWtwo6hXNTbMnaLlGNx4ryMRpe/nOzVqpEzc5iWLw2JLhb8Co05
-	 9s1SasDqfvP91H8sdwcoy4A7YTh8DB0wv+Bi/OoXlL2MblT9cgvSRSaEexFHujfFy6
-	 8P4N8pmqaNnNKGCxCVliu0/Kec45kp7oMDRUSzS6XwAjYJU0gH5oVqdZOxDseQyQO1
-	 Jh1owZbgK0zD6cmR+j9o1TGHMmkFGwpKic4yhyualkluEnQUYWO/YKOT5YBaGeN1wf
-	 Oue7w0xvvFlNw==
+	b=OIpDOBSgJrH76v4qVZGsW50WfuCBkHgvg4YvO+ZN3uJi1EdpWYnqx9/rxijC1G8Y2
+	 VmSITaucbZMwSNTrXt+SWMY3umH2RYhUY9lg8jXa+zDPf6/z26mQyBH6CgVrjNi3NQ
+	 B2IlUKR/DopfAfvqCauFgd0ycxSvLywvK9BKj3UvpoAkW+0BzLMFCXb/P5rNbzhqK/
+	 JomapY4q5gpgznQ6qVwqt0ZH9qq4WWdA8YAfsA0whir9iAxDmqsIfvPFDUxhSBP6v+
+	 MDdFlVH88zzAe38RNflu9HCao15bxZR9oE8mh13QjCKeM/zrvUOJfBkBoNAveTh4ui
+	 c227LJShut05w==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Tue, 08 Sep 2026 21:55:20 +0100
-Subject: [PATCH 20/23] kbuild: rust: parallelise rustc front end
+Date: Tue, 08 Sep 2026 21:55:21 +0100
+Subject: [PATCH 21/23] rust: make exports.o depend on the headers generated
+ for it
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260908-build-speedup-v1-20-5dc1ac01672d@kernel.org>
+Message-Id: <20260908-build-speedup-v1-21-5dc1ac01672d@kernel.org>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 In-Reply-To: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -73,98 +74,47 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3115; i=ljs@kernel.org;
- h=from:subject:message-id; bh=LB9T7y9hXziw5kYzoWlATIyn+dzyDLeA+KV1Dtb+tR0=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlFnEMd3Ve9ZQVLbpj4/Z9s0fLu8KN58+tafn1S/fR
- l1FmWdTO0pZGMS4GGTFFFmefxHfHyQSNq/zgr8bzBxWJpAhDFycAjCR0CuMDFOjrd+XSqqK1Lpq
- xpUur5gszfvmzYl5k5X2XJzc+WaJ1SNGhteOwtIX8jW6gl0FqjNPhzDoas99cHsCh5ZbR+ar/1f
- 9uAA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1286; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=kx145CbsbOZNlrJo3YNnQ6X8zzclemP0tqvdTYAGrNw=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLIWlFmyftt0/rHJ4/XeJ5NNZMp8m66+kNfu9lsnecLy8
+ QEXFo2SjlIWBjEuBlkxRZbnX8T3B4mEzeu84O8GM4eVCWQIAxenAEwkPJGRoT+U9y0318zvJ0XM
+ dT6t5PNlvlHHN0H8/Wup7seP/9x/r8bI8Hra9b3v2RsWHzq2frJy1QIuIS+b/yHHakRzt3woe77
+ sJicA
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-Rust crates are compiled in a serial chain on the critical path - core,
-bindings, kernel crates and then the drivers - each a rustc invocation.
+rust/exports.c includes the exports_*_generated.h listing the symbols of
+the core, bindings, kernel and helpers objects, but this is not expressed
+in its Makefile.
 
-With CONFIG_RUST set and every rust driver enabled, the entire chain takes
-around 25 seconds on a 128-thread machine, with the associated C code
-taking 24 seconds.
+This worked previously because the headers are always-y targets, and make
+prepare built all of the rust crates first, which is an implicit
+dependency.
 
-Each time a change is made to any of the bindings, it triggers a rebuild.
-
-Use the -Zthreads option to have rustc perform builds in parallel. This has
-been available since rust 1.84 (rust-lang/rust#132282), and the kernel
-requires rust 1.85 or above.
-
-A future -j/--jobs option is planned for
-rustc:(rust-lang/compiler-team#1005), so check to see if this available and
-if so use it.
-
-If the user's rustc supports neither, then it falls back gracefully and
-neither are used.
-
-The threads are taken from make's jobserver, so a parallel build is not
-oversubscribed. It was found that benefits level off at 8 threads (16 was
-found to be around the same, and 32 slower).
-
-Generated output was confirmed byte-for-byte identical.
-
-Observed build time changes (using rustc 1.98, clang):
-
-                                        before    after
-  core.o                                   7.7s	    4.9s
-  bindings.o                               4.3s     3.1s
-  kernel.o                                 2.0s     1.4s
-  clean build                             39.3s    34.6s
-  touch rust/kernel/lib.rs                12.9s    12.1s
-  touch rust/bindings/bindings_helper.h   19.5s    17.5s
-
-Whole build, 128-thread Threadripper 9980X, best of N runs:
-
-                                         before   after     delta
-                                         -------------------------------
-  x86 defconfig+RUST, clean               41.0s    36.4s     -4.6s (-11%)
-  x86 defconfig+RUST, touch lib.rs         8.3s     7.7s    -0.56s (-7%)
+Fix this as it is a dependency of the subsequent commit.
 
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- Makefile     | 4 ++++
- init/Kconfig | 7 +++++++
- 2 files changed, 11 insertions(+)
+ rust/Makefile | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/Makefile b/Makefile
-index 997fc7ebe096..7d23d7b64be3 100644
---- a/Makefile
-+++ b/Makefile
-@@ -1204,6 +1204,10 @@ KBUILD_RUSTFLAGS += --remap-path-prefix=$(srcroot)/= --remap-path-scope=macro
- endif
- endif
+diff --git a/rust/Makefile b/rust/Makefile
+index da1a7409d984..74d21ae6f383 100644
+--- a/rust/Makefile
++++ b/rust/Makefile
+@@ -728,6 +728,11 @@ endef
+ $(obj)/helpers/helpers.o: $(src)/helpers/helpers.c $(recordmcount_source) FORCE
+ 	+$(call if_changed_rule,rust_cc_library)
  
-+ifdef CONFIG_RUST
-+KBUILD_RUSTFLAGS += $(if $(CONFIG_RUSTC_HAS_JOBS),-j8,$(if $(CONFIG_RUSTC_HAS_ZTHREADS),-Zthreads=8))
-+endif
++# The exported symbol lists are generated from the crates' objects.
++$(obj)/exports.o: $(obj)/exports_core_generated.h \
++    $(obj)/exports_bindings_generated.h $(obj)/exports_kernel_generated.h \
++    $(if $(CONFIG_RUST_INLINE_HELPERS),,$(obj)/exports_helpers_generated.h)
 +
- # include additional Makefiles when needed
- include-y			:= scripts/Makefile.warn
- include-$(CONFIG_DEBUG_INFO)	+= scripts/Makefile.debug
-diff --git a/init/Kconfig b/init/Kconfig
-index 3c92c87254a3..4096a306e2ab 100644
---- a/init/Kconfig
-+++ b/init/Kconfig
-@@ -231,6 +231,13 @@ config RUSTC_HAS_FILE_AS_C_STR
- config RUSTC_HAS_SUSPICIOUS_RUNTIME_SYMBOL_DEFINITIONS
- 	def_bool RUSTC_VERSION >= 109800
- 
-+# rustc's parallel front end: -j is the coming spelling, -Zthreads the current one
-+config RUSTC_HAS_JOBS
-+	def_bool $(rustc-option,-j8)
-+
-+config RUSTC_HAS_ZTHREADS
-+	def_bool $(rustc-option,-Zthreads=8)
-+
- config PAHOLE_VERSION
- 	int
- 	default "$(PAHOLE_VERSION)"
+ # Disable symbol versioning for exports.o to avoid conflicts with the actual
+ # symbol versions generated from Rust objects.
+ $(obj)/exports.o: private skip_gendwarfksyms = 1
 
 -- 
 2.55.0
