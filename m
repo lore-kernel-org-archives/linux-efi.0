@@ -1,138 +1,137 @@
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96D8D509F19
-	for <linux-efi@vger.kernel.org>; Tue,  8 Sep 2026 10:18:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.170
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788862688; cv=pass; b=qVXun1eL3K4X2hZg/pJdTDyWeuOcvVntGFnVUdFggQnBziQQp7V+f46CmTb8lvVAlHbTuwNYRY3cmnRaBZ6uM9ZOyPYq1dUVPNoBD95XrM3pbL+1oDk0BfIedSbBvT8yh0zTVl5ko5+JJUDHOuNXb/L9Byo9Z3JYx89zNWI+sWU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788862688; c=relaxed/simple;
-	bh=JWKHM4xhjVVj9o1CYYnXhN5iVw47R++Dsndo96mshq8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BbmXnN9HDR/ynQien5K/cFQgTPYz7QNFgBb1laoORYhOW0LIFetlZdXdYh9ioAHfbkxmIMEEmEW71jKa6hAXrgO/GdvlMZKxEzohrpkvLdGNo9PBZ4O1iJi05sJ6XXFz8bssfjSS+lOp6Wg1GVAcYtx+PHxR7InE34puG93sC7c=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=eM+S9Xbv; arc=pass smtp.client-ip=209.85.128.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0123857C70E;
+	Tue,  8 Sep 2026 15:56:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788883010; cv=none; b=O8BftewNg2WwCklNsdPZipr7gg6wy6Wixz+Hk6/VidvqcTrfD1JFMU6kgg5i0sFJnZ45TB3/cmyWTvePsSjGLvuL+W0jqgZV7w767FIXnPnJXTD1jUsUgIrMuqnBOzSf8f+t+mWgSa4iLHPvhMchGB+9oADGpfTV+Esh9QwIojo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788883010; c=relaxed/simple;
+	bh=jqomfzAPcB/YsEZ5Zl+BQ8kUXgK69YV3ld/oKwVf5+g=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Imqg2Xs4zmiviULwA0wG2SnGILYsXtAqFxQQZOFimtt1YYSBodPZ30Np3uIzZ7UzoisBRNO7BA6UagE1rjUBvnBUuWhDYkfrWUk87q4e23NfZXrodveIQ6hMvNvQsOqJhgMdMhaYaR2mquq4V4n+X3MwZ6UKvCKT+KbT632F4Dw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dgzqAq0R; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="eM+S9Xbv"
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-861f30636f9so61863777b3.0
-        for <linux-efi@vger.kernel.org>; Tue, 08 Sep 2026 03:18:06 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1788862685; cv=none;
-        d=google.com; s=arc-20260327;
-        b=jO0F73T5s+Oxg7n1G1Bd+jfWpLoERtLcnyKT/MHf+vCWp80uo3AWytYcKHc3y1IYKV
-         nM7QULX3tshA0UcU8jqPl8zT6JEl9Ob5Jq6rqRUxhZKYO0b06I7e95A8pg+CjXHkqtN3
-         7pIe9dmyHXjuybgDjvSqxIb7UzY2XEQXTnohLUR5XTOB2F1G+SpnWPf+TVkKW8DAktNt
-         6X4saURWihrDyhGtsLI4fpFMUPg332ovsn0RyZsT8A6k9sgNaemqiHUmllI5Xo/m3LPW
-         pdlPybMMxeuwI5aVWC9MOwqaOtwE3qPNL+TWxuz5IY9zzkA6MemyX5eiiVUU2wLXjB8e
-         0kBQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=cLIVHgmWP92ScbvFBUNRbCINvKyYqSKCdwo7uYzpFHM=;
-        fh=Q4FxDMfSio5E1Db0lWhU8KJIOmtSg0NYzVgDw16kB0Q=;
-        b=CKOGvbYR4pvGAl29XFNcg74OIt0skfw/WtZbF0XC3DEE56CUcWvNzWJOuu9tpckiow
-         ytFbFuUniD4ODkYXlym8/W7ct/P2bkKIvt1P8NfoyvJ8ppHZR52reXnZUzeuQ2ILAkPR
-         51fygik19bzF0h5nTePN+R5JJMXlCKrQx5O/s8v0Yg3HpRL9cyCrsc3VgOyhpyqmTwJq
-         h9gfpJzdH4TyefE1bIgrU63muCn8bwS/9DPEvm98rVnW1hkbLKB1n7scKQPi6IVhFGR4
-         XkyHswp+HzPpZplk+NdgelB9p7hv01nlw00FFTdqYlCbQFDym1UplpeSa2bt9Q+Y4b/7
-         Wfkw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1788862685; x=1789467485; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=cLIVHgmWP92ScbvFBUNRbCINvKyYqSKCdwo7uYzpFHM=;
-        b=eM+S9XbvtDNL80ueItEh+MbBwkv7Ct9ZQRnv77MU0MH+674HeDpBd86h3juhgMaihg
-         jSDeVc6EEkjNZSpiEmprkSnT7pxW+fr+TMfxBNvrV0e4SM5iU79SNlcR2aOQln13eUIh
-         phsKcgtOagx+HosLtNqDZTZ6dD8CpGUVK5YSFNm4q7sXRd+hh1dcBEyVOuilJ6oBSTTp
-         Voes9rfvKVexEjaug4KpLzo9xOQ360xvIpE9fYBmV5/NcwjCN/hdmpLkjAE8xLWY1Ecr
-         MFO0KtaJhyOd81shINN7JFpSdB4ygyvMCkLJUK3XRh3gOwIX/u/OXCVqyxXitGWkobmQ
-         OkkQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788862685; x=1789467485;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=cLIVHgmWP92ScbvFBUNRbCINvKyYqSKCdwo7uYzpFHM=;
-        b=ov9LWmefFnAg6HHNvxraO1cf0FPprBF7VSfZWuJptUrQxAplDbBzdEFgdVXORdlHRq
-         8CH2UtXFikXRXffGKZhCX+MCqEvI76HIq8bS3/GNJLdc3qmfrGI5G4BHqL/OZKA+ij6u
-         adIaFQb6hHtwtm6JgM3Rie8kQFHymybgOa6Vtko7oKD0hpLyKpiRBjneOn4RihnAe6IK
-         HKMXRQsfLDeDEHPylVGXlYtk5tWvcKtHwWSCZRr24UN+uTFwKoyPsq48wrzTSjVUlQSd
-         +SRfxcBgcBncx3M+P1fgHkvQ6W4ZyGWFnnkwmUD00oj17zv4OP7ujyLBFrRLpyJKNkrA
-         byQQ==
-X-Forwarded-Encrypted: i=1; AKwUvBws0bb3P+f+YO9Td/Y9EJCirW34VhTvdL6Q+OQSHznZtUww7y3kiPj5+cUYaRF7TzLE9oWyAyRfihM=@vger.kernel.org
-X-Gm-Message-State: AFuF++ltqa4vHsJv+nvRtp1W9Lkjee7qHB8HOXIy65rMrM72UgJmuVwX
-	NqKw7gR+MHHth9n4TxOZoyGWIS/H1Nwp07eAuQQFh2Hpp/E8s/9AMnFaf8mPP/q57qVgT7iXX43
-	sIaNzv9IvGLOUChYcEw42DQEBvXMJ5ExdldvGXzmyWA==
-X-Gm-Gg: AYBFou3MVwCBykHIoavIi4/YbAhr76mJUzLf7T6gnp/yQ6tBphmW8PhGVUmsJc/wKYW
-	H5bfqjKSAohj9OXAG5WPmJPCvoSZLajuQg7g9L7XJp1fG0IwWlAAHJJ6dKe2Ph3rboQYui12upL
-	jkU60q3r/3262vxtb2GgoWounAMo3tLD3C4esH9nQ5Ma/giIzpnwTN/FLqwLeSHW+soxDeL4urS
-	NLTESv87ZLUZGSv89Xb618D/wpDmiX/vO9WekPIq6WGq/aNeFwZ8JvaqKdxki4WOM07KDSr+zCb
-	Qv3s7DF+prkH9KXdW1sE17QH2xcHc7Oko9/g0Kk5av1HYebHMk3fh3fiN3CIdrp/3dgRz9yfnf9
-	dfBM8cysdN4FQE3utmQ21f7D4avQDQokTddXjkn+zKdun3wwEE+VnryHg+XIKl+jIIIIEtM1Kig
-	HxLYLt12jrt3njVOIpl89qWzrJd0SRpZUYROWZOIUtVRrP7ov+ugdPOWQ91jwSJmC7YtPrhzG2H
-	/UuPVNTgMflWgZBKmva9KEKyO49ZEA0fMexXAOEF2xp4Y/IDu0qN9pFaiW6fYeZPYOH7rHQ3xpC
-	SbWdZQ9eBYGMtFgWbrZYsNxrA+SLsDgBLzzFbXlKr1T9qRx5ISJ74U+QcIXTE4ESCDJKElVtl8S
-	LSHIsD+PnTHfyJq08vNO+AFzJ02GYa5IUgF4Kmd8cLqjM
-X-Received: by 2002:a05:690c:6602:b0:858:d6fb:2b9f with SMTP id
- 00721157ae682-871221ad847mr97459367b3.5.1788862685448; Tue, 08 Sep 2026
- 03:18:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dgzqAq0R"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DE3E71F00A3D;
+	Tue,  8 Sep 2026 15:56:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788883008;
+	bh=sRrd8HW6tVkZeGdEyEtiUpIMBkv6a/57SRsi9SBmBeE=;
+	h=From:To:Cc:Subject:Date;
+	b=dgzqAq0Rb4t3E65A90uWXQ8od7s2sZqu5HDBqaJYS739IKSVberiqznPYaCD46X76
+	 hg7VF2iHl6HtZqNtYIGeMQKuNy1OcnIqdyV2Npj8y99of6jDpJGQaTtRm4sV8kXBrT
+	 wZ28xpm0TQ+y8vNp9XgYu7sReJxXI2Srrf7PXc5BJKRImATk8y4scer0CX2Wdk+Ygs
+	 7fNnOlWi69n052qHTsAJcBEsosfaF/dO113v1vD1Hs/MR9HMYD7A5rHRuc+yLNe696
+	 iYg6m/WbEHurdr6ucmTDEdR45Zi7/yEnJJZLhMeePTkWBjoDdJMaLi/3GdTwdzmT7J
+	 YMPEMq8UVBnJA==
+From: Pratyush Yadav <pratyush@kernel.org>
+To: Jonathan Corbet <corbet@lwn.net>,
+	Shuah Khan <skhan@linuxfoundation.org>,
+	Mike Rapoport <rppt@kernel.org>,
+	Pasha Tatashin <pasha.tatashin@soleen.com>,
+	Pratyush Yadav <pratyush@kernel.org>,
+	Alexander Graf <graf@amazon.com>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	David Hildenbrand <david@kernel.org>,
+	Lorenzo Stoakes <ljs@kernel.org>,
+	"Liam R. Howlett" <liam@infradead.org>,
+	Vlastimil Babka <vbabka@kernel.org>,
+	Suren Baghdasaryan <surenb@google.com>,
+	Michal Hocko <mhocko@suse.com>,
+	Thomas Gleixner <tglx@kernel.org>,
+	Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Dave Hansen <dave.hansen@linux.intel.com>,
+	"H. Peter Anvin" <hpa@zytor.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Saravana Kannan <saravanak@kernel.org>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Baoquan He <baoquan.he@linux.dev>
+Cc: x86@kernel.org,
+	linux-doc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	kexec@lists.infradead.org,
+	linux-mm@kvack.org,
+	linux-efi@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-arch@vger.kernel.org
+Subject: [PATCH v2 0/4] kho: rename "scratch" to "bootmem"
+Date: Tue,  8 Sep 2026 17:56:34 +0200
+Message-ID: <20260908155639.2496551-1-pratyush@kernel.org>
+X-Mailer: git-send-email 2.55.0.979.g7e5102b832-goog
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260704003341.3923900-1-junxiao.chang@intel.com>
- <20260815095057.2461943-1-junxiao.chang@intel.com> <be731d49-398b-4b5b-9de5-b94d53177f94@app.fastmail.com>
-In-Reply-To: <be731d49-398b-4b5b-9de5-b94d53177f94@app.fastmail.com>
-From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Date: Tue, 8 Sep 2026 13:17:29 +0300
-X-Gm-Features: AcwNN1VCPP6_XNPrA1Kh1llyOtPA4jWMwQQl3eSQ2tuDlYnGbLuTpGFYmwCQdBw
-Message-ID: <CAC_iWjLP1rXqw8dAUzPcZUK=pr+aOXY4w0zEW+WjTC2Kmfya1A@mail.gmail.com>
-Subject: Re: [PATCH] efi: add dynamic control interface for EFI runtime services
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: Junxiao Chang <junxiao.chang@intel.com>, linux-efi@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, 
-	Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Thu, 3 Sept 2026 at 13:08, Ard Biesheuvel <ardb@kernel.org> wrote:
->
->
-> On Sat, 15 Aug 2026, at 11:50, Junxiao Chang wrote:
-> > Add an interface for PREEMPT_RT kernels to dynamically enable or
-> > disable EFI runtime services.
-> >
-> > EFI runtime services are typically disabled on RT systems using
-> > kernel parameters such as "noefi" or "efi=disable" to avoid
-> > long latency caused by firmware calls. However, this permanently
-> > disables EFI runtime services, preventing operations such as UEFI
-> > firmware updates.
-> >
-> > With this change, EFI runtime services can be disabled while
-> > real-time workloads are running and re-enabled afterwards,
-> > providing low-latency operation without permanently sacrificing
-> > firmware functionality.
-> >
-> > Signed-off-by: Junxiao Chang <junxiao.chang@intel.com>
-> > ---
-> >  drivers/firmware/efi/efi.c              | 31 +++++++++++++++++++++++++
-> >  drivers/firmware/efi/runtime-wrappers.c | 28 ++++++++++++++++++++++
-> >  include/linux/efi.h                     |  1 +
-> >  3 files changed, 60 insertions(+)
-> >
->
-> I've queued this up now - thanks.
+From: "Pratyush Yadav (Google)" <pratyush@kernel.org>
 
-Apologies for the noise, resending as the previous one was dropped.
-One of the things that changes with runtime services is mounting the
-efivarfs as RO/RW.
-I am pretty sure nothing bad will happen, but is it worth the pain of
-remounting it on enable/disable?
+The term "KHO scratch" is vague and overloaded. It does not accurately
+describe what the memory is for. This was discussed previously at [0].
+The conclusion was to rename "KHO scratch" to "KHO bootmem", since this
+is memory passed by the previous kernel for early boot allocations.
 
-Thanks
-/Ilias
+In addition, memblock does not care about the provenance of the memory.
+It cares more about how it should use it. Use MEMBLOCK_KHO_NOPRSRV,
+instead of MEMBLOCK_KHO_SCRATCH, to describe this memory to memblock.
+
+This series does the renames. It also gets rid of a redundant Kconfig.
+
+While the diffstat is big and scary, most of the changes are mechanical.
+The most interesting functional change is in patch 4.
+
+This series touches a lot of files across a lot of trees. But since all
+of that is purely KHO-related code, I would like to collect ACKs from
+the maintainers and take it via the liveupdate tree.
+
+Ideally we should queue it in liveupdate/next early in the v7.4 cycle
+since it will cause a lot of conflicts with other patches throughout the
+KHO tree.
+
+[0] https://lore.kernel.org/kexec/agHGOxSnP_VraH1M@kernel.org/T/#u
+
+Changes in v2:
+- Rebase on latest liveupdate/next.
+
+Pratyush Yadav (Google) (4):
+  memblock: get rid of CONFIG_MEMBLOCK_KHO_SCRATCH
+  memblock: rename KHO_SCRATCH to KHO_NOPRSRV
+  kho: rename KHO scratch to KHO bootmem
+  kho: rename kho_scratch= commandline parameter to kho_bootmem=
+
+ .../admin-guide/kernel-parameters.txt         |  15 +-
+ Documentation/admin-guide/mm/kho.rst          |  18 +-
+ Documentation/core-api/kho/index.rst          |  36 +-
+ arch/x86/boot/compressed/kaslr.c              |  12 +-
+ arch/x86/include/uapi/asm/setup_data.h        |   4 +-
+ arch/x86/kernel/e820.c                        |   2 +-
+ arch/x86/kernel/kexec-bzimage64.c             |   6 +-
+ arch/x86/kernel/setup.c                       |   2 +-
+ arch/x86/realmode/init.c                      |   2 +-
+ drivers/firmware/efi/efi-init.c               |   6 +-
+ drivers/of/kexec.c                            |  16 +-
+ include/asm-generic/kexec_handover.h          |   2 +-
+ include/linux/kexec.h                         |   2 +-
+ include/linux/kexec_handover.h                |  16 +-
+ include/linux/memblock.h                      |  30 +-
+ kernel/liveupdate/Kconfig                     |   1 -
+ kernel/liveupdate/kexec_handover.c            | 340 +++++++++---------
+ kernel/liveupdate/kexec_handover_debugfs.c    |  24 +-
+ kernel/liveupdate/kexec_handover_internal.h   |   4 +-
+ mm/Kconfig                                    |   4 -
+ mm/memblock.c                                 |  56 +--
+ mm/mm_init.c                                  |   6 +-
+ tools/testing/memblock/internal.h             |   2 +-
+ 23 files changed, 302 insertions(+), 304 deletions(-)
+
+
+base-commit: c65687600ed075d237a204755d99ad538db34b47
+-- 
+2.55.0.979.g7e5102b832-goog
+
