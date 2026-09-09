@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 996313A382D;
-	Wed,  9 Sep 2026 19:47:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56DA73C8C43;
+	Wed,  9 Sep 2026 19:47:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788983258; cv=none; b=AQPhfzoGjVh2UhJpXSdMk4HRVRyJVuAc/j8wdkmCyqt1JTqtla2SR606W5us+5Id67AHDUKZP1BOywBxTqLJ2S6803a91gq5z0j61BttaGU3YbaVITadgv1LOYTPxUX3GCPmKVqbDQ5iMgkxXN5/yuw7N0oAeEI5tZxKL3PY+gg=
+	t=1788983261; cv=none; b=X2D2QKoKvuCAdzFVDIIiwKJ8NYKIdYKlYhDyN/X4KW1/eQMqg6R/cFuBB/Ly28M9yjNDXhwNElxOWIBQ2KREEgHLH3GUGyG5t41inrj1X6ErTDnJDCvyJM3vEdX86YDaaTkRZ7O0SCCnNQ7BzNFV3eWLFT1wsQDraolMEtfWffQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788983258; c=relaxed/simple;
-	bh=dIsgkmHT8CySWCVBXJdGNVcXGxhoYdLBOKFpSuXewxk=;
+	s=arc-20240116; t=1788983261; c=relaxed/simple;
+	bh=NizfhVOT/VvA2dUqB5NXjYFEK1DkfSANyvy3gAhNVwY=;
 	h=MIME-Version:Content-Type:Subject:From:To:Cc:In-Reply-To:
-	 References:Date:Message-Id; b=md68gfdFxJUEOJLV2Ej2DWXBD9JsW5Br5d1xW8xe89ztS/JqFmffvU3zIeQ4C20i9VDvyveL2T0OzUmctNMaMNp2y1bCWJUveHZWLF0XtrxqpvdD1zyqKvVA0pS7AeB5yvcD3hOsVRSSC3xfrqxtuh+Fd8TvcH05LPoz4bxQ3Ls=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YjJs8ghS; arc=none smtp.client-ip=100.103.45.18
+	 References:Date:Message-Id; b=cWT/LAJx3YNwivXaqcE+aTsQz4IJnGcNie6LvPSq5RazLMJCqtwQ4PX8vnV0ofq8yaHEh3SJk5Ri5Q7m73dOy1umfO6lWaDGwFPo57DO6gkmTjh9Ru1+wAqeXe981JGkrVVjk0SG7ynIJ6t5szG3rELU3zlFbaOvLKlthcbQ32w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RE+iRgyp; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YjJs8ghS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6DEF51F000FF;
-	Wed,  9 Sep 2026 19:47:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RE+iRgyp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4BDAD1F000FF;
+	Wed,  9 Sep 2026 19:47:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788983257;
-	bh=/DdlRrwOvlulNXt5vfNVhc9pESgkmxnCKefmHG9DdJg=;
+	s=k20260515; t=1788983260;
+	bh=G7FTp6iVpcIdN5Xvcj9jVAhuUcfgpjxShTyjExlqApk=;
 	h=Subject:From:To:Cc:In-Reply-To:References:Date;
-	b=YjJs8ghS7pquI02zgxgnqAZpy/OVin7jboQXmQ0wY8onfmY2YEyGG7Sfzm4c2sOKM
-	 rFDdcfElKGAxHRqNc+rinp7nJ+wCQH6Vb95vh58wLPXQ1odCWLJe04eACoTuFioont
-	 zxSQ1pjZiow+eBiaWGVjuLRNlyCqvVDssZorBA3p/x8PNoIBRFKh/dU6Q6+ZawpS3r
-	 lhuW7j1uGUqIdJYaxaykmJ8wFqoefavHECQtZEgHqhDLwYbPniAo0HZz+g6mbVHRaj
-	 w5XMpYKW/zCEN+2X0rTQTI0hDVUrNcaXMxZuuOvRtS/WrwzpVi+Hzc80KvPGGEeBUd
-	 k0oBYKKL1GDJw==
+	b=RE+iRgypgtxiGH3q8JJskwl3TmdpMFavTXW4O087iWcLRDpCKuDZXaHFmXWekOnH9
+	 ijGG1NEISpLVBfQUFK8npUZUJDiQ0Q3S7+LKVf+dbu3+7uIXKVriBmBMmaIdBsGby3
+	 9XrHw9IyWegS+oMIT8/JU6XGRlO/cbB5cLOi3kkkGAAFszmS0cCBqQw1VucOINId3a
+	 hDkCoHIXy7BRc1ix9OTYLpF3c1RooB8oRgnqGLjaGjg/1BdrEOVPZhyMTH3Qxc/YLp
+	 z6nmAMsihmZ+dmGZ+5jTY4eiIMBmrGaG7kV0QtlV06t2xDMck6pPA25mesjpn9xH0Z
+	 vWnQcn0cGaldQ==
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -34,8 +34,8 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 02/23] scripts/mksysmap: fix escape of '$' in the __pi_
- pattern
+Subject: Re: [PATCH 01/23] scripts/mksysmap: drop the MODULE_INFO() symbols
+ from kallsyms
 From: Nicolas Schier <nsc@kernel.org>
 To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -69,68 +69,75 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
  linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
  linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <20260908-build-speedup-v1-2-5dc1ac01672d@kernel.org>
+In-Reply-To: <20260908-build-speedup-v1-1-5dc1ac01672d@kernel.org>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
- <20260908-build-speedup-v1-2-5dc1ac01672d@kernel.org>
+ <20260908-build-speedup-v1-1-5dc1ac01672d@kernel.org>
 Date: Wed, 09 Sep 2026 21:47:18 +0200
-Message-Id: <178898323844.67740.17554063026930604280.b4-review@b4>
+Message-Id: <178898323844.67740.9621915831851570155.b4-review@b4>
 X-Mailer: b4 0.17-dev-db0b7
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1274; i=nsc@kernel.org;
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1653; i=nsc@kernel.org;
  s=20250924; h=from:subject:message-id;
- bh=dIsgkmHT8CySWCVBXJdGNVcXGxhoYdLBOKFpSuXewxk=;
- b=owEBbQKS/ZANAwAKAQdSCnAWJhJpAcsmYgBqobfOSh+e4lMe1fSWxlaLZhgOIgxYQusA7GVb3
- GP6qj8CfVqJAjMEAAEKAB0WIQSHQTenhzckp4G+wsYHUgpwFiYSaQUCaqG3zgAKCRAHUgpwFiYS
- afLaEACGk6ii8eNuSpScPWy+cfy7cb+OysRMgJJIEJgv+RUDlBhsNCZMJ0y3jSN22aiyotenGiC
- 6dISnDxnLNFRSCn+dezIxUZGsgHvpEoCcYaGQrDKopNK0iI+Q1JNseZvEewdh65F9BiKfGq8bjW
- NNU5w//uxMjUZio2jAqRYvUVZgA3CboN4BwkNCnyWXRsHTiV+BSmZ3elMU6Lx2OhHkcnq4GO3Jz
- PuePAzJrl03LS0S9fq35OcUY9BdaINj9nFKkpUSvi/oNfqEGbexhkxo80Mcmx/METfdmWjboEhw
- 25NRet1wJQxvUMLtwBxRqTEIyaJX7iadh7RKo2ok5B9alZsTJOtZTbMT+OTF9T4NC5r2p7sH7Rb
- bpz8Oy9RnblisbMXRDpYqTn/FXMcXpUzE20I09YS1u+/7R48vh8FyEQMDPJSME0JjXH8MR4l8ic
- McJi0KCMdQnNvSCLHj7sDYE18ldgEJS77qaLqPs7TvY7ip2BZ7QAHF8a9Mpx24UrocN4DEdStz/
- o2eTfnkQvDpiqoyY206IS3pajNvQUy0BGV/fN4sVRxRpBXM150sNwQKBLglqQ429SLzS71wWA2L
- IK5SrYGQn3q6MF7gHMUrmlheBkeAKu9KVv05Hz18M1wrdjck2Ocihhi5ftjRNuwmQDdhDg/etb9
- LDbX9wIG+of9pWg==
+ bh=NizfhVOT/VvA2dUqB5NXjYFEK1DkfSANyvy3gAhNVwY=;
+ b=owEBbQKS/ZANAwAKAQdSCnAWJhJpAcsmYgBqobfJ9BgDh91qnjAMpDNJucGv2ZXrlzPMYRjE7
+ rNCrcRJCh2JAjMEAAEKAB0WIQSHQTenhzckp4G+wsYHUgpwFiYSaQUCaqG3yQAKCRAHUgpwFiYS
+ aZqOD/4sUOM2BAG5AdjrKij8kvmIBpqDDZ5E3rDYx/anFXwzCclat3h8vQwYItxXJ7fCEPjKQGr
+ cDNy+7qBJY7uJ3ZKmcexTphtdfYupo20JRAZOFtsiP7x2gFJ0b4IIdoAMl4pd1PPQrAxkQ9W7/i
+ blU9LungzgMmgQYrrnRs05DYz1+ZDOl6bG8oGb/EYjgw0kWHjc5bZTAur62d/ifmJJvQPkj55oc
+ IS8ErGY8wxkBebMDMAFPhGA8GkcQ2TRffMmx2F/wUV6pIynpSlnmEVo8saZSUXAihCjTzieorK8
+ XjNUssKIEUuOX0uYPjototEvLbfOv9dSVDTyLuX6Zij+X/3ASSRaxeEUyZyWVO0BEWfSvNG6q8V
+ BPxXmdhq/KVyWyECZvekZe9Gqljcz2nEuaOpBCIB8HeeIsorSBDO+5+YPIG2cYoTfMkQeorT+ym
+ kNCOhNKtY73TpuvviFSIrY1Elmf8A7A4EyFxjOEG6c/OtkdBMQxsD1qbUdrsHPekrwy6mPL7AYR
+ ztWhiBZNfY9m3q2JSqljpgnntGUSUR3D/waRev+SuSgugkwOvEx1LB/QcBydMNEylydptY7b03m
+ i463GkNGNWhgKZATvqr3lxYskg1t2yDQ+Bjd6S8XWmVzEaNMGfDi+jySiHpHX8jl3+NBuRoOceG
+ AyVga/GJBPqKQTA==
 X-Developer-Key: i=nsc@kernel.org; a=openpgp;
  fpr=18ED52DBE34F860EE9FBC82B7D97093255A0CE7F
 
-> Commit b18b047002b7 ("kbuild: change scripts/mksysmap into sed script")
-> converted scripts/mksysmap from a shell script to a sed script.
+> Commit 3e86e4d74c04 ("kbuild: keep .modinfo section in vmlinux.unstripped")
+> keeps .modinfo symbols out of System.map and kallsyms, which assumes unique
+> IDs have a format like '__UNIQUE_ID_modinfo123'.
 > 
-> However an error was made - escaping of '$' required \\ escaping in shell
-> but only \ in a sed script.
+> However, commit afb026b6d35c ("compiler: Tweak __UNIQUE_ID() naming"), sent
+> in the same cycle, changes this to '__UNIQUE_ID_modinfo_123'.
 > 
-> This was mostly corrected in commit 7a6c355b55c0 ("scripts/mksysmap: Fix
-> escape chars '$'"), but this fix missed arm64 PIE namespace local symbols
-> like __pi_$x and __pi_$d which appear in System.mapand /proc/kallsyms:
+> As a result this regexp has never matched and every kernel since v6.18 has
+> carried one kallsyms entries for every MODULE_INFO() declaration in the
+> kernel whether the modules are compiled or not.
 > 
-> $ grep __pi_\\$ /proc/kallsyms | sort -u
-> 0000000000000000 d __pi_$d
-> 0000000000000000 t __pi_$x
+> That's 5,810 entries for an x86 defconfig build and 15,200 for arm64.
 > 
-> Fix the escaping properly.
+> On x86 defconfig that is 113 KiB of kallsyms tables and 32 KiB of bzImage,
+> and every lookup walks past them.
 > 
-> Fixes: b18b047002b7 ("kbuild: change scripts/mksysmap into sed script")
+> Fix the pattern.
 > 
-> No measurable change in build time.
+> Fixes: 3e86e4d74c04 ("kbuild: keep .modinfo section in vmlinux.unstripped")
 > 
+> No measurable change in build time, the smaller tables are not on any path
+> the build waits for.
+> 
+
+For consistency, it would be nice to have the 'Fixes:' trailer at the
+beginning of the trailer block (that is: here.)
+
 > Assisted-by: LLM
 > Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 >
 > diff --git a/scripts/mksysmap b/scripts/mksysmap
-> index 56a8b8bbdb37..856b26ba2ac0 100755
+> index c4531eacde20..56a8b8bbdb37 100755
 > --- a/scripts/mksysmap
 > +++ b/scripts/mksysmap
-> @@ -35,7 +35,7 @@
->  / __efistub_/d
+> @@ -83,7 +83,7 @@
+>  / _SDA2_BASE_$/d
 >  
->  # arm64 local symbols in PIE namespace
-> -/ __pi_\\$/d
-> +/ __pi_\$/d
->  / __pi_\.L/d
+>  # MODULE_INFO()
+> -/ __UNIQUE_ID_modinfo[0-9]*$/d
+> +/ __UNIQUE_ID_modinfo_[0-9]*$/d
 >  
->  # arm64 local symbols in non-VHE KVM namespace
+>  # ---------------------------------------------------------------------------
+>  # Ignored patterns
 
-(Move 'Fixes:' to trailer block)
+Thanks!
 
 Reviewed-by: Nicolas Schier <nsc@kernel.org>
 
