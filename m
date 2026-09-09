@@ -1,107 +1,138 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com [209.85.128.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9BB475328CE
-	for <linux-efi@vger.kernel.org>; Wed,  9 Sep 2026 11:39:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E53225476DF
+	for <linux-efi@vger.kernel.org>; Wed,  9 Sep 2026 11:55:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788953959; cv=none; b=mlctyaXQ7aSREQO/k8vFrKmhLOVhA98X6yKojDBjmIF7agucQVLlbU0lvnRr7fLYOLt9VrtvrMJdojctifja/Ibj5W3h3z4zIskJiDrXwD5y2nr0OCKxtmZiD+LImkRLd2BLJerLTO6gc7LU3tNKeQDYCaZ3sWUttwTvXH38oDk=
+	t=1788954958; cv=none; b=AukblKi/KlzSugU8W6NwMUyMweWRE2bSU+Tj76cRXcPn750yA217PM7sGFlstw+k6BqrVMNBKCYyIKzNG4zVrpT614rPibOV6z69/LCy1DVuXuSfM+u6h1TGxK7BkbiYTGrzvvUa/g4BaCXd/JTXP4OZCwRt2EH//BDDw7/Q3KU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788953959; c=relaxed/simple;
-	bh=D0mga59qJMgbJ+iJ8HU3/USnjjnxCc4udmhK8U7gv5E=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=n3sS/wquzSChfV149OjIAVCftdqMIxjPC01cZ1W2SaPzK7odyQs1je0P4n3msgmcyAPBBoSAS90Jd/uZ0TYrT6o2JPucPrJYFH0XtdI5MuF63YTXAOlXvUt+oB7ayYZG07KPSKFHNdWmgSmqobi1z6jV8mKP0xGNwlVE1pv6A6k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=M4JVtg6i; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788954958; c=relaxed/simple;
+	bh=+s6urL61TI3QuNQQQm3SsKlhTUTTfyRdv4trL2AMgH8=;
+	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=bFyAe3URDPql3JKMxifEhaKo5qaY1olEMX8hxCPeERUCV1K9EHiKw1cIDv7fae3ZZH011LaBnMrROHI9BK0xQAYTIKsXq86FVuLbRY9j2bzhysZCcDFOYR2LCixYN1h8KmEeKK0QvtBWaV09FSxOz5fGHYdnJGxKRNMcf+NzShQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=C7M1Krbo; arc=none smtp.client-ip=209.85.128.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="M4JVtg6i"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 35B9E1F00A3D
-	for <linux-efi@vger.kernel.org>; Wed,  9 Sep 2026 11:39:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788953958;
-	bh=D0mga59qJMgbJ+iJ8HU3/USnjjnxCc4udmhK8U7gv5E=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=M4JVtg6igxslKIpTLnEYmKV9b3ABBiPNIIxYuxEMLxFDIV36T5KbmILm/EaIosqeQ
-	 rTOElNFxHFhbUkk7kVx4ZzPDOxjLC/NYavCSx78RR+J2KVfPMJRuhQYo3yy7EBbHwT
-	 R0pvlOtp2Utsq+odBwq+/agL0l4UxtpQ9Z/Rbc+tMyOGoWt0Y2c7qIrIOz0+YoSR68
-	 YZW5js3ASGL7K4hFjv7PxKeM8WvPYgO6KULUHrzvZcEbowz/foUwQyWjKo72HQkM5A
-	 x9/RCDkA30Z2gWlsk3pw26bedYKuPmWJHqAvxMTDmHtXWkHTZLGwEFtsw2gKq85udr
-	 RYTDS9k+aPRag==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 86791198004A;
-	Wed,  9 Sep 2026 07:39:16 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Wed, 09 Sep 2026 07:39:16 -0400
-X-ME-Sender: <xms:Y0WhavxXfYK8WFPHobVdJ7hy9UptoKA4UIMzHA7GEAukK_HwLF8aRQ>
-    <xme:Y0WhaiGySawDblceYPyWcaUVsV3MMpXBCcxcFgyfBni4XliMQs0bzR5xYtRiK1pIm
-    g2snn9RNCJN54vdz-kykgPTEUmEMabEbsh2eqqMU9P7C3u_vxerbbnT>
-X-ME-Proxy-Cause: dmFkZTFybi/C5/YxjlxSGTSnziYj9BAzTDyTbizX/VEcL5BRF5SgkhV3Yu9EyPyrxUv0Gy
-    ujJYe1i3wXIou6mNfzHXrP7zXC/7paFp/vY97IcWSRyFmG2GXApGVDqJv8qT+5Hn6QXlHX
-    ktboINvkS14tiJ1bQzb1WFlq4Sj05+uwrpNsRWyXxVX8tWebwD+ifrWNjiQ21F5uHlWVap
-    hFX8eBWFUm5LCg/iIzrn0xUTSEEPlQwIKVEdLNNZMOkDPXC5Op3LsBTD+ZvgY08UUIbUHU
-    O9ze+JqZ9CmpQ68CM8tFEk3ii9kV+BBNlQKj5WBKbTE+ZnSif0of6l6MtEpqPvSo/1i9WI
-    pnzdhKUHc9Mv9Fp7SB+dFYTUkumP4J7j5qq0aDHHkWZnrkFAzTH1su204TGrOwwKfx++Sb
-    pKwuHa48jDu/oHCyYPFMpXnl4QtfSF2KM9vszq4Di4E5CJe315/307/QFSUTN3KU+Ydp8D
-    lIe0DXkj+id6baBOc0ytw0gowW3a588mnAG1DRsYqSDfXQlyr7t+XFNhOsGa+vAIdoiGkF
-    FD0KpWGx6DalFqhc7u+Ahjhu46vgHkGpkViCDCi+3FIzMqYqgqL4iEW3hES7F4JeW3umIX
-    2ycbAuvbHO0KAj2u+6il3rR/xrUFlASiTGgmdUxgIqtBX/6HRp0HQm+l5o6Q
-X-ME-Proxy: <xmx:ZEWhapXRvh4W7msuW2-m3_jDrNoFxnbFlQglJFnp5m7iUNnUr6ElCQ>
-    <xmx:ZEWhapubeP15ChiphSbYLSuAxVOhcgfmMOHjioDq804D7kWb_0I71A>
-    <xmx:ZEWhatWM3pL06No70n-MzEHw4-uw4I9kGagY73NekoGlVEDNKIdamQ>
-    <xmx:ZEWhakkV1Gi-XLfHbUsbxABGATDIhxi0LkS-t_Gn9uOrCv1GQlXyqg>
-    <xmx:ZEWhauazooj7-XCGBJXi6lB2uBF62Fw6xLJeqgQp0dTSM27mIyMwy6AB>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 51EDEF8007D; Wed,  9 Sep 2026 07:39:15 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="C7M1Krbo"
+Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-490a767b782so46034575e9.2
+        for <linux-efi@vger.kernel.org>; Wed, 09 Sep 2026 04:55:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20251104; t=1788954955; x=1789559755; darn=vger.kernel.org;
+        h=content-type:cc:to:from:subject:message-id:mime-version:date:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=dsT4MeBzNzxyKb8kQsFfPkCd78D7/G9jUBv70WOR9oo=;
+        b=C7M1Krbor1pRqx6bvcfkNT7ZtAM4pwAfJy+yMDaoqelH5/Way8/xj+uhH3LWZxU8oV
+         H/T9I61ukqvzR+/ZkbaG/C3yxM2cw/R8b89SdAmjv5877i8B+mEdpfWTknr9DzVjG5Ba
+         0Nsa/5fTw8ATXbhUfzPmRkbVzfZqHBdpIEJZ3meRR8ViX1zNTsYdAK33fBIjuZ7Wh3GW
+         5Ouhfi8womRB/ABTyol8bGnTyYTVDpevjVkg2rkg50/M/vD8oDYGaR5shZLXeJWL5q5V
+         4Dkqd0m1Dv4fsSlxsAGZsr4ShhjaQMktwRmiXIGemdgAzRReZaK5kJjGKvkXkwIXuAiM
+         yKZQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788954955; x=1789559755;
+        h=content-type:cc:to:from:subject:message-id:mime-version:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=dsT4MeBzNzxyKb8kQsFfPkCd78D7/G9jUBv70WOR9oo=;
+        b=seh9Vw2UdtC2YMtc0RDlPym8aqYSY0byi49yjFCaGX19qquLTqF9gGz+UjFe7roGpU
+         QmSU1lubVjEAbVV6h14ZCh8AuIW1RhQXEGQ6P6kDPfPz0dX/Q+UHMX2b2bdX0EByh3nf
+         g4nuj2Q0omxBFpfzSy8bi+UINz9wADxXb7Mb4AKwyTKerPc4IrHYJQpnp6nJwIj6tDVH
+         mr/fYDRVrIURmOhy5StRn6VmUDb+NmPxvGmA883ecTBr1FJQV15KqZREc9PHyzvRmkiw
+         +uvT4gvkmW0d4DMKy6JQ2Nk+6pg4iIt/C/+SI4g+xEWgi/6SyIDLEVeP+r77SSMY+43E
+         h/HA==
+X-Gm-Message-State: AFuF++lHtFi4j+FNw9T8xpkDW2BWvLdrzYYrDFm3TscuG0Qu/iXCxCYm
+	8Z6nVR384etslPc2nFrftL1HRaG0swVs/i7HVLJAXpKNLZIJKWujuWzzt0eJTkEtWvLNdMF5/lZ
+	2xB3eqt9QkLDylo6/q0YtP62uLUBOGjcPS8FRV9FwaVZ1XlomfqoqbaSDfpwVkqrLniQOmNDkw5
+	mSfCow7rZdK4tkVq9chQpM/1DrrUWwmA==
+X-Received: from wmpo40.prod.google.com ([2002:a05:600c:33a8:b0:49b:9117:59e6])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:548d:b0:49d:15b9:2a2a
+ with SMTP id 5b1f17b1804b1-49d15b92b2bmr138733315e9.10.1788954954931; Wed, 09
+ Sep 2026 04:55:54 -0700 (PDT)
+Date: Wed,  9 Sep 2026 13:55:31 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Date: Wed, 09 Sep 2026 13:38:54 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Vincent Mailhol" <mailhol@kernel.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Message-Id: <50e9d27c-8609-4a2b-87b5-bfe97fadcfd5@app.fastmail.com>
-In-Reply-To: <20260908172555.3356-1-mailhol@kernel.org>
-References: <20260906130817.1151961-9-ardb@kernel.org>
- <20260908172555.3356-1-mailhol@kernel.org>
-Subject: Re: [PATCH] efi: pass NUL-inclusive sizes to ucs2_as_utf8()
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2969; i=ardb@kernel.org;
+ h=from:subject; bh=95TEXlWKF0+ARGLoRCunFRPLtfVwZQVfFlqKtvTcQnw=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIWuhpzEv95ENe069uSD96m/H5zkxUxbFMt44oZ27/rxW1
+ YcnG9P9O0pZGMS4GGTFFFkEZv99t/P0RKla51myMHNYmUCGMHBxCsBEPpQx/NNb8fZeac997YPG
+ 1UfXKaeITQmYLpJsFNfXGLD37/GQixIM/8P2ngycPXFR6fEJZWb3lKQmPetg3vzrj6RiRH3EwdM CTIwA
+X-Mailer: git-send-email 2.55.0.1003.g10538fe699-goog
+Message-ID: <20260909115530.1924665-12-ardb+git@google.com>
+Subject: [PATCH v2 00/10] efi/libstub: Avoid UTF-16 conversion busywork
+From: Ard Biesheuvel <ardb+git@google.com>
+To: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, 
+	Vincent Mailhol <mailhol@kernel.org>, x86@kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-(drop x86@ from cc)
+From: Ard Biesheuvel <ardb@kernel.org>
 
-Hi Vincent,
+The EFI libstub performs some redundant conversions between UTF-16 and
+UTF-8 and back again, which includes dealing with surrogate pairs, which
+UEFI implementations themselves simply ignore.
 
-On Tue, 8 Sep 2026, at 19:24, Vincent Mailhol wrote:
-> An upcoming change will update ucs2_as_utf8() to expose a strscpy()
-> style API where the size argument is the destination buffer size,
-> including space for the final NUL terminator.
->
-> Some EFI callers currently pass the exact number of UTF-8 payload bytes
-> that they expect to copy and add the terminator themselves afterwards.
-> Extend those sizes to include the final NUL terminator so the upcoming
-> contract change does not truncate the converted output by one byte.
->
-> Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
-> ---
-> Hi Ard,
->
-> I saw that you pushed on efi-libstub-native-utf16 WIP branch [1] and did
-> some testing, despite those changes not yet submitted for review.
->
+So drop all the homegrown code, and use the existing UCS-2 (== UTF-16
+without surrogate pairs) library code where conversion to UTF-8 is
+actually needed (the kernel command line).
 
+The remaining handling involves the EFI console, which supports wide
+characters natively, so just use those directly.
 
-Thanks for the review, but I am going to drop that change. I am also going
-to drop the ucs2_strscpy() call from my series, and use memcpy() instead.
-The guaranteed NUL terminator is not really needed for a printf() style
-function, and it actually interferes with the precision handling.
+Changes since v1 [0]:
+- drop size limit from ucs2_strscpy() instead of just the WARN()
+- suppress modinfo sections from ucs2_string when __DISABLE_EXPORTS is
+  defined
+- allow the input limit and max output size to be passed separately to
+  ucs2_to_utf8()
+- reimplement efi_convert_cmdline() to optimize the common case, and
+  only process the input character by character if its size exceeds
+  COMMAND_LINE_SIZE
+- use memcpy() to avoid strscpy() semantics in handling of %ls
+- incorporate Vincent's patch (which inspired this work) for
+  completeness
+	
+Cc: Vincent Mailhol <mailhol@kernel.org>
+Cc: x86@kernel.org
 
-Instead, I'm adding a ucs2_to_utf8() that takes a separate limit argument,
-and putting efi_convert_cmdline() on its head entirely so we don't go
-through the input character by character twice.
+[0] https://lore.kernel.org/all/20260906130817.1151961-9-ardb@kernel.org
 
-I'll have v2 out shortly, including your v3 with my tweaks on top.
-Please take the time to review on list if you have the bandwidth. Thanks.
+Ard Biesheuvel (9):
+  x86/boot: Drop pointless re-implementation of panic()
+  lib/ucs2_string: Drop arbitrary input size limit and associated WARN()
+  lib/ucs2_string: Suppress modinfo when __DISABLE_EXPORTS is set
+  lib/ucs2_string: Split out ucs2_as_utf8_l() taking a separate limit
+  efi/libstub: Use ucs2_string library for UTF-16 to UTF-8 conversion
+  efi/libstub: Avoid efi_puts() for compile time constant strings
+  efi/libstub: Output UTF-16 directly from vsnprintf()
+  efi/libstub: Add support for printing human readable GUIDs
+  efi/libstub: Add efi_snprintf() to construct wide strings
+
+Vincent Mailhol (1):
+  efi/libstub: add initial Boot Loader Interface support
+
+ arch/x86/boot/compressed/error.c               |  19 ---
+ arch/x86/boot/compressed/error.h               |   1 -
+ arch/x86/boot/compressed/mem.c                 |   2 +-
+ drivers/firmware/efi/libstub/Makefile          |   3 +-
+ drivers/firmware/efi/libstub/bli.c             |  87 ++++++++++++
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 100 +++++--------
+ drivers/firmware/efi/libstub/efi-stub.c        |   1 +
+ drivers/firmware/efi/libstub/efistub.h         |   8 +-
+ drivers/firmware/efi/libstub/gop.c             |   6 +-
+ drivers/firmware/efi/libstub/printk.c          |  95 ++-----------
+ drivers/firmware/efi/libstub/vsprintf.c        | 150 +++++++-------------
+ drivers/firmware/efi/libstub/x86-stub.c        |   1 +
+ include/linux/efi.h                            |  22 +++
+ include/linux/ucs2_string.h                    |  11 +-
+ lib/ucs2_string.c                              |  10 +-
+ 15 files changed, 241 insertions(+), 275 deletions(-)
+ create mode 100644 drivers/firmware/efi/libstub/bli.c
+
+-- 
+2.55.0.1003.g10538fe699-goog
+
