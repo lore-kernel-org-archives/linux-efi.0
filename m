@@ -1,152 +1,182 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F3D3552947;
-	Wed,  9 Sep 2026 13:21:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53DD6565105;
+	Wed,  9 Sep 2026 13:24:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788960091; cv=none; b=aHRIcdL0xs8errVbE6BLAxTOon/Uyn08YY/ylabK/kIyOqnkFt+RtjBKs6mX2k5DMC0MrGLn11cmG5UXajj6bv/rlbxWAOWSil7hJkilY4h9DKZzxAicMJvykKImDwYSQTQdan2qGP6JvF7bz8DdkC4b5vq5+jVLWy7Ddq/KPtQ=
+	t=1788960281; cv=none; b=SGg2uKf7iwVx9nj0oPHP2d07tKwSU+Sxsk38JnIhuqZVrR69dr+fhJdyZFVkATobDmdPAs1mWiwjGry/zLLF8n5mZwsGiT1PGLAMoFLK2ZVCAnSIjrW0IPRFoKkp1pDSzkR81uG/YoVmczJH5jsgmAbD3JXUk4HdnNrP3N/wwSo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788960091; c=relaxed/simple;
-	bh=jL14stIA2rn68YKG4zCHQgGa1C9S4Qh+DLrH7ru852E=;
+	s=arc-20240116; t=1788960281; c=relaxed/simple;
+	bh=L4W85ddT3HE6Duyoh6P0QhiRg4shMpztOkxeCp3tRqg=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=iMO6kRLzfrWeLEMP27Wt8XepsADdAsYYVlY1Oe0zTE3CEkvNlcdB4fHDd2D9aDmDYII8tCtAcPU0xRKy7G0SjgQY/OJOSfT4aredxAbrVcCorJaGWKK9WBPVyEdJKvHbuJaB20pEptGAw21YQcnuUK/OjGLW2fEzzlwsXbhYdIs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cSZMaNiF; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=PHj/MiBIK3WP8iezNKGYoOlVXvNxZoWnyZNGGia8qq7wDNfLz7SrA+zEzvzUkk9RWkTP7nsK33735QRmbYVySggzrObuKC3xbPnnN8UP6+ItWJwAgQ/Mg9gHz0EL3gEavGrQjyVxFeCd+wACL7B6eM99Ox+qgA9BrMJLvbSVBeQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CmQNemKi; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cSZMaNiF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AD4D01F00A3A;
-	Wed,  9 Sep 2026 13:21:28 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CmQNemKi"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7CB011F00AC4;
+	Wed,  9 Sep 2026 13:24:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788960090;
-	bh=Et8Tc+zJYrlmS7IHYeOD4T4P7eMPWgKqQ5XzB6XXw7M=;
+	s=k20260515; t=1788960273;
+	bh=kW02xwwfobHDqKYd5wNAbqTLVNekBz/ryWW+HAKscjY=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=cSZMaNiFDM/iBbEtipO42XrDHprhWxCTfMIycSPNBvU57qYx7auTLKBkEex9w0WQv
-	 SKXEtl/3ZYJyMM9IfTMl9feHqT1bnBoVu9ONikLN8FktK7fjmOAnJKTIVbtELsgJuy
-	 TPdXsRaftBDkIpm7qDvNYomLzyPH1TPmwnH1PGdM12W6ZhNR+5Fnw1iw4t+TnvdC3F
-	 NMmn/RKfetqFCNdf3nAuvQU/PsWuHEapuyYy2BRPB4Udq6FMVRXMTrVzQguhktAZzL
-	 9lgZzW2BlYbgPpL4s3q0ps1mvZVlFFCx7QgDQ1MPp6UegTTYvLhQPoclSHHsMP2THN
-	 z1OtfDX0svuIw==
+	b=CmQNemKiITSt5nne5crT7mydGU7xhK9xTOk7q+T6HnPql9JlKKWyL5CvBtlHWJrAx
+	 aVS7QTXQoqMOPGt1mRzZAhLwsC7jVG0puSWSK75HdmvNeXVQFDxXRCUGhZZM1I+Ppf
+	 Z2tY2gTsyt05FwizpIgaJk9SkISj64mPMHO8LpSI1u6pkxo44CK1P1G9JynYiLTR3j
+	 WbPPu/+qE6afFvaL1BWw5Px6eEhxh9oeOp2ALXeFcbVc3BuedKvqb3rAJ+FfsQmtRy
+	 65kAdWnDh0YY640IIVbu179iMcNccfiv3R8yJjdGWO4OZ4JncR+2+pMLBbnnAnxoqY
+	 /MGQH+zjBIqVw==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v4 3/5] mm/memory-failure: efi: record hardware-poisoned
- frames into the poisoned-memory table
+Subject: Re: [PATCH v4 5/5] mm/memory-failure: keep inherited poisoned
+ frames out of the buddy allocator
 Reply-To: sashiko-reviews@lists.linux.dev
-To: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>, "Michal Hocko" <mhocko@suse.com>, "Naoya
- Horiguchi" <nao.horiguchi@gmail.com>, "Andrew Morton" <akpm@linux-foundation.org>, kas@kernel.org, "Vlastimil
- Babka" <vbabka@kernel.org>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, "David
- Hildenbrand" <david@kernel.org>, "Breno Leitao" <leitao@debian.org>, "Liam
- R. Howlett" <liam@infradead.org>, "Brendan Jackman" <brendan.jackman@linux.dev>, "Johannes
- Weiner" <hannes@cmpxchg.org>, "Borislav Petkov" <bp@alien8.de>, "Suren
- Baghdasaryan" <surenb@google.com>, "Ard Biesheuvel" <ardb@kernel.org>, "Lorenzo
- Stoakes" <ljs@kernel.org>, "Mike Rapoport" <rppt@kernel.org>, "Miaohe Lin" <linmiaohe@huawei.com>, "Ingo
- Molnar" <mingo@redhat.com>, "Dave Hansen" <dave.hansen@linux.intel.com>, "Zi
- Yan" <ziy@nvidia.com>, "Thomas Gleixner" <tglx@kernel.org>
-Cc: kernel-team@meta.com, rmikey@meta.com, harry@kernel.org, linux-efi@vger.kernel.org, riel@surriel.com, linux-kernel@vger.kernel.org, linux-mm@kvack.org, kexec@lists.infradead.org
-In-Reply-To: <20260909-hwpoison-kho-v4-3-359313564495@debian.org>
+To: "Liam R. Howlett" <liam@infradead.org>, "Michal Hocko" <mhocko@suse.com>, "Naoya
+ Horiguchi" <nao.horiguchi@gmail.com>, kas@kernel.org, "David Hildenbrand" <david@kernel.org>, "Ilias
+ Apalodimas" <ilias.apalodimas@linaro.org>, "Thomas Gleixner" <tglx@kernel.org>, "Lorenzo
+ Stoakes" <ljs@kernel.org>, "Ingo Molnar" <mingo@redhat.com>, "Zi Yan" <ziy@nvidia.com>, "Breno
+ Leitao" <leitao@debian.org>, "Andrew Morton" <akpm@linux-foundation.org>, "Dave
+ Hansen" <dave.hansen@linux.intel.com>, "Mike Rapoport" <rppt@kernel.org>, "Miaohe
+ Lin" <linmiaohe@huawei.com>, "Suren Baghdasaryan" <surenb@google.com>, "Johannes
+ Weiner" <hannes@cmpxchg.org>, "Brendan Jackman" <brendan.jackman@linux.dev>, x86@kernel.org, "Ard
+ Biesheuvel" <ardb@kernel.org>, "Vlastimil Babka" <vbabka@kernel.org>, "Borislav
+ Petkov" <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>
+Cc: riel@surriel.com, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, rmikey@meta.com, harry@kernel.org, kernel-team@meta.com, kexec@lists.infradead.org
+In-Reply-To: <20260909-hwpoison-kho-v4-5-359313564495@debian.org>
 References: <20260909-hwpoison-kho-v4-0-359313564495@debian.org>
- <20260909-hwpoison-kho-v4-3-359313564495@debian.org>
+ <20260909-hwpoison-kho-v4-5-359313564495@debian.org>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Wed, 09 Sep 2026 13:21:28 +0000
-Message-Id: <20260909132128.AD4D01F00A3A@smtp.kernel.org>
+Date: Wed, 09 Sep 2026 13:24:31 +0000
+Message-Id: <20260909132431.7CB011F00AC4@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 
-Thank you for your contribution! Sashiko AI review found 1 potential issue(=
+Thank you for your contribution! Sashiko AI review found 5 potential issue(=
 s) to consider:
-- [High] Missing overflow check when computing the end address of the EFI p=
-oisoned memory table can lead to an unbounded memblock reservation and memo=
-ry corruption.
+- [High] Healthy pages within a memory block containing a poisoned page are=
+ completely leaked, preventing memory offlining.
+- [Medium] Concurrent non-atomic updates to per-node memory failure statist=
+ics (mf_stats) cause lost updates and corrupted counters.
+- [Medium] Memory block poison accounting is skipped during memory hotplug,=
+ breaking block-level poison tracking and causing global counter leaks.
+- [Medium] Boot-poisoned pages lack the MAGIC_HWPOISON marker, breaking unp=
+oison_memory() logic and causing a memory leak on unpoison.
+- [Medium] TOCTOU race when setting the HWPoison flag during memory hotplug=
+, potentially causing double accounting of memory failure stats.
 --
 
-commit 7216d7e029930900ac5741a5f5bbfe7a2107b408
+commit 804f678a0cc93ac88d9e22aff45a011384c3ac87
 Author: Breno Leitao <leitao@debian.org>
 
-mm/memory-failure: efi: record hardware-poisoned frames into the poisoned-m=
-emory table
+mm/memory-failure: keep inherited poisoned frames out of the buddy allocator
 
-This commit hooks action_result() to efi_hwpoison_record_pfn() to record ha=
-rd
-offlined frames in the LINUX_EFI_POISONED_MEMORY table, ensuring they are
-passed down to the next kernel via kexec. It also adds early initialization
-code to vet the table inherited from previous boots.
+This commit checks if pages being given to the allocator are poisoned and m=
+arks
+them accordingly. It hooks into __free_pages_core() so poisoned frames never
+enter the buddy allocator. A new function hwpoison_boot_page() is used to s=
+et
+the appropriate state for these pages.
 
-> diff --git a/drivers/firmware/efi/poison.c b/drivers/firmware/efi/poison.c
-> new file mode 100644
-> index 0000000000000..c18edf111c710
-> --- /dev/null
-> +++ b/drivers/firmware/efi/poison.c
+> diff --git a/mm/memory-failure.c b/mm/memory-failure.c
+> index d9b8be696aac3..f6afdb2a89a94 100644
+> --- a/mm/memory-failure.c
+> +++ b/mm/memory-failure.c
+
 [ ... ]
-> +static bool __init
-> +efi_poison_geometry_valid(const struct linux_efi_poisoned_memory *pm)
+
+> +static void update_per_node_mf_stats(unsigned long pfn, enum mf_result r=
+esult);
+> +
+> +/* Not num_poisoned_pages_inc(): its per block half divides by zero this=
+ early. */
+> +void __meminit hwpoison_boot_page(struct page *page)
 > +{
-> +	u64 nbits;
-> +
-> +	/* Whole words, and a bit count that can be taken without wrapping. */
-> +	if (!pm->size || !IS_ALIGNED(pm->size, sizeof(unsigned long)) ||
-> +	    check_mul_overflow(pm->size, (u64)BITS_PER_BYTE, &nbits))
-> +		return false;
-
-[Severity: High]
-Does this validation fully protect against an excessively large pm->size?
-
-While check_mul_overflow() validates the size for bit conversion, it appears
-it does not verify that the table's footprint fits within the physical addr=
-ess
-space without overflowing when combined with efi.poisoned_memory.
-
-> +
-> +	if (pm->unit_size < PAGE_SIZE || !is_power_of_2(pm->unit_size))
-> +		return false;
-> +
-> +	return IS_ALIGNED(pm->phys_base, pm->unit_size);
-> +}
-[ ... ]
-> +void __init efi_poisoned_memory_reserve(void)
-> +{
-> +	struct linux_efi_poisoned_memory *pm;
-> +	phys_addr_t start, end;
-> +
-> +	if (efi.poisoned_memory =3D=3D EFI_INVALID_TABLE_ADDR)
+> +	if (PageHWPoison(page))
 > +		return;
 > +
-> +	pm =3D early_memremap(efi.poisoned_memory, sizeof(*pm));
-> +	if (!pm) {
-> +		pr_warn("Could not map poisoned-memory table\n");
-> +		efi.poisoned_memory =3D EFI_INVALID_TABLE_ADDR;
+> +	SetPageHWPoison(page);
+
+[Severity: Medium]
+Could a concurrent hardware MCE race with hwpoison_boot_page() here? During
+memory hotplug, this path checks PageHWPoison(page) and then non-atomically
+calls SetPageHWPoison(page). This might lead to both paths setting the flag
+and double accounting in both global and per-node memory failure statistics.
+
+> +	set_page_count(page, 1);
+> +	/* The page has been completely isolated =3D=3D MF_RECOVERED */
+
+[Severity: Medium]
+Does this code need to call SetPageHWPoisonTakenOff(page) here? Without the
+MAGIC_HWPOISON marker, if unpoison_memory() is called on a boot-poisoned
+page, it might not properly recognize the page as having been taken off the
+buddy allocator, potentially causing a permanent memory leak on unpoison.
+
+> +	update_per_node_mf_stats(page_to_pfn(page), MF_RECOVERED);
+
+[Severity: Medium]
+Are the non-atomic increments inside update_per_node_mf_stats() safe when
+called concurrently during boot? Since __free_pages_core() can be executed
+concurrently by multiple kthreads, the unprotected non-atomic increments li=
+ke
+++mf_stats->recovered might lead to corrupted per-node memory failure
+statistics.
+
+> +	atomic_long_inc(&num_poisoned_pages);
+
+[Severity: Medium]
+Does bypassing num_poisoned_pages_inc() here break memory hot-remove
+accounting? By calling atomic_long_inc(&num_poisoned_pages) instead of
+num_poisoned_pages_inc(), the hotplug memory block's nr_hwpoison counter is
+left at 0. If the block is later hot-removed, the global num_poisoned_pages
+counter would not be decremented properly.
+
+> +}
+> +
+>  /**
+>   * MF_ATTR_RO - Create sysfs entry for each memory failure statistics.
+
+[ ... ]
+
+> diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+> index 404896b53003e..9e2ce833fd409 100644
+> --- a/mm/page_alloc.c
+> +++ b/mm/page_alloc.c
+
+[ ... ]
+
+> @@ -1613,6 +1626,18 @@ void __meminit __free_pages_core(struct page *page=
+, unsigned int order,
+>  		atomic_long_add(nr_pages, &page_zone(page)->managed_pages);
+>  	}
+> =20
+> +	/* First: a block parked by __free_unaccepted() never returns here. */
+> +	if (range_contains_poisoned_memory(page_to_phys(page),
+> +					   PAGE_SIZE << order)) {
+> +		poison_block(page, order);
+> +		/*
+> +		 * TODO: free the frames in the block that are not poisoned.
+> +		 * They stay out of the allocator and still count in
+> +		 * managed_pages, so a unit costs up to a block.
+> +		 */
 > +		return;
 > +	}
-> +
-> +	if (!efi_poison_table_valid(pm)) {
-> +		efi.poisoned_memory =3D EFI_INVALID_TABLE_ADDR;
-> +		early_memunmap(pm, sizeof(*pm));
-> +		return;
-> +	}
-> +
-> +	start =3D PAGE_ALIGN_DOWN(efi.poisoned_memory);
-> +	end =3D PAGE_ALIGN(efi.poisoned_memory + sizeof(*pm) + pm->size);
 
 [Severity: High]
-Can this computation wrap around if pm->size is maliciously large?
+Does this early return completely leak the unpoisoned pages within the memo=
+ry
+block? By returning early and bypassing __free_pages_ok(), the healthy pages
+in the block are not returned to the buddy allocator. Since these leaked
+pages lack PageBuddy, PageOffline, or PageHWPoison, memory offlining
+(test_pages_isolated) might permanently fail with -EBUSY for this block.
 
-Because pm->size is only constrained to be less than U64_MAX / 8 in
-efi_poison_geometry_valid(), an unvalidated addition here could overflow,
-resulting in end < start. If that happens, an enormous end - start would
-be passed to memblock_add() and memblock_reserve().
-
-This could result in memblock capping the size to PHYS_ADDR_MAX - start,
-blindly marking the rest of the physical address space (including MMIO) as
-RAM. This forces direct-map cacheable page table entries for MMIO regions,
-leading to system crashes or memory layout corruption.
-
-> +	early_memunmap(pm, sizeof(*pm));
 > +
-> +	memblock_add(start, end - start);
-> +	memblock_reserve(start, end - start);
-> +}
+>  	if (page_contains_unaccepted(page, order)) {
+>  		if (order =3D=3D MAX_PAGE_ORDER && __free_unaccepted(page))
+>  			return;
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260909-hwpoison-k=
-ho-v4-0-359313564495@debian.org?part=3D3
+ho-v4-0-359313564495@debian.org?part=3D5
