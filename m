@@ -1,177 +1,139 @@
-Received: from mail.alien8.de (mail.alien8.de [65.109.113.108])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F18D23B0587;
-	Wed,  9 Sep 2026 19:14:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=65.109.113.108
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 996313A382D;
+	Wed,  9 Sep 2026 19:47:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788981276; cv=none; b=F0H50/7r1sGyfS1E1vN3LGNH0r4JpY7moJ9FO8+jyPmFKMhmOh6ckEAD4XZ3BQAiBir3jUtdNhWEis+c8toHPjQ1Vw1m6VgqGEIa8S8FLQ4sdfC6OsHhdyNExUHvl/ONEsWywmUQRUXMW13TiXmuNL/xdnsqLe6fgATWukXV4L8=
+	t=1788983258; cv=none; b=AQPhfzoGjVh2UhJpXSdMk4HRVRyJVuAc/j8wdkmCyqt1JTqtla2SR606W5us+5Id67AHDUKZP1BOywBxTqLJ2S6803a91gq5z0j61BttaGU3YbaVITadgv1LOYTPxUX3GCPmKVqbDQ5iMgkxXN5/yuw7N0oAeEI5tZxKL3PY+gg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788981276; c=relaxed/simple;
-	bh=d8WCbeo6jjOivxNyTxUN+oxzgGbmO2YuDGqsYw1uw7I=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uCRzsN8J+6+1JVvSeDcAlnUDsFu1JJi0vXNHFzF+8AArZOduJwButIOzehH58u54fUy8CqQXs8P+Kb/luTEvkda+3+jWYOmzH+FdZ/50Uj4Ycq+p6y60mkCnRKHXoTPm5O+bEZ5QlFifZPIBAYdzkXoxDeevhiWbOuU++IVvSqY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=alien8.de; spf=pass smtp.mailfrom=alien8.de; dkim=pass (4096-bit key) header.d=alien8.de header.i=@alien8.de header.b=ah4+xZDI; arc=none smtp.client-ip=65.109.113.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=alien8.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=alien8.de
+	s=arc-20240116; t=1788983258; c=relaxed/simple;
+	bh=dIsgkmHT8CySWCVBXJdGNVcXGxhoYdLBOKFpSuXewxk=;
+	h=MIME-Version:Content-Type:Subject:From:To:Cc:In-Reply-To:
+	 References:Date:Message-Id; b=md68gfdFxJUEOJLV2Ej2DWXBD9JsW5Br5d1xW8xe89ztS/JqFmffvU3zIeQ4C20i9VDvyveL2T0OzUmctNMaMNp2y1bCWJUveHZWLF0XtrxqpvdD1zyqKvVA0pS7AeB5yvcD3hOsVRSSC3xfrqxtuh+Fd8TvcH05LPoz4bxQ3Ls=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YjJs8ghS; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (4096-bit key) header.d=alien8.de header.i=@alien8.de header.b="ah4+xZDI"
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by mail.alien8.de (SuperMail on ZX Spectrum 128k) with ESMTP id E28AF40E01ED;
-	Wed,  9 Sep 2026 19:14:30 +0000 (UTC)
-X-Virus-Scanned: Debian amavisd-new at mail.alien8.de
-Authentication-Results: mail.alien8.de (amavisd-new); dkim=pass (4096-bit key)
-	header.d=alien8.de
-Received: from mail.alien8.de ([127.0.0.1])
-	by localhost (mail.alien8.de [127.0.0.1]) (amavisd-new, port 10026)
-	with ESMTP id iIu_wFNTMsPI; Wed,  9 Sep 2026 19:14:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=alien8;
-	t=1788981261; bh=XeugPcE935YQxipQwg/vnfXosvIcdyaMCLFwxk84wns=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ah4+xZDIHdXYnFEBnKOX7zJPSURXnBXKOovTMsu0XCpBsjYPcwt6+pxfSosZQzjXH
-	 ILxaMTmNpV3u/EpBFwJ0i8RBZjWpj90xaYmyBUVwR7zoNHs/l/n0G+R+BFOTBJdFXn
-	 oGQZeiZ9PiiUYli4nOfLTugp2sNG9R3L7ZYEgqHdKRTDOnGGOk/zxFIURyAJmrFN2J
-	 +oGGRWvRID45uATYRrvCNjybFxQnwc0sNr2/Noy4ubVx98C9OlQhELrOkEVgSdfn/F
-	 4RHZXKWMliaORaZox4VuPS62wH0rAjtA7V0VC2kuhXZvp7RDqCVuxkcJ5MPbx6fgVF
-	 cw4d1GdG92XpdlWGsJqBHHLubqgTTrl9Vl+6pFL1yp2HWtlW8CHExFEjUSXiG1dbvD
-	 9yDvwHKIQRhN9p97XgOuXczfkVN0yD+mUssrMFNxYPI5AVTUug4ShLGW6s/hA7tMLZ
-	 CfU8+WXTU7DQzcRSeXFEhkxAmf5GcOsgFfaaOwA2+lUWdvGD5p5LAC5NaLYpBZCGKL
-	 HxzTVQYWzvhwFxIWNa662gA0Q2LUbF4r9JjO9OX/aDHLIvU6+0XXCYw3dsAnGh61ut
-	 vgShKQnqYqatEj5rOrHh1tsfd2dG8xlFrTgJvOsfQrZnxTh4eDyZ6ilQwhUSEOqhw1
-	 9E4OSwq5RGa9V7MQN+yZv2eE=
-Received: from stx.tnic (unknown [IPv6:2600:1700:38ca:c00::42])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (P-256) server-signature ECDSA (P-256) server-digest SHA256)
-	(No client certificate requested)
-	by mail.alien8.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 6150440E01E1;
-	Wed,  9 Sep 2026 19:14:13 +0000 (UTC)
-Date: Wed, 9 Sep 2026 12:14:10 -0700
-From: Borislav Petkov <bp@alien8.de>
-To: Ard Biesheuvel <ardb+git@google.com>,
-	Kiryl Shutsemau <kirill@shutemov.name>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Vincent Mailhol <mailhol@kernel.org>, x86@kernel.org
-Subject: Re: [PATCH v2 01/10] x86/boot: Drop pointless re-implementation of
- panic()
-Message-ID: <20260909191410.GAaqGwAsCewrdVZZ0s@fat_crate.local>
-References: <20260909115530.1924665-12-ardb+git@google.com>
- <20260909115530.1924665-13-ardb+git@google.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YjJs8ghS"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6DEF51F000FF;
+	Wed,  9 Sep 2026 19:47:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788983257;
+	bh=/DdlRrwOvlulNXt5vfNVhc9pESgkmxnCKefmHG9DdJg=;
+	h=Subject:From:To:Cc:In-Reply-To:References:Date;
+	b=YjJs8ghS7pquI02zgxgnqAZpy/OVin7jboQXmQ0wY8onfmY2YEyGG7Sfzm4c2sOKM
+	 rFDdcfElKGAxHRqNc+rinp7nJ+wCQH6Vb95vh58wLPXQ1odCWLJe04eACoTuFioont
+	 zxSQ1pjZiow+eBiaWGVjuLRNlyCqvVDssZorBA3p/x8PNoIBRFKh/dU6Q6+ZawpS3r
+	 lhuW7j1uGUqIdJYaxaykmJ8wFqoefavHECQtZEgHqhDLwYbPniAo0HZz+g6mbVHRaj
+	 w5XMpYKW/zCEN+2X0rTQTI0hDVUrNcaXMxZuuOvRtS/WrwzpVi+Hzc80KvPGGEeBUd
+	 k0oBYKKL1GDJw==
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20260909115530.1924665-13-ardb+git@google.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH 02/23] scripts/mksysmap: fix escape of '$' in the __pi_
+ pattern
+From: Nicolas Schier <nsc@kernel.org>
+To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
+ Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
+ Nick Desaulniers <ndesaulniers@google.com>, 
+ Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
+ Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>, 
+ Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, 
+ Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, 
+ x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+ Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, 
+ Arnd Bergmann <arnd@arndb.de>, Catalin Marinas <catalin.marinas@arm.com>, 
+ Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>, 
+ Ard Biesheuvel <ardb@kernel.org>, 
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
+ Josh Poimboeuf <jpoimboe@kernel.org>, Peter Zijlstra <peterz@infradead.org>, 
+ Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
+ Gary Guo <gary@garyguo.net>, 
+ =?utf-8?q?Bj=C3=B6rn_Roy_Baron?= <bjorn3_gh@protonmail.com>, 
+ Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
+ Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
+ Danilo Krummrich <dakr@kernel.org>, 
+ Daniel Almeida <daniel.almeida@collabora.com>, 
+ Tamir Duberstein <tamird@kernel.org>, 
+ Alexandre Courbot <acourbot@nvidia.com>, 
+ =?utf-8?q?Onur_=C3=96zkan?= <work@onurozkan.dev>, 
+ Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>, 
+ linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ llvm@lists.linux.dev, linux-riscv@lists.infradead.org, 
+ linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
+ linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
+In-Reply-To: <20260908-build-speedup-v1-2-5dc1ac01672d@kernel.org>
+References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
+ <20260908-build-speedup-v1-2-5dc1ac01672d@kernel.org>
+Date: Wed, 09 Sep 2026 21:47:18 +0200
+Message-Id: <178898323844.67740.17554063026930604280.b4-review@b4>
+X-Mailer: b4 0.17-dev-db0b7
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1274; i=nsc@kernel.org;
+ s=20250924; h=from:subject:message-id;
+ bh=dIsgkmHT8CySWCVBXJdGNVcXGxhoYdLBOKFpSuXewxk=;
+ b=owEBbQKS/ZANAwAKAQdSCnAWJhJpAcsmYgBqobfOSh+e4lMe1fSWxlaLZhgOIgxYQusA7GVb3
+ GP6qj8CfVqJAjMEAAEKAB0WIQSHQTenhzckp4G+wsYHUgpwFiYSaQUCaqG3zgAKCRAHUgpwFiYS
+ afLaEACGk6ii8eNuSpScPWy+cfy7cb+OysRMgJJIEJgv+RUDlBhsNCZMJ0y3jSN22aiyotenGiC
+ 6dISnDxnLNFRSCn+dezIxUZGsgHvpEoCcYaGQrDKopNK0iI+Q1JNseZvEewdh65F9BiKfGq8bjW
+ NNU5w//uxMjUZio2jAqRYvUVZgA3CboN4BwkNCnyWXRsHTiV+BSmZ3elMU6Lx2OhHkcnq4GO3Jz
+ PuePAzJrl03LS0S9fq35OcUY9BdaINj9nFKkpUSvi/oNfqEGbexhkxo80Mcmx/METfdmWjboEhw
+ 25NRet1wJQxvUMLtwBxRqTEIyaJX7iadh7RKo2ok5B9alZsTJOtZTbMT+OTF9T4NC5r2p7sH7Rb
+ bpz8Oy9RnblisbMXRDpYqTn/FXMcXpUzE20I09YS1u+/7R48vh8FyEQMDPJSME0JjXH8MR4l8ic
+ McJi0KCMdQnNvSCLHj7sDYE18ldgEJS77qaLqPs7TvY7ip2BZ7QAHF8a9Mpx24UrocN4DEdStz/
+ o2eTfnkQvDpiqoyY206IS3pajNvQUy0BGV/fN4sVRxRpBXM150sNwQKBLglqQ429SLzS71wWA2L
+ IK5SrYGQn3q6MF7gHMUrmlheBkeAKu9KVv05Hz18M1wrdjck2Ocihhi5ftjRNuwmQDdhDg/etb9
+ LDbX9wIG+of9pWg==
+X-Developer-Key: i=nsc@kernel.org; a=openpgp;
+ fpr=18ED52DBE34F860EE9FBC82B7D97093255A0CE7F
 
-On Wed, Sep 09, 2026 at 01:55:32PM +0200, Ard Biesheuvel wrote:
-> From: Ard Biesheuvel <ardb@kernel.org>
+> Commit b18b047002b7 ("kbuild: change scripts/mksysmap into sed script")
+> converted scripts/mksysmap from a shell script to a sed script.
 > 
-> The decompressor has its own implementation of panic(), which is based
-> on the vsnprintf() routine provided by the EFI stub.
+> However an error was made - escaping of '$' required \\ escaping in shell
+> but only \ in a sed script.
 > 
-> Relying on the EFI stub from code that does not execute in the context
-> of the EFI boot services is a bad idea. It is also completely pointless
-> in this case, given that the only user of this version of panic() only
-> passes a compile time constant string, without any printf conversions.
+> This was mostly corrected in commit 7a6c355b55c0 ("scripts/mksysmap: Fix
+> escape chars '$'"), but this fix missed arm64 PIE namespace local symbols
+> like __pi_$x and __pi_$d which appear in System.mapand /proc/kallsyms:
 > 
-> So use error() instead of panic() in that case, and drop the panic()
-> implementation entirely. This is needed so that the EFI stub's
-> vsnprintf() can be modified in a manner that is incompatible with the
-> expectations of this caller.
+> $ grep __pi_\\$ /proc/kallsyms | sort -u
+> 0000000000000000 d __pi_$d
+> 0000000000000000 t __pi_$x
 > 
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-> ---
->  arch/x86/boot/compressed/error.c | 19 -------------------
->  arch/x86/boot/compressed/error.h |  1 -
->  arch/x86/boot/compressed/mem.c   |  2 +-
->  3 files changed, 1 insertion(+), 21 deletions(-)
+> Fix the escaping properly.
 > 
-> diff --git a/arch/x86/boot/compressed/error.c b/arch/x86/boot/compressed/error.c
-> index 19a8251de506..ce5ed7d8265e 100644
-> --- a/arch/x86/boot/compressed/error.c
-> +++ b/arch/x86/boot/compressed/error.c
-> @@ -22,22 +22,3 @@ void error(char *m)
->  	while (1)
->  		asm("hlt");
->  }
-> -
-> -/* EFI libstub  provides vsnprintf() */
-> -#ifdef CONFIG_EFI_STUB
-> -void panic(const char *fmt, ...)
-
-So this thing appeared magically in v8 of the TDX unaccepted memory patches
-and I don't think we questioned it back then.
-
-v7's tdx_accept_memory() does error():
-
-https://lore.kernel.org/all/20220614120231.48165-15-kirill.shutemov@linux.intel.com/
-
-and v8 started doing panic():
-
-+void tdx_accept_memory(phys_addr_t start, phys_addr_t end)
-+{
-+	if (!tdx_enc_status_changed_phys(start, end, true))
-+		panic("Accepting memory failed: %#llx-%#llx\n",  start, end);
-+}
-
-https://lore.kernel.org/all/20221207014933.8435-15-kirill.shutemov@linux.intel.com/
-
-and it switched to it being a vsnprintf() wrapper because it wanted to dump
-start and end perhaps.
-
-But then it ended up dropping the params in v13 and landed upstream with
-a single string as an argument.
-
-Anyway, adding Kiryl/Kirill for comment and leaving in the rest for reference.
-
-> -{
-> -	static char buf[1024];
-> -	va_list args;
-> -	int len;
-> -
-> -	va_start(args, fmt);
-> -	len = vsnprintf(buf, sizeof(buf), fmt, args);
-> -	va_end(args);
-> -
-> -	if (len && buf[len - 1] == '\n')
-> -		buf[len - 1] = '\0';
-> -
-> -	error(buf);
-> -}
-> -#endif
-> diff --git a/arch/x86/boot/compressed/error.h b/arch/x86/boot/compressed/error.h
-> index 31f9e080d61a..87062dea9a20 100644
-> --- a/arch/x86/boot/compressed/error.h
-> +++ b/arch/x86/boot/compressed/error.h
-> @@ -6,6 +6,5 @@
+> Fixes: b18b047002b7 ("kbuild: change scripts/mksysmap into sed script")
+> 
+> No measurable change in build time.
+> 
+> Assisted-by: LLM
+> Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
+>
+> diff --git a/scripts/mksysmap b/scripts/mksysmap
+> index 56a8b8bbdb37..856b26ba2ac0 100755
+> --- a/scripts/mksysmap
+> +++ b/scripts/mksysmap
+> @@ -35,7 +35,7 @@
+>  / __efistub_/d
 >  
->  void warn(const char *m);
->  void error(char *m) __noreturn;
-> -void panic(const char *fmt, ...) __noreturn __cold;
+>  # arm64 local symbols in PIE namespace
+> -/ __pi_\\$/d
+> +/ __pi_\$/d
+>  / __pi_\.L/d
 >  
->  #endif /* BOOT_COMPRESSED_ERROR_H */
-> diff --git a/arch/x86/boot/compressed/mem.c b/arch/x86/boot/compressed/mem.c
-> index 0e9f84ab4bdc..e1c017b55184 100644
-> --- a/arch/x86/boot/compressed/mem.c
-> +++ b/arch/x86/boot/compressed/mem.c
-> @@ -37,7 +37,7 @@ void arch_accept_memory(phys_addr_t start, phys_addr_t end)
->  	/* Platform-specific memory-acceptance call goes here */
->  	if (early_is_tdx_guest()) {
->  		if (!tdx_accept_memory(start, end))
-> -			panic("TDX: Failed to accept memory\n");
-> +			error("TDX: Failed to accept memory\n");
->  	} else if (early_is_sevsnp_guest()) {
->  		snp_accept_memory(start, end);
->  	} else {
-> -- 
-> 2.55.0.1003.g10538fe699-goog
+>  # arm64 local symbols in non-VHE KVM namespace
+
+(Move 'Fixes:' to trailer block)
+
+Reviewed-by: Nicolas Schier <nsc@kernel.org>
 
 -- 
-Regards/Gruss,
-    Boris.
+Nicolas
 
-https://people.kernel.org/tglx/notes-about-netiquette
