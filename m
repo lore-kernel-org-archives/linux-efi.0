@@ -1,83 +1,84 @@
-Received: from mail-lf2-f12.google.com (mail-lf2-f12.google.com [74.125.229.204])
+Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2DA0569F1A
-	for <linux-efi@vger.kernel.org>; Wed,  9 Sep 2026 15:33:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.229.204
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B954A47F795
+	for <linux-efi@vger.kernel.org>; Wed,  9 Sep 2026 15:34:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788968032; cv=none; b=LxBSbqhPvcupyEhQTyBTdeCsHXfnYZD6I7BptvUsfDosrYFKrfgChAVNHxB6oDBavL52/oCf9kKMASyv8OOsxSA2yOMNI1qCpWMNEbdz7hv7S0n+W0q701N01QyMnwsMjLLvpWZHg0UMFJxCIe5oYtypCXlCeltvqhYvnw8CDsY=
+	t=1788968088; cv=none; b=EdW+VyncwoitSJUaH3rtnVv6pbQzp+ZlpcenNd/XTuYXRkdXInNCDTTK9HFb6AaR2fQEHobl+ZS2efjg5WRvCPD8uwOQE6IQW2wxOPp0ckHotroBnPLGfHtctOcHTkklv7ZN4qP/CcAUptSG4KGq6eeIu7PbeDTJnpyCvH+FDlo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788968032; c=relaxed/simple;
-	bh=qF8PC9Ug90yk/PrOmZBC0YqOzOPUdR+ADtjc56MP5mA=;
+	s=arc-20240116; t=1788968088; c=relaxed/simple;
+	bh=t3yqbvSqtFoLUHow+WwPXXOfeaEh7bClm80fMM9rQTg=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=EmoA7N9/FkQdjO+Y9uciDTBgE2T8qZqAr3oPNNRk/t9faxf8RzumHuKMZolbTNVCYKU3ZWK11HGorvzLTosHKXClop+BRDUxLuyLrZ+Zfj9hTBoQrTPN8K7WF6+y6hJlntEb43KNwjQ9dlssNp2mcylYdiH+rtwmX5yhvZx28Kc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=V845b/Dl; arc=none smtp.client-ip=74.125.229.204
+	 To:Cc:Content-Type; b=jSMP5BUwH+RQI9XUR6/NqbpxoSmJtfdTksfey+Ls8vFu1VIWxqYnua/t8W0HYIEQ/urhAujYxk8z1CXJIuRq6jxO/Jr0/gJdEJX3GPSk6ESXFbM5PvCmRGI2NixIzK0cy/zlhdgykCExxIG8QmuTttWRJcROQG3dmlHCES8qhog=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=hyCr0qkQ; arc=none smtp.client-ip=209.85.167.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="V845b/Dl"
-Received: by mail-lf2-f12.google.com with SMTP id 2adb3069b0e04-5b89a0e69dfso1701e87.3
-        for <linux-efi@vger.kernel.org>; Wed, 09 Sep 2026 08:33:50 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="hyCr0qkQ"
+Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-5b8996d65a3so351590e87.2
+        for <linux-efi@vger.kernel.org>; Wed, 09 Sep 2026 08:34:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1788968028; x=1789572828; darn=vger.kernel.org;
+        d=linux-foundation.org; s=google; t=1788968085; x=1789572885; darn=vger.kernel.org;
         h=content-type:cc:to:subject:message-id:date:from:in-reply-to
          :references:mime-version:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=9JHU6Yr48iRYl83IyQpODgW1j4SilTECHHS/aRaqSbs=;
-        b=V845b/DlkIRTxiAVEiekmMmfn7niugLKTJLV5FH7Y5hnWq9CYstkw34cxnATMnzO0c
-         3ekDDCvmBt5vSV6odAi24rkphXt7VbTI7gzJTj9cpvYSDvBto1Vo5KP/ow5ccGw/PDo7
-         ukypo6huCJoMDyxgz06MQCCipnbSSHWcnKdCM=
+        bh=/FowYqhA2IUhImtOTNUOvZbuU0tnu+Lv5LcROnzCHgI=;
+        b=hyCr0qkQwD5W5QB0lyqpO9ccqVTukbFh0TeNNFCg9Qf9gfjG6eLLw7B5favjjNigbF
+         7qPBorPYkhaXHnK+0UMeBp+wfkRiC5NivxAmE1OpVQcKaGbHtmmSB7Pw5/O8iRPlfODs
+         PcjBGBKB9a0NFjSUE4oW2OSLoBsY7gmmrJrXY=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788968028; x=1789572828;
+        d=1e100.net; s=20251104; t=1788968085; x=1789572885;
         h=content-type:cc:to:subject:message-id:date:from:in-reply-to
          :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to:content-type;
-        bh=9JHU6Yr48iRYl83IyQpODgW1j4SilTECHHS/aRaqSbs=;
-        b=oF46Flst/RPsKTP7rIZJYiDYsYhZVu7vNiJU0So8EZTESGUeut2K2dEBUlH43L1OrV
-         5jTpe1hzaLQb7HOn+u8I5A7hhgN+/9HeoXgeBwMSfv38d5K/kgc9oztbr/n90RzRO569
-         hCYItM5DBDcSWzo5M/YpCYmxV5QQkerokQF8jYjb77TUOXcQGK189hHwcllrHa2FNakA
-         VJvbb9aJRnSD/eBTxyl/WDJ1WQCq3TLjP/lCgqHaPEoSboEkGV/rakLjpNjnbL/8KQ0A
-         LqE5nbQO/QFlXw6mKL1Ju6rufChXMjm0eclJOLl53Gol9BChkx2yaFjfUkFoUcx4PCOE
-         tLpA==
-X-Forwarded-Encrypted: i=1; AKwUvBx3/yqD7p2Vzf4X4h2Lpk1Ju+IAeZ0x7RXrmiaqmH8GbWBtQVqeOAnP5iwxJW8wcsQWw80KpbtG5kw=@vger.kernel.org
-X-Gm-Message-State: AFuF++l7y2fwq8ZUNYzu/VwfFESxaPaUJovm72o4rT+uhEVAkerXGpKS
-	DWDLP1WGDeYID5Z5Fx5T9DhxGyRQ6tHLGgkMh42pFv4pwyJdhZNOJxtSHTp2BXLEFtm2TmFhERT
-	J5D5GTH9ZVUzY
-X-Gm-Gg: AYBFou3r1uxOurtPPpk1G4P5WRV/5GunubBtlv69cg07rAjZDCDLcqSr6auiZy0Kg/+
-	PBYdZjhPqCJV/cu+IGl1Lisa7ggIjIRUjUwWM4xGPb933C78TXiEHNC0Gjjb13LTvykUePiSQ/5
-	klwYURn1ynmY6EWgUPB90IeEBBRBJm3iHe2TJGMCEQvVpuGtPwQqaUlGicuwsjKSniFuXKFNstW
-	bcIl/Ow0PsNaQpJhDmIy8Eh6kATB2dDQDi8+21UQSoRIUS8QDXPKft2kPj5JEo5MalHStqW+d4j
-	St3CzmUutWvGQV8tYIMaeDSRI9vNGhedWNKFSYKfbd4C7mkLaTGvfArwRH4us8SYqj0wxZbH/WY
-	2CqvJo2+hc5FghsVoMrUYqEvwIoRRZWVxBVnfDymtFqdgVyc5/sK5+eboeNYz71COqFZPy9VZL0
-	lJLnHd7ea2hQ6uLhUzkKzykL2o+TgwQDeAVhBsBGNqiiZ2aEehfNQ4iAaYmDUx1aWTy8ZakgNLd
-	6jPy2R++U3k73VbR4nVmmRx5v93soa9LeqJetAb
-X-Received: by 2002:a05:6402:43ce:b0:6a9:8db2:5c61 with SMTP id 4fb4d7f45d1cf-6a99cd344f4mr702747a12.45.1788966391122;
-        Wed, 09 Sep 2026 08:06:31 -0700 (PDT)
-Received: from mail-ed2-x10.google.com (mail-ed2-x10.google.com. [2a00:1450:4864:33::10])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6a7e68c3b2esm7427474a12.11.2026.09.09.08.06.30
+        bh=/FowYqhA2IUhImtOTNUOvZbuU0tnu+Lv5LcROnzCHgI=;
+        b=bSF0W+NWZMB4vvPMJ1glZ0OPHvijCqoxjJf6bOaqAK0A1XqV3q/Zl/wJPgIpEkORU+
+         m90uVIHTXQ5UTffNnpsxPZWdW1m8rg/ns6UGhk7jYmLuuScykSRI0o8facXW0pojTpLH
+         uTYFcvruBrVOFRmybvRhKeA0jenQoMk8nV5FT6tjUtrc0wCB9CX+EqMDGu+/8KPT7OXi
+         w0jJa2grKiBFNVlLRyFVkQVKdhQ3L6IDmfgZ6A0e5LJbmdD63Hv9GD9vlHhjJp3bYoiy
+         YQ0CNYLyb9cmdPPwdU1VRLLbKXnk3RCWgrVmjewt7VHM/RCwReLqkUCwcmym9SOjlZCU
+         JFlA==
+X-Forwarded-Encrypted: i=1; AKwUvBzg3DF2DTGLkPrTfrL2Oz8Iy5iV7Cl6+qQQOjzet2ZGxw1zpmoEp6MRetd2cJEwJcmYQbcFCYAWRPY=@vger.kernel.org
+X-Gm-Message-State: AFuF++lm6bsJV/GJR9Dviu4Z+kw8jRGT0MLHsqnlGVYgvM6eqgBumaec
+	gbE3fLGQJxOcqtM/L2M8orIRGBoUVl/dZGkt2YBW6Y+dj6d5pzHPxkCH7MOMTkx2oHQIUftZDPF
+	+gtX9c/Urxw==
+X-Gm-Gg: AYBFou394c4JOPhE4YlMHZnqeXLDBfIjD1QdvXgl855J+cv5/UuHCPYG5U7GTLUoU0y
+	2uxw1l/O7kZSO+8Fso4Cd68EkEvFiJsdUgqkEidJNQST5ocHCeeFPQv2zwCw1IoZdKaYdc2zOJC
+	c1gh8TzPzTCeCZK5hOxwIMwOwWuitSm2mBSMaP4CV1iQWWLUunKhsYQLhyMt+XRf5JNnpe+CQ00
+	9TsuKyA+zhX9+3ecuuJeH0e54z7Oue8e7DKxNHnBBkU6tYMBjdPV2VdZ6Wo5kK/1hKnF7G0AVat
+	7I2Jgx+hCv0wRoo7GE/m7HQdX6/A4gNiqe4rBn/szNZSpZMmHjhy5f2BpU6+YAwt9wt33S71vbj
+	cJi1zhnK5gCl2+3b636N+1ut88CkI26En/ckFMxdJkE4GygGyT5BX/6LWss+yZOHOuwem3WQnGy
+	HLwhs0kSLi+Nyr0htAMa7YDxEe6Sirfb+jkGbAux+aPgAERlS/+vJvw67tS5oyFzHBXNl8IXHve
+	H3EgVbvz36SOi2waIUjzjSN4dzZ/JdhQecej9GSbVNmWArH
+X-Received: by 2002:a05:6512:23a5:b0:5b5:e7a8:9b1f with SMTP id 2adb3069b0e04-5b616f41fc8mr6297980e87.20.1788968084675;
+        Wed, 09 Sep 2026 08:34:44 -0700 (PDT)
+Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com. [209.85.221.54])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5b6166fbfacsm3874916e87.42.2026.09.09.08.34.44
         for <linux-efi@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 09 Sep 2026 08:06:30 -0700 (PDT)
-Received: by mail-ed2-x10.google.com with SMTP id 4fb4d7f45d1cf-6a9984f9adcso514653a12.0
-        for <linux-efi@vger.kernel.org>; Wed, 09 Sep 2026 08:06:30 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AKwUvBxIcbmA1aH3SHO5KH7ozdgWYsET5sgZol6umF7+4MfnVXZUmBx0ExmP7AP80+TjgFu9UjM2+1ArleI=@vger.kernel.org
-X-Received: by 2002:a17:907:728f:b0:c25:8e4f:6d84 with SMTP id
- a640c23a62f3a-c2941868b12mr66185066b.2.1788966011712; Wed, 09 Sep 2026
- 08:00:11 -0700 (PDT)
+        Wed, 09 Sep 2026 08:34:44 -0700 (PDT)
+Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-482e067e908so4748863f8f.2
+        for <linux-efi@vger.kernel.org>; Wed, 09 Sep 2026 08:34:44 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AKwUvBxnj/HEgESII5ppFWXYc5w2rIa9YeQoiQ0Crhi7qAoCCb3Npw19RlZsxWiBtwsH8k2fykRyFFmrXQM=@vger.kernel.org
+X-Received: by 2002:a17:907:da4:b0:c26:1649:47af with SMTP id
+ a640c23a62f3a-c26164955fcmr1368813666b.37.1788967618809; Wed, 09 Sep 2026
+ 08:26:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org> <20260908-build-speedup-v1-15-5dc1ac01672d@kernel.org>
-In-Reply-To: <20260908-build-speedup-v1-15-5dc1ac01672d@kernel.org>
+References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org> <20260908-build-speedup-v1-11-5dc1ac01672d@kernel.org>
+In-Reply-To: <20260908-build-speedup-v1-11-5dc1ac01672d@kernel.org>
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Wed, 9 Sep 2026 07:59:55 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wgAWpVHmR74jC7sbSJGQEHyaaN0awNfSz_SjPv3VGSYYA@mail.gmail.com>
-X-Gm-Features: AcwNN1XmVo334b1UP-lcj3CPx7zvteJ2HddEJqKkfbem-zQh2qUu9HycJHabLtk
-Message-ID: <CAHk-=wgAWpVHmR74jC7sbSJGQEHyaaN0awNfSz_SjPv3VGSYYA@mail.gmail.com>
-Subject: Re: [PATCH 15/23] modpost: emit module descriptors as assembly
+Date: Wed, 9 Sep 2026 08:26:42 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wiA_UJbKiu8fOezKV=MfEcaFuzZiuk8Fto-Bc1KrA=43Q@mail.gmail.com>
+X-Gm-Features: AcwNN1UWYYtk4z7iDc5cI-l9BNT1_XTZBZ1EzZVT-QGEk4RrzSdK76DVFXE4iKE
+Message-ID: <CAHk-=wiA_UJbKiu8fOezKV=MfEcaFuzZiuk8Fto-Bc1KrA=43Q@mail.gmail.com>
+Subject: Re: [PATCH 11/23] kbuild: implement and use depcheck to check
+ dependency timestamps
 To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 Cc: Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
 	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
@@ -104,60 +105,49 @@ Cc: Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>,
 	Jens Axboe <axboe@kernel.dk>
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 8 Sept 2026 at 13:58, Lorenzo Stoakes (ARM) <ljs@kernel.org> wrote:
+On Tue, 8 Sept 2026 at 13:57, Lorenzo Stoakes (ARM) <ljs@kernel.org> wrote:
 >
-> modpost generates a descriptor for every module in the form of a
-> <module>.mod.c file with .modinfo strings, the __this_module descriptor,
-> exported symbol tables and (with CONFIG_MODVERSIONS set), the CRC of
-> imported symbols.
+> Each object's .cmd file lists its header dependencies, which often
+> consists of over a thousand dependencies.
 >
-> These files are compiled like any other kernel C file with all of the
-> -include preamble, as well as including linux/module.h, header dependencies
-> generated by fixdep of a few hundred headers, an objtool run and if LTO is
-> being performed, a link is performed to generate native code.
+> When little has changed in the tree, this is what make spends most of its
+> time doing, spending over a second, single-threaded when parsing larger
+> directory trees.
 
-This kind of triggers the same reaction as the kallsyms code: I think
-not including <linux/module.h> is probably the biggest win in this
-all, and precomputing the offsets of the (few) structures that modpost
-uses then makes the whole end result fairly trivial in raw asm.
+Side note: from some kernel build profiles I did long ago, I have this
+memory of it being made much worse by the fact that we use
 
-Fine.
+    "$(wildcard xyzzy)"
 
-BUT.
+for all our config header files in those .cmd.o files. That then
+causes extra work for 'make' for all of this.
 
-You end up with things like this instead:
+And we do that 'wildcard' thing not because we want to actually match
+a pattern, but because that was the only way to have 'make' not
+complain about missing config headers.
 
-> diff --git a/scripts/mod/module-offsets.c b/scripts/mod/module-offsets.c
+I'm not even sure the original reason for it is relevant any more -
+this is all a very dim memory from years and years ago when I actually
+tried to look at profiles of 'make' itself (normally when I do kernel
+build profiles I only look at the what the kernel part of the build
+is, not user mode).
 
-where it generates a header file for those asm scripts so that the asm
-generation can do things like
+I just tried removing the 'wildcard' generation from
+scripts/basic/fixdep.c and the kernel build didn't care about it at
+all. The whole 'wildcard' trick goes all the way back to the original
+commit that added that whole 'fixdep.c' phase.
 
-        buf_printf(buf, "\t.size __this_module, %d\n",
-MOD_SIZEOF_struct_module);
+Maybe the whole thing is entirely stale now and should be removed. I
+probably just didn't trigger the situation where those extra
+'wildcard' things matter. That whole thing is from a quarter century
+ago, and nobody has dared look at that code since..
 
-etc.
+Or maybe 'make' is better at those wildcards these days - or other
+things have shifted.
 
-But I - again - get the feeling that this is all going through AS as a
-silly way to generate an object file, and that there really isn't any
-obvious advantage to that side quest.
+From those dim memories, make spent a lot of time doing filesystem
+lookups (directory reading  and 'stat()' calls - the wildcard thing
+triggered more getdents calls), but even more time just in string
+handling.
 
-Becuase no human ever wants to see that asm file, and it's no more
-legible than generating the object file directly would have been.
-
-So I get the feeling that it would again be more natural to just
-generate the object file directly when all those files really end up
-being are a few symbol definitions and a couple of fixed structures
-(is there anything but the magic "__this_module" thing and the modinfo
-unique ID thing?)
-
-And again - I feel like nobody sane would want to write that code. I
-certainly don't. But if this was at least partly automated anyway,
-going that extra step might not be all that horrific.
-
-I'll also be honest: part of why I do these suggestions is that I do
-think it would be faster to skip the intermediate assembler step, but
-a big part of it is that I don't love the random turds our build
-creates. Getting rid of the *.mod.c files would be a cleanup of our
-strange build.
-
-             Linus
+               Linus
