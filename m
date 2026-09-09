@@ -1,146 +1,144 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56DA73C8C43;
-	Wed,  9 Sep 2026 19:47:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6272059220A;
+	Wed,  9 Sep 2026 20:43:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788983261; cv=none; b=X2D2QKoKvuCAdzFVDIIiwKJ8NYKIdYKlYhDyN/X4KW1/eQMqg6R/cFuBB/Ly28M9yjNDXhwNElxOWIBQ2KREEgHLH3GUGyG5t41inrj1X6ErTDnJDCvyJM3vEdX86YDaaTkRZ7O0SCCnNQ7BzNFV3eWLFT1wsQDraolMEtfWffQ=
+	t=1788986640; cv=none; b=Pkx0k+98YAhaFxz85LQi6Ipiq7MBKk7o/O647+MWWNSVVzUQ2xItD3hF2bW6UOaOK49Sg/Tm1BwDQZZunbcNP/f6QsahFwwAJ3LQMcejZJcvL7e5mlggPnd8Jq9+hH1M9XyhEKQ6S23AO20uLRh2HVWQaTfR+2eWwqxsLDCnSV0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788983261; c=relaxed/simple;
-	bh=NizfhVOT/VvA2dUqB5NXjYFEK1DkfSANyvy3gAhNVwY=;
-	h=MIME-Version:Content-Type:Subject:From:To:Cc:In-Reply-To:
-	 References:Date:Message-Id; b=cWT/LAJx3YNwivXaqcE+aTsQz4IJnGcNie6LvPSq5RazLMJCqtwQ4PX8vnV0ofq8yaHEh3SJk5Ri5Q7m73dOy1umfO6lWaDGwFPo57DO6gkmTjh9Ru1+wAqeXe981JGkrVVjk0SG7ynIJ6t5szG3rELU3zlFbaOvLKlthcbQ32w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RE+iRgyp; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788986640; c=relaxed/simple;
+	bh=Mpo/eON4EGbciQ62eVHwbqiiR45qKajIcWtR7Cw6JW4=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=k4Oskx4G+xYJoA6fYJxXXnhFoSuXab1ZmVgRKdHVWRT6VZyqhUZjXLlh56fxIhhFY+UJRDK84+0XKW+NVy406LKikrRAZDafX+9M6sDZ+VWZYudyxUdwD/GX5+Q9XMn5DixglL8HhtCrxeVPowmkSEFsiFpUTh8QqcbS6CZymCk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Wgd32pEQ; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RE+iRgyp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4BDAD1F000FF;
-	Wed,  9 Sep 2026 19:47:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Wgd32pEQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6F2E01F00898;
+	Wed,  9 Sep 2026 20:43:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788983260;
-	bh=G7FTp6iVpcIdN5Xvcj9jVAhuUcfgpjxShTyjExlqApk=;
-	h=Subject:From:To:Cc:In-Reply-To:References:Date;
-	b=RE+iRgypgtxiGH3q8JJskwl3TmdpMFavTXW4O087iWcLRDpCKuDZXaHFmXWekOnH9
-	 ijGG1NEISpLVBfQUFK8npUZUJDiQ0Q3S7+LKVf+dbu3+7uIXKVriBmBMmaIdBsGby3
-	 9XrHw9IyWegS+oMIT8/JU6XGRlO/cbB5cLOi3kkkGAAFszmS0cCBqQw1VucOINId3a
-	 hDkCoHIXy7BRc1ix9OTYLpF3c1RooB8oRgnqGLjaGjg/1BdrEOVPZhyMTH3Qxc/YLp
-	 z6nmAMsihmZ+dmGZ+5jTY4eiIMBmrGaG7kV0QtlV06t2xDMck6pPA25mesjpn9xH0Z
-	 vWnQcn0cGaldQ==
+	s=k20260515; t=1788986627;
+	bh=ctgKhrQLgtaI7lnS8kf4ZW39i+AzjnlUOX8ibu1nvl4=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=Wgd32pEQEbxbQNNRG6UZdlvtMRIAtGGcsIREzTqgnPaKs+I/LAU8NWuz1YSPuTXox
+	 BGY7W44Tuj9kalXQiIvB1y9E1+gqQ3dUThWSzfQaG/JXzxAvQh5S7iciHcVfBsKJ+J
+	 8BObD1ufvhjxbBBXagbNLQtOZw9FoEy/wiqQ7xShBEe0OxKBZibMgp4uWBUC8IBF1W
+	 ocPhosNR7ePoXm6CILhk8m5PjD7GKW6jcIZHjbfRAOhG2VDRaMr70gUr6YvvhL8Koz
+	 /gjQ+PNKXbfBqfqUudJb2NhiKiB5T88kKfmY1KJWa9d8Jffp3OiXm4RZaW8290sy54
+	 SDUDsuf6XIEQQ==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id DAF3A198004A;
+	Wed,  9 Sep 2026 16:43:45 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Wed, 09 Sep 2026 16:43:45 -0400
+X-ME-Sender: <xms:AMWhahee9Q3XPDeuk1eIsHNXY-qyfdjAePCOd3v5a6tujdNiGj256Q>
+    <xme:AMWhaqDNXygTLULgCQE07FkRS-v-i_uzSE0AdJvXh6ZxyVia1sX3VkidQ775vFry8
+    DDzDEZgVKg7tBQXD_yKK1KPJUhRu_afx5pQiw50Y5A383MX6ELq333U>
+X-ME-Proxy-Cause: dmFkZTFgw4Wq2jougAk49K2fgmK+IGp2tl7ecJoWj6zJXqm30JFGysDXGed1Lq2zUpW0H1
+    0n6hL2njPiWcULw0qnT3UQT4CU8LEiZuVDVJO156q5fMnXNIEkpq+RB9z9ij5VCy9bzKWf
+    aoyvLHKC9deTLVrj+oj6tCYTsUL0657MaOc9kBFRPCe6dfvgM+IejfflG8qWxO8miKr2rP
+    gMkyfE5lFN4xAMcMJItok3GmE1rvSYTzawELUdZgtJekUVe8jhgL5ydGOgaVgKNpCJmE0R
+    LK3RcKddMJ7PmWQlbxU2a96R4tVfTIkoi7dTEOX9VZP+tL3blHV4/XM8jsjSf4k7bbSLWP
+    97vLhUguvI/To04XjQrxmBiegv39dAvONAU9fzYR26Xx2wBDI8aolhrXddmYYzst5OZ+k8
+    iyU8o1NonnlKPOHDYYnie/4kqU4YQFY3VRg86j9Xw/H2VDLVeoSQGtBq/U5p22QCuawVJY
+    Fh8pr+CCHkPBP+Lm4Z9+Xyk8iph6y55bzhfWHUlCU4ar6aWHmw9TpETxHtiTaZKgxIEMrm
+    OLUzEl/Y2eefpwnhBjlL6221zzCQXeY4/z2nsAm0OU3dHhPNFBLXx1MTcmt0MyiWYFYtK+
+    8BaAX8gBZyMZ7LaXBbXSY9SnGRbL/Utvg30JOt8BVC0sVVAJdIY7FabjlymA
+X-ME-Proxy: <xmx:AcWharHLob06hEPtAZbKUkkJNzfrau3q5qVMUKp03pJolF3stcKEZA>
+    <xmx:AcWhaiYgXrJBGwzGQAUIzTu-lvxJqIAFocvWxMl-VXpYJubiMLCWlA>
+    <xmx:AcWhatAv2I3fsjv4IrHT2OsQgqwlugJtlsAZ73WPSe6LKb_c5phwWg>
+    <xmx:AcWhaqk2KqI4mtoHFtBgt2LVVdymyhW3ly-tRbVhBV9AuoPpYwL7Kg>
+    <xmx:AcWhauzZbX6eFVNlaTYwDpw1p0RC7L0shUVaBswYruesOVSS2CAUEzL6>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 093A2F8007E; Wed,  9 Sep 2026 16:43:44 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Date: Wed, 09 Sep 2026 22:43:23 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Borislav Petkov" <bp@alien8.de>, "Ard Biesheuvel" <ardb+git@google.com>,
+ "Kiryl Shutsemau" <kirill@shutemov.name>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+ "Vincent Mailhol" <mailhol@kernel.org>, x86@kernel.org
+Message-Id: <cee2e02b-3817-44cf-857f-62a148290367@app.fastmail.com>
+In-Reply-To: <20260909191410.GAaqGwAsCewrdVZZ0s@fat_crate.local>
+References: <20260909115530.1924665-12-ardb+git@google.com>
+ <20260909115530.1924665-13-ardb+git@google.com>
+ <20260909191410.GAaqGwAsCewrdVZZ0s@fat_crate.local>
+Subject: Re: [PATCH v2 01/10] x86/boot: Drop pointless re-implementation of panic()
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 01/23] scripts/mksysmap: drop the MODULE_INFO() symbols
- from kallsyms
-From: Nicolas Schier <nsc@kernel.org>
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
- Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
- Nick Desaulniers <ndesaulniers@google.com>, 
- Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
- Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>, 
- Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, 
- Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, 
- x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
- Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, 
- Arnd Bergmann <arnd@arndb.de>, Catalin Marinas <catalin.marinas@arm.com>, 
- Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>, 
- Ard Biesheuvel <ardb@kernel.org>, 
- Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
- Josh Poimboeuf <jpoimboe@kernel.org>, Peter Zijlstra <peterz@infradead.org>, 
- Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
- Gary Guo <gary@garyguo.net>, 
- =?utf-8?q?Bj=C3=B6rn_Roy_Baron?= <bjorn3_gh@protonmail.com>, 
- Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
- Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
- Danilo Krummrich <dakr@kernel.org>, 
- Daniel Almeida <daniel.almeida@collabora.com>, 
- Tamir Duberstein <tamird@kernel.org>, 
- Alexandre Courbot <acourbot@nvidia.com>, 
- =?utf-8?q?Onur_=C3=96zkan?= <work@onurozkan.dev>, 
- Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>, 
- linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
- llvm@lists.linux.dev, linux-riscv@lists.infradead.org, 
- linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
- linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
- linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <20260908-build-speedup-v1-1-5dc1ac01672d@kernel.org>
-References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
- <20260908-build-speedup-v1-1-5dc1ac01672d@kernel.org>
-Date: Wed, 09 Sep 2026 21:47:18 +0200
-Message-Id: <178898323844.67740.9621915831851570155.b4-review@b4>
-X-Mailer: b4 0.17-dev-db0b7
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1653; i=nsc@kernel.org;
- s=20250924; h=from:subject:message-id;
- bh=NizfhVOT/VvA2dUqB5NXjYFEK1DkfSANyvy3gAhNVwY=;
- b=owEBbQKS/ZANAwAKAQdSCnAWJhJpAcsmYgBqobfJ9BgDh91qnjAMpDNJucGv2ZXrlzPMYRjE7
- rNCrcRJCh2JAjMEAAEKAB0WIQSHQTenhzckp4G+wsYHUgpwFiYSaQUCaqG3yQAKCRAHUgpwFiYS
- aZqOD/4sUOM2BAG5AdjrKij8kvmIBpqDDZ5E3rDYx/anFXwzCclat3h8vQwYItxXJ7fCEPjKQGr
- cDNy+7qBJY7uJ3ZKmcexTphtdfYupo20JRAZOFtsiP7x2gFJ0b4IIdoAMl4pd1PPQrAxkQ9W7/i
- blU9LungzgMmgQYrrnRs05DYz1+ZDOl6bG8oGb/EYjgw0kWHjc5bZTAur62d/ifmJJvQPkj55oc
- IS8ErGY8wxkBebMDMAFPhGA8GkcQ2TRffMmx2F/wUV6pIynpSlnmEVo8saZSUXAihCjTzieorK8
- XjNUssKIEUuOX0uYPjototEvLbfOv9dSVDTyLuX6Zij+X/3ASSRaxeEUyZyWVO0BEWfSvNG6q8V
- BPxXmdhq/KVyWyECZvekZe9Gqljcz2nEuaOpBCIB8HeeIsorSBDO+5+YPIG2cYoTfMkQeorT+ym
- kNCOhNKtY73TpuvviFSIrY1Elmf8A7A4EyFxjOEG6c/OtkdBMQxsD1qbUdrsHPekrwy6mPL7AYR
- ztWhiBZNfY9m3q2JSqljpgnntGUSUR3D/waRev+SuSgugkwOvEx1LB/QcBydMNEylydptY7b03m
- i463GkNGNWhgKZATvqr3lxYskg1t2yDQ+Bjd6S8XWmVzEaNMGfDi+jySiHpHX8jl3+NBuRoOceG
- AyVga/GJBPqKQTA==
-X-Developer-Key: i=nsc@kernel.org; a=openpgp;
- fpr=18ED52DBE34F860EE9FBC82B7D97093255A0CE7F
 
-> Commit 3e86e4d74c04 ("kbuild: keep .modinfo section in vmlinux.unstripped")
-> keeps .modinfo symbols out of System.map and kallsyms, which assumes unique
-> IDs have a format like '__UNIQUE_ID_modinfo123'.
-> 
-> However, commit afb026b6d35c ("compiler: Tweak __UNIQUE_ID() naming"), sent
-> in the same cycle, changes this to '__UNIQUE_ID_modinfo_123'.
-> 
-> As a result this regexp has never matched and every kernel since v6.18 has
-> carried one kallsyms entries for every MODULE_INFO() declaration in the
-> kernel whether the modules are compiled or not.
-> 
-> That's 5,810 entries for an x86 defconfig build and 15,200 for arm64.
-> 
-> On x86 defconfig that is 113 KiB of kallsyms tables and 32 KiB of bzImage,
-> and every lookup walks past them.
-> 
-> Fix the pattern.
-> 
-> Fixes: 3e86e4d74c04 ("kbuild: keep .modinfo section in vmlinux.unstripped")
-> 
-> No measurable change in build time, the smaller tables are not on any path
-> the build waits for.
-> 
 
-For consistency, it would be nice to have the 'Fixes:' trailer at the
-beginning of the trailer block (that is: here.)
-
-> Assisted-by: LLM
-> Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
+On Wed, 9 Sep 2026, at 21:14, Borislav Petkov wrote:
+> On Wed, Sep 09, 2026 at 01:55:32PM +0200, Ard Biesheuvel wrote:
+>> From: Ard Biesheuvel <ardb@kernel.org>
+>> 
+>> The decompressor has its own implementation of panic(), which is based
+>> on the vsnprintf() routine provided by the EFI stub.
+>> 
+>> Relying on the EFI stub from code that does not execute in the context
+>> of the EFI boot services is a bad idea. It is also completely pointless
+>> in this case, given that the only user of this version of panic() only
+>> passes a compile time constant string, without any printf conversions.
+>> 
+>> So use error() instead of panic() in that case, and drop the panic()
+>> implementation entirely. This is needed so that the EFI stub's
+>> vsnprintf() can be modified in a manner that is incompatible with the
+>> expectations of this caller.
+>> 
+>> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+>> ---
+>>  arch/x86/boot/compressed/error.c | 19 -------------------
+>>  arch/x86/boot/compressed/error.h |  1 -
+>>  arch/x86/boot/compressed/mem.c   |  2 +-
+>>  3 files changed, 1 insertion(+), 21 deletions(-)
+>> 
+>> diff --git a/arch/x86/boot/compressed/error.c b/arch/x86/boot/compressed/error.c
+>> index 19a8251de506..ce5ed7d8265e 100644
+>> --- a/arch/x86/boot/compressed/error.c
+>> +++ b/arch/x86/boot/compressed/error.c
+>> @@ -22,22 +22,3 @@ void error(char *m)
+>>  	while (1)
+>>  		asm("hlt");
+>>  }
+>> -
+>> -/* EFI libstub  provides vsnprintf() */
+>> -#ifdef CONFIG_EFI_STUB
+>> -void panic(const char *fmt, ...)
 >
-> diff --git a/scripts/mksysmap b/scripts/mksysmap
-> index c4531eacde20..56a8b8bbdb37 100755
-> --- a/scripts/mksysmap
-> +++ b/scripts/mksysmap
-> @@ -83,7 +83,7 @@
->  / _SDA2_BASE_$/d
->  
->  # MODULE_INFO()
-> -/ __UNIQUE_ID_modinfo[0-9]*$/d
-> +/ __UNIQUE_ID_modinfo_[0-9]*$/d
->  
->  # ---------------------------------------------------------------------------
->  # Ignored patterns
+> So this thing appeared magically in v8 of the TDX unaccepted memory patches
+> and I don't think we questioned it back then.
+>
+> v7's tdx_accept_memory() does error():
+>
+> https://lore.kernel.org/all/20220614120231.48165-15-kirill.shutemov@linux.intel.com/
+>
+> and v8 started doing panic():
+>
+> +void tdx_accept_memory(phys_addr_t start, phys_addr_t end)
+> +{
+> +	if (!tdx_enc_status_changed_phys(start, end, true))
+> +		panic("Accepting memory failed: %#llx-%#llx\n",  start, end);
+> +}
+>
+> https://lore.kernel.org/all/20221207014933.8435-15-kirill.shutemov@linux.intel.com/
+>
+> and it switched to it being a vsnprintf() wrapper because it wanted to dump
+> start and end perhaps.
+>
+> But then it ended up dropping the params in v13 and landed upstream with
+> a single string as an argument.
+>
+> Anyway, adding Kiryl/Kirill for comment and leaving in the rest for reference.
+>
 
-Thanks!
-
-Reviewed-by: Nicolas Schier <nsc@kernel.org>
-
--- 
-Nicolas
-
+Looking at that v13, it seems the panic() call was added to
+arch/x86/coco/tdx/tdx-shared.c, which was shared between the kernel proper and
+the decompressorat the time, and so a panic() implementation was needed in the
+decompressor too. But that is no longer the case.
