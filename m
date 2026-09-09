@@ -1,152 +1,129 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from fanzine2.igalia.com (fanzine2.igalia.com [213.97.179.56])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F5FC569F04;
-	Wed,  9 Sep 2026 16:30:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87AC7332EA0;
+	Wed,  9 Sep 2026 17:12:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.97.179.56
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788971435; cv=none; b=LCj1cz5pEydsngfoVNIH2iAbTHMy4GcLGUAG3Pdwsg6MamIJW671n/mobnZXFH5sK4ex9ZVel1tRRawLkjy2fT4DA574yvXbi564cPcMDifL+zwhD6x7sIppRttbHblmNQXq8+XjWnngEfWKhL4OM4gKl5jeJycQ5uBMPr0/qOk=
+	t=1788973943; cv=none; b=qcg8H2qiWJ1Z89t/2qf2QQfP+FezzRi0BD+Z3FVjgWc9p2vI0J6p8lE23miWJ6IoHQZMvXfHi3GAFme9oshsg6pl7OuZ0VJ1XtditcnuyATJ75uMnMM/dpUDXy902VTIJpuXK0Ga/E42UtzSgpsgcImsNkbr+CP7ckz7jxlI6YI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788971435; c=relaxed/simple;
-	bh=wWzKtrFidTzm1N7slbL3klzIb0Qo2W2SWXnk1Ha8gms=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sPRggIgSGkWPOos/H5UBqeByDwT2NbXy8bfqZ1pTRA36y5Tus4ZP9y4BWmOkesmxYIvgLBbHzui0u2RU8osJBIn0tZj/sbjWQqkgkg8B4FIe918ZUagq2MJhqx2Bm+JHGgG6+Pdng5Hipi3K5eCEJkD077D1Xr0k8C/Cf0A3fUo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dcYf5Ku6; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788973943; c=relaxed/simple;
+	bh=tkFm8ArrEWzeaieZuP5vpupn9vkxk9K5f19tdLq0x6A=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=oTxbAnUOF84sHWvycMgOQ5ItnjKLa2l9LQqsbVPgyNlZf21Bcon4/klTm+nGjYskfvq/I00srQmnCdJmVMlKLeenABnV8kdvAUHqHmtAddQcAMbTLQkN5DxUQPQ+Ko0F2qu6dpGODbg9PcIg6QpDSBrtH3NdvLY/6e1rrhMJoZU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com; spf=pass smtp.mailfrom=igalia.com; dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b=mRoldLWC; arc=none smtp.client-ip=213.97.179.56
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=igalia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dcYf5Ku6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0AFE61F000FF;
-	Wed,  9 Sep 2026 16:30:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788971434;
-	bh=Kz7rWeqwh7ufJDv87BxiJfD/gwwv4aMAp/7XS3gBPEo=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=dcYf5Ku63ij8aECQoJafs4Ipg1pK9oXj9HMZSoM3ml9RYUs9bgWbI892r15HKD+aq
-	 TO6FjMT8mTQhfp+iMomWORtQlAM3jIsyaPwYZSaHoJn7R/JGCghwy4f2f0niwav6ni
-	 eBJdRLPFcGRmhIBelQgMN8TiQon3ZGk+0ZjUxsPj6ZoUq1f644nJlygEq9jKwgJozp
-	 ivMzm6l0Cf1qm0bdrELXOXxe7OHf/vwZsgJpnbZUDSpqIhRXP81TW35ZC+juNo5mm5
-	 w8CyZDKbmN2fe9Tm4ZiwdQMSYdgzFqNx03fbVBS+oujn39g8U1gp6xIrrIUpTbPfjZ
-	 fo6l8mjP/fXXQ==
-Date: Wed, 9 Sep 2026 17:30:19 +0100
-From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
-	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
-	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
-	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
-	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
-	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
-	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
-	Gary Guo <gary@garyguo.net>, =?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, 
-	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
-	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
-	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
-	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
-	Randy Dunlap <rdunlap@infradead.org>, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	llvm@lists.linux.dev, linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
-	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH 00/23] kbuild: significantly speed up kernel builds
-Message-ID: <aqGG1iSwF7SyY7d6@gremlin>
-References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
- <CAHk-=wieaheq8rXSps3xRZpNNMQMEj9BH5gU+Dh4q_ZgokO51Q@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b="mRoldLWC"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
+	s=20170329; h=Content-Transfer-Encoding:Content-Type:From:Cc:To:Subject:
+	MIME-Version:Date:Message-ID:From:Reply-To;
+	bh=8XgErxDLDWlJhlMbKCkXJshZlMHhtU9PCEfmJxraKvk=; b=mRoldLWCiE+Lczs6o22SpBAC7s
+	zbihh4qj+xqvm+CI70oQnXGdh7imAFsYLddNd0QC+I6JsS7aJrX7LG9UP5afYSyoh82fh6IU3B0sw
+	/qOOsJOQPNxtPckLL3ccmi86TY1A8OAZ6iuDazFksryg/k7IEI03ipJHXNLT4uhivScVqRt5cWbys
+	4UqiExJPOPOggxCUy/mZgJv19a0NO3I1fOuD9/1SGvvGK5bXZAC+eO1eELPJ4xCtxhEWeXwaBGOyE
+	AKoGcmzwAr0GE7BrO00J01FAl9kdnt4TTqKZ1DjA8qPAwjv99szF2Xe0OLub5rGw0m5rwlStdnpeH
+	5H1t+8Tg==;
+Received: from [191.32.244.59] (helo=[192.168.1.56])
+	by fanzine2.igalia.com with esmtpsa 
+	(Cipher TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_128_GCM:128) (Exim)
+	id 1x4LqF-00H9d9-Jm; Wed, 09 Sep 2026 19:12:11 +0200
+Message-ID: <cdd454e2-a311-71b5-2449-25cdfba893fd@igalia.com>
+Date: Wed, 9 Sep 2026 14:12:05 -0300
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHk-=wieaheq8rXSps3xRZpNNMQMEj9BH5gU+Dh4q_ZgokO51Q@mail.gmail.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Subject: Re: [PATCH] efi: pstore: Fix pstore_disable parameter setting (if
+ built as module)
+Content-Language: en-US
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: linux-efi@vger.kernel.org, linux-hardening@vger.kernel.org,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>, Kees Cook <kees@kernel.org>,
+ Tony Luck <tony.luck@intel.com>, stable@vger.kernel.org,
+ kernel-dev@igalia.com, kernel@gpiccoli.net
+References: <20260906235838.2928815-1-gpiccoli@igalia.com>
+ <273c9217-4630-4585-8cb5-3c5c8f0b77d3@app.fastmail.com>
+From: "Guilherme G. Piccoli" <gpiccoli@igalia.com>
+In-Reply-To: <273c9217-4630-4585-8cb5-3c5c8f0b77d3@app.fastmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Wed, Sep 09, 2026 at 08:37:10AM -0700, Linus Torvalds wrote:
-> On Tue, 8 Sept 2026 at 13:55, Lorenzo Stoakes (ARM) <ljs@kernel.org> wrote:
-> >
-> > A typical kernel build consists of a frustratingly large amount of time
->
-> .. you're preaching to the choir.
+Hi Ard, thanks for your prompt response!
 
-:) Yeah, it's something that's annoyed me for a long time too.
 
->
-> >                 == allmodconfig FULL build ==
-> >
-> >                         before    after     delta
-> >                       ----------------------------------
-> > Threadripper, gcc       345.3s   275.2s    -70.1s (-20%)
->
-> Well, that's certainly very encouraging. We should do this. I sent out
-> some emails as just reactions to individual patches, but I have no
-> numbers to back any of those emails up, and I never actually applied
-> this series to my tree - they were all based on reading the patches
-> themselves.
+>> [...]
+>>  	if (pstore_disable)
+>>  		return 0;
+>>
+>> +	if (efi_pstore_info.bufsize)
+>> +		return 0;
+>> +
+> 
+> Can we please address the root cause rather than paper over it here?
+> 
+> What is the point of having a) a pstore_disable= param on a module
+> (which can be blacklisted or simply not loaded) and b) having it
+> runtime writable so pstore-efi can be toggled on/off at will?
+> 
 
-Thanks, will have a read through those!
+Well ... despite we agree on that, I think removing pstore_disable is
+kinda breaking "the contract" we're following since long time ago.
 
-I do recommend trying them locally ;)
+The thing is: unlike ramoops, or even maybe pstore/blk and other
+potential backends, efi_pstore is a bit of a different beast IIUC.
 
-It makes a surprising difference to defconfig even. (Though you need pigz
-installed for the full effect)
+It doesn't require any config, by having it loaded, it'll just go ahead
+and ...get enabled as pstore backend (unless pstore.backend sets otherwise).
 
->
-> That said:
->
-> > An LLM was used to first determine where the bottlenecks were then to
-> > figure out how to improve them.
-> >
-> > It generated a lot of code, much of it hideous.
->
-> This made me scared to look at the patches originally, and I held off
-> in fear that the patches would be horrible and this build time
-> improvement would be hugely controversial garbage code.
->
-> But:
->
-> > I extensively audited and rewrote a lot of it, and heavily edited commit
-> > messages, the cover letter and comments.
->
-> None of the patches look at all horrible to me. You clearly excised
-> the hideous parts. All of my reactions were of the type "this could
-> probably be taken _further_" rather than me throwing my hands up in
-> disgust.
+And not only that: efi_pstore is **usually built-in** - I guess in all
+distros I've checked and by default config, it's built-in.
 
-Thanks! :)
+So, probably to avoid having to use {initcall,module}_blacklist
+(depending on the build type), I guess it was decided to have this
+parameter. The commit [0] that added that, >13y ago, mentions that since
+it was enabled by default and some EFI implementations had issues when
+filling its memory with oops logs, the option was to add such
+parameter+Kconfig to force disabling efi_pstore. Good decision or not,
+we should now live with that IMO.
 
-I made sure to audit everything it came up with patch-by-patch, got it to
-rework the horrors then rewrote large chunks of what it came up with.
 
->
-> So the Rust parallelism thing clearly isn't ready based on feedback
-> from that quarter, but the rest looked safe and innocuous. I'm all for
+> Also, the practice of controlling the functionality of a builtin
+> diagnostic feature by poking something under /sys/module/foo/params
+> is in rather poor taste IMNSHO.
+> 
 
-Sure, happy to drop anything like that.
+Not only poor taste, I would say super counter-intuitive. But allowing
+the sysfs playing was added by myself, to enable users to change it
+without requiring a reboot, for a very cheap cost (well...not so cheap,
+since I added a bug and here am I now, trying to fix it heh).
 
-Though based on what Miguel said it _might_ be ok perhaps with a nightly
-gate on it? Will see what he/Bjorn say.
+If we require a reboot, we are in the same situation of kdump -
+crashkernel must be set on command-line and requires a reboot to
+properly reserve the memory. There is no technical reason for that in
+case of efi_pstore, at least, none I can see.
 
-> merging this, although it should obviously go in through the right
-> channels. Mostly the kbuild tree, although some of it clearly would be
-> other cases - the objtool change in particular is fairly substantial
-> and needsobjtool people to approve. It didn't look all that
-> contentious, but still..
 
-Agreed, it definitely needs some eyes on it, especially the trickier bits.
+So, with all that said, what is the path you suggest we follow?
 
->
-> Anyway, I'd love for this all to go in. Build times are a pet peeve of mine.
+a) This simple fix (or something similar)?
 
-Yeah, it'd be nice to see this benefit everyone!
+b) Drop entirely pstore_disable, risking a lot of users to just face
+breakages in their setups?
 
-Am happy to iterate on it as needed to get it upstream.
+c) Other ideas?
 
->
->               Linus
 
---
-Cheers, Lorenzo
+Appreciate your/others feedback, thanks in advance!
+Cheers,
+
+Guilherme
+
+
+[0] ec0971ba5372 ("efivars: Add module parameter to disable use as a
+pstore backend")
