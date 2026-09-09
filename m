@@ -1,182 +1,105 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53DD6565105;
-	Wed,  9 Sep 2026 13:24:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2721E5678EE;
+	Wed,  9 Sep 2026 14:00:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788960281; cv=none; b=SGg2uKf7iwVx9nj0oPHP2d07tKwSU+Sxsk38JnIhuqZVrR69dr+fhJdyZFVkATobDmdPAs1mWiwjGry/zLLF8n5mZwsGiT1PGLAMoFLK2ZVCAnSIjrW0IPRFoKkp1pDSzkR81uG/YoVmczJH5jsgmAbD3JXUk4HdnNrP3N/wwSo=
+	t=1788962451; cv=none; b=XgCqwwNzApfz1pBKy2Hvf31ihJG6AOb2VMS6+12F7gFTbWS78kxAvuzJo7miMvTkm52gfY6TyB7EY2QE+wbbzt/aRG8fdZuNONHNBLi+kCSrxH1HwRj020clnQ70rqQZrub8wSv+s73NVMimbOwNZZL8pecrDUydJLUBAoaKkws=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788960281; c=relaxed/simple;
-	bh=L4W85ddT3HE6Duyoh6P0QhiRg4shMpztOkxeCp3tRqg=;
-	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=PHj/MiBIK3WP8iezNKGYoOlVXvNxZoWnyZNGGia8qq7wDNfLz7SrA+zEzvzUkk9RWkTP7nsK33735QRmbYVySggzrObuKC3xbPnnN8UP6+ItWJwAgQ/Mg9gHz0EL3gEavGrQjyVxFeCd+wACL7B6eM99Ox+qgA9BrMJLvbSVBeQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CmQNemKi; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788962451; c=relaxed/simple;
+	bh=41JPlRh0qfoMonH4MWA9VgLNLi8v66uH8M35E0E2oSY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=p6e4DZefPIR7wCCLKc4/iARMaI7CCrYDXG5oyMLAjI8eYxsptZXsZ9h+QhqhkkY3Kd2NKmsvoeWW0pJ02daIh1rKSw8bUPfrnry23MgZRcQt0WwrBnp8c/KPMXzuffChwgAUasuL5NCh7j3CrEqon6xFOR4shQQoUxCM6yFwXEY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=cTCDZr6Z; arc=none smtp.client-ip=82.195.75.108
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CmQNemKi"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7CB011F00AC4;
-	Wed,  9 Sep 2026 13:24:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788960273;
-	bh=kW02xwwfobHDqKYd5wNAbqTLVNekBz/ryWW+HAKscjY=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=CmQNemKiITSt5nne5crT7mydGU7xhK9xTOk7q+T6HnPql9JlKKWyL5CvBtlHWJrAx
-	 aVS7QTXQoqMOPGt1mRzZAhLwsC7jVG0puSWSK75HdmvNeXVQFDxXRCUGhZZM1I+Ppf
-	 Z2tY2gTsyt05FwizpIgaJk9SkISj64mPMHO8LpSI1u6pkxo44CK1P1G9JynYiLTR3j
-	 WbPPu/+qE6afFvaL1BWw5Px6eEhxh9oeOp2ALXeFcbVc3BuedKvqb3rAJ+FfsQmtRy
-	 65kAdWnDh0YY640IIVbu179iMcNccfiv3R8yJjdGWO4OZ4JncR+2+pMLBbnnAnxoqY
-	 /MGQH+zjBIqVw==
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v4 5/5] mm/memory-failure: keep inherited poisoned
- frames out of the buddy allocator
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Liam R. Howlett" <liam@infradead.org>, "Michal Hocko" <mhocko@suse.com>, "Naoya
- Horiguchi" <nao.horiguchi@gmail.com>, kas@kernel.org, "David Hildenbrand" <david@kernel.org>, "Ilias
- Apalodimas" <ilias.apalodimas@linaro.org>, "Thomas Gleixner" <tglx@kernel.org>, "Lorenzo
- Stoakes" <ljs@kernel.org>, "Ingo Molnar" <mingo@redhat.com>, "Zi Yan" <ziy@nvidia.com>, "Breno
- Leitao" <leitao@debian.org>, "Andrew Morton" <akpm@linux-foundation.org>, "Dave
- Hansen" <dave.hansen@linux.intel.com>, "Mike Rapoport" <rppt@kernel.org>, "Miaohe
- Lin" <linmiaohe@huawei.com>, "Suren Baghdasaryan" <surenb@google.com>, "Johannes
- Weiner" <hannes@cmpxchg.org>, "Brendan Jackman" <brendan.jackman@linux.dev>, x86@kernel.org, "Ard
- Biesheuvel" <ardb@kernel.org>, "Vlastimil Babka" <vbabka@kernel.org>, "Borislav
- Petkov" <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: riel@surriel.com, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, rmikey@meta.com, harry@kernel.org, kernel-team@meta.com, kexec@lists.infradead.org
-In-Reply-To: <20260909-hwpoison-kho-v4-5-359313564495@debian.org>
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="cTCDZr6Z"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
+	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
+	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=ZqGD6+EIHmen/yXXRwBLkUFq1BO6jBImOTP5fEBlNDw=; b=cTCDZr6ZCnhsx+vTe2Bu439RDN
+	zgmXwoq1tVj2rx1oPZhMrSaFompcN5ZiFJdN/lhLCVc6R5T3U/Utt6CUPXc2qguLiC9jxT+VCRK/F
+	U3ncOktFQ9HN+NnyyZ2Y71JQr6LSiFDnT8eLQMzOY+g97udoqNxU3Fjkl8/RX0cwOuFk45/Cl2qcu
+	J+drc+sx7Y2+76t/NIr7LdQcnx66ZNjf3vXefaNaYQXDTvp4kor32JZGM20hxOsmjbCdHPvyiR5XX
+	2GFIhX2leHw0/Vg/YI7PM1Vmbtf7uRgGps32nBAS2NlQyuwr3fpCx4xgVi5FR/JZs92o3FEwfD2zb
+	H3lcLMpQ==;
+Received: from authenticated-user
+	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
+	(Exim 4.96)
+	(envelope-from <leitao@debian.org>)
+	id 1x4Iqs-0036XE-0I;
+	Wed, 09 Sep 2026 14:00:38 +0000
+Date: Wed, 9 Sep 2026 07:00:30 -0700
+From: Breno Leitao <leitao@debian.org>
+To: sashiko-reviews@lists.linux.dev
+Cc: David Hildenbrand <david@kernel.org>, 
+	Vlastimil Babka <vbabka@kernel.org>, Naoya Horiguchi <nao.horiguchi@gmail.com>, 
+	Mike Rapoport <rppt@kernel.org>, Michal Hocko <mhocko@suse.com>, Ingo Molnar <mingo@redhat.com>, 
+	Zi Yan <ziy@nvidia.com>, Dave Hansen <dave.hansen@linux.intel.com>, 
+	Thomas Gleixner <tglx@kernel.org>, Borislav Petkov <bp@alien8.de>, 
+	Johannes Weiner <hannes@cmpxchg.org>, "H. Peter Anvin" <hpa@zytor.com>, 
+	Lorenzo Stoakes <ljs@kernel.org>, Miaohe Lin <linmiaohe@huawei.com>, 
+	Andrew Morton <akpm@linux-foundation.org>, Ard Biesheuvel <ardb@kernel.org>, kas@kernel.org, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, "Liam R. Howlett" <liam@infradead.org>, x86@kernel.org, 
+	Suren Baghdasaryan <surenb@google.com>, Brendan Jackman <brendan.jackman@linux.dev>, harry@kernel.org, 
+	linux-efi@vger.kernel.org, riel@surriel.com, linux-kernel@vger.kernel.org, 
+	linux-mm@kvack.org, kexec@lists.infradead.org, rmikey@meta.com, kernel-team@meta.com
+Subject: Re: [PATCH v4 2/5] mm/memory-failure: libstub: install the
+ poisoned-memory EFI table
+Message-ID: <aqFmJao8Os0ySPjF@gmail.com>
 References: <20260909-hwpoison-kho-v4-0-359313564495@debian.org>
- <20260909-hwpoison-kho-v4-5-359313564495@debian.org>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Wed, 09 Sep 2026 13:24:31 +0000
-Message-Id: <20260909132431.7CB011F00AC4@smtp.kernel.org>
+ <20260909-hwpoison-kho-v4-2-359313564495@debian.org>
+ <20260909131911.76D361F00A3A@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260909131911.76D361F00A3A@smtp.kernel.org>
+X-Debian-User: leitao
 
-Thank you for your contribution! Sashiko AI review found 5 potential issue(=
-s) to consider:
-- [High] Healthy pages within a memory block containing a poisoned page are=
- completely leaked, preventing memory offlining.
-- [Medium] Concurrent non-atomic updates to per-node memory failure statist=
-ics (mf_stats) cause lost updates and corrupted counters.
-- [Medium] Memory block poison accounting is skipped during memory hotplug,=
- breaking block-level poison tracking and causing global counter leaks.
-- [Medium] Boot-poisoned pages lack the MAGIC_HWPOISON marker, breaking unp=
-oison_memory() logic and causing a memory leak on unpoison.
-- [Medium] TOCTOU race when setting the HWPoison flag during memory hotplug=
-, potentially causing double accounting of memory failure stats.
---
+On Wed, Sep 09, 2026 at 01:19:11PM +0000, sashiko-bot@kernel.org wrote:
+> Thank you for your contribution! Sashiko AI review found 1 potential issue(s) to consider:
+> - [Critical] Integer truncation in efi_poison_alloc leads to a massive heap buffer overflow during memset on 32-bit or mixed-mode systems.
+> --
+> 
+> commit 626632820fe1fdcddc73aaeb109705cbddc9828c
+> Author: Breno Leitao <leitao@debian.org>
+> Subject: mm/memory-failure: libstub: install the poisoned-memory EFI table
+> 
+> This patch introduces functionality in the EFI stub to create and install a
+> poisoned-memory EFI configuration table. It walks the UEFI memory map to find
+> the RAM range and allocates a bitmap to track poisoned memory granules.
+> 
+> > diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> > index 48f93f7758e9e..5cbe675491333 100644
+> > --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+> > +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> [ ... ]
+> > +static struct linux_efi_poisoned_memory *efi_poison_alloc(u64 phys_base,
+> > +							  u64 bitmap_size)
+> > +{
+> > +	struct linux_efi_poisoned_memory *pm;
+> > +	efi_status_t status;
+> > +
+> > +	status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
+> > +			     sizeof(*pm) + bitmap_size, (void **)&pm);
+> 
+> [Severity: Critical]
+> Could sizeof(*pm) + bitmap_size overflow 32 bits on 32-bit or mixed-mode
+> systems?
 
-commit 804f678a0cc93ac88d9e22aff45a011384c3ac87
-Author: Breno Leitao <leitao@debian.org>
+This feature (EFI_POISONED_MEMORY) is only enabled on 32-bits system,
+so, 32-bit issues is not a real issue. See very first patch:
 
-mm/memory-failure: keep inherited poisoned frames out of the buddy allocator
+	+config EFI_POISONED_MEMORY
+	+	def_bool y
+	+	depends on EFI_STUB && MEMORY_FAILURE && 64BIT
 
-This commit checks if pages being given to the allocator are poisoned and m=
-arks
-them accordingly. It hooks into __free_pages_core() so poisoned frames never
-enter the buddy allocator. A new function hwpoison_boot_page() is used to s=
-et
-the appropriate state for these pages.
-
-> diff --git a/mm/memory-failure.c b/mm/memory-failure.c
-> index d9b8be696aac3..f6afdb2a89a94 100644
-> --- a/mm/memory-failure.c
-> +++ b/mm/memory-failure.c
-
-[ ... ]
-
-> +static void update_per_node_mf_stats(unsigned long pfn, enum mf_result r=
-esult);
-> +
-> +/* Not num_poisoned_pages_inc(): its per block half divides by zero this=
- early. */
-> +void __meminit hwpoison_boot_page(struct page *page)
-> +{
-> +	if (PageHWPoison(page))
-> +		return;
-> +
-> +	SetPageHWPoison(page);
-
-[Severity: Medium]
-Could a concurrent hardware MCE race with hwpoison_boot_page() here? During
-memory hotplug, this path checks PageHWPoison(page) and then non-atomically
-calls SetPageHWPoison(page). This might lead to both paths setting the flag
-and double accounting in both global and per-node memory failure statistics.
-
-> +	set_page_count(page, 1);
-> +	/* The page has been completely isolated =3D=3D MF_RECOVERED */
-
-[Severity: Medium]
-Does this code need to call SetPageHWPoisonTakenOff(page) here? Without the
-MAGIC_HWPOISON marker, if unpoison_memory() is called on a boot-poisoned
-page, it might not properly recognize the page as having been taken off the
-buddy allocator, potentially causing a permanent memory leak on unpoison.
-
-> +	update_per_node_mf_stats(page_to_pfn(page), MF_RECOVERED);
-
-[Severity: Medium]
-Are the non-atomic increments inside update_per_node_mf_stats() safe when
-called concurrently during boot? Since __free_pages_core() can be executed
-concurrently by multiple kthreads, the unprotected non-atomic increments li=
-ke
-++mf_stats->recovered might lead to corrupted per-node memory failure
-statistics.
-
-> +	atomic_long_inc(&num_poisoned_pages);
-
-[Severity: Medium]
-Does bypassing num_poisoned_pages_inc() here break memory hot-remove
-accounting? By calling atomic_long_inc(&num_poisoned_pages) instead of
-num_poisoned_pages_inc(), the hotplug memory block's nr_hwpoison counter is
-left at 0. If the block is later hot-removed, the global num_poisoned_pages
-counter would not be decremented properly.
-
-> +}
-> +
->  /**
->   * MF_ATTR_RO - Create sysfs entry for each memory failure statistics.
-
-[ ... ]
-
-> diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-> index 404896b53003e..9e2ce833fd409 100644
-> --- a/mm/page_alloc.c
-> +++ b/mm/page_alloc.c
-
-[ ... ]
-
-> @@ -1613,6 +1626,18 @@ void __meminit __free_pages_core(struct page *page=
-, unsigned int order,
->  		atomic_long_add(nr_pages, &page_zone(page)->managed_pages);
->  	}
-> =20
-> +	/* First: a block parked by __free_unaccepted() never returns here. */
-> +	if (range_contains_poisoned_memory(page_to_phys(page),
-> +					   PAGE_SIZE << order)) {
-> +		poison_block(page, order);
-> +		/*
-> +		 * TODO: free the frames in the block that are not poisoned.
-> +		 * They stay out of the allocator and still count in
-> +		 * managed_pages, so a unit costs up to a block.
-> +		 */
-> +		return;
-> +	}
-
-[Severity: High]
-Does this early return completely leak the unpoisoned pages within the memo=
-ry
-block? By returning early and bypassing __free_pages_ok(), the healthy pages
-in the block are not returned to the buddy allocator. Since these leaked
-pages lack PageBuddy, PageOffline, or PageHWPoison, memory offlining
-(test_pages_isolated) might permanently fail with -EBUSY for this block.
-
-> +
->  	if (page_contains_unaccepted(page, order)) {
->  		if (order =3D=3D MAX_PAGE_ORDER && __free_unaccepted(page))
->  			return;
-
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260909-hwpoison-k=
-ho-v4-0-359313564495@debian.org?part=3D5
+So, this is a false positive
