@@ -1,333 +1,149 @@
-Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com [209.85.221.71])
+Received: from mail-wm2-f12.google.com (mail-wm2-f12.google.com [74.125.225.140])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29B5B552946
-	for <linux-efi@vger.kernel.org>; Wed,  9 Sep 2026 11:56:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.71
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A173755C329
+	for <linux-efi@vger.kernel.org>; Wed,  9 Sep 2026 12:46:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.225.140
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788954971; cv=none; b=h68gVy+wo6n9B/3SkV9lm8uxs2WSFTCd5d6fwdKDvjh74YFtvzDju6A8zVzLr4fpmNKXYqNqt8lwGSn3YRGfhiIpSMrwH4SQUAFv5EZ5S0LTardbYsxKhRYCLHbSPYqKPGV7iVB0XswnkCFdyhPPtEBe/mZP0OSTgetDjQDxTqc=
+	t=1788957991; cv=none; b=DMSgjO3lCTvFhXwsIm8Shv2l1aJLVJMKuf1FiknujP3FdCHfY0RS2vBKWrvyToPyU41qlKNtKX3cNqDiN/E3Ss0xOXXFgCIsI8DMQeJj0GYXK5iuWcpOGzLAUxBQ84wfF/BTR7A+HaTazKLPsM4lRDLGAJx7lesIQzlPuIPOb4I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788954971; c=relaxed/simple;
-	bh=pRW4HEecg9x05VlvvNHWyO+Xj06f//HTE1CvA11M7fI=;
-	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=OKUISPmZ8mHEbIRZfpZgnJQgrYV50VJccBiTpE2nITEVt5XDPWtoDm+33YmTcYeviIssB++fAPAR3Pn68B3EhSvorEC8IZ3JkDRjI8tpEzpx3SYzKbhVPJiXrEto1ng56cR0coGmzwWEU1mQgWu1mcz0G2ZPrRKyVi4M+QhNfcI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=DpyRsEZA; arc=none smtp.client-ip=209.85.221.71
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
+	s=arc-20240116; t=1788957991; c=relaxed/simple;
+	bh=+2j4AKVOCmiCv3B4/UniinpKlgAIf0kjIps8z6AAMXI=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=JT85RBDbZ9cnbn0MLbbVx8VXI2dTLlgLOVuF4oFX+4peidFPAqpMy31Dx8i9cu0eMNwoEltp9KhKrJOTpTPkm4E3MVmF9egJGCpIplVhfCPbuxq+AiOpD73GRdVa2p7f9Iw2WeWzUil9vD33AuNrYjoSq4mU+Ckq0SiW5p2TVWg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZvIYAPrx; arc=none smtp.client-ip=74.125.225.140
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="DpyRsEZA"
-Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-48436db95e1so4065350f8f.0
-        for <linux-efi@vger.kernel.org>; Wed, 09 Sep 2026 04:56:08 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZvIYAPrx"
+Received: by mail-wm2-f12.google.com with SMTP id 5b1f17b1804b1-49cd5462b69so6174775e9.1
+        for <linux-efi@vger.kernel.org>; Wed, 09 Sep 2026 05:46:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1788954967; x=1789559767; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:from:subject
-         :message-id:references:mime-version:in-reply-to:date:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=M1PgB2C5uHj9PbLGcmV0eg0x/me0oU1kp6bOAlQo5bk=;
-        b=DpyRsEZAKKHhuwEhn6S7VedCpwlLL6ZQAhyPdLp7bU/VvT6hst7tfEimQPDcJYtFBW
-         qZo6icMSjOSADZIslGj771L2SPR50Nv1Pod413m70+0E/n9WE0EEGzGqiDX35dD/f8TA
-         5gQ1cTmM/CnAFKSmNcXabv3XXf9OGl+VWWlqS4jZxoNlTr/tGY4CKNd1Wl42lR2spiOV
-         ZpMwHQHy5Ij1Vnnr1lbolVbJ9l1+NPnzusahrPeB3VNb508sstgo6B7p2loQToX6vYXK
-         k6uguxkfq00LhuGabJXOupquDBUdLn6dKSev08V/lMZGHKB7yr6jv/1NzPKpHBKoc9Ue
-         SY8g==
+        d=gmail.com; s=20251104; t=1788957984; x=1789562784; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:subject:cc:to:from:date:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=hHXdQU+2nyNy8Rq6Z9GonQZ8Ld3gseEFdGRUMS7w87Y=;
+        b=ZvIYAPrxg+IMMQiO7tjJCyXox77HhpaPWYZbV1Hv07G4Ae0WQvA5tpuBpT+y7eJwgx
+         OczgXhr6BRPAvDlUG5vKvl0yg0EJ3GPLLjqH1zDE2g57qexun+X8LgOAMxS8DWg0MZmG
+         TYxLqPKKWAILGp92SwRxfxWOcg10D/c83JrxU7uByvpN0/H/z0BC8jvISc/J4FbnlJQb
+         BkXY6SFgJPoEgYwgoYVOE5yxru+cCCw8v4WNY7TaQHBfT014zYn9niV/gIYKDzoplWNe
+         a9/Y15twerE6kfeJGX7vQY8k46iqghRsziMnS87vEsZ3X9odWC6czOi63BIyAnUUyTx3
+         w7aQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788954967; x=1789559767;
-        h=content-transfer-encoding:content-type:cc:to:from:subject
-         :message-id:references:mime-version:in-reply-to:date
+        d=1e100.net; s=20251104; t=1788957984; x=1789562784;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:subject:cc:to:from:date:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=M1PgB2C5uHj9PbLGcmV0eg0x/me0oU1kp6bOAlQo5bk=;
-        b=dZwbT7qex0lmHmmkyCu7flixflSAJrahlnHeEttpWvrMRGmnJ52IopV758Ip7dOK38
-         wG9/euQPY8clcXAC1zPb4qO+z98t1DctRvDfdfhX3iCoLq8PniUR/VDl+ieUD8EorDPS
-         XqENOcD1z5m/KTdI5i3x4fam9h2vdnVszXwU/BzIGv+IuSJGStxm46OZZFPSqX4st6vG
-         t61hv/r210IUjXN4rp9w3MXCYIfW0RXBdUV+IA2qRgj3MJ801CXI10m1In/GpzcdCsAM
-         i4it1V0qpuERL3eTL4TWGJ6ePJNRO+vsPuDxcFEJuu6vf9BNVNqFkchmqqH/pffGY9i+
-         ESFg==
-X-Gm-Message-State: AFuF++ltSkOwdX7lgBJkAcbEMrrOopIricfuCaWEP59OSvM37cdXoSe9
-	wmu+/uCg0Ru15lnOdjTD/qF/gPzjoPDFXgovSHusmJ/FJ7fpz7dafC0GACp7BXIdplFcGa08raS
-	E+DFWO/oqpegGphwaI+kcmDtIFmyxrQhO5diprlPKbqyadS9qh1tHaKT6joP2w/fyoSIjpVd234
-	KopHU9kSNQvgq4o3iyEX6Zc1OAEJWG5Q==
-X-Received: from wmbeu9.prod.google.com ([2002:a05:600c:81c9:b0:49c:ce06:6657])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:81c8:b0:49d:1f10:8b9f
- with SMTP id 5b1f17b1804b1-49d1f109802mr48575265e9.7.1788954966686; Wed, 09
- Sep 2026 04:56:06 -0700 (PDT)
-Date: Wed,  9 Sep 2026 13:55:41 +0200
-In-Reply-To: <20260909115530.1924665-12-ardb+git@google.com>
+        bh=hHXdQU+2nyNy8Rq6Z9GonQZ8Ld3gseEFdGRUMS7w87Y=;
+        b=I4AH5ik+UIcBtg8208zmneDO+03/nIOI+G6pP9VYh30pdpMGsybj5KYsA3FH+zuh91
+         R0bYw6XB/VBn2QkxrB8JFRO/Hkvhky7CUdleNM9sCCOWBEyH6hpbHE7LOtsZ5dAfn6YE
+         uCaJekv6xw2BTxokzm0TKRxnrdjBu5y9GBVpXRe4oKCR+FdFU9QsoBF4m334JKBJsjeX
+         hgHsh0/3/3hQ8rH7Ua1kupLIOKbIRX/IqtNlUG/labq8nejOW5BqoJxhNZmVjHsJ0R1s
+         V2HfkM08FZ/9z5IKGkdb9TTFToJfUeGCjitU36WQzaG47jms4z+T60mfhkwTl5LcggPE
+         Y45A==
+X-Gm-Message-State: AFuF++kROu1HPuV8EN+uHC4AJfPeSaFzJBsFRndEfoxSNAotA2Y8Zkmp
+	V5OnbotXWpgTR74G1fVHIzV1qF3umnqlRPgnopvL+G7MYLaJ2GAF3jXW
+X-Gm-Gg: AYBFou00NN697eRdqTHxB4jLyoZjbbTSQK6JsEu01xiDq5eBERXm0PtOT7uzpppr78I
+	6YxeGJtqzo7CO4BEwpUHdky8S8YMUJ73p6nCNK33UsjxNYJxnYzyBWzPDWqCMU7qSFCgU8c0yQi
+	ocWfzskaWoiexVoD6K4msTWg5JoWn5bWMnN96K6IMYYVbXnu8b2xj8G3r+WleCN4amTpqMdoNWs
+	KeCWxzmwtl9m6ZpLgSo7AiEtyVUMi/bk/uHRd9nCSeslRR6iYtt0Ui8mbCBJzbpMlH051C/AORh
+	phE39/EvRkVohzUBTu17R40VUhc0l4mB+WbIhsZtg71/TCKw+x8HON2wAuScKH0AOGCCLmWZlat
+	JXSD7SDxzmHHqF2NPPZg6+NMcR911pime5XVvvvZah9OFkGbgIlY4OLZQuzUoP8KlStHxjvyoUH
+	zAjE1eCrAH0IO2RAIJ2VapZ8EWll3VrBVlDkRXzT8lW7g8Fs4tSdvULAM3VRJ8GNATYFG0uG2b6
+	dYQ0q1qLtvx9vQ8c7sMNrSsTTY0AUXnwKWn
+X-Received: by 2002:a05:600c:b93:b0:499:8174:9f39 with SMTP id 5b1f17b1804b1-49d1f0af3d1mr76721715e9.0.1788957983568;
+        Wed, 09 Sep 2026 05:46:23 -0700 (PDT)
+Received: from pumpkin (82-69-66-36.dsl.in-addr.zen.co.uk. [82.69.66.36])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48588392b3esm49500308f8f.12.2026.09.09.05.46.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 09 Sep 2026 05:46:23 -0700 (PDT)
+Date: Wed, 9 Sep 2026 13:46:22 +0100
+From: David Laight <david.laight.linux@gmail.com>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Vincent Mailhol
+ <mailhol@kernel.org>, x86@kernel.org
+Subject: Re: [PATCH 5/7] efi/libstub: Output UTF-16 directly from
+ vsnprintf()
+Message-ID: <20260909134622.3ac54b52@pumpkin>
+In-Reply-To: <20260906130817.1151961-14-ardb@kernel.org>
+References: <20260906130817.1151961-9-ardb@kernel.org>
+	<20260906130817.1151961-14-ardb@kernel.org>
+X-Mailer: Claws Mail 4.1.1 (GTK 3.24.38; arm-unknown-linux-gnueabihf)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-References: <20260909115530.1924665-12-ardb+git@google.com>
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=8323; i=ardb@kernel.org;
- h=from:subject; bh=4dLVPZyjs94kAN2Ujs1pKn8L7TMMSfHm0tBktF2p2CE=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIWuhp90qeZldv7k9n70TizgX+3jvH/3sKcYFLqs18hvk7
- 0468OlFRykLgxgXg6yYIovA7L/vdp6eKFXrPEsWZg4rE8gQBi5OAZjIJQeG/6FvuRTO6qQnb2f7
- 6ypy2OeV7pJipxROq/snZOvuCzlKazL801mZtUnO7XZhsues9fLnc534VnxePPvJrGbz3vLJ+9X PMwAA
-X-Mailer: git-send-email 2.55.0.1003.g10538fe699-goog
-Message-ID: <20260909115530.1924665-22-ardb+git@google.com>
-Subject: [PATCH v2 10/10] efi/libstub: add initial Boot Loader Interface support
-From: Ard Biesheuvel <ardb+git@google.com>
-To: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, 
-	Vincent Mailhol <mailhol@kernel.org>, x86@kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 
-From: Vincent Mailhol <mailhol@kernel.org>
+On Sun,  6 Sep 2026 15:08:23 +0200
+Ard Biesheuvel <ardb@kernel.org> wrote:
 
-The Boot Loader Interface (BLI) [1] defines EFI variables that expose
-boot loader state to the running OS. LoaderInfo identifies the boot
-loader, while LoaderDevicePartUUID records the GPT partition UUID of
-the partition containing it.
+> The only remaining users of vsnprintf() in the EFI stub are the
+> diagnostic printk()'s, which are emitted to the console and not recorded
+> for posterity.
+> 
+> The EFI console uses UTF-16 (or actually, UCS-2) natively, and so all
+> non-UTF16 strings that are emitted need to be converted. Given the
+> stub's vsnprintf() support for wide strings (using the %ls conversion
+> modifier), which uses UTF-16 to UTF-8 conversion internally, the final
+> conversion to UTF-16 needs to support not just plain ASCII but UTF-8 as
+> well.
+> 
+> This is all pointless, of course, and it makes more sense to use UTF-16
+> internally. This removes the need for UTF-16 to UTF-8 conversion in
+> vsnprintf(), and given that all non-wide string inputs to vsnprintf()
+> that exist in the stub today are compile time constant ASCII strings,
+> the need to convert UTF-8 to UTF-16 disappears as well.
+> 
+> So implement efi_vsnprintf() taking a const char *fmt as before, but
+> outputting a efi_char16_t[] that can be passed to the EFI console
+> directly, rather than via efi_puts(), leaving the latter unused and
+> therefore removed.
+> 
+> Note that efi_puts() performs LF to CR-LF conversion internally, so add
+> this capability to efi_vsnprintf() as well.
+> 
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+...
+>  /**
+>   * efi_printk() - Print a kernel message
+>   * @fmt:	format string
+>   *
+>   * The first letter of the format string is used to determine the logging level
+>   * of the message. If the level is less then the current EFI logging level, the
+> - * message is suppressed. The message will be truncated to 255 bytes.
+> + * message is suppressed. The message will be truncated to 255 characters
+> + * (ignoring surrogates).
+>   *
+>   * Return:	number of printed characters
+>   */
+>  int efi_printk(const char *fmt, ...)
+>  {
+> -	char printf_buf[256];
+> +	efi_char16_t printf_buf[256];
+>  	va_list args;
+>  	int printed;
+>  	int loglevel = printk_get_level(fmt);
+> @@ -141,10 +63,11 @@ int efi_printk(const char *fmt, ...)
+>  	fmt = printk_skip_level(fmt);
+>  
+>  	va_start(args, fmt);
+> -	printed = vsnprintf(printf_buf, sizeof(printf_buf), fmt, args);
+> +	printed = efi_vsnprintf(printf_buf, ARRAY_SIZE(printf_buf), fmt, args,
+> +				true);
+>  	va_end(args);
+>  
+> -	efi_puts(printf_buf);
+> +	efi_char16_puts(printf_buf);
+>  	if (printed >= sizeof(printf_buf)) {
 
-LoaderDevicePartUUID is used, for example, by systemd-gpt-auto-generator
-[2] to identify the disk the boot loader was launched from and
-automatically detect and mount partitions on it.
+You missed that sizeof().
+Be nice to have a note about the size not being in bytes.
 
-GRUB [3] and systemd-boot [4] populate these variables, but when the
-kernel is started directly by EFI firmware, there is no conventional
-external boot loader to provide them. In that case, because the EFI stub
-performs the boot loader role, it should provide the variables itself.
-
-Use LoaderInfo as a sentinel: if it is already set by an earlier boot
-stage or cannot be set, bail out. Otherwise, populate the other BLI
-variables.
-
-Parse the loaded image device path, extract the GUID signature from its
-GPT HD() node and publish it under the Linux loader entry vendor GUID as
-the volatile LoaderDevicePartUUID EFI variable.
-
-Install the efi_bli_set_variables() hook in both the generic efi-stub.c
-path and the x86-specific x86-stub.c path.
-
-[1] The Boot Loader Interface
-Link: https://systemd.io/BOOT_LOADER_INTERFACE/
-
-[2] systemd-gpt-auto-generator
-Link: https://www.freedesktop.org/software/systemd/man/latest/systemd-gpt-a=
-uto-generator.html
-
-[3] GRUB -- =C2=A716.2 bli
-Link: https://www.gnu.org/software/grub/manual/grub/html_node/bli_005fmodul=
-e.html
-
-[4] systemd -- systemd-boot UEFI Boot Manager
-Link: https://github.com/systemd/systemd/blob/main/docs/BOOT.md?plain=3D1#L=
-102
-
-Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
-[ardb: - constify 'image' pointer parameter
-       - pass efi_guid_t* to efi_snprintf()]
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/firmware/efi/libstub/Makefile   |  2 +-
- drivers/firmware/efi/libstub/bli.c      | 87 ++++++++++++++++++++
- drivers/firmware/efi/libstub/efi-stub.c |  1 +
- drivers/firmware/efi/libstub/efistub.h  |  2 +
- drivers/firmware/efi/libstub/x86-stub.c |  1 +
- include/linux/efi.h                     | 22 +++++
- 6 files changed, 114 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/l=
-ibstub/Makefile
-index 12c0c7deb5cb..564773c89d14 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -66,7 +66,7 @@ KBUILD_AFLAGS			:=3D $(KBUILD_CFLAGS) -D__ASSEMBLY__
- lib-y				:=3D efi-stub-helper.o gop.o secureboot.o tpm.o \
- 				   file.o mem.o random.o randomalloc.o pci.o \
- 				   skip_spaces.o lib-cmdline.o lib-ctype.o \
--				   alignedmem.o printk.o vsprintf.o \
-+				   alignedmem.o printk.o vsprintf.o bli.o \
- 				   lib-ucs2_string.o
-=20
- # include the stub's libfdt dependencies from lib/ when needed
-diff --git a/drivers/firmware/efi/libstub/bli.c b/drivers/firmware/efi/libs=
-tub/bli.c
-new file mode 100644
-index 000000000000..b2407f63b743
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/bli.c
-@@ -0,0 +1,87 @@
-+// SPDX-License-Identifier: GPL-2.0
-+
-+#include <generated/utsrelease.h>
-+
-+#include <linux/efi.h>
-+#include <linux/errno.h>
-+#include <linux/unaligned.h>
-+
-+#include "efistub.h"
-+
-+static efi_guid_t loader_entry_guid =3D LINUX_EFI_LOADER_ENTRY_GUID;
-+
-+static const struct efi_hd_dev_path *
-+efi_bli_find_hd_node(const struct efi_dev_path *path)
-+{
-+	const struct efi_dev_path *node;
-+	u16 node_len;
-+
-+	for (node =3D path;
-+	     node->header.type !=3D EFI_DEV_END_PATH &&
-+	     node->header.type !=3D EFI_DEV_END_PATH2;
-+	     node =3D (const void *)node + node_len) {
-+		node_len =3D get_unaligned_le16(&node->header.length);
-+
-+		if (node_len < sizeof(node->header))
-+			return NULL;
-+
-+		if (node->header.type !=3D EFI_DEV_MEDIA ||
-+		    node->header.sub_type !=3D EFI_DEV_MEDIA_HARD_DRIVE)
-+			continue;
-+
-+		if (node_len < sizeof(node->hd))
-+			return NULL;
-+
-+		if (node->hd.partition_format !=3D EFI_HD_PARTITION_FORMAT_GPT ||
-+		    node->hd.signature_type !=3D EFI_HD_SIGNATURE_TYPE_GUID)
-+			continue;
-+
-+		return &node->hd;
-+	}
-+
-+	return NULL;
-+}
-+
-+static void efi_bli_populate_loader_part_uuid(const efi_loaded_image_t *im=
-age)
-+{
-+	static efi_guid_t device_path_guid =3D EFI_DEVICE_PATH_PROTOCOL_GUID;
-+	efi_char16_t partuuid[UUID_STRING_LEN + 1];
-+	const struct efi_hd_dev_path *hd_node;
-+	const struct efi_dev_path *path;
-+
-+	if (efi_bs_call(handle_protocol, efi_table_attr(image, device_handle),
-+			&device_path_guid, (void **)&path) !=3D EFI_SUCCESS)
-+		return;
-+
-+	hd_node =3D efi_bli_find_hd_node(path);
-+	if (!hd_node)
-+		return;
-+
-+	if (efi_snprintf(partuuid, ARRAY_SIZE(partuuid), "%pUl",
-+			 &hd_node->signature) !=3D UUID_STRING_LEN)
-+		return;
-+
-+	set_efi_var(L"LoaderDevicePartUUID", &loader_entry_guid,
-+		    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-+		    sizeof(partuuid), partuuid);
-+}
-+
-+void efi_bli_set_variables(const efi_loaded_image_t *image)
-+{
-+	static efi_char16_t loader_info[] =3D L"Linux EFI stub " UTS_RELEASE;
-+	unsigned long size =3D 0;
-+
-+	if (!image)
-+		return;
-+
-+	if (get_efi_var(L"LoaderInfo", &loader_entry_guid,
-+			NULL, &size, NULL) !=3D EFI_NOT_FOUND)
-+		return;
-+
-+	if (set_efi_var(L"LoaderInfo", &loader_entry_guid,
-+			EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-+			sizeof(loader_info), loader_info) !=3D EFI_SUCCESS)
-+		return;
-+
-+	efi_bli_populate_loader_part_uuid(image);
-+}
-diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi=
-/libstub/efi-stub.c
-index 42d6073bcd06..2a95f4ea104a 100644
---- a/drivers/firmware/efi/libstub/efi-stub.c
-+++ b/drivers/firmware/efi/libstub/efi-stub.c
-@@ -165,6 +165,7 @@ efi_status_t efi_stub_common(efi_handle_t handle,
- 	dpy =3D setup_primary_display();
-=20
- 	efi_retrieve_eventlog();
-+	efi_bli_set_variables(image);
-=20
- 	/* Ask the firmware to clear memory on unclean shutdown */
- 	efi_enable_reset_attack_mitigation();
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/=
-libstub/efistub.h
-index 880c1d0c464b..4f9e7ae28b6c 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -1072,6 +1072,8 @@ efi_status_t efi_random_alloc(unsigned long size, uns=
-igned long align,
- 			      int memory_type, unsigned long alloc_min,
- 			      unsigned long alloc_max);
-=20
-+void efi_bli_set_variables(const efi_loaded_image_t *image);
-+
- efi_status_t efi_random_get_seed(void);
-=20
- efi_status_t check_platform_features(void);
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi=
-/libstub/x86-stub.c
-index cef32e2c82d8..b762f7f37f28 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -1014,6 +1014,7 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- 	efi_random_get_seed();
-=20
- 	efi_retrieve_eventlog();
-+	efi_bli_set_variables(image);
-=20
- 	setup_graphics(boot_params);
-=20
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index c35446a0b66f..ecb34be37a87 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -957,6 +957,17 @@ extern int efi_status_to_err(efi_status_t status);
- #define   EFI_DEV_END_INSTANCE			0x01
- #define   EFI_DEV_END_ENTIRE			0xFF
-=20
-+enum efi_hd_partition_format {
-+	EFI_HD_PARTITION_FORMAT_MBR =3D 1,
-+	EFI_HD_PARTITION_FORMAT_GPT,
-+};
-+
-+enum efi_hd_signature_type {
-+	EFI_HD_SIGNATURE_TYPE_NONE,
-+	EFI_HD_SIGNATURE_TYPE_MBR,
-+	EFI_HD_SIGNATURE_TYPE_GUID,
-+};
-+
- struct efi_generic_dev_path {
- 	u8				type;
- 	u8				sub_type;
-@@ -988,6 +999,16 @@ struct efi_rel_offset_dev_path {
- 	u64				ending_offset;
- } __packed;
-=20
-+struct efi_hd_dev_path {
-+	struct efi_generic_dev_path	header;
-+	u32				partition_number;
-+	u64				partition_start;
-+	u64				partition_size;
-+	efi_guid_t			signature;
-+	u8				partition_format;
-+	u8				signature_type;
-+} __packed;
-+
- struct efi_mem_mapped_dev_path {
- 	struct efi_generic_dev_path	header;
- 	u32				memory_type;
-@@ -1007,6 +1028,7 @@ struct efi_dev_path {
- 		struct efi_pci_dev_path		pci;
- 		struct efi_vendor_dev_path	vendor;
- 		struct efi_rel_offset_dev_path	rel_offset;
-+		struct efi_hd_dev_path		hd;
- 	};
- } __packed;
-=20
---=20
-2.55.0.1003.g10538fe699-goog
+David
 
