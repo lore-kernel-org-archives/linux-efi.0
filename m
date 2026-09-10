@@ -1,146 +1,170 @@
-Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from fhigh-b5-smtp.messagingengine.com (fhigh-b5-smtp.messagingengine.com [202.12.124.156])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 141B0489FCB
-	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 12:52:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6236047D468;
+	Thu, 10 Sep 2026 13:12:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.156
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789044777; cv=none; b=DgMKTGAabLXORJbguTsPS8YdbL8JpY9cBhOrvXIta56YA6VNMswUDgrNH6BMgklLEzu8YUqERu8ri50hZpkXpVQxu4pqsozrT+OSc7Mp/K9FvGaqPsieFy/KWqkzv1qDRUBnl7F8Net/YzV4N7GjdnOEFA/FTS+eCspMP7OWkro=
+	t=1789045948; cv=none; b=o6f+FpG6AEOjLE1w+KkCjmGLNsB16ca1vO8uNuXJ7HwHR9SZwPYeCbWUMjkkRpNaMoTlq7yGn50+2ULWvCrZAIjT0B++fYVmjnjbArhcZSLj0zVwRRABX2INavOFjWvTy4N4/U2bl04i5TPZmsl9+MChVDzMGL2Yxcmv6KWOyIE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789044777; c=relaxed/simple;
-	bh=aV14/F8DsF3P9FHVwJuzeIJuUW3zK2f3SCDMKZGJuA4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kGAWKKV13/PqEr+Q3lrrgjvlfuwO2BAWvEOSX+4b6d3/etDBqcYBZEMN+dFkxjtS0TOMpXLK3EVczO7lClG10nELmt0pHZcIJ9aA7TNfQ+V2tUInlHEf3Q0DDjiaE4j86ITg2Pf/U8/IhyG9/9wW5i69yhhhAtnRNulhRxletoI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=SmOKr973; arc=none smtp.client-ip=209.85.128.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1789045948; c=relaxed/simple;
+	bh=KRPBCMqju6sAaFsER+3NIni5Rb7UTXAFGokMvO1JzjQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fgRJCZY1Cr/gNq1/L6ASpN0+EspM8WZeJLy0MU1HpYKSBmWY5JFtyZl+Epti0M6Cyruwfjso+2PEQGS2Rt2NvsmLCJUU8/LcddAx98Vi1qSodtLtx7x//qRN9TJEi7HYi2Q2IPT9JVgnqPtCZJgmjoWHGmMkNoHk9dIuKdGNj7w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=shutemov.name; spf=pass smtp.mailfrom=shutemov.name; dkim=pass (2048-bit key) header.d=shutemov.name header.i=@shutemov.name header.b=N+KhENbh; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=UtAcdd5v; arc=none smtp.client-ip=202.12.124.156
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=shutemov.name
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=shutemov.name
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="SmOKr973"
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-49cca4ffdcfso58345225e9.0
-        for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 05:52:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1789044773; x=1789649573; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=ei/562soKHFJqkSdXuQm6X1dYNc/yFpT8LphVTPsPBs=;
-        b=SmOKr973K1dGCdZNSvV0lZ/+KT9BbRIbD3GOIAibUNJ0qhDjKzaJljF4LSPNkW8bB2
-         HuTx1PLTDPwTxnXLhGLdkAB+yvGjx19FpTMhto8pdD8XeVAybuZ6v45GmuegsUQbFv0A
-         r5tsiGJMyJ+CTV4L29p8/OHBuCB/Jv4TyJDThI2FdXmhKsIpiLaS2/EUJrwO93TPodLM
-         CS3eFxLcUy270ZtNSYfcBV/5plhB6VvhVqoXJOjiOa42xr9jJXMrxMP9H279UkBdc0Z/
-         dKrfOKBdlY7oe1AphxeGiXttM62BubLUX+lzyjnDKsH9lJcugdc7BQzMz+jFCDx1qj7d
-         IryA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1789044773; x=1789649573;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=ei/562soKHFJqkSdXuQm6X1dYNc/yFpT8LphVTPsPBs=;
-        b=ENP41FtKoU3WLuqo8JkBQNipbskL87N+4TNxg99hBD3+opTjdkfhalmmtrlMStIb3c
-         jcBbjGrswAVYqTG1U0cZh1RpSMxXrMdbf7vrDWXAV5p4hCrxCn7JcSB/QmBxlWSaMJ+i
-         1KBOPBvy3JbLtrhBZCLsHUYGxyNVBk2BDJF0h4aIajX2XNFbyiEWX9p8CYiYQKmwG6AF
-         mmZLYh2qaGIp9+bNLmL2QkHBkCTEEJL8g2Nbr754EuTtDycHGbvvmUWZwyere3ZW+eUp
-         B4jfn3UZPP5IVh9tCT2iifNaPmo5bvuLfs/Eak0dzVfU9Rm0JbxwvGSS25lerG976YHB
-         4HFQ==
-X-Forwarded-Encrypted: i=1; AKwUvBxM6Dy5LZekjX0GXgLD1LclbCGYwju4MiyikUvn4d2+MY096ZadOo00gOec0ltjVlKek7JCc8N6PhU=@vger.kernel.org
-X-Gm-Message-State: AFuF++n8RdOvP2F51OzW68IA/xpaCo8a1f0hPWXxrG3yTpT04Wf3BPU2
-	KAcqBKgqWPGzuXNJZ82vzPeDpCcXlmTXlO9QREZcH3bjWCuYCFeVJ6ANPBboMYuk/xY=
-X-Gm-Gg: AYBFou35jPmYsqQyzBI06bkY31nzhAWdU0m4SQMxnV7igx1qIQU5PWMaZgMNC8Gi57O
-	Lv3uF4y2h22Ho0rtCuHHWcu1Yf20byp8orVJQlc972tZXSZx0YWD77wymJZpxAMqvaN20ap2MqN
-	GmanW/Qz+4cUnZxiJ3lSvK9TLM8kb9cAxBtQpJBVorPqJBJ3KZZAvGet5JVps3R35eCZs9W+ELR
-	LwkowLHwfWq8rCWLxhBAeIe/YL1mcnykj5xhGopEt6KpI7z0fcEjy4KCA1Zr3ieS+j5ValuSMiG
-	dBLqEw219SqT0DIPxBRyNn1XlQAIedBfHylawkxPd1oU/sdel2Ln7fe7hicksm7xQ/j+u8OJogl
-	HtnQffphoW4WG2q9zh7/fVLUmDUmqwStLkx9cxVW9Dsi3Gg+m5+2lCdB8AKHEOv0e/ivW4qVcvg
-	naMmcB6eCU7qGb+gCX9CYdu6pKYhThMBlqkMRDeUAxBTmtQ8s2mbZ6RUXcn+oeNik6V3WsPj7B3
-	rKTmP0i2wXzfoLkN7IHXW2z0aqkVlWRaec=
-X-Received: by 2002:a05:600c:620d:b0:49c:fc6e:a3d6 with SMTP id 5b1f17b1804b1-49cfc6ea731mr404244015e9.21.1789044772934;
-        Thu, 10 Sep 2026 05:52:52 -0700 (PDT)
-Received: from ?IPV6:2a07:de40:8100:0:89a9:fd0e:583d:4a53? ([2001:af0:8000:1409:193:86:92:181])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49d20fce7a7sm286173185e9.4.2026.09.10.05.52.51
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 10 Sep 2026 05:52:52 -0700 (PDT)
-Message-ID: <434a7a10-d83e-4402-be91-816bbbc15bb7@suse.com>
-Date: Thu, 10 Sep 2026 14:52:50 +0200
+	dkim=pass (2048-bit key) header.d=shutemov.name header.i=@shutemov.name header.b="N+KhENbh";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="UtAcdd5v"
+Received: from phl-compute-08.internal (phl-compute-08.internal [10.202.2.48])
+	by mailfhigh.stl.internal (Postfix) with ESMTP id 64FA57A0075;
+	Thu, 10 Sep 2026 09:12:25 -0400 (EDT)
+Received: from phl-frontend-03 ([10.202.2.162])
+  by phl-compute-08.internal (MEProxy); Thu, 10 Sep 2026 09:12:25 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=shutemov.name;
+	 h=cc:cc:content-type:content-type:date:date:from:from
+	:in-reply-to:in-reply-to:message-id:mime-version:references
+	:reply-to:subject:subject:to:to; s=fm2; t=1789045945; x=
+	1789132345; bh=0jDWHSTuNbhoCTJf9sEK6WPL9npjARd36eOneS0PQs8=; b=N
+	+KhENbhh7KQoiBMAj4b4D+8z0tWGUtWXV47RhQUTn01l9scT4TIhuls1KLtFm3Lb
+	sqR29dz2vArN7ru8Bp9ayR1rUgSL5AFpoQF6BhLreVJ4VBix8yL5XhRf5xRV9rjn
+	h+BAmzW5saLzu6EGEDnEOS78vK0thXvO8dVcye9rQnVt5+3zvgK8MpcJvQBMHGzr
+	k/C6GpVch2fniwUFwTv+LEMBh1JkYci4pQ6lnT1iCx4RWRbO8JOMnfuB+aWFcY60
+	70ubFnNx/1qsxwbNVN3f25KIXbK5FqTYwIHweavs/JAP2hBvMO9wY0kFASxRcEks
+	2wwM+48vhYy2PZ7ouFgzA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-type:content-type:date:date
+	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+	:message-id:mime-version:references:reply-to:subject:subject:to
+	:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=
+	1789045945; x=1789132345; bh=0jDWHSTuNbhoCTJf9sEK6WPL9npjARd36eO
+	neS0PQs8=; b=UtAcdd5vhEyLG0pU1Rw+mNitCY2bNuQR970HG7ehZeD/qR8L9EK
+	L0dcXQPuWp1ARjYtJNpAIhezzKMGd43FDvhIQaviVFtjShzidDFMrvujHBzeP1S8
+	kOG/QJKxLaghdhZOxVsmZ8ZttZuC0bnre47zeT0+7EKsBCMgNSOni1vBSOkeMPtn
+	3RcsaIVP/bikiHvIBga2KuHhoNjv3hwEofsXe/xw5P8nJZVXiCG9/sIOT21nFBak
+	vDICO5reqBVq0gn2X8HY+x2AbvJUJIEKQ1OTe09Vm/pyWx1kALJksAiWVH2WTDoZ
+	EPgcQ2lohkDl2gr3Xic1KUU+/iIXZ9lAfew==
+X-ME-Sender: <xms:uKyiat133pKtS2BzJ7Kz-Y61j1tPjDvusi1kIh4FbO676w9SF5KOyQ>
+    <xme:uKyiagcXBs9eMshdcUxoCDQHQXzkp2yLNHg2MwNYoyeggAE9BdTjiFspY3-plo2jo
+    tTaYmRBCgnXNqbJGHOFGmPW0NyFfjeNqsidtkkj4hoJ1GWTfBzhX4Ql>
+X-ME-Received: <xmr:uKyiaiWpdy3o6sVAjvgLx3vX-q6G1mu7tpsEeo3NwmkDd6CqockznmzhdPU>
+X-ME-Proxy-Cause: dmFkZTGiRBm+g20tR5r7WAlCxmjmQfdKJ7Ydjtx7NttiUyQIVV3eBF/2sd5v/n7b9k8t+k
+    l6XvwEeXVN2T7cEYOTLjMtva3ocXdlgqvv3xTIRk06BxiTO/+RgGlSozQF/TVNAjxmL7gt
+    v9YbQ5UOSfYcfRH7XOWZSlWxbOQAdTgWW39hm1FijhEUwTpdgdXKnvWTRIzjB8asowoqCX
+    wu3AwUh5w/vuiR92Xlkah4MamNz3Ay6Pba3CS5qPkKfECCFOM5Q1Kd/wcycbl5foekWj6D
+    +hPDhfi0HOA1F+LaE63mjAMFIwriKsTPLVY90ACxioHQR2nQMgQn95C2GXYkVNyzegqPOX
+    QelFyB9goT+Ji5fu+dFA9ZNQEPURQoVTWSj0hDuLB3Z4LoawQ3ObCwn8xYH0jBVbeMnkd+
+    hQzXAjT9SvAo3ztFtc69KEGCwSEZQu2BjcanDuCR5lHLGEbHmx4BKV5AQ75rQ8OA3k+rhW
+    uji/6jYoL5gMmIOz8GE7bS6GRRNIL1tMbJj5yi+D71coTWmEBag0QQUw/07pTsNi8KxuGq
+    vy/iYgjghh8VUNWhpURhmbcr8Ks06eFhEo2xlHWDhpYc+FCrBjhaHXz6w3tvQS3EbtBzZD
+    qB7SH46Jh0O7IBxQLV0lVwMEoZcw55wc1tyKM5pxkF8hFyD9IqafKekK5ZAQ
+X-ME-Proxy: <xmx:uKyiao9XO2l7vmUZ2fVJc47dExe5ZJT1tfgr5vNW4CK63JTrBFUiCg>
+    <xmx:uayiashhiYUGB_8Zq9FUisyzMo8lLEG2Ir1WgnXT5GZ-axm7N9NgSA>
+    <xmx:uayiakd2H_nWWLzxWxgXk1Oe8f8OuFu3gawffWDYRRr4cspaDpiFyQ>
+    <xmx:uayialIrSIZWbbBUBf8FfmcoAx0z8UdjL6DP79hLzuge_FDSnEzDyg>
+    <xmx:uayiaugIjvwIYzHmUP4hSKG5HDCSofaUlwXaowBIhU0DqdrBAFe3xdzg>
+Feedback-ID: ie3994620:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 10 Sep 2026 09:12:24 -0400 (EDT)
+Date: Thu, 10 Sep 2026 14:12:23 +0100
+From: Kiryl Shutsemau <kirill@shutemov.name>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: Borislav Petkov <bp@alien8.de>, Ard Biesheuvel <ardb+git@google.com>, 
+	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Vincent Mailhol <mailhol@kernel.org>, x86@kernel.org
+Subject: Re: [PATCH v2 01/10] x86/boot: Drop pointless re-implementation of
+ panic()
+Message-ID: <aqKrhNQ3mZMs5-Dy@thinkstation>
+References: <20260909115530.1924665-12-ardb+git@google.com>
+ <20260909115530.1924665-13-ardb+git@google.com>
+ <20260909191410.GAaqGwAsCewrdVZZ0s@fat_crate.local>
+ <cee2e02b-3817-44cf-857f-62a148290367@app.fastmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 13/23] modpost: hash module source per-file, not per-byte
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
- Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>,
- Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling
- <morbo@google.com>, Justin Stitt <justinstitt@google.com>,
- Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>,
- Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
- Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
- x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>,
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
- Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
- Arnd Bergmann <arnd@arndb.de>, Catalin Marinas <catalin.marinas@arm.com>,
- Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
- Ard Biesheuvel <ardb@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Josh Poimboeuf <jpoimboe@kernel.org>, Peter Zijlstra <peterz@infradead.org>,
- Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>,
- Gary Guo <gary@garyguo.net>, =?UTF-8?Q?Bj=C3=B6rn_Roy_Baron?=
- <bjorn3_gh@protonmail.com>, Benno Lossin <lossin@kernel.org>,
- Andreas Hindborg <a.hindborg@kernel.org>, Alice Ryhl <aliceryhl@google.com>,
- Trevor Gross <tmgross@umich.edu>, Danilo Krummrich <dakr@kernel.org>,
- Daniel Almeida <daniel.almeida@collabora.com>,
- Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot
- <acourbot@nvidia.com>, =?UTF-8?Q?Onur_=C3=96zkan?= <work@onurozkan.dev>,
- Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>,
- linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
- llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
- linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
- linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
-References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
- <20260908-build-speedup-v1-13-5dc1ac01672d@kernel.org>
-Content-Language: en-US
-From: Petr Pavlu <petr.pavlu@suse.com>
-In-Reply-To: <20260908-build-speedup-v1-13-5dc1ac01672d@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <cee2e02b-3817-44cf-857f-62a148290367@app.fastmail.com>
 
-On 9/8/26 10:55 PM, Lorenzo Stoakes (ARM) wrote:
-> modpost spends a long time md4 hashing module source at a per-byte
-> granularity.
+On Wed, Sep 09, 2026 at 10:43:23PM +0200, Ard Biesheuvel wrote:
 > 
-> Fix this by doing this hashing per-file instead by accumulating a per-file
-> buffer in parse_file().
+> On Wed, 9 Sep 2026, at 21:14, Borislav Petkov wrote:
+> > On Wed, Sep 09, 2026 at 01:55:32PM +0200, Ard Biesheuvel wrote:
+> >> From: Ard Biesheuvel <ardb@kernel.org>
+> >> 
+> >> The decompressor has its own implementation of panic(), which is based
+> >> on the vsnprintf() routine provided by the EFI stub.
+> >> 
+> >> Relying on the EFI stub from code that does not execute in the context
+> >> of the EFI boot services is a bad idea. It is also completely pointless
+> >> in this case, given that the only user of this version of panic() only
+> >> passes a compile time constant string, without any printf conversions.
+> >> 
+> >> So use error() instead of panic() in that case, and drop the panic()
+> >> implementation entirely. This is needed so that the EFI stub's
+> >> vsnprintf() can be modified in a manner that is incompatible with the
+> >> expectations of this caller.
+> >> 
+> >> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> >> ---
+> >>  arch/x86/boot/compressed/error.c | 19 -------------------
+> >>  arch/x86/boot/compressed/error.h |  1 -
+> >>  arch/x86/boot/compressed/mem.c   |  2 +-
+> >>  3 files changed, 1 insertion(+), 21 deletions(-)
+> >> 
+> >> diff --git a/arch/x86/boot/compressed/error.c b/arch/x86/boot/compressed/error.c
+> >> index 19a8251de506..ce5ed7d8265e 100644
+> >> --- a/arch/x86/boot/compressed/error.c
+> >> +++ b/arch/x86/boot/compressed/error.c
+> >> @@ -22,22 +22,3 @@ void error(char *m)
+> >>  	while (1)
+> >>  		asm("hlt");
+> >>  }
+> >> -
+> >> -/* EFI libstub  provides vsnprintf() */
+> >> -#ifdef CONFIG_EFI_STUB
+> >> -void panic(const char *fmt, ...)
+> >
+> > So this thing appeared magically in v8 of the TDX unaccepted memory patches
+> > and I don't think we questioned it back then.
+> >
+> > v7's tdx_accept_memory() does error():
+> >
+> > https://lore.kernel.org/all/20220614120231.48165-15-kirill.shutemov@linux.intel.com/
+> >
+> > and v8 started doing panic():
+> >
+> > +void tdx_accept_memory(phys_addr_t start, phys_addr_t end)
+> > +{
+> > +	if (!tdx_enc_status_changed_phys(start, end, true))
+> > +		panic("Accepting memory failed: %#llx-%#llx\n",  start, end);
+> > +}
+> >
+> > https://lore.kernel.org/all/20221207014933.8435-15-kirill.shutemov@linux.intel.com/
+> >
+> > and it switched to it being a vsnprintf() wrapper because it wanted to dump
+> > start and end perhaps.
+> >
+> > But then it ended up dropping the params in v13 and landed upstream with
+> > a single string as an argument.
+> >
+> > Anyway, adding Kiryl/Kirill for comment and leaving in the rest for reference.
+> >
 > 
-> All 11,189 .mod.c files and Module.symvers were confirmed to be identical
-> with this change applied.
-> 
-> This is especially impactful for allmodconfig incremental builds (where
-> CONFIG_MODULE_SRCVERSION_ALL is set).
-> 
-> Whole build, 128-thread Threadripper 9980X, best of N runs:
-> 
->                                          before   after     delta
->                                          -------------------------------
->   x86 allmodconfig, touch mm/vma.c, gcc    40.6s    38.2s     -2.4s (-6%)
->   x86 allmodconfig, touch mm/vma.c, clang  36.2s    35.0s     -1.2s (-3%)
-> 
-> Assisted-by: LLM
-> Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
-> ---
->  scripts/mod/sumversion.c | 56 +++++++++++++++++++++++++++++++++++++-----------
->  1 file changed, 44 insertions(+), 12 deletions(-)
+> Looking at that v13, it seems the panic() call was added to
+> arch/x86/coco/tdx/tdx-shared.c, which was shared between the kernel proper and
+> the decompressorat the time, and so a panic() implementation was needed in the
+> decompressor too. But that is no longer the case.
 
-Support for the module srcversion is being removed in "module: remove
-MODULE_VERSION() and srcversion" [1] and scripts/mod/sumversion.c should
-be gone completely.
+Right. I don't mind dropping this panic() from the decompressor. The
+range was already gone since v13 and I never saw the error trigger
+anyway.
 
-[1] https://lore.kernel.org/linux-modules/20260731-module_ver_remove-v2-0-c9163858f382@linuxfoundation.org/
+Acked-by: Kiryl Shutsemau (Meta) <kas@kernel.org>
 
 -- 
-Thanks,
-Petr
+  Kiryl Shutsemau / Kirill A. Shutemov
