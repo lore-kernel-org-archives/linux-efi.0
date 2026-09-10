@@ -1,208 +1,180 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 498C413D886
-	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 07:53:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76AD341834D
+	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 08:10:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789026818; cv=none; b=hJoRBLVPDH0QK/nPpp0vKAFTu6IwiIK4heRKJocK12LNZ/QfjBk5rR9yYXxQhceTcTy2aBlpb2DgfcjoF7wWNL6znoSeFJbvq8ls3Kis2o1lBcufguDriwAChyogtqxOh4vFOESvBNf3hqolVH2L+v8XQASBCBWT6oz4FUSCZbU=
+	t=1789027811; cv=none; b=dD2s92I+8Y70QWFZBnaBFldtyorw1wZAxm6NTwmYFDsn/wVPzy5Y7zF6mVnheJTQYwz7mBAG07wZuwkLy7N8UwAp63nDxwxeQTiTEVmb/a3fn7B/RE3c1xUgZGdSG+5Yciq6VsYtL+cHe4nM2SRWu3snYKcrqqO7bTkY8Q5bXS4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789026818; c=relaxed/simple;
-	bh=VifgjBx4o5YOa1mgKjLVMaWXawUaIZCGEGZx8ySrxwE=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=psvy4jh75TmQObSpu04br9iCbUwUDiGJcukwksRlWhS1HugJ/vK8QJB1BZCl6+pJ2XPjXoXTqJJdYx8ut8XIVx56TQTtyC4JSjt9H6AqBuMmJ7RjQrVDTxuKmZy6azPYD9gqbiyTjJp9N21haSY+BffmnQz+uK/9i+ElXVKB5wk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dT6HeNiG; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789027811; c=relaxed/simple;
+	bh=WkSg7LSexZkUOQ8zOAAVGML9vwe/7hyS7QXw6ngueQo=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=REXBWZplLG6aw29ofqmI97UEJWS8O1C4y6qsg4UXGHCxQGzMZ5YpHkytRhU3EFpab1NTEkLd1EpfD3RnThZYn4R6fX4MlZSipvGyytQS8lx+iUof5GgC8JAqUXL/dt1Z15bws0D5lljoRQJ75rUkq+JmtesaeSwQ1zecAnDLXE8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=b8/ia5ID; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=GmsW+4CE; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dT6HeNiG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 92CB11F00898;
-	Thu, 10 Sep 2026 07:53:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789026817;
-	bh=jgKxlw2lLVblwi+QhFBTRDP3s7qMEEumx97pBaUADHo=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=dT6HeNiGMF43/gjVHz7iJF8/6dJA7Fn4Kh7424qu6WCU3mcYvMHA+X4OcKq3SUgHu
-	 DdYBfSzLg6S8IYeA5gcjT2bTQg0THWIqveBFa76EwvfOB65fdWKtMFH1n1y4Yw6AWw
-	 /u/mPn7KL/n3BiUfdriuIpr5fNq4Q3f4JZiAW6+jfNnlxZSnPywP/BHndp3+jtyucc
-	 7NwsnSLcGkcRFItDlo5Zby4CEg2kBGQ7xyrTXB3kttvZyaNxLF3EwqrWe1ihWqCvlB
-	 IUdCOS6so/z6/DFBkuWualvvwaFIU8oA3enMhnk0qbt0DWGGrujf8XDoZN8XqwfsUy
-	 0Qf8zBcr+6zEQ==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 0BFB2198003A;
-	Thu, 10 Sep 2026 03:53:35 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Thu, 10 Sep 2026 03:53:35 -0400
-X-ME-Sender: <xms:_WGiaoQ2XAdrAk4zHL58Ho49WTkps0YgndccMvdkP1M1WJW-upUEJA>
-    <xme:_WGiagmifJBNRvPTclSGCB9jpmtsi4ulCR4mW6zH2JupdlM-Glr3_SwPSUc_zy-Db
-    7e4uZpk4UCGwfF6h62U6hUHOu7e5xh3OIaFQliFFALFgrTJA06CiIgO>
-X-ME-Proxy-Cause: dmFkZTEmhSEeZiUdG3XmtlcScG4+j9IeaOGnAcX+S5yZ00PQ20oQaWWQ2hR9h9cjShQV4p
-    1jvmviI0DPV8v5K4KGmEkn8iE5B8FMEpPaoNMlST93r3TlIZd9r8CqjUsWShQR0jwTZPn2
-    xV9WR9vcnggSnUacI6/rvRyzj77Xs4345qkx7QJvIrPFh7PZBSR7+2JXZeCnol3i7efnni
-    2+HbITTtYxsSDvrzXnYCBlAWA5vYsjrBA3FV5L2/DiHoXfkFHCHijJ1OuXyTQyr4NTlVOq
-    ZQn3+M2jztd/LTSQlLkRmMfrFx7RsrD9KIq7ChC2WJuXm8ZUCi/7ZWqDtd0Yq4nUfdSFGl
-    bz80XRgqQH04GhVuwAbCiv12ar5iLULic+DTwCZotEZBDJ3+lQzCTf3v0jwy1JYcE7/52v
-    coJd2g+VUa+5cHt0hbywXiD4R5c/2RjNNgv5EQ8Ha1XEIWdok7vLuhh9/bggW4dcBz/DJ+
-    uefMFWo817AELz6J+ex6G0PmqFC1rTYRBPsuG8vqDNCQ0nS2awcYWB5jI4sSUZXvXX6ZuN
-    YWydkVaYwr+2LA2pU2KCZ23Dj+fuz/QkrDhw4/smUsf8kQQUdspzcy+wury9MxfSYwmixz
-    48VY+jl/T2K/gKkjpjuW3X5RUdRdDMWOp+GrO82FKkQjymnbqpVjtSsVfPkQ
-X-ME-Proxy: <xmx:_2Giav2-YavfuTr3-bQQTJxOeearq4P1Z3j6qveXnH2gwPI6EN2F5Q>
-    <xmx:_2GiamSw4wP5owQBgMznPlopyGFreoJMJDJS6fBgXyPpD8iqI9J5uw>
-    <xmx:_2Giare0Fhb8NKqdGywOnt0ZW77NLxtmZLcYesv3DP2VMzEAQBQjTw>
-    <xmx:_2GiavfhM3svfxFjTHbRbhQQg4XFr0r-qUjudiNKR5kCNsFw-ERZbg>
-    <xmx:_2Giat1jHYt9d_HRidkJruRVVpFQPaMawRflbtoFk12VXhnJfqx-COxk>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 1A7DAF8007D; Thu, 10 Sep 2026 03:53:33 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="b8/ia5ID";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="GmsW+4CE"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1789027808;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=ww5DLB2Q6HbTXqc3AvcjNL7DcG0OH+QY3n8HRzmcc6A=;
+	b=b8/ia5IDNKCKEF+GkH/YkMBVXtrNeJExGNcQuNM0BcfBmc7Pj+zyE1U46EjnQ201gP0eYW
+	DsJ2On/yzVhsKEX/jSPCr4IjjJRaXArBSC+6keXVzhd87jdbHDtnCUtjrVlJ7l2qLixD5I
+	IsIUd59lZyq90yO/G680u2cFdcTQiRw=
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com
+ [209.85.128.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-269-tXBVC0kvMiKzUISWiOgocw-1; Thu, 10 Sep 2026 04:10:07 -0400
+X-MC-Unique: tXBVC0kvMiKzUISWiOgocw-1
+X-Mimecast-MFC-AGG-ID: tXBVC0kvMiKzUISWiOgocw_1789027806
+Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-4957287363bso51796885e9.0
+        for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 01:10:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1789027806; x=1789632606; darn=vger.kernel.org;
+        h=content-type:mime-version:message-id:date:references:in-reply-to
+         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=ww5DLB2Q6HbTXqc3AvcjNL7DcG0OH+QY3n8HRzmcc6A=;
+        b=GmsW+4CEGrR/p29wj/9JFKrCg7KhPhVqpQKJlotcbSVRLP3OIwMmJWK+GUGjUbl4kU
+         jTdj2k6f2/7W+7oDGPqNHwkpdbmosd3tVHeqxzTO4FU+fzXPekOEMfwTJ2CoERdHRG8n
+         T8LMy0VJqmWBdOojsSNxcT6mC9Mv2iNNXBMY+aCtlZ0rX/ifP/43d/rGTQN5k4uWdMRc
+         FthU7+ZofercgANDkYatjEKlIPqkORl/PD/g1r8LY+vg29Jink6uPSnwI8vYjJ+su30w
+         Xpol6WkPY9uNzYc47imtXcOWRW2QbHMfMmm/t+v2ZFKZmEkrsoaXIBVQcIDvxxaxV8nX
+         0wMw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1789027806; x=1789632606;
+        h=content-type:mime-version:message-id:date:references:in-reply-to
+         :subject:cc:to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=ww5DLB2Q6HbTXqc3AvcjNL7DcG0OH+QY3n8HRzmcc6A=;
+        b=psiM/2mfqoGY6JzCMCAuBo1pxfMWcReT7eQzFQTDiQDOv6vsQkdUsxxodI//X64odp
+         FN8LvkYULhYAzqurPP40wzL2h3MtCvAOkEJiW7Jp6MekOVjeJRj95ROyPZ3CHJHZPTwB
+         dcEYaDhYFDeMywlOEP/vNZdFing6UwmpX1JiHW1XNC6YBKDSFnXywqkGDQGZHncVsKiF
+         9+qFblyLxk5X1uhjFFPUQSsU8Qq71tbvw5Mr+ljGmdqP/mWjEwp1zqcINCXSJhiJ4jR3
+         uB0ZAIN6j2mLrKuj1xKnlvE+tDZF/3V50IwabbR4ljYRxjJwcepy09bp4sbkLmQNexum
+         Vcag==
+X-Forwarded-Encrypted: i=1; AKwUvBzwKMgBy/pojkKoyQx1ccd3rG9rioUS/ajOxM/P3BMXGNP5zGpzgA2kOXH46+od+eAXYPltVvFXEXQ=@vger.kernel.org
+X-Gm-Message-State: AFuF++m7EUCOuHFvPiPrts92OIRgnnUPSsNslmUTs0hodJLKEKSZMbJ+
+	bSW6GsRAw+HVK2gE0kIM/j1S4f3B/96n4Na9OjmN7jpYAGSxVtWAZOYCzC88M2dr2klUQtusx5J
+	cM72QY7WPzAG+6TaIMvJb+4phDuafrVLmY2N9wCN+SNEsyHzEQGxLUkrd/nPy7g==
+X-Gm-Gg: AYBFou1+wUReHfKRZ0l7veWPt6jvZdZmHylFSV5ekbTIvpCHpUoC9WZqDylnYUzjcZ4
+	xDiUGTqUox/bpZddks3fqH6A4hy6oPTeS/IqIasiMPVoFMUpV8VvJsyJ39Oho5w9UVkfqA99Krp
+	/bTBl960NI7pmXBKxur/0LtLqrV/zr3z/oUG5Km3USz6NcifmxafARJfb7XOSnCVd/rKq7EooAs
+	fd98/oj31oq8IxuhdNChWHNbkNN5xDXil12zsYHjdBuASMlA571LmmxOefKoKLw7Ng/UbMQ4iRa
+	pnYynrbnE8HX9yu8FHu21MVMs2QwNpBF/hjChA/Y5BOTPCB2t2O91O1lhDd2bbBqvOVKEbHqeuH
+	WMwTJfOjc/smJrp9zkOgy3Gd0IK3WtSYZi/CHvctbf30LiZYw0QHmxRnYyg==
+X-Received: by 2002:a05:600c:8715:b0:49c:fa20:cc06 with SMTP id 5b1f17b1804b1-49cfe7a30demr323256385e9.29.1789027805776;
+        Thu, 10 Sep 2026 01:10:05 -0700 (PDT)
+X-Received: by 2002:a05:600c:8715:b0:49c:fa20:cc06 with SMTP id 5b1f17b1804b1-49cfe7a30demr323255955e9.29.1789027805326;
+        Thu, 10 Sep 2026 01:10:05 -0700 (PDT)
+Received: from localhost (62-151-111-63.jazzfree.ya.com. [62.151.111.63])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-485883953cfsm41228794f8f.13.2026.09.10.01.10.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 10 Sep 2026 01:10:04 -0700 (PDT)
+From: Javier Martinez Canillas <javierm@redhat.com>
+To: Thomas Zimmermann <tzimmermann@suse.de>, ardb@kernel.org,
+ ilias.apalodimas@linaro.org, jani.nikula@linux.intel.com,
+ maarten.lankhorst@linux.intel.com, mripard@kernel.org, simona@ffwll.ch,
+ airlied@gmail.com
+Cc: dri-devel@lists.freedesktop.org, linux-efi@vger.kernel.org,
+ sashiko-reviews@lists.linux.dev, Thomas Zimmermann <tzimmermann@suse.de>
+Subject: Re: [PATCH v4 2/3] drm/edid: Add drm_edid_detect_panel_size()
+In-Reply-To: <20260904090850.43060-3-tzimmermann@suse.de>
+References: <20260904090850.43060-1-tzimmermann@suse.de>
+ <20260904090850.43060-3-tzimmermann@suse.de>
+Date: Thu, 10 Sep 2026 10:10:03 +0200
+Message-ID: <87y0d9cysk.fsf@ocarina.mail-host-address-is-not-set>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Thu, 10 Sep 2026 09:53:12 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Eshaan Deshmukh" <eshaan2031@icloud.com>,
- "Thomas Gleixner" <tglx@kernel.org>, "Ingo Molnar" <mingo@redhat.com>,
- "Borislav Petkov" <bp@alien8.de>, dave.hansen@linux.intel.com, x86@kernel.org
-Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- "H . Peter Anvin" <hpa@zytor.com>, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Message-Id: <c321dc7d-7cee-4222-a346-fa0448ce4f74@app.fastmail.com>
-In-Reply-To: <20260810102237.2167872-1-eshaan2031@icloud.com>
-References: <20260810102237.2167872-1-eshaan2031@icloud.com>
-Subject: Re: [PATCH] x86/efi: Handle errors for efi_map_region_fixed()
 Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
 
-Hello Eshaan,
+Thomas Zimmermann <tzimmermann@suse.de> writes:
 
-On Mon, 10 Aug 2026, at 12:22, Eshaan Deshmukh wrote:
-> The function efi_map_region_fixed() ignores the errors returned from
-> kernel_map_pages_in_pgd(). If mapping failes, this can cause page
-> faults. Update __map_region() and efi_map_region_fixed() to return the
-> error code from kernel_map_pages_in_pgd(). If there is an error,
-> efi_map_region_fixed() logs an error message using pr_err(), disables
-> EFI runtime services, and returns.
+> Add drm_edid_detect_panel_size() to extract the panel's preferred
+> display resolution from a given EDID. Required for setting up DRM's
+> panel orientation quirks in sysfb drivers.
 >
-
-Does this solve an actual problem that you observed?
-
-> Signed-off-by: Eshaan Deshmukh <eshaan2031@icloud.com>
+> v4:
+> - fix test for EDID PTD (Jani)
+> v3:
+> - mention use case in documentation (Jani)
+> - use is_detailed_timing_descriptor() (Jani)
+> - rename helper to drm_edid_detect_panel_size()
+> v2:
+> - handle EDID without pixel timing descriptor (Sashiko)
+> - fix checks for width and height pointers
+>
+> Signed-off-by: Thomas Zimmermann <tzimmermann@suse.de>
+> Acked-by: Ard Biesheuvel <ardb@kernel.org>
 > ---
->  arch/x86/include/asm/efi.h     |  2 +-
->  arch/x86/platform/efi/efi.c    | 10 ++++++++--
->  arch/x86/platform/efi/efi_32.c |  6 +++++-
->  arch/x86/platform/efi/efi_64.c | 20 ++++++++++++++------
->  4 files changed, 28 insertions(+), 10 deletions(-)
+>  drivers/gpu/drm/drm_edid.c | 47 ++++++++++++++++++++++++++++++++++++++
+>  include/drm/drm_edid.h     |  2 ++
+>  2 files changed, 49 insertions(+)
 >
-> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-> index be58b7f5c..04952e064 100644
-> --- a/arch/x86/include/asm/efi.h
-> +++ b/arch/x86/include/asm/efi.h
-> @@ -128,7 +128,7 @@ extern bool efi_disable_ibt_for_runtime;
->  extern int __init efi_memblock_x86_reserve_range(void);
->  extern void __init efi_print_memmap(void);
->  extern void __init efi_map_region(efi_memory_desc_t *md);
-> -extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
-> +extern int __init efi_map_region_fixed(efi_memory_desc_t *md);
->  extern void efi_sync_low_kernel_mappings(void);
->  extern int __init efi_alloc_page_tables(void);
->  extern int __init efi_setup_page_tables(unsigned long pa_memmap, 
-> unsigned num_pages);
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 0c39adb96..4b875843a 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -735,8 +735,14 @@ static void __init kexec_enter_virtual_mode(void)
->  	* Map efi regions which were passed via setup_data. The virt_addr is a
->  	* fixed addr which was used in first kernel of a kexec boot.
->  	*/
-> -	for_each_efi_memory_desc(md)
-> -		efi_map_region_fixed(md); /* FIXME: add error handling */
-> +	for_each_efi_memory_desc(md) {
-> +		if (efi_map_region_fixed(md)) {
-> +			pr_err("Failed to map fixed EFI region\n");
-> +			clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-> +			return;
-> +		}
-> +
-> +	}
-> 
->  	/*
->  	 * Unregister the early EFI memmap from efi_init() and install
-> diff --git a/arch/x86/platform/efi/efi_32.c 
-> b/arch/x86/platform/efi/efi_32.c
-> index b2cc7b455..9307999b9 100644
-> --- a/arch/x86/platform/efi/efi_32.c
-> +++ b/arch/x86/platform/efi/efi_32.c
-> @@ -84,7 +84,11 @@ int __init efi_setup_page_tables(unsigned long 
-> pa_memmap, unsigned num_pages)
->  	return 0;
+> diff --git a/drivers/gpu/drm/drm_edid.c b/drivers/gpu/drm/drm_edid.c
+> index 9990a836d0b6..1331efb4876c 100644
+> --- a/drivers/gpu/drm/drm_edid.c
+> +++ b/drivers/gpu/drm/drm_edid.c
+> @@ -7852,3 +7852,50 @@ bool drm_edid_is_digital(const struct drm_edid *drm_edid)
+>  		drm_edid->edid->input & DRM_EDID_INPUT_DIGITAL;
 >  }
-> 
-> -void __init efi_map_region_fixed(efi_memory_desc_t *md) {}
-> +int __init efi_map_region_fixed(efi_memory_desc_t *md)
+>  EXPORT_SYMBOL(drm_edid_is_digital);
+> +
+> +/**
+> + * drm_edid_detect_panel_size - Get a panel's size from EDID
+> + * @drm_edid: EDID of the panel.
+> + * @width: Returns the panel's width in pixels per scanline, if given
+> + * @height: Returns the panel's height in scanlines, if given
+> + *
+> + * This function detects the preferred size of a panel from the given
+> + * EDID. There is no such information stored in the EDID block directly,
+> + * but the preferred mode often corresponds to the panel's native geometry.
+> + *
+> + * This helper should only be used during initialization before the
+> + * connector is available. For regular use, retrieve the available display
+> + * modes with the connector functions.
+> + *
+> + * Return: Zero on success, or a negative errno code otherwise.
+> + */
+> +int drm_edid_detect_panel_size(const struct drm_edid *drm_edid,
+> +			       unsigned int *width, unsigned int *height)
 > +{
-> +	return 0;
-> +}
+> +	const struct edid *edid = drm_edid->edid;
+> +	const struct detailed_timing *dt;
+> +	const struct detailed_pixel_timing *pt;
 > +
->  void __init parse_efi_setup(u64 phys_addr, u32 data_len) {}
-> 
->  efi_status_t efi_call_svam(efi_runtime_services_t * const *,
-> diff --git a/arch/x86/platform/efi/efi_64.c 
-> b/arch/x86/platform/efi/efi_64.c
-> index 5861008ea..05f1df6ca 100644
-> --- a/arch/x86/platform/efi/efi_64.c
-> +++ b/arch/x86/platform/efi/efi_64.c
-> @@ -269,12 +269,12 @@ int __init efi_setup_page_tables(unsigned long 
-> pa_memmap, unsigned num_pages)
->  	return 0;
->  }
-> 
-> -static void __init __map_region(efi_memory_desc_t *md, u64 va)
-> +static int __init __map_region(efi_memory_desc_t *md, u64 va)
->  {
->  	unsigned long flags = _PAGE_RW;
->  	unsigned long pfn;
->  	pgd_t *pgd = efi_mm.pgd;
-> -
-> +	int error;
->  	/*
->  	 * EFI_RUNTIME_SERVICES_CODE regions typically cover PE/COFF
->  	 * executable images in memory that consist of both R-X and
-> @@ -299,9 +299,11 @@ static void __init __map_region(efi_memory_desc_t 
-> *md, u64 va)
->  		flags |= _PAGE_ENC;
-> 
->  	pfn = md->phys_addr >> PAGE_SHIFT;
-> -	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
-> +	error = kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags);
-> +	if (error)
->  		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
->  			   md->phys_addr, va);
-> +	return error;
->  }
-> 
->  void __init efi_map_region(efi_memory_desc_t *md)
-> @@ -357,10 +359,16 @@ void __init efi_map_region(efi_memory_desc_t *md)
->   * md->virt_addr is the original virtual address which had been mapped in kexec
->   * 1st kernel.
->   */
-> -void __init efi_map_region_fixed(efi_memory_desc_t *md)
-> +int __init efi_map_region_fixed(efi_memory_desc_t *md)
->  {
-> -	__map_region(md, md->phys_addr);
-> -	__map_region(md, md->virt_addr);
-> +	int error;
+> +	/*
+> +	 * Use display mode from the Preferred Timing Descriptor. For old
+> +	 * and obscure displays, we might need better heuristics.
+> +	 */
 > +
-> +	error = __map_region(md, md->phys_addr);
+> +	if (edid->revision < 4 || !(edid->features & DRM_EDID_FEATURE_PREFERRED_TIMING))
+> +		return -EINVAL; /* no Preferred Timing Descriptor */
 > +
-> +	if (error)
-> +		return error;
-> +
-> +	return __map_region(md, md->virt_addr);
->  }
-> 
->  void __init parse_efi_setup(u64 phys_addr, u32 data_len)
-> -- 
-> 2.55.0
+
+I saw that Jani and you discussed this logic in v3. I originally thought that
+your v3 was correct and this one was wrong, but I noticed now that this flag
+changed its semantic between 1.3 and 1.4.
+
+So I think that this latest version is correct indeed, 1.3 didn't include the
+native pixel format and 1.4 does not either if DRM_EDID_FEATURE_PREFERRED_TIMING
+flag is not set.
+
+Reviewed-by: Javier Martinez Canillas <javierm@redhat.com>
+
+-- 
+Best regards,
+
+Javier Martinez Canillas
+Core Platforms
+Red Hat
+
