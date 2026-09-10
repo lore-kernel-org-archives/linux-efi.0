@@ -1,57 +1,57 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9643F329E7E
-	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 07:51:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 498C413D886
+	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 07:53:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789026708; cv=none; b=ppb1IjJH8ePFMohA3c8frEiCp2Yz00yGlwSQrPqLir0KMef0UQHJd2nQ9IPWPA/GmYfUjB5VgdQXQ6OVNOTPyTMLLNSllCIDOTZI8yHTnnsCbaPjVloF4CzFZ/xiWbbK/umv5rO/hEPkjGFryxVJkPek8ENDPvYRz4lXU40a82o=
+	t=1789026818; cv=none; b=hJoRBLVPDH0QK/nPpp0vKAFTu6IwiIK4heRKJocK12LNZ/QfjBk5rR9yYXxQhceTcTy2aBlpb2DgfcjoF7wWNL6znoSeFJbvq8ls3Kis2o1lBcufguDriwAChyogtqxOh4vFOESvBNf3hqolVH2L+v8XQASBCBWT6oz4FUSCZbU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789026708; c=relaxed/simple;
-	bh=1ZmSzFG0Fu7fOjSZErepfnaJ3qxrPkB8O4EXS1CbYiE=;
+	s=arc-20240116; t=1789026818; c=relaxed/simple;
+	bh=VifgjBx4o5YOa1mgKjLVMaWXawUaIZCGEGZx8ySrxwE=;
 	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=D3FkfabR7RBlR4yrEwhdJ+GP0Dm87lbLxLwVrztRGow3RIzSZ4F+1jz4tLNdxypOHgKehdn+v4SCXo0L0Ai62+VgJ1QbHgNX961CiJtESBwgEcjx3c+3TowiM90LW3MvUqv5afnwgbrXiiTjUJwjZsNS6HzpGkJzT8Y/o8OPceo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=d/20Tw7I; arc=none smtp.client-ip=100.103.45.18
+	 Subject:Content-Type; b=psvy4jh75TmQObSpu04br9iCbUwUDiGJcukwksRlWhS1HugJ/vK8QJB1BZCl6+pJ2XPjXoXTqJJdYx8ut8XIVx56TQTtyC4JSjt9H6AqBuMmJ7RjQrVDTxuKmZy6azPYD9gqbiyTjJp9N21haSY+BffmnQz+uK/9i+ElXVKB5wk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dT6HeNiG; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="d/20Tw7I"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B94E01F00893
-	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 07:51:40 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dT6HeNiG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 92CB11F00898;
+	Thu, 10 Sep 2026 07:53:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789026701;
-	bh=fTV1Bf4xq71rXT5Ktql6Fl2ucqZaiTmwx4EnmVZxpco=;
+	s=k20260515; t=1789026817;
+	bh=jgKxlw2lLVblwi+QhFBTRDP3s7qMEEumx97pBaUADHo=;
 	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=d/20Tw7IbtXipyJONWRVddV2uIcd3EospKzvsLDa9PH3WPkqR16uz8GUnSdDiuGUg
-	 FrqMmaWMVhpPS+JL3q3miVL9oJuQQzFBPJ8xtXidKietUwv99l3DuZBFpfYIcQUKsS
-	 cQ19S+WyB294RWRd0+dm14Eo686eJ0uuUNHJJViITrt+IBHY9jytvK0ixoYVvqtNS9
-	 5mMzflHUAoRPkTmxMNhjJv9IZRGeFyBorvfP9RBJRfpwzeTaRRA/6/QiLxKUPx7umf
-	 spT/dRIs8U7f2nzW0kPw0zHAZ04cYWJGdo1PNtUzMht/MocESIZy9uOF2zgRJRxSSu
-	 kHwRYXI+5ctgQ==
+	b=dT6HeNiGMF43/gjVHz7iJF8/6dJA7Fn4Kh7424qu6WCU3mcYvMHA+X4OcKq3SUgHu
+	 DdYBfSzLg6S8IYeA5gcjT2bTQg0THWIqveBFa76EwvfOB65fdWKtMFH1n1y4Yw6AWw
+	 /u/mPn7KL/n3BiUfdriuIpr5fNq4Q3f4JZiAW6+jfNnlxZSnPywP/BHndp3+jtyucc
+	 7NwsnSLcGkcRFItDlo5Zby4CEg2kBGQ7xyrTXB3kttvZyaNxLF3EwqrWe1ihWqCvlB
+	 IUdCOS6so/z6/DFBkuWualvvwaFIU8oA3enMhnk0qbt0DWGGrujf8XDoZN8XqwfsUy
+	 0Qf8zBcr+6zEQ==
 Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 30B58198003A;
-	Thu, 10 Sep 2026 03:51:39 -0400 (EDT)
+	by mailfauth.ams.internal (Postfix) with ESMTP id 0BFB2198003A;
+	Thu, 10 Sep 2026 03:53:35 -0400 (EDT)
 Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Thu, 10 Sep 2026 03:51:39 -0400
-X-ME-Sender: <xms:iWGial0YfZzz8NyxwzBMeERTmoAxSgY4w2u99auDxQRB5qbXcD5LOw>
-    <xme:iWGiam7BcfxEi_byOHLYgCHwOaOIyO-98lLXuMykxBw9DKtEYPmAd4yzrLUYV3u9N
-    PMvoxyjbJZazs7BWy1o5ZsA14bRY7SbX2muiAOfAn7VCW64Jb_7Cbw2>
-X-ME-Proxy-Cause: dmFkZTEPvKawiz7mUAL92o+4JCXIIMD++sKyAcjqH50tYYm8waV6VzHYz24+KXS1F7Dg/L
-    HNUVRMF4DZqFUzwh/ocSTUIjyb9axva+h1Zu+FastzH7GinRY1IJgNW1AqRl2TO8bcAzgY
-    lbDQxZdVODYOFHvOSWcUXi6Knq/PpENCpwa58g6cNC9zkPPWyJeS1RW+hKwaro3nUcMKiu
-    PM5gGnNGef+OWSg9pgnTVcxbKPF4Q1ubRb0lSFGhysR2gVKf+9y9t9yp4iSH1S63DydaMJ
-    kjxxY1Fti8H8Iq40IW9ymYmO6E2X7Q1CTQgzhUJo8G3bW7LKRLnvckD3HHsm3+kd+6C6TS
-    9qAZ0SvjLedrYw9LrLLX8GMv75eodafHzOrMFPD7idiZGHt5oKAO5rCH/38Mq7ONhW4Bli
-    CB0O9xZgMUwepV8ao38M3nnq7JrhrQCSsP5+LvN5h+vDsMi4jQTVOsyc3Otbe9ALwDfFcr
-    Zze91vJiERX28NMq6Zr44DVWmzxHBa/mgErtialwY0GPw3vm2WylTKFwodikV3YpL7Cjba
-    iXcWVZPiP08yjc17gbxTxIZvRiFPrvETn8Dxn3fux23zpKRlpgwrWIFevaqD7giWfEb5hd
-    vB8BRrF51zQj7MvIO3pYu3BLRN1XNVHBhDbEUoRLg3IyBaCysgp3ZfDTg0DA
-X-ME-Proxy: <xmx:i2Giau-YPQZ-qalpUhABGqn9-FpE8kMKaEG7WcYC_4Qg6vxrchd79w>
-    <xmx:i2GiaqIli4zudZJ8i2oghNPm4J98FlR3Xd5t80ivZufWnVaKMY0ILg>
-    <xmx:i2GianilUZDZO0-in8vd_sJq0P-6jd6AvTh8g0xwuTvSdtp4BPxPdA>
-    <xmx:i2Giaq4qOoNFs_L8xHm3ByGUOKQT9BUYt2BWObq-lMiTLUDUjZZNKw>
-    <xmx:i2GiavYSlwHjNRo-wuXnzN99O5R0mY0C8CiKra7Z3ggoldYsawzuQTkS>
+  by ams-compute-02.internal (MEProxy); Thu, 10 Sep 2026 03:53:35 -0400
+X-ME-Sender: <xms:_WGiaoQ2XAdrAk4zHL58Ho49WTkps0YgndccMvdkP1M1WJW-upUEJA>
+    <xme:_WGiagmifJBNRvPTclSGCB9jpmtsi4ulCR4mW6zH2JupdlM-Glr3_SwPSUc_zy-Db
+    7e4uZpk4UCGwfF6h62U6hUHOu7e5xh3OIaFQliFFALFgrTJA06CiIgO>
+X-ME-Proxy-Cause: dmFkZTEmhSEeZiUdG3XmtlcScG4+j9IeaOGnAcX+S5yZ00PQ20oQaWWQ2hR9h9cjShQV4p
+    1jvmviI0DPV8v5K4KGmEkn8iE5B8FMEpPaoNMlST93r3TlIZd9r8CqjUsWShQR0jwTZPn2
+    xV9WR9vcnggSnUacI6/rvRyzj77Xs4345qkx7QJvIrPFh7PZBSR7+2JXZeCnol3i7efnni
+    2+HbITTtYxsSDvrzXnYCBlAWA5vYsjrBA3FV5L2/DiHoXfkFHCHijJ1OuXyTQyr4NTlVOq
+    ZQn3+M2jztd/LTSQlLkRmMfrFx7RsrD9KIq7ChC2WJuXm8ZUCi/7ZWqDtd0Yq4nUfdSFGl
+    bz80XRgqQH04GhVuwAbCiv12ar5iLULic+DTwCZotEZBDJ3+lQzCTf3v0jwy1JYcE7/52v
+    coJd2g+VUa+5cHt0hbywXiD4R5c/2RjNNgv5EQ8Ha1XEIWdok7vLuhh9/bggW4dcBz/DJ+
+    uefMFWo817AELz6J+ex6G0PmqFC1rTYRBPsuG8vqDNCQ0nS2awcYWB5jI4sSUZXvXX6ZuN
+    YWydkVaYwr+2LA2pU2KCZ23Dj+fuz/QkrDhw4/smUsf8kQQUdspzcy+wury9MxfSYwmixz
+    48VY+jl/T2K/gKkjpjuW3X5RUdRdDMWOp+GrO82FKkQjymnbqpVjtSsVfPkQ
+X-ME-Proxy: <xmx:_2Giav2-YavfuTr3-bQQTJxOeearq4P1Z3j6qveXnH2gwPI6EN2F5Q>
+    <xmx:_2GiamSw4wP5owQBgMznPlopyGFreoJMJDJS6fBgXyPpD8iqI9J5uw>
+    <xmx:_2Giare0Fhb8NKqdGywOnt0ZW77NLxtmZLcYesv3DP2VMzEAQBQjTw>
+    <xmx:_2GiavfhM3svfxFjTHbRbhQQg4XFr0r-qUjudiNKR5kCNsFw-ERZbg>
+    <xmx:_2Giat1jHYt9d_HRidkJruRVVpFQPaMawRflbtoFk12VXhnJfqx-COxk>
 Feedback-ID: ice86485a:Fastmail
 Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id D633BF8007E; Thu, 10 Sep 2026 03:51:37 -0400 (EDT)
+	id 1A7DAF8007D; Thu, 10 Sep 2026 03:53:33 -0400 (EDT)
 X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -59,62 +59,150 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Thu, 10 Sep 2026 09:51:17 +0200
+Date: Thu, 10 Sep 2026 09:53:12 +0200
 From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Thorsten Blum" <blum@kernel.org>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Message-Id: <e41fae7c-9a09-4ae9-aef2-ab4a59d974f0@app.fastmail.com>
-In-Reply-To: <20260830102911.345357-3-blum@kernel.org>
-References: <20260830102911.345357-3-blum@kernel.org>
-Subject: Re: [PATCH 1/2] efi/libstub: Simplify check_image_region()
+To: "Eshaan Deshmukh" <eshaan2031@icloud.com>,
+ "Thomas Gleixner" <tglx@kernel.org>, "Ingo Molnar" <mingo@redhat.com>,
+ "Borislav Petkov" <bp@alien8.de>, dave.hansen@linux.intel.com, x86@kernel.org
+Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "H . Peter Anvin" <hpa@zytor.com>, linux-efi@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+Message-Id: <c321dc7d-7cee-4222-a346-fa0448ce4f74@app.fastmail.com>
+In-Reply-To: <20260810102237.2167872-1-eshaan2031@icloud.com>
+References: <20260810102237.2167872-1-eshaan2031@icloud.com>
+Subject: Re: [PATCH] x86/efi: Handle errors for efi_map_region_fixed()
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 
+Hello Eshaan,
 
-
-On Sun, 30 Aug 2026, at 12:29, Thorsten Blum wrote:
-> Drop the local ret variable and the break statement by returning the
-> result directly. Also use unsigned long for map_offset, since map_size
-> and desc_size are both unsigned long.
+On Mon, 10 Aug 2026, at 12:22, Eshaan Deshmukh wrote:
+> The function efi_map_region_fixed() ignores the errors returned from
+> kernel_map_pages_in_pgd(). If mapping failes, this can cause page
+> faults. Update __map_region() and efi_map_region_fixed() to return the
+> error code from kernel_map_pages_in_pgd(). If there is an error,
+> efi_map_region_fixed() logs an error message using pr_err(), disables
+> EFI runtime services, and returns.
 >
-> Signed-off-by: Thorsten Blum <blum@kernel.org>
+
+Does this solve an actual problem that you observed?
+
+> Signed-off-by: Eshaan Deshmukh <eshaan2031@icloud.com>
 > ---
->  drivers/firmware/efi/libstub/kaslr.c | 11 ++++-------
->  1 file changed, 4 insertions(+), 7 deletions(-)
+>  arch/x86/include/asm/efi.h     |  2 +-
+>  arch/x86/platform/efi/efi.c    | 10 ++++++++--
+>  arch/x86/platform/efi/efi_32.c |  6 +++++-
+>  arch/x86/platform/efi/efi_64.c | 20 ++++++++++++++------
+>  4 files changed, 28 insertions(+), 10 deletions(-)
 >
-
-Both patches applied to efi/next - thanks.
-
-> diff --git a/drivers/firmware/efi/libstub/kaslr.c 
-> b/drivers/firmware/efi/libstub/kaslr.c
-> index 4bc963e999eb..17549bf3dc3e 100644
-> --- a/drivers/firmware/efi/libstub/kaslr.c
-> +++ b/drivers/firmware/efi/libstub/kaslr.c
-> @@ -59,8 +59,7 @@ static bool check_image_region(u64 base, u64 size)
->  {
->  	struct efi_boot_memmap *map __free(efi_pool) = NULL;
->  	efi_status_t status;
-> -	bool ret = false;
-> -	int map_offset;
-> +	unsigned long map_offset;
+> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> index be58b7f5c..04952e064 100644
+> --- a/arch/x86/include/asm/efi.h
+> +++ b/arch/x86/include/asm/efi.h
+> @@ -128,7 +128,7 @@ extern bool efi_disable_ibt_for_runtime;
+>  extern int __init efi_memblock_x86_reserve_range(void);
+>  extern void __init efi_print_memmap(void);
+>  extern void __init efi_map_region(efi_memory_desc_t *md);
+> -extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
+> +extern int __init efi_map_region_fixed(efi_memory_desc_t *md);
+>  extern void efi_sync_low_kernel_mappings(void);
+>  extern int __init efi_alloc_page_tables(void);
+>  extern int __init efi_setup_page_tables(unsigned long pa_memmap, 
+> unsigned num_pages);
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index 0c39adb96..4b875843a 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -735,8 +735,14 @@ static void __init kexec_enter_virtual_mode(void)
+>  	* Map efi regions which were passed via setup_data. The virt_addr is a
+>  	* fixed addr which was used in first kernel of a kexec boot.
+>  	*/
+> -	for_each_efi_memory_desc(md)
+> -		efi_map_region_fixed(md); /* FIXME: add error handling */
+> +	for_each_efi_memory_desc(md) {
+> +		if (efi_map_region_fixed(md)) {
+> +			pr_err("Failed to map fixed EFI region\n");
+> +			clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+> +			return;
+> +		}
+> +
+> +	}
 > 
->  	status = efi_get_memory_map(&map, false);
->  	if (status != EFI_SUCCESS)
-> @@ -74,13 +73,11 @@ static bool check_image_region(u64 base, u64 size)
->  		 * Find the region that covers base, and return whether
->  		 * it covers base+size bytes.
->  		 */
-> -		if (base >= md->phys_addr && base < end) {
-> -			ret = (base + size) <= end;
-> -			break;
-> -		}
-> +		if (base >= md->phys_addr && base < end)
-> +			return (base + size) <= end;
->  	}
-> 
-> -	return ret;
-> +	return false;
+>  	/*
+>  	 * Unregister the early EFI memmap from efi_init() and install
+> diff --git a/arch/x86/platform/efi/efi_32.c 
+> b/arch/x86/platform/efi/efi_32.c
+> index b2cc7b455..9307999b9 100644
+> --- a/arch/x86/platform/efi/efi_32.c
+> +++ b/arch/x86/platform/efi/efi_32.c
+> @@ -84,7 +84,11 @@ int __init efi_setup_page_tables(unsigned long 
+> pa_memmap, unsigned num_pages)
+>  	return 0;
 >  }
 > 
->  /**
+> -void __init efi_map_region_fixed(efi_memory_desc_t *md) {}
+> +int __init efi_map_region_fixed(efi_memory_desc_t *md)
+> +{
+> +	return 0;
+> +}
+> +
+>  void __init parse_efi_setup(u64 phys_addr, u32 data_len) {}
+> 
+>  efi_status_t efi_call_svam(efi_runtime_services_t * const *,
+> diff --git a/arch/x86/platform/efi/efi_64.c 
+> b/arch/x86/platform/efi/efi_64.c
+> index 5861008ea..05f1df6ca 100644
+> --- a/arch/x86/platform/efi/efi_64.c
+> +++ b/arch/x86/platform/efi/efi_64.c
+> @@ -269,12 +269,12 @@ int __init efi_setup_page_tables(unsigned long 
+> pa_memmap, unsigned num_pages)
+>  	return 0;
+>  }
+> 
+> -static void __init __map_region(efi_memory_desc_t *md, u64 va)
+> +static int __init __map_region(efi_memory_desc_t *md, u64 va)
+>  {
+>  	unsigned long flags = _PAGE_RW;
+>  	unsigned long pfn;
+>  	pgd_t *pgd = efi_mm.pgd;
+> -
+> +	int error;
+>  	/*
+>  	 * EFI_RUNTIME_SERVICES_CODE regions typically cover PE/COFF
+>  	 * executable images in memory that consist of both R-X and
+> @@ -299,9 +299,11 @@ static void __init __map_region(efi_memory_desc_t 
+> *md, u64 va)
+>  		flags |= _PAGE_ENC;
+> 
+>  	pfn = md->phys_addr >> PAGE_SHIFT;
+> -	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
+> +	error = kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags);
+> +	if (error)
+>  		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+>  			   md->phys_addr, va);
+> +	return error;
+>  }
+> 
+>  void __init efi_map_region(efi_memory_desc_t *md)
+> @@ -357,10 +359,16 @@ void __init efi_map_region(efi_memory_desc_t *md)
+>   * md->virt_addr is the original virtual address which had been mapped in kexec
+>   * 1st kernel.
+>   */
+> -void __init efi_map_region_fixed(efi_memory_desc_t *md)
+> +int __init efi_map_region_fixed(efi_memory_desc_t *md)
+>  {
+> -	__map_region(md, md->phys_addr);
+> -	__map_region(md, md->virt_addr);
+> +	int error;
+> +
+> +	error = __map_region(md, md->phys_addr);
+> +
+> +	if (error)
+> +		return error;
+> +
+> +	return __map_region(md, md->virt_addr);
+>  }
+> 
+>  void __init parse_efi_setup(u64 phys_addr, u32 data_len)
+> -- 
+> 2.55.0
