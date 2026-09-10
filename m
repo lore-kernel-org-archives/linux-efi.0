@@ -1,125 +1,212 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFBBC2C234E
-	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 08:11:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A77823E025E
+	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 09:29:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789027877; cv=none; b=u6UXu9PQEjTfBxw1tMXa6NPlgeCVr9KnhRhOzsgU6TShrIKve2n9eiTDzU4VfEBl56Fkh/fRsNO/GHSbzsm7aM5mKvwOHl9l/66MVGJgZPP4Htv+tEkkt87GCuqScdJnsT0zkYtoyZ4ofzDy3cx/m6Ffkdlu+ptQkQiuiQVYLUQ=
+	t=1789032550; cv=none; b=RmnpoOED1gy+jwy7k30OS7iL7fgk665iSLz2E8FHb8+3mnvbSdt7uZV+5kgGEnSvb0HuUuqMk/+1eGxV69iBSxcqI056ZV/4yH8xtsbqltO85a8qdVPIs/9QSO/tC3vEpQVxZTRl1JlHqwqsH62Y4RMkuHPXVpE190HW/w3GZYY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789027877; c=relaxed/simple;
-	bh=vgTt1CKugXmTVCyKAK1V5bcR84Bpza5H6R9rp5ITitg=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=mtPrvTRuenhEB5S0F5GeTb6v7Lw3yjNxOemJjEP44hgPo8awrZK7I5AUluCZ/WhRlr6ixN1W6oZizSVX094vKt4NiFLw6lMpLjb2RV4pjNQE/qMTICbpuZX+tQ0Nnnu2rlep/kzxfJLbyTDPGoAHU8lm2M6LEGqcLmfyDVlwu30=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=IG8/mI3j; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=CW+WST9t; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1789032550; c=relaxed/simple;
+	bh=YmZhILYI1Ap/QhHEbws/tgVKUcLX7+iRsfdsJ1tAFSs=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=hbMmciJ+pEPUPjQGlbgq2ykHuJi8IhvmanFJGDzn5LclsXnrs/5BJ+XV88mFMt1R673ekuqUt1TVjI/yeosp0g3HK7UYIusAYlfU7I5v4DyKhXIV6dWbGA3Sn1wL0J4ME3Ek39OB7BKQ4RnL9/yfBIxNrBiMKU2At/jifdFRRiU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fl7rpEKW; arc=none smtp.client-ip=209.85.128.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IG8/mI3j";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="CW+WST9t"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1789027874;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=DHVsvo6RwXVpI3O0qorfwMCGL9oJM3VblhLkUEiQrLE=;
-	b=IG8/mI3jUmKq59CE+EOS0OknKjl7nvZ1X+aMoYbZKqCMBsFl+7fiPhO4tQaA0Izz6ryM3i
-	luZkrNUHSacSEtd8AlICBo/k9qKS4Q922HsjURROHgwWTvkrZ9D2AX1BuqXHGQxpcy/rn1
-	vxz7uC/RMydmqkQ1MfjolDwO0BBOvhM=
-Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com
- [209.85.221.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-660-vzqcuC83P12ezL9xscllYw-1; Thu, 10 Sep 2026 04:11:13 -0400
-X-MC-Unique: vzqcuC83P12ezL9xscllYw-1
-X-Mimecast-MFC-AGG-ID: vzqcuC83P12ezL9xscllYw_1789027872
-Received: by mail-wr1-f72.google.com with SMTP id ffacd0b85a97d-48584d903ddso2102449f8f.3
-        for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 01:11:13 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fl7rpEKW"
+Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-49b96837ca3so53015775e9.3
+        for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 02:29:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1789027872; x=1789632672; darn=vger.kernel.org;
-        h=content-type:mime-version:message-id:date:references:in-reply-to
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=DHVsvo6RwXVpI3O0qorfwMCGL9oJM3VblhLkUEiQrLE=;
-        b=CW+WST9tF8gAuzeJCcUxnWBG/Bz9DijYOE1a1MiJBA2bFdCUJuDT4FJW7WATWL1BfY
-         SVZXDFKrZaXhM1xCgCzHboDceMBXrtVbuZim1ZsCLruQxzwtxk8Tq47FFWl3tP8asdS3
-         RCJ/SVn8auYLL9WtmDIe7nKIxO0su5x0WcWLqDjCsOcb/HE4iP1MrfpTnHkaXkvuELWS
-         wLhwFt5QvFNXUDTbltTRNAOUgt9OR0VblvFApa192Zc9dB1u7b23QdSBgxuGQRKvX+2P
-         xltKND23A88xvYD9jrdvZ4tUEUKWdQKyuwaoNt4NCvLY3P5v0WMme3MxIZ8rbUY/xXvW
-         sQDA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1789027872; x=1789632672;
-        h=content-type:mime-version:message-id:date:references:in-reply-to
-         :subject:cc:to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject
+        d=gmail.com; s=20251104; t=1789032546; x=1789637346; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:subject:cc:to:from:date:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=DHVsvo6RwXVpI3O0qorfwMCGL9oJM3VblhLkUEiQrLE=;
-        b=HEmicTyHJ44K0gSZ5aRj2nBHLQvMIZxF/aO1ANEy6mdwh+w81yC6attt8hPQinTo/w
-         PWy0NvhwxgT5ufRS90gUIrGTvqVixUBMD7y7nd14QFOckZ1L/yh24y6oNNBqOF/lgJyc
-         72JgCgwFy71YzIns8C7raTN8TkMsyZnW20frZ6QLG3aWL9sNDYW/q0SvFeGbFIhxwXHI
-         0uBBy/K/QvatPTcW/1vDwDvuvlUw16yJwspRyOms3A8GM+fPGArk8hvV6PXZPHxHw/OJ
-         9m9mDZnXWrrp0rtUeFjIuUvhabzAWzBl8k2MWjJRSJv2Y8f7Uw+OELZ5jkw1Qs+Y+5Oc
-         8vjg==
-X-Forwarded-Encrypted: i=1; AKwUvBxYqoyU97T8TFzCsw1i15vAUlUDbHTgQogcSQ7E8f4zmOxCHpVyLBbwNmCoM7A9uIT4WhrIyiIPV3M=@vger.kernel.org
-X-Gm-Message-State: AFuF++laPxVDEDoEPLsFcqH1xSfrMa6h25FYVwaSuudlD5V5C7aQAqyx
-	72JI+8LVFFeyvr28nC4B+0XDkdmltEp1L4Hy13VpEYl1ICg0RDWx4GkBSdkCJ4AlQe+2MkQZ2oC
-	VyOQu897thfkHbqQtyD5y791lD9QOCt4fdsRqPapXw8ID2jD9TwK1akHQkDJeKQ==
-X-Gm-Gg: AYBFou04+devTNdDaNIyEbOn69gBezNQbwI3MmaPiy6kpjltBocnUl6LMKsVKYSoWD5
-	sy9oTfUvq1OrMuwvgo0Y+AorGuRSl6KAsx7DSjz49HCWYMBL5LrsVemLrNGyFO+IWoPr4noD2Kw
-	bzc8e07Jo0vLwQ8TU5HRZs4Na6Ywbj/w8F54oDTp2U+EIyhQDdojBppbEMvBik4Kw7yFcjHcs/R
-	5XaHj+GfS/q1alHInO8xUtRj7lDqDRFF3PO1jKObVQhNBZBKXcjoWqwz5wtrEBFCihKImdLQ5kD
-	QQ47sN8K2CUYoOHuCiai8EDiTToKuHlJZYx3EqaUOo8YPJm7xIUfa3LUfzfB2Gut0tHJHGErnH+
-	1DCAct7XIW2Ns3McRKa5pLzcs+IScFQeWqavoWWdqoZ22HgF7x2CNivtVNQ==
-X-Received: by 2002:a05:6000:4694:b0:482:fb97:2ae0 with SMTP id ffacd0b85a97d-485872ade60mr34287602f8f.14.1789027872201;
-        Thu, 10 Sep 2026 01:11:12 -0700 (PDT)
-X-Received: by 2002:a05:6000:4694:b0:482:fb97:2ae0 with SMTP id ffacd0b85a97d-485872ade60mr34287569f8f.14.1789027871872;
-        Thu, 10 Sep 2026 01:11:11 -0700 (PDT)
-Received: from localhost (62-151-111-63.jazzfree.ya.com. [62.151.111.63])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-485883c5bc5sm52649193f8f.24.2026.09.10.01.11.11
+        bh=xKhavT2ReA2W483I2xKkmSEJ1FM7bdVhooTyy/B0hnc=;
+        b=fl7rpEKWOGJGTfMOVeV9QpCGl2mMK4Vehvs3dY8Rm+didzRH0gtOfiyzeoU8ALNMoM
+         cT2BPMjJbXV5gQ6sliYvSB0QZIjgDx8/CdX1PBfpXHGSWrpCsIwYqoddBYs/UedP0HG3
+         17GV1ku/mwl67dARTOxQ1Kpd06hZJ0r/c10p5zF0ehwV5FtS0mZnrdm99rFVd8Xtpjiz
+         6VD6yvQSxr2ssCUsOX9CqQ8e534WuIcxyEfYFBisMF9gWWhB//9kRq84KgudvGXGGI2G
+         7qfV7g8OkDajr/59MwtxDvgu3IQT3JAm7g/o50sPZ2s+6GE9ZKKNDlMGj5vUjZoPBa88
+         3WPw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1789032546; x=1789637346;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=xKhavT2ReA2W483I2xKkmSEJ1FM7bdVhooTyy/B0hnc=;
+        b=o3yOCn1M/PV092Xr5CH+hkOUj4AoJqftPAl17oogZyDKU0rMOA7p/KothKDswOCNHo
+         PTswdcAlrUdyeSlX6XqEzkEtaVGkDw1vzBooP1PmtHmLgeyiPgzFKplFb4GKr3ABIZxy
+         u48RwjNMCDW4ObeGu3FYWSSXRCm4X08RgzYNdBV+q5RJC6d+QjwLQS3jcvglgBL/D//2
+         MmgOxUsfZxtIyiosgQpCwJl6q3VEZ9BJZVUkSr3Xt8U1DPmBxqv+nc7sIvm76pPafUvM
+         3qHeF1JK+vF3Iiiuh7q3zR9OWSPTyo/Jojrzxs89EICMH9x/vACl2V0D2iS3iieP9qoq
+         trkw==
+X-Forwarded-Encrypted: i=1; AKwUvBypj4JD5SpF6GauizGuDLfT5xu3CcAsMz6pwUN3fWQioYtSetkM3XH4646kXjG4VkGyj8W+Sm1SVok=@vger.kernel.org
+X-Gm-Message-State: AFuF++nzyy5+ZtOvDBQHlN2ihk36707VBHCHnDxntInBhSOuSKf8aFlD
+	EcyKdBwJelcl/QZfJcgUdeiL3p7BCkatojhFspeL0PsnnKp1/jW4fNMB
+X-Gm-Gg: AYBFou36veZNWzC0P96gjs+scPHG3hpfqxQT2dSxisCtFYu9t/PsfKkYT3vDjw4x240
+	y5p35IQJA8EGmYhG8T0Uxy9vq/e3pyPKRfaUWDTkdZ73LZszwFXlNFc57zHfaIh7RPU7Litfmlg
+	tq4iKq1+/OCqxgVXraxZqpmLZmbHjn3Hcc9kjGvQL1uPFfyfLvboeIoAPc+OozL/RkcEPWjjA8/
+	OytmA3/J2ezlfHAEp5uswYs3zbZT2vp3Cz9RCoLYFWJOf2kJvHiEkkEVSDr110eDvkCrWER9w14
+	cPQWjJe11yt8jEJCcc/yJpZKfJrjyXR1JtK8RXtU5zWX0jKMJaKh+d+BfWNCaH9EInjg+2/G0ui
+	z1q05mhKlYgGYCZ64QX4RRUYG01fGLSxME2Fvlcsv49mIexJwseoassSKWOJulrU6zPLEmNLxMu
+	wxK9KG/NE+0dyxrY/hLUm08Uu+peGJHmDWpsNx+aQanxcee4Awg+jfeBO1gAShSRJdq8ld7VRcZ
+	YweV95jyDcxnjCTNrLu8jKWke5w0d6vClOi
+X-Received: by 2002:a05:600c:138b:b0:49e:2a61:a17b with SMTP id 5b1f17b1804b1-49e2a61a41emr9166915e9.5.1789032546119;
+        Thu, 10 Sep 2026 02:29:06 -0700 (PDT)
+Received: from pumpkin (82-69-66-36.dsl.in-addr.zen.co.uk. [82.69.66.36])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49d20fc23fcsm106027125e9.3.2026.09.10.02.29.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Sep 2026 01:11:11 -0700 (PDT)
-From: Javier Martinez Canillas <javierm@redhat.com>
-To: Thomas Zimmermann <tzimmermann@suse.de>, ardb@kernel.org,
- ilias.apalodimas@linaro.org, jani.nikula@linux.intel.com,
- maarten.lankhorst@linux.intel.com, mripard@kernel.org, simona@ffwll.ch,
- airlied@gmail.com
-Cc: dri-devel@lists.freedesktop.org, linux-efi@vger.kernel.org,
- sashiko-reviews@lists.linux.dev, Thomas Zimmermann <tzimmermann@suse.de>
-Subject: Re: [PATCH v4 3/3] drm/sysfb: Use preferred panel size for panel
- orientation quirks
-In-Reply-To: <20260904090850.43060-4-tzimmermann@suse.de>
-References: <20260904090850.43060-1-tzimmermann@suse.de>
- <20260904090850.43060-4-tzimmermann@suse.de>
-Date: Thu, 10 Sep 2026 10:11:10 +0200
-Message-ID: <87v78dcyqp.fsf@ocarina.mail-host-address-is-not-set>
+        Thu, 10 Sep 2026 02:29:05 -0700 (PDT)
+Date: Thu, 10 Sep 2026 10:29:03 +0100
+From: David Laight <david.laight.linux@gmail.com>
+To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Nathan Chancellor
+ <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, Nick Desaulniers
+ <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, Justin Stitt
+ <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, Alexey
+ Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, Ingo Molnar
+ <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen
+ <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin"
+ <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt
+ <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti
+ <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, Catalin Marinas
+ <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Mark Rutland
+ <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, Ilias Apalodimas
+ <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, Peter
+ Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun
+ Feng <boqun@kernel.org>, Gary Guo <gary@garyguo.net>, =?UTF-8?B?QmrDtnJu?=
+ Roy Baron <bjorn3_gh@protonmail.com>, Benno Lossin <lossin@kernel.org>,
+ Andreas Hindborg <a.hindborg@kernel.org>, Alice Ryhl
+ <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, Danilo Krummrich
+ <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, Tamir
+ Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>,
+ Onur =?UTF-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet
+ <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>,
+ linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
+ llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
+ linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
+ linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
+Subject: Re: [PATCH 04/23] kallsyms: output binary data to speed output and
+ kallsyms assembly
+Message-ID: <20260910102903.1b211f6b@pumpkin>
+In-Reply-To: <20260908-build-speedup-v1-4-5dc1ac01672d@kernel.org>
+References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
+	<20260908-build-speedup-v1-4-5dc1ac01672d@kernel.org>
+X-Mailer: Claws Mail 4.1.1 (GTK 3.24.38; arm-unknown-linux-gnueabihf)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 
-Thomas Zimmermann <tzimmermann@suse.de> writes:
+On Tue, 08 Sep 2026 21:55:04 +0100
+"Lorenzo Stoakes (ARM)" <ljs@kernel.org> wrote:
 
-> Sysfb drivers currently use the given display mode for looking up the
-> panel orientation. But the look-up table stores the native geometry of
-> the panels, so the lookup fails if the current mode sizes differs.
->
-> Get the panel's native geometry with drm_edid_detect_panel_size() from
-> the EDID and use it for looking up the panel orientation.
->
-> v2:
-> - ofdrm: validate EDID header before using it (Sashiko)
->
-> Signed-off-by: Thomas Zimmermann <tzimmermann@suse.de>
-> Acked-by: Ard Biesheuvel <ardb@kernel.org>
+> kallsyms generates an assembly file that consists mostly of .byte entries
+> containing compressed names, token strings and name-sorted sequence
+> numbers.
+> 
+> For an x86-64 build with 158k symbols that is a 37 MiB .S file which takes
+> 0.57s to assemble each of the two to three times it is built over a kernel
+> build.
+> 
+> Each time it is generated it also takes kallsyms a similar amount of time
+> to output it.
+> 
+> Avoid this overhead by instead outputting this data as binary and importing
+> it into the assembly using the .incbin directive.
+> 
+> Tables that are wider than a byte remain part of the assembly to ensure
+> endianness and relative relocations are performed correctly.
+> 
+> With this change, the output assembly file shrinks from 37 MiB to 9.8 MiB,
+> with a 2.6 MiB binary data file alongside it, and the object remains
+> identical.
+> 
+> The generated binary file is deleted correctly on build clean along with
+> all other ephemeral data.
+> 
+> On an x86-64 system with CONFIG_KALLSYMS_ALL set:
+> 
+>                        before   after    delta
+>   scripts/kallsyms     0.24s    0.18s    0.06s
+>   assemble             0.57s    0.16s    0.41s
+> 
+> Per kallsyms invocation/assembly, for a total of 0.47s time saving upon
+> invocation.
+> 
+> An incremental build on the same system was reduced from 11.15s to 9.65s,
+> indicating a total of 1.5 seconds saved over the build.
+> 
+> The kallsyms runs and their assembly are on the serial tail of every build
+> that links vmlinux, no-op builds are unchanged.
+> 
+> Whole build, 128-thread Threadripper 9980X, best of N runs:
+> 
+>                                          before   after     delta
+>                                          -------------------------------
+>   x86 defconfig, touch mm/vma.c, gcc       10.8s     9.9s    -0.92s (-8%)
+>   x86 defconfig, touch mm/vma.c, clang     10.7s     9.5s     -1.2s (-11%)
+>   x86 defconfig, clean, gcc                29.5s    28.7s    -0.81s (-3%)
+>   x86 defconfig, clean, clang              29.7s    28.6s     -1.1s (-4%)
+>   x86 allmodconfig, touch mm/vma.c, gcc    45.3s    44.0s     -1.3s (-3%)
+>   x86 allmodconfig, touch mm/vma.c, clang  42.9s    40.2s     -2.7s (-6%)
+> 
+> Assisted-by: LLM
+> Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 > ---
+>  scripts/kallsyms.c      | 97 ++++++++++++++++++++++++++++++++++++++-----------
+>  scripts/link-vmlinux.sh |  2 +-
+>  2 files changed, 77 insertions(+), 22 deletions(-)
+> 
+> diff --git a/scripts/kallsyms.c b/scripts/kallsyms.c
+> index 350d118c3b9e..61c5eb537ed4 100644
+> --- a/scripts/kallsyms.c
+> +++ b/scripts/kallsyms.c
+> @@ -5,7 +5,10 @@
+>   * This software may be used and distributed according to the terms
+>   * of the GNU General Public License, incorporated herein by reference.
+>   *
+> - * Usage: kallsyms [--all-symbols] in.map > out.S
+> + * Usage: kallsyms [--all-symbols] [--pc-relative] in.map out.bin > out.S
+> + *
+> + *      The byte tables go to out.bin and are pulled into out.S with .incbin;
+> + *  wider tables stay assembler source for endianness and relocations.
+>   *
+>   *      Table compression uses all the unused char codes on the symbols and
+>   *  maps these to the most used substrings (tokens). For instance, it might
+> @@ -102,7 +105,7 @@ static void sym_arr_free(struct sym_arr *arr)
+>  
+>  static void usage(void)
+>  {
+> -	fprintf(stderr, "Usage: kallsyms [--all-symbols] in.map > out.S\n");
+> +	fprintf(stderr, "Usage: kallsyms [--all-symbols] [--pc-relative] in.map out.bin > out.S\n");
+>  	exit(1);
+>  }
+>  
+> @@ -319,6 +322,40 @@ static void output_label(const char *label)
+>  	printf("%s:\n", label);
+>  }
+>  
+> +static void write_bin(FILE *file, const void *data, size_t len)
+> +{
+> +	if (fwrite(data, 1, len, file) == len)
+> +		return;
+> +
+> +	perror("kallsyms: write");
+> +	exit(EXIT_FAILURE);
+> +}
 
-Reviewed-by: Javier Martinez Canillas <javierm@redhat.com>
+It is pretty pointless checking the return value from fwrite().
+Most of the time it is just doing a memcpy().
+Instead call fflush() and the ferror() prior to the fclose().
+(Or just rely on fclose() giving you that error status.)
 
--- 
-Best regards,
-
-Javier Martinez Canillas
-Core Platforms
-Red Hat
-
+David
