@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97A65361670;
-	Thu, 10 Sep 2026 19:00:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E175E59B661;
+	Thu, 10 Sep 2026 19:00:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789066833; cv=none; b=gPLEmkigGFBZ3hnvfZ1HQ8g4Zm2DArjMTtYCOKTZ/HWZVTRR66bZQHnsoPsKamdwpe3vnV6p+eXhMQYjICdYFKc8FqB706LFnfIWNesu1C0Qn4wb/81nwsHA0ENMJAtOrH8Lx53kE59TdfLk3PnnQy1DRfBqZeKuiz3wegCGfUY=
+	t=1789066836; cv=none; b=Z6dINhMINVZpiX7PkWHiLCHhiRDciw55hG7/t0eTZLAiQhhy1zivyl2rvD/ZLsLdkYRwBl36yMM1GhfdoGP06wWfdVJ1sXbI6QQEILe6IcRo/U4qENzfjX808AGNUdHvIh3b4sFjr1fay4VyVaQk4/jpHHcRxRsXAaox/xJ6dBo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789066833; c=relaxed/simple;
-	bh=TqXpALvbDXvsA0sqSVnOHDQuA9LO48i8U28lTHA8Mb4=;
+	s=arc-20240116; t=1789066836; c=relaxed/simple;
+	bh=Jy4DXAG0SPTzwfacTiq4mR+y0f3/zcZiNxvzDjsPQNs=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=BgEUOsfkh1t0NLprf+8G6NNHiO4aEtACRW/n09Jn0KDI6ZFYWAtR4YODybsOtzcmhva9ci2LDktUy1UME6+KMMeHf5Xq4NNAwvPVD36o9LfLQZU7MWbU71nMbIJ8X7YnL4kgSuBNURGwH8ULEY7P1dVh3BwvaDmsG5bNU57aqtw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fpt2DW2D; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=f6y0v0wDiIb0sg25kWxnISxEdjwSzto/dOVCb8f4oxphMneomP6OuX4l3pt/pfwWevx2WU4kgYcD5xrobMzF4Ldj34evPDU4kQGXAJ6FZy27TFpXAEexzIpb33W+vxcE+t4PqaTDr14FCju9BsuTcdKcWaj6p+aRR2ZcU6/BVKI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Uo6MJqki; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fpt2DW2D"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id C19AF1F008A7;
-	Thu, 10 Sep 2026 19:00:31 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Uo6MJqki"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 156B11F0089D;
+	Thu, 10 Sep 2026 19:00:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789066832;
-	bh=qVLCzCol0ztHmPBF0fa8Jwjb86wBY4YsV5QLOxzKWYg=;
+	s=k20260515; t=1789066834;
+	bh=adpUAXMLWlwls3uA0tHpuBpUMbpToZc2bhx+dPqey8c=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=fpt2DW2DYha1MqdROAQMJuWiFYGP2IXkY29JJawBo8RZ6Ij4EMIJzWGzzTj8Fz9if
-	 fwvuecYFpKATLPy/E6JBQLSpVSg5fkTPerDXEl5QcC3WMZ1ExStoj3AKX2lAf3yBfy
-	 ohO/V2c3DDBc7QRsB4WqARy0H46e1HQjPK9yvegAcLogsjQFUHTyjrCOze21/9RJcF
-	 eoPJkrHBYKOtulGI2+dAKmgMwkVWoUWR1xs5RvxLdWYAvmSeC9oTy6tA5kmjNhu4aA
-	 9IZ47udxuU4aDKE+9Q2nPRPOuTqaTza60/Br216MGndlCKBlzO1A9KjVvaklnLHWFb
-	 rb81xbPcYsw1w==
+	b=Uo6MJqkiza5YQp8bmOAnZZ7Clc3G4MCqQgdKfnCBsPBugXp/06M0nPAXCsmC8NpwI
+	 sXIcCQcWDcUKPDlMwiuyrKxmuiuj/of1ACyYxanR5qSG8LOCML5FtrJ7/T429DaAEq
+	 GG8p/bKvaUOzzKlZEPxAneoX1o5Lz0hX6QrC4vPGMGXR55tnZVsvE81ITy6gcMjJ6w
+	 TmQiePj48cDDpnvMR3NrRqPFm7ZLv+5rKuhm0n1HGvXyj7T7UNuJOoVs00l/jQxE1w
+	 /8HTbwN9Hd38NoU2MTSbv3XawJfpUUhnYe9+RygWi0HdpC0JEr7CWkIpFzGtKzdaYQ
+	 vCh3f4bpTQdnA==
 From: Nicolas Schier <nsc@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>,
 	Nathan Chancellor <nathan@kernel.org>,
@@ -79,12 +79,12 @@ Cc: Nicolas Schier <nsc@kernel.org>,
 	rust-for-linux@vger.kernel.org,
 	linux-doc@vger.kernel.org,
 	Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH 01/23] scripts/mksysmap: drop the MODULE_INFO() symbols from kallsyms
-Date: Thu, 10 Sep 2026 21:00:15 +0200
-Message-ID: <178906667516.724141.3737829890204628745.b4-ty@b4>
+Subject: Re: [PATCH 02/23] scripts/mksysmap: fix escape of '$' in the __pi_ pattern
+Date: Thu, 10 Sep 2026 21:00:16 +0200
+Message-ID: <178906667522.724141.8105989008359153155.b4-ty@b4>
 X-Mailer: git-send-email 2.47.3
-In-Reply-To: <20260908-build-speedup-v1-1-5dc1ac01672d@kernel.org>
-References: <20260908-build-speedup-v1-1-5dc1ac01672d@kernel.org>
+In-Reply-To: <20260908-build-speedup-v1-2-5dc1ac01672d@kernel.org>
+References: <20260908-build-speedup-v1-2-5dc1ac01672d@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -94,20 +94,23 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 
-On Tue, 08 Sep 2026 21:55:01 +0100, Lorenzo Stoakes (ARM) wrote:
-> Commit 3e86e4d74c04 ("kbuild: keep .modinfo section in vmlinux.unstripped")
-> keeps .modinfo symbols out of System.map and kallsyms, which assumes unique
-> IDs have a format like '__UNIQUE_ID_modinfo123'.
+On Tue, 08 Sep 2026 21:55:02 +0100, Lorenzo Stoakes (ARM) wrote:
+> Commit b18b047002b7 ("kbuild: change scripts/mksysmap into sed script")
+> converted scripts/mksysmap from a shell script to a sed script.
 > 
-> However, commit afb026b6d35c ("compiler: Tweak __UNIQUE_ID() naming"), sent
-> in the same cycle, changes this to '__UNIQUE_ID_modinfo_123'.
+> However an error was made - escaping of '$' required \\ escaping in shell
+> but only \ in a sed script.
+> 
+> This was mostly corrected in commit 7a6c355b55c0 ("scripts/mksysmap: Fix
+> escape chars '$'"), but this fix missed arm64 PIE namespace local symbols
+> like __pi_$x and __pi_$d which appear in System.mapand /proc/kallsyms:
 > 
 > [...]
 
 Applied to kbuild/linux.git (kbuild-fixes-unstable), thanks!
 
-[01/23] scripts/mksysmap: drop the MODULE_INFO() symbols from kallsyms
-        https://git.kernel.org/kbuild/c/3e2276de
+[02/23] scripts/mksysmap: fix escape of '$' in the __pi_ pattern
+        https://git.kernel.org/kbuild/c/b99d1f50
 
 Please look out for regression or issue reports or other follow up
 comments, as they may result in the patch/series getting dropped,
