@@ -1,146 +1,112 @@
-Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B0BB489FDC
-	for <linux-efi@vger.kernel.org>; Wed,  9 Sep 2026 22:09:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.51
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788991768; cv=pass; b=iA3JNWqpLw8FJ9CPEnPDWx/2nZ+GnFL/sC97hC2B783RwcBbfH0o7daYf5ns3sdVbYneOLDV6iYtMfPkmsRANyRyqaqEzt2gobzKlE1D3TGhCZSGxy5eAAD7fizgZsKon+bz0D3/bg8xf6as9dLLVivcCrGRn8bQz5kK85VJ3CY=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788991768; c=relaxed/simple;
-	bh=bvzxaEfHxbnbItUGjnix/CzOoHNfP6Agb5FNfRpjWL4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ksag1Lc8A1xXBAt//LLeoWZiEYUFIiEbZTJBZbs3tyiJJmces6UoLj4Mw78MTcMOw4Nvr+lXolw6oqPCkFuQRYVac3LpfYPTEoNBgPWdFIP4Anyef/DEKIyJEhD+egt5t719inCUOX6z/JeGuusVNWojzPv4P/+mhO+24yQSdYg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=hJnHmHhe; arc=pass smtp.client-ip=209.85.128.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E82E3769FF
+	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 03:19:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789010348; cv=none; b=C7OUbCQJH80oezTP7lt6oRHQE+MGpQsLuFW022KH1Ry73q5nG5AFsY6F5KFztMf6WVr6VuBNcbyEDuwGGtkEyHSJpxOC5sBIa86eipvJh/Lm83urSpHx2SiT556pU5XMkJj+PAfnCxmoGIvrI3pHPTP49M0iaOH/C8aqSz3Moy4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789010348; c=relaxed/simple;
+	bh=CZCZphFtwnyR9V4pnluF5ZaUb2LNgvX6iqLOQ9kTly4=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=clVYADaosDmLnRSpni4irEtkAetPTzoB6ilBY3dC9cFrKMrcfbCXpnJ83GlKPq4NItBoeaYZqfPWSHISa2p4g7auYqeJV9Ukp3xZhLli6vToGWGfTFHgTgSi5hCmR1Z+FVAJXAuxGPGygmTazA07c1oJgzU4MN/lDcUHcrp/loM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=tJC7HJN5; arc=none smtp.client-ip=209.85.128.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="hJnHmHhe"
-Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-49cca4ffdcfso52327885e9.0
-        for <linux-efi@vger.kernel.org>; Wed, 09 Sep 2026 15:09:24 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1788991763; cv=none;
-        d=google.com; s=arc-20260327;
-        b=e73r2Vxx129BmyV8HpaZWQgy4viW/cbbYeVMZfjOh8V1lQFhTLyHjHvxKKD7wCqTmr
-         VEMwlGcldedt2VHikVNOTRjdygXCptAORnDERrHpmlgN2euVYCl2szAwvMqxpDx9sCi4
-         yQdFsHEd+7T7CpkyoFfS/ILusAC4rkD+Qm4xWGY0TEkHn3XqlYIeD8LR5DVY9ApYFryT
-         tkv6s1JpZVCAhDpfU/kML4s8RJ/GSk+hvGnTKFX7BhC2nWwQvDQveTx0TG6pgZfpoDJU
-         USDtuP9Dv0xxjnSh++xK/SkxNz/SVLCWCKGIxQLRl0qotCTODC07tlaZu/CKhiuAMV/V
-         0pYw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=bvzxaEfHxbnbItUGjnix/CzOoHNfP6Agb5FNfRpjWL4=;
-        fh=WCjJPE9xQMVBOcSuINpWeDNwtO6wLhlPA65qdaKJdE4=;
-        b=IW8uL0c6PNXo1usnmPW5HZLylpWHDe+oplYMVoB9FaEA3jlV+E4W7TnB6nsFRtvrSJ
-         orUjEBX8/mF4nbZkJIxx+nzYbECEyj9xJX0rxHx7FwsNhCLHsYzwzE6ILUpkJhhnaYEP
-         yjHqKxFIFofoVUqYjmFtXcln4EZeKYDIDlwdLTLmmSES5u2ra//Yqd79XT1SYTq0tqMw
-         0tjdcdTNNz5mMl9ehgtIz0gfd7qBGM+issp8suc7P3eEJZj1gb9+yyW/VLkesNBEXzw4
-         PpuDXasNPJOeKlcG0JszGHhNopLKl9UF55OQ89JhS1CW8mlehrOxa8edNm+Dh7e85WXu
-         diOQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="tJC7HJN5"
+Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-499ac87c92bso69555945e9.1
+        for <linux-efi@vger.kernel.org>; Wed, 09 Sep 2026 20:19:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1788991763; x=1789596563; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=bvzxaEfHxbnbItUGjnix/CzOoHNfP6Agb5FNfRpjWL4=;
-        b=hJnHmHhe+3Z3B/o1b9i3gNkm/aDnbsezDcQyviqY7dy1zsxKPyI3bYCDtR1pjVAytV
-         yhiu4H+vtxVlBhhNE1bQlb6f7a48UllOzIPrYLGGCIAN4VhfSbAXPRCETqRmpiSPDTOv
-         rWJDZaqFYHjuluIDtrEYzUPixzXiqxS/D9IuWtdGQYfHep7KfZZ14736P7EXNQpqVW08
-         pKn1RBFdnG2451tR/nrEy7dEFMergprk0ekp8fLZLbsiP5bXRvyDoJRneG3y2J37tiN7
-         kc+HMdzfao1r9BRM3SH3gaRbanbA8Sf7jUGn/rPWRtaAzSNYEBIxyhaqePlgxLqEmC+C
-         bNxg==
+        d=gmail.com; s=20251104; t=1789010344; x=1789615144; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=7h5a++gvjff2+ABbxAEfyPjYnS85ALwwS0YaPZ1LMBg=;
+        b=tJC7HJN5+6oiu1emA7TkYcrvA+9lATR1TwaEGFVxZVZCkyf47Ua8ryD8xu2pK6RH5E
+         U3jIS/X3iGhEKcXs3bNtq+JRhh7idZ2lQF0690/hvCoIfIeLsY9ni2w9o6iPgHoet+TP
+         dgrYa4olGaYn5UsBOb1nZayAYikfqWb0cXbt3LuwkIWWQwUJCNFJ45mwAXdTBTXgIA2E
+         y8JQLzqy6CHl4mWfexIVuOxZidXJYWAbiqgxF27NmmGsRz2/XV78GA2x1PcQtzGCLQrx
+         r66FLIA+Sx8eFI4UU+2MrouK3v/cgLCtvENa/iD7zct8j19mzQrS083rSjU3xNNtwJsy
+         7uRQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788991763; x=1789596563;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=bvzxaEfHxbnbItUGjnix/CzOoHNfP6Agb5FNfRpjWL4=;
-        b=S4gh9+6SlDwpt89zyp5eeUjjjaekrHIYgaIVPZMtitVC2ETU5YdOkxKEAR1IU5ISQj
-         2u/9YGRcIv/phcJHftiNxMbzZNuY7eGP+LnUs5qdjsTKK6hakt4iNyI752Oxaj5jnC6A
-         eg6U8hKxJGgSb4XyRxHDwOU3D/ozNFkXAeQF2EhGNKFnPns3Y4DvDnufsIncR6y5sGE6
-         yMmuBzu77JrOAfDfQfrJJC4OAZuhtOeToaOpxCii1kHSddg4LasnRaauXQzI467L0Rgi
-         y3AuQ6hDQO1r7WlXwkOYoqGgHdj4k8/fyDUN+jTioEz7AVUxyHTUDoQMruaHojmauflY
-         oKHA==
-X-Forwarded-Encrypted: i=1; AKwUvBwpCUiO2xmtSqLdKPH74b8bVHO5En02buY/PrAofpSUFmIeqQaCWOAuaMuD7XC6hcTWxL0aCX2ttng=@vger.kernel.org
-X-Gm-Message-State: AFuF++nPKcWScBslE62CoPUEra9RKKJMOSlgqJv8dPFKN3dfjyRIoh4n
-	9wQoloQYsKAMuW+/2JTmJo+Ljt96w3sPDpdx7skevtj4fnA4u7UElEVF/S37g9krgDy7mMyavXd
-	lF6V4PfrpSEdgbr8un1v0jzzDXQvQDly9kvZteqHz
-X-Gm-Gg: AYBFou1MEPRUaYqXZs5RxrO+95LymmfGLXV4yKqybSqXMjOTdXNAhi3xkH8ZZC2GHSK
-	0xI2iGxPoPz4SJFX9rhYzlsA6jKqQYBWwVF/j6dBM2sGSul1j4GX0nHViypjaL/CC+FnDTfVU4d
-	0XiISqICUf3wgwSxDqgJo0SfiZfcs0NYr7g/qgsfN1AMRD7cmqFHypy9+o0mA5B8crRYTajgqWT
-	ASq0Oj0mhiAMQpJvv+vjhNcV/w02qSfX7LZBT4E77cxi3L/cyhmKesZTIOR7cbpIYtnNDtEZJXI
-	XTJjnxS1nPPXG6uIgBgkv2er2K4JdGquXpTK+5C+zrtpk4p0GJP8X8k/o1uChTAglW415nNnGAV
-	ZrdG8D9WOTLU/3IBXVUBOyOpOffB+DI+mipJTIcB5+grDVrRU8kVdXzWSuNklOJBovK/TG4I=
-X-Received: by 2002:a05:600c:81c8:b0:49d:1f10:8b9f with SMTP id
- 5b1f17b1804b1-49d1f109802mr74781425e9.7.1788991761946; Wed, 09 Sep 2026
- 15:09:21 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1789010344; x=1789615144;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=7h5a++gvjff2+ABbxAEfyPjYnS85ALwwS0YaPZ1LMBg=;
+        b=RzMe5pQDb7IjQWD4Ph2HvGM06e/LrnutWGhbFR7O7GgbY35b7wW2Ppuweavg8hiVMD
+         DRRpThwmammRFUX61+O5qcApXXDW+A3Iu5OUlBIgGInkdGKFcdn870Xpq6UyK97lNhRy
+         YFpwLYzXXqCSIc6e8Hf0xJHMToST99dZwdxMVZo5SRqBUoU2Ejk3UA0Q1BUV2i5TZLI2
+         RgvwUBE8ya8vqZ/O7brxOGxRhiJBvwfQodYPZ/j3uQtNrW0XnCf5/cYi75N2PNY1pO/P
+         xQpFwGRCGb9liRr2SxO43gBj2QDyBaA7zhPeKJXFflrbb1cs98JT13jz6WSyrGD/cByD
+         EflA==
+X-Forwarded-Encrypted: i=1; AKwUvBwPavcIvon922vnVikl25E+e33r924NxL/gBayMZE28b4KeACviWgQxNoMf/diqVUGoKe+wNvon/j8=@vger.kernel.org
+X-Gm-Message-State: AFuF++lNWWAOS3dtQfjATb2givgYLd14q4evDr4eVv+UDejRKX/9nRDs
+	zcwKfHn0D8RWf7tUJtCB6EWlF41UZjqoDPbZfnpgBj0YhHC380UPz9SQ
+X-Gm-Gg: AYBFou2XM/py7nTTMsGTWDLzIxAP9do4SbxNh5yYlkQLrKNVCU9MqpT6QV6yDdjm1px
+	GPz29qabYFOVVKUZHDG/asmSvYV4ho9VQckcEcsCBixnafc/pElnZ0P+Hopaqt4Mhh87B7+2X8N
+	4wDajkhoiX6kixgdwUn7lKMCgEkiFgAlFWbqkmWUWeTcgYHRX2bZQI4rsSHopNvQwzjo7QtHG/c
+	RAjk/sI0oC8jXY9am/ecOtoDU7f2+PXuEMfjH6nQ1M9T8rmHVGRRa3jHwxnNU0KVrYvmwa052UT
+	GMnOtkej+dlI4to5T5RO+HCs57k+KbvIu9KbvanGxCObbtDRRwccF98cYuzQbd9xT34S2HCTJum
+	1Y4ye+JYEqKTz5HzFw14FsQTUwM/wnlKFM7b7NHJT63+1RjX6NYyVeRHhOnMXVHPZJ8eXuRcMSR
+	KJviZurdQXBQApE0Sw5Bt3Fd1nnP/rgfJn/Clz7UpB4YmdHoNI251K6oRpsHvFL150BlRh/3cm/
+	EBj09c6KDmcLEMOEtcsZylahTJ1prB/4b51FFn3YlGHfe1XxDd9k6JD0MAiKWy7mDBBAKGiDmTZ
+	cqLXd7Ku+KrNc4hhlJAprFirdjOG7gYHdhchAuRdUF+Js87T2ku9M01uHQo/zgvYVeItFh7HZQk
+	=
+X-Received: by 2002:a05:600c:154f:b0:49c:fc6e:8cb5 with SMTP id 5b1f17b1804b1-49cfc6e8ee3mr393723595e9.25.1789010344521;
+        Wed, 09 Sep 2026 20:19:04 -0700 (PDT)
+Received: from localhost.localdomain (dynamic-2a02-3100-b3d9-b901-0402-5aad-0ef4-88ac.310.pool.telefonica.de. [2a02:3100:b3d9:b901:402:5aad:ef4:88ac])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49d1fb1e60bsm90976765e9.0.2026.09.09.20.19.03
+        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
+        Wed, 09 Sep 2026 20:19:04 -0700 (PDT)
+From: Karl Mehltretter <kmehltretter@gmail.com>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: Karl Mehltretter <kmehltretter@gmail.com>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Heinrich Schuchardt <xypron.glpk@gmx.de>,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] efi/libstub: Fix efi_set_event_at() parameter documentation
+Date: Thu, 10 Sep 2026 05:18:53 +0200
+Message-Id: <20260910031853.15236-1-kmehltretter@gmail.com>
+X-Mailer: git-send-email 2.39.5 (Apple Git-154)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
- <CAKwvOdmdFdW8=y+s5NLoNeKz4LVbmW8tr+JqJ26wqYFJDdARFQ@mail.gmail.com> <aqFptJRjLZIL-NX7@gremlin>
-In-Reply-To: <aqFptJRjLZIL-NX7@gremlin>
-From: Nick Desaulniers <ndesaulniers@google.com>
-Date: Wed, 9 Sep 2026 15:09:10 -0700
-X-Gm-Features: AcwNN1VBBOSItlzf2aBfQ1Tsn20Bkz1vl5nUIWxayca3KAiKBTvQ_pPLoFqBSq8
-Message-ID: <CAKwvOdnMuwKxPB_SXDcwmrAiwZFXWUAgcS1TdAkW+bqhYEZ=ZQ@mail.gmail.com>
-Subject: Re: [PATCH 00/23] kbuild: significantly speed up kernel builds
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Nathan Chancellor <nathan@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, 
-	Nicolas Schier <nsc@kernel.org>, Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
-	Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>, 
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, 
-	"H. Peter Anvin" <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
-	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
-	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
-	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
-	Gary Guo <gary@garyguo.net>, =?UTF-8?Q?Bj=C3=B6rn_Roy_Baron?= <bjorn3_gh@protonmail.com>, 
-	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
-	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
-	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
-	=?UTF-8?Q?Onur_=C3=96zkan?= <work@onurozkan.dev>, 
-	Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>, linux-kbuild@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
-	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, 
-	rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
-	Jens Axboe <axboe@kernel.dk>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Wed, Sep 9, 2026 at 7:17=E2=80=AFAM Lorenzo Stoakes (ARM) <ljs@kernel.or=
-g> wrote:
->
-> On Tue, Sep 08, 2026 at 02:06:18PM -0700, Nick Desaulniers wrote:
-> > It would be cool if your LLM could generate any visualizations of
-> > what's going on during a build? Seeing what's serial vs parallelized
-> > in perhaps useful. Particularly when you can compare the before vs
-> > after.
->
-> Great idea!
->
-> I asked it to do exactly that, attached. Came out quite nice and sums it =
-up
-> nicely :)
->
-> It also provided an ASCII version:
+efi_set_event_at() documents ids although its array index argument is
+named idx. This produces missing and excess parameter warnings.
 
-unreadable, but the pictures you attached are worth a thousand words.
-Particularly exciting are the speed ups to the usual edit+compile+run
-loop.
+Match the argument name and fix the adjacent spelling of array.
 
-For the blue graph (the top one, first), any idea what that dip in the
-middle is? That's always what annoyed me.
---=20
-Thanks,
-~Nick Desaulniers
+Fixes: 8c0a839c2bcc ("efi/libstub: Descriptions for stub helper functions")
+Assisted-by: LLM
+Signed-off-by: Karl Mehltretter <kmehltretter@gmail.com>
+---
+ drivers/firmware/efi/libstub/efistub.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index fd91fc15ec81..049263a541ae 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -224,8 +224,8 @@ typedef void (__efiapi *efi_event_notify_t)(efi_event_t, void *);
+  * efi_set_event_at() - add event to events array
+  *
+  * @events:	array of UEFI events
+- * @ids:	index where to put the event in the array
+- * @event:	event to add to the aray
++ * @idx:	index where to put the event in the array
++ * @event:	event to add to the array
+  *
+  * boottime->wait_for_event() takes an array of events as input.
+  * Provide a helper to set it up correctly for mixed mode.
+
+base-commit: 50d05c7c76c96b90462f24debacca971d2e86713
+-- 
+2.39.5 (Apple Git-154)
+
