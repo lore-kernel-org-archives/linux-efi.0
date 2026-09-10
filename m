@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DECDB46EC70;
-	Thu, 10 Sep 2026 11:01:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1526146EF94;
+	Thu, 10 Sep 2026 11:03:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789038068; cv=none; b=oG/IZHWCKvGz98a3KXWYOFBt3QuKVrYbkqKUw5VBfPM5jgrguX3t8SngDe0T4eJIYm+JR2pu3nTm+G1DL+mWy9fCv6HbAsoeDTIDKqq5wcqJHtBTLLu78/cY84qX+fNihVije4fvOFrQBZ3itl0NX5j3pVphmMDEbvxrlxuIVPE=
+	t=1789038221; cv=none; b=MnclnnM/HIr4rMtNZAq7uFbohX/e/PBa80bKSd+VokbjsozLl6zqP+Y1RhGhhXAsT1ZylJojY7ZkELjsRgImE9ZbIo2lxvAD3i51umI37OI9hpeNdWEx28EEJD02kCwrtEE8GOdexBe9ZVXnXYQBZPb3m3UcfbnldfsVLdMKD1g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789038068; c=relaxed/simple;
-	bh=6Co7N08x8n3BIPqRfu42DAPzb966GwJUI+PwIAmaJy8=;
+	s=arc-20240116; t=1789038221; c=relaxed/simple;
+	bh=zkF+okllJHqKXvQdM/EqvzsMOtDxyc5TsolTsb/xGl8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=u1cKB8Br1Snsv1Uey7DuS/6s/eRGVYClRoGzWFJCCIil7aa6oZ4PLCqbQgmTpyQ+AyubjTkA4BPbHWNZMiyduX87xSsj6CSMeOjbPeCNFDxbrxm5EALA6hvHWYD7AXOp5PXA/malKxJ+50aNHhjJ3JLOCe5zAWUn2uNpPXtenmc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GjHfMNbg; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=SoMb6Y2JMk0VlvExEyH/+KhFf4RDVlYp8m0nYHMLrUvE53+MqUF8nTsSaXzjVW6F3Fjk8F5TeBPCMPeL1sdXcxHcS8ZwoUBl3OrsgNSYqgZo89lUfILL8Wad+8Ijc/1n90BvTk+p0wDtIWmn94sxUSex+6GmsIQZ6C/OGgH44q0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cuxcQ5jw; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GjHfMNbg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 02A131F000FF;
-	Thu, 10 Sep 2026 11:00:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cuxcQ5jw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 72CBB1F000FF;
+	Thu, 10 Sep 2026 11:03:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789038066;
-	bh=Ysr1aeZRruTO/kwpd2zBCB/fNXGYRvMbwiFBQZsaXX4=;
+	s=k20260515; t=1789038220;
+	bh=zkF+okllJHqKXvQdM/EqvzsMOtDxyc5TsolTsb/xGl8=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=GjHfMNbgWtZXVVvy4yrx1x7YF9AP8Mkzu4MlbWX7VmxRm6mAWLc8LgSERp1bsM8Km
-	 CnvTgQrePYoKl4p0NLebsW2NiVhAdO2zkErs2FPVzEm81ikhbTZNMlrI9O78VSSEY5
-	 GB/+eamdB4pr4CorF7GtvDp7uxnZ1C2g/ftMtcUejQ1eyZZ62naguabdSTu+5r3f5G
-	 HI55m9alQspSOEkxuPadAmKxLi7xNxDtZHogQEam3ZPw2SU0occeQ7t9wplr8R9SkV
-	 99O4PaCwWfiABccklZHYAViUdHa6Mu8mwlM3lO8H9TioVDN1ifQAh6OHZg3NZhRsLV
-	 f9GUdaQ6/6IpA==
-Date: Thu, 10 Sep 2026 12:00:52 +0100
+	b=cuxcQ5jw3m5rzCB46cgEUCPdWQH2FZQJvP80czAO5zYsV5hzlkMBwq353jvE2+SlC
+	 EsOH7NRCi1jSQHG6KMUX9oKr38OlGyWcmfsrMYJdAMof2w+IP2n77ZzKB/cQdOS0KB
+	 DS551N6VCg1Gix5tUP72Eds63nkBcKhfHqCXzqGsy0xp2QnF9vMCnGWQWtmO6qy+hf
+	 /lJ2rvjRJpWW4OJ9D/XkL/CSnsj/ERj2S/Dv6ruCjs73ckc+cRSd9WPcpsHnocp49K
+	 z1e05dQ+uMCNuRgf8Y0N2ZWNxMdpYiM1JsjE8gxntujzUZ+EHS1CIM+MFUPb0K9szo
+	 rJGQeSQbm3XLQ==
+Date: Thu, 10 Sep 2026 12:03:25 +0100
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-To: Nicolas Schier <nsc@kernel.org>
+To: Nathan Chancellor <nathan@kernel.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
-	Nathan Chancellor <nathan@kernel.org>, Nick Desaulniers <ndesaulniers@google.com>, 
+	Nicolas Schier <nsc@kernel.org>, Nick Desaulniers <ndesaulniers@google.com>, 
 	Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
 	Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>, 
 	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
@@ -53,10 +53,10 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
 Subject: Re: [PATCH 01/23] scripts/mksysmap: drop the MODULE_INFO() symbols
  from kallsyms
-Message-ID: <aqKN0cfGeb15X8pv@gremlin>
+Message-ID: <aqKN-SwzZRY93p6V@gremlin>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
  <20260908-build-speedup-v1-1-5dc1ac01672d@kernel.org>
- <178898323844.67740.9621915831851570155.b4-review@b4>
+ <178901395288.3971858.7586978173036863863.b4-review@b4>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -65,9 +65,9 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <178898323844.67740.9621915831851570155.b4-review@b4>
+In-Reply-To: <178901395288.3971858.7586978173036863863.b4-review@b4>
 
-On Wed, Sep 09, 2026 at 09:47:18PM +0200, Nicolas Schier wrote:
+On Wed, Sep 09, 2026 at 09:19:12PM -0700, Nathan Chancellor wrote:
 > > Commit 3e86e4d74c04 ("kbuild: keep .modinfo section in vmlinux.unstripped")
 > > keeps .modinfo symbols out of System.map and kallsyms, which assumes unique
 > > IDs have a format like '__UNIQUE_ID_modinfo123'.
@@ -83,47 +83,45 @@ On Wed, Sep 09, 2026 at 09:47:18PM +0200, Nicolas Schier wrote:
 > >
 > > On x86 defconfig that is 113 KiB of kallsyms tables and 32 KiB of bzImage,
 > > and every lookup walks past them.
-> >
+>
+> Bummer :/
+
+Yeah super easy to miss though I think!
+
+>
 > > Fix the pattern.
 > >
 > > Fixes: 3e86e4d74c04 ("kbuild: keep .modinfo section in vmlinux.unstripped")
 > >
 > > No measurable change in build time, the smaller tables are not on any path
 > > the build waits for.
-> >
 >
-> For consistency, it would be nice to have the 'Fixes:' trailer at the
-> beginning of the trailer block (that is: here.)
+> I don't think this needs to be in the commit message, it could be below
+> the fold, since it appears to be a valid fix on its own. Agree with
+> Nicolas on adjusting the Fixes tag.
 
-Yeah sorry my screw up when rejigging the commit message :)
+Ack yeah I screwed this bit up sorry!
+
+>
+> Is this worth Cc'ing stable for?
+
+Yeah I wasn't sure, it's not like it breaks anything but you see stuff in
+kallsyms that you shouldn't.
+
+So I'd say probably on balance yes we should actually?
 
 >
 > > Assisted-by: LLM
 > > Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
-> >
-> > diff --git a/scripts/mksysmap b/scripts/mksysmap
-> > index c4531eacde20..56a8b8bbdb37 100755
-> > --- a/scripts/mksysmap
-> > +++ b/scripts/mksysmap
-> > @@ -83,7 +83,7 @@
-> >  / _SDA2_BASE_$/d
-> >
-> >  # MODULE_INFO()
-> > -/ __UNIQUE_ID_modinfo[0-9]*$/d
-> > +/ __UNIQUE_ID_modinfo_[0-9]*$/d
-> >
-> >  # ---------------------------------------------------------------------------
-> >  # Ignored patterns
 >
-> Thanks!
->
-> Reviewed-by: Nicolas Schier <nsc@kernel.org>
+> Reviewed-by: Nathan Chancellor <nathan@kernel.org>
 
 Thanks!
 
 >
 > --
-> Nicolas
+> Cheers,
+> Nathan
 >
 
 --
