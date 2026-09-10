@@ -1,119 +1,224 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBDE939CD1D
-	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 07:44:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0CC2937C0FC
+	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 07:46:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789026249; cv=none; b=U3XK5YngWCUrQCr4LU72sCVOfb7EAbrt0b1MGHpRAvi2lZIWGrYRv79P2zj+QYAdRDRbrMdcAN7R0reUrhZ1oGzg33lWi0wfH6VcFML3BeQpPAwFTF5uszgroX+9FjOky0AqTbsPFqtgl21AsbYAD7Fy+An2barRCLj1goCUf9U=
+	t=1789026402; cv=none; b=pbL+bm2Cnef7M1oYp//r1rulbVTGCfxFuwI6WPwp4bL7suG2OKC7LP3kaovxKA1iJSOn6QO79mEZVMZIOMvmjTe2itZnk4GPFn2i/fW3zJDG4Y6j6JzSFDN6dZcSnV9pRo7wsq+9ooo34qBZWOYV3b4rwTpcU9GKncOPTH3bIng=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789026249; c=relaxed/simple;
-	bh=+TzsVF4Sf+laEColmGzdaySxxrb8mVMEFLeaCwCAGxU=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=hAIyHF7wwx6PGyIdQdHAi0kdV7711lv3qUThdjKyRqcMCP739R7mb0h2/z4ZCnLolm0n91umo3WWzUo6KfViBPBSkY7ZBB5brcJ5y1679ljisZKQ3H8hsu59x0N20MvyFqub5gZQ5dvGhOVMsU+6GPJGqBbiwqXPxdvKhD+vzSM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nHTwqcx6; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789026402; c=relaxed/simple;
+	bh=lzL0fPUpb/BGMqLu4QcJnm0yVfsoZQ/YWqxshKCHljA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=OOnTrB/gqdCIE2SVjEOQbLegKZyuEPnXpHBbI6TrqE61FEhe2ZFG74MASdKeGjUEclLSlSQNIihfOTBwGo9/swlbIPJjyiwAgwSdrOvIrL9HjLTpNki7Ijys/ljJO6YFQJ6VSI93979AJRZnXmC3lLz2JxJuajc88VqAzvM0p+k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=ZXMDQmkX; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=wWHKx78m; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=MP8miy3L; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=+zs98xmk; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nHTwqcx6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D9F801F00898;
-	Thu, 10 Sep 2026 07:44:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789026247;
-	bh=b6OpRuQYvAAGOb22ASjcA3RaqhNtPXU8PoMlJBJ1q/Y=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=nHTwqcx65W/Rjk0bw8h5Q3nnn+H1liybwRD5yWQMYGpLqMYLQyY/6WeQAbfAsRth1
-	 xuuts9PxR784Y2wMPYq5CK46lHGex5r6ZRfLXHU/cDAgKXVUzFFQKklcWue7EHoccm
-	 s3DTnLj+FhGeE7YBNwq6xG+TYrvu7L+6+wUUkbYf5vSiiNY93u55CzQKVYl3TmqLfJ
-	 ofz/iqrdxdR09LEnT/aYThNMsqYEyXtPgOnWDNOpgT2MqvJQlCZ7vd0BDNhnKgCfZS
-	 ihmu5ySx9HXu4oamZM7KL8kcoq/uM92EjRCg/gwZNcHtiJwWYQEJ6o94yM0ZJ6U3/I
-	 zbL/WXKUTA7ww==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 330E3198003A;
-	Thu, 10 Sep 2026 03:44:05 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Thu, 10 Sep 2026 03:44:05 -0400
-X-ME-Sender: <xms:w1-iaowRyeha88iqqUIB7qbLz0Wp7THB4uvbQ52MnM9pKHV6g8o7Eg>
-    <xme:w1-ianEU_zOVf6JQoKXuDyc5rkSdEoBMP77Yi5E6QYVwjZ4buR5BVxnizgCtt2iET
-    KsCWQqNzhgW9liCnsVHUJFBQgHSkOP_KuLNr6dNSzmn7JS5hzmFsQBk>
-X-ME-Proxy-Cause: dmFkZTFDBlCYWrFxP3XXlINjjr6BqUytts/FxhOMA/3y+VJKIaUZPfC7jiKmFkswLGU3ek
-    dvSFXzBwoV5ySuIMuEA/wmxcMGnWs8YDPFMkmSYYeVNgn7BYd0pn3kHqNodJW1D613PQUI
-    2AJ3N0m8dMbbRoaSHs0tiC3wjfE8+2RcEMc4aj/xmNBS03y7lDoxX/UfGLMt6WrDz0xRCg
-    S8YHXu4RXHv8LhOjBwoVjlMDmx6zbFjuXsWMegy8seOyxA8/IW+5Ium9vp+20+X0cG03VD
-    Gdnk2Xxvhk9Hx9sUhwTP+/lPxjAFU94DMvnlhfZYm8mhbS6RLC7I/Vzus3TMSLqYJChhGE
-    BvnP+SFBxu15EMzNcd1v1zzt+wAwF2U3ryWQ9r3n2Znrmg6yR7U2y47ymE4zJO6MA4g854
-    BM/nol9YOzM+wJrXYiIXjSSryVp+ln1R/m3egx2JCCwLIvt4AXsE6BxaMYdpMGyPPoAq+Q
-    sM+vgahXRj7EC4UwxYhEoUqdcoi161tTL3LzM6SGUAIvUb5KclVm6up5PxnOUuZqx6AeUc
-    rfTAJpXbrTLBnaaiRnMy+dEaJmQBunkcG82jszXw58kKy2FxPrQ8Nf/Q5+lndFVrQzdrFX
-    VQDPRrY5Y/9iqmJa+zPGX+rH0nqj3G+ilyhKwDJ9ewQZPevhQU2D7QWDVEtg
-X-ME-Proxy: <xmx:xV-iauBjo4lb-I-mvIQ-kOy8t9ODB1_6SWv4y4omMsyPNUZdZFCArQ>
-    <xmx:xV-iao98bspWWGzcMRKDY89TTf3N6SkHzJR2yYLHSbMA8T2n37f5VQ>
-    <xmx:xV-iaiR_zhOrjns82DP2OFlGJD_CFJOWsVUMIy7_3icnlRIc4fSrqQ>
-    <xmx:xV-iakVhItqUHg2xHjCc3gvFxonNALpL6HWYVn9pny_M85mNlCh8yA>
-    <xmx:xV-iakShSbkE6v_lQqAU7PcqqU7A48eghpQcPmX27JFXy-RSOIq50C1o>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 7C8B6F8007D; Thu, 10 Sep 2026 03:44:03 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="ZXMDQmkX";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="wWHKx78m";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="MP8miy3L";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="+zs98xmk"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id B041F21B42;
+	Thu, 10 Sep 2026 07:46:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1789026392; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=W/1nFyWEaqVKCugUxEfivy+nSvc0epaMKTnk4PJqaXY=;
+	b=ZXMDQmkXqRZJDk+kfWs5lyxmI+auqMm45QcptQvkua2wmtYuCQLT+WxF0rsrYmMj0l0Zpm
+	vJpneFRhPEnuTDcnnYhx/bd/RuCrZ085KYWEjvw7U2HTz1El0IbpH3ucK33mrqaD0zxObL
+	cTOq7c+4dze3YGXnuWtcJKInl6OTPxs=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1789026392;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=W/1nFyWEaqVKCugUxEfivy+nSvc0epaMKTnk4PJqaXY=;
+	b=wWHKx78mhiJ5A+EQrV4UcqQzs26Wl/VbNEvXm6BbSvDPGY35+mcdE6DKnBnz9r96+UmwME
+	kt/8h/dBMh+QL8Dw==
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1789026388; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=W/1nFyWEaqVKCugUxEfivy+nSvc0epaMKTnk4PJqaXY=;
+	b=MP8miy3LvktgsHoL/t4w3LczrSIlHvFOX7v9EnfXJIH8UxaxalYiNH8Oxz2j+tBSJEy2bu
+	oXx9b3ZxILlzvJZpWukRC2B4Y+jBqXhNS6Pq5g4+6jGbj9rxW+57o0880ugvQJTOmuEAE8
+	XMV6VVV83ZB8E7D/Ng8hypgDg6mWym0=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1789026388;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=W/1nFyWEaqVKCugUxEfivy+nSvc0epaMKTnk4PJqaXY=;
+	b=+zs98xmkipgPxB8PpNveVGDtQUHmghJCNZ2UJQReJfwK/xPDmbxO6olpZmyw5bpTwa9NU2
+	mJoNFV6zEZVs6/Dw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 4B6C5137FD;
+	Thu, 10 Sep 2026 07:46:28 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id zZVTCVRgomqdKgAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Thu, 10 Sep 2026 07:46:28 +0000
+Message-ID: <92d94fa9-1e82-4f82-a2a1-345f5ef3abe8@suse.de>
+Date: Thu, 10 Sep 2026 09:46:27 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Thu, 10 Sep 2026 09:43:43 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Thorsten Blum" <blum@kernel.org>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- "Javier Martinez Canillas" <javierm@redhat.com>,
- "Thomas Zimmermann" <tzimmermann@suse.de>,
- "Lenny Szubowicz" <lszubowi@redhat.com>, "Borislav Petkov" <bp@alien8.de>,
- "Francesco Pompo" <francescopompo2@gmail.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Message-Id: <7df8a578-06da-4769-9e9f-f8765fb87e9e@app.fastmail.com>
-In-Reply-To: <20260829212037.335569-2-blum@kernel.org>
-References: <20260829212037.335569-2-blum@kernel.org>
-Subject: Re: [PATCH] efistub/x86: Use struct boot_e820_entry for size calculations
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 1/3] firmware/sysfb: Remove rotation quirk for Lenovo
+ D330
+To: Javier Martinez Canillas <javierm@redhat.com>, ardb@kernel.org,
+ ilias.apalodimas@linaro.org, jani.nikula@linux.intel.com,
+ maarten.lankhorst@linux.intel.com, mripard@kernel.org, simona@ffwll.ch,
+ airlied@gmail.com
+Cc: dri-devel@lists.freedesktop.org, linux-efi@vger.kernel.org,
+ sashiko-reviews@lists.linux.dev
+References: <20260904090850.43060-1-tzimmermann@suse.de>
+ <20260904090850.43060-2-tzimmermann@suse.de>
+ <871pb1efi3.fsf@ocarina.mail-host-address-is-not-set>
+Content-Language: en-US
+From: Thomas Zimmermann <tzimmermann@suse.de>
+Autocrypt: addr=tzimmermann@suse.de; keydata=
+ xsBNBFs50uABCADEHPidWt974CaxBVbrIBwqcq/WURinJ3+2WlIrKWspiP83vfZKaXhFYsdg
+ XH47fDVbPPj+d6tQrw5lPQCyqjwrCPYnq3WlIBnGPJ4/jreTL6V+qfKRDlGLWFjZcsrPJGE0
+ BeB5BbqP5erN1qylK9i3gPoQjXGhpBpQYwRrEyQyjuvk+Ev0K1Jc5tVDeJAuau3TGNgah4Yc
+ hdHm3bkPjz9EErV85RwvImQ1dptvx6s7xzwXTgGAsaYZsL8WCwDaTuqFa1d1jjlaxg6+tZsB
+ 9GluwvIhSezPgnEmimZDkGnZRRSFiGP8yjqTjjWuf0bSj5rUnTGiyLyRZRNGcXmu6hjlABEB
+ AAHNJ1Rob21hcyBaaW1tZXJtYW5uIDx0emltbWVybWFubkBzdXNlLmRlPsLAjgQTAQgAOAIb
+ AwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftODH
+ AAoJEGgNwR1TC3ojx1wH/0hKGWugiqDgLNXLRD/4TfHBEKmxIrmfu9Z5t7vwUKfwhFL6hqvo
+ lXPJJKQpQ2z8+X2vZm/slsLn7J1yjrOsoJhKABDi+3QWWSGkaGwRJAdPVVyJMfJRNNNIKwVb
+ U6B1BkX2XDKDGffF4TxlOpSQzdtNI/9gleOoUA8+jy8knnDYzjBNOZqLG2FuTdicBXblz0Mf
+ vg41gd9kCwYXDnD91rJU8tzylXv03E75NCaTxTM+FBXPmsAVYQ4GYhhgFt8S2UWMoaaABLDe
+ 7l5FdnLdDEcbmd8uLU2CaG4W2cLrUaI4jz2XbkcPQkqTQ3EB67hYkjiEE6Zy3ggOitiQGcqp
+ j//OwE0EWznS4AEIAMYmP4M/V+T5RY5at/g7rUdNsLhWv1APYrh9RQefODYHrNRHUE9eosYb
+ T6XMryR9hT8XlGOYRwKWwiQBoWSDiTMo/Xi29jUnn4BXfI2px2DTXwc22LKtLAgTRjP+qbU6
+ 3Y0xnQN29UGDbYgyyK51DW3H0If2a3JNsheAAK+Xc9baj0LGIc8T9uiEWHBnCH+RdhgATnWW
+ GKdDegUR5BkDfDg5O/FISymJBHx2Dyoklv5g4BzkgqTqwmaYzsl8UxZKvbaxq0zbehDda8lv
+ hFXodNFMAgTLJlLuDYOGLK2AwbrS3Sp0AEbkpdJBb44qVlGm5bApZouHeJ/+n+7r12+lqdsA
+ EQEAAcLAdgQYAQgAIAIbDBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftOH6AAoJEGgNwR1T
+ C3ojVSkIALpAPkIJPQoURPb1VWjh34l0HlglmYHvZszJWTXYwavHR8+k6Baa6H7ufXNQtThR
+ yIxJrQLW6rV5lm7TjhffEhxVCn37+cg0zZ3j7zIsSS0rx/aMwi6VhFJA5hfn3T0TtrijKP4A
+ SAQO9xD1Zk9/61JWk8OysuIh7MXkl0fxbRKWE93XeQBhIJHQfnc+YBLprdnxR446Sh8Wn/2D
+ Ya8cavuWf2zrB6cZurs048xe0UbSW5AOSo4V9M0jzYI4nZqTmPxYyXbm30Kvmz0rYVRaitYJ
+ 4kyYYMhuULvrJDMjZRvaNe52tkKAvMevcGdt38H4KSVXAylqyQOW5zvPc4/sq9c=
+In-Reply-To: <871pb1efi3.fsf@ocarina.mail-host-address-is-not-set>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Spam-Level: 
+X-Spam-Score: -4.30
+X-Spam-Flag: NO
+X-Spamd-Result: default: False [-4.30 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	NEURAL_HAM_SHORT(-0.20)[-0.999];
+	MIME_GOOD(-0.10)[text/plain];
+	FREEMAIL_TO(0.00)[redhat.com,kernel.org,linaro.org,linux.intel.com,ffwll.ch,gmail.com];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	ARC_NA(0.00)[];
+	RCPT_COUNT_SEVEN(0.00)[11];
+	MIME_TRACE(0.00)[0:+];
+	MID_RHS_MATCH_FROM(0.00)[];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:url,imap1.dmz-prg2.suse.org:helo,suse.de:email,suse.de:mid]
 
+Hi
 
-
-On Sat, 29 Aug 2026, at 23:20, Thorsten Blum wrote:
-> alloc_e820ext() and setup_e820() use sizeof(struct e820_entry) when
-> calculating the sizes of boot_e820_entry structures.
+Am 10.09.26 um 09:23 schrieb Javier Martinez Canillas:
+> Thomas Zimmermann <tzimmermann@suse.de> writes:
 >
-> Even though struct e820_entry and struct boot_e820_entry have the same
-> size, use sizeof(struct boot_e820_entry) for consistency instead.
+> Hello Thomas,
 >
-> Signed-off-by: Thorsten Blum <blum@kernel.org>
-> ---
->  drivers/firmware/efi/libstub/x86-stub.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>> The Lenovo D330 is a notebook with detachable display. The display
+>> is installed in landscape orientation, but the display mode is in
+>> portrait orientation. By default, the display output is rotated to
+>> the left by 90°.
+>>
+>> The sysfb quirk breaks the display by swapping display width and
+>> height; and thus mixing up the display geometry. Fix this by keeping
+>> the display as-is. The sysfb DRM drivers, usually efidrm, will pick
+>> the correct panel orientation for the display.
+>>
+>> The exact behavior might depend on the version of the BIOS release,
+>> but the exact version numbers of broken and good releases are unknown.
+>> Users are advised to update to the latest firmware.
+>>
+>> Tested on a Lenovo D330-10IGM IdeaPad with firmware 8NCN43WW.
+>>
+>> v3:
+>> - mention possible dependency on BIOS release in commit description
+>>
+>> Signed-off-by: Thomas Zimmermann <tzimmermann@suse.de>
+>> Acked-by: Ard Biesheuvel <ardb@kernel.org>
+>> ---
+>>   drivers/firmware/efi/sysfb_efi.c | 9 ---------
+>>   1 file changed, 9 deletions(-)
+>>
+>> diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
+>> index 685283bb7327..2338de73c62c 100644
+>> --- a/drivers/firmware/efi/sysfb_efi.c
+>> +++ b/drivers/firmware/efi/sysfb_efi.c
+>> @@ -301,15 +301,6 @@ static const struct dmi_system_id efifb_dmi_swap_width_height[] __initconst = {
+>>   		},
+>>   		.callback = efifb_swap_width_height,
+>>   	},
+>> -	{
+>> -		/* Lenovo D330 with 800x1280 or 1200x1920 portrait screen */
+>> -		.matches = {
+>> -			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "LENOVO"),
+>> -			DMI_EXACT_MATCH(DMI_PRODUCT_VERSION,
+>> -					"Lenovo ideapad D330-10IGM"),
+>> -		},
+>> -		.callback = efifb_swap_width_height,
+>> -	},
+> Agreed that is better to rely on the information provided by the
+> firmware, instead of having this quirk. Specially given that it
+> breaks when the firmware provides the correct display geometry.
+
+The plan is to tell users to upgrade to the latest firmware if we hear 
+about regressions. The update is available on Lenovo's homepage. If an 
+update really isn't possible for a user, we should at least know which 
+firmware revision is broken. Then we can add back the quirk only for 
+that specific release.
+
+Best regards
+Thomas
+
+
+>
+> Reviewed-by: Javier Martinez Canillas <javierm@redhat.com>
 >
 
-Queued up in efi/next - thanks.
+-- 
+--
+Thomas Zimmermann
+Graphics Driver Developer
+SUSE Software Solutions Germany GmbH
+Frankenstr. 146, 90461 Nürnberg, Germany, www.suse.com
+GF: Jochen Jaser, Andrew McDonald, (HRB 36809, AG Nürnberg)
 
-> diff --git a/drivers/firmware/efi/libstub/x86-stub.c 
-> b/drivers/firmware/efi/libstub/x86-stub.c
-> index cef32e2c82d8..ae2481f8a4c3 100644
-> --- a/drivers/firmware/efi/libstub/x86-stub.c
-> +++ b/drivers/firmware/efi/libstub/x86-stub.c
-> @@ -648,7 +648,7 @@ setup_e820(struct boot_params *params, struct 
-> setup_data *e820ext, u32 e820ext_s
->  		}
-> 
->  		if (nr_entries == ARRAY_SIZE(params->e820_table)) {
-> -			u32 need = (nr_desc - i) * sizeof(struct e820_entry) +
-> +			u32 need = (nr_desc - i) * sizeof(struct boot_e820_entry) +
->  				   sizeof(struct setup_data);
-> 
->  			if (!e820ext || e820ext_size < need)
-> @@ -684,7 +684,7 @@ static efi_status_t alloc_e820ext(u32 nr_desc, 
-> struct setup_data **e820ext,
->  	unsigned long size;
-> 
->  	size = sizeof(struct setup_data) +
-> -		sizeof(struct e820_entry) * nr_desc;
-> +		sizeof(struct boot_e820_entry) * nr_desc;
-> 
->  	if (*e820ext) {
->  		efi_bs_call(free_pool, *e820ext);
+
