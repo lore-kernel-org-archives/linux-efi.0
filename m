@@ -1,57 +1,57 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEF9C3A6EEC
-	for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 07:33:43 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A44212DCBFA;
+	Thu, 10 Sep 2026 07:38:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789025626; cv=none; b=TxvhUyPzHrKu2tyBxIFipppFk4lB5sVZ3f5hPLZUrfQMnyA1vvXkn5IJvLIhYePXLyXuRCa5/yveDlRey9xEKOYZVPNcwt5wCGXIme9n+U5Gj5OWSgcsAgqVT3lPlmYo5PYdfpTpxb9uBDAQgILjK9KnkavB2ViZQE6nvdgIHy4=
+	t=1789025927; cv=none; b=M11qVdGniBj8MaJnskOL0P0XcG3j3hfUPY0F9NfFfAn05RvDT3qyf0xyjZFi8w9GUFbqKkXc5L2qCpXKLxrWiB0CT2pa02PTSB4F1rPeRW6v0fTHsox5ObgIBHW3TtqursKSynOSMkOZ0Pny3yhOxt34Ruay6BCi5sJDp4bRdps=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789025626; c=relaxed/simple;
-	bh=Pf3HZBBEF+9h15SHCm35up+fwk41VfMyDzQOFqO1R9k=;
+	s=arc-20240116; t=1789025927; c=relaxed/simple;
+	bh=ylLPjfUmDp5OgakHE/h6+iUXPwleRmAymyHsUJs3oGs=;
 	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=pnoEksSlQeUXJjfmgm+1r5E47wxK8ftmv8WtSgjIZWqvuYSfhVWMzxkwMKOEi3NJyXMvBlet1vQNmRtvYc8XT1SYK7o1X7Q7v0H1eNFdMl5RpDAcg9oLAlredtWF2J1IUkUKLbJ/y1BybBvKYczDvm43+H07A6tubhhIRG6soqc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SYkaTNog; arc=none smtp.client-ip=100.103.45.18
+	 Subject:Content-Type; b=QOzwsCtz3n8/hwoAWfusWaPVCoUnYJHlsQz1vFUGg5NJ/6Jpcrxw8VAHS3HaNnm+dTkCCz/dEwTSzrhYgAiKYgCrF7FhDW5tE2lP6p3IqMRR+walvy4yE+RGnJ+s4C3F94Zza4hURX3DoLDRPCe5tpI7xRGb5EXZWZl0yEWzXRc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Sb4B1RUB; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SYkaTNog"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F23D41F000FF;
-	Thu, 10 Sep 2026 07:33:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Sb4B1RUB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 17DE31F000FF;
+	Thu, 10 Sep 2026 07:38:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789025620;
-	bh=kHBIS98tui19QlB+Qy4l90svkBpYwDMGk63JNQvC2pg=;
+	s=k20260515; t=1789025909;
+	bh=2niUt7FygR+JTfvVu+m/W5AWpF8tk+eb/4AARp/D4uA=;
 	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=SYkaTNogiCApZeCimGQ4WYNE/UCTSgVjzltzjeBko8/41T9EkRDvRZRfKqZP9dzMe
-	 6pv6M8DKIghj8rRZaSc6PVQZ2fbLxEdBeVOYjLZ6NtsfUT7SxmEAXe+N4JSZI0VNAy
-	 dRVob+OvP3oeja/xj7QLui3+rA97BIYSBuAg7sBjzzmB8+0/B8F6zmvyprInNRROOv
-	 bFjE386jVlUDt9zOIaJwM4SYNNlB9vvJA83UV+tzBif9yuGNCFJWZ10Ezd3+X127ZE
-	 nedt/B+61XOoq4xOEcDUTWVdMUD1klc+lmT7dh24+J953+1ShZSlmDVQK6PXNSwEZi
-	 8Io2iFbKflHoA==
+	b=Sb4B1RUBNjUThJTG4q9JTuZLcCxKBmhGXV/knS1bRh8qy/Klj1FuccHUclx8PjudT
+	 OvdvHlBPjuNNt/BIkqB8Ke4mOvo9kCG+SQtKefKSSBUDX+g7YozMJGdWBwEkdnR3oW
+	 iC51CDjowALobShOD6ARkfUdTa/j3Ne4b26f4Py3QopDiiO4ahMIV4LwUl3KonwPQV
+	 g6rPNziSzFLmo8C+XGeYeLPeieFfmP+/4nUHyqK5zl7XguOgNS4o1S+Qqeba1SikOr
+	 7ta6H6e5RQGrWi2L5xiXg0HJAs4Lw+P6BQBmRfXF1KAJLfYNUzIy+Dp3uo4GIoHkhg
+	 tCI/BbSlKySzQ==
 Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 6DDF6198003A;
-	Thu, 10 Sep 2026 03:33:38 -0400 (EDT)
+	by mailfauth.ams.internal (Postfix) with ESMTP id 7808A198003A;
+	Thu, 10 Sep 2026 03:38:27 -0400 (EDT)
 Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Thu, 10 Sep 2026 03:33:38 -0400
-X-ME-Sender: <xms:UV2iauShsNFZEQu9NCHQ2gb7MSXcu8jYcNQnL0HEo6J5imp-DCTNRg>
-    <xme:UV2iaumZZssFwB5PCYNinY9M6eK_GPkfmznKnDvlVZpjnESOUeKg0EzRv6gtCKv-C
-    iWixsX429XvoraDnJaL1tuA9CG0GjDCCg_Ej6DKQOg_VlzXjOZ8f_x1>
-X-ME-Proxy-Cause: dmFkZTEsukaUZh49mKtNEtj4RH0Wyopa7oOwqByrpGZsWQuUogfifVhVS6t09JaZ9Z8GpX
-    mKd07dITkXBvyLGuhENEzxBGqtJBdPqDnoH5Nu39CEjA+ab6rQ9Pqt/p96VEZ18hnDAnxi
-    lKbGQUimOQvRHHl7hxzbMjGmKUaDYCuvjkpHPt7OHI3x4xpXtxXMVVMEXwQhoZDUbn/1ZE
-    DkzNxfRW8/af7LfOXWdGEa3L7Alj89RTlCNc8s2j8Nv6EouHsPZzo/DqZGkxzSUdFWmeeB
-    7/iiD0N41fNbTfMjL32dl5UP6pJbN34d8y5b4r7rQDzj9uR2LyN7MSpwT15QpVYZ2bdso/
-    bfvpGdiW+FTmOZeHQhpk0Q2Kq1qvqd+0IncFg7bJXolryc9Zk2Tctzx0Vapii9nvkkM5nw
-    1u9UepZ3p4V53n26GBlTG/OiP+uElmvyk28dqQwx/87ZCLFrCyVukmzLe/XKjjKNH0FI8d
-    Hn2XD0pYB6hXkdxmPshGxzaMlmPrhjXOQHoe2w+plZrxioaFEu4YOA5XXMk2LPLHhmCdud
-    ko7jdbH6G1Gws0J1mJ/wWsG4MoMPUZcU9wGKpl7JHttDNpTQzaSULy2kLOB0QavXObsBTK
-    LLQcVL6n58haOFVH8KK6gEgABxHwAYNPE0Do5VBHLoAXT7cnh/L4Buxlkk7w
-X-ME-Proxy: <xmx:Ul2iat6S5qfeMQ1qve1VVaee2Mmtqn4nPccWwiel3lwfRViLiLD1_A>
-    <xmx:Ul2iamVKXtzc_QzZXPMZSd_h2JlbBLYyEGWSpHkfUWIhldra6PGX5g>
-    <xmx:Ul2ian9-Az7yna645plsczgKrr29Bnl2FdRTm_YQ1VwosqGpQLPoqA>
-    <xmx:Ul2iaqncY2XvHHxGtzLKTNtHifJkuvGKLj4rJphLPPp3GQXoTWwXqw>
-    <xmx:Ul2iatVco4BqBl5WTEuJzLn-qbPLWtR5APBwz1fhREUzNvMPu0HuYIOs>
+  by ams-compute-02.internal (MEProxy); Thu, 10 Sep 2026 03:38:27 -0400
+X-ME-Sender: <xms:cl6iarw2VZBrmk0gKEYfWlEPrBWMuY4q2ywrBVdJFayN6sT8SIMfXg>
+    <xme:cl6iauEJVFzEpJyCSbE79IGbRHu7zPjkvde5g4A_wRtwGlTmHqE2951bQMCo4CdoV
+    k49Nv0E5x9Z-qwYAIPRQ6r7NBCNKUwHY-LWOYM6gFHoYDNSj7sLO_6d>
+X-ME-Proxy-Cause: dmFkZTGY5RmXDWSkj7iEa3+1WOsxhNyYaxceSoq7uj84XkAKgZ8MGJegpiDGKUQgMiuuLS
+    /X6Tvxsshu9cepb+dX+XWPytiE0R2WUfJvNNGCilKV3QiigGflvB4B1GBhxw2lijhJGZmZ
+    t5KmP6jMDKb2FoY5xte9z3yHBFrrAcMfAEE2FsJ/AdH8vQWA/kQbcyi3i04f9JgLpyCpCB
+    p9KyrZhTsGJCVT897jqkk56gqqTAAr6iQxV936j+j58qKqRJoEqwdsXyaxGCL4fFZ64NQi
+    QUlAq0IWh6nPJD3PQ7zYUAxysUQ8f56q+uyjNCQmX/MX3cuLnqI7TOQO/8QexIqGB1eafh
+    V89YPXu9fhmTC61CI+FmDsHdGsqOXByM7nGhSsGsG/k3r16w9SBwjKXhyE32rspXoqkypT
+    Sx85E1ybdPEGMAzOKz8LxTX4I7o3jIV7YghxJs55aF5AIEpA5Lw0O1JP06dp0jh01Te0NZ
+    8TF5XWV3N1hnTy0Imp6QoXWGHKCb1HBn+EJz6AGpkjvAIpMOFh3hE8KRE/DYb3WOgNl2Z1
+    MTiaoRs8z/D1m7Uzi9gChLWDGyYrQ83FlMguURYOKtilPQ5ecT3qzL7Jf3z16NlwD7RAMN
+    gh6FMZuHy58bxkRgpsGTg3mz6r60blqP0CtAZdQxZxkQJLOsKuUF8BKIhUjQ
+X-ME-Proxy: <xmx:c16iavZho8pF1cBn9XSt6KTJc7TA7Su9zpx6Jf3Zv1aJc6VYgZxOKQ>
+    <xmx:c16iap0H8gJ8HeMO8N4r81C4q1zty5ZxHlwi7jDMM5bY1lthKG1WIw>
+    <xmx:c16ialdfi2a_Wdkj_eDowDS9TyO8ZCFLCOKQV2kHIeoEYV0-ogTPmA>
+    <xmx:c16iaqGoYFIJJE33l40WiDqV8AF99h1vstdjAx6g_SrMCXOqCpDUvg>
+    <xmx:c16iam0FJ6Bn95k4OMyW_vkHjDpmRuv9On4R6guwa9blRW8V2IGJJ1Am>
 Feedback-ID: ice86485a:Fastmail
 Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 05214F8007D; Thu, 10 Sep 2026 03:33:37 -0400 (EDT)
+	id 7C466F8007D; Thu, 10 Sep 2026 03:38:26 -0400 (EDT)
 X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -59,43 +59,46 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Thu, 10 Sep 2026 09:33:15 +0200
+Date: Thu, 10 Sep 2026 09:38:06 +0200
 From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Hemanth Selam" <hemanth.selam@gmail.com>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
-Message-Id: <85a1dfdf-e3da-43b0-92d6-c7dc2631bcfa@app.fastmail.com>
-In-Reply-To: <20260904112009.33620-1-hemanth.selam@gmail.com>
-References: <20260904112009.33620-1-hemanth.selam@gmail.com>
-Subject: Re: [PATCH] firmware: efi: fix typo "existance" in comment
+To: "Danish Khateeb" <danishkhateeb03@gmail.com>
+Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Message-Id: <8aae5b53-fbaa-43b1-97df-283730aeff8c@app.fastmail.com>
+In-Reply-To: <20260904153131.134383-1-danishkhateeb03@gmail.com>
+References: <20260904153131.134383-1-danishkhateeb03@gmail.com>
+Subject: Re: [PATCH] efi/capsule-loader: Replace kmap() with kmap_local_page()
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 
 
-
-On Fri, 4 Sep 2026, at 13:20, Hemanth Selam wrote:
-> Correct "existance" to "existence", reported by scripts/checkpatch.pl using
-> the misspelling list in scripts/spelling.txt.  Only touches comments, no
-> code changes.
+On Fri, 4 Sep 2026, at 17:31, Danish Khateeb wrote:
+> kmap() is deprecated in favour of kmap_local_page(), as described in
+> Documentation/mm/highmem.rst.
 >
-> Assisted-by: Cursor:claude-opus-5
-> Signed-off-by: Hemanth Selam <hemanth.selam@gmail.com>
+> The conversion is safe here. efi_capsule_write() maps the page and
+> releases it within the same call, on both the success and the fail_unmap
+> error path, so the mapping never escapes the thread that created it and
+> the stack-based unmap ordering is preserved. No atomic context is
+> involved: the page is allocated with alloc_page(GFP_KERNEL) just above,
+> and the copy_from_user() performed while the page is mapped is fine
+> because faults are permitted in a local kmap region.
+> efi_capsule_setup_info() also runs while the mapping is live, but only
+> reads through the pointer.
+>
+> kunmap_local() is handed a pointer that has been advanced into the page,
+> which is fine as it masks the address back down to the page boundary.
+>
+> Build-tested only, on i386 with CONFIG_HIGHMEM=y -- where
+> kmap_local_page() actually establishes a mapping rather than returning
+> the direct-map address -- and on x86_64. No new gcc or sparse warnings.
+>
+> Assisted-by: LLM sparse
+> Signed-off-by: Danish Khateeb <danishkhateeb03@gmail.com>
 > ---
->  drivers/firmware/efi/efi.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/firmware/efi/capsule-loader.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 0327a39d31fa..846179b23160 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -8,7 +8,7 @@
->   *
->   * This code registers /sys/firmware/efi{,/efivars} when EFI is supported,
->   * allowing the efivarfs to be mounted or the efivars module to be loaded.
-> - * The existance of /sys/firmware/efi may also be used by userspace to
-> + * The existence of /sys/firmware/efi may also be used by userspace to
->   * determine that the system supports EFI.
->   */
-> 
 
 Queued up in efi/next - thanks.
+
