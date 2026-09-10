@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6772E3A9871;
-	Thu, 10 Sep 2026 04:20:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7492630E0D5;
+	Thu, 10 Sep 2026 04:20:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789014032; cv=none; b=AeoSc+pD0J5Hpl2nc/ysCeQmUkqqrPEEiZnm97T7v7+gLaGqj5nqPe/CO/bByYM3gFVleMVDJAjLoI9wzIYsbKf9rPIyFcfmB0lTfs8gUVd11wVbv1zsxMEAl1/OsFQ09tujqV4OFVLRkcfhX8He7OhHYeo+055XvYhqnJossn4=
+	t=1789014041; cv=none; b=GqfaIrZtcrnY2ZaOg+dQJHyN1P7HIhHDm6keb3Bi2fEYTqvWX69xID3i3/fNzK1ZowPywJVpRiV8qfI4rdvynZH4QVW9alTCQBwFWUVys+gkeTLU9gx8O4NjAVQBcmxkSBbVqTSSmx3pTWX864sMVz4ynhR4aAID9tVIOO1OfKY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789014032; c=relaxed/simple;
-	bh=1LFSzvqpCVNNJ9TQXhcT9L2wj+5Vsf0qujUp2w7rHOI=;
+	s=arc-20240116; t=1789014041; c=relaxed/simple;
+	bh=a5vCGhYhznJBlAMg4zpoxcfM/5J2iEIIOrHpjRAzbMw=;
 	h=MIME-Version:Content-Type:Subject:From:To:Cc:In-Reply-To:
-	 References:Date:Message-Id; b=sbuy+hHztGfWmH4Y8+mTfCgV42X86wqRUXmB1qeigBPL4dusWpoFUECgPz/h9rn+bpjgbi++qZuoAoZs3jx2IeXzliKyiEvG0Ou9suSPHunxTvIa1J7+2iHbxgcdyR2bPGvjU8ZUX+zRQx7rX3SSprxWyjCed7M0fDntlA6LMhw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZWgIgGMp; arc=none smtp.client-ip=100.103.45.18
+	 References:Date:Message-Id; b=X1qm6hdw8eZHVYIPpKagicbb/PsJo0Ry3TvnKuYmEIhYNrbvvqodZeS1EVlNqYsFrxpprQshc80ntqYnjxWQ4TrkGWD2qEM/6IjFcFKv5nsYyYvcHaWzDHEdl/0i+cBF2KAA/PkWNp5H0Mjp5fXKr7o7rtTje3C60hhjhoW4wTk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kbGauKZR; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZWgIgGMp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 98BD31F00893;
-	Thu, 10 Sep 2026 04:20:20 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kbGauKZR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5FE1D1F00898;
+	Thu, 10 Sep 2026 04:20:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789014029;
-	bh=VKklRIsIxfcoqhL1bLbYjXtyVgG12YsgMkjcgJHF19w=;
+	s=k20260515; t=1789014039;
+	bh=hkHaj3ZDY+GSiiQATaD5l0BDY5zlIy2Z0yK6RtmhmEw=;
 	h=Subject:From:To:Cc:In-Reply-To:References:Date;
-	b=ZWgIgGMpyJn8Q23MKsmUyrNiPnuYsuNq5Ku3nu7xOfiGaIP/fA/vz3QWqfKaDkgJ7
-	 6HuSxa38Cnsby5LJui4B1xPYy8/rn6EGaTgai9SPpMEVHvn6ee2YTCsUVqQmN6bc86
-	 ZPjRgz5a3k3wmx1cqiVM8fG/YHegIBIZnjil2lsQpb/nzBGoVnvf9xv08TkLxLUHgC
-	 Ttci1rqJUVBFT6aAGuNRyIQJ3uKuKyISYAbIJXV5B5pHGHyBEM2Mql04RPifUAZNCH
-	 IHXSesZbThqRTT8Fh7hVHk5QQMpOGHhk1vBBZ/xHZy4p8FKLPMcGjwLmDyM2UBQaXv
-	 IdzkSKQ0Jd3jw==
+	b=kbGauKZREquije9DUIiTkfeZg0qIjFXk2gcbTwlmC+7OtseDZctgB3M3HK1V2D81x
+	 n3r9cLIbTPlFFkueISLJEGjql/IqWAnhXZ1j1ZzU3a/NaRxNjf3DvnvKhrKyhL7OIk
+	 oS4EDj6blPSq5tgmLWRgRikxHXdtMg8AU4PKJLjdDGS3i1JBttxQr37jNhMl0aPD9W
+	 Er0QhBk6mbH0lpgEqy/3CneXCNIBJ6qxXZEdEdd8buyYao7i2IO3ItR7snQuSf4Ew9
+	 S7LJmPNpX+6K44V4HVaoUEXusz583gyhhUDa3Ez2uboX2AHQjj+VH+pwUjL7aPcHh6
+	 RL7H57msT+0Ow==
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -34,8 +34,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 06/23] kbuild: only emit vmlinux relocations when
- required
+Subject: Re: [PATCH 09/23] kbuild: do not allocate .modinfo in vmlinux
 From: Nathan Chancellor <nathan@kernel.org>
 To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -69,115 +68,116 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
  linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
  linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <20260908-build-speedup-v1-6-5dc1ac01672d@kernel.org>
+In-Reply-To: <20260908-build-speedup-v1-9-5dc1ac01672d@kernel.org>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
- <20260908-build-speedup-v1-6-5dc1ac01672d@kernel.org>
+ <20260908-build-speedup-v1-9-5dc1ac01672d@kernel.org>
 Date: Wed, 09 Sep 2026 21:19:12 -0700
-Message-Id: <178901395291.3971858.16666031836463650276.b4-review@b4>
+Message-Id: <178901395291.3971858.229822965899686230.b4-review@b4>
 X-Mailer: b4 0.17-dev
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3738; i=nathan@kernel.org;
- h=from:subject:message-id; bh=1LFSzvqpCVNNJ9TQXhcT9L2wj+5Vsf0qujUp2w7rHOI=;
- b=owGbwMvMwCUmm602sfCA1DTG02pJDFmL9I83l26TUGp7eTXM6JyC2iTRNbqhVz+eVzdjnHf+2
- O3fh9PqOkpZGMS4GGTFFFmqH6seNzScc5bxxqlJMHNYmUCGMHBxCsBEEvMZ/il/Pq+9/aDFQnsJ
- 2SnLJn1+MP3wvNVbOWz2pOzhOJQTtO02w38v5XOfk6x2C7PslDO5JXYr9VP6nyuaxQqL9k/5vzQ
- nV4kZAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4511; i=nathan@kernel.org;
+ h=from:subject:message-id; bh=a5vCGhYhznJBlAMg4zpoxcfM/5J2iEIIOrHpjRAzbMw=;
+ b=owGbwMvMwCUmm602sfCA1DTG02pJDFmL9I8nHrvkaPxN3ne7cs6Dons1x3siyrZP4+nb3N17W
+ fVCwTnPjlIWBjEuBlkxRZbqx6rHDQ3nnGW8cWoSzBxWJpAhDFycAjARl3OMDI9djia9e6p1fv3C
+ HuPmopkCPkZ7BDpj+kwvPGDPkFN/9peR4ajAj7uTPi8/1fz8Qc+TyH19LwrFHzgl/00KYAifJbW
+ OmRsA
 X-Developer-Key: i=nathan@kernel.org; a=openpgp;
  fpr=2437CB76E544CB6AB3D9DFD399739260CB6CB716
 
-> A kernel build consists of more than one linking pass on vmlinux.o and
-> vmlinux, at minimum two, and with CONFIG_KALLSYMS and BTF enabled on x86-64
-> for example there are 5 such stages.
+> Commit 3e86e4d74c04 ("kbuild: keep .modinfo section in vmlinux.unstripped")
+> placed MODULE_INFO() strings in the .modinfo section in vmlinux.unstripped,
+> however it left the section allocatable, so it gets assigned an address and
+> on arm64, arm and riscv, the section is tagged as PT_LOAD.
 > 
-> For architectures that build their own relocation tables (x86, riscv, mips,
-> s390), vmlinux is linked with the --emit-relocs parameter specified.
+> This is useless as the data is ultimately stripped anyway.
 > 
-> However, this is only required on the final vmlinux link.
+> Doing this results in a lot of unnecessary work - each pass copies the
+> whole file, 450 MIB with relocations for an x86 allmodconfig build and 250
+> MiB for an arm64 allmodconfig build.
 > 
-> Symbol tables of trial links preceding it don't need it because they
-> already check that System.map matches kallsyms symbols on each build.
+> This adds ~0.7s on the serial tail of every build for arm64 and ~0.2s for
+> x86 (the tail is single-threaded work done after parallel work has
+> finished).
 > 
-> GNU ld is slow at emitting relocation tables, so this results in a
-> reduction in build time.
+> Nothing requires .modinfo to exist at an address, so fix this by using
+> --dump-section which prevents the allocation.
+> 
+> Image, bzImage, System.map and modules.builtin.modinfo are unchanged and
+> the stripped vmlinux differs only in its program headers.
+> 
+> The objcopy passes are on the serial tail of every build that links
+> vmlinux, no-op builds are unchanged.
 > 
 > Whole build, 128-thread Threadripper 9980X, best of N runs:
 > 
 >                                          before   after     delta
 >                                          -------------------------------
->   x86 defconfig, touch mm/vma.c, gcc        9.8s     9.4s    -0.43s (-4%)
->   x86 defconfig, clean, gcc                28.6s    28.1s    -0.47s (-2%)
->   x86 allmodconfig, touch mm/vma.c, gcc    44.0s    42.7s     -1.3s (-3%)
-> 
-> Note that this has little impact on LLVM ld which performs this operation
-> more efficiently.
+>   x86 defconfig, touch mm/vma.c, gcc        8.9s     8.8s    -0.16s (-2%)
+>   x86 defconfig, touch mm/vma.c, clang      8.1s     7.9s    -0.20s (-2%)
+>   x86 defconfig, clean, gcc                27.6s    27.5s    -0.13s (0%)
+>   x86 defconfig, clean, clang              27.2s    27.0s    -0.18s (-1%)
+>   x86 allmodconfig, touch mm/vma.c, gcc    42.0s    41.6s    -0.40s (-1%)
 > 
 > Assisted-by: LLM
 > Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 >
-> diff --git a/Makefile b/Makefile
-> index 9bd226726358..de095b11e20a 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -1266,8 +1266,10 @@ LDFLAGS_vmlinux += --orphan-handling=$(CONFIG_LD_ORPHAN_WARN_LEVEL)
->  endif
+> diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
+> index b2988aa12f66..7be9e0321867 100644
+> --- a/include/asm-generic/vmlinux.lds.h
+> +++ b/include/asm-generic/vmlinux.lds.h
+> @@ -855,7 +855,7 @@
+>  		KLP_SYMID
 >  
->  ifneq ($(CONFIG_ARCH_VMLINUX_NEEDS_RELOCS),)
-> -LDFLAGS_vmlinux	+= --emit-relocs --discard-none
-> +LDFLAGS_vmlinux	+= --discard-none
-> +LDFLAGS_vmlinux_relocs := --emit-relocs
->  endif
-> +export LDFLAGS_vmlinux_relocs
+>  #define MODINFO								\
+> -		.modinfo : { *(.modinfo) . = ALIGN(8); }
+> +		.modinfo (INFO) : { *(.modinfo) . = ALIGN(8); }
 >  
->  # Align the architecture of userspace programs with the kernel
->  USERFLAGS_FROM_KERNEL := --target=%
+>  #ifdef CONFIG_GENERIC_BUG
+>  #define BUG_TABLE							\
 > diff --git a/scripts/Makefile.vmlinux b/scripts/Makefile.vmlinux
-> index fcae1e432d9a..4b54aaeca65d 100644
+> index 4b54aaeca65d..1fc7a0ca8eaf 100644
 > --- a/scripts/Makefile.vmlinux
 > +++ b/scripts/Makefile.vmlinux
-> @@ -64,7 +64,8 @@ ARCH_POSTLINK := $(wildcard $(srctree)/arch/$(SRCARCH)/Makefile.postlink)
+> @@ -90,11 +90,9 @@ remove-section-$(CONFIG_ARCH_VMLINUX_NEEDS_RELOCS) += '.rel.*'
 >  
->  # Final link of vmlinux with optional arch pass after final link
->  cmd_link_vmlinux =							\
-> -	$< "$(LD)" "$(KBUILD_LDFLAGS)" "$(LDFLAGS_vmlinux)" "$@";	\
-> +	$< "$(LD)" "$(KBUILD_LDFLAGS)" "$(LDFLAGS_vmlinux)" "$@"	\
-> +	   "$(LDFLAGS_vmlinux_relocs)";					\
->  	$(if $(ARCH_POSTLINK), $(MAKE) -f $(ARCH_POSTLINK) $@, true)
+>  remove-symbols := -w --strip-unneeded-symbol='__mod_device_table__*'
 >  
->  targets += vmlinux.unstripped .vmlinux.export.o
-> diff --git a/scripts/link-vmlinux.sh b/scripts/link-vmlinux.sh
-> index 970ca10f8fa9..09c5222ccb94 100755
-> --- a/scripts/link-vmlinux.sh
-> +++ b/scripts/link-vmlinux.sh
-> @@ -32,6 +32,7 @@ LD="$1"
->  KBUILD_LDFLAGS="$2"
->  LDFLAGS_vmlinux="$3"
->  VMLINUX="$4"
-> +LDFLAGS_vmlinux_relocs="$5"
+> -# To avoid warnings: "empty loadable segment detected at ..." from GNU objcopy,
+> -# it is necessary to remove the PT_LOAD flag from the segment.
+> +# none of the removed sections is allocated, so no segment is left empty
+
+I think we could just drop this comment, I don't think it is
+particularly helpful
+
+>  quiet_cmd_strip_relocs = OBJCOPY $@
+> -      cmd_strip_relocs = $(OBJCOPY) $(patsubst %,--set-section-flags %=noload,$(remove-section-y)) $< $@; \
+> -                         $(OBJCOPY) $(addprefix --remove-section=,$(remove-section-y)) $(remove-symbols) $@
+> +      cmd_strip_relocs = $(OBJCOPY) $(addprefix --remove-section=,$(remove-section-y)) $(remove-symbols) $< $@
 >  
->  is_enabled() {
->  	grep -q "^$1=y" include/config/auto.conf
-> @@ -96,6 +97,11 @@ vmlinux_link()
->  		ldflags="${ldflags} ${wl}--strip-debug"
->  	fi
+>  targets += vmlinux
+>  vmlinux: vmlinux.unstripped FORCE
+> @@ -103,21 +101,11 @@ vmlinux: vmlinux.unstripped FORCE
+>  # modules.builtin.modinfo
+>  # ---------------------------------------------------------------------------
 >  
-> +	# Only the final link actually requires the relocations.
-> +	if [ "${output}" = "${VMLINUX}" ] && [ -n "${LDFLAGS_vmlinux_relocs}" ]; then
-> +		ldflags="${ldflags} ${wl}${LDFLAGS_vmlinux_relocs}"
-> +	fi
-> +
+> -# .modinfo in vmlinux.unstripped is aligned to 8 bytes for compatibility with
+> -# tools that expect vmlinux to have sufficiently aligned sections but the
+> -# additional bytes used for padding .modinfo to satisfy this requirement break
+> -# certain versions of kmod with
+> -#
+> -#   depmod: ERROR: kmod_builtin_iter_next: unexpected string without modname prefix
+> -#
+> -# Strip the trailing padding bytes after extracting .modinfo to comply with
+> -# what kmod expects to parse.
+> +# use --dump-section to include non-allocated sections
 
-We don't use LDFLAGS_vmlinux_relocs anywhere else, so do we even need
-this whole dance to just end up with the equivalent of
+Same thing here, I am not sure anyone will question '--dump-section'
+here. Otherwise, this seems reasonable. I was curious about the $@.tmp
+until I read the objcopy manual but that probably is not worth a
+comment.
 
-  if [ "${output}" = "${VMLINUX}" ] && is_enabled CONFIG_ARCH_VMLINUX_NEEDS_RELOCS; then
-    ldflags="${ldflags} ${wl}--emit-relocs"
-  fi
-
-which would make this diff much simpler?
-
-That being said, Sashiko makes a comment that may be relevant, have not
-verified though:
-
-  https://sashiko.dev/#/message/20260908-build-speedup-v1-6-5dc1ac01672d@kernel.org
+I can probably take this one faster than the rest if you want to put it
+early in the stack since it is pretty low hanging fruit and earlier it
+gets exposure to -next, the better.
 
 -- 
 Cheers,
