@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1EED9337699;
-	Thu, 10 Sep 2026 04:20:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 374B43A9871;
+	Thu, 10 Sep 2026 04:20:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789014002; cv=none; b=H9zrI6NFnHcML3RNLXYMKBjxYY6paMiv6SPXB6zGpIyIG+/+JyzMPezCewxL58P0bvgGB1VrcvARLwrSVd9SieZwxuDmFuxTeuSepUSciZbKHwTq1ogQOjre2+jQPaRYYrgNFix7Lm4lTivMax/88rJjcWQPmClhrYaToY27WyA=
+	t=1789014012; cv=none; b=gss5+lGsArJyGnKg0X0X1pt/glEIthUaD9zuKMK7ClVUtQOXOSptp2gHnF+9ZTSwtDJV+SkbtB76nldXByCQLwipr/q23kOgzc8riZeDl17U5shVtaKlwu1KgPVJcoL31h0Cl/nshxyaOixWYov0ioWAtkDkzCR/Qi9a1tiM2K4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789014002; c=relaxed/simple;
-	bh=05GrEiERSxx2o6qsJloijB2A+3tAXcR6CUyQjUdQZFs=;
+	s=arc-20240116; t=1789014012; c=relaxed/simple;
+	bh=zHPj2szBcbSmoH4JwyFcKVpCllXE2+9N70k9qnFBnXw=;
 	h=MIME-Version:Content-Type:Subject:From:To:Cc:In-Reply-To:
-	 References:Date:Message-Id; b=QVF2s9hGRX6SbDB6rhXcV5BnfS0spxDYMwxMLGGLSKGcQq1Fknj0EBi9NaS5s8pNDbi4iohNJO4dAAMvRPiykhPQ2+LaSk0vaxDodd2TgI2VvVMH5lxaQL5rKSaoeSr6CL8FjLV/h6nyFTs8FloGE2B1RDzJZfYgBfjEq3r0vjs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Wn885YSU; arc=none smtp.client-ip=100.103.45.18
+	 References:Date:Message-Id; b=AagZPLLs5kFo1BxW6mT2OHGDYY8hg2ppfuQ6Hke9VHIqj6wLONu7cvqrCmUCyvp/hNVfvDd0bB5pKg7IGtzNYZNxn8StTPupogoUZsK/8D/lcA919jH8mfzS9wj5xG/9AY9jemSX4gdet1TwYj+euNFB1V+iHUCptfohXHu7dSo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EKyQjsS6; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Wn885YSU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 32D3C1F00898;
-	Thu, 10 Sep 2026 04:19:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EKyQjsS6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 106651F00893;
+	Thu, 10 Sep 2026 04:20:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789014000;
-	bh=PntnJdn7wAwHgF/WIFXSRem+NenOWRytScTjrxTXlZs=;
+	s=k20260515; t=1789014010;
+	bh=JReepVN6gwZiOP6ZjKJTxF3z3jlGbnLgDKNGMegArdA=;
 	h=Subject:From:To:Cc:In-Reply-To:References:Date;
-	b=Wn885YSUx6EhO3wdOpSpXXaVKGNMMVKk3NXGiT+3dhCHXunvwHoaeTNzKDDW3muQM
-	 /Cmsj5eUirNpEY3dKG84LypVVldgp8ycUb5GclC+HNgOZBIx25BcnnZZ6ooL+TrM8W
-	 ypPM3MrB5xyy+G2FlPKMqGIiQDxFx4SiqjdV3TujYdzNAxUMP/lUMpPrI/2jAMgl83
-	 +pHOdjO95VoBAFjWWOK6UZYfATvZloKCmfqYJrpJIcpG2C/QOGVBBCVELcZMdfH183
-	 D1wFRvpw6XJiytJWUbJIMm7LbZC+3eWU/yaMRdA5l+KTNw94XCB2MRSSY88gBUUBcO
-	 vQbfXevz6Wpeg==
+	b=EKyQjsS6e6XEhJdYz9bhpQio2w5YXD1FuxIrHGQAxRkY9oBM0vocah1F/W6sDfIic
+	 tz1/Bk3fzoC0Zyw+wnJ6F82uubGm4IS6jP01mmDUwUz/1fwgis3rvUIYK07MjwCDDP
+	 eThnYCq8yct9FvFK4qtPpASRQAFv4ymdgI50pxzeqy7A4wI7RxT+taUP6/xuWRs/u5
+	 GBa0CEi7VjtmoDUUgYGNCEZu4mH+sXc3GdYSe9im2R5GSptHYh0W8WdTJBOOLaSi1P
+	 LS17BkT7TWDiyNl+iXPFbzHCYqg5LW+xeB9vhKPWBC4Dfh/ZCbfcfnsSr7zXSiTUrq
+	 WZ+mZ8Tsci/YA==
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -34,8 +34,8 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 01/23] scripts/mksysmap: drop the MODULE_INFO() symbols
- from kallsyms
+Subject: Re: [PATCH 02/23] scripts/mksysmap: fix escape of '$' in the __pi_
+ pattern
 From: Nathan Chancellor <nathan@kernel.org>
 To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -69,56 +69,55 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
  linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
  linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <20260908-build-speedup-v1-1-5dc1ac01672d@kernel.org>
+In-Reply-To: <20260908-build-speedup-v1-2-5dc1ac01672d@kernel.org>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
- <20260908-build-speedup-v1-1-5dc1ac01672d@kernel.org>
+ <20260908-build-speedup-v1-2-5dc1ac01672d@kernel.org>
 Date: Wed, 09 Sep 2026 21:19:12 -0700
-Message-Id: <178901395288.3971858.7586978173036863863.b4-review@b4>
+Message-Id: <178901395289.3971858.3678831513020211615.b4-review@b4>
 X-Mailer: b4 0.17-dev
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1360; i=nathan@kernel.org;
- h=from:subject:message-id; bh=05GrEiERSxx2o6qsJloijB2A+3tAXcR6CUyQjUdQZFs=;
- b=owGbwMvMwCUmm602sfCA1DTG02pJDFmL9I/pB2VJsrxwyw7jEfNfx2DwuKTvg+mbj1WLq05uk
- m9bIrG1o5SFQYyLQVZMkaX6sepxQ8M5ZxlvnJoEM4eVCWQIAxenAEzkYwXDH0725eE50XvX/3pX
- +UkiXdfetfLJem2OqW/dzs87vFtIz56RYcNpyWmNGTvqNlSb3V3Q/Kcx55TZijNtD33WZT8+sD7
- jDC8A
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1389; i=nathan@kernel.org;
+ h=from:subject:message-id; bh=zHPj2szBcbSmoH4JwyFcKVpCllXE2+9N70k9qnFBnXw=;
+ b=owGbwMvMwCUmm602sfCA1DTG02pJDFmL9I+xrQq3kizjPMF5IunRUd9HG227qlb41T+wmvQj0
+ UPpUGtMRykLgxgXg6yYIkv1Y9XjhoZzzjLeODUJZg4rE8gQBi5OAZjI/BCG/86vZDfafFTa+W5W
+ 16etDJcMDQ8xugccf3n4SfNe0XN75x9n+B96Vka7XEJY9Qr331Avtb3Tp5fIP5h8SOr+DN1lkbk
+ FWuwA
 X-Developer-Key: i=nathan@kernel.org; a=openpgp;
  fpr=2437CB76E544CB6AB3D9DFD399739260CB6CB716
 
-> Commit 3e86e4d74c04 ("kbuild: keep .modinfo section in vmlinux.unstripped")
-> keeps .modinfo symbols out of System.map and kallsyms, which assumes unique
-> IDs have a format like '__UNIQUE_ID_modinfo123'.
+> Commit b18b047002b7 ("kbuild: change scripts/mksysmap into sed script")
+> converted scripts/mksysmap from a shell script to a sed script.
 > 
-> However, commit afb026b6d35c ("compiler: Tweak __UNIQUE_ID() naming"), sent
-> in the same cycle, changes this to '__UNIQUE_ID_modinfo_123'.
+> However an error was made - escaping of '$' required \\ escaping in shell
+> but only \ in a sed script.
 > 
-> As a result this regexp has never matched and every kernel since v6.18 has
-> carried one kallsyms entries for every MODULE_INFO() declaration in the
-> kernel whether the modules are compiled or not.
+> This was mostly corrected in commit 7a6c355b55c0 ("scripts/mksysmap: Fix
+> escape chars '$'"), but this fix missed arm64 PIE namespace local symbols
+> like __pi_$x and __pi_$d which appear in System.mapand /proc/kallsyms:
 > 
-> That's 5,810 entries for an x86 defconfig build and 15,200 for arm64.
+> $ grep __pi_\\$ /proc/kallsyms | sort -u
+> 0000000000000000 d __pi_$d
+> 0000000000000000 t __pi_$x
 > 
-> On x86 defconfig that is 113 KiB of kallsyms tables and 32 KiB of bzImage,
-> and every lookup walks past them.
+> Fix the escaping properly.
+> 
+> Fixes: b18b047002b7 ("kbuild: change scripts/mksysmap into sed script")
+> 
+> No measurable change in build time.
 
-Bummer :/
-
-> Fix the pattern.
-> 
-> Fixes: 3e86e4d74c04 ("kbuild: keep .modinfo section in vmlinux.unstripped")
-> 
-> No measurable change in build time, the smaller tables are not on any path
-> the build waits for.
-
-I don't think this needs to be in the commit message, it could be below
-the fold, since it appears to be a valid fix on its own. Agree with
-Nicolas on adjusting the Fixes tag.
-
-Is this worth Cc'ing stable for?
+Same comments as before.
 
 > Assisted-by: LLM
 > Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 
-Reviewed-by: Nathan Chancellor <nathan@kernel.org>
+Same thing, is this worth taking to stable? Truthfully, you could
+probably send these two changes separately from the series so that we
+could send them to Linus with the other pending Kbuild fixes, unless
+there are objections from Linus or Nicolas on taking that route? Shaving
+two patches off of an ~20 patch series is a 10% reduction so seems worth
+it?
+
+I'll review some of the other low hanging fruit now so that we can start
+chunking this series out, since I too care deeply about build times.
 
 -- 
 Cheers,
