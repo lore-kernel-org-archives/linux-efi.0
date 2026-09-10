@@ -1,132 +1,167 @@
-Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail.avm.de (mail.avm.de [212.42.244.94])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D8BA47D468;
-	Thu, 10 Sep 2026 13:12:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7F9D47C0E6;
+	Thu, 10 Sep 2026 15:42:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.42.244.94
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789045974; cv=none; b=X571/Xo7786sRhSFOeUtBoIOB1VGuEzT3/yCbe5TnpwjlUNqDJGIIsSNEgLfD7OeRXmqVwoGU3nIfRx5Ii2tK5qD4gxoYhZOOvxD38N0YErFQjLsEweUvLdApoG/xMFBtvs/CE4uW41vP6QX3GfZpaVndzbnaOA9XSOfbdqNt+M=
+	t=1789054965; cv=none; b=uqZpHhWW4VhWb3IYUuUn0vlNNivFRNnFgYtKLdVf+qlml2jIDTPAS/tqp805UoR9gyXwDah9y62aBfUCPjFM1JTI6uTSgv32DbvidOvzz0QKq+qhkIck+okeqxtbyJV1lzQgTyCPCjC1MvWKQFV3hMy3q9QZIGq1tVKi2fZ5R9Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789045974; c=relaxed/simple;
-	bh=0jkxfEczfdXgoVd/1L7GqIHWvOTEnG45Ffk742VLST0=;
+	s=arc-20240116; t=1789054965; c=relaxed/simple;
+	bh=LK8bkV1Vz0floem0tDs4fowSkN+VH/bI8JorqlPfxFI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TNIxnLJ4sqC3z2RgEF1v0HWscmBcW7c1UZPMDXXKs7vIoMU3Hg+tWXv97wtapxkmPLXWNLy6bMRPOyA+QpG654HbeFGmU9iwfvgMIVxGN7nyaczsEGKy5S3fVrXAN2pCOYYgYzzc810U347Ior+z3Bfsb19O7gziyZpOXUiVLVo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=AuqZrEh/; arc=none smtp.client-ip=82.195.75.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=vEhI2adnYKEjFaB2+xveoEcnm1S+SPsbE1Uz9LCU86YqeHWXdnnTHw21RWTjXLKf1N5Y8vJuBOuJjYv6HhJjzDQLqleeHV6ioNF47LrlwLAPTvUIWxJ4UlRqZPeVL81F9unhRwSSjy4rQdcpyB9WRSVG3eRdwXDjVwb4Kh3i6S0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fritz.com; spf=pass smtp.mailfrom=fritz.com; dkim=pass (2048-bit key) header.d=fritz.com header.i=@fritz.com header.b=m2t/gCBQ; arc=none smtp.client-ip=212.42.244.94
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fritz.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fritz.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="AuqZrEh/"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
-	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=kNyABl3CZEW2VceQ9RPkhr81c66ogdLDFwy8ZLemQBA=; b=AuqZrEh/loPwu80xoo+6bFKkEq
-	D6bmTxKs6ubIzvlQLl6ThDG3wDMZZmUNKuNnHTkItBlmAFUBBN/Pnk5cX8FViRxsGwizxtujk1/mO
-	/BqoKI/sTi5zF2MRq9wUXR2K3bqUKC3ujAzlrBvPnMwhmV6Isz7sUSBU0qULx1hOzj2ZpTuQ+qqR6
-	taU/sjiiLY39JDGLcN5Q6Ux6mxw6A0JgJu/H456kgzTzNX1r26Ogi4u7JfELMyAGRKufRQD9eXZlJ
-	JFXG0fLOR1FwHdLSDNtwKtVbMd4i04PUi2uO0SFy/nP7GRIsXioBCLJJuABTsbQJWIwb3P8J1D1pZ
-	q2iks6CA==;
-Received: from authenticated-user
-	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
-	(Exim 4.96)
-	(envelope-from <leitao@debian.org>)
-	id 1x4eZN-000XBL-1U;
-	Thu, 10 Sep 2026 13:12:02 +0000
-Date: Thu, 10 Sep 2026 06:11:53 -0700
-From: Breno Leitao <leitao@debian.org>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
-	Miaohe Lin <linmiaohe@huawei.com>, Naoya Horiguchi <nao.horiguchi@gmail.com>, 
-	Andrew Morton <akpm@linux-foundation.org>, "Kiryl Shutsemau (Meta)" <kas@kernel.org>, 
-	kexec@lists.infradead.org, David Hildenbrand <david@kernel.org>, 
-	Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>, 
-	Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>, 
-	Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>, 
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H . Peter Anvin" <hpa@zytor.com>, 
-	Brendan Jackman <brendan.jackman@linux.dev>, Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>, 
-	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, 
-	rmikey@meta.com, riel@surriel.com, harry@kernel.org, kernel-team@meta.com
-Subject: Re: [PATCH v4 2/5] mm/memory-failure: libstub: install the
- poisoned-memory EFI table
-Message-ID: <aqKhgPKzRf0e22s3@gmail.com>
-References: <20260909-hwpoison-kho-v4-0-359313564495@debian.org>
- <20260909-hwpoison-kho-v4-2-359313564495@debian.org>
- <2c9a7bef-3189-4f78-a6cb-61d2f7afd643@app.fastmail.com>
+	dkim=pass (2048-bit key) header.d=fritz.com header.i=@fritz.com header.b="m2t/gCBQ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=fritz.com; s=mail;
+	t=1789054956; bh=LK8bkV1Vz0floem0tDs4fowSkN+VH/bI8JorqlPfxFI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=m2t/gCBQ5Ji+klRB77okzADkIBpOjucABpFdn1joI6CGFroNQ2dok89iTW7zlsgDJ
+	 OhupApf9LKIRvcGE2XGbdgRc1L/Cyu778E8qiCt5Mx3N/HSwPKfTDWrLuQBULuYETh
+	 DEpZTMKIWNIB95kcOEYyM+KTdXBA1kly0af9dVc2J1yCQpvugpbSIq04iHmdW/EGZ3
+	 Y4A/qaU5/ks6TeFtBhGFS/mS3OdzSq+oJRGgjHfaRsaS82LquTqTSeUDZk3Yd/dQog
+	 lg48YsTm0IrzSWtTPbK8Ble4vH9U4bTyk8isOlH6ribTe1cTR6+aKHV2VGyYR9cK7K
+	 zTVgF+ct8Jfhw==
+Received: from [212.42.244.78] (helo=mail.avm.de)
+	by mail.avm.de with ESMTP (eXpurgate 4.57.1)
+	(envelope-from <n.schier@fritz.com>)
+	id 6aa2cfec-6dc7-7f0000032729-7f000001a7b2-1
+	for <multiple-recipients>; Thu, 10 Sep 2026 17:42:36 +0200
+Received: from mail-auth.fritz.com (unknown [212.42.244.78])
+	by mail.avm.de (Postfix) with ESMTPS;
+	Thu, 10 Sep 2026 17:42:36 +0200 (CEST)
+Date: Thu, 10 Sep 2026 17:42:35 +0200
+From: Nicolas Schier <n.schier@fritz.com>
+To: Nathan Chancellor <nathan@kernel.org>
+Cc: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
+	Linus Torvalds <torvalds@linux-foundation.org>,
+	Nick Desaulniers <ndesaulniers@google.com>,
+	Bill Wendling <morbo@google.com>,
+	Justin Stitt <justinstitt@google.com>,
+	Masahiro Yamada <masahiroy@kernel.org>,
+	Alexey Gladkov <legion@kernel.org>,
+	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+	"H. Peter Anvin" <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Josh Poimboeuf <jpoimboe@kernel.org>,
+	Peter Zijlstra <peterz@infradead.org>,
+	Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>,
+	Gary Guo <gary@garyguo.net>,
+	=?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>,
+	Benno Lossin <lossin@kernel.org>,
+	Andreas Hindborg <a.hindborg@kernel.org>,
+	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>,
+	Danilo Krummrich <dakr@kernel.org>,
+	Daniel Almeida <daniel.almeida@collabora.com>,
+	Tamir Duberstein <tamird@kernel.org>,
+	Alexandre Courbot <acourbot@nvidia.com>,
+	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Randy Dunlap <rdunlap@infradead.org>, linux-kbuild@vger.kernel.org,
+	linux-kernel@vger.kernel.org, llvm@lists.linux.dev,
+	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
+	rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org,
+	Jens Axboe <axboe@kernel.dk>
+Subject: Re: [PATCH 12/23] kbuild: avoid re-running compiler and linker probes
+Message-ID: <20260910-translucent-sweet-sidewinder-7acacb@l-nschier-aarch64>
+References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
+ <20260908-build-speedup-v1-12-5dc1ac01672d@kernel.org>
+ <178901395292.3971858.13236774094648272066.b4-review@b4>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="6NJv2EjhorC/TYUZ"
 Content-Disposition: inline
-In-Reply-To: <2c9a7bef-3189-4f78-a6cb-61d2f7afd643@app.fastmail.com>
-X-Debian-User: leitao
-
-Hello Ard,
-
-Thanks for the feedback!
-
-On Wed, Sep 09, 2026 at 04:47:27PM +0200, Ard Biesheuvel wrote:
-> On Wed, 9 Sep 2026, at 15:05, Breno Leitao wrote:
-> > A EFI config table can only be installed while boot services are still
-> > up, so the stub has to create it; the running kernel can only flip bits
-> > in a table that already exists.
->
-> This is true, but that also means a config table could have a 'next' field
-> pointing to an allocation that was added later.
->
-> There is a EFI memreserve table based on this principle: this is a hack
-> that we added for the arm64 GICv3 LPI table handling, which is a braindead
-> piece of kit that must use the same physical allocation as the previous
-> kernel. It is not currently enabled on x86.
->
-> Please consider whether or not that is more suitable, and can be repurposed
-> or shared. (Feel free to make changes to the current format if needed).
-
-That's actually what I tried in the RFC. I passed an almost-empty EFI
-table, then built a linked list of poisoned pages on top of it.
-
-It looked like this:
-
-	struct linux_efi_poisoned_memory {
-		int		size;			// allocated size of the array
-		atomic_t	count;			// number of entries used
-		phys_addr_t	next;			// pa of next struct instance
-		struct {
-			phys_addr_t	base;
-			phys_addr_t	size;
-		} entry[];
-	};
+In-Reply-To: <178901395292.3971858.13236774094648272066.b4-review@b4>
+Organization: FRITZ! Technology GmbH
+x-ms-reactions: disallow
+X-purgate-ID: 149429::1789054956-F1CDF0BC-4895A414/0/0
+X-purgate-type: clean
+X-purgate-size: 2705
+X-Notice: Whitelisted
+X-purgate: This mail is considered clean (visit https://www.eleven.de for further information)
+X-purgate: clean
+X-pfmilter: host: postfix-mx-03  mail-id: 9AB3CA045E  external: no
 
 
-The allocation walks that list the same way; see
-efi_hwpoison_record_pfn() in patch "[PATCH RFC 2/3] efi: record hardware-poisoned frames into the poisoned-memory table"
+--6NJv2EjhorC/TYUZ
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-This is the RFC patchset:
-https://lore.kernel.org/all/20260717-hwpoison-kho-v1-1-9c5eda551998@debian.org/#t
+On Wed, Sep 09, 2026 at 09:19:12PM -0700, Nathan Chancellor wrote:
+> > diff --git a/init/Kconfig b/init/Kconfig
+> > index 8583d9f06c52..3c92c87254a3 100644
+> > --- a/init/Kconfig
+> > +++ b/init/Kconfig
+> > @@ -144,6 +144,44 @@ config CC_HAS_ASSUME
+> >  config CC_HAS_NO_PROFILE_FN_ATTR
+> >  	def_bool $(success,echo '__attribute__((no_profile_instrument_functio=
+n)) int x();' | $(CC) -x c - -c -o /dev/null -Werror)
+> > =20
+> > +config CC_HAS_ZERO_INIT_PADDING_BITS
+> > +	def_bool $(cc-option,-fzero-init-padding-bits=3Dall)
+> > +
+> > +config CC_HAS_NO_STACK_CLASH_PROTECTION
+> > +	def_bool $(cc-option,-fno-stack-clash-protection)
+> > +
+> > +config CC_HAS_NO_ADDRSIG
+> > +	def_bool $(cc-option,-fno-addrsig)
+>=20
+> I am generally in favor of this proposal since I think these checks
+> should be cached by Kconfig where possible to clear up running them
+> twice. That said, I wonder if we should pick a better dumping ground for
+> these checks other than init/Kconfig. Maybe init/Kconfig.tools or
+> scripts/Kconfig.tools or something?
 
-> I don't have a strong preference either way, but I feel the 2M granularity
-> may be a bit wasteful, no?
+Yes, skimming through the patch, I thought about that, too.  Moving more=20
+cc option checks to Kconfig will make building out-of-tree kmods with a=20
+different compiler more dangerous.  Maybe we will have to make the=20
+warning in Makefile's prepare (external kmods) target a bit louder.
 
-Maybe. It's the same trade-off as unaccepted memory: reducing the
-granularity means growing the bitmap.
+> I also worry about backsliding and growing cc-option checks. Should we
+> update the documentation to state that it is preferrable for these
+> checks to live in Kconfig so that they can be properly cached?
 
-We can reduce the granularity, but I don't think we should reduce the
-granularity if we're going to KEEP using a bitmap.
+Sounds good, yes.
 
-So I'd say we have two options:
+--=20
+Nicolas
 
-1) Keep it similar to unaccepted memory, with 2M granularity.
-   - Pro : Similar mental model as unnacepted memory
-   - Cons: 2 MB might be a bit wasteful 
+--6NJv2EjhorC/TYUZ
+Content-Type: application/pgp-signature; name="signature.asc"
 
-2) Move to a linked list like the RFC, keeping it outside of the EFI
-   table.
-   - Pro: Reduce the memory granularities to page instead of 2M blocs.
-   - Cons: Another way of passing memory information between kexec
-     kernels.
+-----BEGIN PGP SIGNATURE-----
 
-Any any other option or strong preference?
---breno
+iQIzBAABCAAdFiEEDv+Fiet06YHnC6RpiMa8nIiabbgFAmqiz+cACgkQiMa8nIia
+bbgNERAAgCLMWkWnCF5POqjQiZGkZbm/i9SwwH2BVVg0H8Bf+O6WGCZ4YiM0NOu7
+6d9EZV95NkDD36Y3vCEaq1/GclFeUn2ET6HEprS7tQsmYbcofxLYoQuMV/5Si/18
+jJBz3eksIZYRAnSFGG6K1+Hq3u63l3cV5TmRaquZg76LwJkTjCNsFmfT2wxHP40y
+LmkyOsw9NiHo2Bm75Bz8ds7EVqHU/wPxCAWBuiw6ervOrw4RR7PURz61DaBGIuOc
+9B/HnhACn44debha9z9dUTsDIsPsK2sftFLfgJvD8c1V8vj6D1uhX7Fx/hXRElRA
+srsyf2q67EuQ8hKIU8sch6rKkD9slQJd0/w2XNQsONffnO9RghF+Qu8dzo9mUusZ
+l1vYg30SglV5c7m1FlgCvvmvJSppryu6zZw4FgzOUTfcxt6l+VXTm9jaigCWPXbT
+KAYgvQqNVVgkIAg2WDqyiVTeWQxrxo9ctf3m/6srxI4/AkuGZV/XU2m1QiQJxQ5/
+rdm3WGYjD/gVrLPBr6oIoPWDSgP7C4U4kSuZGq1jWAhPeqaa691z+Z5WbRVoVDO/
+SEc1cIdDE88/z8QwIEsgmaXaVhnaCiW66Npfh9zP1J+/pQV3kvU4kf9CIEQ6QMDf
+MPfl1Si0rJA9thzauvNi6Mu6JsUi9FPz7+Oen1Y22eMfv2st6Sc=
+=TUj9
+-----END PGP SIGNATURE-----
+
+--6NJv2EjhorC/TYUZ--
