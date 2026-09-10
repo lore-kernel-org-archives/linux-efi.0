@@ -1,154 +1,109 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE96C3A75BD;
-	Thu, 10 Sep 2026 04:20:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A0FD3C3F7C;
+	Thu, 10 Sep 2026 07:15:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789014061; cv=none; b=cl1UeyYBtESnwOmMvM3NEDRklqeyEAYUA5RUFSTjA1ZpQZkFc8QoHturLxsClRlOrBrEzUxao/IN0N9aVl0rQ1Fp+5TmgdfM3aDDxKBBtnJ0M0Yeyeppy57kHdFHhUoAg1ehVuoLe/Mww2a8mtJEQ68VXmE5btPpanWV+BCl9C8=
+	t=1789024521; cv=none; b=h3JAvpXxNtnwmVKkpAWkGixDrokDRyo+niPSdFUHzNxs0gym+0z9XzLdyT3iAAVKYoIf9zXKRS7zCKmc5reT5bQKbSmR0drXakAUMAxmc6PCbVoh7w4dyyUCavYoJwnMTUKCVVza/RWgcfMnimaZ7piKHAkHfxRlge1hC7ZnLX4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789014061; c=relaxed/simple;
-	bh=Q9fpS3QOis8VywAZ/qxPoy8tzjaMXYquN4IKUkvKQhc=;
-	h=MIME-Version:Content-Type:Subject:From:To:Cc:In-Reply-To:
-	 References:Date:Message-Id; b=fp5vCt3A/ZdoijE6m7BdwVwvTQ0HI+LP04ncpoAVPj8UTyykYoo0uU8Qin7upshKzJUrL5vwKjfBWVsNaZi/MvrIaenhccRxUsNGVNtXX/zU6zUVyU8jXr7lX0HkVTUTQn/mBD0FzU373gC8izCl2y87M2JwS7cpMaQkRIFcv2Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LOau81+D; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789024521; c=relaxed/simple;
+	bh=VDba2KPI6PbIxGphZ1yBNvVNqGQKmRohnd/1QDsjCBw=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=tz7bz9NQ0VuBBX5h8nbhFvSEkthgyoyeweCPWinmaOaO7WuOb08Zgx70mSQpw1is5wpq8OPaWcMmmJcSiqge4vKPjsyKl3tySYfb6fRGgJIRxzi6FNSyYewg3PQJtm1fi9Po8Jp2qXfF+q+MAiruWY7WAq2D19qonOgQlHn2Owg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=APd2mcwW; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LOau81+D"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E21F11F00899;
-	Thu, 10 Sep 2026 04:20:49 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="APd2mcwW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CB0A51F000FF;
+	Thu, 10 Sep 2026 07:15:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789014059;
-	bh=cMnHIsMT3Av8PvHpH9hpF6YHkNFuphcbfvagp11LhEI=;
-	h=Subject:From:To:Cc:In-Reply-To:References:Date;
-	b=LOau81+Dv/xKL32e2arFIbHaGoSgQpb+AI2gkMiaJCJaeihtQd5swFCINh0NS/fXY
-	 27Kt0zTV6Qx+rt+tNM7e3LiacUYitVE3VbDUYt4fK3CxkqLOWV8xMZnj9b0EZaaydq
-	 x0ITEU+kRT6oChGTaf5tWJyEVskqbznIU/K9ReMlsMJoT3+t8D3HQePN+NPTwG2FxI
-	 UlvQCa33hH+CiLDyMyotExom0wtrjvND/SnFBGLN8IV1HUDxDHY5+PXIS4qVzJlL8i
-	 oScYkSwU5i3KJoGevo7zXbKO++vOgA/m63IBuYnGKTZQPikQrdB4KNGx3nNtljAEQZ
-	 HAum+WwKel+ig==
+	s=k20260515; t=1789024520;
+	bh=Q75KCh8j6/6+Ddg9lRQqQ38mf+VZPu1fVc1oyTeyH6g=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=APd2mcwWC6jFrZb3ZYm5Wb6CR7p7YbfxZ6H2XXSUbhGdcaxnqat3yVOCiTAyFkppK
+	 ZDdtI6ykEEweTWhgceOaPRYwf2H/Is9gsEBM2hCaDcXlg5QGM3qmb9jANAioxVJtGt
+	 a5glWVFESrgfCU9/cP/pgwuxdfjFRLOnXcIlgC1JyCkF0krXKelDE1Fpxkj5Ss90gk
+	 p3rSm4o7IUPS/PcgZW+NBVQYbcVv9w4keF4fCoL72VwNfaabWT9yxrE2l8uQum9Kum
+	 MhQQGUDnxCJKjPOuuPbH7n08rBVxGLsZwy1IPm6Ym0Yvh7LP/fyeUdBTbQ6to0d8u1
+	 9zpsyPtS+yCWA==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 3D481198003A;
+	Thu, 10 Sep 2026 03:15:18 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Thu, 10 Sep 2026 03:15:18 -0400
+X-ME-Sender: <xms:BFmiao7cl-lvhT4Zd9fsPFky86zRsRf7bwmzmcRoWGqyhLROAaM5UQ>
+    <xme:BFmiaktQRzj3THpZ4E08qHZsXgpFM275MuEwYYIoOK466MubBfvLofGVcD1egiP4N
+    ShDMzcdnn5fDeo6z6a_RdFAbEfOW0_4Ap-UfiBE7Y-LF0iqr3urisCe>
+X-ME-Proxy-Cause: dmFkZTGW+YhjjkjTS38oi2r/IMw6wNb7QjhILlkT0ga6/LtmwLm3ag3xm+5goBubsLkohH
+    mw3+UXmZ5fzPmUvpCAfYL5OBuHzZJBi1+uKCwpEK4rctEw/UedzqNK3GhjKqm1OA055Xrs
+    FuR7JF+UmPTmyoHYcetL8ui6FcxvhY82xRCqtTIL949ZqdrQsYbOucSHEN2/NtbqVfFcmR
+    oB2DXeKxKHPrBuTKVAGiTGU63urdC4LlAk3mO4ecPqHKjl6bU7hc9SVN55NHv4keDJdOqZ
+    3cP8XZ2u/bkTwtl42DKH4e5mpJL1ZtSvdhqoIJHfafes5TWtLePS6Yy0yEL3iAkaycHGZk
+    +aqNet/7rWDXYDW7zghuOfki8/AlxRj2Gd/If0fN5/uc+AGlqEfEFZGcWktZMCTzInxgeH
+    UuARZabNlCnsj3ihjp0Lrqoo/s9V6Hv5uE/v0VGCQh3CkLSMi5kqqe2tRed7JY6R1IS3oF
+    WrLJrcJWqhLYHKLgcAZ5OFpQa4wNrIvVDR6ZEUB4isMMoNncCOm8Hdq9YRru8bjVBjaWLw
+    Hiz43dJ3JbRDMQdcK84lDOpFm5jUeIQ6xIdmjoJdzJHJLeJ7434K3mfFQHMLNh5r0Vb0uF
+    AfvwlK2rZgESDxQ/UnUP6o/5uKuY79xzVAhdEdyRySl30JZ5KZX9HKKa7xAg
+X-ME-Proxy: <xmx:BlmiauEHpaUz1iTJTOAtPiYW7i1cTiRvRdl5sKhHInBVz7aw8s1pmQ>
+    <xmx:BlmiaoTawDHzx8GF_8TxlMppgssllaEBOFbEtyFEPUaYNCl3gORNow>
+    <xmx:BlmiajvqWLPdNaOq9R-8hMoXyppp64rrEBP4NKBvOLDcbAR0yB2uPg>
+    <xmx:BlmiaoL-IU8n5Rp6wqF6xpj_M5Q-WVPqJ3gW867mQ5oJffKFJ6fkPg>
+    <xmx:BlmiagmEveA-dj56E25vxF9ARR9XOWGFkAvw9pum3utBKnosBWVDlXsV>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 86327F8007E; Thu, 10 Sep 2026 03:15:16 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Date: Thu, 10 Sep 2026 09:14:56 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Karl Mehltretter" <kmehltretter@gmail.com>
+Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "Heinrich Schuchardt" <xypron.glpk@gmx.de>, linux-efi@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+Message-Id: <49225810-ec79-48b9-8d36-dff7296ef4d8@app.fastmail.com>
+In-Reply-To: <20260910031853.15236-1-kmehltretter@gmail.com>
+References: <20260910031853.15236-1-kmehltretter@gmail.com>
+Subject: Re: [PATCH] efi/libstub: Fix efi_set_event_at() parameter documentation
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 23/23] kbuild: use pigz for gzip compression if
- available
-From: Nathan Chancellor <nathan@kernel.org>
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
- Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
- Nick Desaulniers <ndesaulniers@google.com>, 
- Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
- Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>, 
- Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, 
- Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, 
- x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
- Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, 
- Arnd Bergmann <arnd@arndb.de>, Catalin Marinas <catalin.marinas@arm.com>, 
- Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>, 
- Ard Biesheuvel <ardb@kernel.org>, 
- Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
- Josh Poimboeuf <jpoimboe@kernel.org>, Peter Zijlstra <peterz@infradead.org>, 
- Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
- Gary Guo <gary@garyguo.net>, 
- =?utf-8?q?Bj=C3=B6rn_Roy_Baron?= <bjorn3_gh@protonmail.com>, 
- Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
- Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
- Danilo Krummrich <dakr@kernel.org>, 
- Daniel Almeida <daniel.almeida@collabora.com>, 
- Tamir Duberstein <tamird@kernel.org>, 
- Alexandre Courbot <acourbot@nvidia.com>, 
- =?utf-8?q?Onur_=C3=96zkan?= <work@onurozkan.dev>, 
- Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>, 
- linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
- llvm@lists.linux.dev, linux-riscv@lists.infradead.org, 
- linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
- linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
- linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <20260908-build-speedup-v1-23-5dc1ac01672d@kernel.org>
-References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
- <20260908-build-speedup-v1-23-5dc1ac01672d@kernel.org>
-Date: Wed, 09 Sep 2026 21:19:12 -0700
-Message-Id: <178901395293.3971858.15429964442902485180.b4-review@b4>
-X-Mailer: b4 0.17-dev
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2892; i=nathan@kernel.org;
- h=from:subject:message-id; bh=Q9fpS3QOis8VywAZ/qxPoy8tzjaMXYquN4IKUkvKQhc=;
- b=owGbwMvMwCUmm602sfCA1DTG02pJDFmL9I9/nfxO72ppzjS5mYt/nszesc/yM3fFVJtNm524b
- /7wEcje1VHKwiDGxSArpshS/Vj1uKHhnLOMN05NgpnDygQyhIGLUwAmEsnAyPDvwIes2Wk3VQ7X
- VDzfe5qnb6OioMqiD+w2Ts4O2huWrlBj+Gf3oltEibvv7B0LRkems/f6hV3mWe7U3JB5ZYXFtSs
- /DzEAAA==
-X-Developer-Key: i=nathan@kernel.org; a=openpgp;
- fpr=2437CB76E544CB6AB3D9DFD399739260CB6CB716
 
-> The gzip step of a kernel build is very lengthily, especially for larger
-> builds such as allmodconfig.
-> 
-> gzip itself cannot be run in parallel, however an alternative tool exists
-> that can, providing the same feature set as gzip itself - pigz - which
-> works as a drop-in replacement.
-> 
-> On a 128-core Threadripper, gzip -9 of a 36 MiB x86-64 vmlinux.bin takes
-> 1.6s, and with pigz it takes 0.09s, so the performance increase is
-> significant.
-> 
-> It is already possible to specify the KGZIP environmental variable to make
-> use of pigz, however it seems sensible to make use of pigz if it is
-> available.
-> 
-> Therefore default to using pigz if it is available on the system upon which
-> the kernel is being built, otherwise fall back to gzip.
-> 
-> The output is byte-for-byte identical between pigz/gzip invocations, but
-> gzip and pigz do not produce the same stream as one another.
-> 
-> Therefore, for reproducible builds, the same set of tools should be used.
-> 
-> This seems to already be an implicit requirement in any case, but update
-> the reproducible build documentation to make this clear.
-> 
-> Also update the kbuild documentation to reflect the change.
-> 
-> Every x86 build ends with the compression of vmlinux.bin, 36MB for
-> defconfig and over 200MB for allmodconfig, no-op builds are unchanged.
-> 
-> Whole build, 128-thread Threadripper 9980X, best of N runs:
-> 
->                                          before   after     delta
->                                          -------------------------------
->   x86 defconfig, touch mm/vma.c, gcc        7.4s     5.4s     -2.0s (-27%)
->   x86 defconfig, touch mm/vma.c, clang      6.6s     4.9s     -1.7s (-26%)
->   x86 defconfig, clean, gcc                26.2s    24.4s     -1.8s (-7%)
->   x86 defconfig, clean, clang              25.8s    24.3s     -1.5s (-6%)
->   x86 allmodconfig, touch mm/vma.c, gcc    23.7s    15.3s     -8.4s (-35%)
->   x86 allmodconfig, touch mm/vma.c, clang  22.1s    15.2s     -6.9s (-31%)
->   x86 allmodconfig, clean, gcc            291.4s   275.2s     -16.2s (-6%)
->   x86 allmodconfig, clean, clang          278.3s   265.7s     -12.6s (-5%)
-> 
-> Link: https://zlib.net/pigz/
+
+
+On Thu, 10 Sep 2026, at 05:18, Karl Mehltretter wrote:
+> efi_set_event_at() documents ids although its array index argument is
+> named idx. This produces missing and excess parameter warnings.
+>
+> Match the argument name and fix the adjacent spelling of array.
+>
+> Fixes: 8c0a839c2bcc ("efi/libstub: Descriptions for stub helper functions")
 > Assisted-by: LLM
-> Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
-...
-> diff --git a/Makefile b/Makefile
-> index a0d29dee81d7..efa6a2d77e6b 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -561,7 +561,7 @@ PERL		= perl
->  PYTHON3		= python3
->  CHECK		= sparse
->  BASH		= bash
-> -KGZIP		= gzip
-> +KGZIP		:= $(if $(shell command -v pigz 2>/dev/null),pigz,gzip)
+> Signed-off-by: Karl Mehltretter <kmehltretter@gmail.com>
+> ---
+>  drivers/firmware/efi/libstub/efistub.h | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/libstub/efistub.h 
+> b/drivers/firmware/efi/libstub/efistub.h
+> index fd91fc15ec81..049263a541ae 100644
+> --- a/drivers/firmware/efi/libstub/efistub.h
+> +++ b/drivers/firmware/efi/libstub/efistub.h
+> @@ -224,8 +224,8 @@ typedef void (__efiapi 
+> *efi_event_notify_t)(efi_event_t, void *);
+>   * efi_set_event_at() - add event to events array
+>   *
+>   * @events:	array of UEFI events
+> - * @ids:	index where to put the event in the array
+> - * @event:	event to add to the aray
+> + * @idx:	index where to put the event in the array
+> + * @event:	event to add to the array
+>   *
+>   * boottime->wait_for_event() takes an array of events as input.
+>   * Provide a helper to set it up correctly for mixed mode.
+>
 
-This should be '?=', right? Sashiko also notes a concern around parallel
-module installation with gzip module compression since there is no
-thread limitation, which could bring a little risk to doing this by
-default? Might not be that big of a deal though?
-
--- 
-Cheers,
-Nathan
-
+Queued up in efi/next - thanks.
