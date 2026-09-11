@@ -1,42 +1,43 @@
-Received: from mail.avm.de (mail.avm.de [212.42.244.94])
+Received: from mail.avm.de (mail.avm.de [212.42.244.120])
 	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C44D4AFE08;
-	Fri, 11 Sep 2026 18:10:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.42.244.94
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C54444AE11E;
+	Fri, 11 Sep 2026 18:18:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.42.244.120
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789150247; cv=none; b=EqjKMxjboHAEHGB9QK109mDr4946Lmh/jendB/0leT06/IZ8MlHebjNIJmUdGmPV99tKp6JxTh49tut6lTkoXiGNdD0OOxzRcYD4g8bZzzbKsLrR0V1uB0P696KnNF+CeQ9YuOM+aybzvsU/wGFq5lgI6rneR+MZ1LHUmcgebi8=
+	t=1789150690; cv=none; b=pf3vJu74IIWWROfQ973VF1oMH/ngNaSPiZPXwJqvnIWqyBt6qm8MX78wE17LtITJoEe6M+reJtcc74DCmFNcWV3czlG3IU7M/jnrbXs946+EELTy+V0XLZDfSYhVJ28chXok6EHT3KfBfXtboNAiBXGWs8AePHa4bFewvcYt5Mk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789150247; c=relaxed/simple;
-	bh=HiXUwfB+4U/xUpyEGVb/EMeam4+iG8adYAIKsP37yh4=;
+	s=arc-20240116; t=1789150690; c=relaxed/simple;
+	bh=4m5yk/k55asBFxV3Yrw4jckjF0Ccpy/QWIGf4quzAAg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=MI2i2LwTqrkWevB/DA7Ks+LCc4ZCnB3ApFg0Z8iUAmOIzYnt6pCKkdX4L+FQGqM74s1eQa4O8G8Wz8jfjsEcDoO1QoL7r0Fxb6y2b8UEn4alrkilKKspJTd8A9OmMA8ok5WK2iwZVqnEsuS5sSL4R3VMWmmugRPEss1E0bEHVUs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fritz.com; spf=pass smtp.mailfrom=fritz.com; dkim=pass (2048-bit key) header.d=fritz.com header.i=@fritz.com header.b=hR+36mzQ; arc=none smtp.client-ip=212.42.244.94
+	 Content-Type:Content-Disposition:In-Reply-To; b=kWuWdCdfrQBBZGIL0fmRDNH+woyxIOAVreKHctvXOxdAqqJTJkfo6eYYC4kSLT3fSdlceycBQlGFodUCP67DB9veiT/dVnKxocM1qkAeZQcABO0OF8Q9vHmaF62C//wuRG5pkTM8NsB+6aX62rWf5R7z9FQUDYVO/Tm9/kKThh0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fritz.com; spf=pass smtp.mailfrom=fritz.com; dkim=pass (2048-bit key) header.d=fritz.com header.i=@fritz.com header.b=feKsbpgg; arc=none smtp.client-ip=212.42.244.120
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fritz.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fritz.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fritz.com header.i=@fritz.com header.b="hR+36mzQ"
+	dkim=pass (2048-bit key) header.d=fritz.com header.i=@fritz.com header.b="feKsbpgg"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=fritz.com; s=mail;
-	t=1789150227; bh=HiXUwfB+4U/xUpyEGVb/EMeam4+iG8adYAIKsP37yh4=;
+	t=1789150677; bh=4m5yk/k55asBFxV3Yrw4jckjF0Ccpy/QWIGf4quzAAg=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=hR+36mzQyixe5THHS68Z7oZZlRIG+Ih3UoLL1BWcc1NKiHu5yfuvvZ3PeA8HsaaZM
-	 wpqKNgAnhSoLeoOyyesVQrqn/GY9K8f5+aevV7RXvVGhSStcQ7VkeKrLQjj6x94QMP
-	 bj5Mk8xS1JwoSKDhzLKC2qy15uZyyr9WI9dQ55ZEMhAq4RZcgj5FgoVbR4DaqHSq5Z
-	 J6YPaTOtocigcccnEQy5vXqhN0RJJwBJEmkMfeokD07s3b8D6hERPE+UmNWFIbBIDQ
-	 CpF9zDCxgqafA2mNB0r6jjir20f3LIolX/B4doBNUVqwmyCG317UaapcsrukyZzjYq
-	 M4A5nOMB9H82Q==
-Received: from [212.42.244.78] (helo=mail.avm.de)
+	b=feKsbpggxPjO+L8yKkeMjSg6GdSQSLR9XKrPldZ9xwoiDTB1nada6e6Li3U1uvJBE
+	 Bo9ycQtybDQsKVCVHFCI8iHDrDHnM45RxEWyVLs2ro3ntOgdpgJ11kkgAY9jdofcnW
+	 LgO4oBww24RpJ58OsSW3XCpjW+FXiwHlRhE98b3U1MFCqvppGY+ughJOa04x0D4ZrC
+	 peC9C90PMJA5fL176KDAzvRjAu7tZIyjUhEGV54N6o9V9ACcFMSWAMg0W3ImC2L1ai
+	 cjCBFHzkytvnqjpewr3Nj6Uv8G3FTG6D8hkEPSX8PgDsKMcdUjYS53LHKCoY3pYAUs
+	 rVNlWagNGbLcw==
+Received: from [2001:bf0:244:244::78] (helo=mail.avm.de)
 	by mail.avm.de with ESMTP (eXpurgate 4.57.1)
 	(envelope-from <n.schier@fritz.com>)
-	id 6aa44413-6dc7-7f0000032729-7f000001d950-1
-	for <multiple-recipients>; Fri, 11 Sep 2026 20:10:27 +0200
-Received: from mail-auth.fritz.com (unknown [212.42.244.78])
+	id 6aa445d5-0449-7f0000032729-7f000001c01e-1
+	for <multiple-recipients>; Fri, 11 Sep 2026 20:17:57 +0200
+Received: from mail-auth.fritz.com (unknown [IPv6:2001:bf0:244:244::78])
 	by mail.avm.de (Postfix) with ESMTPS;
-	Fri, 11 Sep 2026 20:10:27 +0200 (CEST)
-Date: Fri, 11 Sep 2026 20:10:26 +0200
+	Fri, 11 Sep 2026 20:17:57 +0200 (CEST)
+Date: Fri, 11 Sep 2026 20:17:57 +0200
 From: Nicolas Schier <n.schier@fritz.com>
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+To: David Laight <david.laight.linux@gmail.com>
 Cc: Nathan Chancellor <nathan@kernel.org>,
+	"Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
 	Linus Torvalds <torvalds@linux-foundation.org>,
 	Nick Desaulniers <ndesaulniers@google.com>,
 	Bill Wendling <morbo@google.com>,
@@ -75,115 +76,47 @@ Cc: Nathan Chancellor <nathan@kernel.org>,
 	rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org,
 	Jens Axboe <axboe@kernel.dk>
 Subject: Re: [PATCH 12/23] kbuild: avoid re-running compiler and linker probes
-Message-ID: <20260911-mottled-gerbil-of-abracadabra-bacb17@l-nschier-aarch64>
+Message-ID: <20260911-invaluable-indigo-seal-e31aec@l-nschier-aarch64>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
  <20260908-build-speedup-v1-12-5dc1ac01672d@kernel.org>
  <178901395292.3971858.13236774094648272066.b4-review@b4>
  <20260910-translucent-sweet-sidewinder-7acacb@l-nschier-aarch64>
- <aqPXj1nDQ06KRhf4@gremlin>
+ <20260911183333.1df0f2e2@pumpkin>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="iQrCf81kTXDdOy/g"
-Content-Disposition: inline
-In-Reply-To: <aqPXj1nDQ06KRhf4@gremlin>
-Organization: FRITZ! Technology GmbH
-x-ms-reactions: disallow
-X-purgate-ID: 149429::1789150227-F94CE0BC-0719254D/0/0
-X-purgate-type: clean
-X-purgate-size: 3410
-X-Notice: Whitelisted
-X-purgate: This mail is considered clean (visit https://www.eleven.de for further information)
-X-purgate: clean
-X-pfmilter: host: postfix-mx-03  mail-id: B7F39A0438  external: no
-
-
---iQrCf81kTXDdOy/g
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20260911183333.1df0f2e2@pumpkin>
+Organization: FRITZ! Technology GmbH
+x-ms-reactions: disallow
+X-purgate-ID: 149429::1789150677-0CF8F965-95D5DB55/0/0
+X-purgate-type: clean
+X-purgate-size: 775
+X-purgate: This mail is considered clean (visit https://www.eleven.de for further information)
+X-purgate: clean
+X-pfmilter: host: postfix-mx-01  mail-id: 4CFD1A0632  external: no
 
-On Fri, Sep 11, 2026 at 11:30:12AM +0100, Lorenzo Stoakes (ARM) wrote:
-> On Thu, Sep 10, 2026 at 05:42:35PM +0200, Nicolas Schier wrote:
-> > On Wed, Sep 09, 2026 at 09:19:12PM -0700, Nathan Chancellor wrote:
-> > > > diff --git a/init/Kconfig b/init/Kconfig
-> > > > index 8583d9f06c52..3c92c87254a3 100644
-> > > > --- a/init/Kconfig
-> > > > +++ b/init/Kconfig
-> > > > @@ -144,6 +144,44 @@ config CC_HAS_ASSUME
-> > > >  config CC_HAS_NO_PROFILE_FN_ATTR
-> > > >  	def_bool $(success,echo '__attribute__((no_profile_instrument_fun=
-ction)) int x();' | $(CC) -x c - -c -o /dev/null -Werror)
-> > > >
-> > > > +config CC_HAS_ZERO_INIT_PADDING_BITS
-> > > > +	def_bool $(cc-option,-fzero-init-padding-bits=3Dall)
-> > > > +
-> > > > +config CC_HAS_NO_STACK_CLASH_PROTECTION
-> > > > +	def_bool $(cc-option,-fno-stack-clash-protection)
-> > > > +
-> > > > +config CC_HAS_NO_ADDRSIG
-> > > > +	def_bool $(cc-option,-fno-addrsig)
-> > >
-> > > I am generally in favor of this proposal since I think these checks
-> > > should be cached by Kconfig where possible to clear up running them
-> > > twice. That said, I wonder if we should pick a better dumping ground =
-for
-> > > these checks other than init/Kconfig. Maybe init/Kconfig.tools or
-> > > scripts/Kconfig.tools or something?
-> >
->=20
-> (Sorry hadn't seen you'd replied also!)
->=20
-> > Yes, skimming through the patch, I thought about that, too.  Moving more
-> > cc option checks to Kconfig will make building out-of-tree kmods with a
-> > different compiler more dangerous.  Maybe we will have to make the
+On Fri, Sep 11, 2026 at 06:33:33PM +0100, David Laight wrote:
+> On Thu, 10 Sep 2026 17:42:35 +0200
+> Nicolas Schier <n.schier@fritz.com> wrote:
+> 
+> ...
+> > Yes, skimming through the patch, I thought about that, too.  Moving more 
+> > cc option checks to Kconfig will make building out-of-tree kmods with a 
+> > different compiler more dangerous.  Maybe we will have to make the 
 > > warning in Makefile's prepare (external kmods) target a bit louder.
->=20
-> I guess this bit can be a follow up potentially?
+> 
+> One problem is that distributions have a nasty habit of shipping kernels
+> that are compiled with a different compiler version to they actually
+> ship as a compiler.
+> In some cases the versions are clearly the same - but the version
+> strings differ.
 
-yes, sure.
+yeah, I guess you hit the mark.
 
-> >
-> > > I also worry about backsliding and growing cc-option checks. Should we
-> > > update the documentation to state that it is preferrable for these
-> > > checks to live in Kconfig so that they can be properly cached?
-> >
-> > Sounds good, yes.
->=20
-> I can add a doc update as part of this series, unless you guys want to ha=
-ndle
-> separately?
-
-I don't think it has to be part of the series, it's long enough already. =
-=20
-But if you want to prepare some docmentation about the preference of=20
-cc-option checks, feel free to go ahead or not.
-
-Kind regards
+-- 
 Nicolas
-
---iQrCf81kTXDdOy/g
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEDv+Fiet06YHnC6RpiMa8nIiabbgFAmqkRAoACgkQiMa8nIia
-bbh/KQ//Samyl3M+cgoMbxZIs/cR+MwpyWz5bB6lThR5UVELLhuPCTUNC7vWi1ML
-vr3kXdcn7sXCBHA4hoe7PhlINVSGc5kaWiIyry21IPlsJ0ekFdPF8B40PL80yjk8
-y/uU49y0qpRVqTKgSw75t2oyL5boj5TPFwfPRQT8UY3WtvNFyWWLqxP1sq2H15Rb
-8PF/3F1o5b2TdURepbF3drc33OzpVoHQBe+4OWezT8HKe6wsvTlUcpxhnt5eMp3D
-pVCVlxwL4SL0l5JC6gUkCq9DcCL8SltfEvUdAPQbcRCyz6ZgME/zI9Cic7j1b3fn
-tyRHMX+hGWWeDvOpIj7iued1yGWB67DmNfsTeQi7VYR8nFF421w48w8WbVZZV6i2
-8m4dzzmQE7+k574d98GJVHQHR150J1j5OnktE4no2ncIlywpYgnnPFV6dQgjl5ZW
-wlLDK8Hb/224l9Iedak4vWld3VMCNTjn72dDV9LSZzsioM/xNqZc/0tKBnOa67F8
-kbMjM6J4jcmUxuAEWqnSxhBv4t5TFWL9C1nVduQten5kqNWvYdyRuo9AQoeCyRmc
-74nUR4m7g8oCKCGxDYB0oymnuE7HwmtMAQYsq99gZiUVenSZfHl2SXoEdQlWsaTl
-Lr54hkpu2IMqPkMg1EPuCi4U+4x1GAt2mcZAsPaFTXV4lMKhfjg=
-=hl7O
------END PGP SIGNATURE-----
-
---iQrCf81kTXDdOy/g--
