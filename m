@@ -1,196 +1,160 @@
-Received: from mail-oo1-f48.google.com (mail-oo1-f48.google.com [209.85.161.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CEFA53290AA
-	for <linux-efi@vger.kernel.org>; Fri, 11 Sep 2026 03:03:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D55026ED37
+	for <linux-efi@vger.kernel.org>; Fri, 11 Sep 2026 07:32:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789095800; cv=none; b=qc+wMEoXaMHOO9O49ShcBnfethJkKPm67HQH+T1DDal61yz4k8ZDj9bME1CfafKXDQkFm/bTZzCtCglLT5NrwP7pp7dRLR/2hBj8rEttooaLh9qa+Bz7A/kYpvk+SGw+7CtQgWlEwjIQcFiq3NHNcYqZaHNQgJ5/U3MX+q/Merc=
+	t=1789111971; cv=none; b=Rbncby36EOLTlDnxgvwuW3ynQnQTgoLAeVVffjTmMo3+P9ubIC2Vc3TuILZteY02/pzugqd4HfRF0LXGc8CyiTDPWQbkehjvjeAtL1DeKHg7vbozbbUApj5WCXLdMsenQrCG4CaJfZBKOFrkaDCU3kChnebXbv6fOatX+hNbLRo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789095800; c=relaxed/simple;
-	bh=UL4IaLvDYf4eZDrQo3pMfd8B5yVZDGWQIefeXbbQrAM=;
-	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:From:To:
-	 References:In-Reply-To; b=V16/F7k7NxIe3kVZYcb9S4BpTEmztZYk5qV6C9lfMTlFB/bz4EOklv3OBfT4//0r33fLMWPRR9YhUtp6rjpZyZr/hJbuKRak/aa/2OXAumJbTLfJR5hTF10DFWimjzTTznyZ/ZtJ0QhRQCsQiD1+arY2B4/DXQDcgakjsfVNxJY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JTTsMU2t; arc=none smtp.client-ip=209.85.161.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1789111971; c=relaxed/simple;
+	bh=1UFHnwd6+8Wr85l8PNqVg9OGvRzjDP7RS2PmEv71huo=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=fR2coWuf55HJ3di5YBDz5YKkGE8Mzfm9hOdhTk/Vl5n9rTdZ0VklA2SPnIx6WC1xjK8vNBbExeHOSHbDPLrKsQz7eJ9ruxeOK5KacBw6J4KeRL5p7RoteGcw+RSe2FsmfmhrrZEPa6bbP9ymAYWsJ7CoCRtPSQ+GHgkKqyoRiS8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cp3EG9iM; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JTTsMU2t"
-Received: by mail-oo1-f48.google.com with SMTP id 006d021491bc7-6b1c75f0049so471334eaf.3
-        for <linux-efi@vger.kernel.org>; Thu, 10 Sep 2026 20:03:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1789095798; x=1789700598; darn=vger.kernel.org;
-        h=in-reply-to:references:to:from:subject:cc:message-id:date
-         :content-type:content-transfer-encoding:mime-version:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=0nnirejavAbxn9gQ8vj1fIYctFpSqsa1QzZ3kmf8s7Y=;
-        b=JTTsMU2tAVJBPl34IX0LC5kUjClmXfeInt0mwTvfREf920JKgGQnPQO9/KLi0EsXG2
-         feMKvTyMWEQJVmCjtcE1OrAAzfvlZHXuGT22b4n9y4wyp4L/I9GdkmSZJzJvo6XmamZV
-         1GLj75qZFGgZhRMmHtOBzLCTJpmRHzjQScmsdg71+CyzVIoBvh/W+OE7SuzLUwUDZije
-         QPPiH/5/4W22/dW+xnmQXanAYNLlhIaDAmD5otRORKS5IxJ2dRBElrO5Z90bcDdbHt+S
-         O5iV3m2xtBRTMLYHY2dwG/WGWm07tyFtEeON8Z7/gDOcGE3fOT5Ow13WA1N5gWVkXuKR
-         ZG+w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1789095798; x=1789700598;
-        h=in-reply-to:references:to:from:subject:cc:message-id:date
-         :content-type:content-transfer-encoding:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=0nnirejavAbxn9gQ8vj1fIYctFpSqsa1QzZ3kmf8s7Y=;
-        b=SZbRQJEJi3nrH7VaZ4shztieqDcW9bdnSYJO4FoSrt6sa4oALEOVVfIjkthozGtuiI
-         2gdcwGGCvucNPVJWCGi7eakQZpEytIv9ca1IvZjXXGa1/nWjYCsro96hi1jZjlGa2KVz
-         BHKlfsMnDeNG7AixiI9cNTsbLNp8LbCgitUpxUxlZHiAvv4jLB3fHoKwv7rDMsPfYnot
-         xYa/fKpW5/kOwpBuUtZZ8mOfLWCntnCH0ZIqwkay6sk6JkVeQFjwb1NzFi6FDdB6RRq4
-         xfzZ8776nGw/rGYlzTsL1XWOAcLk+BFy2sfkrpa1+uphAc4GFm0z3uSErqMxYdp5hefT
-         XtWQ==
-X-Forwarded-Encrypted: i=1; AKwUvByFY26p5wEhzLsSuKEhQd2Pla3wkpZBYAo5OVhZdPcKcxzkaWlDaQrsq9YZJZWLxOPXb1oX44WfnuQ=@vger.kernel.org
-X-Gm-Message-State: AFuF++lfebDSrKCyKYdZdtDZGjCYJTsLK5LPhu1Irkw1rDlIw4sdwfmv
-	N8QGMZSVjrpHdnd0Um9YosfuCfmDlrkp1R6tXT2pLDm/fBCDu6ui5ipP
-X-Gm-Gg: AYBFou1RKtyvEssaPArJND5+R64QdeWfw71UOTTFGmjeEzTlIUmoEIR+KiWnE9YHECZ
-	jNYD4Ua45hsYNTMz/XEPYU1OClyBiypgyc2FVWwPKNRdpxYtYMpmrWL7ffnDJ7t9E6vkyyQgwkO
-	43e03b8S0kHOoAcS2jCiz/Ynt7IyIFbum8AckVex84YbRbp82zSi46sR0+yKzSorfFFpM3wxojG
-	hzCFHbqjN8poxL2DBVnK/ugt97CqDfddXYgf2fCFRQv5i5+sKW9CDMoDW9US1eNwD3716+CGtBk
-	VJB9Oacr3sNobySrgQwr/VT7KUt0OxNm/vvKfAJpOjpjKsAhI/TBZcZQ1+gzxtPZe4P1XSiq3bs
-	F2WPcSu/E3X47wa+U7KpVeAYDtylG8hoKISuLumOa/MxlIbOpYid8znJk7O1SXU35IyOX0nNKJQ
-	WO6Sx0OziM+bVhyuzMFzavUtWGSPXfVzBIUxCb5qN+MyjT3rF+hpxKzy7awagL/lFSnD7YCHA7q
-	AfZ17i3g3bDNIx7/UOKFeikmi4XZw1xvA==
-X-Received: by 2002:a05:6820:61b:b0:6bd:fbe8:fb95 with SMTP id 006d021491bc7-6c0be1502f9mr1256940eaf.60.1789095797410;
-        Thu, 10 Sep 2026 20:03:17 -0700 (PDT)
-Received: from localhost (ip68-107-67-45.sd.sd.cox.net. [68.107.67.45])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-33ba4e9b359sm2093108eec.14.2026.09.10.20.03.15
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 10 Sep 2026 20:03:16 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cp3EG9iM"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 02BC71F00898;
+	Fri, 11 Sep 2026 07:32:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789111970;
+	bh=zRoqA8gwo46Z3d3793xmQ09WXeGIuNZTk/LbcAQmCXc=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=cp3EG9iMYLd2b1XT2xoX9M3RezyPQX9/ChM+hJZNV84tfUhItZgSvz2TaasyRkIhc
+	 g9gd6QJsPRZFH3Et4SWVR8dtR6nqrEQK/H5vY4x3ePxMd/64vk0Ug3ENOFUqB6zuJv
+	 GiMYGm7lDcfEEKkB03+utbFbqG9TLes1M3u+i6VaG80wU4bnVZbB0PzFnHR6rToqJK
+	 Q53SAMQBO8KehW6lSpqMtyKVHhHjewNWisTBBf3Iuf+xrZHtPfuFejGPZRv/VU4x6D
+	 Uqbd79i/UkjUF9GoDlEtKi/z8zsLwp2glNgui5UGPQMlxcpyuTpb9n8gIgEBBsfrKf
+	 RBi1Vr5HNcGiw==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 7A9FE198005C;
+	Fri, 11 Sep 2026 03:32:48 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Fri, 11 Sep 2026 03:32:48 -0400
+X-ME-Sender: <xms:n66jao8z-GA-k_vaH3SoJT6xRgYo6dX3JEeM1Ku6M7gM5NYC1i9aYw>
+    <xme:n66jarhBY61pQvqPbnEmBRixgwH9UM65RlU3ZYtrfY0Hy-esn407LThXYI-iGgW1f
+    daINW_CWHVrKQBlVRjxvlNcz9TTfQYyG3I6ZQnZA5U0tJyfGbS5WJLt>
+X-ME-Proxy-Cause: dmFkZTEEpozdq6tFcxcD2mkfJbcSNGdltWWmuDlHCPU83f9wctUWSTu/n82SxX94Ph42oK
+    MTsFHkOapClX1grXWGfyIdbqrmagAKXFg54yeQeNrV/hbT47A1HYOnG6Mmx6D8vmYRjnpQ
+    RtP5YL4LoSyVe8QCBf/EJiMHJ90iJvTd1NROvJxnRNHxCUOurPJJYYNK+uXfDGpke7Ntn2
+    0Mi+XK8jLGNLpnaB2ThcsFNa+22SW09zjD09VkaiWnfU5T7E2Y1GFwtJTm3ioEWTXR0uw/
+    cfHqtJk4eL+BjnnjP68q9TUFieTH3fB3NbxwCrepDqAK2WXkaWkj2bfpoKnEhD06iTAHa0
+    59HYgfqW+5MBbHu/dX2GVYPRUYPKp4gulpc5lwcY0S+xJtmVay3s2iEk+XvnFWeg1x/KPS
+    SKW1NAknqgjfrK6EF5v6qoCab/c4499IaokAcQp6vgZxDO+zS41AHIhYS9DsPehwjjluKA
+    TkykPQdq+E1tknC6Dhh6q7eju3h3vhSc2i9xXskPvJcnJBVYSNrPcxENFLBMrRRJNUwVPn
+    eklg77xDMc5dEaOEyTf9OHOXVB+ei8l7qVpnWBU1weCB0TqFl1cyEw8NhtkRb5NYVtvJSr
+    wy7W4hmMpmRg2G4gPAiUYiYGnSNgLf3EDKWugwbxeCEHjVm5tYSFIP2Ap8TA
+X-ME-Proxy: <xmx:oK6jainLI2qgtrH2WCZU5DlTQRoT9M5yJEohLUgtEEDyfQl3UV9_0Q>
+    <xmx:oK6jaj623YP4pjc8Sk7T6frQxyeXxs2KJVXNVNMD8ICOS5xj7iDWeA>
+    <xmx:oK6jagioJJDlOc2kRExWgsiWX9LiKWwxdeIx5vfF1T7V-G4FwpKv3Q>
+    <xmx:oK6jaoG2W7TY0lLzjp8AT7qLCeFc4qOl1YjWjbzoOI-SHp5Jhwwlag>
+    <xmx:oK6jauRYfeH3RE6kefmtlp0Nf89sTDKPkbZ4Gil17OWG996H0e6KD9TT>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 1974AF8007D; Fri, 11 Sep 2026 03:32:47 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
-Date: Thu, 10 Sep 2026 20:03:15 -0700
-Message-Id: <DLC5J1TZ2XOC.NRYCTBZ72424@gmail.com>
-Cc: "Jasmeet (Jazz) Bhatia" <jasmeet.bhatia.us@gmail.com>, "Rafael J .
- Wysocki" <rafael@kernel.org>, "Pavel Machek" <pavel@ucw.cz>,
- <linux-efi@vger.kernel.org>, <linux-pm@vger.kernel.org>, <x86@kernel.org>,
- <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v1 0/2] efi/tpm: Preserve event log without changing x86
- E820
-From: "Jasmeet (Jazz) Bhatia" <jasmeet.bhatia.us@gmail.com>
-To: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>, "Ard Biesheuvel"
- <ardb@kernel.org>
-X-Mailer: aerc 0.22.0-0-gc2f86b7abde3
-References: <cover.1788259938.git.jasmeet.bhatia.us@gmail.com>
- <a9e23066-aa75-44be-ac3b-9a15f4cf6047@app.fastmail.com>
- <DL6NCV1KQ9F9.6K6XZQCS4AF3@gmail.com>
- <c3ca811b-a6eb-4f4d-bbb2-4feef02e3db2@app.fastmail.com>
- <CAC_iWjL9jDsRaU7kEemYfwk292Nxa49cK0Rq=81pC=FWNRDhvg@mail.gmail.com>
-In-Reply-To: <CAC_iWjL9jDsRaU7kEemYfwk292Nxa49cK0Rq=81pC=FWNRDhvg@mail.gmail.com>
+MIME-Version: 1.0
+Date: Fri, 11 Sep 2026 09:32:26 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Kiryl Shutsemau" <kirill@shutemov.name>
+Cc: "Borislav Petkov" <bp@alien8.de>, "Ard Biesheuvel" <ardb+git@google.com>,
+ linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+ "Vincent Mailhol" <mailhol@kernel.org>, x86@kernel.org
+Message-Id: <b24b9785-b790-476d-985d-e8c5405d192b@app.fastmail.com>
+In-Reply-To: <aqKrhNQ3mZMs5-Dy@thinkstation>
+References: <20260909115530.1924665-12-ardb+git@google.com>
+ <20260909115530.1924665-13-ardb+git@google.com>
+ <20260909191410.GAaqGwAsCewrdVZZ0s@fat_crate.local>
+ <cee2e02b-3817-44cf-857f-62a148290367@app.fastmail.com>
+ <aqKrhNQ3mZMs5-Dy@thinkstation>
+Subject: Re: [PATCH v2 01/10] x86/boot: Drop pointless re-implementation of panic()
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Mon Sep 7, 2026 at 8:57 AM PDT, Ilias Apalodimas wrote:
-> Hi Ard,
->
-> On Fri, 4 Sept 2026 at 19:39, Ard Biesheuvel <ardb@kernel.org> wrote:
->>
->>
->>
->> On Fri, 4 Sep 2026, at 17:45, Jasmeet (Jazz) Bhatia wrote:
->> > On Thu Sep 3, 2026 at 7:18 AM PDT, Ard Biesheuvel wrote:
->> >> Hi Jazz,
->> >>
->> >> On Tue, 1 Sep 2026, at 13:34, Jasmeet (Jazz) Bhatia wrote:
->> >>> The EFI stub currently allocates the TPM event log as
->> >>> EFI_ACPI_RECLAIM_MEMORY. On x86, this becomes an ACPI data entry
->> >>> in the E820 map.
->> >>>
->> >>> On a Framework Laptop 16 (AMD Ryzen AI 300 Series), the EFI allocato=
-r
->> >>> can place this allocation at different physical addresses across boo=
-ts.
->> >>> Since x86 hibernation validates architecture-specific data from
->> >>> the firmware E820 map, this causes an otherwise valid hibernation im=
-age
->> >>> to be rejected on resume with the following error:
->> >>>
->> >>>   Hibernate inconsistent memory map detected!
->> >>>   PM: hibernation: Image mismatch: architecture specific data
->> >>>
->> >>> Allocating the event log as EFI_LOADER_DATA avoids changing the E820
->> >>> map, but doing that alone would regress the kexec corruption issue f=
-ixed
->> >>> by commit 77d48d39e991 ("efistub/tpm: Use ACPI reclaim memory for ev=
-ent
->> >>> log to avoid corruption").
->> >>>
->> >>
->> >> As I replied in the other thread, I am not convinced preserving the T=
-PM
->> >> event log across a kexec makes sense to begin with. This is the firmw=
-are's
->> >> view of the state of the TPM PCRs when it handed over the system to t=
-he
->> >> first OS.
->
-> It doesn't make sense imho. The only thing you prove is that you
-> kexeced from a 'previous good OS', but without knowledge of what that
-> OS did before kexecing.
->
->> >>
->> >> If the first OS boots, loads a kexec kernel and then boots it without
->> >> measuring any of that into the TPM, the TPM event log will match the
->> >> TPM state, but this is meaningless because of the missing measurement=
-s,
->> >> and the attestation chain is broken.
->> >>
->> >> If the first OS does perform TPM measurements, it would need to recor=
-d
->> >> them into a log and pass that on to the kexec'ed in some implementati=
-on
->> >> specific way - it cannot use the existing TPM event log for that.
->
-> Hrmm, that might be problematic. The EventLog needs to illustrate the
-> state of the TPM PCRs. IOW replaying the EventLog in memory should
-> match the current TPM PCRs. But that also means we'll have to teach
-> kexec how to properly extend the PCRs and update the EventLog.
->
->> >>
->> >> TL;DR perhaps we should just discard the TPM event log reference from
->> >> the EFI config tables after consuming it. Or add a special case to th=
-e
->> >> kexec code to disregard it.
 
-Assuming we drop the LINUX_EFI_TPM_EVENT_LOG_GUID reference after the
-kernel consumes the log, is that going to impact any in-kernel kexec
-path that expects that efi.tpm_log to remain valid? Or is that reference
-only needed during the initial TPM event log import?
-
-I'm trying to understand whether removing that reference is just for
-stopping the next kernel from re-importing the stale firmware log, or
-whether other there exists other users of that reference.
-
->
-> I can't decide what's best here. IIRC we don't expose the final event
-> log config table in systab right? So we won't break any user-space app
-> that depends on it.  We just copy it in
-> /sys/kernel/security/tpm0/binary_bios_measurements. In that case
-> getting rid of it would work.
->
-> Cheers
-> /Ilias
->
->> > Ok, honestly that makes a lot of sense I see what you are saying and I
->> > tend to agree. I'm treating the copied event log at something that
->> > survives kexec in this patch because of the corruption fix so I'll loo=
-k
->> > at dropping that LINUX_EFI_TPM_EVENT_LOG_GUID reference and rewrite th=
-is
->> > patch. Hopefully, that will avoid that x86 E820 instability as well.
+On Thu, 10 Sep 2026, at 15:12, Kiryl Shutsemau wrote:
+> On Wed, Sep 09, 2026 at 10:43:23PM +0200, Ard Biesheuvel wrote:
+>> 
+>> On Wed, 9 Sep 2026, at 21:14, Borislav Petkov wrote:
+>> > On Wed, Sep 09, 2026 at 01:55:32PM +0200, Ard Biesheuvel wrote:
+>> >> From: Ard Biesheuvel <ardb@kernel.org>
+>> >> 
+>> >> The decompressor has its own implementation of panic(), which is based
+>> >> on the vsnprintf() routine provided by the EFI stub.
+>> >> 
+>> >> Relying on the EFI stub from code that does not execute in the context
+>> >> of the EFI boot services is a bad idea. It is also completely pointless
+>> >> in this case, given that the only user of this version of panic() only
+>> >> passes a compile time constant string, without any printf conversions.
+>> >> 
+>> >> So use error() instead of panic() in that case, and drop the panic()
+>> >> implementation entirely. This is needed so that the EFI stub's
+>> >> vsnprintf() can be modified in a manner that is incompatible with the
+>> >> expectations of this caller.
+>> >> 
+>> >> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+>> >> ---
+>> >>  arch/x86/boot/compressed/error.c | 19 -------------------
+>> >>  arch/x86/boot/compressed/error.h |  1 -
+>> >>  arch/x86/boot/compressed/mem.c   |  2 +-
+>> >>  3 files changed, 1 insertion(+), 21 deletions(-)
+>> >> 
+>> >> diff --git a/arch/x86/boot/compressed/error.c b/arch/x86/boot/compressed/error.c
+>> >> index 19a8251de506..ce5ed7d8265e 100644
+>> >> --- a/arch/x86/boot/compressed/error.c
+>> >> +++ b/arch/x86/boot/compressed/error.c
+>> >> @@ -22,22 +22,3 @@ void error(char *m)
+>> >>  	while (1)
+>> >>  		asm("hlt");
+>> >>  }
+>> >> -
+>> >> -/* EFI libstub  provides vsnprintf() */
+>> >> -#ifdef CONFIG_EFI_STUB
+>> >> -void panic(const char *fmt, ...)
 >> >
->> > Appreciate the guidance!
->>
->> Please don't send any patches yet - I'd like to get some input from othe=
-r
->> folks as well.
->>
+>> > So this thing appeared magically in v8 of the TDX unaccepted memory patches
+>> > and I don't think we questioned it back then.
+>> >
+>> > v7's tdx_accept_memory() does error():
+>> >
+>> > https://lore.kernel.org/all/20220614120231.48165-15-kirill.shutemov@linux.intel.com/
+>> >
+>> > and v8 started doing panic():
+>> >
+>> > +void tdx_accept_memory(phys_addr_t start, phys_addr_t end)
+>> > +{
+>> > +	if (!tdx_enc_status_changed_phys(start, end, true))
+>> > +		panic("Accepting memory failed: %#llx-%#llx\n",  start, end);
+>> > +}
+>> >
+>> > https://lore.kernel.org/all/20221207014933.8435-15-kirill.shutemov@linux.intel.com/
+>> >
+>> > and it switched to it being a vsnprintf() wrapper because it wanted to dump
+>> > start and end perhaps.
+>> >
+>> > But then it ended up dropping the params in v13 and landed upstream with
+>> > a single string as an argument.
+>> >
+>> > Anyway, adding Kiryl/Kirill for comment and leaving in the rest for reference.
+>> >
+>> 
+>> Looking at that v13, it seems the panic() call was added to
+>> arch/x86/coco/tdx/tdx-shared.c, which was shared between the kernel proper and
+>> the decompressorat the time, and so a panic() implementation was needed in the
+>> decompressor too. But that is no longer the case.
+>
+> Right. I don't mind dropping this panic() from the decompressor. The
+> range was already gone since v13 and I never saw the error trigger
+> anyway.
+>
+> Acked-by: Kiryl Shutsemau (Meta) <kas@kernel.org>
+>
 
+Thanks. Can this be applied as a fix please? I need it to base efi/next
+on it for the next cycle.
 
