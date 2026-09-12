@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA829353EF7;
-	Sat, 12 Sep 2026 22:47:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 770013264F9;
+	Sat, 12 Sep 2026 23:39:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789253259; cv=none; b=LhY/6Di1ShqkCJwmKe2njc2UivAZfq2bqrgyqrGg9zd0D1jE+3AR2BujVulhflqwxLYOH35nCUzY/YqSi8T1775lZlIWgV7fbf+Yjk+6jpRvGZGaKRZFnWlkLQByDxqzZpxOLSi3jXF5+zgPZV3chvp02Ndt2CP3n35ofv1KfY0=
+	t=1789256394; cv=none; b=DDE2Vkdh1Nx5sBDqCXUc8yzSZ8dJ+dTBE2iU5bxUO1UdJWmBYPrI2YJ5qao6sOCzt+f3cAOXSsgju7qdNabBePXwoItWGdxvkaJ09IYG5QPa6yWwJYOLKpTSji8PJ5xkxZViYcBWJoPlMrmxzPBikPnpYWxwC/1vb4BjiuT3A0E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789253259; c=relaxed/simple;
-	bh=WhpKhnaimmiDMo+7z3TyZxw7aAekk9TUYm3OZVPStwM=;
+	s=arc-20240116; t=1789256394; c=relaxed/simple;
+	bh=mXXWEvTL6/Escqe9caEb/Ml6MTF6C3+TLVT95QNVseM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RdxGMy4M6iEisGH3D5UO+INk8CTO8YCVD9/oh/YnLcdogOCTdCReZXvnK5zfuIlMEelYL/LsCggsIP65tFE6LoORuqAiGexI50V1rTt2bkSDSXp8X5l+VAHNCN1nrmeWd46R9Cwt33brImFoFP1AqL36pu+G+s1+N+A4DTDpMd0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=e4ZfcMFm; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=dtfJKRlRwx9JTZrytaWHZAlWlMXtWE83VGvk6hTxK8maE48D4EPcW26uOXtb0Pfpd1/v38B6roXN5/wJB0MOPKLoUK7vusVowdj/LOfiPyCeg/YiIr/aM9D3EXNK9YpFHQi3S4HzbLPTscUbkv9qUnb7ttkdhEKxJ8+SVbC2n1E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TFwkGY+G; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="e4ZfcMFm"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7215B1F000FF;
-	Sat, 12 Sep 2026 22:47:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TFwkGY+G"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1F43D1F000FF;
+	Sat, 12 Sep 2026 23:39:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789253257;
-	bh=YTs0RHzOBARO9Zxd/72JxEwAoUlFgRlD7PJM9ViCXyc=;
+	s=k20260515; t=1789256393;
+	bh=IwGn1I+rAy33y7oqaqvyvQbpwgIGskjqTBVWKdDUb9w=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=e4ZfcMFmvfYKUh71LAPoMcJrwB+EauX2idSlHvlrc7/TcwWF4y4so18J/fbY5lXYi
-	 R7U55xnaXLAON7/zdmlPVdNgwj6zPMq1L2fBY8yKvOCgRckwkR0KzQNa2gxGw7uFfA
-	 wm2T2BsSDlRNJ4H1wIXuFyyLsOUX42JzfBTZ57ZX668HEN5yhgzUyOYlE/vi9rRF1e
-	 wxNzTDgBlwyw4kYH+U2DPdRNeBPA1JL+8gr8GbujAgHSSmzPofsMXi7mlmK5MX4lQM
-	 Q9YMH4vqdH97Z9EK53Aaj452z+/sBIpyi8GFKK13J3KjBc/JY1me3oHi5xO3iHRUE4
-	 jKTcBOzWYivwQ==
-Date: Sat, 12 Sep 2026 15:47:33 -0700
+	b=TFwkGY+GHCJrSxsgOvjVPO4RtJHqXtY6NmWLDm51LwYQ61/GgP9YWvhSmINFXEMdP
+	 GMN5nuq9/1oJNcIfvA0sK5kouCUnAKf3af81PiqZukOojdg1bLGQjQc+Ed/8Mt31Th
+	 jAL7jF5k9P0Kv4FKPk8MNtZEhOFdyJEAMrUUQUa7KPl0OrltmB7H1H+Y845mJps4IB
+	 OcJhLmKUZEJblr7IYgkdp35SMbUDqAiqtNxT9W6hklmhwzbALX1KGR7RHoA67+ndyO
+	 ZYVcADiRjh3JK+nRFFh1roZJYSjp9Cyh/eG1OHlRjW6frqE4YLALy+cR48xc2ZtUP8
+	 VPCgchE2iZZiw==
+Date: Sat, 12 Sep 2026 16:39:49 -0700
 From: Josh Poimboeuf <jpoimboe@kernel.org>
 To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -52,11 +52,11 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
 	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
 	Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH 18/23] objtool: cache relocations and function dead end
- state, do less work
-Message-ID: <aqW4klkDI2P0aUn5@jpoimboe>
+Subject: Re: [PATCH 19/23] objtool: decode instructions and resolve branch
+ targets in parallel
+Message-ID: <aqXXF6otLbLtnhWw@jpoimboe>
 References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
- <20260908-build-speedup-v1-18-5dc1ac01672d@kernel.org>
+ <20260908-build-speedup-v1-19-5dc1ac01672d@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -65,86 +65,61 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260908-build-speedup-v1-18-5dc1ac01672d@kernel.org>
+In-Reply-To: <20260908-build-speedup-v1-19-5dc1ac01672d@kernel.org>
 
-On Tue, Sep 08, 2026 at 09:55:18PM +0100, Lorenzo Stoakes (ARM) wrote:
-> Whole build, 128-thread Threadripper 9980X, best of N runs:
-> 
->                                          before   after     delta
->                                          -------------------------------
->   x86 defconfig, touch mm/vma.c, gcc        8.4s     8.1s    -0.28s (-3%)
->   x86 defconfig, touch mm/vma.c, clang      7.5s     7.1s    -0.41s (-5%)
->   x86 defconfig, clean, gcc                27.1s    26.8s    -0.34s (-1%)
->   x86 defconfig, clean, clang              26.6s    26.2s    -0.40s (-1%)
->   x86 allmodconfig, touch mm/vma.c, gcc    30.2s    28.4s     -1.8s (-6%)
->   x86 allmodconfig, touch mm/vma.c, clang  28.1s    26.0s     -2.1s (-7%)
-
-Nice!
-
-> @@ -305,7 +305,15 @@ static bool __dead_end_function(struct objtool_file *file, struct symbol *func,
->  
->  static bool dead_end_function(struct objtool_file *file, struct symbol *func)
->  {
-> -	return __dead_end_function(file, func, 0);
-> +	if (!func)
-> +		return false;
+On Tue, Sep 08, 2026 at 09:55:19PM +0100, Lorenzo Stoakes (ARM) wrote:
+> +/* Only an object this large, e.g. vmlinux.o, is decoded on several threads. */
+> +#define DECODE_THREADED_MIN_TEXT	SZ_8M
+> +/* Only decoding and the branch passes are threaded, so more gains nothing. */
+> +#define DECODE_MAX_THREADS		16
+> +#define DECODE_RANGES_PER_THREAD	4
 > +
-> +	if (!func->dead_end_known) {
-> +		func->dead_end = __dead_end_function(file, func, 0);
-> +		func->dead_end_known = 1;
+> +/*
+> + * sec_offset_hash() keys on OFFSET_STRIDE windows, so the instructions of a
+> + * window share a chain and buckets beyond one per window would sit empty.
+> + */
+> +#define INSN_HASH_BYTES_PER_BUCKET	OFFSET_STRIDE
+> +#define INSN_HASH_MIN_BITS		10
+> +
+> +static unsigned long total_text_size(struct objtool_file *file)
+> +{
+> +	unsigned long size = 0;
+> +	struct section *sec;
+> +
+> +	for_each_sec(file->elf, sec)
+> +		if (is_text_sec(sec))
+> +			size += sec_size(sec);
+> +
+> +	return size;
+> +}
+> +
+> +static int alloc_insn_hash(struct objtool_file *file, unsigned long text_size)
+> +{
+> +	const unsigned long nr_buckets = text_size / INSN_HASH_BYTES_PER_BUCKET;
+> +	const int bits = ilog2(nr_buckets);
+> +
+> +	file->insn_hash_bits = max(INSN_HASH_MIN_BITS, bits);
+> +	file->insn_hash = calloc(1UL << file->insn_hash_bits,
+> +				 sizeof(*file->insn_hash));
+> +	if (!file->insn_hash) {
+> +		ERROR_GLIBC("calloc");
+> +		return -1;
 > +	}
 > +
-> +	return func->dead_end;
->  }
-
-This bit seems like it should be a separate patch.  Though actually, it
-can just be dropped as I have something similar brewing:
-
-  https://lore.kernel.org/9d4b8ccfed745ac47a954aa2e1de62a85197122d.1788899473.git.jpoimboe@kernel.org
-
-> -struct reloc *find_reloc_by_dest(const struct elf *elf, struct section *sec, unsigned long offset)
-> +/* Should never be invoked, provided as a backstop. */
-> +static struct reloc *find_reloc_linear(struct section *rsec,
-> +				       unsigned long offset, unsigned int len)
->  {
-> -	return find_reloc_by_dest_range(elf, sec, offset, 1);
-> +	struct reloc *reloc, *first = NULL;
+> +	if (opts.stats)
+> +		printf("insn_hash_bits: %d\n", file->insn_hash_bits);
 > +
-> +	WARN("%s: linear scan for sec %s with %u relocs at offset %lu len %u",
-> +	     __func__, rsec->name, sec_num_entries(rsec), offset, len);
+> +	return 0;
+> +}
 
-Won't this be triggered for sections created with
-elf_create_rela_section()?  I don't see where they set rsec->hashed.
+The dynamic insn hash sizing should probably be its own patch.  It's a
+standalone improvement, and much more obviously correct compared to the
+rest of patch.  I suspect it will make a big difference on allyesconfig.
 
-> @@ -1147,6 +1307,28 @@ static int read_relocs(struct elf *elf)
->  
->  		rsec->base->rsec = rsec;
->  
-> +		/* DWARF relocs are never looked up. */
-> +		if (is_dwarf_section(rsec->base))
-> +			continue;
-> +		if (reloc_sec_in_order(rsec)) {
-> +			rsec->sorted = true;
-> +			continue;
-> +		}
-> +
-> +		rsec->hashed = true;
-> +		nr_hashed += sec_num_entries(rsec);
-> +	}
-
-Hm, I'm not sure whether hashing is even still needed, as compilers
-generally emit sorted relocs.
-
-> @@ -1592,6 +1799,7 @@ static int elf_alloc_reloc(struct elf *elf, struct section *rsec)
->  	}
->  
->  	rsec->nr_alloc_relocs = nr_alloc;
-> +	copy_reloc_cache_to_hash(elf, rsec, nr_relocs_old);
-
-Not all relocation appends go through this allocation code path.
-It can return earlier in this function if the space has already been
-allocated previously.  So this call probably belongs in
-elf_create_reloc().
+The rest of the patch looks ok to me, though it needs to be reviewed
+very carefully (which I haven't done yet).  I'd like to see a Sashiko
+review (I wasn't able to find these patches on sashiko.dev for some
+reason).
 
 -- 
 Josh
