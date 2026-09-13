@@ -1,117 +1,126 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 404CB361943
-	for <linux-efi@vger.kernel.org>; Sun, 13 Sep 2026 16:35:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B3EB361943;
+	Sun, 13 Sep 2026 16:36:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789317359; cv=none; b=YKVyN4+3T7eifEG5UzQgQMXqKIuj68fx5Alc+y4yzD34ODvtXDU0tWXff9FcN6SsoxLrREEwKb8535IIVCgiKMMPaYey1mRXw8PkYpaoo9aJtLMe3t6Yo+BiTi7oZtX3yr2I/bw4V/01hzZCllYH8W6DAd+4aMtssCcUip6F2VU=
+	t=1789317414; cv=none; b=s+cQzpMS4Rxy0vmtGg62nCgYWnk0mQ2XWjhP0E3XyOR/W116v1pKkZWO8YJl/n7ZISQj2bzXxXmgsMjJOFDfZJHmU9SdxJblRSUSlnlo2OT63qt7ogkJAcLNd/g4HK0hHuPDo9PIPHFsY1QzX0ZM42evp51sauicxZas6zJRUnM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789317359; c=relaxed/simple;
-	bh=syRLLaTbbkRqf7ULKYiWrw01EvEz04f3MgJhJlK5Oww=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=k05c0u61zCAUuzOkuhVk0Bz9shlqCLIKWdiKdSbN4BWWe5TT04Z0F0L3i+QfIRTgedztL6pibMkL8xn7ZYqKX3PkHgXMTdqqc0vRasd6twhekwsFMF4cPBIukTf7TqZKF8Jymdg0ev4o7ryMz9l3Oo1LXKCqZF3GT1ndAUHwzEk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ByPw/t0a; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789317414; c=relaxed/simple;
+	bh=3cetiHmsplFWJ+S96Qjna0YXLC/+Qhfff+MJkaGC2AU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=EpmnLeEtkx4/mzmFJyM+n0YBQKZFTs77RculjMXbDdW+rBFE2a5m/jWK+H1rWdtBtO+JjkEdBsSG2E0A/j49G4+Ku/g4rsFc4UU8h8H3VEOKDqmmIto68cMEMvQfbAAbNLQK8k18cGajLhB8YtX6YpDtpdSk/CRXGjeoRnUuJxQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VMRn/4Gg; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ByPw/t0a"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 11B2A1F00893;
-	Sun, 13 Sep 2026 16:35:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VMRn/4Gg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2B2A71F000FF;
+	Sun, 13 Sep 2026 16:36:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789317357;
-	bh=kD6A/JyFUqLL9iYXCsC4e135a5kpWhi8Sv7OGIVOzX8=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=ByPw/t0aO1yqgYBpYDv28K1KD81++UKGmj6Tw0Kn02YzJOQkCF8F+gILXCLK844qv
-	 phps1DMeN8KPiWfW9drl9T9jRr83eUS0JJqx7et0XA789u2TRZEFNjoS7jRaMNvy1x
-	 eXgAZPdO5vPrAQdSq5uwqIxc8l1BzJanzaqkKlQaVJIBt8GAiylrPwhrKbtfXRZobQ
-	 aVutshvpg4ZzZ/1X7CbkzoISjYfUwgsXs2aOwdjQ81ONaW685miJsSdhO9Z8BV3jD6
-	 Ld0qtDN9UoU9tG/hjpvXytupjk2rb1aozmw4Xp5ek6B+AqMBPEoUlEIn4LEVvwnBXH
-	 629ImWkbFwMCQ==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 6CA9B1980052;
-	Sun, 13 Sep 2026 12:35:55 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Sun, 13 Sep 2026 12:35:55 -0400
-X-ME-Sender: <xms:6dCmasOP7Nb50u1ehy6pP8n2xaGlTZ5YYN-5DEzol6Eg9Au14sYxHg>
-    <xme:6dCmatw7NYmTIGZEDbUt_SmUEDFN7mky_udZUsk4x4XdjF4Ed3VHD8U-eagbtqmOu
-    34_V0fMlONLv7xbpSCgFvvHb1625lq_qawcygtAgDQ-kK-qizlAkvw>
-X-ME-Proxy-Cause: dmFkZTEurrpb6X4yZyfyIk5xpoJjSevjD/sx13uZ/EGRGXmz4irO4fBnDjBvd5iHgqgPAZ
-    +xYv3wEE+LNHxKhRMf1oBU83aJN43CNTp53H63DiypGMRIWrwtnMBMsE6vK1FTyxmljTY9
-    e6Bv8t83ykU39RcT+Lfm1mgweaWwMZoAZWHMrzsOUUYjP/E6Q6WsZIQfF9E2X9elSsM1wG
-    CzdxoYbxyCcYuw8N2E37742Q7U9okFuEpcXoHom1IWFQOeo8YXapNZ3yMcQJW7SYP+A+D3
-    c7sVNZK7c5ho14UMClOeUdxIA+5Pxjzam94mKF6ZbbCHoKC0o9MJ/FljCDkeAwzCH5WHUQ
-    dXVW6rH80uO+yAtu2yH5FFwj8Ed9qYHY1/RSuuMT2l276fmBs4jBMxvT8HeGR6DVkpR6vn
-    03n+DSvIeA1wtshOeCMvqEu+ZGM1LbQG5rEu49LI6MMGAA7MRdJkxEU9DnXV9mQfI3bF27
-    Wvz1NBZk0HFBh5AjsxgXlsFRbSfS6/Y01+MJ5zSfsgCtLXz3SEfSlUFss/aC/UokXYVBoN
-    pknaXiAe5CBoP4E0SF7acD9kALP4C1Tv0U53ftKq/SYOV+FRzAtz61j6ORnP0ugUfKy5pI
-    ehLPrr7X52jlLMaz3iBY2RoAEQHV8q11hgq9FnzU4TprtrdAUs1sz53ex+jw
-X-ME-Proxy: <xmx:69Cmal1G3HiiVi9kU0DiVVJQDesAZbM4xpJDxy5YpsnmutjpzZ8njQ>
-    <xmx:69CmamLjCjO2tTD_pG1r4BXdq9LoRTKovPVflx2bX3HbWA2s_EBapw>
-    <xmx:69Cmalw4H5Kuyiz1AF15BfGXY4SZvRO_FleKFaRJewck033Oazaqhw>
-    <xmx:69CmakWiJo92yURNxp0rTBa1iN87mD6v1enAjvxn6UF4IWB5iaO-0w>
-    <xmx:69CmaljTZao1gzjI7BG9UOlFAj9V3rxiOA0GH5lvhBzz31PTJtibP3gR>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 84455F8007D; Sun, 13 Sep 2026 12:35:53 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=k20260515; t=1789317413;
+	bh=4B9lPYJZx2WtDB/f5GYcYiGdJjQEGc2VffrdMkBYbGc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=VMRn/4Ggw0dXaUy1jNqG3n3Y3lFltR1JKKPxPddcpiouSI90FL6bJhQ0xjuXhlNvp
+	 QO1eJQCBNg+tmWZk87cuALgFzNb/l7wfaiANKKcLbSXgtVUrkWdkNh64DthcliwB3k
+	 0oxm7Ms59/P2/kAKOj9iBsmBiBTunJMFV80yf35hbkPAs4+FIHmmbL3vZJD6FpvmxZ
+	 mHQ7218RLoe2DdnCFuFPUqEz4+gu0Hl6ff15ZY13jwu8GRfFcoVd5HkF51bunsZjp/
+	 xGN3TJ3cymEhnAkRu8EhgLboTMnYMtazjxkrpjpzHNudJWLJHnoXfwaiSJEJt+1Gbn
+	 Meb3psVdxKrCA==
+Date: Sun, 13 Sep 2026 17:36:39 +0100
+From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+To: Yann Droneaud <yann@droneaud.fr>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
+	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
+	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
+	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
+	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
+	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
+	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
+	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
+	Gary Guo <gary@garyguo.net>, =?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, 
+	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
+	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
+	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
+	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
+	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
+	Randy Dunlap <rdunlap@infradead.org>, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	llvm@lists.linux.dev, linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
+	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
+Subject: Re: [PATCH 17/23] modpost: perform srcversion hashing in parallel
+Message-ID: <aqbP9ewBMAGAXbQB@gremlin>
+References: <20260908-build-speedup-v1-0-5dc1ac01672d@kernel.org>
+ <20260908-build-speedup-v1-17-5dc1ac01672d@kernel.org>
+ <4e447b33-574e-425e-bc92-2b728128cf18@droneaud.fr>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Sun, 13 Sep 2026 18:35:33 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Borislav Petkov" <bp@alien8.de>
-Cc: "Kiryl Shutsemau" <kirill@shutemov.name>,
- "Ard Biesheuvel" <ardb+git@google.com>, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org, "Vincent Mailhol" <mailhol@kernel.org>,
- x86@kernel.org
-Message-Id: <862d50e1-2072-407b-882d-5e3074a3c225@app.fastmail.com>
-In-Reply-To: <20260912175410.GAaqWRwnz7bHUtXYSs@fat_crate.local>
-References: <20260909115530.1924665-12-ardb+git@google.com>
- <20260909115530.1924665-13-ardb+git@google.com>
- <20260909191410.GAaqGwAsCewrdVZZ0s@fat_crate.local>
- <cee2e02b-3817-44cf-857f-62a148290367@app.fastmail.com>
- <aqKrhNQ3mZMs5-Dy@thinkstation>
- <b24b9785-b790-476d-985d-e8c5405d192b@app.fastmail.com>
- <20260912061005.GDaqTsveevVkzxRJoI@fat_crate.local>
- <b259aff1-1fb1-4819-88ca-9b47dac036cd@app.fastmail.com>
- <20260912175410.GAaqWRwnz7bHUtXYSs@fat_crate.local>
-Subject: Re: [PATCH v2 01/10] x86/boot: Drop pointless re-implementation of panic()
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <4e447b33-574e-425e-bc92-2b728128cf18@droneaud.fr>
 
-
-On Sat, 12 Sep 2026, at 19:54, Borislav Petkov wrote:
-> On Sat, Sep 12, 2026 at 10:41:56AM +0200, Ard Biesheuvel wrote:
->> If you're not taking it as a fix, then yes, please.
+On Sat, Sep 12, 2026 at 01:50:00PM +0200, Yann Droneaud wrote:
+> Hi,
 >
-> Help me understand the exact problem pls: 
+> Le 08/09/2026 à 22:55, Lorenzo Stoakes (ARM) a écrit :
+> > modpost does a lot of single-threaded work hashing files from each object's
+> > .cmd file.
+> >
+> > This makes the build slower than it needs to be, so do this work in
+> > parallel.
 >
-> That panic() function gets called by arch_accept_memory() and *that* gets
-> called only by code in drivers/firmware/efi/libstub/unaccepted_memory.c or
-> drivers/firmware/efi/unaccepted_memory.c (but that uses the kernel proper
-> panic() one).
 >
-> So we *are* in the context of EFI boot services.
+> If you're going parallel, it would be nicer to do it under make's jobserver
+> supervision.
+
+Ack, though this patch is going to be dropped due to mod versions being removed
+upstream.
+
 >
-> What am I missing?
+>
+> > This is egregious for allmodconfig builds - for instance x86-64 can end up
+> > opening 200,000 files individually and hashing them all serially.
+> >
+> > Parallelise this operation by maintaining a thread pool for the hashing
+> > work.
+> >
+> > Combined with the per-file hashing commit this cuts modpost's run time
+> > nearly in half for an allmodconfig build.
+> >
+> > Module.symvers and every *.mod.S are byte for byte the same.
+> >
+> > modpost is on the serial tail of every allmodconfig build, however
+> > defconfig does not set CONFIG_MODULE_SRCVERSION_ALL and is unchanged.
+> >
+> > Whole build, 128-thread Threadripper 9980X, best of N runs:
+> >
+> >                                           before   after     delta
+> >                                           -------------------------------
+> >    x86 allmodconfig, touch mm/vma.c, gcc    33.4s    30.2s     -3.2s (-10%)
+> >    x86 allmodconfig, touch mm/vma.c, clang  31.1s    28.1s     -3.0s (-10%)
+> >
+> > Assisted-by: LLM
+> > Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
+> > ---
+> >   scripts/mod/Makefile     |  1 +
+> >   scripts/mod/modpost.c    | 72 ++++++++++++++++++++++++++++++++++++++++++++++--
+> >   scripts/mod/modpost.h    |  2 ++
+> >   scripts/mod/sumversion.c |  3 +-
+> >   4 files changed, 74 insertions(+), 4 deletions(-)
+> >
+>
+> Regards.
+>
 >
 
-Right, I'd missed that.
-
-But when booting via the EFI stub, the decompressor is omitted entirely,
-except for some TDX and SEV-SNP code that is shared between them.
-
-This means calling error() is a bad idea, because the TDX initialization
-code that overrides the port I/O based __putstr() handling never executes
-in that case.
-
-The reason I want to get rid of panic() is because snprintf() is going
-to be removed from the EFI stub.
-
-So I think the current patch is still correct. I will follow up with another
-one that moves arch_accept_memory() into the EFI stub, and drops the
-dependency on error().
-
- 
+--
+Cheers, Lorenzo
