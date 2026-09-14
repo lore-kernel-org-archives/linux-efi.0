@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9869E427F97;
-	Mon, 14 Sep 2026 09:22:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C32B942A175;
+	Mon, 14 Sep 2026 09:23:01 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789377774; cv=none; b=VwOfGAhlZOqc9FP2+VkFKBbppxWmsmzS4XrkeU/76AmX3D3z2vAryEc2mjKEzCw/bSVQDZDRPHGG+UAaMe5hjrErne9TbVjYm7ROzkV/VFpXLJUAIOoHBnEYKYmfPyNT1g0H68/+0m+RNRNFLFopTzqyzbDdmOpS/OQU04jaBAs=
+	t=1789377783; cv=none; b=S6o7+m09MKIS4uQ7MXVcy/lNSlkvf7kRo3l5ODkiG/a9r4QiIeLCPkt1GZf/BqAmQj63yjAmbudwJoe4X1h4knMEqwCokyllmhcQcjdDRwvFslJuAw50hkQgJVYIogjrgqAVy92LVP8vWlszrCPY/misHtjylan5U1xnRHdJJkA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789377774; c=relaxed/simple;
-	bh=4iA14ccJ3tToIuW0JxnDcx57dEM9zZDephjwK3h1FOo=;
+	s=arc-20240116; t=1789377783; c=relaxed/simple;
+	bh=EBlEnSGuCnJVwiujMjlFOqeFXEqyFnYzRW7W0NWQNRY=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=AYnMNuZU/8hhp97IogJ1Rbs+QDLe9oipAd2gjnxIFryNCoZG7uvZrLZA/k4KmcdCBXyOxiDEpYh9Icf+YggcY+BD3tqWqdiEhZETjnBJ5vT0NF4lRwoFERBG1LZ/k4zrgrVx2KPXl3af0OsSO8G+KlPpUiC3ebWgW7+EnA/KQJA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ly3GpfFw; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=gVgb62R9YF1AHCeBy5Uny8zYM6vAtlGNvlKWev18SDQWFsBV00swH9v5qbUACX7FC867/Jd2ZuUwE9egXclfZ3KxZVpGvQ5q3tc2EBuAUomqEjbKCzB0ZZBOs8oM/wwOk9jbFsP+sORkmboa2L6iYwwj95A/6Yo7jf7BrbYY8As=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=h1YfuEEU; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ly3GpfFw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1CF4E1F00898;
-	Mon, 14 Sep 2026 09:22:44 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="h1YfuEEU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8E0FC1F0089A;
+	Mon, 14 Sep 2026 09:22:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789377773;
-	bh=01qdzsZbCvqL8FdMyc8gaErER1nQlt9KVctHGyxLt4o=;
+	s=k20260515; t=1789377781;
+	bh=kU2taAW2zjsL9Ma3CzB5TbBN6AIOAn4hVTWBK2Wl6c8=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=ly3GpfFwzeqQhFXL9RBRlnCm7i2lc8zMmNG887hohTHJaqD8g/j9dA3ALTIXiCc7V
-	 n1rgcFp60l3i46kUX3oZQj3hgEzc6RUT0XMEolGB06ew3zbQXzo4cnIHxAlnm0LRGw
-	 CWooH94Su/O3c7x7qvgpFLRpmZrX+Eexrw/N+8iWSaEQn3Cead8wexnhq2UBZa4b1K
-	 ujW28Kje65+Xapm6DH6iCM0tS2aBt45vrC0WpojZnc7aEZh2695vMJBcZfpjUlxga3
-	 r5qWdL4ijF9NuICsKsQvZZ+wepmbCWFVaXXljPh0ZVbI8Y+mXttaWEpr57R6Ophvft
-	 uVaqnM4zGZ/rQ==
+	b=h1YfuEEUr1jL82h2ZqdJ44qNoHvt9yx6buktBtngN8pjpbfu9FIsuq/gzrB9EyEwa
+	 ig3BWeyieBeR/Wzpz8+tG8OLEwaK7HJCiUsBRVobDJjuonQT9a3ivCdCVoPl37yA+d
+	 HkKSEKIzuLXGwNBcRN4KNeehquasJC+eMloCgx5g++n2UfOjFY2qVopCHnCuOAK2G3
+	 i1FCwq8uDPbjtqA6lj452gaM+zTc6yDL+ATUwMEyo/jqJ1n4k74D0RwsNglCg66DAb
+	 4KbMmwNdfdDJ999PZrPrgJTdauP2Y/vVSJXxIh0G8NJ6QLb4GzKpHE9kLsYeKMGCFs
+	 pkcc3Z0/ttRvQ==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Mon, 14 Sep 2026 10:22:03 +0100
-Subject: [PATCH v2 04/21] kbuild: do not sort nm output where the order is
- irrelevant
+Date: Mon, 14 Sep 2026 10:22:04 +0100
+Subject: [PATCH v2 05/21] kbuild: only emit vmlinux relocations when
+ required
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -38,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260914-build-speedup-v2-4-39817ec5db23@kernel.org>
+Message-Id: <20260914-build-speedup-v2-5-39817ec5db23@kernel.org>
 References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
 In-Reply-To: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -75,126 +75,77 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  linux-hardening@vger.kernel.org, "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4994; i=ljs@kernel.org;
- h=from:subject:message-id; bh=4iA14ccJ3tToIuW0JxnDcx57dEM9zZDephjwK3h1FOo=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLKW79lvvuIH7+Pb6/wL96Qvm2S1cin3yoa1c8vcOaJZU
- svWKajc6ihlYRDjYpAVU2R5/kV8f5BI2LzOC/5uMHNYmUCGMHBxCsBEXs9j+O/XeczQJsDwwG8b
- 1g6H9hvb/96f0mUmULvj4uSUddz7qzcxMux+tPCIjbrOt4dHb7SxKyVIaNXdjWyac+Z23S7WiQb
- 7n7EAAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2346; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=EBlEnSGuCnJVwiujMjlFOqeFXEqyFnYzRW7W0NWQNRY=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLKW79mfJjlH8lu8/bIJm9d7ln/oNL91RHnWxNU80nppj
+ xVmpp960lHKwiDGxSArpsjy/Iv4/iCRsHmdF/zdYOawMoEMYeDiFICJ5OgzMvz1DJHzd/INU7hz
+ Xqjx3K3WJyzPP2vfli0OT1Kdfav8yByG/+lXQlvNtt2sNmkxv2q55HjohuyO38eXLXj7wEll/d7
+ rpiwA
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-Unless instructed otherwise, nm sorts by name.
+A kernel build consists of more than one linking pass on vmlinux.o and
+vmlinux, at minimum two, and with CONFIG_KALLSYMS and BTF enabled on x86-64
+for example there are 5 such stages.
 
-There are places where this is unnecessary - an invocation from
-scripts/sorttable every vmlinux link, scripts/check-function-names.sh run
-after every vmlinux.o link, and the x86 VOFFSET and ZOFFSET listings
-between vmlinux and bzImage.
+For architectures that build their own relocation tables (x86, riscv, mips,
+s390), vmlinux is linked with the --emit-relocs parameter specified.
 
-Both GNU nm and llvm-nm accept the same '-p' parameter to disable sorting
-in these instances, so use that to prevent this unnecessary work.
+However, this is only required on the final vmlinux link.
 
-Each nm run on its own, x86-64, median of 5:
+Symbol tables of trial links preceding it don't need it because they
+already check that System.map matches kallsyms symbols on each build.
 
-                             GNU nm 2.47              llvm-nm 22
-                          before  after   delta    before  after   delta
-  defconfig
-  sorttable, nm -S vmlinux 0.080s 0.039s -0.041s   0.265s 0.113s -0.152s
-  check-function-names.sh  0.072s 0.033s -0.039s   0.244s 0.102s -0.142s
-  VOFFSET                  0.077s 0.034s -0.043s   0.261s 0.113s -0.148s
-  ZOFFSET                  0.007s 0.005s -0.002s   0.005s 0.005s  0.000s
-  TOTAL                                  -0.125s                 -0.442s
-
-  allmodconfig
-  sorttable, nm -S vmlinux 0.156s 0.063s -0.093s   0.539s 0.223s -0.316s
-  check-function-names.sh  0.149s 0.054s -0.095s   0.537s 0.217s -0.320s
-  VOFFSET                  0.146s 0.052s -0.094s   0.524s 0.221s -0.303s
-  ZOFFSET                  0.007s 0.005s -0.002s   0.006s 0.004s -0.002s
-  TOTAL                                  -0.284s                 -0.941s
-
-llvm-nm appears to be a lot slower than GNU nm, so these builds naturally
-improve the most.
-
-The four run one after another in the serial tail of every build that links
-vmlinux so impact kernel builds directly.
-
-In an allmodconfig the decompressor is built in parallel while the modules,
-so only the two before the vmlinux link contribute to build time.
-
-The build outputs remain unchanged.
+GNU ld is slow at emitting relocation tables, so this results in a
+reduction in build time.
 
 Whole build, 128-thread Threadripper 9980X, best of N runs:
 
-                                          before    after     delta
-                                        ---------------------------------
-  x86 defconfig, touch mm/vma.c, gcc        9.7s     9.5s    -0.18s (-2%)
-  x86 defconfig, touch mm/vma.c, clang      9.3s     9.0s    -0.27s (-3%)
-  x86 defconfig, clean, gcc                30.3s    30.1s    -0.16s (-1%)
-  x86 defconfig, clean, clang              31.7s    31.2s    -0.55s (-2%)
-  x86 allmodconfig, touch mm/vma.c, clang  36.4s    35.8s    -0.67s (-2%)
+                                         before   after     delta
+                                         -------------------------------
+  x86 defconfig, touch mm/vma.c, gcc        9.5s     9.1s    -0.42s (-4%)
+  x86 defconfig, clean, gcc                30.1s    29.5s    -0.59s (-2%)
+  x86 allmodconfig, touch mm/vma.c, gcc    37.2s    35.8s     -1.4s (-4%)
+
+Note that this has little impact on LLVM ld which performs this operation
+more efficiently.
 
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- arch/x86/boot/Makefile            | 2 +-
- arch/x86/boot/compressed/Makefile | 2 +-
- scripts/check-function-names.sh   | 3 ++-
- scripts/link-vmlinux.sh           | 2 +-
- 4 files changed, 5 insertions(+), 4 deletions(-)
+ Makefile                | 2 +-
+ scripts/link-vmlinux.sh | 5 +++++
+ 2 files changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/boot/Makefile b/arch/x86/boot/Makefile
-index 3f9fb3698d66..4a9bce32586d 100644
---- a/arch/x86/boot/Makefile
-+++ b/arch/x86/boot/Makefile
-@@ -74,7 +74,7 @@ SETUP_OBJS = $(addprefix $(obj)/,$(setup-y))
- sed-zoffset := -e 's/^\([0-9a-fA-F]*\) [a-zA-Z] \(startup_32\|efi.._stub_entry\|efi\(32\)\?_pe_entry\|input_data\|kernel_info\|_end\|_ehead\|_text\|_e\?data\|_e\?sbat\|z_.*\)$$/\#define ZO_\2 0x\1/p'
+diff --git a/Makefile b/Makefile
+index 0f1b80100b47..dd4c10afbb7f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1263,7 +1263,7 @@ LDFLAGS_vmlinux += --orphan-handling=$(CONFIG_LD_ORPHAN_WARN_LEVEL)
+ endif
  
- quiet_cmd_zoffset = ZOFFSET $@
--      cmd_zoffset = $(NM) $< | sed -n $(sed-zoffset) > $@
-+      cmd_zoffset = $(NM) -p $< | sed -n $(sed-zoffset) > $@
+ ifneq ($(CONFIG_ARCH_VMLINUX_NEEDS_RELOCS),)
+-LDFLAGS_vmlinux	+= --emit-relocs --discard-none
++LDFLAGS_vmlinux	+= --discard-none
+ endif
  
- targets += zoffset.h
- $(obj)/zoffset.h: $(obj)/compressed/vmlinux FORCE
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 06934f9691d6..6ec5e031db1d 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -76,7 +76,7 @@ HOST_EXTRACFLAGS += -I$(srctree)/tools/include
- sed-voffset := -e 's/^\([0-9a-fA-F]*\) [ABbCDGRSTtVW] \(_text\|__start_rodata\|_sinittext\|__inittext_end\|__bss_start\|_end\)$$/\#define VO_\2 _AC(0x\1,UL)/p'
- 
- quiet_cmd_voffset = VOFFSET $@
--      cmd_voffset = $(NM) $< | sed -n $(sed-voffset) > $@
-+      cmd_voffset = $(NM) -p $< | sed -n $(sed-voffset) > $@
- 
- targets += ../voffset.h
- 
-diff --git a/scripts/check-function-names.sh b/scripts/check-function-names.sh
-index 08071133e5a5..94883e690627 100755
---- a/scripts/check-function-names.sh
-+++ b/scripts/check-function-names.sh
-@@ -13,7 +13,8 @@ if [ ! -f "$objfile" ]; then
- 	exit 1
- fi
- 
--bad_symbols=$(${NM:-nm} "$objfile" | awk '$2 ~ /^[TtWw]$/ {print $3}' | grep -E '^(startup|exit|split|unlikely|hot|unknown)(\.|$)')
-+bad_symbols=$(${NM:-nm} -p "$objfile" | awk '$2 ~ /^[TtWw]$/ {print $3}' |
-+	      grep -E '^(startup|exit|split|unlikely|hot|unknown)(\.|$)')
- 
- if [ -n "$bad_symbols" ]; then
- 	echo "$bad_symbols" | while read -r sym; do
+ # Align the architecture of userspace programs with the kernel
 diff --git a/scripts/link-vmlinux.sh b/scripts/link-vmlinux.sh
-index e88604150d2c..970ca10f8fa9 100755
+index 970ca10f8fa9..ed5ff97c0667 100755
 --- a/scripts/link-vmlinux.sh
 +++ b/scripts/link-vmlinux.sh
-@@ -161,7 +161,7 @@ mksysmap()
+@@ -96,6 +96,11 @@ vmlinux_link()
+ 		ldflags="${ldflags} ${wl}--strip-debug"
+ 	fi
  
- sorttable()
- {
--	${NM} -S ${1} > .tmp_vmlinux.nm-sort
-+	${NM} -p -S ${1} > .tmp_vmlinux.nm-sort
- 	${objtree}/scripts/sorttable -s .tmp_vmlinux.nm-sort ${1}
- }
- 
++	# Only the final link actually requires the relocations.
++	if [ "${output}" = "${VMLINUX}" ] && is_enabled CONFIG_ARCH_VMLINUX_NEEDS_RELOCS; then
++		ldflags="${ldflags} ${wl}--emit-relocs"
++	fi
++
+ 	if [ -n "${generate_map}" ];  then
+ 		ldflags="${ldflags} ${wl}-Map=vmlinux.map"
+ 	fi
 
 -- 
 2.55.0
