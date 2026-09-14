@@ -1,87 +1,154 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 20276473C67;
-	Mon, 14 Sep 2026 13:52:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from mail.stoffel.org (mail.stoffel.org [172.104.24.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5CE33DA7D9;
+	Mon, 14 Sep 2026 15:09:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=172.104.24.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789393948; cv=none; b=tND/xHe7vESYXvTBA+BG6mBHWVLkIN02gmF+Vbud+gTm9xTjwYnVrpuBlbxVdTMu/CjjWan5ou/TgI4f5eu/rQn+RPDQNGT1MQb8FUNzEfR8hA3FPRk37xzaGyH1ff/gI8Hv4JshBHvoz2eTVdtTfCJF9ru1ZXRdqtLF62MOtps=
+	t=1789398546; cv=none; b=YgaFOHTuTg46lG4ZF+7WuWXTjcg7d5X9Nq9+szKBKOcm3l+vyY7iCGPw4xdADQrDumpqhNXJNfq2hE89dyXKzfrfxxzMTmTYvWMZrFlkMwwJo3hKe+7V87mgthPJRI6vg8MWYQs5tbOL/c1YGKfoHzMIOF1AE7NAxOhrMDhxD9s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789393948; c=relaxed/simple;
-	bh=e4ntXcUDjdHd2MfAB02Vr1Et9b59XeXUsYWhphwiZL0=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=AV6dvD2WoW2DfeTv/TOj4IHxClYfeL3eVBUHSafIZHOFeXcPw2Az8GY9ZQ/UBIOUmYWb91+yLkjxMBDlwfOiH5L1xVASFj07Ll9VQUKTf+Nhvb915hVsR+OGxKsKzH2/qDmtSMXyeHO8TjFKxn/xHrm/4kpjMYZnDujtO2i5nrA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=gHy6581v; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+	s=arc-20240116; t=1789398546; c=relaxed/simple;
+	bh=oMblGF1PmYRaqle4YPaaEqUlpIDejeN8jfSd3IyEo/E=;
+	h=MIME-Version:Content-Type:Message-ID:Date:From:To:Cc:Subject:
+	 In-Reply-To:References; b=eYjYu1MUzO4PmOsxppvIPenLg5LLgy4ERwzumqrNdICBWgDIw/OMKxDDznnGOltGH917kF8lQYSzUQKnGRfgAK+eYWv0vwbqjRWVrRRc8f4hBzRznArTVFrjBSJ8bEj4LLgINAdU1BmuHgkwejOhyMb7pQ/dvCCJhXhLqskOfWE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=stoffel.org; spf=pass smtp.mailfrom=stoffel.org; dkim=pass (2048-bit key) header.d=stoffel.org header.i=@stoffel.org header.b=AlmtH9ST; arc=none smtp.client-ip=172.104.24.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=stoffel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=stoffel.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="gHy6581v"
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id E6DC61570;
-	Mon, 14 Sep 2026 06:52:22 -0700 (PDT)
-Received: from [127.0.1.1] (e142334-100.cambridge.arm.com [10.2.198.93])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 4FC283F882;
-	Mon, 14 Sep 2026 06:52:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1789393946; bh=e4ntXcUDjdHd2MfAB02Vr1Et9b59XeXUsYWhphwiZL0=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=gHy6581v3Osy62vEgipfLO7U9hGflqXQ1eCPuqXwQrCBqd/7/OFx2bCOuwhgz4k3E
-	 ZnsOLh53E6Jlr+SeHyB3quPKCabxE0k+Qxa0dkfRIjMVgipHmzQYWXIFYq3OLPXMss
-	 Mc8NOBq/1UzJG/ibmkDVamAsZWuVXbHEJOWLMyeo=
-From: Muhammad Usama Anjum <usama.anjum@arm.com>
-Date: Mon, 14 Sep 2026 14:51:36 +0100
-Subject: [PATCH 6/6] arm64: enable a distinct type for HW PTEs
+	dkim=pass (2048-bit key) header.d=stoffel.org header.i=@stoffel.org header.b="AlmtH9ST"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=stoffel.org;
+ i=@stoffel.org; q=dns/txt; s=20250308; t=1789398143; h=mime-version :
+ content-type : content-transfer-encoding : message-id : date : from :
+ to : cc : subject : in-reply-to : references : from;
+ bh=oMblGF1PmYRaqle4YPaaEqUlpIDejeN8jfSd3IyEo/E=;
+ b=AlmtH9STTB3sBPP31THd4Ukf5Z6t561oZCkY6InocAjV6FJV0GlJpESrVaoEiZ4A2uvYj
+ gSessr0w8EU13qxN0B+jYQ20yXsLhCqUZutbGy7AcGcD5CFenB+bVoo/1m8Bw/R1ZtoWetF
+ sBmKOUI3nx0KxE7wUcDCF+5n4994xds9o7lSQH/T2399oBGJXN2k3kZ8PCGsCP8feOVSZt7
+ E2jqE9cJAeF1HOKpro5FXdEZy3YI3ScbXELaBw6grc9sla2gt2x7VXc0k45gBGa5H3OmWN9
+ QSHUKS/Lr8CJN8h1E+WssVpWqEPHuNKBoEAReWkV8A5H3NgyUYydzjMKYCNw==
+Received: from quad.stoffel.org (unknown [24.177.6.168])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	(No client certificate requested)
+	by mail.stoffel.org (Postfix) with ESMTPSA id 96A101EC77;
+	Mon, 14 Sep 2026 11:02:23 -0400 (EDT)
+Received: by quad.stoffel.org (Postfix, from userid 1000)
+	id E573BA3288; Mon, 14 Sep 2026 11:02:22 -0400 (EDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260914-pte0_arm-v1-6-bb53b663e396@arm.com>
-References: <20260914-pte0_arm-v1-0-bb53b663e396@arm.com>
-In-Reply-To: <20260914-pte0_arm-v1-0-bb53b663e396@arm.com>
-To: Catalin Marinas <catalin.marinas@arm.com>, 
- Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>, 
- Ard Biesheuvel <ardb@kernel.org>, 
- Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
- Andrey Ryabinin <ryabinin.a.a@gmail.com>, 
- Alexander Potapenko <glider@google.com>, 
- Andrey Konovalov <andreyknvl@gmail.com>, Dmitry Vyukov <dvyukov@google.com>, 
- Vincenzo Frascino <vincenzo.frascino@arm.com>, 
- Andrew Morton <akpm@linux-foundation.org>, 
- David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>, 
- "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>, 
- Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>, 
- Michal Hocko <mhocko@suse.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
- linux-efi@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, 
- Muhammad Usama Anjum <usama.anjum@arm.com>
-X-Mailer: b4 0.16.0
+Message-ID: <27304.3198.867048.379684@quad.stoffel.home>
+Date: Mon, 14 Sep 2026 11:02:22 -0400
+From: "John Stoffel" <john@stoffel.org>
+To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>,
+    Nathan Chancellor <nathan@kernel.org>,
+    Nicolas Schier <nsc@kernel.org>,
+    Nick Desaulniers <ndesaulniers@google.com>,
+    Bill Wendling <morbo@google.com>,
+    Justin Stitt <justinstitt@google.com>,
+    Masahiro Yamada <masahiroy@kernel.org>,
+    Alexey Gladkov <legion@kernel.org>,
+    Thomas Gleixner <tglx@kernel.org>,
+    Ingo Molnar <mingo@redhat.com>,
+    Borislav Petkov <bp@alien8.de>,
+    Dave Hansen <dave.hansen@linux.intel.com>,
+    x86@kernel.org,
+    "H. Peter Anvin" <hpa@zytor.com>,
+    Paul Walmsley <pjw@kernel.org>,
+    Palmer Dabbelt <palmer@dabbelt.com>,
+    Albert Ou <aou@eecs.berkeley.edu>,
+    Alexandre Ghiti <alex@ghiti.fr>,
+    Arnd Bergmann <arnd@arndb.de>,
+    Catalin Marinas <catalin.marinas@arm.com>,
+    Will Deacon <will@kernel.org>,
+    Mark Rutland <mark.rutland@arm.com>,
+    Ard Biesheuvel <ardb@kernel.org>,
+    Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+    Josh Poimboeuf <jpoimboe@kernel.org>,
+    Peter Zijlstra <peterz@infradead.org>,
+    Miguel Ojeda <ojeda@kernel.org>,
+    Boqun Feng <boqun@kernel.org>,
+    Gary Guo <gary@garyguo.net>,
+    =?iso-8859-1?Q?Bj=F6rn?= Roy Baron <bjorn3_gh@protonmail.com>,
+    Benno Lossin <lossin@kernel.org>,
+    Andreas Hindborg <a.hindborg@kernel.org>,
+    Alice Ryhl <aliceryhl@google.com>,
+    Trevor Gross <tmgross@umich.edu>,
+    Danilo Krummrich <dakr@kernel.org>,
+    Daniel Almeida <daniel.almeida@collabora.com>,
+    Tamir Duberstein <tamird@kernel.org>,
+    Alexandre Courbot <acourbot@nvidia.com>,
+    Onur =?iso-8859-1?Q?=D6zkan?= <work@onurozkan.dev>,
+    Jonathan Corbet <corbet@lwn.net>,
+    Randy Dunlap <rdunlap@infradead.org>,
+    Kees Cook <kees@kernel.org>,
+    "Gustavo A. R. Silva" <gustavoars@kernel.org>,
+    linux-kbuild@vger.kernel.org,
+    linux-kernel@vger.kernel.org,
+    llvm@lists.linux.dev,
+    linux-riscv@lists.infradead.org,
+    linux-arch@vger.kernel.org,
+    linux-arm-kernel@lists.infradead.org,
+    linux-efi@vger.kernel.org,
+    rust-for-linux@vger.kernel.org,
+    linux-doc@vger.kernel.org,
+    Jens Axboe <axboe@kernel.dk>,
+    linux-hardening@vger.kernel.org
+X-Clacks-Overhead: GNU Terry Pratchett
+Subject: Re: [PATCH v2 11/21] kbuild: avoid re-running compiler and linker
+ probes
+In-Reply-To: <20260914-build-speedup-v2-11-39817ec5db23@kernel.org>
+References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
+	<20260914-build-speedup-v2-11-39817ec5db23@kernel.org>
+X-Mailer: VM 8.3.3snapshot under GNU Emacs 28.2 (x86_64-pc-linux-gnu)
 
-With HW PTE pointers and direct HW PTE accesses converted, arm64 can use
-the generic hw_pte_t wrapper instead of the pte_t alias.
+>>>>> "Lorenzo" == Lorenzo Stoakes (ARM) <ljs@kernel.org> writes:
 
-Select ARCH_HAS_HW_PTE_T to give HW PTEs and SW PTE values distinct C
-types.
+> Each kernel make invocation begins with ~30 compiler and linker runs each
+> of which performs duplicate probe for a number of compiler and linker
+> options.
 
-Signed-off-by: Muhammad Usama Anjum <usama.anjum@arm.com>
----
- arch/arm64/Kconfig | 1 +
- 1 file changed, 1 insertion(+)
+> This is useless work - the compiler and its version is known, so use these
+> to determine which options are available, once.
 
-diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 2bbeded33da0d..42841d5e2ed26 100644
---- a/arch/arm64/Kconfig
-+++ b/arch/arm64/Kconfig
-@@ -31,6 +31,7 @@ config ARM64
- 	select ARCH_HAS_FORTIFY_SOURCE
- 	select ARCH_HAS_GCOV_PROFILE_ALL
- 	select ARCH_HAS_GIGANTIC_PAGE
-+	select ARCH_HAS_HW_PTE_T
- 	select ARCH_HAS_KCOV
- 	select ARCH_HAS_KERNEL_FPU_SUPPORT if KERNEL_MODE_NEON
- 	select ARCH_HAS_KEEPINITRD
+> A convention already exists for this - CC_HAS_xxx, LD_HAS_xxx in Kconfig
+> files (for example, CC_HAS_COUNTED_BY), so convert these probes to Kconfig
+> options where appropriate.
 
--- 
-2.47.3
+> This change avoids a sublte issue with ppc32 (big endian) - clang doesn't
+                       ^^^^^^
+
+subtle
+
+> accept -fno-stack-clash-protection on this sub-target, so keep this option
+> in the Makefile.
+
+> With gcc and clang, defconfig and allmodconfig, the recorded command
+> lines are unchanged, a build with nothing to do rebuilds nothing and W=1
+> continues to function correctly.
+
+> Doing this improves all builds, but has a particularly positive impact on
+> no-op builds (builds where nothing has changed).
+
+> Whole build, 128-thread Threadripper 9980X, best of N runs:
+
+>                                          before   after     delta
+>                                          -------------------------------
+>   x86 defconfig, no-op make, gcc           0.78s    0.60s    -0.18s (-23%)
+>   x86 defconfig, no-op make, clang         0.94s    0.66s    -0.28s (-30%)
+>   x86 defconfig, touch mm/vma.c, gcc        8.6s     8.5s    -0.16s (-2%)
+>   x86 defconfig, touch mm/vma.c, clang      8.0s     7.7s    -0.24s (-3%)
+>   x86 defconfig, clean, clang              29.8s    29.4s    -0.37s (-1%)
+>   x86 allmodconfig, no-op make, gcc        12.9s    12.7s    -0.23s (-2%)
+>   x86 allmodconfig, no-op make, clang      14.2s    13.9s    -0.29s (-2%)
+>   x86 allmodconfig, touch mm/vma.c, clang  32.2s    31.9s    -0.30s (-1%)
+
+Are these deltas just per-patch, but cumulative with all the previous
+patches applied?   
 
