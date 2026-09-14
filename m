@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D5AB385D8E;
-	Mon, 14 Sep 2026 18:32:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2674713C9C4;
+	Mon, 14 Sep 2026 18:37:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789410736; cv=none; b=hCgxWav00xixAnW1OHdILFemqIltfiMMvLpIBp6UQOKdU8ZVE+/6z4u8dhngz89IKeialhPh/VXXTLsiLnTPw6D/MnmMQ303uJ7YJPkrZFv8q2ymZoh6De1smbKl9mxByyEpDRrH+UsLxEJOXoH+o0jSCu73gQabrgaUcTiY0ho=
+	t=1789411079; cv=none; b=MsepIHyGGc1X6itoL0pk+vKs5PiW/QYKQ2uO/hYTXTXfHoJ4/l8VIqJPxUnL89iuVdiOcUPCdqsjY0Qwvwb19OOU3gVpmFpdeGiOy+OoqVSqNuh0TPLITWhtjuf6oDLpKobeWpUFHsWZKS+avvt668cWdSJ698/IboVZaAsv+OE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789410736; c=relaxed/simple;
-	bh=D2+hleGXIMDN227b5SNY36r7EzpYxCREKmva1l2nkHY=;
+	s=arc-20240116; t=1789411079; c=relaxed/simple;
+	bh=SjZhDK0nqC8Zf70N+lOhNCSuAoux/KPPcpOxFpCchJE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Nv8YZUORR9KkQpXQ/WxoTj3VMl+zvfVc2n39giYCHlYb0Y6+D3kxMYM2GCbMVC4KO3pp3+2BpscVskTrOBXfn6wq98hR9khr9LkrLhYntrHeByGvSPP754tz3+vq/JimqnucM5Zpg1JJtP++O3vjMIlNvziOFEn6pm35sRfBwlI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LT1cFNgk; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=kvle6ksgH74A8km/lXKkQsMEmSVqH5QaJ2pJCfhAU88gdv2di/gF+4L2InDsBgMgdLF/i8AUr7T7ML64p5YGqUJjbzCWsBzO6lc5WcCjDcN3E2jvkzNGEbmv5NHjo9u5vFIGnLi2P/etOItPpL434ABnf5rVgLuaTwLkq6twGIY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fG+V7yzl; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LT1cFNgk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D5DB41F00893;
-	Mon, 14 Sep 2026 18:32:14 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fG+V7yzl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC2811F000FF;
+	Mon, 14 Sep 2026 18:37:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789410734;
-	bh=qh1ZerciXS6mhhgUbgOWtjBtb3wIfa62KF3pRdi9HRg=;
+	s=k20260515; t=1789411074;
+	bh=TOeAKXfv/9Zy/Vfek9QqwXZIIUS3I0SElaU0l07Cf5U=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=LT1cFNgkvbD3eoVT/UaBEH3+r1ZmImzoNjg1sB0fKgYfiWphX+2k3leDEJjTKPvkI
-	 UCeZKsCtpOsU1Qh6ZRgd9PGKscvkwgEZ/CXkgLZsggzcTd3LcxREE5AMbc7rSZ176a
-	 7gNUxLvYBfZ5rTEMblheppVavtWDrYGJ9aihGEv2SwKX80uE2nVnkBoFYyryneR1eY
-	 l99LJZaV59sYUO8uU85RDxazHEX6uhwHzX4FGdH4s0ESmZYKyjLD5malFkq7HqRZYp
-	 MO93SpFQpfLWTJCfXhlr1iU+iBNmOcV7d+vp6+IkNPD3Hj/IjfJ9MaHA5ebXh1WWUJ
-	 +Cz7fAfk/ogdA==
-Date: Mon, 14 Sep 2026 11:32:14 -0700
+	b=fG+V7yzlO/w0vfzga+Er1Im9w2nHQjGIE6fv/TcE9yZN36AcVaiP2eUfJDKBas6On
+	 RFQ/MFy1HF88siOyqxgZmP7n353ap4t60XaHQhej2n7EEy0y8CU1JCQ4YVVihSjaDC
+	 Bfi9nJWUmjg/GkyX4dXIEssOZ4wsxkyBjZzeiIIJIEy34FGa4X8vievIYjeAOaij/p
+	 Jwt8bVmiMB/Mbdant7+aLCkTFR32BG08p1eflMNYApfK35ofOF+o5rgQ67xfqHu607
+	 Prx2UzuIbDPwMzgAqVndZnJMOen14O0sM1o80y2ItrBJL/QPa++KMVODvol6LUxWey
+	 Bw8hYleVDBFsg==
+Date: Mon, 14 Sep 2026 11:37:54 -0700
 From: Kees Cook <kees@kernel.org>
 To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
@@ -70,11 +70,11 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
 	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
 	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v2 18/21] kbuild: rust: optionally parallelise rustc
- front end
-Message-ID: <202609141124.F24B6F77@keescook>
+Subject: Re: [PATCH v2 20/21] kbuild: build rust crates in parallel with the
+ rest of the build
+Message-ID: <202609141133.7CA979C89@keescook>
 References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
- <20260914-build-speedup-v2-18-39817ec5db23@kernel.org>
+ <20260914-build-speedup-v2-20-39817ec5db23@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -83,36 +83,53 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260914-build-speedup-v2-18-39817ec5db23@kernel.org>
+In-Reply-To: <20260914-build-speedup-v2-20-39817ec5db23@kernel.org>
 
-On Mon, Sep 14, 2026 at 10:22:17AM +0100, Lorenzo Stoakes (ARM) wrote:
-> The threads are taken from make's jobserver, so a parallel build is not
-> oversubscribed. It was found that benefits level off at 8 threads (16 was
-> found to be around the same, and 32 slower).
-
-I think it's worth noting that this comes from rustc itself (it has
-built-in support for the make jobserver). See commit ecab4115c44c
-("kbuild: mark `rustc` (and others) invocations as recursive").
-
-What happens when there is no jobserver, e.g. "make" without -j, or
-"make -j1"?
-
+On Mon, Sep 14, 2026 at 10:22:19AM +0100, Lorenzo Stoakes (ARM) wrote:
+> Care is taken to ensure that external rust modules can still be built
+> against the tree - make modules_prepare ... (where ... are other goals)
+> will build rust/ first.
 > [...]
-> rustc has a parallel front end, enabled with -Zthreads, available since
-> rust 1.84 [0] and therefore on every rustc the kernel supports.
-> 
-> It is not yet stable and its output is not reproducible, so it cannot be
+>  prepare: prepare0
+>  ifdef CONFIG_RUST
+>  	+$(Q)$(CONFIG_SHELL) $(srctree)/scripts/rust_is_available.sh
+> -	$(Q)$(MAKE) $(build)=rust
+>  endif
+>  
+>  PHONY += remove-stale-files
+> @@ -1760,6 +1763,12 @@ modules: modules_prepare
+>  # Target to prepare building external modules
+>  modules_prepare: prepare
+>  	$(Q)$(MAKE) $(build)=scripts scripts/module.lds
+> +ifdef CONFIG_RUST
+> +# Ensure rust/ is built before any external rust module which will rely upon it.
+> +ifneq ($(filter modules_prepare,$(MAKECMDGOALS)),)
+> +	$(Q)$(MAKE) $(build)=rust
+> +endif
+> +endif
+
+As far as I can see, nothing orders this recipe against the tree build,
+which also descends into rust/ through "obj-$(CONFIG_RUST) += rust/"
+in Kbuild, while $(build-dir) only depends on prepare. Before this
+patch that was fine, because prepare had already built rust/ by the
+time either of them ran. Now "make -jN modules_prepare all" can have
+two make processes building rust/ at the same time, and so can
+"make -jN rustdoc all" or "make -jN rusttest all", whose recipes also
+run "$(MAKE) $(build)=rust". That means two rustc runs writing the same
+objects in rust/ ...
+
+> +# Rust code elsewhere in the tree depends upon rust/.
+> +ifdef CONFIG_RUST
+> +$(KBUILD_RUST_DIRS): | rust
+> +endif
 > [...]
-> +The number of threads rustc's parallel front end may use, passed to it as
-> +``-Zthreads``. Unset by default, as the parallel front end is not yet
-> +stable and its output is not reproducible. The gain levels off at 8
-> +threads.
+> +export KBUILD_RUST_DIRS := drivers lib mm samples
 
-Okay, unstable, not reproducible.
-
-> Generated output was confirmed byte-for-byte identical.
-
-But this says otherwise? I am confused. Reproducible or not?
+Doesn't this make all of drivers/, lib/, mm/ and samples/ wait for rust/?
+That's a lot of stall: drivers/ is most of the tree. I think then a
+CONFIG_RUST build has most of its C work waiting on the rust chain;
+only the other top-level directories start early? This didn't create new
+build delays for those configurations?
 
 -- 
 Kees Cook
