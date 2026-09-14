@@ -1,135 +1,87 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2674713C9C4;
-	Mon, 14 Sep 2026 18:37:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A602739E9AC;
+	Mon, 14 Sep 2026 18:38:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789411079; cv=none; b=MsepIHyGGc1X6itoL0pk+vKs5PiW/QYKQ2uO/hYTXTXfHoJ4/l8VIqJPxUnL89iuVdiOcUPCdqsjY0Qwvwb19OOU3gVpmFpdeGiOy+OoqVSqNuh0TPLITWhtjuf6oDLpKobeWpUFHsWZKS+avvt668cWdSJ698/IboVZaAsv+OE=
+	t=1789411084; cv=none; b=cxs+vuEuF6eQjx8Wi5biN6wmHxbRQliq1GRNyAP0F4D+ZecHGrvnLF1ZUp6GZE0p4QEyxaeb0EWoNSx6JabFHKoiuS4SdInpmq14dTJ8cXI5u1Br579ZLfud5qv4j10Qk79hzaDTbPdQBA4GQ9oilzX6asSAFuAsU4HtrCyGNRo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789411079; c=relaxed/simple;
-	bh=SjZhDK0nqC8Zf70N+lOhNCSuAoux/KPPcpOxFpCchJE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kvle6ksgH74A8km/lXKkQsMEmSVqH5QaJ2pJCfhAU88gdv2di/gF+4L2InDsBgMgdLF/i8AUr7T7ML64p5YGqUJjbzCWsBzO6lc5WcCjDcN3E2jvkzNGEbmv5NHjo9u5vFIGnLi2P/etOItPpL434ABnf5rVgLuaTwLkq6twGIY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fG+V7yzl; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789411084; c=relaxed/simple;
+	bh=V8oHB9tepYvRR+hXK96/ICwrRJ5Uev1MWGdSHDB6FDs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=RMWHZCZwwsLez8YM5GkYEgzT1iTuIBS5ad0a2b03dCwyGaiONZw7UZiBw+zS1P3DkyEapnOij5vxNSk9XTsGnQq+HuMF4eL6cGRyEJbvANj4JzezUtU0fcdUiMmxGz5eXlnIpI7w0v2TyMnFKsbo6i2sRnJlf8umaBUIIihkmz4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZITNpScO; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fG+V7yzl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC2811F000FF;
-	Mon, 14 Sep 2026 18:37:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZITNpScO"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AA1821F00898;
+	Mon, 14 Sep 2026 18:37:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789411074;
-	bh=TOeAKXfv/9Zy/Vfek9QqwXZIIUS3I0SElaU0l07Cf5U=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=fG+V7yzlO/w0vfzga+Er1Im9w2nHQjGIE6fv/TcE9yZN36AcVaiP2eUfJDKBas6On
-	 RFQ/MFy1HF88siOyqxgZmP7n353ap4t60XaHQhej2n7EEy0y8CU1JCQ4YVVihSjaDC
-	 Bfi9nJWUmjg/GkyX4dXIEssOZ4wsxkyBjZzeiIIJIEy34FGa4X8vievIYjeAOaij/p
-	 Jwt8bVmiMB/Mbdant7+aLCkTFR32BG08p1eflMNYApfK35ofOF+o5rgQ67xfqHu607
-	 Prx2UzuIbDPwMzgAqVndZnJMOen14O0sM1o80y2ItrBJL/QPa++KMVODvol6LUxWey
-	 Bw8hYleVDBFsg==
-Date: Mon, 14 Sep 2026 11:37:54 -0700
-From: Kees Cook <kees@kernel.org>
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nicolas Schier <nsc@kernel.org>,
-	Nick Desaulniers <ndesaulniers@google.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	Masahiro Yamada <masahiroy@kernel.org>,
-	Alexey Gladkov <legion@kernel.org>,
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-	"H. Peter Anvin" <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
+	s=k20260515; t=1789411077;
+	bh=kp8eN6LJj4BgTRlawhDSrzGb5ffXtOcY9dGTmwun7+E=;
+	h=From:To:Cc:Subject:Date;
+	b=ZITNpScOFJxB9F5Dkx0tVhgy+RMy3uu/f8m6unamHoPQIGGo3WdShKCSLqu4EiBtS
+	 Slsy8B22HIGJdyYMuzI6uIOLyJ+l9ciL1RHKETkCP0CWZAdLiADLmH0todT2raSyZQ
+	 bhMCFf12ZyuQuH9wZWDm0Kz+KwmZTPxnEKepqnjVZ8eSrvVg5o5fkARCUB38M8jX8K
+	 WiVn0LnpwqAtxv5oYgRC5PmFr43/deG9szWYNRoxLd4mNqHodziKLhr9r1IYPU61qO
+	 yao14654s7zdVwuXGNbDb3zCSC/svEJiElCPgrD+D+YHIS8Orc5TeVIGNlcfgzZSbj
+	 qSIaZN5ONgssw==
+From: Ard Biesheuvel <ardb@kernel.org>
+To: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org,
+	x86@kernel.org,
 	Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Josh Poimboeuf <jpoimboe@kernel.org>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>,
-	Gary Guo <gary@garyguo.net>,
-	=?iso-8859-1?Q?Bj=F6rn?= Roy Baron <bjorn3_gh@protonmail.com>,
-	Benno Lossin <lossin@kernel.org>,
-	Andreas Hindborg <a.hindborg@kernel.org>,
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>,
-	Danilo Krummrich <dakr@kernel.org>,
-	Daniel Almeida <daniel.almeida@collabora.com>,
-	Tamir Duberstein <tamird@kernel.org>,
-	Alexandre Courbot <acourbot@nvidia.com>,
-	Onur =?iso-8859-1?Q?=D6zkan?= <work@onurozkan.dev>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Randy Dunlap <rdunlap@infradead.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
-	llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
-	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
-	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
-	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v2 20/21] kbuild: build rust crates in parallel with the
- rest of the build
-Message-ID: <202609141133.7CA979C89@keescook>
-References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
- <20260914-build-speedup-v2-20-39817ec5db23@kernel.org>
+	"Kiryl Shutsemau (Meta)" <kas@kernel.org>,
+	Borislav Petkov <bp@alien8.de>
+Subject: [PATCH 0/3] Move memory acceptance x86 arch code into EFI stub
+Date: Mon, 14 Sep 2026 20:37:46 +0200
+Message-ID: <20260914183745.37538-5-ardb@kernel.org>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260914-build-speedup-v2-20-39817ec5db23@kernel.org>
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1551; i=ardb@kernel.org; h=from:subject; bh=V8oHB9tepYvRR+hXK96/ICwrRJ5Uev1MWGdSHDB6FDs=; b=owGbwMvMwCVmkMcZplerG8N4Wi2JIWuF3c/+Amahy3Jv3hjXiJ7c6XF6h8YD3wv/i3jtm9zFM x7c/ujRUcLCIMbFICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACYyZQPD/2INI6eyu377nlwp b1U8lRiwvahfVqvN/mjHqz4tlzesvgw/Hu/PfxntcGT11kOrdvzYEZezljH7ncg05ytt13Ubtau 4AQ==
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+Content-Transfer-Encoding: 8bit
 
-On Mon, Sep 14, 2026 at 10:22:19AM +0100, Lorenzo Stoakes (ARM) wrote:
-> Care is taken to ensure that external rust modules can still be built
-> against the tree - make modules_prepare ... (where ... are other goals)
-> will build rust/ first.
-> [...]
->  prepare: prepare0
->  ifdef CONFIG_RUST
->  	+$(Q)$(CONFIG_SHELL) $(srctree)/scripts/rust_is_available.sh
-> -	$(Q)$(MAKE) $(build)=rust
->  endif
->  
->  PHONY += remove-stale-files
-> @@ -1760,6 +1763,12 @@ modules: modules_prepare
->  # Target to prepare building external modules
->  modules_prepare: prepare
->  	$(Q)$(MAKE) $(build)=scripts scripts/module.lds
-> +ifdef CONFIG_RUST
-> +# Ensure rust/ is built before any external rust module which will rely upon it.
-> +ifneq ($(filter modules_prepare,$(MAKECMDGOALS)),)
-> +	$(Q)$(MAKE) $(build)=rust
-> +endif
-> +endif
+This is a follow-up to [0].
 
-As far as I can see, nothing orders this recipe against the tree build,
-which also descends into rust/ through "obj-$(CONFIG_RUST) += rust/"
-in Kbuild, while $(build-dir) only depends on prepare. Before this
-patch that was fine, because prepare had already built rust/ by the
-time either of them ran. Now "make -jN modules_prepare all" can have
-two make processes building rust/ at the same time, and so can
-"make -jN rustdoc all" or "make -jN rusttest all", whose recipes also
-run "$(MAKE) $(build)=rust". That means two rustc runs writing the same
-objects in rust/ ...
+Move arch_accept_memory(), which is only called by the EFI stub and
+never by the decompressor on a non-EFI boot, into the EFI stub, and
+avoid relying directly on decompressor APIs such as error().
 
-> +# Rust code elsewhere in the tree depends upon rust/.
-> +ifdef CONFIG_RUST
-> +$(KBUILD_RUST_DIRS): | rust
-> +endif
-> [...]
-> +export KBUILD_RUST_DIRS := drivers lib mm samples
+Instead, call tdx_panic() on a failure to accept memory in a TDX guest.
 
-Doesn't this make all of drivers/, lib/, mm/ and samples/ wait for rust/?
-That's a lot of stall: drivers/ is most of the tree. I think then a
-CONFIG_RUST build has most of its C work waiting on the rust chain;
-only the other top-level directories start early? This didn't create new
-build delays for those configurations?
+This makes the decompressor's implementation of panic() obsolete, and
+allows it to be removed. This is a prerequisite for dropping the
+implementation of snprintf() from the EFI stub entirely, which is what
+the series containing [0] implements.
 
+[0] http://lore.kernel.org/r/20260909115530.1924665-13-ardb+git@google.com
+
+Cc: Kiryl Shutsemau (Meta) <kas@kernel.org>
+Cc: Borislav Petkov <bp@alien8.de>
+
+Ard Biesheuvel (3):
+  x86/tdx: Share tdx_panic() with the EFI stub
+  x86/boot: Move unaccepted memory handling out of the decompressor
+  x86/boot: Drop unused implementation of panic()
+
+ arch/x86/boot/compressed/error.c        | 19 ---------
+ arch/x86/boot/compressed/error.h        |  1 -
+ arch/x86/boot/compressed/mem.c          | 42 --------------------
+ arch/x86/boot/compressed/sev.h          |  2 -
+ arch/x86/coco/tdx/tdx-shared.c          | 35 ++++++++++++++++
+ arch/x86/coco/tdx/tdx.c                 | 35 ----------------
+ arch/x86/include/asm/sev.h              |  2 +
+ arch/x86/include/asm/shared/tdx.h       |  1 +
+ drivers/firmware/efi/libstub/x86-stub.c | 40 +++++++++++++++++++
+ 9 files changed, 78 insertions(+), 99 deletions(-)
+
+
+base-commit: cee9395acd8043be0644b25c34bfa86623f2b935
 -- 
-Kees Cook
+2.47.3
+
