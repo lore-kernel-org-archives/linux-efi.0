@@ -1,36 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C7084963D2;
-	Mon, 14 Sep 2026 17:50:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D8DF43F8BA;
+	Mon, 14 Sep 2026 18:00:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789408221; cv=none; b=jNxzOtqcVwq8gAY7uzuaCyWfQ7UeLy6azo7wiADlQ9nMqtySfXLIzA9+14pCyrd/sZM6j/ka9AjjQg5qHhQtgU2vZcmoXC+o5YxD/C+xf/1G3ueNZmmqhu44olqimPTWYNJP4oW0ombtqZ272863g7zzJAWq9mJ8Y4IvqL9zzM8=
+	t=1789408829; cv=none; b=OtnOSU+I53uBn3g2S6n0RlKYos9tyobyAtDQ2MWu5t5o4lOKsVM2HKVa5fPmVM66JsnY6jNNdrqX+1+cEJmZSGsqGquDiTyCF/iIRzibGc5HrreDlvHfNYSdVJvZs1bowNui58zV1nhGVWe7aZKwVsEgfP4OZ5Y3Y5gGWwkK/G0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789408221; c=relaxed/simple;
-	bh=M6W30yQBqKEOsxjdNM6nYf5Fsz2YrwIgKsHWwkS2q/I=;
+	s=arc-20240116; t=1789408829; c=relaxed/simple;
+	bh=3+cqU+7jmuS3Vs/6V/yEs66Msl6H9pWzW4OWZhoiFlA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=bOKx5xHplhX9yWC/WX8+I++hMtqe7JF5VMXMowr9VekGlOSmZRvViE7gIu+uxJnNLbiwoAzAOiiySI26TcRTUoUynn3ULwm/GvoFNldUsfL6qHCvr012tKygcZP2xwcKjm4lsFkfujAVZJxUFH1pwsB14iCoZWmdPS61Ub7ECNI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VzhPxfhr; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=PLlawIGd3hNFX3aGseGj9/gLxmr8TnNuoaJtdk+3IBsNLdh9jEn0Y0QNbiSl/guPC2Y+q8cP5ACwKA+LbTIs/xYrZBARroAQcD8jQx/Onrr0TjNkJm7B42VeBOnuUc47BBac8qwLV5luOLVTGw8WulqRZimuQWEfFOOEgOJ/vSk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ODZLqWaY; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VzhPxfhr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D61DA1F00898;
-	Mon, 14 Sep 2026 17:50:19 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ODZLqWaY"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B0B891F00893;
+	Mon, 14 Sep 2026 18:00:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789408219;
-	bh=e67qZ3QCn2L8qyNk+mdAvO35N1up2MXWgPivIgLpess=;
+	s=k20260515; t=1789408827;
+	bh=NXbbt1iUoauMs+fLO9RzZKe19lkdH+Cr594Dnv6SVKQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=VzhPxfhrNGwUFy/l2g4I81wR8gE/J718KmUtsDuY/Uh6uBvIcRmhC5kc8HQt0wGA2
-	 brpSBw73lF6qYAafp2WUtJU+3pucoX4YyQOUUaz9p4ygq6pNrUXZIMlbn4gYEXsohf
-	 bhstkaAV1y+GgJQzeladwBwQ4/xbaBeFfcoyFp0d/FdRjbO+4+HbiFSpuQoczjcEfw
-	 sBB7VEeWFU/QcEEEiSjFBYIgF300IaDeV+5AG/C7MAsOZOlCW1sCy8cOGc/cQRr7qT
-	 VvtxBqcopXv4rrKOLi6jWjhgFHFOUqy4WC82WwOIBmeDMhNiG05AJMZ2nPVLgOKFOD
-	 KhM7mBnSCMeuA==
-Date: Mon, 14 Sep 2026 10:50:19 -0700
+	b=ODZLqWaYMLu9jeAppJFzYzDYbmDcJaGKcKFa9maRrc6IVgd+L6cfnoF+W8eb4TyYP
+	 VBuHxSYqLE0IKj4JLNPRHFMrajD3oqPR0Hli5WItdUw2yzXh5Fs1Z4z4Pk7XJ9ltAI
+	 lK9ar1JcXgrjYpleMvYP9gD/0aeoVIW9MHRWXi6H63l0hudVVU0iyu3NXARJ9wAmpg
+	 Ta47EUvAsb1kOr/kor+xnCOr7kifair0OdB5MBceq0djdxtfuvb8ncAwhxJHq7rgYO
+	 0kgGIOgELBX9Z2bS9EIKYMvoB7j/ksCVXBCRHVF9/hI3IZndRa3knP+m3HefHNC/k0
+	 1UIcN90vCw8zQ==
+Date: Mon, 14 Sep 2026 11:00:27 -0700
 From: Kees Cook <kees@kernel.org>
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
+To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Nathan Chancellor <nathan@kernel.org>,
 	Nicolas Schier <nsc@kernel.org>,
 	Nick Desaulniers <ndesaulniers@google.com>,
@@ -41,7 +40,8 @@ Cc: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
 	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
 	Borislav Petkov <bp@alien8.de>,
 	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+	"H. Peter Anvin" <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
 	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
 	Arnd Bergmann <arnd@arndb.de>,
 	Catalin Marinas <catalin.marinas@arm.com>,
@@ -70,13 +70,10 @@ Cc: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
 	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
 	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
 	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v2 21/21] kbuild: use pigz for gzip compression if
- available
-Message-ID: <202609141049.4B795585A@keescook>
+Subject: Re: [PATCH v2 14/21] kbuild: batch module finalisation
+Message-ID: <202609141056.6AE2C82E@keescook>
 References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
- <20260914-build-speedup-v2-21-39817ec5db23@kernel.org>
- <202609140844.FA7E848A@keescook>
- <BCCCC1E7-25B7-4A8D-BDFC-D5D1FA295F6C@zytor.com>
+ <20260914-build-speedup-v2-14-39817ec5db23@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -85,46 +82,23 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <BCCCC1E7-25B7-4A8D-BDFC-D5D1FA295F6C@zytor.com>
+In-Reply-To: <20260914-build-speedup-v2-14-39817ec5db23@kernel.org>
 
-On Mon, Sep 14, 2026 at 09:49:50AM -0700, H. Peter Anvin wrote:
-> On September 14, 2026 9:39:07 AM PDT, Kees Cook <kees@kernel.org> wrote:
+On Mon, Sep 14, 2026 at 10:22:13AM +0100, Lorenzo Stoakes (ARM) wrote:
+> Module finalisation on allmodconfig builds consists of a large number of
+> very short-lived jobs, and the make job dispatcher cannot possibly dispatch
+> jobs fast enough.
+
+This "cannot possibly" sounds like a weird LLM language intensifier. I'd
+rather a concrete description of the problem, not this kind of
+(redundant?) vagueness.
+
 > [...]
-> >diff --git a/tools/lib/python/jobserver.py b/tools/lib/python/jobserver.py
-> >index 0b1ffdf9f7a3..fc38c5020b22 100755
-> >--- a/tools/lib/python/jobserver.py
-> >+++ b/tools/lib/python/jobserver.py
-> >@@ -29,6 +29,11 @@ $claim child to do the actual work.
-> > The end goal here is to keep the total number of build tasks under the
-> > limit established by the initial ``make -j$n_proc`` call.
-> > 
-> >+Setting the ``SINGLE_THREADED`` environment variable skips the reservation
-> >+entirely and runs the command with ``PARALLELISM=1``. This is meant for callers
-> >+that run many short commands in parallel themselves, where each one should use
-> >+only the job slot it already holds.
-> >+
-> > See:
-> >     https://www.gnu.org/software/make/manual/html_node/POSIX-Jobserver.html#POSIX-Jobserver
-> > """
-> >@@ -68,6 +73,13 @@ class JobserverExec:
-> >         self.is_open = True  # We only try once
-> >         self.claim = None
-> >         #
-> >+        # SINGLE_THREADED asks for no reservation at all: the command runs
-> >+        # with PARALLELISM=1, using only the slot its caller already holds.
-> >+        #
-> >+        if os.environ.get('SINGLE_THREADED'):
-> >+            self.claim = 1
-> >+            return
-> >+        #
-> >         # Check the make flags for "--jobserver=R,W"
-> >         # Note that GNU Make has used --jobserver-fds and --jobserver-auth
-> >         # so this handles all of them.
-> >
-> 
-> If we are going to add dependencies, can we add *any* scripting language that is less stone tablet than POSIX awk?
+> Fix this by splitting modules.order into chunks of 128 at a time, run in
+> parallel.
 
-What are you referring to here? The jobserver logic is all Python.
+Why "128"? This seems tied to the 128-thread test machine, but ends up
+getting hard-coded, but this choice of value needs some rationale, IMO.
 
 -- 
 Kees Cook
