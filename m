@@ -1,34 +1,34 @@
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id D95C4476694;
-	Mon, 14 Sep 2026 13:52:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 20276473C67;
+	Mon, 14 Sep 2026 13:52:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789393946; cv=none; b=q2xea+M38vjpevWnT0WpoifyIIJPI5TCBCZILblzWN6X7k9BhZfSBfwYUZBB+Hvf9XO673yqE2KJ0gOEqDtx/sTq+2socQhYG0mY4t8fZxoMedJvAx8snc1ixXJPrsoL5dCkxLVw6kpzbKl79zbYcLbIcLeFKFknVsEoaMlc03c=
+	t=1789393948; cv=none; b=tND/xHe7vESYXvTBA+BG6mBHWVLkIN02gmF+Vbud+gTm9xTjwYnVrpuBlbxVdTMu/CjjWan5ou/TgI4f5eu/rQn+RPDQNGT1MQb8FUNzEfR8hA3FPRk37xzaGyH1ff/gI8Hv4JshBHvoz2eTVdtTfCJF9ru1ZXRdqtLF62MOtps=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789393946; c=relaxed/simple;
-	bh=M/GSINSwm6+Et2eyJmmD/tFqPTuI/A1b5T1YgKWiL9c=;
+	s=arc-20240116; t=1789393948; c=relaxed/simple;
+	bh=e4ntXcUDjdHd2MfAB02Vr1Et9b59XeXUsYWhphwiZL0=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=f3RR5EhxxuRy2l8CMbiZ9tRm0B7eoknz9/4ybqJB/OV/zCL7FnT48QSEGtzssF5+3BGVajXmbpzMJHcxHctZHF7Vwp1d/e8mTqutMP6IqLa6Deb0eDa9jJzQITRo9TvtmVdHO713eeJko8fN/d4fJjkmY0si+2rO9jfPyRJG4IA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=l1MXFaUt; arc=none smtp.client-ip=217.140.110.172
+	 In-Reply-To:To:Cc; b=AV6dvD2WoW2DfeTv/TOj4IHxClYfeL3eVBUHSafIZHOFeXcPw2Az8GY9ZQ/UBIOUmYWb91+yLkjxMBDlwfOiH5L1xVASFj07Ll9VQUKTf+Nhvb915hVsR+OGxKsKzH2/qDmtSMXyeHO8TjFKxn/xHrm/4kpjMYZnDujtO2i5nrA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=gHy6581v; arc=none smtp.client-ip=217.140.110.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="l1MXFaUt"
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="gHy6581v"
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 60C4B1576;
-	Mon, 14 Sep 2026 06:52:19 -0700 (PDT)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id E6DC61570;
+	Mon, 14 Sep 2026 06:52:22 -0700 (PDT)
 Received: from [127.0.1.1] (e142334-100.cambridge.arm.com [10.2.198.93])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id C1F373F882;
-	Mon, 14 Sep 2026 06:52:19 -0700 (PDT)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 4FC283F882;
+	Mon, 14 Sep 2026 06:52:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1789393943; bh=M/GSINSwm6+Et2eyJmmD/tFqPTuI/A1b5T1YgKWiL9c=;
+	t=1789393946; bh=e4ntXcUDjdHd2MfAB02Vr1Et9b59XeXUsYWhphwiZL0=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=l1MXFaUtsScvaXSmDpLzKQ0x5H2a0xG7fjpv0PnXJZhfGml/cb2/NWB6wiGm/2m/W
-	 HbtYIf5YprgsmmREN4DpnnSbzRTpl0G8iRLXXwXoBcCYEWBUBfax0si2I2ttMOWuCI
-	 JgPXqqlaUmx6uMk6xS6A4rRtyvVaJNKnNht1RaJ0=
+	b=gHy6581v3Osy62vEgipfLO7U9hGflqXQ1eCPuqXwQrCBqd/7/OFx2bCOuwhgz4k3E
+	 ZnsOLh53E6Jlr+SeHyB3quPKCabxE0k+Qxa0dkfRIjMVgipHmzQYWXIFYq3OLPXMss
+	 Mc8NOBq/1UzJG/ibmkDVamAsZWuVXbHEJOWLMyeo=
 From: Muhammad Usama Anjum <usama.anjum@arm.com>
-Date: Mon, 14 Sep 2026 14:51:35 +0100
-Subject: [PATCH 5/6] arm64: use HW PTE accessors in early map_range()
+Date: Mon, 14 Sep 2026 14:51:36 +0100
+Subject: [PATCH 6/6] arm64: enable a distinct type for HW PTEs
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +37,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260914-pte0_arm-v1-5-bb53b663e396@arm.com>
+Message-Id: <20260914-pte0_arm-v1-6-bb53b663e396@arm.com>
 References: <20260914-pte0_arm-v1-0-bb53b663e396@arm.com>
 In-Reply-To: <20260914-pte0_arm-v1-0-bb53b663e396@arm.com>
 To: Catalin Marinas <catalin.marinas@arm.com>, 
@@ -58,61 +58,29 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
  Muhammad Usama Anjum <usama.anjum@arm.com>
 X-Mailer: b4 0.16.0
 
-map_range() uses HW PTE pointers to build early translation tables at
-each level. Directly testing, decoding, or assigning *tbl treats an
-HW PTE as a SW PTE value, which requires explicit conversion once
-hw_pte_t becomes distinct.
+With HW PTE pointers and direct HW PTE accesses converted, arm64 can use
+the generic hw_pte_t wrapper instead of the pte_t alias.
 
-Use __ptep_get() to load a SW PTE value for the empty-entry check and
-child-table address, and __set_pte_nosync() to convert SW PTE values to
-HW PTEs on stores. The no-sync helper performs WRITE_ONCE() without
-adding the completion barriers used by __set_pte().
+Select ARCH_HAS_HW_PTE_T to give HW PTEs and SW PTE values distinct C
+types.
 
 Signed-off-by: Muhammad Usama Anjum <usama.anjum@arm.com>
 ---
- arch/arm64/kernel/pi/map_range.c | 13 ++++++++-----
- 1 file changed, 8 insertions(+), 5 deletions(-)
+ arch/arm64/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm64/kernel/pi/map_range.c b/arch/arm64/kernel/pi/map_range.c
-index 94f06da76e333..9c4c8060c5df4 100644
---- a/arch/arm64/kernel/pi/map_range.c
-+++ b/arch/arm64/kernel/pi/map_range.c
-@@ -51,19 +51,21 @@ void __init map_range(phys_addr_t *pte, u64 start, u64 end, phys_addr_t pa,
- 
- 	while (start < end) {
- 		u64 next = min((start | lmask) + 1, PAGE_ALIGN(end));
-+		pte_t entry = __ptep_get(tbl);
- 
- 		if (level < 2 || (level == 2 && (start | next | pa) & lmask)) {
- 			/*
- 			 * This chunk needs a finer grained mapping. Create a
- 			 * table mapping if necessary and recurse.
- 			 */
--			if (pte_none(*tbl)) {
--				*tbl = __pte(__phys_to_pte_val(*pte) |
-+			if (pte_none(entry)) {
-+				entry = __pte(__phys_to_pte_val(*pte) |
- 					     PMD_TYPE_TABLE | PMD_TABLE_UXN);
--				*pte += PTRS_PER_PTE * sizeof(pte_t);
-+				__set_pte_nosync(tbl, entry);
-+				*pte += PTRS_PER_PTE * sizeof(hw_pte_t);
- 			}
- 			map_range(pte, start, next, pa, prot, level + 1,
--				  (hw_pte_t *)(__pte_to_phys(*tbl) + va_offset),
-+				  (hw_pte_t *)(__pte_to_phys(entry) + va_offset),
- 				  may_use_cont, va_offset);
- 		} else {
- 			/*
-@@ -81,7 +83,8 @@ void __init map_range(phys_addr_t *pte, u64 start, u64 end, phys_addr_t pa,
- 				protval &= ~PTE_CONT;
- 
- 			/* Put down a block or page mapping */
--			*tbl = __pte(__phys_to_pte_val(pa) | protval);
-+			entry = __pte(__phys_to_pte_val(pa) | protval);
-+			__set_pte_nosync(tbl, entry);
- 		}
- 		pa += next - start;
- 		start = next;
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 2bbeded33da0d..42841d5e2ed26 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -31,6 +31,7 @@ config ARM64
+ 	select ARCH_HAS_FORTIFY_SOURCE
+ 	select ARCH_HAS_GCOV_PROFILE_ALL
+ 	select ARCH_HAS_GIGANTIC_PAGE
++	select ARCH_HAS_HW_PTE_T
+ 	select ARCH_HAS_KCOV
+ 	select ARCH_HAS_KERNEL_FPU_SUPPORT if KERNEL_MODE_NEON
+ 	select ARCH_HAS_KEEPINITRD
 
 -- 
 2.47.3
