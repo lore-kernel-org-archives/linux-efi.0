@@ -1,192 +1,130 @@
-Received: from mout.web.de (mout.web.de [217.72.192.78])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 351A932143D;
-	Mon, 14 Sep 2026 17:01:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.72.192.78
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C7084963D2;
+	Mon, 14 Sep 2026 17:50:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789405295; cv=none; b=IYVhGHb2XqlffrXvI8+n/PKW5GYqcqSaxwMaQ/JLEtc+W0Hq1glnZ59OWHcMLKRvE9+aDD93HAz3hi0ATySpmX4QbaVo8ENp7i8uv/l8HPyu4DmNeohe2iijreDeFx7sIgJ5JV9A082zN9DIE+H0oFPcZJy/KAkidPqX3PYGpFc=
+	t=1789408221; cv=none; b=jNxzOtqcVwq8gAY7uzuaCyWfQ7UeLy6azo7wiADlQ9nMqtySfXLIzA9+14pCyrd/sZM6j/ka9AjjQg5qHhQtgU2vZcmoXC+o5YxD/C+xf/1G3ueNZmmqhu44olqimPTWYNJP4oW0ombtqZ272863g7zzJAWq9mJ8Y4IvqL9zzM8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789405295; c=relaxed/simple;
-	bh=+FAWVHdMZteQR4U3PWSHxXwSw0I30zDv6DHTjcR9Lkg=;
-	h=Message-ID:Date:MIME-Version:To:Cc:References:Subject:From:
-	 In-Reply-To:Content-Type; b=NzmlOwYb//MrODbtt5infZrPYlvwPvkRoW7xpMorbpBXVRaH/Rf2t33/xI7AoYA0AtoXOFvtX4ldafjcoxJim+1v9rzK3cb9HU/jIAw/Ip4nsq1LjhmBspqrC2JhnzsTH22n3K+LapGwczrXx74ydHAlLN07dAe9EkqnOshGR68=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de; spf=pass smtp.mailfrom=web.de; dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b=AIVtcrvN; arc=none smtp.client-ip=217.72.192.78
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=web.de
+	s=arc-20240116; t=1789408221; c=relaxed/simple;
+	bh=M6W30yQBqKEOsxjdNM6nYf5Fsz2YrwIgKsHWwkS2q/I=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=bOKx5xHplhX9yWC/WX8+I++hMtqe7JF5VMXMowr9VekGlOSmZRvViE7gIu+uxJnNLbiwoAzAOiiySI26TcRTUoUynn3ULwm/GvoFNldUsfL6qHCvr012tKygcZP2xwcKjm4lsFkfujAVZJxUFH1pwsB14iCoZWmdPS61Ub7ECNI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VzhPxfhr; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b="AIVtcrvN"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=web.de;
-	s=s29768273; t=1789405291; x=1790010091; i=markus.elfring@web.de;
-	bh=+FAWVHdMZteQR4U3PWSHxXwSw0I30zDv6DHTjcR9Lkg=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:To:Cc:References:
-	 Subject:From:In-Reply-To:Content-Type:Content-Transfer-Encoding:
-	 cc:content-transfer-encoding:content-type:date:from:message-id:
-	 mime-version:reply-to:subject:to;
-	b=AIVtcrvNGPq5wDS4chE9vpJI9xwqd09LikOclM5LTfsfn7xzshXxOOAAsYViyneS
-	 RDLe6MJWTPsyQF8UXkdoFStbf8/Kn85kRNI07DVJ7ptBqz1dOcBVL/I3OVyZ+yYeW
-	 zIheRkk5g4IkbXTqw5RrMDUB7TrXsmWOy7vSTS7VFoHfPFDlQ4v4OLSYl8XbyhuFy
-	 DVQbOmlfpw09aV9M+y2sosNaoy39wBfd/7vWi4AOSjFy7piFRoP7bmw3AVCKeG8jr
-	 5LWGwvNizExaXTujrEZNErbdpj3OhhmDxe9DBBpqmzR4+PWHUlUS1tf3yXCrPmQfg
-	 xt220c/voe1IgO+drQ==
-X-UI-Sender-Class: 814a7b36-bfc1-4dae-8640-3722d8ec6cd6
-Received: from client.hidden.invalid by smtp.web.de (mrweb106
- [213.165.67.124]) with ESMTPSA (Nemesis) id 1MpU1u-1wRa2Y1t3k-00kq18; Mon, 14
- Sep 2026 19:01:30 +0200
-Message-ID: <acd1cdc6-71e2-4fab-9d56-0df704c66b81@web.de>
-Date: Mon, 14 Sep 2026 19:01:26 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VzhPxfhr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D61DA1F00898;
+	Mon, 14 Sep 2026 17:50:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789408219;
+	bh=e67qZ3QCn2L8qyNk+mdAvO35N1up2MXWgPivIgLpess=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=VzhPxfhrNGwUFy/l2g4I81wR8gE/J718KmUtsDuY/Uh6uBvIcRmhC5kc8HQt0wGA2
+	 brpSBw73lF6qYAafp2WUtJU+3pucoX4YyQOUUaz9p4ygq6pNrUXZIMlbn4gYEXsohf
+	 bhstkaAV1y+GgJQzeladwBwQ4/xbaBeFfcoyFp0d/FdRjbO+4+HbiFSpuQoczjcEfw
+	 sBB7VEeWFU/QcEEEiSjFBYIgF300IaDeV+5AG/C7MAsOZOlCW1sCy8cOGc/cQRr7qT
+	 VvtxBqcopXv4rrKOLi6jWjhgFHFOUqy4WC82WwOIBmeDMhNiG05AJMZ2nPVLgOKFOD
+	 KhM7mBnSCMeuA==
+Date: Mon, 14 Sep 2026 10:50:19 -0700
+From: Kees Cook <kees@kernel.org>
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
+	Linus Torvalds <torvalds@linux-foundation.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Nicolas Schier <nsc@kernel.org>,
+	Nick Desaulniers <ndesaulniers@google.com>,
+	Bill Wendling <morbo@google.com>,
+	Justin Stitt <justinstitt@google.com>,
+	Masahiro Yamada <masahiroy@kernel.org>,
+	Alexey Gladkov <legion@kernel.org>,
+	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Josh Poimboeuf <jpoimboe@kernel.org>,
+	Peter Zijlstra <peterz@infradead.org>,
+	Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>,
+	Gary Guo <gary@garyguo.net>,
+	=?iso-8859-1?Q?Bj=F6rn?= Roy Baron <bjorn3_gh@protonmail.com>,
+	Benno Lossin <lossin@kernel.org>,
+	Andreas Hindborg <a.hindborg@kernel.org>,
+	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>,
+	Danilo Krummrich <dakr@kernel.org>,
+	Daniel Almeida <daniel.almeida@collabora.com>,
+	Tamir Duberstein <tamird@kernel.org>,
+	Alexandre Courbot <acourbot@nvidia.com>,
+	Onur =?iso-8859-1?Q?=D6zkan?= <work@onurozkan.dev>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Randy Dunlap <rdunlap@infradead.org>,
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
+	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
+	llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
+	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
+	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
+	linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v2 21/21] kbuild: use pigz for gzip compression if
+ available
+Message-ID: <202609141049.4B795585A@keescook>
+References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
+ <20260914-build-speedup-v2-21-39817ec5db23@kernel.org>
+ <202609140844.FA7E848A@keescook>
+ <BCCCC1E7-25B7-4A8D-BDFC-D5D1FA295F6C@zytor.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-To: Lorenzo Stoakes <ljs@kernel.org>, linux-kbuild@vger.kernel.org,
- x86@kernel.org, Albert Ou <aou@eecs.berkeley.edu>,
- Alexandre Courbot <acourbot@nvidia.com>, Alexandre Ghiti <alex@ghiti.fr>,
- Alexey Gladkov <legion@kernel.org>, Alice Ryhl <aliceryhl@google.com>,
- Andreas Hindborg <a.hindborg@kernel.org>, Ard Biesheuvel <ardb@kernel.org>,
- Arnd Bergmann <arnd@arndb.de>, Benno Lossin <lossin@kernel.org>,
- Bill Wendling <morbo@google.com>, =?UTF-8?Q?Bj=C3=B6rn_Roy_Baron?=
- <bjorn3_gh@protonmail.com>, Boqun Feng <boqun@kernel.org>,
- Borislav Petkov <bp@alien8.de>, Catalin Marinas <catalin.marinas@arm.com>,
- Daniel Almeida <daniel.almeida@collabora.com>,
- Danilo Krummrich <dakr@kernel.org>, Dave Hansen
- <dave.hansen@linux.intel.com>, Gary Guo <gary@garyguo.net>,
- "Gustavo A. R. Silva" <gustavoars@kernel.org>, "H. Peter Anvin"
- <hpa@zytor.com>, Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Ingo Molnar <mingo@redhat.com>, Jonathan Corbet <corbet@lwn.net>,
- Josh Poimboeuf <jpoimboe@kernel.org>, Justin Stitt <justinstitt@google.com>,
- Kees Cook <kees@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>,
- Mark Rutland <mark.rutland@arm.com>, Masahiro Yamada <masahiroy@kernel.org>,
- Miguel Ojeda <ojeda@kernel.org>, Nathan Chancellor <nathan@kernel.org>,
- Nick Desaulniers <ndesaulniers@google.com>, Nicolas Schier <nsc@kernel.org>,
- =?UTF-8?Q?Onur_=C3=96zkan?= <work@onurozkan.dev>,
- Palmer Dabbelt <palmer@dabbelt.com>, Paul Walmsley <pjw@kernel.org>,
- Peter Zijlstra <peterz@infradead.org>, Randy Dunlap <rdunlap@infradead.org>,
- Tamir Duberstein <tamird@kernel.org>, Thomas Gleixner <tglx@kernel.org>,
- Trevor Gross <tmgross@umich.edu>, Will Deacon <will@kernel.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org,
- linux-hardening@vger.kernel.org, linux-doc@vger.kernel.org,
- linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
- linux-arch@vger.kernel.org, llvm@lists.linux.dev,
- linux-riscv@lists.infradead.org, linux-arm-kernel@lists.infradead.org,
- Jens Axboe <axboe@kernel.dk>
-References: <20260914-build-speedup-v2-7-39817ec5db23@kernel.org>
-Subject: Re: [PATCH v2 07/21] kallsyms: reimplement mksysmap in C
-Content-Language: en-GB, de-DE
-From: Markus Elfring <Markus.Elfring@web.de>
-In-Reply-To: <20260914-build-speedup-v2-7-39817ec5db23@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:OVbNFCPrp2lwo8qoPIjvLpRQGh0MTzc/0FlBpHdLKzU6RUI0Ot8
- +EqxbhlOfdsqXKgnhdCskOTz/f1eIbeDeaw3ZqKwEJvm0pzGCfHl2liQgkquMvrNv9/ysf3
- hTIFA/of+Hn1SuZaMKxw4IsIYEYSI5H+xJVH6sZAqqhvkmKh+0d2OikM0AqwpHzTb2GSiUq
- i/xrQEO+aOzgdIGksgfHA==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:Hx3gTUJrCmw=;CThha3odVGxLtL7cynA051xApg6
- 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
- Bxo5InWKPI=
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <BCCCC1E7-25B7-4A8D-BDFC-D5D1FA295F6C@zytor.com>
 
-> mksysmap is a sed script consisting of 30 patterns which link-vmlinux.sh
-> uses to generate *.syms files, and which kallsyms is then called against=
- to
-> generate *.kallsyms files, with the final vmlinux build ultimately
-> generating System.map.
-=E2=80=A6
-> This is unnecessary, instead have kallsyms simply read the ELF file
-> directly making use of the existing elf-parse library in scripts/.
-=E2=80=A6
+On Mon, Sep 14, 2026 at 09:49:50AM -0700, H. Peter Anvin wrote:
+> On September 14, 2026 9:39:07 AM PDT, Kees Cook <kees@kernel.org> wrote:
+> [...]
+> >diff --git a/tools/lib/python/jobserver.py b/tools/lib/python/jobserver.py
+> >index 0b1ffdf9f7a3..fc38c5020b22 100755
+> >--- a/tools/lib/python/jobserver.py
+> >+++ b/tools/lib/python/jobserver.py
+> >@@ -29,6 +29,11 @@ $claim child to do the actual work.
+> > The end goal here is to keep the total number of build tasks under the
+> > limit established by the initial ``make -j$n_proc`` call.
+> > 
+> >+Setting the ``SINGLE_THREADED`` environment variable skips the reservation
+> >+entirely and runs the command with ``PARALLELISM=1``. This is meant for callers
+> >+that run many short commands in parallel themselves, where each one should use
+> >+only the job slot it already holds.
+> >+
+> > See:
+> >     https://www.gnu.org/software/make/manual/html_node/POSIX-Jobserver.html#POSIX-Jobserver
+> > """
+> >@@ -68,6 +73,13 @@ class JobserverExec:
+> >         self.is_open = True  # We only try once
+> >         self.claim = None
+> >         #
+> >+        # SINGLE_THREADED asks for no reservation at all: the command runs
+> >+        # with PARALLELISM=1, using only the slot its caller already holds.
+> >+        #
+> >+        if os.environ.get('SINGLE_THREADED'):
+> >+            self.claim = 1
+> >+            return
+> >+        #
+> >         # Check the make flags for "--jobserver=R,W"
+> >         # Note that GNU Make has used --jobserver-fds and --jobserver-auth
+> >         # so this handles all of them.
+> >
+> 
+> If we are going to add dependencies, can we add *any* scripting language that is less stone tablet than POSIX awk?
 
-Are there further opportunities for parallel data processing for an improv=
-ed
-processing pipeline in this software area?
+What are you referring to here? The jobserver logic is all Python.
 
-Regards,
-Markus
+-- 
+Kees Cook
