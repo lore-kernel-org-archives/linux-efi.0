@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C79233D6E6;
-	Tue, 15 Sep 2026 11:01:27 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC622392836;
+	Tue, 15 Sep 2026 11:09:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789470088; cv=none; b=ULweyweWg3/c4GFFOj2P3JiN39YIGgFZIATMGDohFmuESluep6uujch7kjYSWhVMnOjeZWZC58fg2/St1Qr6HCPwK5wi7M5SvObB8iKv3AC2QXr/jZFwNg1RVixhfSCPoNQzzjUY2u5/ZkgzlkVRk3RDvldu0vSfdXPp1pfujhM=
+	t=1789470559; cv=none; b=LJobL75msx+Bt+GjaReYkUlTbeike0Z6GH+nQXXs6FPIRti+DctKNKA2BsDHMzzymoiMx9FTz2i2cLHWluXsxm71xbBhJkTTbWPHXyDMXTcgbDYgSEleAnAsSpGwrPaeGPIyb9J58Abupedw7PAvsCrQ2PC+ebJGhVZ9lk2nK2g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789470088; c=relaxed/simple;
-	bh=gY9EJkbCr3NCyt+2eN4TRNFmygy7qNzFbmztkbUoUhc=;
+	s=arc-20240116; t=1789470559; c=relaxed/simple;
+	bh=Ht+VueHHQDuGb9oo32upfSf1ZdnvEKZ3Bdh5MAm5suk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OtZdCBELYxTw8LW3+2f6AYt+FpNZ5Yy5KuBk8InqbggODr2Ev5w2VduMLaANz9sgjo8FmaLxzh4S6c/Y5+bOApXjtcXMCbqe/Mw770GYV4ZXKEzU9bieZZOToSbFUi5T96BdUCQLGd0M1pd5KvAxGRn0rQ57+TOmG9kMm4l9eqs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Mc3PV4Wg; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=gh8vrvuyvHqK//MPPdqIQBR3I2f3aG+L9/wDX+855v7Z+s3Oysb5EuNunb8EEUtsbvMwY8SUHTBp+fg6dMhNjwJYdwKe73+cSCVdmQuBK1jHZX9OMtgIsdo0eKwiUA/aJlKkhJOuLG5IHlCaKh9yvl7CpfO9SYyGLWmnfIwO0gk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AKcX7vyo; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Mc3PV4Wg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D4BAE1F000FF;
-	Tue, 15 Sep 2026 11:01:14 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AKcX7vyo"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B6BDF1F000FF;
+	Tue, 15 Sep 2026 11:09:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789470086;
-	bh=ZvqUeKCU1dKmmVba4tQNzefSMi1mI5HcwktsDzzTxQ4=;
+	s=k20260515; t=1789470558;
+	bh=Ht+VueHHQDuGb9oo32upfSf1ZdnvEKZ3Bdh5MAm5suk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=Mc3PV4Wgo5o9iOphUm7YhSoqarFhqhHoKUhlZ8EfxphzdYUX454A2pjapcNhWbLfC
-	 jI9ZlWkHTbW6unDY4x3Htp1aLjzANzXAkEyQv2+a83T/zVKQijKbl0NaPmgOm3p9Cz
-	 e6bz1QL8Rvp4PFJskRZamOsOiAQPtXHL791oxWBdRbgfJ/iE/Z0bnImCLgQpsuBaZ1
-	 k/3jYP8SPUJsDpVcMEnPIfcXUChX78R722NbXsQ1Eg6lKV2JvRQ2PwIz64gPui/icT
-	 w3j3bzzU0Cl8Qk3uebX+ZkTO0gD/HTEksDpW5VlS/jRzbwd+l/RwqJaNwxeZprh+f/
-	 gE488uPZpb30Q==
-Date: Tue, 15 Sep 2026 12:01:12 +0100
+	b=AKcX7vyo+Nhqh7POFqhvuc9JWBX784D5R/DAbqihHERmisp/ytEs71fMztlOW2a6Q
+	 rTX7dxF3H8IE91qdd9WaLYViK/e2+q8CJ/0xQ8h0P5FjdNAFURUFMxZQS6JQRwWaqw
+	 59gc6EPseMu1StBwQHlyITJwOnsUk4T0cZkYKTjIZ/qU/ETG4ZkKI/evbXJCH/uAQB
+	 CK/6i5BRN3flYByF+/nmrpWB5Tij6+nGj805Xis7a5lL0mwpjKKYdCHfsC3niQxHB8
+	 aZoLue0h4eTWvkACvH6N6u1HpJmAvm3IIs6g99qn11U4nvX9bqqGnPF4ZnVUJcItSU
+	 ox6T8P9hfDOSw==
+Date: Tue, 15 Sep 2026 12:09:04 +0100
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-To: John Stoffel <john@stoffel.org>
+To: Kees Cook <kees@kernel.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
 	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
 	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
@@ -48,18 +48,17 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
 	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
 	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
-	Randy Dunlap <rdunlap@infradead.org>, Kees Cook <kees@kernel.org>, 
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	llvm@lists.linux.dev, linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
-	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v2 11/21] kbuild: avoid re-running compiler and linker
- probes
-Message-ID: <aqklJxyNPal2ou-e@gremlin>
+	Randy Dunlap <rdunlap@infradead.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
+	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
+	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
+	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v2 18/21] kbuild: rust: optionally parallelise rustc
+ front end
+Message-ID: <aqknMMdLXG-gW1jd@gremlin>
 References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
- <20260914-build-speedup-v2-11-39817ec5db23@kernel.org>
- <27304.3198.867048.379684@quad.stoffel.home>
- <aqgRXk6DXyAah488@gremlin>
+ <20260914-build-speedup-v2-18-39817ec5db23@kernel.org>
+ <202609141124.F24B6F77@keescook>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -68,20 +67,44 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aqgRXk6DXyAah488@gremlin>
+In-Reply-To: <202609141124.F24B6F77@keescook>
 
-> On Mon, Sep 14, 2026 at 11:02:22AM -0400, John Stoffel wrote:
-> > > This change avoids a sublte issue with ppc32 (big endian) - clang doesn't
-> >                        ^^^^^^
+On Mon, Sep 14, 2026 at 11:32:14AM -0700, Kees Cook wrote:
+> On Mon, Sep 14, 2026 at 10:22:17AM +0100, Lorenzo Stoakes (ARM) wrote:
+> > The threads are taken from make's jobserver, so a parallel build is not
+> > oversubscribed. It was found that benefits level off at 8 threads (16 was
+> > found to be around the same, and 32 slower).
+>
+> I think it's worth noting that this comes from rustc itself (it has
+> built-in support for the make jobserver). See commit ecab4115c44c
+> ("kbuild: mark `rustc` (and others) invocations as recursive").
+>
+> What happens when there is no jobserver, e.g. "make" without -j, or
+> "make -j1"?
+>
+> > [...]
+> > rustc has a parallel front end, enabled with -Zthreads, available since
+> > rust 1.84 [0] and therefore on every rustc the kernel supports.
 > >
-> > subtle
+> > It is not yet stable and its output is not reproducible, so it cannot be
+> > [...]
+> > +The number of threads rustc's parallel front end may use, passed to it as
+> > +``-Zthreads``. Unset by default, as the parallel front end is not yet
+> > +stable and its output is not reproducible. The gain levels off at 8
+> > +threads.
 >
-> Oops!
+> Okay, unstable, not reproducible.
 >
-> I love that I ran this through AI review several times and it missed
-> something as simple as this :)
+> > Generated output was confirmed byte-for-byte identical.
+>
+> But this says otherwise? I am confused. Reproducible or not?
 
-(Fixed for v3 along with a few other typos :)
+Well, we can set all of this aside as, based on Miguel's feedback, I think
+dropping this commit is best :)
+
+>
+> --
+> Kees Cook
 
 --
 Cheers, Lorenzo
