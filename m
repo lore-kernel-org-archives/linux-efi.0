@@ -1,116 +1,159 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id C4A523AF647;
-	Tue, 15 Sep 2026 08:49:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from flow-a6-smtp.messagingengine.com (flow-a6-smtp.messagingengine.com [103.168.172.141])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 352003DAAD0;
+	Tue, 15 Sep 2026 08:54:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789462185; cv=none; b=thqFYEU5J2cIZQJkWBXL1zE80kXB5v0rVgaaXTt+ZN7RVxStOsC2IqnoBr5oyPxcwjw4KIcXrMGkMhOST7y0DFQhVCLbIOr4/1PYM/mp03dbtTqQbBMY8hItZABajAfMbivCy24EEHixismaiDRsxuR7hcVsvUgH6+cnyG/BQ1A=
+	t=1789462482; cv=none; b=gSgCI4rHVlYLvzPdGp9TlhB2Iql1KlMASpv/fEDF7wFcyakvDZLSqH/vAt0hvt73CJfvj6xwVZr87UWdX5Ir1tzwgdlSkKfXAqy+eHXNGHDGwFb1xj9n+Za9LmGDXjHPadP5SNisjgwAme7y94+LON2MNZms6wyK6jKM/csp0pU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789462185; c=relaxed/simple;
-	bh=oyNHMyZYqpDoIcovpuHq/8xHd5nxJXQeaDtXcCz49N0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HNsfm+GZpgkT1r/5MbBdMIwta/4w/ucYhGp1m2Dtt1ZAkaDeUo0ymOybcz1qjqU2zG+AcZg+IkXB7oPXSZWiiEdULlLuiDDKS449dHUSCj9Jehez21hHXPdaH8J6JY189rMgZQdTiRaWrEKLrfxl6X9j/XIEt4cT9xOhuDLYzhY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=H5C5ag1n; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+	s=arc-20240116; t=1789462482; c=relaxed/simple;
+	bh=TrFy84WFLihamQ2UtPEIp9cWrnbixhLsx/cx/JOsURw=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=Gwt4J9BJ21kueYZ6sw8cWxnQruGt+nMmD0NCOT9JiWGooP9zDApwclP9IhjwmMEwiL0geGEbIr2MUOYCwgsgPOItY2qj0on2lHENyGJ++QchgU/uUtSaMOgdRsGdp4ZdVnq4UR4jZtKfa819jIQQqCt7PlXVRnjP/T6JeVLkSkI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=Xody1oJN; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=Fr6fJyQZ; arc=none smtp.client-ip=103.168.172.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="H5C5ag1n"
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 725DA169C;
-	Tue, 15 Sep 2026 01:49:38 -0700 (PDT)
-Received: from e129823.arm.com (e129823.arm.com [10.2.213.3])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 1C1A53F7B4;
-	Tue, 15 Sep 2026 01:49:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1789462182; bh=oyNHMyZYqpDoIcovpuHq/8xHd5nxJXQeaDtXcCz49N0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=H5C5ag1nVPLPhe55qsjBPQBbtGvhwI+EZy4hOGcyjOPWYcUe0GpC4S0V9JgcZN0nb
-	 obKGCOQNx/hPY4kiy/lcgwTHy3lNzQowHJtLPL4gljGbLWzPav4p4nS+1oGuQbStlp
-	 QVdzo86jLuagwOj0unB4MjzirpKKKS0SsTW4ZI4s=
-Date: Tue, 15 Sep 2026 09:49:38 +0100
-From: Yeoreum Yun <yeoreum.yun@arm.com>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: Yeoreum Yun <yeoreum.yun@arm.com>, linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Breno Leitao <leitao@debian.org>,
-	"sami.mujawar@arm.com" <Sami.Mujawar@arm.com>
-Subject: Re: [PATCH] firmware: efi: add a separate timeout for UpdateCapsule()
-Message-ID: <aqkGohQYChzkBPZ7@e129823.arm.com>
-References: <20260903113238.2291844-1-yeoreum.yun@arm.com>
- <960e985e-b338-4648-a29b-1f8a31e00599@app.fastmail.com>
- <apl_29t7Jxr2mv9C@e129823.arm.com>
- <44097058-9fdc-4e9f-a277-d63e3876b035@app.fastmail.com>
- <23ce2fb0-1002-409f-bb84-f592db9d0b89@app.fastmail.com>
- <apmFpUvkRBgMdOH2@e129823.arm.com>
+	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="Xody1oJN";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="Fr6fJyQZ"
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailflow.phl.internal (Postfix) with ESMTP id 0CFA21380347;
+	Tue, 15 Sep 2026 04:54:35 -0400 (EDT)
+Received: from ams-imap-03 ([10.64.2.23])
+  by ams-compute-02.internal (MEProxy); Tue, 15 Sep 2026 04:54:40 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm3; t=1789462475;
+	 x=1789469675; bh=l+Dca6AU7f0s7A11m75QKiePhth6dKEUN646ZUyOcxw=; b=
+	Xody1oJNWEMViAMOHPbGMbFFJWDXAlekhcwJV2SoNNjV3Itz044FXU72K/NOTqui
+	dGNVaAbLlZulA5UBbJ7XisJ4/Tvb8vxRSHZgr1rg86rZaW2N6A20pRXX6CjuJFzZ
+	qN4XhD+zqJj7G6GzdewHzc9Ub5bvOnhXRm5+AIgWAw6aKT926nad1Knuxbpc675A
+	AzTOl0hJn/NZF15+dJYlH0kXOE9oaDD1dkmsAcj8fBTRb96rHKlGhQLyQSuMNDH/
+	4VAddWv+NRh+YnPkx2GOowIODOGAueKi2AxYNKtoPrv0OBaFTazekFo9yS6tBLOp
+	1Q82whhHv8fjGkGI4JpxpA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1789462475; x=
+	1789469675; bh=l+Dca6AU7f0s7A11m75QKiePhth6dKEUN646ZUyOcxw=; b=F
+	r6fJyQZ3B1K5YtWjMoTp/fRKQnkOGDNwUteDe4nSuymkyvq2WsfTel5mLEsiIniB
+	Q8Mg3SaUa+hsdJwDYad3RVOHqY6wVuGBbRMXj+q0YdMMGPUOsGRVwT87zBxsoxES
+	RO9e/Kk1iPvbMNYiJPlnyVnmhvk9iZJMC0Hl8RMrWAZ2w+CFpRVPeszShBh7jyY4
+	8pafu94pmoPvJ37O6z8ACe0BUJ66rCCYt+VIRpYGoi+zNkUwBU0gu7mu7AArH7H1
+	kfhRzCurvSNdhnOouyFcmOZ/aEYZowpWKOguKfCcIqTeATR2Y52GrsDRnY4YlRT8
+	4mvRCMtRoq3C+WpdMDmrA==
+X-ME-Sender: <xms:vgepagxIogvlk792euZsMnA2AD-07upm7o1gQScllFz15_5556isuA>
+    <xme:vgepavFIcm_1MvsAOmz2-JbwyBuNZNrMJpYsNzJOlp3FsY8ocFhn_i6RRbVtbI_xh
+    1ZW5w582V70b24GHPa0lC4s3Vi_hKlkZoAkL5CnvbECiIVQRZ2bC7IS>
+X-ME-Proxy-Cause: dmFkZTFl07Cd2pNoRIcz+Y9DRXa9I+CAUbyY73IeYUKFyinqRYJWqvWva9WPMlSrUtrXXQ
+    4Ce7uDNbLSoFWkhxcsl23fov82rHUN8DJQrUSxcE/UGH5WEDUUFVVGsxSlX9y1C16y1ikq
+    1Hzd/K8lu3qfyVrj+2Esn9a+9urCLgaUn1/Hd12DOGJvXPGzYSt8nJENaQptMkY/jEyE+u
+    S9faTEM6ZNXS1Rhf+11JTufpU/muQclYTOYI+iNfCTdQIpuxlsrqU2hRdRCR3my42gTIci
+    foRjjuFQi3I4plLW/2yjK9qsVn6rhO1nfI17QxL4uXxeeZVrN1VwQjZE4ge9q8fo1rM0X9
+    rhiOoth3vgfsKc6+FhKiMgmD69qMeWJU5dx0D71/c9CvyFGUfnl5G7No2fZi2vJmcmsWv/
+    +UST0qDeQsCHTDbJGGyedoSdHZ7/3mF5Q1wzNjHqpNnUUAF7MF/RhXwaQA8Qj3bpXpRWZk
+    WM2pUx2qPAmh1y6xmTh8nd0xCpzZHILt4JYJprl0AWZ62t80PI4UgOxCQLgGPoRTb8KlzB
+    7SSwnrEvKdcy0NSaAHG069l+OP4bVIt5jLLqs+Vt+azYtoLHe7W+0DYJTzaj831I7mO2gR
+    af3uM0A9HNtxo2qLYSmTeYYtjD/xXjNAVQ8rRDyPxRvaGwqUBq2NMVTlab5g
+X-ME-Proxy: <xmx:xAepagJ83hBWhUGi-qVtm002tZ6nTUV_OQ9QV71wb8cZ5sDkjqBMPA>
+    <xmx:xAeparBNN9LUMZgDPwhes7U75oqanecICHjUTVaE1k1UIFiw3-JoVg>
+    <xmx:xAepajlQfJFGq9Ujz61CsXpfe6X8ZyU-XYpSbmHIXAFjLrnSj5AGjA>
+    <xmx:xAepanETL89xwgdJrVvqYbWpq6B3LGj8dODqxwt8wrzrZnsIIpowVw>
+    <xmx:ywepaiFG3kexiM5eVna2DP0CZbgBhmkObpO3qC-5-C8A-WnmgHPjeTq->
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 268F432A0081; Tue, 15 Sep 2026 04:54:22 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <apmFpUvkRBgMdOH2@e129823.arm.com>
+X-ThreadId: AGrkui6Nx9zw
+Date: Tue, 15 Sep 2026 10:53:51 +0200
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: "Linus Torvalds" <torvalds@linux-foundation.org>,
+ "Kees Cook" <kees@kernel.org>
+Cc: "Lorenzo Stoakes" <ljs@kernel.org>,
+ "Nathan Chancellor" <nathan@kernel.org>,
+ "Nicolas Schier" <nsc@kernel.org>,
+ "Nick Desaulniers" <ndesaulniers@google.com>,
+ "Bill Wendling" <morbo@google.com>,
+ "Justin Stitt" <justinstitt@google.com>,
+ "Masahiro Yamada" <masahiroy@kernel.org>,
+ "Alexey Gladkov" <legion@kernel.org>,
+ "Thomas Gleixner" <tglx@kernel.org>, "Ingo Molnar" <mingo@redhat.com>,
+ "Borislav Petkov" <bp@alien8.de>,
+ "Dave Hansen" <dave.hansen@linux.intel.com>, x86@kernel.org,
+ "H. Peter Anvin" <hpa@zytor.com>, "Paul Walmsley" <pjw@kernel.org>,
+ "Palmer Dabbelt" <palmer@dabbelt.com>,
+ "Albert Ou" <aou@eecs.berkeley.edu>, "Alexandre Ghiti" <alex@ghiti.fr>,
+ "Catalin Marinas" <catalin.marinas@arm.com>,
+ "Will Deacon" <will@kernel.org>, "Mark Rutland" <mark.rutland@arm.com>,
+ "Ard Biesheuvel" <ardb@kernel.org>,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "Josh Poimboeuf" <jpoimboe@kernel.org>,
+ "Peter Zijlstra" <peterz@infradead.org>,
+ "Miguel Ojeda" <ojeda@kernel.org>, "Boqun Feng" <boqun@kernel.org>,
+ "Gary Guo" <gary@garyguo.net>,
+ =?UTF-8?Q?Bj=C3=B6rn_Roy_Baron?= <bjorn3_gh@protonmail.com>,
+ "Benno Lossin" <lossin@kernel.org>,
+ "Andreas Hindborg" <a.hindborg@kernel.org>,
+ "Alice Ryhl" <aliceryhl@google.com>, "Trevor Gross" <tmgross@umich.edu>,
+ "Danilo Krummrich" <dakr@kernel.org>,
+ "Daniel Almeida" <daniel.almeida@collabora.com>,
+ "Tamir Duberstein" <tamird@kernel.org>,
+ "Alexandre Courbot" <acourbot@nvidia.com>,
+ =?UTF-8?Q?Onur_=C3=96zkan?= <work@onurozkan.dev>,
+ "Jonathan Corbet" <corbet@lwn.net>,
+ "Randy Dunlap" <rdunlap@infradead.org>,
+ "Gustavo A. R. Silva" <gustavoars@kernel.org>,
+ linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
+ llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
+ Linux-Arch <linux-arch@vger.kernel.org>,
+ linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
+ rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org,
+ "Jens Axboe" <axboe@kernel.dk>, linux-hardening@vger.kernel.org
+Message-Id: <7646eb0c-7c4a-4ec2-9562-66a74c4d9858@app.fastmail.com>
+In-Reply-To: 
+ <CAHk-=whB0X28MNAg71it=1SfFyV7rB+PK3qajpRyWoxXHW81fw@mail.gmail.com>
+References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
+ <202609140833.88C0E16E50@keescook>
+ <CAHk-=whB0X28MNAg71it=1SfFyV7rB+PK3qajpRyWoxXHW81fw@mail.gmail.com>
+Subject: Re: [PATCH v2 00/21] kbuild: significantly speed up kernel builds
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-> > On Thu, 3 Sep 2026, at 16:29, Ard Biesheuvel wrote:
-> > > On Thu, 3 Sep 2026, at 16:10, Yeoreum Yun wrote:
-> > >> Hi Ard,
-> > >>
-> > >>> Hello Yeoreum Yun,
-> > >>> 
-> > >>> On Thu, 3 Sep 2026, at 13:32, Yeoreum Yun wrote:
-> > >>> > On platforms that allows to update firmware in runtime, UpdateCapsule()
-> > >>> > may immediately write a firmware image to persistent storage.
-> > >>> > This operation can take longer than EFI_RTS_TIMEOUT.
-> > >>> >
-> > >>> > Use a separate timeout for the UpdateCapsule() runtime service. By
-> > >>> > default, wait indefinitely to avoid interrupting an ongoing firmware
-> > >>> > update. Administrators may configure an appropriate timeout, in seconds,
-> > >>> > through /sys/firmware/efi/capsule_update_timeout.
-> > >>> >
-> > >>> > Signed-off-by: Yeoreum Yun <yeoreum.yun@arm.com>
-> > >>> > ---
-> > >>> >  drivers/firmware/efi/efi.c              | 41 +++++++++++++++++++++++++
-> > >>> >  drivers/firmware/efi/runtime-wrappers.c | 14 +++------
-> > >>> >  include/linux/efi.h                     | 10 ++++++
-> > >>> >  3 files changed, 55 insertions(+), 10 deletions(-)
-> > >>> >
-> > >>> 
-> > >>> Given that UpdateCapsule() is rarely used these days at runtime, I
-> > >>> wonder if we should just call it synchronously instead of via the
-> > >>> EFI workqueue.
-> > >>> 
-> > >>> I assume that would also solve the timeout issue?
-> > >>
-> > >> Might be. But it would make *non-preemptible* for UpdateCapsule().
-> > >> AFAIK the purpose of running runtime service with efi_queue to
-> > >> run it in indepdent context and to be preemtible in case of arm64.
-> > >>
-> > >
-> > > No.
-> > >
-> > >> Since most of UpdateCapsule() will be called via capsule-loader's misc
-> > >> device, if UpdateCaspule() is called synchronously, It would be
-> > >> non-preemtible in arm64 platform.
-> > >>
-> > >> But, some platform could be preemptible while updating firmware so
-> > >> I think it would be better that it would be called via EFI workqueue.
-> > >>
-> > >
-> > > EFI runtime service invocations are preemptible on arm64, so this is
-> > > not a problem.
-> > 
-> > Ah wait - you're right, they are only preemptible when invoked from the
-> > work queue.
-> 
-> Yes. That's why I think it would be better to call via EFI workqueue
-> when I see arch_efi_call_virt_setup().
+On Mon, Sep 14, 2026, at 17:53, Linus Torvalds wrote:
+> On Mon, 14 Sept 2026 at 08:41, Kees Cook <kees@kernel.org> wrote:
+>>
+>> One area I think might solved via an LLM is the 3-pass kallsyms stuff.
+>> If we could get a deterministic kallsyms build in 1 pass, that would be
+>> very nice. A lot of people have tried, but it has eluded upstreaming.
+>
+> Even the three-pass one hasn't apparently always been entirely
+> deterministic. We've had random reports over the years of it failing
+> in some circumstances.
 
-Hi Ard,
+This tends to break whenever a linker (rather than the compiler) starts
+creating a new type of symbols that show up in pass 2.
 
-Could there be any issues with doing it this way, or would there be
-a better approach?
+> Maybe we've fixed it all, or maybe the failures just go imperceptibly
+> rare. Regardless, it has definitely been fragile.
 
--- 
-Sincerely,
-Yeoreum Yun
+The rate seems to be once every few years, looking at the list
+of exceptions added to scripts/kallsyms.c (now scripts/mksysmap):
+
+efe6e3068067 ("kallsyms: fix nonconverging kallsyms table with lld")
+516d980f8541 ("scripts/kallsyms: skip ppc compiler stub *.long_branch.* / *.plt_branch.*")
+b9b74be163a2 ("ARM: 8555/1: kallsyms: ignore ARM mode switching veneers")
+
+I'm sure there are other instances on architectures that get less
+build coverage.
+
+     Arnd
