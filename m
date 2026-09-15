@@ -1,137 +1,157 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1771366542;
-	Tue, 15 Sep 2026 14:11:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 992C038E5E9;
+	Tue, 15 Sep 2026 14:25:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789481484; cv=none; b=sYNBIMrm/NqC0DLvLGbhdl6BJp+OcPHKpM60AmfX4+tkGjSRD0zNYxm2sq8yg0GKGK8abPQLPHte/FiyEwXhy6JTn9l8mk6XcxWsaDFzagOfdhrfs2/GqvKO6RId9fCpCvGVm3f7topcI1kDm3VTouXeupkgbhCCfzgUGfD0mZE=
+	t=1789482346; cv=none; b=DDuDeGISV6gsmNe8eujF76sJdj7Fd8rPl96Js2zZ9030VUbWk/PP2NgoN51xNmmSEssrm5D39o/L/azMQ/wmNkCxH/lmHSLb+fRrtuGYDPTCmn5yCcA/gJ1caPqK5NqJZaGW9geB5Bv/i8/OAMl6/MAOrmicPkxxb/drp5eHu84=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789481484; c=relaxed/simple;
-	bh=zTmABsZ2slNTNTqR5g2nelZscwg4Mg0EJTyMFrNzVrM=;
+	s=arc-20240116; t=1789482346; c=relaxed/simple;
+	bh=ucTHnbc9VTTokMhg4Q89YI/1gofGkYgVEHd0h0Jm5lk=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=Yh9alABjawkqnEl4VE1gFC9YcAYB90GDlmtgMqBpQHsNA8OkZCDIaXZi8oBtpJ6CS6VVjLIanEXQJbTlaYhh0w1FVP6By831a0Kn9XyTqpX2Wi+epy8hL9ygVZlHV3QtyxzoRrsFq3bz+luH61Ywc1XQBU+89nNp2dno3EI0AyQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=baDlUtFw; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=bJRS2FTVoyZSxEk4y7ak3hr9CJKoQgzN7drkXPqJsCmzuvShLOo/u3vQxCTfU2JfN54BA0lHrH5jiOWiudQ/NZ4dWFDMRtVL553JCgWCuPGeoi4bB1CW21+sorloQqTViZA9845wukM2oibOQ6QOidKsHH/U570lbPoiyxVyvb0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XpOWlEX6; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="baDlUtFw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A209A1F000FF;
-	Tue, 15 Sep 2026 14:11:20 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XpOWlEX6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5154C1F0089E;
+	Tue, 15 Sep 2026 14:25:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789481482;
-	bh=U0YAPSCzjIvx9j5UuO3la71ldkiY663ti2cQ1z7Zo34=;
+	s=k20260515; t=1789482344;
+	bh=41P4RsZFtpH5NGFfQV+UZfxuwGC9lxZAIr1dw8RbTR4=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=baDlUtFwZ7KCV4ufgTF//oU9YijykM7UmGP8RPQrD+I8pBO+jchLE29xCD1JteFFG
-	 uJ0SOqHSmDC+KQ4IZxr7tzq7M6U2SU8TAl5BBntbdoZ5zj1na3pmN7vXwcO9Wpx5SC
-	 rY25b6BGE0yPe+0Mswb8tlBkv5+sXjFsGykikSy1u4unUQZWAkHACiourVm8X4+O/E
-	 HDneJHgr8sfHh5bwIaTnsDcvU/1uJxa2dZ/oPSwy0lhieD/NUrLxIJRS5tFAt/jW1D
-	 l3m84KwUcryVRdWgYhgaA0nOxBWmOhcjT4OkTN+OlDGJuUQa+LciWoQcxHs7mQDkuq
-	 cZRjH/f/KpnBg==
+	b=XpOWlEX6GlUhNRuKshbD4eV+VEWBxo/aZrSmcGDmlWldOIv2oE0bi2PvRXl6eBz4P
+	 RDmTK0sJjLksTMFuzt/fanlQTp8CDwd2ASUZcxjD/mPd5LSu6/vz+2kf3z+RKdoR4Y
+	 54d8u34R+rtJn7lOtpEg9sezQx4Fuw88RI/i+JGwTrYovq9jfevfBhs+nfQ+ARliu+
+	 bnwHo5WZKnXl9omRdCilRPgX4vGWWWL8czheQi9hZ7UGe570w/e7MBIC5hu5h5OuDi
+	 OBpOv3iOs3URkcWqtnKKa+I3OAdzpd7wzPITmwFaT5iKV/8N33zzqTPaKd6nio9Zit
+	 SCuNzx4N2FHUw==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v5 8/9] mm/memory-failure: add hwpoison_boot_page() to
- flag an inherited frame
+Subject: Re: [PATCH v5 9/9] mm/memory-failure: keep inherited poisoned
+ frames out of the buddy allocator
 Reply-To: sashiko-reviews@lists.linux.dev
-To: "Oscar Salvador" <osalvador@suse.de>, "Suren Baghdasaryan" <surenb@google.com>, "Danilo
- Krummrich" <dakr@kernel.org>, "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>, "Liam
- R. Howlett" <liam@infradead.org>, "Michal Hocko" <mhocko@suse.com>, "Rafael
- J. Wysocki" <rafael@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, "Ilias
- Apalodimas" <ilias.apalodimas@linaro.org>, "Zi Yan" <ziy@nvidia.com>, "Miaohe
- Lin" <linmiaohe@huawei.com>, "Borislav Petkov" <bp@alien8.de>, "Thomas
- Gleixner" <tglx@kernel.org>, "Vlastimil Babka" <vbabka@kernel.org>, "Johannes
- Weiner" <hannes@cmpxchg.org>, "Mike Rapoport" <rppt@kernel.org>, "Lorenzo
- Stoakes" <ljs@kernel.org>, "Andrew Morton" <akpm@linux-foundation.org>, x86@kernel.org, "David
- Hildenbrand" <david@kernel.org>, "Naoya Horiguchi" <nao.horiguchi@gmail.com>, shakeel.butt@linux.dev, "Brendan
- Jackman" <brendan.jackman@linux.dev>, hannes@cmpxchg.or, "Ard Biesheuvel" <ardb@kernel.org>, kas@kernel.org, "Ingo
- Molnar" <mingo@redhat.com>, "Dave Hansen" <dave.hansen@linux.intel.com>, "Breno
- Leitao" <leitao@debian.org>
-Cc: linux-cxl@vger.kernel.org, linux-mm@kvack.org, rmikey@meta.com, linux-kernel@vger.kernel.org, kernel-team@meta.com, linux-efi@vger.kernel.org, harry@kernel.org, driver-core@lists.linux.dev, kexec@lists.infradead.org, riel@surriel.com
-In-Reply-To: <20260915-hwpoison-kho-v5-8-3bc7a57bd503@debian.org>
+To: "Zi Yan" <ziy@nvidia.com>, hannes@cmpxchg.or, "Danilo Krummrich" <dakr@kernel.org>, "Oscar
+ Salvador" <osalvador@suse.de>, "Vlastimil Babka" <vbabka@kernel.org>, "Thomas
+ Gleixner" <tglx@kernel.org>, shakeel.butt@linux.dev, "Ard Biesheuvel" <ardb@kernel.org>, "Michal
+ Hocko" <mhocko@suse.com>, "Dave Hansen" <dave.hansen@linux.intel.com>, "H.
+ Peter Anvin" <hpa@zytor.com>, "Andrew Morton" <akpm@linux-foundation.org>, "Borislav
+ Petkov" <bp@alien8.de>, "Ingo Molnar" <mingo@redhat.com>, x86@kernel.org, "Miaohe
+ Lin" <linmiaohe@huawei.com>, kas@kernel.org, "Mike Rapoport" <rppt@kernel.org>, "Naoya
+ Horiguchi" <nao.horiguchi@gmail.com>, "Brendan Jackman" <brendan.jackman@linux.dev>, "Lorenzo
+ Stoakes" <ljs@kernel.org>, "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>, "Johannes
+ Weiner" <hannes@cmpxchg.org>, "Ilias Apalodimas" <ilias.apalodimas@linaro.org>, "David
+ Hildenbrand" <david@kernel.org>, "Liam R. Howlett" <liam@infradead.org>, "Rafael
+ J. Wysocki" <rafael@kernel.org>, "Breno Leitao" <leitao@debian.org>, "Suren
+ Baghdasaryan" <surenb@google.com>
+Cc: kexec@lists.infradead.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-cxl@vger.kernel.org, riel@surriel.com, harry@kernel.org, driver-core@lists.linux.dev, kernel-team@meta.com, linux-mm@kvack.org, rmikey@meta.com
+In-Reply-To: <20260915-hwpoison-kho-v5-9-3bc7a57bd503@debian.org>
 References: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
- <20260915-hwpoison-kho-v5-8-3bc7a57bd503@debian.org>
+ <20260915-hwpoison-kho-v5-9-3bc7a57bd503@debian.org>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Tue, 15 Sep 2026 14:11:20 +0000
-Message-Id: <20260915141120.A209A1F000FF@smtp.kernel.org>
+Date: Tue, 15 Sep 2026 14:25:41 +0000
+Message-Id: <20260915142542.5154C1F0089E@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 
-Thank you for your contribution! Sashiko AI review found 1 potential issue(=
+Thank you for your contribution! Sashiko AI review found 2 potential issue(=
 s) to consider:
-- [Medium] mm: memory_failure_stats data race in hwpoison_boot_page()
+- [High] mm: panic when accepting clean pages sharing an unaccepted unit wi=
+th poisoned pages
+- [Medium] mm: lost memory failure stats due to lockless update in hwpoison=
+_boot_page()
 --
 
-commit 95ab593413859ad843df67ede9095a08529eb0cd
+commit 92cea9db628cbe8f9651b225628684a39c80ddd4
 Author: Breno Leitao <leitao@debian.org>
+Subject: mm/memory-failure: keep inherited poisoned frames out of the buddy=
+ allocator
 
-mm/memory-failure: add hwpoison_boot_page() to flag an inherited frame
+This commit intercepts inherited poisoned pages before they enter the buddy
+allocator. It processes memory blocks by checking for poisoned pages, flagg=
+ing
+them, and passing the remaining clean pages through the allocator. This
+prevents unaccepted memory blocks with poisoned frames from being mistakenly
+re-merged.
 
-This commit adds a helper, hwpoison_boot_page(), to flag inherited frames
-recorded as poisoned by the previous kernel before they reach the allocator.
-It leaves the frame in the state expected for poisoned frames, allowing
-existing PG_hwpoison logic to cover it appropriately.
-
-> diff --git a/mm/memory-failure.c b/mm/memory-failure.c
-> index d9b8be696aac3..60e9682434700 100644
-> --- a/mm/memory-failure.c
-> +++ b/mm/memory-failure.c
+> diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+> index b07b5f4751cb9..cca67a2702a42 100644
+> --- a/mm/page_alloc.c
+> +++ b/mm/page_alloc.c
 [ ... ]
-> @@ -137,6 +137,32 @@ phys_addr_t range_last_hwpoison(phys_addr_t start, u=
-nsigned long size)
->  	return range_hwpoison(start, size, false);
+> @@ -1597,6 +1597,25 @@ static void __meminit accept_and_free_block(struct=
+ page *page,
+>  	__free_pages_ok(page, order, FPI_TO_TAIL);
 >  }
 > =20
-> +static void update_per_node_mf_stats(unsigned long pfn, enum mf_result r=
-esult);
-> +
-> +void __meminit hwpoison_boot_page(struct page *page,
-> +				  enum meminit_context context)
+> +static void __meminit free_poisoned_block(struct page *page, unsigned in=
+t order,
+> +					  enum meminit_context context)
 > +{
-> +	unsigned long pfn =3D page_to_pfn(page);
+> +	unsigned long i, nr_pages =3D 1UL << order;
 > +
-> +	if (PageHWPoison(page))
-> +		return;
+> +	for (i =3D 0; i < nr_pages; i++) {
+> +		struct page *p =3D page + i;
+> +		phys_addr_t phys =3D page_to_phys(p);
 > +
-> +	SetPageHWPoison(page);
-> +	set_page_count(page, 1);
-> +	/* The page has been completely isolated =3D=3D MF_RECOVERED */
-> +	update_per_node_mf_stats(pfn, MF_RECOVERED);
+> +		if (range_contains_poisoned_memory(phys, PAGE_SIZE)) {
+> +			hwpoison_boot_page(p, context);
 
 [Severity: Medium]
-Is it safe to call update_per_node_mf_stats() here without acquiring mf_mut=
-ex?
+Is this call to hwpoison_boot_page() safe from data races during memory
+hotplug?
 
-During memory hotplug (when context =3D=3D MEMINIT_HOTPLUG), if
-hwpoison_boot_page() is called for inherited poisoned frames, it appears th=
-is
-could race with runtime hardware error processing on other CPUs.
-
-Other paths like memory_failure() update these same per-node statistics whi=
-le
-holding mf_mutex. Because update_per_node_mf_stats() performs non-atomic
-increments:
+When called during hotplug (where context =3D=3D MEMINIT_HOTPLUG),
+hwpoison_boot_page() calls update_per_node_mf_stats() which performs
+non-atomic read-modify-write operations on the node stats:
 
 mm/memory-failure.c:update_per_node_mf_stats() {
-        ...
-        case MF_RECOVERED:
-                ++mf_stats->recovered;
-                break;
-        ...
-        ++mf_stats->total;
+    ...
+    ++mf_stats->recovered;
+    ...
 }
 
-Could calling it here circumvent the mutex and corrupt the memory failure
-sysfs statistics by losing counter updates?
+Since hwpoison_boot_page() does not acquire mf_mutex, could a concurrent
+memory_failure() execution on the same NUMA node corrupt the recovered and
+total counters?
 
+> +			continue;
+> +		}
 > +
-> +	/*
-> +	 * The per memory block half of num_poisoned_pages_inc() has no block to
-> +	 * find at boot, and divides by zero looking for one. A hotplugged block
-> +	 * is already there.
-> +	 */
+> +		/* this part of the block is not poisoned */
+> +		accept_and_free_block(p, 0);
+
+[Severity: High]
+Can this sequence cause a kernel panic when accepting clean pages that share
+an unaccepted memory unit with poisoned pages?
+
+When a clean page belongs to an unaccepted memory region,
+accept_and_free_block() invokes accept_memory(). However, accept_memory()
+operates at the unit_size granularity (typically 2MB) and rounds down the
+start address to this boundary before calling arch_accept_memory():
+
+drivers/firmware/efi/unaccepted_memory.c:accept_memory() {
+    ...
+    arch_accept_memory(phys_start, phys_end);
+    ...
+}
+
+Because the clean page and the poisoned page share the same unaccepted
+unit_size block, won't arch_accept_memory() be inadvertently executed on the
+poisoned page as well?
+
+If arch_accept_memory() attempts to accept physically poisoned memory (such
+as via TDX TDG.MEM.PAGE.ACCEPT), could this trigger an unrecoverable Machine
+Check Exception?
+
+> +	}
+> +}
+> +
 [ ... ]
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260915-hwpoison-k=
-ho-v5-0-3bc7a57bd503@debian.org?part=3D8
+ho-v5-0-3bc7a57bd503@debian.org?part=3D9
