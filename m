@@ -1,157 +1,260 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 992C038E5E9;
-	Tue, 15 Sep 2026 14:25:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 337283C1090;
+	Tue, 15 Sep 2026 14:30:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789482346; cv=none; b=DDuDeGISV6gsmNe8eujF76sJdj7Fd8rPl96Js2zZ9030VUbWk/PP2NgoN51xNmmSEssrm5D39o/L/azMQ/wmNkCxH/lmHSLb+fRrtuGYDPTCmn5yCcA/gJ1caPqK5NqJZaGW9geB5Bv/i8/OAMl6/MAOrmicPkxxb/drp5eHu84=
+	t=1789482656; cv=none; b=ErHIs0fpctOCYER1tEyoG9bOckpgLeTK1OuDHR3QXonGCMEIc5flL24PiE/WFTG9BDstLxw3N3FCxFAR0C0TndbHlVtMkt4T5tV4A0nO2XmDlmfUPyAE2gpNYMHM6MiW5JgYZql9I+cPLNgTaEf2faGgiup2Kw5zk0mVXzrby6k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789482346; c=relaxed/simple;
-	bh=ucTHnbc9VTTokMhg4Q89YI/1gofGkYgVEHd0h0Jm5lk=;
-	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=bJRS2FTVoyZSxEk4y7ak3hr9CJKoQgzN7drkXPqJsCmzuvShLOo/u3vQxCTfU2JfN54BA0lHrH5jiOWiudQ/NZ4dWFDMRtVL553JCgWCuPGeoi4bB1CW21+sorloQqTViZA9845wukM2oibOQ6QOidKsHH/U570lbPoiyxVyvb0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XpOWlEX6; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789482656; c=relaxed/simple;
+	bh=moIPUmoig2JAgKqAA6UrukBxyXWK3E849Xq6gng+scw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lVv8ze4yORKlGr1hj9mmYZqa2lg4UN0zSEqf71uOdyRlidz7HOntZYie7JC60DmS6rON/XQJhzk+vsmJvFeBFHPc3myDhPn0MLw5yYuC0JgsWs37K0UDxt0QRECTvcsC5yEMm9Ty+2JprnSeCIqnKD54YDcm+I8afJm7EzM3498=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ExS+veNg; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XpOWlEX6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5154C1F0089E;
-	Tue, 15 Sep 2026 14:25:42 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ExS+veNg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E75D01F000FF;
+	Tue, 15 Sep 2026 14:30:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789482344;
-	bh=41P4RsZFtpH5NGFfQV+UZfxuwGC9lxZAIr1dw8RbTR4=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=XpOWlEX6GlUhNRuKshbD4eV+VEWBxo/aZrSmcGDmlWldOIv2oE0bi2PvRXl6eBz4P
-	 RDmTK0sJjLksTMFuzt/fanlQTp8CDwd2ASUZcxjD/mPd5LSu6/vz+2kf3z+RKdoR4Y
-	 54d8u34R+rtJn7lOtpEg9sezQx4Fuw88RI/i+JGwTrYovq9jfevfBhs+nfQ+ARliu+
-	 bnwHo5WZKnXl9omRdCilRPgX4vGWWWL8czheQi9hZ7UGe570w/e7MBIC5hu5h5OuDi
-	 OBpOv3iOs3URkcWqtnKKa+I3OAdzpd7wzPITmwFaT5iKV/8N33zzqTPaKd6nio9Zit
-	 SCuNzx4N2FHUw==
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v5 9/9] mm/memory-failure: keep inherited poisoned
- frames out of the buddy allocator
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Zi Yan" <ziy@nvidia.com>, hannes@cmpxchg.or, "Danilo Krummrich" <dakr@kernel.org>, "Oscar
- Salvador" <osalvador@suse.de>, "Vlastimil Babka" <vbabka@kernel.org>, "Thomas
- Gleixner" <tglx@kernel.org>, shakeel.butt@linux.dev, "Ard Biesheuvel" <ardb@kernel.org>, "Michal
- Hocko" <mhocko@suse.com>, "Dave Hansen" <dave.hansen@linux.intel.com>, "H.
- Peter Anvin" <hpa@zytor.com>, "Andrew Morton" <akpm@linux-foundation.org>, "Borislav
- Petkov" <bp@alien8.de>, "Ingo Molnar" <mingo@redhat.com>, x86@kernel.org, "Miaohe
- Lin" <linmiaohe@huawei.com>, kas@kernel.org, "Mike Rapoport" <rppt@kernel.org>, "Naoya
- Horiguchi" <nao.horiguchi@gmail.com>, "Brendan Jackman" <brendan.jackman@linux.dev>, "Lorenzo
- Stoakes" <ljs@kernel.org>, "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>, "Johannes
- Weiner" <hannes@cmpxchg.org>, "Ilias Apalodimas" <ilias.apalodimas@linaro.org>, "David
- Hildenbrand" <david@kernel.org>, "Liam R. Howlett" <liam@infradead.org>, "Rafael
- J. Wysocki" <rafael@kernel.org>, "Breno Leitao" <leitao@debian.org>, "Suren
- Baghdasaryan" <surenb@google.com>
-Cc: kexec@lists.infradead.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-cxl@vger.kernel.org, riel@surriel.com, harry@kernel.org, driver-core@lists.linux.dev, kernel-team@meta.com, linux-mm@kvack.org, rmikey@meta.com
-In-Reply-To: <20260915-hwpoison-kho-v5-9-3bc7a57bd503@debian.org>
-References: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
- <20260915-hwpoison-kho-v5-9-3bc7a57bd503@debian.org>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Tue, 15 Sep 2026 14:25:41 +0000
-Message-Id: <20260915142542.5154C1F0089E@smtp.kernel.org>
+	s=k20260515; t=1789482654;
+	bh=C8lwuOuhj9txlc80fCv3H4oifLhv4WSxNGb/qOtVudM=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=ExS+veNgBdz30FclQpYaSCTexz90mRkZ4TxP0L0gy1RFIR6zbpI4Dikj4vA4P/AXO
+	 t/OeNJSnMmU40l2yi2IYcES7gZP7EQSHLVgAVDU85kj/8mL+llrLyBIfZS0WEp98qz
+	 I4U7fawy4JaSj9S5OnGVb+wb//Agn/A0wpOa6phj0QtDBo5ywXKqv9zqMTN6TWNR4U
+	 rsAfoE3JGOXAg1scCoJgia/HWwS8t8a+WJLjyr+sCr0S5GULThAMjvcA3cOsfFH0co
+	 87e14KinXUO7LY8fcGAkmTAPBtlSakU1p1pRIwGhCIC38zvMGAqMmENgla+q9vrc7S
+	 Fu6OaBPBfXB7g==
+Date: Tue, 15 Sep 2026 15:30:43 +0100
+From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+To: Kees Cook <kees@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
+	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
+	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
+	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
+	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
+	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
+	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
+	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
+	Gary Guo <gary@garyguo.net>, =?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, 
+	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
+	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
+	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
+	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
+	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
+	Randy Dunlap <rdunlap@infradead.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
+	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
+	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
+	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v2 21/21] kbuild: use pigz for gzip compression if
+ available
+Message-ID: <aqk9gakQhxToLnDI@gremlin>
+References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
+ <20260914-build-speedup-v2-21-39817ec5db23@kernel.org>
+ <202609140844.FA7E848A@keescook>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <202609140844.FA7E848A@keescook>
 
-Thank you for your contribution! Sashiko AI review found 2 potential issue(=
-s) to consider:
-- [High] mm: panic when accepting clean pages sharing an unaccepted unit wi=
-th poisoned pages
-- [Medium] mm: lost memory failure stats due to lockless update in hwpoison=
-_boot_page()
+On Mon, Sep 14, 2026 at 09:39:07AM -0700, Kees Cook wrote:
+> On Mon, Sep 14, 2026 at 10:22:20AM +0100, Lorenzo Stoakes (ARM) wrote:
+> > On a 128-core Threadripper, gzip -9 of a 36 MiB x86-64 vmlinux.bin takes
+> > 1.6s, and with pigz it takes 0.09s, so the performance increase is
+> > significant.
+>
+> Neat! I wanna go learn how pigz accomplishes this -- I thought the
+> problem with gzip was a common lookup table. Anyway...
+
+Yeah not sure on the details :)
+
+>
+> > --- a/Documentation/kbuild/reproducible-builds.rst
+> > +++ b/Documentation/kbuild/reproducible-builds.rst
+> > @@ -76,6 +76,22 @@ include generated files.  You should ensure the source tree is
+> >  pristine by running ``make mrproper`` or ``git clean -d -f -x`` before
+> >  building a source package.
+> >
+> > +Compression tools
+> > +-----------------
+> > +
+> > +The compressed kernel image, compressed modules and packages are produced
+> > +using the program named by the make variable ``KGZIP`` (described in
+> > +Documentation/kbuild/kbuild.rst).
+> > +
+> > +It defaults to ``pigz`` if installed (a parallel implementation of gzip),
+> > +or ``gzip`` otherwise.
+> > +
+> > +The generated output between two invocations of identical builds with
+> > +either of the default tools will be byte-for-byte equivalent.
+> > +
+> > +However, for reproducible builds, ensure the same tool is used on all build
+> > +hosts, as different tools may generate different output from one another.
+> > +
+> >  Module signing
+> >  --------------
+> >
+>
+> This doc update seems totally unneeded? Having the same build tools for RB
+> is already a known requirement. I don't think anything new is added here?
+
+Ack that's fair enough, will drop the doc update.
+
+>
+> > diff --git a/Makefile b/Makefile
+> > index 790ef23c5e8a..38c0cdc9f591 100644
+> > --- a/Makefile
+> > +++ b/Makefile
+> > @@ -561,7 +561,7 @@ PERL		= perl
+> >  PYTHON3		= python3
+> >  CHECK		= sparse
+> >  BASH		= bash
+> > -KGZIP		= gzip
+> > +KGZIP		:= $(if $(shell command -v pigz 2>/dev/null),pigz,gzip)
+>
+> I think the more idiomatic way to do this is:
+>
+> KGZIP := $(call try-run,command -v pigz,pigz,gzip)
+
+try-run is defined in scripts/Makefile.compiler which is only included ~200
+lines after KGZIP is set.
+
+That'll also set up and tear down a temp dir for a probe that doesn't need
+that, so I think it's fine as it is.
+
+>
+> However, parallelism needs to be set. We can't let it eat all CPUs: it
+> needs to respect the -j make option (and make its CPU reservation known
+> to "make"), which we already have a solution for in
+> scripts/jobserver-exec.
+
+The only place where it's invoked is vmlinux.bin at the end of the serial
+tail, where all the tokens would be free anyway.
+
+So I don't think it really buys anything at all?
+
+Using jobserver-exec would also put python3 and two wrapper scripts in
+front of every gzip in the build including tar -I "$(KGZIP)" when packaging
+and some arm and m68k scripts too.
+
+(For the module zips it's already constrained to a single process.)
+
+Overall I think it's less complexity and really no delta to just invoke it
+as normal.
+
+It's designed as drop-in so it makes sense to use it as that.
+
+>
+> However, I would actually argue that given such an improvement we should just
+> make pigz explicitly required and not optional. It is packaged everywhere:
+>
+>   │ Debian / Ubuntu              │ ✅          │ pigz (main)
+>   │ Fedora                       │ ✅          │ pigz 2.8 (current)
+>   │ RHEL / CentOS / Rocky / Alma │ ✅ via EPEL │ pigz — not in base/AppStream
+>   │ openSUSE / SLE               │ ✅          │ pigz
+>   │ Arch Linux                   │ ✅          │ pigz (extra)
+>   │ Alpine                       │ ✅          │ pigz
+>   │ Gentoo                       │ ✅          │ app-arch/pigz 2.8
+>
+> Only RHEL appears a little glitchy, but likely they would trivially move
+> it to base since it's already packaged, but off in EPEL.
+
+Definitely not something for this series, the fallback is one invocation of
+command -v and I don't really want to break RHEL either :)
+
+If, once this has landed, we want to go that way then it's simple enough
+for us to change it.
+
+>
+> So, I would say that pigz would be best run as something like:
+>
+>   KGZIP := $(PYTHON3) $(abs_srctree)/scripts/jobserver-exec $(abs_srctree)/scripts/parallel-pigz
+>
+> with scripts/parallel-pigz being something like:
+>
+> 	#!/bin/sh
+> 	exec pigz -p ${PARALLELISM:-1} "$@"
+>
+> > --- a/scripts/Makefile.modinst
+> > +++ b/scripts/Makefile.modinst
+> > @@ -145,8 +145,10 @@ endif
+> >  #
+> >  # Compression
+> >  #
+> > +# Modules are compressed in parallel by make itself, so keep the compressor
+> > +# single-threaded when it is pigz.
+> >  quiet_cmd_gzip = GZIP    $@
+> > -      cmd_gzip = $(KGZIP) -n -f $<
+> > +      cmd_gzip = $(KGZIP) $(if $(filter pigz,$(notdir $(firstword $(KGZIP)))),-p 1) -n -f $<
+> >  quiet_cmd_xz = XZ      $@
+>
+> Then this could be:
+>
+> 	cmd_gzip = SINGLE_THREADED=1 $(KGZIP) -n -f $<
+
+This is already achieved for the modinst case with a one-liner in any case.
+
+>
+> and we patch scripts/jobserver-exec:
+>
+> diff --git a/scripts/jobserver-exec b/scripts/jobserver-exec
+> index 21b319e6c9a5..8b953148ee9f 100755
+> --- a/scripts/jobserver-exec
+> +++ b/scripts/jobserver-exec
+> @@ -5,6 +5,7 @@
+>  Determines how many parallel tasks "make" is expecting, as it is
+>  not exposed via any special variables, reserves them all, runs a subprocess
+>  with PARALLELISM environment variable set, and releases the jobs back again.
+> +If SINGLE_THREADED is set, nothing is reserved and PARALLELISM is 1.
+>
+>  See:
+>      https://www.gnu.org/software/make/manual/html_node/POSIX-Jobserver.html#POSIX-Jobserver
+> diff --git a/tools/lib/python/jobserver.py b/tools/lib/python/jobserver.py
+> index 0b1ffdf9f7a3..fc38c5020b22 100755
+> --- a/tools/lib/python/jobserver.py
+> +++ b/tools/lib/python/jobserver.py
+> @@ -29,6 +29,11 @@ $claim child to do the actual work.
+>  The end goal here is to keep the total number of build tasks under the
+>  limit established by the initial ``make -j$n_proc`` call.
+>
+> +Setting the ``SINGLE_THREADED`` environment variable skips the reservation
+> +entirely and runs the command with ``PARALLELISM=1``. This is meant for callers
+> +that run many short commands in parallel themselves, where each one should use
+> +only the job slot it already holds.
+> +
+>  See:
+>      https://www.gnu.org/software/make/manual/html_node/POSIX-Jobserver.html#POSIX-Jobserver
+>  """
+> @@ -68,6 +73,13 @@ class JobserverExec:
+>          self.is_open = True  # We only try once
+>          self.claim = None
+>          #
+> +        # SINGLE_THREADED asks for no reservation at all: the command runs
+> +        # with PARALLELISM=1, using only the slot its caller already holds.
+> +        #
+> +        if os.environ.get('SINGLE_THREADED'):
+> +            self.claim = 1
+> +            return
+> +        #
+>          # Check the make flags for "--jobserver=R,W"
+>          # Note that GNU Make has used --jobserver-fds and --jobserver-auth
+>          # so this handles all of them.
+>
+> --
+> Kees Cook
+
 --
-
-commit 92cea9db628cbe8f9651b225628684a39c80ddd4
-Author: Breno Leitao <leitao@debian.org>
-Subject: mm/memory-failure: keep inherited poisoned frames out of the buddy=
- allocator
-
-This commit intercepts inherited poisoned pages before they enter the buddy
-allocator. It processes memory blocks by checking for poisoned pages, flagg=
-ing
-them, and passing the remaining clean pages through the allocator. This
-prevents unaccepted memory blocks with poisoned frames from being mistakenly
-re-merged.
-
-> diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-> index b07b5f4751cb9..cca67a2702a42 100644
-> --- a/mm/page_alloc.c
-> +++ b/mm/page_alloc.c
-[ ... ]
-> @@ -1597,6 +1597,25 @@ static void __meminit accept_and_free_block(struct=
- page *page,
->  	__free_pages_ok(page, order, FPI_TO_TAIL);
->  }
-> =20
-> +static void __meminit free_poisoned_block(struct page *page, unsigned in=
-t order,
-> +					  enum meminit_context context)
-> +{
-> +	unsigned long i, nr_pages =3D 1UL << order;
-> +
-> +	for (i =3D 0; i < nr_pages; i++) {
-> +		struct page *p =3D page + i;
-> +		phys_addr_t phys =3D page_to_phys(p);
-> +
-> +		if (range_contains_poisoned_memory(phys, PAGE_SIZE)) {
-> +			hwpoison_boot_page(p, context);
-
-[Severity: Medium]
-Is this call to hwpoison_boot_page() safe from data races during memory
-hotplug?
-
-When called during hotplug (where context =3D=3D MEMINIT_HOTPLUG),
-hwpoison_boot_page() calls update_per_node_mf_stats() which performs
-non-atomic read-modify-write operations on the node stats:
-
-mm/memory-failure.c:update_per_node_mf_stats() {
-    ...
-    ++mf_stats->recovered;
-    ...
-}
-
-Since hwpoison_boot_page() does not acquire mf_mutex, could a concurrent
-memory_failure() execution on the same NUMA node corrupt the recovered and
-total counters?
-
-> +			continue;
-> +		}
-> +
-> +		/* this part of the block is not poisoned */
-> +		accept_and_free_block(p, 0);
-
-[Severity: High]
-Can this sequence cause a kernel panic when accepting clean pages that share
-an unaccepted memory unit with poisoned pages?
-
-When a clean page belongs to an unaccepted memory region,
-accept_and_free_block() invokes accept_memory(). However, accept_memory()
-operates at the unit_size granularity (typically 2MB) and rounds down the
-start address to this boundary before calling arch_accept_memory():
-
-drivers/firmware/efi/unaccepted_memory.c:accept_memory() {
-    ...
-    arch_accept_memory(phys_start, phys_end);
-    ...
-}
-
-Because the clean page and the poisoned page share the same unaccepted
-unit_size block, won't arch_accept_memory() be inadvertently executed on the
-poisoned page as well?
-
-If arch_accept_memory() attempts to accept physically poisoned memory (such
-as via TDX TDG.MEM.PAGE.ACCEPT), could this trigger an unrecoverable Machine
-Check Exception?
-
-> +	}
-> +}
-> +
-[ ... ]
-
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260915-hwpoison-k=
-ho-v5-0-3bc7a57bd503@debian.org?part=3D9
+Cheers, Lorenzo
