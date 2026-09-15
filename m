@@ -1,185 +1,208 @@
-Received: from mail-pz2-f12.google.com (mail-pz2-f12.google.com [74.125.228.12])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.web.de (mout.web.de [212.227.15.4])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDFD5386C08
-	for <linux-efi@vger.kernel.org>; Tue, 15 Sep 2026 06:32:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.228.12
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789453938; cv=pass; b=AX/kZLN9VRFzwHiibMi8WmhmwLnVSATQn9XXnlXkAHCvNReyuNZmyrOr2IJzlrBL75gI0bKuXwl9d/qRBvyV9BSVohZD0HB+MbB2VSntnAot77AMgTYZtZW5k+8ia+JkcF0bTypU5ZV3v4JqG2P+ZZfpM8Elu8pMbzkVFym6+0M=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789453938; c=relaxed/simple;
-	bh=kmDAMC6MFeucn2qpBg3Klhb1ZEFA9BC3craQuU4rvac=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=hixPeLJxXhCslZwtWLeiv1zJRtLxmOxTv5cPG3SUXM4LK4hDDDpICWGQZW6Jg88na4huwjTxYkVWWHPz0Y2uLEx14Ap6EOz9tA32iGhTcOaqhKPCnfcgViakzyCUX3PJ9yw+ZFUPdD6lFHZVGp0FfJfttBj0P5s3fQ7LiuCYt6Y=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=G5CRJ9r3; arc=pass smtp.client-ip=74.125.228.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C61B13DA7D9;
+	Tue, 15 Sep 2026 07:11:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.4
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789456274; cv=none; b=UamB+Zh7Z1QF99IaEIg9Xbrw2Uj9syzy/yI0XR94vG0eHi6aMNjGov+topOKVFYSxNKNk+G/p5qMVBcMfOlA6CkLR+HR2h/Jy0k0VaIiDLXnOtpMmeiNJlbR323GLzNq9QqfK1Sw7mOFYOEzR41LfXSNVf5fP6Vv8csVK4AxexY=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789456274; c=relaxed/simple;
+	bh=6i4/RL05AsH0u8lSSfOYmVcdaEig/sADLhJUw3fG/kQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=UCrRTci0jFRpY6kZ1qUgZEFVzCGwJTCEiB89sc6n3kyQmyOls9RAC6QXXOXEENnhxUXvJYjIFXAjfouMdxasgfHY0HlX2+gxS/KDzDwSu0SQEQrBTb26RNC8foV/0zaOciGozkieODrX329iF6pgk9RdNtQONRa1u4WOQ8Qhru0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de; spf=pass smtp.mailfrom=web.de; dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b=JuuGrPJz; arc=none smtp.client-ip=212.227.15.4
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=web.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="G5CRJ9r3"
-Received: by mail-pz2-f12.google.com with SMTP id d2e1a72fcca58-85368f1d484so252835b3a.1
-        for <linux-efi@vger.kernel.org>; Mon, 14 Sep 2026 23:32:16 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1789453936; cv=none;
-        d=google.com; s=arc-20260327;
-        b=sBLWeKW0xbD7/uCabrBbQyCRSunuodFsMIm7bBrPLuLCCGBS4deQ4db8dFA8JSR5tP
-         7dwTwkPmFdefGZU2TriJXRMciblFw1RrLyEaP4d2gb0c8Fo5Z/ln9fb49uh6l1pv+NRI
-         by3p31l8koL3lLasoM1qIvtx6eIMST1smop/EeXekeLgEvH9H+1ZfEcwzjlLB2d/s2po
-         lrbVmwOnJErREat1L8PQYHUlogOeqT2QZtn85xm74HB0XA6LtzGHQkRoZ0M0BQy3O65Z
-         X8Y5RkG0zm6yg7muUGiCjdZWHKh3KZHuxN0GSi+YJfVa9svgmso9QSQqItxfG7HMl/NB
-         Fh1w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=kmDAMC6MFeucn2qpBg3Klhb1ZEFA9BC3craQuU4rvac=;
-        fh=j8ZuQAd9yw1O861YC7GZTf2Kceb+/Nppv1DI0jaWOic=;
-        b=qsDnMrI6rtNQD+p6lUZH0fl7tEir9DgiCZqZAFFHDm0DcOY2+D3AIUd3TkPkYnd2cU
-         z8YJBM+8BKP+69t6jgfTzTNin+r19NtfRRETdbnoh6HZ9UWgQxcEdpN/OZOH72lJal9f
-         KhdEod6jSQwa5vqCGCzrxcBeGY2XGwnrG5ChhBxcx20CEys05IM0k7N0evegzagR0iVh
-         ua72EucxD4PUAajn343FpnZoKxtNIUnZqGjZwZhYaK/jzlh33SMP1QYwdznzH7QaCuA7
-         C6PL+YL5Si5hy7iGyzaJHLkN0rVlhKwJpIqpTLyIk5Kd1GDmJX9HAsITY88lswdXl28Z
-         Iy9A==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1789453936; x=1790058736; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=kmDAMC6MFeucn2qpBg3Klhb1ZEFA9BC3craQuU4rvac=;
-        b=G5CRJ9r3yU+mY0l+N74B7S/Mjb6TnQqtFCT50TddgkDTFjmeAX7LKtouzxIblxQu7Z
-         h7Z4cg9OQsXlODWiJ4sgVavpB9ZRE2A1fqvhWaI1/oMaUm3ZJIy6GIsgazv3vqM5McEt
-         xGkXdE0pqihCwZshnRy0aSMMIslo+uYXDX7ueQ3LEQJU48Z96j4JVTpAVHnxfBhXKjop
-         mbYpAvHUDnqE3aI2WoyhirXJaLKHJWQBpEM8NK0EDDeCtbvcdTvgNOOCPFFavZBqhcMf
-         Bups1FuNo0+Wrg5gZmFapMkMsrAxt8m5jDvfLJ8SCIT13V3atN0IADBmd6R01ATsyRkn
-         s+hQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789453936; x=1790058736;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=kmDAMC6MFeucn2qpBg3Klhb1ZEFA9BC3craQuU4rvac=;
-        b=05nd2oZ7FNAbesvy7LK83rBkyvHWPLVJ5nL0GqMVdZ2NXhfA61AeBIBtpnx66xV6GC
-         cc3CNT81fwFO0RgNTMsZdIcjoCoj71bDENTckIJuuJiIiUw0e9kosXgtJNvwla2A8kBG
-         fnRpgDtBa16tFDn/UIcoSEZMBpiHSesz0iJ+sMxUqnFc2UfW1PCzIc/jhR8u5qzfAjQH
-         FLWgehnWk+8BRy6FAdO5DSAKegZ9BYvndqBaiV2injhVJfPks7QSrBF4gsnOalG7MyZI
-         bKk47iWc5VwtED1S/R7y9iBQVS1+rQiJ3ByIXwAbc+Czd19KAp0r2KJI0dPHG3DiKBxI
-         JJOg==
-X-Forwarded-Encrypted: i=1; AKwUvBxrtfCrV1v4YcE/sVClqbliTsodGvuPRM3T0l6Wtpb3KtD2BtI8u701T+LD03h1xiQbWBUIslHIPDQ=@vger.kernel.org
-X-Gm-Message-State: AFuF++k1PW4+NKOM10XY+Qu9A+ftY4nvgvl9o470kW3o0DJZb+fFTiRF
-	hBQC05qMMSVC/8bQBJBNwCQxmHiHU8yLBtMB742jgrCRlYtO27zcxQJvljwdXrVBLdgh+nIdEAn
-	zOrvgiTHtxsinSyrHxb3JvDt34BSWqbo=
-X-Gm-Gg: AYBFou2KyEnZ98U/6zwSONWxPwM6pCvYUb7w09Zzt5YGzsE/Bt7xJui+3cZf3EsznMh
-	ZzOjTrtxIQnZHS9G0R6t1DfgmkKD61G1W2DwM4gWVsr3/3pBUf0YCyu5CCOynvA4itudJSYfIE3
-	mMGk1co+KrQNB/D87iPjLc5FWXSDUKvtzFMGR+9haJKwuAMggxQpK40idFhUj7krDsvS4AfYALX
-	gCObcCPT/Z7jjqbTRyxHnUj3AGO2Ltt2uBiSiyD4bHoqqonp1nr8B9EXTxYasP7a1Vulti4ixDj
-	cieNmul5NmKsw0X+udO4KcJyxIJXZ102pZxHTBa6iCzIIMu1Jmpgfx+z3Oj2+VW65SDPpWj15EM
-	GfvevMaVMxWDZMAp7PmllOK0OJEP86ylwd1UF5/NOcz2H5sCdgcMmjIoXra/or+udH3FGW37crH
-	16kf1nK7KwpkS4bsIuMyW7TwuIehKgjd1AztXvy/XpDJmCrTeDVw==
-X-Received: by 2002:a17:90b:390d:b0:396:d27b:86a4 with SMTP id
- 98e67ed59e1d1-39dec02ca06mr8212249a91.2.1789453935885; Mon, 14 Sep 2026
- 23:32:15 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b="JuuGrPJz"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=web.de;
+	s=s29768273; t=1789456226; x=1790061026; i=markus.elfring@web.de;
+	bh=6i4/RL05AsH0u8lSSfOYmVcdaEig/sADLhJUw3fG/kQ=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
+	 References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding:cc:content-transfer-encoding:
+	 content-type:date:from:message-id:mime-version:reply-to:subject:
+	 to;
+	b=JuuGrPJzd97qqbQdO2Ezk7sxB+6OXf4M07QJfz4umUXP/7o97LrF7WsXYv/P0Ftd
+	 wbKiS4yj2B2z4dxjLIh6mHks5oHjaOgiuu/kynTRXO+gDjuGvcqQMSWChvm3Xx8Pm
+	 iWPXcx35/NkDbh91BODPQn8yz6FknQ38pYeNtIMUcCfvbyJ9o9k05mahHoqauwhxb
+	 8u3k5zucMkcJ4R07U/8Oygh0EOziZOLUyd/Fpc5fhh6uXJWlaPdsQIiMriCD1q+7w
+	 oKFilLlH1FtDU9jyx70nnnuLamn4/70JtQUA7/aiGC7/TVUG0VKURufOUe279XvrO
+	 Ck4OiHlZnZibXPn3Bw==
+X-UI-Sender-Class: 814a7b36-bfc1-4dae-8640-3722d8ec6cd6
+Received: from client.hidden.invalid by smtp.web.de (mrweb006
+ [213.165.67.108]) with ESMTPSA (Nemesis) id 1MsrhU-1wmMUE0WU4-011EVF; Tue, 15
+ Sep 2026 09:10:26 +0200
+Message-ID: <381ad17b-72e6-4368-8876-29495f4b423e@web.de>
+Date: Tue, 15 Sep 2026 09:10:06 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org> <20260914-build-speedup-v2-18-39817ec5db23@kernel.org>
-In-Reply-To: <20260914-build-speedup-v2-18-39817ec5db23@kernel.org>
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Date: Tue, 15 Sep 2026 07:32:02 +0100
-X-Gm-Features: AcwNN1XuX4yn0GdoJd77RsJx70W4snllWWAl7hBlEl0V9VQzhH3zC86aEhQjx38
-Message-ID: <CANiq72naY0=iBaxfbWQaPv_06X4SjFSix4NybDQdht33+Tcs0g@mail.gmail.com>
-Subject: Re: [PATCH v2 18/21] kbuild: rust: optionally parallelise rustc front end
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Nathan Chancellor <nathan@kernel.org>, 
-	Nicolas Schier <nsc@kernel.org>, Nick Desaulniers <ndesaulniers@google.com>, 
-	Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
-	Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>, 
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, 
-	"H. Peter Anvin" <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
-	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
-	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
-	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
-	Gary Guo <gary@garyguo.net>, =?UTF-8?Q?Bj=C3=B6rn_Roy_Baron?= <bjorn3_gh@protonmail.com>, 
-	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
-	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
-	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
-	=?UTF-8?Q?Onur_=C3=96zkan?= <work@onurozkan.dev>, 
-	Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>, Kees Cook <kees@kernel.org>, 
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, linux-kbuild@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
-	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, 
-	rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
-	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [v2 03/21] kallsyms: output binary data to speed output and
+ kallsyms assembly
+To: David Laight <david.laight.linux@gmail.com>,
+ Lorenzo Stoakes <ljs@kernel.org>, linux-kbuild@vger.kernel.org
+Cc: x86@kernel.org, Albert Ou <aou@eecs.berkeley.edu>,
+ Alexandre Courbot <acourbot@nvidia.com>, Alexandre Ghiti <alex@ghiti.fr>,
+ Alexey Gladkov <legion@kernel.org>, Alice Ryhl <aliceryhl@google.com>,
+ Andreas Hindborg <a.hindborg@kernel.org>, Ard Biesheuvel <ardb@kernel.org>,
+ Arnd Bergmann <arnd@arndb.de>, Benno Lossin <lossin@kernel.org>,
+ Bill Wendling <morbo@google.com>, =?UTF-8?Q?Bj=C3=B6rn_Roy_Baron?=
+ <bjorn3_gh@protonmail.com>, Boqun Feng <boqun@kernel.org>,
+ Borislav Petkov <bp@alien8.de>, Catalin Marinas <catalin.marinas@arm.com>,
+ Daniel Almeida <daniel.almeida@collabora.com>,
+ Danilo Krummrich <dakr@kernel.org>, Dave Hansen
+ <dave.hansen@linux.intel.com>, Gary Guo <gary@garyguo.net>,
+ "Gustavo A. R. Silva" <gustavoars@kernel.org>, "H. Peter Anvin"
+ <hpa@zytor.com>, Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Ingo Molnar <mingo@redhat.com>, Jonathan Corbet <corbet@lwn.net>,
+ Josh Poimboeuf <jpoimboe@kernel.org>, Justin Stitt <justinstitt@google.com>,
+ Kees Cook <kees@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>,
+ Mark Rutland <mark.rutland@arm.com>, Masahiro Yamada <masahiroy@kernel.org>,
+ Miguel Ojeda <ojeda@kernel.org>, Nathan Chancellor <nathan@kernel.org>,
+ Nick Desaulniers <ndesaulniers@google.com>, Nicolas Schier <nsc@kernel.org>,
+ =?UTF-8?Q?Onur_=C3=96zkan?= <work@onurozkan.dev>,
+ Palmer Dabbelt <palmer@dabbelt.com>, Paul Walmsley <pjw@kernel.org>,
+ Peter Zijlstra <peterz@infradead.org>, Randy Dunlap <rdunlap@infradead.org>,
+ Tamir Duberstein <tamird@kernel.org>, Thomas Gleixner <tglx@kernel.org>,
+ Trevor Gross <tmgross@umich.edu>, Will Deacon <will@kernel.org>,
+ LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org,
+ linux-hardening@vger.kernel.org, linux-doc@vger.kernel.org,
+ linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
+ linux-arch@vger.kernel.org, llvm@lists.linux.dev,
+ linux-riscv@lists.infradead.org, linux-arm-kernel@lists.infradead.org,
+ Jens Axboe <axboe@kernel.dk>
+References: <20260914-build-speedup-v2-3-39817ec5db23@kernel.org>
+ <cda4d320-599d-41c8-a37f-827688b552f9@web.de>
+ <20260914224432.7ed40d48@pumpkin>
+Content-Language: en-GB, de-DE
+From: Markus Elfring <Markus.Elfring@web.de>
+In-Reply-To: <20260914224432.7ed40d48@pumpkin>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:z9QsGsd064Uaid2dUAwEK/Gc8rGYeRnLz9MLfvAMTSbhw+M8uKw
+ 4y3MBC02CYo8KNID/LyixydftWnhIHnQ1LXK/L1nGPT2Go5Z58+PcZZJzwzKcilkhBFFVHW
+ ff1gjZqSuE2zy1cOY7OcVqsHgluaJg+Mjgbe2a2V5Fj97DxgVABZ4LOtouJxOnux5HRUMl+
+ NGqE4hiTEAAnupsDTbMXg==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:vX1ImXBe8w8=;prPyxlMg8EeUTeIzMX/la0ABKWc
+ 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
+ COp4leFAhxaGu08CbA5NjV
 
-On Mon, Sep 14, 2026 at 10:24=E2=80=AFAM Lorenzo Stoakes (ARM) <ljs@kernel.=
-org> wrote:
->
-> Rust crates are compiled in a serial chain on the critical path - core,
-> bindings, kernel crates and then the drivers - each a rustc invocation.
+>> I suggest to avoid return value ignorance a bit more.
+>> https://cmu-sei.github.io/secure-coding-standards/sei-cert-c-coding-sta=
+ndard/rules/error-handling-err/err33-c/
+>> https://cwe.mitre.org/data/definitions/252.html
+>=20
+> And I suggest you do some real coding...
+> The error is sticky and can be checked using ferror().
 
-This confused the LWN article... :)
+Are there further warnings to reconsider also according to unchecked and u=
+nused return values?
 
-There is a critical path in the graph, indeed, and doing it in
-`prepare` is painful, but to clarify: each crate is already built in
-parallel with others where possible, and the fact that each crate is
-built by one `rustc` is unrelated, plus the flag this patch proposes
-is also unrelated to that.
 
-I guess the LLM was trying to add context to the numbers below, but it
-looks like it will easily confuse readers.
+> Code that looks at the return value from fprintf() fwrite() etc is very
+> often broken because the only time they can actual fail is when the
+> buffer is flushed during close.
 
-> Each time a change is made to any of the bindings, it triggers a rebuild.
+Is this a special implementation detail?
 
-This seems oddly focused (i.e. not sure why `bindings` is mentioned in
-particular). It is also at least independent of this patch, i.e. it
-will remain true regardless of the patch.
 
-> rustc has a parallel front end, enabled with -Zthreads, available since
-> rust 1.84 [0] and therefore on every rustc the kernel supports.
->
-> It is not yet stable and its output is not reproducible, so it cannot be
-> used by default - stabilisation is being worked on [1].
+> Adding error checks to every call just make the code unreadable.
+Some developers got used to corresponding programming possibilities.
+Interests might grow also for aspect-oriented software development,
+doesn't it?
 
-Not sure what it means by "by default". In any case, the main issue
-with the flag is that it has had issues recently, not so much the fact
-that it is unstable.
-
-> Add optional build parameter KBUILD_RUST_THREADS, which when set passes
-> that many threads to rustc.
->
-> Observed build time changes with KBUILD_RUST_THREADS=3D8 (rustc 1.98, cla=
-ng):
-
-I assume the improvements are most notable due to the work being on
-`prepare`, i.e. there is no other work available. When that is
-relaxed, this should be way less needed. Though it will be still very
-nice to have for full Rust rebuilds, like when changing the compiler
-versions often, due to `core` mainly (e.g. I have to do that often, so
-I would like it :).
-
-In any case, I am not sure about adding a Kbuild variable already for
-this at the moment, especially with that name, i.e. it is not really
-"threads" but "frontend jobs" and the flag will not be called that in
-the future anyway.
-
-And if someone wants to risk their kernel builds, then they can
-already pass the flag today...
-
-(We probably also want to know what the flag will finally do before
-committing to particular names, e.g. whether it affects
-codegen/reproducibility in any way. But perhaps Kbuild doesn't mind
-having new variables that may be replaced soon.)
-
-Thanks!
-
-Cheers,
-Miguel
+Regards,
+Markus
