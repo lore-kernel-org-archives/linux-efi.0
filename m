@@ -1,41 +1,41 @@
 Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9796237BE81;
-	Tue, 15 Sep 2026 12:54:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07B6538F928;
+	Tue, 15 Sep 2026 12:55:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789476897; cv=none; b=us0pl3816LYO/342c1NThEsl6sMFQBqMR2un+nyOATymkY1fIM08oaQOmm6YyIhueyVL1Q3bhM9fgTQsFs31NA4kNHtkzjWnxtuOfvJ+LWMgqzLFBHB0cjRJkFIel4mVABY4eWsEGANFQNJ1sh/EWLISJVRf6HnbA/TPbCF8QWk=
+	t=1789476905; cv=none; b=meUuURaMsKJDmgo5bkmc0ie3NGoFmYJqI+RNNmqTCdYsL1c7dVhhCsSQqbV7hF5oxy9CbvITo8uEiKO6tmkcD5YBwcwCMJsowp3/PHU+WHsqPzcO6swPfLYrCxjUGL22BymnOt4iolygWE26+d8LarB2Y9aqHshoIbKStcqLK34=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789476897; c=relaxed/simple;
-	bh=T3mL/3Kc07p9K/MT4mso5EEMI4eOaZY0yANJdmvBvvE=;
+	s=arc-20240116; t=1789476905; c=relaxed/simple;
+	bh=pkvLVOtl/wJxWCab4MZWos3IO2QmqKMvCWQXOQFBXcc=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=ZvaRcbzCMceB8IX5K2DpP3lUWsu4SJCjNmKj58AB/wEqG8rhZ+oGVqMxgjRPpoOzZ5P93VA1eUl9QnnTG9gm1JG+oFSOLhjymVR2GWnsQj4y15065UDtPAIhgTGvBGNV+JUDan6WmIREOS0aIjS0+EkaxJ3a7nWzy4JipRuNn6U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=WCLWVJs9; arc=none smtp.client-ip=82.195.75.108
+	 In-Reply-To:To:Cc; b=EHJam23AcUwduOFhu8eoHlwe9PEuWLw16eLwz8Yqiy7s9K+aXQS/Mg7I4tHgBSPUJ5NjzBzK+c06H5mzZwxui9n65lOgcF0/kUgFwkgf4rhsHtuRnbl0QhwrUWn4PWZzxrKjbYCzrf0rUsr1BqbirG3zHsLHkxPKk0PhKQJLV+g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=peho1MiS; arc=none smtp.client-ip=82.195.75.108
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="WCLWVJs9"
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="peho1MiS"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
 	s=smtpauto.stravinsky; h=X-Debian-User:Cc:To:In-Reply-To:References:
 	Message-Id:Content-Transfer-Encoding:Content-Type:MIME-Version:Subject:Date:
 	From:Reply-To:Content-ID:Content-Description;
-	bh=K8v/C9O0g8FUjKOQ0TaIzosy3/qX+2dVro7BLtwLk5M=; b=WCLWVJs990HuIGJZ4x6CqmQCWg
-	uyMV8BszXqdZPcU9jgOKeQm8wtjSV8Koco5/z+PrAKYJu4BryqdfOOcNsgFsbIgJMWh9EzoXRryPa
-	H7dTU+tzAHUV00L56XsX0kLjyfH7qdxfIFnS2uNKDR7vnMsFW/X10qma/qPFVJbUls3KOTsRRSYWi
-	kdY4yJNGj7qWA6Z4zOqwdLgXUbBfH1qW6X1+qt5nF+zzLWXObNMkHR/QwRo9b84yo5qgY6tyxyext
-	mpraWHuEA0CgqcOfTj+XhyG/sbXtj8oecs4/BXDaT2m7WraT67ft2Vg2EmcfB02x6oJGikzUSrxwr
-	7ZdSBIaw==;
+	bh=nJQHvGBJYwJr3F/aktnOoCOR2Bfx83QmvxSaOEex9rc=; b=peho1MiSPxeM5E9y6ZkJnHD3Ac
+	ENhbZZIxpw7yPwYcbEI1X27MJfJtisrsN896BxohWU9hGrJtHupzLBnfbm4DthteXHHreNWnt9Y5C
+	8QS67ouHGUb8vn4m7JblIDmUdx8G8Tbq1ljQQFyC5VZJH4+0zEoMry+Cg+W+fLVO3JLBqhXxHMz21
+	G8aYg3DxyZ+70H3BZqt2ucu+76cl8M0D5evcCm2m7AbyGfDpkKcp0ON6jHuIPa1JO41TWuoiDOdJs
+	wCJ2/NXYJ3k2TrxgelPLDMwcY8BwBtdD41XbfHfuA5/SgPYSwl3p+LEVrAnV1biPV8+pa8risBmSL
+	ZygLzG/A==;
 Received: from authenticated-user
 	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
 	(Exim 4.96)
 	(envelope-from <leitao@debian.org>)
-	id 1x6SgV-004P8h-0Y;
-	Tue, 15 Sep 2026 12:54:51 +0000
+	id 1x6Sgc-004P9J-34;
+	Tue, 15 Sep 2026 12:54:59 +0000
 From: Breno Leitao <leitao@debian.org>
-Date: Tue, 15 Sep 2026 05:53:41 -0700
-Subject: [PATCH v5 7/9] drivers/base/memory: count inherited poisoned
- frames into the block
+Date: Tue, 15 Sep 2026 05:53:42 -0700
+Subject: [PATCH v5 8/9] mm/memory-failure: add hwpoison_boot_page() to flag
+ an inherited frame
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -44,7 +44,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260915-hwpoison-kho-v5-7-3bc7a57bd503@debian.org>
+Message-Id: <20260915-hwpoison-kho-v5-8-3bc7a57bd503@debian.org>
 References: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
 In-Reply-To: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
 To: Ard Biesheuvel <ardb@kernel.org>, 
@@ -71,105 +71,105 @@ Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-cxl@vger.kernel.org, driver-core@lists.linux.dev, 
  kernel-team@meta.com
 X-Mailer: b4 0.16-dev-f8e9d
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2728; i=leitao@debian.org;
- h=from:subject:message-id; bh=T3mL/3Kc07p9K/MT4mso5EEMI4eOaZY0yANJdmvBvvE=;
- b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqqT/e53Hu0gqe5cHhpqQNe7hv0ZP42+UV0B6bQ
- Vl11UrXA/WJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCaqk/3gAKCRA1o5Of/Hh3
- baWYD/9D8jAr4oQzhn8Bl3b7Tmy0SS3Ar8i9wUTDGHUSVH8aR9qkR16ztxsU8oNKXkkIQQVbY6C
- +h4QevMxbRjtvsOyHkX4Kt8/hP+r9ytz2g7Ak3tWpPL/J3kXu4SrJb5o5hRcVhjXvHpW6HIq3Ws
- bFRMMbgL6xFVx7f5KFd8vjnYa6UStxqQKihP9INLA+VS4NYodrQCJ7T7q8udy/4fvLq4uT5eYqE
- HA7DXM5U2+fn5Rg8NKhxjJltesF5EqwqvrJtW8VPYYS6zuuConb9ZqLqsz8EfMSpTa8oliYbe1c
- TGVWNkeMvmBCRv8HaZYXW5cIVAHOzcf/FveCy7/ZZsi49Vc3IeVgNEr+nJwZaXpEYoieTgE7c6V
- LxDER8G4X1yzf8uxvPb37xayi4WN5h5/Dg4Ez6bj+3GRWjwWWY3f9PrMP5mhNt4ER9SSqpIASl5
- JB2Dd1a1891Yf823Bcovd8GMrQySGGIZVKVSMDcqBgPSLZItIzNFgHMV2peT+GVz/CTiyVvJoBe
- gVDkX8elv/o9EQAJ91RlR8W/sBlCXJC7iOi7ilK1upHfZAOFdeIBO+dayDenszq6c6rfWbCrW5p
- 4Q3IQ7FqWebTAaOsGRql4aFJv87VAW7MKQ+gOHvxPtlBXRL2BTAg3au44y9iTOBYqZ8etixQJtO
- aI8MzCIkOTUGhRw==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3014; i=leitao@debian.org;
+ h=from:subject:message-id; bh=pkvLVOtl/wJxWCab4MZWos3IO2QmqKMvCWQXOQFBXcc=;
+ b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBqqT/ejMXIQjF5HQn3VxXq+6Zy/+n0FqXVKhxTp
+ P11aWC3wMmJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCaqk/3gAKCRA1o5Of/Hh3
+ bY+/EACFlIZZKCGkeF1D4pH+3gCLk17ltEVj4rCRVqtzUt3BEHbKX02a5iBOQC/tfTUtE95ecVK
+ lOWKniPGfAbmnAp2TL4aXXUneo8dI4f/STXSJo9qHWYK/Ry9cDgT1xPzvPYj0YDbdp+okn4MT8e
+ Tuti3cA3W+IdRnIsAuJMv1FoGqcEMrsOKnyyODshHbHg29gADtUKTLc5J7ccFlVbejrCjPHu1lG
+ SboVxR+tnbt3la37O7iBxy8VmdO9Tf69BtvNUmkPuXB452agmhtTAt7EwdfBwIQfmyyrM2yThfP
+ rmqSmnXOL/D9MQFjSABsdm/5MrDZOJ8sBY7xpVhGrpBjiFD9Dp6jWC3wFCfuGlSjhONjnYUb3xT
+ 5J/EuMM2Jg4CJpW9GDxeomC6qbiJXOVuMVdzQfDKMwn7aPdPL2JArr6UkKKVAL7J2eina1oP7Iz
+ Og5kFNxhLig6XpPc//LGzKXEXdCESf6B39F/UKPWabHLHJz9Od9S7Q8eNl5KmGoUrANCyGOQvzE
+ cKokqpD7Cz/cXHDBief0J6Y3wE/JnD7y0D6fpIYHs/K5GKXf4j+oyf+LEhf0EsjKhRm8GMFXP88
+ Nk20+jo7Z/87cujzF69coCuRzBORUnpsor0dJA+DFLKUabKCfDz/ikqi6sCv6YCO1fAnwSKgakI
+ RD8ZDEpMLOGVIkQ==
 X-Developer-Key: i=leitao@debian.org; a=openpgp;
  fpr=AC8539A6E8F46702CA4A439B35A3939FFC78776D
 X-Debian-User: leitao
 
-A frame a kexec handed over is flagged as it reaches the allocator, long
-before its memory block exists, so memblk_nr_poison_inc() had nowhere to
-count it. Walk the block once when it is created and take the count from
-the page flag instead.
+A frame the previous kernel recorded as poisoned has to be flagged before
+it reaches the allocator, which is long before memory_failure() can run.
+Add a helper that leaves it in the state a frame poisoned by this kernel
+would be in, so everything that already understands PG_hwpoison covers it,
+the kexec segment placement check included.
 
-Without it an unpoison later subtracts from a counter that was never
-incremented and wraps it, which then refuses memory_block_online() for
-good.
+num_poisoned_pages_inc() does not work at boot: its per memory block half
+looks the block up by pfn, and memory_dev_init() has not run, so it
+divides by zero. Take only the global counter there. A hotplugged block is
+already there, so that path takes both counters as usual.
 
-Only a block created online needs the walk. A hotplugged one is created
-before its pages are, so there is nothing to find, and its frames are
-counted by num_poisoned_pages_inc() as they are flagged.
+The caller comes later in this series.
 
 Signed-off-by: Breno Leitao <leitao@debian.org>
 ---
- drivers/base/memory.c | 35 +++++++++++++++++++++++++++++++++++
- 1 file changed, 35 insertions(+)
+ include/linux/mm.h  |  7 +++++++
+ mm/memory-failure.c | 26 ++++++++++++++++++++++++++
+ 2 files changed, 33 insertions(+)
 
-diff --git a/drivers/base/memory.c b/drivers/base/memory.c
-index 5eead3346f1e32..49a33ddbb2e717 100644
---- a/drivers/base/memory.c
-+++ b/drivers/base/memory.c
-@@ -220,11 +220,16 @@ int memory_notify(enum memory_block_state state, void *v)
- 
- #if defined(CONFIG_MEMORY_FAILURE) && defined(CONFIG_MEMORY_HOTPLUG)
- static unsigned long memblk_nr_poison(struct memory_block *mem);
-+static void memblk_nr_poison_init(struct memory_block *mem);
+diff --git a/include/linux/mm.h b/include/linux/mm.h
+index b68824fcfbef19..8039830998dd4b 100644
+--- a/include/linux/mm.h
++++ b/include/linux/mm.h
+@@ -5225,6 +5225,8 @@ extern const struct attribute_group memory_failure_attr_group;
+ extern void memory_failure_queue(unsigned long pfn, int flags);
+ void num_poisoned_pages_inc(unsigned long pfn);
+ void num_poisoned_pages_sub(unsigned long pfn, long i);
++void __meminit hwpoison_boot_page(struct page *page,
++				  enum meminit_context context);
+ phys_addr_t range_first_hwpoison(phys_addr_t start, unsigned long size);
+ phys_addr_t range_last_hwpoison(phys_addr_t start, unsigned long size);
  #else
- static inline unsigned long memblk_nr_poison(struct memory_block *mem)
+@@ -5232,6 +5234,11 @@ static inline void memory_failure_queue(unsigned long pfn, int flags)
  {
- 	return 0;
  }
-+
-+static inline void memblk_nr_poison_init(struct memory_block *mem)
+ 
++static inline void hwpoison_boot_page(struct page *page,
++				      enum meminit_context context)
 +{
 +}
- #endif
- 
- /*
-@@ -807,6 +812,7 @@ static int add_memory_block(unsigned long block_id, int nid, unsigned long state
- 	mem->state = state;
- 	mem->nid = nid;
- 	INIT_LIST_HEAD(&mem->group_next);
-+	memblk_nr_poison_init(mem);
- 
- #ifndef CONFIG_NUMA
- 	if (state == MEM_ONLINE)
-@@ -1251,4 +1257,33 @@ static unsigned long memblk_nr_poison(struct memory_block *mem)
++
+ static inline void num_poisoned_pages_inc(unsigned long pfn)
  {
- 	return atomic_long_read(&mem->nr_hwpoison);
  }
+diff --git a/mm/memory-failure.c b/mm/memory-failure.c
+index d9b8be696aac38..60e9682434700b 100644
+--- a/mm/memory-failure.c
++++ b/mm/memory-failure.c
+@@ -137,6 +137,32 @@ phys_addr_t range_last_hwpoison(phys_addr_t start, unsigned long size)
+ 	return range_hwpoison(start, size, false);
+ }
+ 
++static void update_per_node_mf_stats(unsigned long pfn, enum mf_result result);
 +
-+/*
-+ * Frames a kexec handed over are flagged as they reach the allocator, long
-+ * before this block exists, so memblk_nr_poison_inc() had nowhere to count
-+ * them. Take them from the page flag instead.
-+ */
-+static void memblk_nr_poison_init(struct memory_block *mem)
++void __meminit hwpoison_boot_page(struct page *page,
++				  enum meminit_context context)
 +{
-+	unsigned long pfn = section_nr_to_pfn(mem->start_section_nr);
-+	unsigned long nr_pages = PAGES_PER_SECTION * sections_per_block;
-+	unsigned long i, nr_poison = 0;
++	unsigned long pfn = page_to_pfn(page);
 +
-+	/* A hotplugged block is created before its pages are online. */
-+	if (mem->state != MEM_ONLINE)
++	if (PageHWPoison(page))
 +		return;
 +
-+	if (!range_contains_poisoned_memory(PFN_PHYS(pfn),
-+					    nr_pages << PAGE_SHIFT))
-+		return;
++	SetPageHWPoison(page);
++	set_page_count(page, 1);
++	/* The page has been completely isolated == MF_RECOVERED */
++	update_per_node_mf_stats(pfn, MF_RECOVERED);
 +
-+	for (i = 0; i < nr_pages; i++) {
-+		struct page *page = pfn_to_online_page(pfn + i);
-+
-+		if (page && PageHWPoison(page))
-+			nr_poison++;
-+	}
-+
-+	atomic_long_set(&mem->nr_hwpoison, nr_poison);
++	/*
++	 * The per memory block half of num_poisoned_pages_inc() has no block to
++	 * find at boot, and divides by zero looking for one. A hotplugged block
++	 * is already there.
++	 */
++	if (context == MEMINIT_HOTPLUG)
++		num_poisoned_pages_inc(pfn);
++	else
++		atomic_long_inc(&num_poisoned_pages);
 +}
- #endif
++
+ /**
+  * MF_ATTR_RO - Create sysfs entry for each memory failure statistics.
+  * @_name: name of the file in the per NUMA sysfs directory.
 
 -- 
 2.53.0-Meta
