@@ -1,104 +1,161 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 632223B9DB3;
-	Tue, 15 Sep 2026 14:35:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6CCC3D9DA1;
+	Tue, 15 Sep 2026 15:04:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789482936; cv=none; b=pNII3ibBn/mn2EWNu1YDSFUYhffKHpaE1maDsoOTdmhcViFhXVQfetax9WaubO0LSLL3fcbi23BwilikNyuN35hEP1VLm4mHe24sucuMR2BZP9C9/vqTLlLJhgmy4Y2J+bpSqDt9qf0Mi2/kOF5ww72tvGf8aCRufP+FoB25IVI=
+	t=1789484655; cv=none; b=ejYAVnRuZvV3VX3j/nTTIUFN5Axl56rdGYZkeUsOZSe6a/tGlHLSy2hYGZHO7tVdneiHxw8yObUme8LvtMJHoeMNuJ13xvf05GbwUiRkvh318v9R7dCgR08zfbSOXPBW3IM7YJkOKcKr3yffXmdpm3Y/eS0hIoL/ErQLC5v+Tzk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789482936; c=relaxed/simple;
-	bh=xC1xzO73V/QVx+SUYTQZLLliucmabiID20h8fopd7zM=;
+	s=arc-20240116; t=1789484655; c=relaxed/simple;
+	bh=IZYowYo0tr99LV5bF5s2Q786jBuUYkEw4pS9QMyuqbA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qhZHmxndNmK54ZVOgcMRFJAorUmKZx5B2mOUtDhUt/iziTTltaS+phPesFQpOprYvkdMqbYYVKCwKHrraS49E+BQ2eJTKsS/JDHNK6THL53mfMgQ0XAf9OUJlqKrk6cd8F0qVODj6Mb2wxrIAyB1LU3J8LuY2EcSaH6V0Ps3Cto=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VtKFlspQ; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=VHNp+NlDRMt/80ZGWAjRtlSbBcLMYoA74cEeUlx7ACrxZp7qVH9Dzfg5zm+ftYJd6fWMPI1YYCSAY/TfGCbGuKkv3BVIU7JGQKEj2xCT+uEBwyOuaEasO8XsDmy6QM/hA87bPNHJcq/salGMPkjoJKlpenKD1Ibu5Kssm2fsZZk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CfUJfxGo; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VtKFlspQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 806681F000FF;
-	Tue, 15 Sep 2026 14:35:34 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CfUJfxGo"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 445A51F000FF;
+	Tue, 15 Sep 2026 15:04:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789482935;
-	bh=HhkTKZqSauRlzDBmuIch4WSDGbcfsJp9na+AzwvnNew=;
+	s=k20260515; t=1789484651;
+	bh=6WCAfz85+ZGgRMN8wAwQXLQh8ReFwgRJPZyO/JsNeYI=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=VtKFlspQzOv/Zif2Ow84xQkRnLY0nrqHqoynrLyvg5SIxf+bnjB9jvnYZlJFCKoHk
-	 Fsvtg3M88EQ9y23RcTgrVdPVCC12nYfwrTuUPtF7T8/em/9zQkHdQ/95dP05TspWKr
-	 wlJbsjBRL2Kjst/08D5KbDCRo3s86XhKAa/vOUrCH037W/omFf9HgCtaWZYqYpWYMl
-	 uKKz66IuX3ETy+gTxW9l3SEAwkF8wt6lilp3aw3yD1ss5zU4+IsNIrAC1l7/o+T56X
-	 Rlmf4Odr5SnNyIpzIyI9wkTJHAURu7kq0z029COy9SPWurwLO8XzjMUfs1HWzJdOGd
-	 394I86ioQiGRQ==
-Date: Tue, 15 Sep 2026 15:35:33 +0100
-From: Harry Yoo <harry@kernel.org>
-To: Breno Leitao <leitao@debian.org>
-Cc: Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Miaohe Lin <linmiaohe@huawei.com>, 
-	Naoya Horiguchi <nao.horiguchi@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, 
-	"Kiryl Shutsemau (Meta)" <kas@kernel.org>, kexec@lists.infradead.org, David Hildenbrand <david@kernel.org>, 
-	Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>, 
-	Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>, 
-	Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>, 
+	b=CfUJfxGo8VPDYjL6tBgfl6L002bEGl1ULF2dCRDxLcUo+ron9vtXHUBT/L1UTJo8L
+	 U0iLglw63rY+yRq09BUmnCcoTd/5o8qIRnxuo2JlsFOAqKr9geNfwGfR1AickYadR1
+	 eZ+UJH8NBVkcyKnuFPyAHxFthRRJgRf2DHU7c2yHI6ZgtsWCDAM9+Dp/WgT7KnklKF
+	 xxwMgPPtPplf0k17pupUP4U4BTD5IWphakn+2wgwPt4Ob7KYYh4Fiufotq7wXJZle1
+	 XndOOWOAK6nwCgJYzumwG2wlhaFBpVgHKhfhm0X9wnZqdojf8v+Yk3NqQjtqoeQ/bI
+	 RWTqH0Scqd2sg==
+Date: Tue, 15 Sep 2026 16:04:00 +0100
+From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+To: David Laight <david.laight.linux@gmail.com>
+Cc: Kees Cook <kees@kernel.org>, 
+	Linus Torvalds <torvalds@linux-foundation.org>, Nathan Chancellor <nathan@kernel.org>, 
+	Nicolas Schier <nsc@kernel.org>, Nick Desaulniers <ndesaulniers@google.com>, 
+	Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
+	Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>, 
 	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H . Peter Anvin" <hpa@zytor.com>, 
-	Brendan Jackman <brendan.jackman@linux.dev>, Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>, 
-	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, 
-	rmikey@meta.com, riel@surriel.com, kernel-team@meta.com
-Subject: Re: [PATCH v4 2/5] mm/memory-failure: libstub: install the
- poisoned-memory EFI table
-Message-ID: <aqlMiLMZ_6RBbtgE@thinkstation>
-References: <20260909-hwpoison-kho-v4-0-359313564495@debian.org>
- <20260909-hwpoison-kho-v4-2-359313564495@debian.org>
- <2c9a7bef-3189-4f78-a6cb-61d2f7afd643@app.fastmail.com>
- <aqKhgPKzRf0e22s3@gmail.com>
- <aqkIdVhoG2wwVBtb@gmail.com>
- <aqkyT0Ui9h5KWuzn@thinkstation>
- <aqk4NUnq92ftuUuJ@gmail.com>
- <aqlFnuIIECOyaweo@thinkstation>
- <aqlI264D-PxJzPWb@gmail.com>
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
+	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
+	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
+	Gary Guo <gary@garyguo.net>, =?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, 
+	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
+	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
+	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
+	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
+	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
+	Randy Dunlap <rdunlap@infradead.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
+	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
+	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
+	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v2 17/21] objtool: decode instructions and resolve branch
+ targets in parallel
+Message-ID: <aqlau0-opF8yG-JU@gremlin>
+References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
+ <20260914-build-speedup-v2-17-39817ec5db23@kernel.org>
+ <202609141112.F8983EE9C@keescook>
+ <aqkR9Xqu-0Tem1zm@gremlin>
+ <20260915122959.2348bf90@pumpkin>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <aqlI264D-PxJzPWb@gmail.com>
+In-Reply-To: <20260915122959.2348bf90@pumpkin>
 
-On Tue, Sep 15, 2026 at 06:38:47AM -0700, Breno Leitao wrote:
-> On Tue, Sep 15, 2026 at 02:31:38PM +0100, Harry Yoo wrote:
-> > On Tue, Sep 15, 2026 at 05:39:44AM -0700, Breno Leitao wrote:
-> > > > Also, I wonder if some architectures have a scattered set of pfn
-> > > > ranges so that the span from the start pfn to the end pfn being much
-> > > > larger than the actual physical memory size.
-> > > >
-> > > > If so it might make more sense to have a bitmap for each pfn range.
+On Tue, Sep 15, 2026 at 12:29:59PM +0100, David Laight wrote:
+> On Tue, 15 Sep 2026 11:09:25 +0100
+> "Lorenzo Stoakes (ARM)" <ljs@kernel.org> wrote:
+>
+> > > > +static unsigned int decode_threads(unsigned long text_size)
+> > > > +{
+> > > > +	const long nr_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+> > > > +
+> > > > +	if (text_size < DECODE_THREADED_MIN_TEXT || nr_cpus < 2)
+> > > > +		return 1;
+>
+> The text_size check ought to be before the sysconf() call.
+
+This is bordering on a silly level of micro-optimisation :)
+
+This is ~us runtime, run once. We can live with it.
+
+>
+> > > > +
+> > > > +	return min_t(unsigned int, nr_cpus, DECODE_MAX_THREADS);
+>
+> Why min_t() -  you might as well make nr_cpus 'unsigned int'.
+
+Except... sysconf() returns a long and -1 on error. Isn't min_t()
+explicitly for cases like this?
+
+>
+> > > > +}
 > > >
-> > > Agreed, having a ->next in linux_efi_poisoned_memory is a good idea that
-> > > we can lean on depending on whatever problem comes up down the road.
-> > >
-> > > Very good point — let's keep this linux_efi_poisoned_memory chain idea in
-> > > mind for whenever we need to expand it.
+> > > No, anything using _SC_NPROCESSORS_ONLN internally is wrong, whether its
+> > > pigz or objtool.
 > >
-> > You mean 1) keeping the structure as-is for now (and expand later with
-> > new EFI table version) or 2) adjusting the structure in the future
-> > revision of this patchset?
-> 
-> I'd say option (1): keep the structure as it is for now, and only adjust
-> it once/if we actually decide to implement the hot-add use case.
-> 
-> That's exactly why I added the "u32 version" field to
-> struct linux_efi_poisoned_memory, so, it can be expanded later.
+> > Why? We shouldn't cap a 4 CPU box to 4 CPUs?
+>
+> You almost certainly don't want to use more...
+> (Unless they end up waiting for disk)
 
-Ack.
+Yup on the former.
 
-> Version 1 (this patchset) covers the common, basic approach. If down the
-> road someone sees value in extending it to other use cases (such as
-> hot-plug), we can bump it to v2 and add a ->next field then.
-> 
-> What do you think?
+>
+> >
+> > The idea is that the empirically obtained 16 core limit should naturally be
+> > capped to the number of CPUs.
+>
+> The 'empirical' limit is very likely to be system dependant.
 
-That will work, no strong opinion here.
+This same objection could be made against literally anything I do or do not
+do, it's a little silly.
 
--- 
-Cheers,
-Harry / Hyeonggon
+Every single cap like this is heuristic and limited. In any case - for
+smaller machines, the cap will be CPU count, on larger machines 16 CPUs is
+where there stops being an noticeable benefit.
+
+Other solutions are strictly worse, this is a sensible, practical
+engineering solution.
+
+> There might also be situations where you don't want the build to run as fast
+> as possible because the system is performing other workloads.
+
+Umm what? It's 2026, schedulers are pretty good now :)
+
+In any case with the changes here objtool doesn't dominate the runtime, so
+it'll have little impact. So run make j=1 to your heart's content :)
+
+> (Not to mention if you have had to add tracing to find a bug.)
+
+This is almost an argument against parallelism in general.
+
+>
+> >
+> > I guess in a world where make hands jobs off this could be dropped, though,
+> > if the complexity there seems worthwhile.
+>
+> You need to pull tokens out of the make pipe :-)
+
+Thanks, I understand what's required, as I said to Kees there's simply no
+benefit for the added complexity.
+
+Series like this can die by 1,000 cuts with all the nitpicks and what if's,
+let's focus on the _significant_ improvements introduced here and keep
+things in perspective please!
+
+>
+> David
+>
+
+--
+Cheers, Lorenzo
