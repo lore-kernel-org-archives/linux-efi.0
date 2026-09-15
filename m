@@ -1,54 +1,63 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A955D3C0634;
-	Tue, 15 Sep 2026 12:12:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 093A54AA41D;
+	Tue, 15 Sep 2026 12:19:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789474378; cv=none; b=FnzAqxJ0qPIrFSd9c+6l+J/6Fnjd2XVrSfsLaBfM+KdCv+vFpWt7hsH4PRppPc1o3V9IENKD6xWjwm1kE59ytnm736VtKs4C0p6Qmq6SbC7GO6hxYURWesQUYZprTLyt6M5HCkC3FFBlNCNr4KeFhzPt48BOmAngQi8avEp4Hp0=
+	t=1789474800; cv=none; b=jDoSWggbbGOWhiMjXEq9Zcr7Om1ghdciFjMEwPtbink+Clr5X86173UjfgPIw3XtSXud9CsEd1kzY6A90GKMXSecvlsbbj1n//88prFlBBuOyqm7JdPqRBHSdCkc+Es+rUnqvnIgF1yFmNMryiGfYS0d1PnYC5mAbQ/z1GXXeGM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789474378; c=relaxed/simple;
-	bh=NpGI2bqE37VIAM71gUv+Uu10+QoYkdrbqDH2oYhLvs4=;
+	s=arc-20240116; t=1789474800; c=relaxed/simple;
+	bh=ghiprE2YXma8S3nktjyL8fwG3J/XUPLemnD4oo5P+kE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pjPoV/Rmf3Yr/krNjjNQA6RWMKFFvdJ1kUNH+dzqRBjIJvAVlFn1xrQZdjCcIZaKpas0ls4iUad8jQxcDvLBSZ/W0CKM6OCPis6HXIUhmtNY/SgDvgcOM5MRQehnCGucz88QQEQ/yf09CWShFShVX/ADJsLoWTJJwRle0kVzq/Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dMecOfkG; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=WNAPtXNQUXG+FxAbTDadVNDEWX5vBZRlDbdqmIDsdBnljxT/AOch3u40OE2Xe4pahBnZAUShtQft1gZsUna8+hiWLAk1p04YtrIdKYCknHu/3hYNBl0U7jg6GaEsQQV+VFgBB+xgU5hc4v2tP7GjPfIkcluaJYh2SVh3xvfQGaI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aJkjiwac; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dMecOfkG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CC8041F000FF;
-	Tue, 15 Sep 2026 12:12:55 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aJkjiwac"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 97FB21F00898;
+	Tue, 15 Sep 2026 12:19:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789474376;
-	bh=TyC2gpsaXN4JBLWKNmm7J702tnSFqXToNgpiVHAQLkg=;
+	s=k20260515; t=1789474798;
+	bh=irsOopNYGA95wlUnsSfuDWFIZCHRgYLO94HlrHa0Li4=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=dMecOfkGD9IVBc5A1wOJ7RaGIcLenu0fPPaNj6ULgetn0QKiid3SmCobziHh5dth/
-	 nsDFEIkSHNG8yfPhdRtOGhuiglEEp7ZCUa/9k5QBoF5PdykrhfAZSEXZHUgx1U1BVK
-	 xGkTFAq/PNyGxR26wFeby3W2dyLnU3iQBk2jD4P50ZyW+dlHVBfMUvzMpwJaiHHOfs
-	 K2RpX/7yFozlGNknDOJ672FQSl3wdlWEAAzJJOS7dXtYw4h5/AJzF587NEwZ4BMyPj
-	 9pfv4RMOw/V3LIbDZ0K3TuOXdj2r4FW+lleHFXb0J74YtGlz0qeP1Rx8Bjz9BMVApD
-	 0vMrkjCKJ1HWA==
-Date: Tue, 15 Sep 2026 13:12:54 +0100
-From: Harry Yoo <harry@kernel.org>
-To: Breno Leitao <leitao@debian.org>
-Cc: Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Miaohe Lin <linmiaohe@huawei.com>, 
-	Naoya Horiguchi <nao.horiguchi@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, 
-	"Kiryl Shutsemau (Meta)" <kas@kernel.org>, kexec@lists.infradead.org, David Hildenbrand <david@kernel.org>, 
-	Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>, 
-	Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>, 
-	Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>, 
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H . Peter Anvin" <hpa@zytor.com>, 
-	Brendan Jackman <brendan.jackman@linux.dev>, Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>, 
-	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, 
-	rmikey@meta.com, riel@surriel.com, kernel-team@meta.com
-Subject: Re: [PATCH v4 2/5] mm/memory-failure: libstub: install the
- poisoned-memory EFI table
-Message-ID: <aqkyT0Ui9h5KWuzn@thinkstation>
-References: <20260909-hwpoison-kho-v4-0-359313564495@debian.org>
- <20260909-hwpoison-kho-v4-2-359313564495@debian.org>
- <2c9a7bef-3189-4f78-a6cb-61d2f7afd643@app.fastmail.com>
- <aqKhgPKzRf0e22s3@gmail.com>
- <aqkIdVhoG2wwVBtb@gmail.com>
+	b=aJkjiwacf+E3+/VX3Ka0dJYUKcDcH/WmCT2qlONGQk7th6drv0kb35aefPiv70I4r
+	 j5cnblmWg1FLPE25yvXTuNiBzpXaORmzEC00G/PiZdjagcizt5UJp/wddBuoarohnF
+	 0wqSuq1R4tT5ve05rzDzt7Kf2M0fA4X8wRpWYrkRf+ggUA2fQhajxQ5O+MHIMmPAmf
+	 PRuDgCNO2h823BwR7J1Dj+xleC5rdQxAN27QkF5/NI1pCJXdSI6Hk2HYlelyx+6kpc
+	 0Ln3Ink87xvrVta5mpAcqlIPk3cST0i9+D8zpl+tcyBuss5WdoiZCBIv1/oEhGZet8
+	 ABWELFo9uzCrQ==
+Date: Tue, 15 Sep 2026 13:19:47 +0100
+From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+To: Josh Poimboeuf <jpoimboe@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
+	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
+	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
+	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
+	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
+	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
+	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Peter Zijlstra <peterz@infradead.org>, 
+	Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, Gary Guo <gary@garyguo.net>, 
+	=?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, Benno Lossin <lossin@kernel.org>, 
+	Andreas Hindborg <a.hindborg@kernel.org>, Alice Ryhl <aliceryhl@google.com>, 
+	Trevor Gross <tmgross@umich.edu>, Danilo Krummrich <dakr@kernel.org>, 
+	Daniel Almeida <daniel.almeida@collabora.com>, Tamir Duberstein <tamird@kernel.org>, 
+	Alexandre Courbot <acourbot@nvidia.com>, Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, 
+	Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>, 
+	Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
+	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
+	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
+	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v2 15/21] objtool: cache relocations, do less work
+Message-ID: <aqk2bTOw_Scb8spw@gremlin>
+References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
+ <20260914-build-speedup-v2-15-39817ec5db23@kernel.org>
+ <aqhLhVMkNzf_4oJw@jpoimboe>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -57,45 +66,107 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aqkIdVhoG2wwVBtb@gmail.com>
+In-Reply-To: <aqhLhVMkNzf_4oJw@jpoimboe>
 
-On Tue, Sep 15, 2026 at 02:03:48AM -0700, Breno Leitao wrote:
-> On Thu, Sep 10, 2026 at 06:11:53AM -0700, Breno Leitao wrote:
-> > So I'd say we have two options:
+On Mon, Sep 14, 2026 at 12:44:13PM -0700, Josh Poimboeuf wrote:
+> On Mon, Sep 14, 2026 at 10:22:14AM +0100, Lorenzo Stoakes (ARM) wrote:
+> > +static struct reloc *find_reloc_sorted(struct section *rsec,
+> >  				       unsigned long offset, unsigned int len)
+> >  {
+> > -	struct reloc *reloc, *r = NULL;
+> > -	struct section *rsec;
+> > -	unsigned long o;
+> > +	struct reloc *relocs = rsec->relocs;
+> > +	const unsigned int nr_relocs = sec_num_entries(rsec);
+> > +	const unsigned long cache_idx = reloc_cache_index(offset);
+> > +	unsigned int reloc_idx, i;
 > >
-> > 1) Keep it similar to unaccepted memory, with 2M granularity.
-> >    - Pro : Similar mental model as unnacepted memory
-> >    - Cons: 2 MB might be a bit wasteful
+> > -	rsec = sec->rsec;
+> > -	if (!rsec)
+> > +	if (cache_idx >= reloc_cache_nr_windows(rsec))
+> > +		return NULL;
+> > +
+> > +	reloc_idx = rsec->reloc_cache[cache_idx];
+> > +
+> > +	/*
+> > +	 * Scan through all relocations covered by cache entry to find the
+> > +	 * first at or after offset. Relocations are sorted by offset.
+> > +	 */
+> > +	for (i = reloc_idx; i < nr_relocs; i++) {
+> > +		struct reloc *reloc = &relocs[i];
+> > +		const unsigned long curr_offset = reloc_offset(reloc);
+> > +
+> > +		if (curr_offset >= offset)
+> > +			break;
+> > +
+> > +		reloc_idx++;
+> > +	}
+> > +
+> > +	/* Nothing found, or the first candidate lies beyond the range. */
+> > +	if (reloc_idx >= nr_relocs ||
+> > +	    reloc_offset(&relocs[reloc_idx]) >= offset + len)
+> >  		return NULL;
 > >
-> > 2) Move to a linked list like the RFC, keeping it outside of the EFI
-> >    table.
-> >    - Pro: Reduce the memory granularities to page instead of 2M blocs.
-> >    - Cons: Another way of passing memory information between kexec
-> >      kernels.
-> >
-> > Any any other option or strong preference?
-> 
-> Since nobody voiced a strong preference, I will stick with option (1),
-> the bitmap, for these reasons:
+> > +	/* If there are duplicate entries, return the last. */
+>
+> Hm, for consistency with the others, shouldn't this be returning the
+> *first* match?
 
-Not sure if this was discussed already, but perhaps we need to have
-a chain of struct linux_efi_poisoned_memory rather than a single
-bitmap, to easily add support for hot-added memory later?
+Ack you're right.
 
-Also, I wonder if some architectures have a scattered set of pfn
-ranges so that the span from the start pfn to the end pfn being much
-larger than the actual physical memory size.
+It was pedantically trying to recreate what the hash did exactly but no section
+has two relocations at one offset anyway, so have updated to return the first
+and removed the special casing.
 
-If so it might make more sense to have a bitmap for each pfn range.
+>
+> > +/* If there are multiple matches, return the first one in the range. */
+> > +struct reloc *find_reloc_by_dest_range(const struct elf *elf, struct section *sec,
+> > +				       unsigned long offset, unsigned int len)
+> >  {
+> > -	return !strncmp(sec->name, ".debug_", 7);
+> > +	struct section *rsec = sec->rsec;
+> > +
+> > +	if (!rsec)
+> > +		return NULL;
+> > +
+> > +	if (rsec->sorted)
+> > +		return find_reloc_sorted(rsec, offset, len);
+> > +
+> > +	if (rsec->hashed)
+> > +		return find_reloc_hash(elf, rsec, offset, len);
+> > +
+> > +	return find_reloc_linear(rsec, offset, len);
+>
+> I'm not sure there's much benefit in having two fallbacks (hashed +
+> linear) instead of one.  If the vast majority of reloc sections are
+> sorted, then hopefully a single (linear) fallback would be fine,
+> assuming no major performance regressions.  That would help contain the
+> complexity.
 
--- 
-Cheers,
-Harry / Hyeonggon
+Ack, and it turns out we don't even need to fallback for growth either after all
+- relocations objtool appends actually arrive in offset order anyway.
 
-> 1) It follows the same mental model as unaccepted memory, which people
->    are already familiar with.
-> 
-> 2) It is simpler to query at boot time, especially as the number of
->    poisoned memory regions grows. Walking a bitmap is easier than
->    walking a linked list when freeing memory back to the buddy
->    allocator.
+So we can indeed just get rid of the hash entirely :)
+
+So now v3 fallbacks to linear if there's anything out of order (belts + braces
+I'm not sure anything will do that now actually but good to have to be safe),
+annnd no hash :)
+
+Have tested locally and confirmed output is byte-identical for vmlinux.o for
+gcc/clang allmodconfig and defconfig, also tested klp-build and that's all
+working too for livepatch stuff.
+
+>
+> BTW, I found another initialization bug: klp-post-link.c uses
+> elf_create_section() to create a reloc section, so it missing the
+> initialization of rsec->hashed in elf_create_rela_section().  But that's
+> moot if we just get rid of the hashing.
+
+Thanks, with the hash gone that's now moot as you say :)
+
+>
+> --
+> Josh
+
+--
+Cheers, Lorenzo
