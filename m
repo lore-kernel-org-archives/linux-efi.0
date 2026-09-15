@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 093A54AA41D;
-	Tue, 15 Sep 2026 12:19:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 106DD3BE643;
+	Tue, 15 Sep 2026 12:24:28 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789474800; cv=none; b=jDoSWggbbGOWhiMjXEq9Zcr7Om1ghdciFjMEwPtbink+Clr5X86173UjfgPIw3XtSXud9CsEd1kzY6A90GKMXSecvlsbbj1n//88prFlBBuOyqm7JdPqRBHSdCkc+Es+rUnqvnIgF1yFmNMryiGfYS0d1PnYC5mAbQ/z1GXXeGM=
+	t=1789475070; cv=none; b=a6OEZY3cmehSKuPeRmdt1fSHVbHAuBizUI6GXH/y4i+OxGcnaZWcAbSH+ee19sxbGp/B7+KV7PIIouRKQPxLZRf1oC9bcK4zUwuYzdGo5VA0zuaDvdbC6stiFtW83kCUDjyIHtf3EoktvlygCpFXrkTpt4hfF6HeWiEvkT6Fbh0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789474800; c=relaxed/simple;
-	bh=ghiprE2YXma8S3nktjyL8fwG3J/XUPLemnD4oo5P+kE=;
+	s=arc-20240116; t=1789475070; c=relaxed/simple;
+	bh=TSFEmHMwC9d9SfXIP/P00kOktCoad+yxGsvpdbTiTwQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WNAPtXNQUXG+FxAbTDadVNDEWX5vBZRlDbdqmIDsdBnljxT/AOch3u40OE2Xe4pahBnZAUShtQft1gZsUna8+hiWLAk1p04YtrIdKYCknHu/3hYNBl0U7jg6GaEsQQV+VFgBB+xgU5hc4v2tP7GjPfIkcluaJYh2SVh3xvfQGaI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aJkjiwac; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=QPdl4g5wm99CXD2gsFiBLO/gtJ4rXBqgtQTlhuRvYEuslN2KVP6d0HLVpTZ96uI2DRBcF4HkLwCjF1wDIe0tP2LttCio1J0pq0YaWe4J6LkSFAQIxP5vEan+azv8JwG2pJHCChfh4OiGpqFcBlbeIhBnmslIB+Td6R9cD7pyuEw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VSaS7F8O; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aJkjiwac"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 97FB21F00898;
-	Tue, 15 Sep 2026 12:19:49 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VSaS7F8O"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 965111F00893;
+	Tue, 15 Sep 2026 12:24:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789474798;
-	bh=irsOopNYGA95wlUnsSfuDWFIZCHRgYLO94HlrHa0Li4=;
+	s=k20260515; t=1789475068;
+	bh=oybH7eUIXKQPekIV7WrspdJ7cyHg8nnBvzsloGcaUcE=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=aJkjiwacf+E3+/VX3Ka0dJYUKcDcH/WmCT2qlONGQk7th6drv0kb35aefPiv70I4r
-	 j5cnblmWg1FLPE25yvXTuNiBzpXaORmzEC00G/PiZdjagcizt5UJp/wddBuoarohnF
-	 0wqSuq1R4tT5ve05rzDzt7Kf2M0fA4X8wRpWYrkRf+ggUA2fQhajxQ5O+MHIMmPAmf
-	 PRuDgCNO2h823BwR7J1Dj+xleC5rdQxAN27QkF5/NI1pCJXdSI6Hk2HYlelyx+6kpc
-	 0Ln3Ink87xvrVta5mpAcqlIPk3cST0i9+D8zpl+tcyBuss5WdoiZCBIv1/oEhGZet8
-	 ABWELFo9uzCrQ==
-Date: Tue, 15 Sep 2026 13:19:47 +0100
+	b=VSaS7F8OJuNuEs3hoUYH76UztTiKslXOl7yAzD2g4gLjW+wKdODE4ANHrYphBLvcC
+	 dGQy3ey9t5efNqzisI0bUxDeGSY5PMDK/ax9/0NQvgRzWjcV7F7EvSP2B/s6DK3yVq
+	 LFk4eZeHY6yXs4Bdceq1zyCgKeMUHsFp59hbk5m8WeQ+Fb5DlCQHi/TGx8gXJTsZ5g
+	 4PAd+0aC9GXETgFVdHQurW/S48n9SVPZKOb37fkbk6zWKNxSbX4MCdrWfrI+5lw5mV
+	 ic86w///f180dvzmes95xRX+VFp+twm4uFnIt2UCdpXtQU6L7BYsK4DvAH5U2Nt83Z
+	 YRdnbbuTH1zuw==
+Date: Tue, 15 Sep 2026 13:24:17 +0100
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-To: Josh Poimboeuf <jpoimboe@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Josh Poimboeuf <jpoimboe@kernel.org>, 
 	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
 	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
 	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
@@ -54,10 +54,13 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
 	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
 Subject: Re: [PATCH v2 15/21] objtool: cache relocations, do less work
-Message-ID: <aqk2bTOw_Scb8spw@gremlin>
+Message-ID: <aqk4Oani0H0Wpxs1@gremlin>
 References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
  <20260914-build-speedup-v2-15-39817ec5db23@kernel.org>
  <aqhLhVMkNzf_4oJw@jpoimboe>
+ <CAHk-=wiB9MX7vBDQ+WHTUVfSYubLhR-PbABewscqTsxRhg-LbQ@mail.gmail.com>
+ <aqhmhmgrnN3Mw8yG@jpoimboe>
+ <CAHk-=wj3BKkCYtmfs5sORF_+Oumv2Gc8D+YxkMp9W2-mvLS=Ug@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -66,107 +69,42 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aqhLhVMkNzf_4oJw@jpoimboe>
+In-Reply-To: <CAHk-=wj3BKkCYtmfs5sORF_+Oumv2Gc8D+YxkMp9W2-mvLS=Ug@mail.gmail.com>
 
-On Mon, Sep 14, 2026 at 12:44:13PM -0700, Josh Poimboeuf wrote:
-> On Mon, Sep 14, 2026 at 10:22:14AM +0100, Lorenzo Stoakes (ARM) wrote:
-> > +static struct reloc *find_reloc_sorted(struct section *rsec,
-> >  				       unsigned long offset, unsigned int len)
-> >  {
-> > -	struct reloc *reloc, *r = NULL;
-> > -	struct section *rsec;
-> > -	unsigned long o;
-> > +	struct reloc *relocs = rsec->relocs;
-> > +	const unsigned int nr_relocs = sec_num_entries(rsec);
-> > +	const unsigned long cache_idx = reloc_cache_index(offset);
-> > +	unsigned int reloc_idx, i;
+On Mon, Sep 14, 2026 at 03:30:19PM -0700, Linus Torvalds wrote:
+> On Mon, 14 Sept 2026 at 15:23, Josh Poimboeuf <jpoimboe@kernel.org> wrote:
 > >
-> > -	rsec = sec->rsec;
-> > -	if (!rsec)
-> > +	if (cache_idx >= reloc_cache_nr_windows(rsec))
-> > +		return NULL;
-> > +
-> > +	reloc_idx = rsec->reloc_cache[cache_idx];
-> > +
-> > +	/*
-> > +	 * Scan through all relocations covered by cache entry to find the
-> > +	 * first at or after offset. Relocations are sorted by offset.
-> > +	 */
-> > +	for (i = reloc_idx; i < nr_relocs; i++) {
-> > +		struct reloc *reloc = &relocs[i];
-> > +		const unsigned long curr_offset = reloc_offset(reloc);
-> > +
-> > +		if (curr_offset >= offset)
-> > +			break;
-> > +
-> > +		reloc_idx++;
-> > +	}
-> > +
-> > +	/* Nothing found, or the first candidate lies beyond the range. */
-> > +	if (reloc_idx >= nr_relocs ||
-> > +	    reloc_offset(&relocs[reloc_idx]) >= offset + len)
-> >  		return NULL;
-> >
-> > +	/* If there are duplicate entries, return the last. */
+> > There might be more efficient ways to structure the considerable amount
+> > of data, like replacing "struct instruction" with "struct basic_block"
+> > or so, but it's hard to know whether that would be a net positive.
 >
-> Hm, for consistency with the others, shouldn't this be returning the
-> *first* match?
+> Yeah, I was thinking that you'd only hash instructions as you find
+> them if they are obvious "I need this instruction", and then try to
+> hash them *again* if they are branch targets (and just have a "already
+> hashed" flag).
+>
+> That way random number instructions would not be on the hash - unless
+> they become branch targets.
+>
+> And you wouldn't ever really have to track any complicated decisions
+> (like that whole "basic block" thing - I agree that it's painful,
+> because the shape of a basic block will change over time as you find
+> branch targets).
+>
+> But not a big deal. More an idle thought brought on by that other
+> patch that changed the hash table size, and this discussion that was
+> talking about the hashing - or not hashing - of sections.
+>
+> So more of a "if it is easy and straightforward" kind of thing.
 
-Ack you're right.
+Obviously I defer to Josh on this, but it seems from what he said it's
+probably a little involved and maybe tricky to figure out how much impact
+it might have.
 
-It was pedantically trying to recreate what the hash did exactly but no section
-has two relocations at one offset anyway, so have updated to return the first
-and removed the special casing.
+Anyway v3 drops the relocation hash altogether so 1 out of 2 ain't bad ;)
 
 >
-> > +/* If there are multiple matches, return the first one in the range. */
-> > +struct reloc *find_reloc_by_dest_range(const struct elf *elf, struct section *sec,
-> > +				       unsigned long offset, unsigned int len)
-> >  {
-> > -	return !strncmp(sec->name, ".debug_", 7);
-> > +	struct section *rsec = sec->rsec;
-> > +
-> > +	if (!rsec)
-> > +		return NULL;
-> > +
-> > +	if (rsec->sorted)
-> > +		return find_reloc_sorted(rsec, offset, len);
-> > +
-> > +	if (rsec->hashed)
-> > +		return find_reloc_hash(elf, rsec, offset, len);
-> > +
-> > +	return find_reloc_linear(rsec, offset, len);
->
-> I'm not sure there's much benefit in having two fallbacks (hashed +
-> linear) instead of one.  If the vast majority of reloc sections are
-> sorted, then hopefully a single (linear) fallback would be fine,
-> assuming no major performance regressions.  That would help contain the
-> complexity.
-
-Ack, and it turns out we don't even need to fallback for growth either after all
-- relocations objtool appends actually arrive in offset order anyway.
-
-So we can indeed just get rid of the hash entirely :)
-
-So now v3 fallbacks to linear if there's anything out of order (belts + braces
-I'm not sure anything will do that now actually but good to have to be safe),
-annnd no hash :)
-
-Have tested locally and confirmed output is byte-identical for vmlinux.o for
-gcc/clang allmodconfig and defconfig, also tested klp-build and that's all
-working too for livepatch stuff.
-
->
-> BTW, I found another initialization bug: klp-post-link.c uses
-> elf_create_section() to create a reloc section, so it missing the
-> initialization of rsec->hashed in elf_create_rela_section().  But that's
-> moot if we just get rid of the hashing.
-
-Thanks, with the hash gone that's now moot as you say :)
-
->
-> --
-> Josh
+>              Linus
 
 --
 Cheers, Lorenzo
