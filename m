@@ -1,141 +1,111 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AEEBA4A2A42;
-	Tue, 15 Sep 2026 13:59:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1895633C1B4;
+	Tue, 15 Sep 2026 14:00:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789480764; cv=none; b=Fwyufkx5jQf24CRZJK4rSWD9nSESx8x9U/SsPRRTN4vJpulTwr5DG1SZUVz/+lenlv4pnMQva0ZOLZvvCYoBfIST8jjwkkVKpB3XKpOhhyGsMSe1Qn3990/kGGf7WcIMl/K+8U2r3s39psVyKl77hc8U8n6eLjKI2A2Ix46TU5c=
+	t=1789480855; cv=none; b=kxPDNrsCesDPGDX5jLx3PYbfwus1SyLy9PHqQkURGXBuqU1wey98b/oCJF9FZeZUvWaO8fRQAB2d2DuARfQMWoiHRTnvU7HYlxHMO5N+RF00mKSqmilQGnY1ePQ03LAwXjp/VRjG2wds08qMb/JdYw8LFdxNXDk5atyeDIxpcx0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789480764; c=relaxed/simple;
-	bh=M9jbckzgXh08eXx6L+BzdLTihu4jBUCNmlrGBM6kK30=;
-	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=oq2faNFOBQ/tAqlY/3WwU+xXJzCvl3+f+P00VGfZDmliUKP6z/2Z39iJ6fCMImTYsNfVcIAgksxulgFfPaU/OWXeUI0syy26g+wfMSH+A+369Jf/tAGVxjYERmfOEEmk3rIupi53eKqq86xVigwSPBszRK9PmfvZOVbkqMi1gKs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=X/4120la; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789480855; c=relaxed/simple;
+	bh=+5wQwKbqcBslcbuDlmsI4q6fFTEx6nmV4uQisRE6REo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=L1fWFpyZICjcgJ6n6s1/ai+wjJpnshqsL3znFixWiC27IXDAxwhsnh0kkCeDTMGXIc6O3a6zrQFs2f6tZ75rVI81g6RO4bv5MVKJbvL70p9BsA/ce+xZUFWQ4Z7dHRNvjqb6VzU+qQrDGvdqsLIZahuKBhQKD/V75V7gJLSAEKY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=vqajrmCt; arc=none smtp.client-ip=82.195.75.108
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="X/4120la"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED2161F00899;
-	Tue, 15 Sep 2026 13:59:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789480761;
-	bh=ebYm8TSC4CYUtZj4Q5hjjIqj2aKy0owa4swW8JAI55c=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=X/4120la222Bs4d30xrI6T2e2igizjI0fR2kIKouHR8SDHTVn82+yUVGlqeN5q3ZT
-	 69wf05F9PrURI1xpqdtwsrnbEJiiw6qHYKmnktgZQKMH+D0HTrQnwxWBmtvAZAwBzq
-	 5T+ofFUPcF76KMrVEwqVrbqdM41tzXYzPCW0HxPSz95Cp73YYFRT6E2nwW3ICze+S8
-	 s8KRWENXyoy/fkDYiltMZv6BL/kq3mYVE9s1CWhofBRj6ikwYdQ13qN+J7HR7T5Ugs
-	 O53AH9t8xLoZ4kjUcjbEODdjIaOjVBewOE24Ev9XyL/Hn8gpWQB1Eh1xFPqy3K8Oey
-	 WaiSxWw8jjqwg==
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v5 7/9] drivers/base/memory: count inherited poisoned
- frames into the block
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Ingo Molnar" <mingo@redhat.com>, "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>, "Liam
- R. Howlett" <liam@infradead.org>, "Mike Rapoport" <rppt@kernel.org>, "Danilo
- Krummrich" <dakr@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, "Lorenzo
- Stoakes" <ljs@kernel.org>, "Zi Yan" <ziy@nvidia.com>, "Michal Hocko" <mhocko@suse.com>, "Borislav
- Petkov" <bp@alien8.de>, "David Hildenbrand" <david@kernel.org>, "Brendan
- Jackman" <brendan.jackman@linux.dev>, "Johannes Weiner" <hannes@cmpxchg.org>, "Oscar
- Salvador" <osalvador@suse.de>, kas@kernel.org, "Naoya Horiguchi" <nao.horiguchi@gmail.com>, hannes@cmpxchg.or, "Rafael
- J. Wysocki" <rafael@kernel.org>, "Suren Baghdasaryan" <surenb@google.com>, x86@kernel.org, "Breno
- Leitao" <leitao@debian.org>, "Miaohe Lin" <linmiaohe@huawei.com>, "Ard
- Biesheuvel" <ardb@kernel.org>, "Dave Hansen" <dave.hansen@linux.intel.com>, shakeel.butt@linux.dev, "Vlastimil
- Babka" <vbabka@kernel.org>, "Andrew Morton" <akpm@linux-foundation.org>, "Ilias
- Apalodimas" <ilias.apalodimas@linaro.org>, "Thomas Gleixner" <tglx@kernel.org>
-Cc: rmikey@meta.com, linux-efi@vger.kernel.org, kernel-team@meta.com, linux-cxl@vger.kernel.org, linux-kernel@vger.kernel.org, harry@kernel.org, linux-mm@kvack.org, driver-core@lists.linux.dev, riel@surriel.com, kexec@lists.infradead.org
-In-Reply-To: <20260915-hwpoison-kho-v5-7-3bc7a57bd503@debian.org>
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="vqajrmCt"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
+	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
+	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=P0JxQYBjmO1vYJSywAUW1OOBMLXNRVrkgSCeVPxsXPU=; b=vqajrmCt1aMjHrgjKgf9nsMc8t
+	1HTSPbrZ2Nu9GG4g/qb+VIW8VrZfKXNfmRiDThFCCgEbVDUPaF2MOej9pzOvolOO1Q4ULqu61+vWA
+	JUHnoFVkpIBkIeFhbh44R1GkHpUH4RmS/d8uEKQHexTpSubRTJ9JmtyjJP5ZB71J43qi+QIxG0miR
+	JC65jdSlXGG3axUCE8+IDglXpMmSaBmLQyZ8pivc9K5fqmz88ngwG++duTsmzfmH7dJnPqJVHuvQo
+	Z58o30vNw2QLRJymW71I3AEVrmdxMAUI0O3y/MSbGXx0CDPON0t7fbMHwIjQ6x6hWv69xAJRAf1gQ
+	09t+H54A==;
+Received: from authenticated-user
+	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
+	(Exim 4.96)
+	(envelope-from <leitao@debian.org>)
+	id 1x6Thi-004RXm-32;
+	Tue, 15 Sep 2026 14:00:11 +0000
+Date: Tue, 15 Sep 2026 07:00:02 -0700
+From: Breno Leitao <leitao@debian.org>
+To: sashiko-bot@kernel.org
+Cc: Suren Baghdasaryan <surenb@google.com>, 
+	Johannes Weiner <hannes@cmpxchg.org>, Mike Rapoport <rppt@kernel.org>, 
+	Brendan Jackman <brendan.jackman@linux.dev>, Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
+	Zi Yan <ziy@nvidia.com>, Miaohe Lin <linmiaohe@huawei.com>, 
+	"H. Peter Anvin" <hpa@zytor.com>, shakeel.butt@linux.dev, kas@kernel.org, 
+	Ard Biesheuvel <ardb@kernel.org>, Andrew Morton <akpm@linux-foundation.org>, 
+	"Rafael J. Wysocki" <rafael@kernel.org>, x86@kernel.org, hannes@cmpxchg.or, 
+	Thomas Gleixner <tglx@kernel.org>, Naoya Horiguchi <nao.horiguchi@gmail.com>, 
+	Ingo Molnar <mingo@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+	Danilo Krummrich <dakr@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>, Michal Hocko <mhocko@suse.com>, 
+	Vlastimil Babka <vbabka@kernel.org>, "Liam R. Howlett" <liam@infradead.org>, 
+	Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, 
+	Oscar Salvador <osalvador@suse.de>, David Hildenbrand <david@kernel.org>, kernel-team@meta.com, 
+	driver-core@lists.linux.dev, linux-kernel@vger.kernel.org, linux-cxl@vger.kernel.org, 
+	rmikey@meta.com, riel@surriel.com, harry@kernel.org, kexec@lists.infradead.org, 
+	linux-efi@vger.kernel.org, linux-mm@kvack.org
+Subject: Re: [PATCH v5 3/9] mm/memory-failure: libstub: install the
+ poisoned-memory EFI table
+Message-ID: <aqlPIbH1zCHtPNcZ@gmail.com>
 References: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
- <20260915-hwpoison-kho-v5-7-3bc7a57bd503@debian.org>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Tue, 15 Sep 2026 13:59:19 +0000
-Message-Id: <20260915135919.ED2161F00899@smtp.kernel.org>
+ <20260915-hwpoison-kho-v5-3-3bc7a57bd503@debian.org>
+ <20260915131527.AFB261F0089A@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260915131527.AFB261F0089A@smtp.kernel.org>
+X-Debian-User: leitao
 
-Thank you for your contribution! Sashiko AI review found 1 potential issue(=
-s) to consider:
-- [Medium] mm: TOCTOU race in memblk_nr_poison_init() drops early MCE counts
---
+On Tue, Sep 15, 2026 at 01:15:27PM +0000, sashiko-bot@kernel.org wrote:
+> Thank you for your contribution! Sashiko AI review found 1 potential issue(s) to consider:
+> - [High] mm: efi: integer overflow in poisoned memory bitmap allocation on 32-bit
+> --
+> 
+> commit 591eef51f672049b14b50a75d67dac823925a19a
+> Author: Breno Leitao <leitao@debian.org>
+> 
+> mm/memory-failure: libstub: install the poisoned-memory EFI table
+> 
+> This commit introduces a new poisoned-memory EFI table installed by the stub.
+> It sizes a bitmap based on the UEFI memory map to describe the RAM span and
+> allocates it as EFI_ACPI_RECLAIM_MEMORY so the next kernel does not take it
+> as free RAM.
+> 
+> > diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> > index 48f93f7758e9e..9c66e06c972c5 100644
+> > --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+> > +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> 
+> [ ... ]
+> 
+> > +static struct linux_efi_poisoned_memory *efi_poison_alloc(u64 phys_base,
+> > +							  u64 bitmap_size)
+> > +{
+> > +	struct linux_efi_poisoned_memory *pm;
+> > +	efi_status_t status;
+> > +
+> > +	status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
+> > +			     sizeof(*pm) + bitmap_size, (void **)&pm);
+> 
+> [Severity: High]
+> Could this allocation size wrap around on 32-bit EFI architectures if the
+> memory map is extremely sparse?
 
-commit a8282f47e9b2f9ae014e9948a2edfc336de13cd0
-Author: Breno Leitao <leitao@debian.org>
+This feature is limited to 64-bits only, so, these wraps on 32-bit
+architectures are not real:
 
-drivers/base/memory: count inherited poisoned frames into the block
-
-This commit initializes the poisoned frame count for memory blocks created
-during early boot by scanning for pre-existing poisoned pages. It addresses
-an issue where kexec-inherited poisoned frames would later cause a counter
-underflow on unpoisoning, preventing the block from being onlined.
-
-> diff --git a/drivers/base/memory.c b/drivers/base/memory.c
-> index 5eead3346f1e3..49a33ddbb2e71 100644
-> --- a/drivers/base/memory.c
-> +++ b/drivers/base/memory.c
-[ ... ]
-> @@ -807,6 +812,7 @@ static int add_memory_block(unsigned long block_id, i=
-nt nid, unsigned long state
->  	mem->state =3D state;
->  	mem->nid =3D nid;
->  	INIT_LIST_HEAD(&mem->group_next);
-> +	memblk_nr_poison_init(mem);
-> =20
->  #ifndef CONFIG_NUMA
->  	if (state =3D=3D MEM_ONLINE)
-
-[Severity: Medium]
-Could this ordering create a Time-Of-Check to Time-Of-Use (TOCTOU) race
-during early boot?
-
-If a hardware machine check exception (MCE) occurs concurrently after
-memblk_nr_poison_init() runs but before __add_memory_block() publishes the
-block via xa_store(), does the memory_failure() worker set the page flag
-but drop the block counter increment because memory_block_get() still
-returns NULL?
-
-If this concurrent increment is dropped, could a subsequent unpoison
-operation underflow mem->nr_hwpoison to ULONG_MAX, permanently breaking
-memory_block_online() with -EHWPOISON?
-
-[ ... ]
-> @@ -1251,4 +1257,33 @@ static unsigned long memblk_nr_poison(struct memor=
-y_block *mem)
->  {
->  	return atomic_long_read(&mem->nr_hwpoison);
->  }
-> +
-> +/*
-> + * Frames a kexec handed over are flagged as they reach the allocator, l=
-ong
-> + * before this block exists, so memblk_nr_poison_inc() had nowhere to co=
-unt
-> + * them. Take them from the page flag instead.
-> + */
-> +static void memblk_nr_poison_init(struct memory_block *mem)
-> +{
-> +	unsigned long pfn =3D section_nr_to_pfn(mem->start_section_nr);
-> +	unsigned long nr_pages =3D PAGES_PER_SECTION * sections_per_block;
-> +	unsigned long i, nr_poison =3D 0;
-> +
-> +	/* A hotplugged block is created before its pages are online. */
-> +	if (mem->state !=3D MEM_ONLINE)
-> +		return;
-> +
-> +	if (!range_contains_poisoned_memory(PFN_PHYS(pfn),
-> +					    nr_pages << PAGE_SHIFT))
-> +		return;
-
-[Severity: Medium]
-Does this check unconditionally return false for a fresh early MCE because
-the MCE is not in the inherited EFI table?
-
-If so, would this skip the manual walk, leaving the counter entirely
-dependent on the concurrent memory_failure() increment that might be
-dropped in the race window described in add_memory_block() above?
-
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260915-hwpoison-k=
-ho-v5-0-3bc7a57bd503@debian.org?part=3D7
+config EFI_POISONED_MEMORY
+	def_bool y
+	depends on EFI_STUB && MEMORY_FAILURE && 64BIT
