@@ -1,110 +1,120 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 106DD3BE643;
-	Tue, 15 Sep 2026 12:24:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF4713B8D7E;
+	Tue, 15 Sep 2026 12:40:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789475070; cv=none; b=a6OEZY3cmehSKuPeRmdt1fSHVbHAuBizUI6GXH/y4i+OxGcnaZWcAbSH+ee19sxbGp/B7+KV7PIIouRKQPxLZRf1oC9bcK4zUwuYzdGo5VA0zuaDvdbC6stiFtW83kCUDjyIHtf3EoktvlygCpFXrkTpt4hfF6HeWiEvkT6Fbh0=
+	t=1789476030; cv=none; b=up3EeJBRzoxMy8ePY6BHljBDRP5p7vX0d8NHDttWDIzQhX36yk+IJlhmyHWCVa9IE5b7OjKkZCnC6cQBXco1IAVvZ5r3lp8lLjKJnnaAgICZab7XCo5hcZTtdd1JhD7FcThqlYKabNun3uo2v4tggOitepZXntgM+thKhjqc7FU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789475070; c=relaxed/simple;
-	bh=TSFEmHMwC9d9SfXIP/P00kOktCoad+yxGsvpdbTiTwQ=;
+	s=arc-20240116; t=1789476030; c=relaxed/simple;
+	bh=p4Hd/6/zw9mR1aiUREIx+yJcylAUWfTgc7O6UnTGHOY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=QPdl4g5wm99CXD2gsFiBLO/gtJ4rXBqgtQTlhuRvYEuslN2KVP6d0HLVpTZ96uI2DRBcF4HkLwCjF1wDIe0tP2LttCio1J0pq0YaWe4J6LkSFAQIxP5vEan+azv8JwG2pJHCChfh4OiGpqFcBlbeIhBnmslIB+Td6R9cD7pyuEw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VSaS7F8O; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=mKYQY98giO30uNQ1bbGmKxhOWKqZ9rfsY4+jis5pbWz2TDNOE3HQS+MmZypgEj0LzYD0Kq/NH1vrxYGyCcZwAQ+3zSyMCCCiHfdepUUI3r2YNtjmO9ZX1GPVTW5vMC4cX5rwPyOhW8Osh/Jkyysnd4r5sKIf3S+TrKPh8bI7avw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=huBfHert; arc=none smtp.client-ip=82.195.75.108
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VSaS7F8O"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 965111F00893;
-	Tue, 15 Sep 2026 12:24:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789475068;
-	bh=oybH7eUIXKQPekIV7WrspdJ7cyHg8nnBvzsloGcaUcE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=VSaS7F8OJuNuEs3hoUYH76UztTiKslXOl7yAzD2g4gLjW+wKdODE4ANHrYphBLvcC
-	 dGQy3ey9t5efNqzisI0bUxDeGSY5PMDK/ax9/0NQvgRzWjcV7F7EvSP2B/s6DK3yVq
-	 LFk4eZeHY6yXs4Bdceq1zyCgKeMUHsFp59hbk5m8WeQ+Fb5DlCQHi/TGx8gXJTsZ5g
-	 4PAd+0aC9GXETgFVdHQurW/S48n9SVPZKOb37fkbk6zWKNxSbX4MCdrWfrI+5lw5mV
-	 ic86w///f180dvzmes95xRX+VFp+twm4uFnIt2UCdpXtQU6L7BYsK4DvAH5U2Nt83Z
-	 YRdnbbuTH1zuw==
-Date: Tue, 15 Sep 2026 13:24:17 +0100
-From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Josh Poimboeuf <jpoimboe@kernel.org>, 
-	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
-	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
-	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
-	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
-	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
-	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Peter Zijlstra <peterz@infradead.org>, 
-	Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, Gary Guo <gary@garyguo.net>, 
-	=?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, Benno Lossin <lossin@kernel.org>, 
-	Andreas Hindborg <a.hindborg@kernel.org>, Alice Ryhl <aliceryhl@google.com>, 
-	Trevor Gross <tmgross@umich.edu>, Danilo Krummrich <dakr@kernel.org>, 
-	Daniel Almeida <daniel.almeida@collabora.com>, Tamir Duberstein <tamird@kernel.org>, 
-	Alexandre Courbot <acourbot@nvidia.com>, Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, 
-	Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>, 
-	Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
-	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
-	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
-	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v2 15/21] objtool: cache relocations, do less work
-Message-ID: <aqk4Oani0H0Wpxs1@gremlin>
-References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
- <20260914-build-speedup-v2-15-39817ec5db23@kernel.org>
- <aqhLhVMkNzf_4oJw@jpoimboe>
- <CAHk-=wiB9MX7vBDQ+WHTUVfSYubLhR-PbABewscqTsxRhg-LbQ@mail.gmail.com>
- <aqhmhmgrnN3Mw8yG@jpoimboe>
- <CAHk-=wj3BKkCYtmfs5sORF_+Oumv2Gc8D+YxkMp9W2-mvLS=Ug@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="huBfHert"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
+	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Transfer-Encoding:
+	Content-Type:MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:
+	Reply-To:Content-ID:Content-Description;
+	bh=Pqqx6qyZK7hDaGMfpM7ctme4msTknL0M/1U1XtnHr1M=; b=huBfHert8ebhJsOV5HNhXjIL6i
+	5hoDBf8pBN819FnWMjS07l+DapxPI5DgQs5AX8qKYVKDdOhXqpOC2FMR9E4k1ERdGl9gLRYa6uS7L
+	29ZMZlV8O/OgrMSMPHHLn//ZifgJXlrn097+s/IzxtyrQ/x+0cTTCUE+CBjBIlTxVONVha3ghSzyU
+	WbWX347JicsNYVyxS7O5iHBc5fdrfrnAA5+tFHy+mlF8v8LVSeJkNUDmq0F40jC7sd6Hp6tqBv7dB
+	v/o0rxqmBw4kUMlPPOg5fHOhqQBLMlVAvYlYUIRvN2RhVwgBX90/49Nyn7l9HOVPICSYQFAbnlWwJ
+	7dSC0UUg==;
+Received: from authenticated-user
+	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
+	(Exim 4.96)
+	(envelope-from <leitao@debian.org>)
+	id 1x6SS0-004Oba-0j;
+	Tue, 15 Sep 2026 12:39:52 +0000
+Date: Tue, 15 Sep 2026 05:39:44 -0700
+From: Breno Leitao <leitao@debian.org>
+To: Harry Yoo <harry@kernel.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Miaohe Lin <linmiaohe@huawei.com>, 
+	Naoya Horiguchi <nao.horiguchi@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, 
+	"Kiryl Shutsemau (Meta)" <kas@kernel.org>, kexec@lists.infradead.org, David Hildenbrand <david@kernel.org>, 
+	Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>, 
+	Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>, 
+	Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>, 
+	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H . Peter Anvin" <hpa@zytor.com>, 
+	Brendan Jackman <brendan.jackman@linux.dev>, Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>, 
+	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, 
+	rmikey@meta.com, riel@surriel.com, kernel-team@meta.com
+Subject: Re: [PATCH v4 2/5] mm/memory-failure: libstub: install the
+ poisoned-memory EFI table
+Message-ID: <aqk4NUnq92ftuUuJ@gmail.com>
+References: <20260909-hwpoison-kho-v4-0-359313564495@debian.org>
+ <20260909-hwpoison-kho-v4-2-359313564495@debian.org>
+ <2c9a7bef-3189-4f78-a6cb-61d2f7afd643@app.fastmail.com>
+ <aqKhgPKzRf0e22s3@gmail.com>
+ <aqkIdVhoG2wwVBtb@gmail.com>
+ <aqkyT0Ui9h5KWuzn@thinkstation>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <CAHk-=wj3BKkCYtmfs5sORF_+Oumv2Gc8D+YxkMp9W2-mvLS=Ug@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <aqkyT0Ui9h5KWuzn@thinkstation>
+X-Debian-User: leitao
 
-On Mon, Sep 14, 2026 at 03:30:19PM -0700, Linus Torvalds wrote:
-> On Mon, 14 Sept 2026 at 15:23, Josh Poimboeuf <jpoimboe@kernel.org> wrote:
+Hi Harry,
+
+Thanks a lot for the feedback.
+
+On Tue, Sep 15, 2026 at 01:12:54PM +0100, Harry Yoo wrote:
+> On Tue, Sep 15, 2026 at 02:03:48AM -0700, Breno Leitao wrote:
+> > On Thu, Sep 10, 2026 at 06:11:53AM -0700, Breno Leitao wrote:
+> > > So I'd say we have two options:
+> > >
+> > > 1) Keep it similar to unaccepted memory, with 2M granularity.
+> > >    - Pro : Similar mental model as unnacepted memory
+> > >    - Cons: 2 MB might be a bit wasteful
+> > >
+> > > 2) Move to a linked list like the RFC, keeping it outside of the EFI
+> > >    table.
+> > >    - Pro: Reduce the memory granularities to page instead of 2M blocs.
+> > >    - Cons: Another way of passing memory information between kexec
+> > >      kernels.
+> > >
+> > > Any any other option or strong preference?
 > >
-> > There might be more efficient ways to structure the considerable amount
-> > of data, like replacing "struct instruction" with "struct basic_block"
-> > or so, but it's hard to know whether that would be a net positive.
+> > Since nobody voiced a strong preference, I will stick with option (1),
+> > the bitmap, for these reasons:
 >
-> Yeah, I was thinking that you'd only hash instructions as you find
-> them if they are obvious "I need this instruction", and then try to
-> hash them *again* if they are branch targets (and just have a "already
-> hashed" flag).
->
-> That way random number instructions would not be on the hash - unless
-> they become branch targets.
->
-> And you wouldn't ever really have to track any complicated decisions
-> (like that whole "basic block" thing - I agree that it's painful,
-> because the shape of a basic block will change over time as you find
-> branch targets).
->
-> But not a big deal. More an idle thought brought on by that other
-> patch that changed the hash table size, and this discussion that was
-> talking about the hashing - or not hashing - of sections.
->
-> So more of a "if it is easy and straightforward" kind of thing.
+> Not sure if this was discussed already, but perhaps we need to have
+> a chain of struct linux_efi_poisoned_memory rather than a single
+> bitmap, to easily add support for hot-added memory later?
 
-Obviously I defer to Josh on this, but it seems from what he said it's
-probably a little involved and maybe tricky to figure out how much impact
-it might have.
+Agreed, that's a good point. We could extend linux_efi_poisoned_memory
+with a ->next pointer, so that if we ever add hot-plug support later, we
+can link in another linux_efi_poisoned_memory. 
 
-Anyway v3 drops the relocation hash altogether so 1 out of 2 ain't bad ;)
+That said, I'm not sure hot-plug memory is really relevant here. Hot-plug
+is mostly used in VMs, while this feature is more host-side, so it doesn't
+seem like a great fit. Maybe it would only matter for servers where
+physical memory can be added while running (do those still exist? I
+recall IBM offered that feature at some point, but I'm not sure there are
+real customers for it).
 
+> Also, I wonder if some architectures have a scattered set of pfn
+> ranges so that the span from the start pfn to the end pfn being much
+> larger than the actual physical memory size.
 >
->              Linus
+> If so it might make more sense to have a bitmap for each pfn range.
 
---
-Cheers, Lorenzo
+Agreed, having a ->next in linux_efi_poisoned_memory is a good idea that
+we can lean on depending on whatever problem comes up down the road.
+
+Very good point — let's keep this linux_efi_poisoned_memory chain idea in
+mind for whenever we need to expand it.
