@@ -1,124 +1,162 @@
-Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A49343D7D89;
-	Wed, 16 Sep 2026 09:36:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACE5E4C67F3;
+	Wed, 16 Sep 2026 10:26:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789551374; cv=none; b=ILHaIrNFZsen1neeegdXEntV2Md1UBwhOqPzut6cM+QLT3zMP2FX7kB4kG5m9aJF/GlpCFz4XEHa9e5cq/Ve5MgCdViNsbTRoAxaKjBn0Q4KGlb/kMADqpQx3O1dJokcztNoEzeUOmHy3hAntZERl4OolPGYC3vU1dFBzS90NDU=
+	t=1789554393; cv=none; b=ICa8M7iE3fZUIQlnASPQrKMEpUflVftOG6Ynt6qcSB4t48pYm8fJ++T5yKNIu7wJtqYMvfH9DhgF2Gl6neXOKOXV5GrYhHUT2vZ63g/S2mOuUuSWnZSMmh196ygTtJ80js4qiDO6lxU2KTGetz8fQMT6dUZ0AcTpspOnZ1rKkTc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789551374; c=relaxed/simple;
-	bh=C4Pgd/QE7Npkzcs4mLoH2ntp6E0i7P7iP2KMXQdLf4A=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GiqVvaeqinEMjmRR/qpcrP7Pkt9JWV5i+JNOdgGGycRkzqtozJXB6cVgNysdZXxTbutVOT9/EHGSDL/T6eGs3rmC5vmEw6X3QzqvBOhuMV/LGHFV5zT15fk6M1WwA4Sp+DqIrNmdGpq1ZLs4++8XPHhlR5j/kKjVAn8CF/m5JD4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=FG+PhcCJ; arc=none smtp.client-ip=82.195.75.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
+	s=arc-20240116; t=1789554393; c=relaxed/simple;
+	bh=RqPzWt+oHUBg+h1+63Lh5bVhj7REFL828WImcX4mdec=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Ys1AeYBP4ajaLxruIZRP2ouWYLjWtnFNRMgWEiidtgbDeRkCi+KABebGT8KWyHrTcNU10Gg1dpeQVtido5HBQheLA0fGu9A01LjVfdy87qnQbct04LUmOrerLGWDfhO1gGesb0fSLKpypSlvZ35L2UVo0ywwTIPF9lTv4SM0x88=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NFCeuEsA; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="FG+PhcCJ"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
-	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=lQusxUCZOg61iBhz+gh2H7namnoGRC3noT9Nzn5HIqQ=; b=FG+PhcCJdohk4nnU98iT/zoR5N
-	BCgB6P043DOhKlGyArs7g31LKrnMGQt2zWbGrRVZDTebMTiVX0hrOpMLGDYK9SjK4Nbhr1XO9Z/oe
-	9kYRquCRmoHMSfDt5RL9ZF+HqohR7f9iO3YfQb2nxLasS8aJC+6WBFFBZVtfu5594dMAJdGAlSEor
-	T//McaeWE/JqURKCLjDalwcD9SxGNYRZ1Ndf6cU2qsZSXzppknaqswzTmRM1m9nMELechoHJ3sF6b
-	SPpSFa5JtX7hBI+K/IGPBKSM0MEmySJV5UgazfmjiDgO8UjZf6aP6k+M7p32sRjJG2WLJIf/ZesHH
-	AEqfN1nw==;
-Received: from authenticated-user
-	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
-	(Exim 4.96)
-	(envelope-from <leitao@debian.org>)
-	id 1x6m2s-0054bo-2i;
-	Wed, 16 Sep 2026 09:35:15 +0000
-Date: Wed, 16 Sep 2026 02:35:06 -0700
-From: Breno Leitao <leitao@debian.org>
-To: "David Hildenbrand (Arm)" <david@kernel.org>
-Cc: Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Miaohe Lin <linmiaohe@huawei.com>, 
-	Naoya Horiguchi <nao.horiguchi@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, kas@kernel.org, 
-	kexec@lists.infradead.org, Lorenzo Stoakes <ljs@kernel.org>, 
-	"Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>, 
-	Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>, 
-	Michal Hocko <mhocko@suse.com>, Thomas Gleixner <tglx@kernel.org>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
-	Brendan Jackman <brendan.jackman@linux.dev>, Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>, 
-	Oscar Salvador <osalvador@suse.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	"Rafael J. Wysocki" <rafael@kernel.org>, Danilo Krummrich <dakr@kernel.org>, hannes@cmpxchg.or, 
-	shakeel.butt@linux.dev, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-mm@kvack.org, rmikey@meta.com, riel@surriel.com, harry@kernel.org, 
-	linux-cxl@vger.kernel.org, driver-core@lists.linux.dev, kernel-team@meta.com
-Subject: Re: [PATCH v5 7/9] drivers/base/memory: count inherited poisoned
- frames into the block
-Message-ID: <aqpczrtIwSG948iv@gmail.com>
-References: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
- <20260915-hwpoison-kho-v5-7-3bc7a57bd503@debian.org>
- <de41b78a-8471-4832-be0c-35d410a4499a@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NFCeuEsA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D535B1F000FF;
+	Wed, 16 Sep 2026 10:26:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789554386;
+	bh=DTp1iA6KwxfztWvDrOMeMz5Phpuk6ej6XYTDd5JnmEM=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=NFCeuEsAfNPwnulZLAZl8koAwRmcS/GD9LoqYg6yFF6sd0+OgPkJBXjMyP3iJcxY4
+	 nw80+05z82v7E0JgmCA089uLt+CyomXrEREXGy5JnAWK5zjTvHwoPuYrKAoRol2cqa
+	 AidO0FR4enzxHHJRDMBJj8Weujftym8B4+Po47swavPmgQXlZHP4MWOcLqYPMdrWTB
+	 M4btQ6ZjcMle919gKCDPGzAcgKHXGPS5ff8GBQmQw1azivW/ho/lVrmkUiQpIJNYVo
+	 duH7v5eZpHpmFp1RmFKu4TkX8IgtpGiag6xGK71Iw3sEdOJJSxBEi6JnNu6b1N9OVC
+	 x7Cqh18FasrLw==
+Message-ID: <1d5c8df2-2517-4e01-a7b2-6a03e31b4b1a@kernel.org>
+Date: Wed, 16 Sep 2026 12:26:22 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <de41b78a-8471-4832-be0c-35d410a4499a@kernel.org>
-X-Debian-User: leitao
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 04/10] lib/ucs2_string: Split out ucs2_as_utf8_l()
+ taking a separate limit
+To: Ard Biesheuvel <ardb+git@google.com>, linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
+ x86@kernel.org
+References: <20260909115530.1924665-12-ardb+git@google.com>
+ <20260909115530.1924665-16-ardb+git@google.com>
+From: Vincent Mailhol <mailhol@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=mailhol@kernel.org; keydata=
+ xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
+ JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
+ fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
+ F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
+ 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
+ YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
+ dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
+ zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
+In-Reply-To: <20260909115530.1924665-16-ardb+git@google.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hello David,
-
-First of all, thanks for your time looking at this patchset.
-
-On Wed, Sep 16, 2026 at 08:48:56AM +0200, David Hildenbrand (Arm) wrote:
-> On 9/15/26 14:53, Breno Leitao wrote:
-> > +static void memblk_nr_poison_init(struct memory_block *mem)
-> > +{
-> > +	unsigned long pfn = section_nr_to_pfn(mem->start_section_nr);
-> > +	unsigned long nr_pages = PAGES_PER_SECTION * sections_per_block;
-> > +	unsigned long i, nr_poison = 0;
-> > +
-> > +	/* A hotplugged block is created before its pages are online. */
-> > +	if (mem->state != MEM_ONLINE)
-> > +		return;
-> > +
-> > +	if (!range_contains_poisoned_memory(PFN_PHYS(pfn),
-> > +					    nr_pages << PAGE_SHIFT))
-> > +		return;
-> > +
-> > +	for (i = 0; i < nr_pages; i++) {
-> > +		struct page *page = pfn_to_online_page(pfn + i);
-> > +
-> > +		if (page && PageHWPoison(page))
-> > +			nr_poison++;
-> > +	}
+On 09/09/2026 at 13:55, Ard Biesheuvel wrote:
+> From: Ard Biesheuvel <ardb@kernel.org>
 > 
-> That just slows down boot unnecessarily on 99.9999999999999999999% of all
-> systems out there.
+> ucs2_as_utf() takes a maxlength argument, which specifies how many bytes
+  ^^^^^^^^^^^^^
+Typo: ucs2_as_utf8() (missing '8').
 
-hmmm, I am not sure I see it that way.
+> the function is permitted to store into the destination buffer.
+> 
+> The same value is used as an upper bound for the ucs2_strnlen()
+> invocation, which is reasonable in the general case, as each UCS-2
+> character produces at least one byte of UTF-8 output, and so there is
+> never a need to process more than 'maxlength' UCS-2 characters.
+> 
+> However, if the UCS-2 string is not NUL terminated, ucs2_strnlen() may
+> read past the end of the buffer if 'maxlength' is set to a high value.
+> 
+> Current callers pass UCS-2 strings that are expected to be NUL
+> terminated, but for processing the load options in the EFI stub, a
+> version is needed that takes a separate limit argument. So split that
+> off from the current implementation.
+> 
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> ---
+>  include/linux/ucs2_string.h | 11 ++++++++++-
+>  lib/ucs2_string.c           |  6 +++---
+>  2 files changed, 13 insertions(+), 4 deletions(-)
+> 
+> diff --git a/include/linux/ucs2_string.h b/include/linux/ucs2_string.h
+> index c499ae809c7d..74f23ca5a967 100644
+> --- a/include/linux/ucs2_string.h
+> +++ b/include/linux/ucs2_string.h
+> @@ -14,7 +14,16 @@ ssize_t ucs2_strscpy(ucs2_char_t *dst, const ucs2_char_t *src, size_t count);
+>  int ucs2_strncmp(const ucs2_char_t *a, const ucs2_char_t *b, size_t len);
+>  
+>  unsigned long ucs2_utf8size(const ucs2_char_t *src);
+> +unsigned long
+> +ucs2_as_utf8_l(u8 *dest, const ucs2_char_t *src, unsigned long limit,
+> +	       unsigned long maxlength);
+> +
+> +static inline
+>  unsigned long ucs2_as_utf8(u8 *dest, const ucs2_char_t *src,
+> -			   unsigned long maxlength);
+> +			   unsigned long maxlength)
+> +{
+> +	return ucs2_as_utf8_l(dest, src, ucs2_strnlen(src, maxlength),
+> +			      maxlength);
+> +}
+>  
+>  #endif /* _LINUX_UCS2_STRING_H_ */
+> diff --git a/lib/ucs2_string.c b/lib/ucs2_string.c
+> index f75fb4f7961a..2df9bef79eea 100644
+> --- a/lib/ucs2_string.c
+> +++ b/lib/ucs2_string.c
+> @@ -132,11 +132,11 @@ EXPORT_SYMBOL(ucs2_utf8size);
+>   * final NUL character.
+>   */
 
-The loop only runs for a block the bitmap marks. On a machine with nothing
-recorded the bitmap is all zeros, the range_contains_poisoned_memory() check
-right above it returns false, and the loop never executes.
+ucs2_as_utf8_l() still uses the old documentation of ucs2_as_utf8().
+It currently reads:
 
-What every boot does pay is that check, once per block. The stub installs
-the table whether or not anything was ever recorded in it, so this is not a
-NULL test: it is two 64-bit divisions by the unit size plus a
-find_next_bit() over the single word a 128M block covers at one bit per 2M.
+  /*
+   * copy at most maxlength bytes of whole utf8 characters to dest from the
+   * ucs2 string src.
+   *
+   * The return value is the number of characters copied, not including the
+   * final NUL character.
+   */
 
-The real cost (that "for loop above"), comes when you kexec (not on cold
-boot -- given the bitmap is empty), and you are trying to init
-a memory block that has poisoned pages into it. Which seems the right
-trade-off, no?
+That documentation should probably be moved to linux/ucs2_string.h so
+that ucs2_as_utf8() remains documented after being turned into a
+static inline wrapper.
 
-That said, can we do better? Yes. The silly win is to let the table say
-whether anything was ever recorded in it, something like a
-linux_efi_poisoned_memory->empty that the first recorded frame clears,
-and return on that before the bitmap is reached at all.
+As for ucs2_as_utf8_l(), it would be worth adding a new comment block
+to highlight its specific behaviour: the new limit argument, the fact
+that the string is only NUL-terminated if there is enough space and
+that the return value is not the number of wide characters copied but
+the number of bytes copied.
 
-Is this what you are looking for, or something more drastic?
+>  unsigned long
+> -ucs2_as_utf8(u8 *dest, const ucs2_char_t *src, unsigned long maxlength)
+> +ucs2_as_utf8_l(u8 *dest, const ucs2_char_t *src, unsigned long limit,
+> +	       unsigned long maxlength)
+>  {
+>  	unsigned int i;
+>  	unsigned long j = 0;
+> -	unsigned long limit = ucs2_strnlen(src, maxlength);
+>  
+>  	for (i = 0; maxlength && i < limit; i++) {
+>  		u16 c = src[i];
+> @@ -163,7 +163,7 @@ ucs2_as_utf8(u8 *dest, const ucs2_char_t *src, unsigned long maxlength)
+>  		dest[j] = '\0';
+>  	return j;
+>  }
+> -EXPORT_SYMBOL(ucs2_as_utf8);
+> +EXPORT_SYMBOL(ucs2_as_utf8_l);
+>  
+>  #ifndef __DISABLE_EXPORTS
+>  MODULE_DESCRIPTION("UCS2 string handling");
 
-Thanks for your review,
---breno
+
+Yours sincerely,
+Vincent Mailhol
