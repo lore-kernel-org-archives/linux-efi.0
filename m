@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60A0E3EC2FF;
-	Wed, 16 Sep 2026 06:44:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD82C345731;
+	Wed, 16 Sep 2026 06:49:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789541081; cv=none; b=pnhlVCQlLPo69M7LenhvAMBvyH2z6DidKZ5eE8+K6tT3DxmWeBMbUjHo5rYS45WqrBEcdvAXYl6JJiXMvnfBunxYELij1kELuwPNypgTAFEGHPBctukuphIocsj8CGL63QLliL01Jggm4MjETSxCaucKXgFaPnioTuxrZwNQk4o=
+	t=1789541348; cv=none; b=M2gwUS7OLp0WGJyF6ioih/IUWK28YuWrQmz+25NFMGpzvPCu/FVrpkl6D7D+3n3CKdtu+U+GeHm3rxf0w3y9HjLpttnaLMhbqKwjA4MsntyQaLnD6iyM6LH/Et+n5eZVDYByn3XZba3F/qux6HGuvENj1wa0jZMWwe1z/p2bvQM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789541081; c=relaxed/simple;
-	bh=oJVufVHpc6+v4+ZtEfmf0huRkJGE2F3y595KZRzcWdk=;
+	s=arc-20240116; t=1789541348; c=relaxed/simple;
+	bh=SLkeh1FKfsgnrTzoEAoxwqgqvO6+Vb2RiMn7chwGQiU=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=fHrPPJk5CHsRVGT7qA2dK/ZJNdKzR9KDi/up5VHz6AmQQYL32EpQyOaZtwon0zod7Lrp+XmTVO/dbGteVKUgU45Bs48iaidR7G1cR4q8BXGDSC6EWaQpqB0HEUUMesHyfVJQKZhNVebL9rGZsSIRoc8cpfgmw1dZdsYrkMRiizY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=P/iScPFn; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:Content-Type; b=T1XhMfUaKAiQlsXBlj8jJdl1ilUogyHuLpSWgCT/eK7bPvg9RgbkxV5kPFgp5I8oZoZn3E4MdgVQv8p87YcuoEO8OsG3d9ZW0U2wg3SvnSFSqc8ZAemWNkHToRusAWVvuRurU/SuX0hq+RLqw6IG0PSmNPJJ1j4n9zeXAByRgpM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NIsHT4gQ; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="P/iScPFn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C982D1F000FF;
-	Wed, 16 Sep 2026 06:44:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NIsHT4gQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 16A611F000FF;
+	Wed, 16 Sep 2026 06:48:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789541079;
-	bh=TSC8m1uvKADe4izgOf34VC22kIw4m7aB4yU4DXkfMIQ=;
+	s=k20260515; t=1789541346;
+	bh=2Jerf9k/7ZUAS3hTD5JMzljHUmpWPb3xVLDzJuhZyno=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=P/iScPFnM5QU1sYRRLc2FNGZUw6F/lcEZYGse0SpiTAH100wnTOStLTNR0mbiMUMy
-	 LTlFwL2yNXOKJEGfmq+8g8y4YjoeY48KN7pFPCDHdX3vu/vLeaKeP6f4pegr2KWtUd
-	 t530FRLGn44//3uYVozTWBv5nVqFY8pWeGpSpJC43U85OQbgdUrnLV28tOYBHKGwyo
-	 C5Pvn2OOZcS3GqdvhyI27yhiwci1cZTxNAq/v6BPm0tgLTmsLkklq19fqTADqSBAFE
-	 EQkRJaniEWsQG4Pw91NETf0FGkJUYeDJZQY0DffEMIG5y+lpVFgCbTRkMghbZo8Hjj
-	 Bcb0dhcpGhefw==
-Message-ID: <edafd246-0bd8-4335-9037-77f552968b56@kernel.org>
-Date: Wed, 16 Sep 2026 08:44:30 +0200
+	b=NIsHT4gQlpxUlSHwQ555s9gNMJGrNz7ejQHcN/REK0LMOB6cfEox8X8i2tPu+/jll
+	 FJSOwrLvAhSHpbHjK786UpAyopzh2bKcAm2t6kmOkoX+UORcYDh+6GQvYWIl9Fw/x3
+	 gQM4qPKQm7BBW1h0lsVoK/bfQ9HPrQafStQ72azFwE6xP5vE/I24khCYFZuGcN4D7c
+	 GD25BYMhMaQNTdmqb7W2wWSyUEoxwM259BajyX3zyuWDyP2Ntg/qlFUCHT+YTBrmfI
+	 iCGXd+hwO6Dg8TK6G33Iu1ZqGPvFjnghrhPWeRCbHL/V28prRh+ygYun/BnTlwsQxZ
+	 el1w/7MZDX5rw==
+Message-ID: <de41b78a-8471-4832-be0c-35d410a4499a@kernel.org>
+Date: Wed, 16 Sep 2026 08:48:56 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -35,32 +35,29 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 6/9] mm/memory-failure: efi: answer whether a range is
- poisoned
-To: sashiko-reviews@lists.linux.dev, Andrew Morton
- <akpm@linux-foundation.org>, hannes@cmpxchg.or,
- Borislav Petkov <bp@alien8.de>, Danilo Krummrich <dakr@kernel.org>,
- Brendan Jackman <brendan.jackman@linux.dev>, x86@kernel.org, kas@kernel.org,
- Suren Baghdasaryan <surenb@google.com>, Zi Yan <ziy@nvidia.com>,
- "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
- Thomas Gleixner <tglx@kernel.org>, Oscar Salvador <osalvador@suse.de>,
- "Rafael J. Wysocki" <rafael@kernel.org>, shakeel.butt@linux.dev,
- Johannes Weiner <hannes@cmpxchg.org>,
+Subject: Re: [PATCH v5 7/9] drivers/base/memory: count inherited poisoned
+ frames into the block
+To: Breno Leitao <leitao@debian.org>, Ard Biesheuvel <ardb@kernel.org>,
  Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Miaohe Lin <linmiaohe@huawei.com>, Ard Biesheuvel <ardb@kernel.org>,
- Breno Leitao <leitao@debian.org>, Michal Hocko <mhocko@suse.com>,
- Naoya Horiguchi <nao.horiguchi@gmail.com>,
+ Miaohe Lin <linmiaohe@huawei.com>, Naoya Horiguchi
+ <nao.horiguchi@gmail.com>, Andrew Morton <akpm@linux-foundation.org>,
+ kas@kernel.org, kexec@lists.infradead.org, Lorenzo Stoakes <ljs@kernel.org>,
+ "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
+ Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
+ Michal Hocko <mhocko@suse.com>, Thomas Gleixner <tglx@kernel.org>,
+ Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+ Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+ "H. Peter Anvin" <hpa@zytor.com>, Brendan Jackman
+ <brendan.jackman@linux.dev>, Johannes Weiner <hannes@cmpxchg.org>,
+ Zi Yan <ziy@nvidia.com>, Oscar Salvador <osalvador@suse.de>,
  Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Mike Rapoport <rppt@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>,
- Lorenzo Stoakes <ljs@kernel.org>, Dave Hansen <dave.hansen@linux.intel.com>,
- Ingo Molnar <mingo@redhat.com>
-Cc: linux-mm@kvack.org, kexec@lists.infradead.org, linux-cxl@vger.kernel.org,
- linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, harry@kernel.org,
- rmikey@meta.com, kernel-team@meta.com, driver-core@lists.linux.dev,
- riel@surriel.com
+ "Rafael J. Wysocki" <rafael@kernel.org>, Danilo Krummrich <dakr@kernel.org>,
+ hannes@cmpxchg.or, shakeel.butt@linux.dev
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mm@kvack.org, rmikey@meta.com, riel@surriel.com, harry@kernel.org,
+ linux-cxl@vger.kernel.org, driver-core@lists.linux.dev, kernel-team@meta.com
 References: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
- <20260915-hwpoison-kho-v5-6-3bc7a57bd503@debian.org>
- <20260915134535.C3FC91F00899@smtp.kernel.org>
+ <20260915-hwpoison-kho-v5-7-3bc7a57bd503@debian.org>
 From: "David Hildenbrand (Arm)" <david@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=david@kernel.org; keydata=
@@ -107,23 +104,91 @@ Autocrypt: addr=david@kernel.org; keydata=
  3iyY2Nsd7JxfKu1PRhCGwXzRw5TlfEsoRI7V9A8isUCoqE2Dzh3FvYHVeX4Us+bRL/oqareJ
  CIFqgYMyvHj7Q06kTKmauOe4Nf0l0qEkIuIzfoLJ3qr5UyXc2hLtWyT9Ir+lYlX9efqh7mOY
  qIws/H2t
-In-Reply-To: <20260915134535.C3FC91F00899@smtp.kernel.org>
+In-Reply-To: <20260915-hwpoison-kho-v5-7-3bc7a57bd503@debian.org>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 9/15/26 15:45, sashiko-bot@kernel.org wrote:
->> The bitmap an earlier kernel filled in gets in this one through EFI,
->> but nothing reads it back yet.
->>
->> Introduce range_contains_poisoned_memory(), which the page allocator
->> will use to ask about a block before handing it out.
->>
->> Signed-off-by: Breno Leitao <leitao@debian.org>
+On 9/15/26 14:53, Breno Leitao wrote:
+> A frame a kexec handed over is flagged as it reaches the allocator, long
+> before its memory block exists, so memblk_nr_poison_inc() had nowhere to
+> count it. Walk the block once when it is created and take the count from
+> the page flag instead.
 > 
-> Sashiko has reviewed this patch and found no issues. It looks great!
+> Without it an unpoison later subtracts from a counter that was never
+> incremented and wraps it, which then refuses memory_block_online() for
+> good.
 > 
+> Only a block created online needs the walk. A hotplugged one is created
+> before its pages are, so there is nothing to find, and its frames are
+> counted by num_poisoned_pages_inc() as they are flagged.
+> 
+> Signed-off-by: Breno Leitao <leitao@debian.org>
+> ---
+>  drivers/base/memory.c | 35 +++++++++++++++++++++++++++++++++++
+>  1 file changed, 35 insertions(+)
+> 
+> diff --git a/drivers/base/memory.c b/drivers/base/memory.c
+> index 5eead3346f1e32..49a33ddbb2e717 100644
+> --- a/drivers/base/memory.c
+> +++ b/drivers/base/memory.c
+> @@ -220,11 +220,16 @@ int memory_notify(enum memory_block_state state, void *v)
+>  
+>  #if defined(CONFIG_MEMORY_FAILURE) && defined(CONFIG_MEMORY_HOTPLUG)
+>  static unsigned long memblk_nr_poison(struct memory_block *mem);
+> +static void memblk_nr_poison_init(struct memory_block *mem);
+>  #else
+>  static inline unsigned long memblk_nr_poison(struct memory_block *mem)
+>  {
+>  	return 0;
+>  }
+> +
+> +static inline void memblk_nr_poison_init(struct memory_block *mem)
+> +{
+> +}
+>  #endif
+>  
+>  /*
+> @@ -807,6 +812,7 @@ static int add_memory_block(unsigned long block_id, int nid, unsigned long state
+>  	mem->state = state;
+>  	mem->nid = nid;
+>  	INIT_LIST_HEAD(&mem->group_next);
+> +	memblk_nr_poison_init(mem);
+>  
+>  #ifndef CONFIG_NUMA
+>  	if (state == MEM_ONLINE)
+> @@ -1251,4 +1257,33 @@ static unsigned long memblk_nr_poison(struct memory_block *mem)
+>  {
+>  	return atomic_long_read(&mem->nr_hwpoison);
+>  }
+> +
+> +/*
+> + * Frames a kexec handed over are flagged as they reach the allocator, long
+> + * before this block exists, so memblk_nr_poison_inc() had nowhere to count
+> + * them. Take them from the page flag instead.
+> + */
+> +static void memblk_nr_poison_init(struct memory_block *mem)
+> +{
+> +	unsigned long pfn = section_nr_to_pfn(mem->start_section_nr);
+> +	unsigned long nr_pages = PAGES_PER_SECTION * sections_per_block;
+> +	unsigned long i, nr_poison = 0;
+> +
+> +	/* A hotplugged block is created before its pages are online. */
+> +	if (mem->state != MEM_ONLINE)
+> +		return;
+> +
+> +	if (!range_contains_poisoned_memory(PFN_PHYS(pfn),
+> +					    nr_pages << PAGE_SHIFT))
+> +		return;
+> +
+> +	for (i = 0; i < nr_pages; i++) {
+> +		struct page *page = pfn_to_online_page(pfn + i);
+> +
+> +		if (page && PageHWPoison(page))
+> +			nr_poison++;
+> +	}
 
-David has reviewed this mail and it annoyed him.
+That just slows down boot unnecessarily on 99.9999999999999999999% of all
+systems out there.
 
 -- 
 Cheers,
