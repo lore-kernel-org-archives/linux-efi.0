@@ -1,333 +1,182 @@
-Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com [209.85.221.71])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C80E37AA78
-	for <linux-efi@vger.kernel.org>; Wed, 16 Sep 2026 14:47:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.71
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 045C52F6577;
+	Wed, 16 Sep 2026 14:51:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789570060; cv=none; b=ofp9P5qFvwgJfK9tZPTALdHlSh/nsoMK18Ah3QJqT/Mjf+5MHto/D69Ln11Mgh5PKVshrbi4woKCg5oZNaz/MNStqPdbc656wWJPsRoqiXtskoNP2pReQAH8273KcN7JakWtQG1y7H9bI050FZuCEueoGmoJ8QlRjhBJFsJUbf8=
+	t=1789570311; cv=none; b=aWW03GHWvpmaxBKPpbcODsDMZuaoxioRtKSNYHjn0/RPfkmE4MTioW0XNYvJZkfcF9TPFpCo1PUWuZP02lnd5RN+6XJs+EHQfiXaCG+kGBDi2nOKLwvO7qxJpB3T/tudNVgd4mzBdussyqWmiKXNxO9ogJZOVE21vRQjnb++YfE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789570060; c=relaxed/simple;
-	bh=Z/PHy8SqOY039ZfzHL4rdkKTKv2Tm1OexHtDCOj+1Zo=;
-	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=Rk3EZVg81DJ/M0a69vWlmHTnGmx/dUQ7StpILuAHM5cJKyEMAAaLRZYR1vVZjmo/fHqmR9QNJfB4SSARqiKDYTD/FckuqDRfdMtp2FPlpyCicVbxM6p90+9IYOpu60cZA/sYY3noOhfxk97dy9cxg+l4FfXWihdox9fzaK+nTHs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=cF5Erw+u; arc=none smtp.client-ip=209.85.221.71
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
+	s=arc-20240116; t=1789570311; c=relaxed/simple;
+	bh=zYg/3krPTcdu5MzTerrryFU/deY+7sVJGobxEMv98DQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=hbAAc5rYIyMNkOBxPODJaegMZqY4/085lihjDC7O8uqWrEWFyiBQQOWL2JuiJVaI+e0xDLbglHWFv0CmQYIT+V5OgDe+N81cUIrJOzyV78K4vI+UNdgrS5GYC2c0Psw4xy+rD2VKHMiLB7XzrG8SERbhBB5+6u5RBK/UtIDUIr4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DJmX77mg; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="cF5Erw+u"
-Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-4870eda3782so585980f8f.0
-        for <linux-efi@vger.kernel.org>; Wed, 16 Sep 2026 07:47:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1789570056; x=1790174856; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:from:subject
-         :message-id:references:mime-version:in-reply-to:date:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=ZM3fU71DKklu1u+zDqECfkv49Iwpg2mCdspvEHepLy4=;
-        b=cF5Erw+umUYbkRqqX+ckgZPQExZ5ps3OIaRic/OBIDjNarU9ARTl1huomfuarlKq7v
-         M6l8BLG4EybH1lnR60fYfg8xRbs6jR5f6bRVwD88MXNn7LegqYodWClTWyulS9gwgmae
-         XCYndJHVMDhA4pDEjNscx99H+5coI92kYOnTdiPNJt7MGTLEp2LKNM2+G0Nu+zGf6fwu
-         YU35UWQMrunMBPMcp8dsfOsY6QYrM/WZwoelTFO7Rjl/ubyhIp5wRrD+Sv7o1jQe1oGr
-         UqgQxX8gmN0RI+Qfk+dIgS9kbGqIbpwFhep5ZveR3KgkkA15rTlTxPSB3yPQ2nfq/6n9
-         9jDQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789570056; x=1790174856;
-        h=content-transfer-encoding:content-type:cc:to:from:subject
-         :message-id:references:mime-version:in-reply-to:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=ZM3fU71DKklu1u+zDqECfkv49Iwpg2mCdspvEHepLy4=;
-        b=F4AzsnTUs6rLlNAwzjpmRTuQaseSwH/MD+o10ERCRuVncrcReOLlkrngORPTuK7rgV
-         KDxYkyHo1ePXFrHTi2ISjKA+wJTs43UVU4357rmYtUrNGV/PSNg2hnLomt+hCY/DDZBd
-         ZcTo5jY8UvO3wR3TTJuNvvcMghn3Bd6GyotYXhSzaLPUdKYFYAcIjDsnl07BZMCI59pt
-         TduUJOxzo0j8Upr8QyfldYfW77cjCRLFpv6za+FnCaPKnKLSkPN3zKmDpkA3E/zBzb5a
-         cdlkDpNsXkAwLfmn5wgk9gqEzs6ffehSLewToOV9lKxSPZfEp8PbJlzXaK5KR1Nygfw5
-         HqKw==
-X-Gm-Message-State: AFuF++myaSgAt0f6fgRYUplj4lSNpRqc+nW8alNL3+RajI07EtEYQ3fL
-	Un3NLyzOimAbXIVyYhlYTXpwWHva6y8Z1wboMukieJfy0nn7N1xjORfBf9s0tIXqvC18u5YUjLj
-	pHEcwRM3Uea9xb+8f8Qj/GaEi9lhTyrBK6w52ZQhyHx9+NOX0TWVHp4VWwBvHFV8M/HPyiGMYZo
-	ea42dyFNlUFZmdatwA/BW68w4WWRc9Og==
-X-Received: from wmbf2.prod.google.com ([2002:a05:600c:5942:b0:499:4c8d:551f])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:8b58:b0:49c:fa21:e749
- with SMTP id 5b1f17b1804b1-49eb733e3b5mr35778325e9.31.1789570056169; Wed, 16
- Sep 2026 07:47:36 -0700 (PDT)
-Date: Wed, 16 Sep 2026 16:46:57 +0200
-In-Reply-To: <20260916144647.2651379-11-ardb+git@google.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DJmX77mg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1141A1F00898;
+	Wed, 16 Sep 2026 14:51:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789570309;
+	bh=s9b/9Hwh5vUHfr3h3yI1jv7U58Y0A9HgrBxLkX3sPvA=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=DJmX77mgdbs6Q8GAXeo0braYp2Bik3mxuTOg0XuCWiVphbHAn0kd2P/Gl+uG+6WHV
+	 Nj7WIlnKvMiHz2i5VCCjR0CKoRaRenUKdVTz4v8buhxLZCDYs7IWCtsnkMkJY5qML5
+	 abKuZvlhV5VK8XsDgdsDHh2VJyTT/NPOcB+cu8l4dl4wTx3cP9yEipHHWuu3Sstsgs
+	 w2BFWBemQKvOXthe2X/HXPSb4U4WjkI1WB1QXgotSE6z7uqoNYpuGUaxbqDGsHaugi
+	 qFBqz/j/wpD9Z4FAxE0BIjGvJbIomrHP3AiW+U8sR6kKKimRJUHOhADx5jFJ6fVP0H
+	 hUGLHYw9SMtJQ==
+Message-ID: <b8ad366a-a019-4462-9dce-f687f60ee7f2@kernel.org>
+Date: Wed, 16 Sep 2026 16:51:40 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-References: <20260916144647.2651379-11-ardb+git@google.com>
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=8323; i=ardb@kernel.org;
- h=from:subject; bh=NfkFq12GKt3yz40ChbwrvQeuiqCTEPkRCNxLFhlu1HY=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIWvV6idLbji1b+ZnEToufergu00R0bPa5zzS2pO1/n8xX
- 9FEr+0GHaUsDGJcDLJiiiwCs/++23l6olSt8yxZmDmsTCBDGLg4BWAip+4y/NOvPpu746Dd90vf
- zpRv25uprXNpqbxQaPXk6+/untJf1DGb4Q+nT5l98nT5yYH3S5kvLjPfZ5S04Eb429OFoo5bP7x yd2YCAA==
-X-Mailer: git-send-email 2.55.0.1032.g73a4cd73de-goog
-Message-ID: <20260916144647.2651379-20-ardb+git@google.com>
-Subject: [PATCH v3 9/9] efi/libstub: add initial Boot Loader Interface support
-From: Ard Biesheuvel <ardb+git@google.com>
-To: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, 
-	Vincent Mailhol <mailhol@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 7/9] drivers/base/memory: count inherited poisoned
+ frames into the block
+To: Breno Leitao <leitao@debian.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Miaohe Lin <linmiaohe@huawei.com>, Naoya Horiguchi
+ <nao.horiguchi@gmail.com>, Andrew Morton <akpm@linux-foundation.org>,
+ kas@kernel.org, kexec@lists.infradead.org, Lorenzo Stoakes <ljs@kernel.org>,
+ "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
+ Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
+ Michal Hocko <mhocko@suse.com>, Thomas Gleixner <tglx@kernel.org>,
+ Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+ Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+ "H. Peter Anvin" <hpa@zytor.com>, Brendan Jackman
+ <brendan.jackman@linux.dev>, Johannes Weiner <hannes@cmpxchg.org>,
+ Zi Yan <ziy@nvidia.com>, Oscar Salvador <osalvador@suse.de>,
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ "Rafael J. Wysocki" <rafael@kernel.org>, Danilo Krummrich <dakr@kernel.org>,
+ hannes@cmpxchg.or, shakeel.butt@linux.dev, linux-efi@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-mm@kvack.org, rmikey@meta.com,
+ riel@surriel.com, harry@kernel.org, linux-cxl@vger.kernel.org,
+ driver-core@lists.linux.dev, kernel-team@meta.com
+References: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
+ <20260915-hwpoison-kho-v5-7-3bc7a57bd503@debian.org>
+ <de41b78a-8471-4832-be0c-35d410a4499a@kernel.org>
+ <aqpczrtIwSG948iv@gmail.com>
+From: "David Hildenbrand (Arm)" <david@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=david@kernel.org; keydata=
+ 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
+ qIws/H2t
+In-Reply-To: <aqpczrtIwSG948iv@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-From: Vincent Mailhol <mailhol@kernel.org>
+On 9/16/26 11:35, Breno Leitao wrote:
+> Hello David,
+> 
+> First of all, thanks for your time looking at this patchset.
+> 
+> On Wed, Sep 16, 2026 at 08:48:56AM +0200, David Hildenbrand (Arm) wrote:
+>> On 9/15/26 14:53, Breno Leitao wrote:
+>>> +static void memblk_nr_poison_init(struct memory_block *mem)
+>>> +{
+>>> +	unsigned long pfn = section_nr_to_pfn(mem->start_section_nr);
+>>> +	unsigned long nr_pages = PAGES_PER_SECTION * sections_per_block;
+>>> +	unsigned long i, nr_poison = 0;
+>>> +
+>>> +	/* A hotplugged block is created before its pages are online. */
+>>> +	if (mem->state != MEM_ONLINE)
+>>> +		return;
+>>> +
+>>> +	if (!range_contains_poisoned_memory(PFN_PHYS(pfn),
+>>> +					    nr_pages << PAGE_SHIFT))
+>>> +		return;
+>>> +
+>>> +	for (i = 0; i < nr_pages; i++) {
+>>> +		struct page *page = pfn_to_online_page(pfn + i);
+>>> +
+>>> +		if (page && PageHWPoison(page))
+>>> +			nr_poison++;
+>>> +	}
+>>
+>> That just slows down boot unnecessarily on 99.9999999999999999999% of all
+>> systems out there.
+> 
+> hmmm, I am not sure I see it that way.
+> 
+> The loop only runs for a block the bitmap marks. On a machine with nothing
+> recorded the bitmap is all zeros, the range_contains_poisoned_memory() check
+> right above it returns false, and the loop never executes.
+> 
+> What every boot does pay is that check, once per block. The stub installs
+> the table whether or not anything was ever recorded in it, so this is not a
+> NULL test: it is two 64-bit divisions by the unit size plus a
+> find_next_bit() over the single word a 128M block covers at one bit per 2M.
+> 
+> The real cost (that "for loop above"), comes when you kexec (not on cold
+> boot -- given the bitmap is empty), and you are trying to init
+> a memory block that has poisoned pages into it. Which seems the right
+> trade-off, no?
+> 
+> That said, can we do better? Yes. The silly win is to let the table say
+> whether anything was ever recorded in it, something like a
+> linux_efi_poisoned_memory->empty that the first recorded frame clears,
+> and return on that before the bitmap is reached at all.
+> 
+> Is this what you are looking for, or something more drastic?
 
-The Boot Loader Interface (BLI) [1] defines EFI variables that expose
-boot loader state to the running OS. LoaderInfo identifies the boot
-loader, while LoaderDevicePartUUID records the GPT partition UUID of
-the partition containing it.
+Ah, that magical "range_contains_poisoned_memory" does a bitmap scan?
 
-LoaderDevicePartUUID is used, for example, by systemd-gpt-auto-generator
-[2] to identify the disk the boot loader was launched from and
-automatically detect and mount partitions on it.
+I'm sorry, but that is absolutely confusing.
 
-GRUB [3] and systemd-boot [4] populate these variables, but when the
-kernel is started directly by EFI firmware, there is no conventional
-external boot loader to provide them. In that case, because the EFI stub
-performs the boot loader role, it should provide the variables itself.
+There is no way someone will figure out that range_contains_poisoned_memory()
+queries some efi specific bitmap that won't even be able to represent any memory
+outside of it's range.
 
-Use LoaderInfo as a sentinel: if it is already set by an earlier boot
-stage or cannot be set, bail out. Otherwise, populate the other BLI
-variables.
+I don't really have time to give a better solution, but starting with the
+naming, range_contains_poisoned_memory() is just absolutely misleading.
 
-Parse the loaded image device path, extract the GUID signature from its
-GPT HD() node and publish it under the Linux loader entry vendor GUID as
-the volatile LoaderDevicePartUUID EFI variable.
+-- 
+Cheers,
 
-Install the efi_bli_set_variables() hook in both the generic efi-stub.c
-path and the x86-specific x86-stub.c path.
-
-[1] The Boot Loader Interface
-Link: https://systemd.io/BOOT_LOADER_INTERFACE/
-
-[2] systemd-gpt-auto-generator
-Link: https://www.freedesktop.org/software/systemd/man/latest/systemd-gpt-a=
-uto-generator.html
-
-[3] GRUB -- =C2=A716.2 bli
-Link: https://www.gnu.org/software/grub/manual/grub/html_node/bli_005fmodul=
-e.html
-
-[4] systemd -- systemd-boot UEFI Boot Manager
-Link: https://github.com/systemd/systemd/blob/main/docs/BOOT.md?plain=3D1#L=
-102
-
-Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
-[ardb: - constify 'image' pointer parameter
-       - pass efi_guid_t* to efi_snprintf()]
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/firmware/efi/libstub/Makefile   |  2 +-
- drivers/firmware/efi/libstub/bli.c      | 87 ++++++++++++++++++++
- drivers/firmware/efi/libstub/efi-stub.c |  1 +
- drivers/firmware/efi/libstub/efistub.h  |  2 +
- drivers/firmware/efi/libstub/x86-stub.c |  1 +
- include/linux/efi.h                     | 22 +++++
- 6 files changed, 114 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/l=
-ibstub/Makefile
-index 12c0c7deb5cb..564773c89d14 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -66,7 +66,7 @@ KBUILD_AFLAGS			:=3D $(KBUILD_CFLAGS) -D__ASSEMBLY__
- lib-y				:=3D efi-stub-helper.o gop.o secureboot.o tpm.o \
- 				   file.o mem.o random.o randomalloc.o pci.o \
- 				   skip_spaces.o lib-cmdline.o lib-ctype.o \
--				   alignedmem.o printk.o vsprintf.o \
-+				   alignedmem.o printk.o vsprintf.o bli.o \
- 				   lib-ucs2_string.o
-=20
- # include the stub's libfdt dependencies from lib/ when needed
-diff --git a/drivers/firmware/efi/libstub/bli.c b/drivers/firmware/efi/libs=
-tub/bli.c
-new file mode 100644
-index 000000000000..b2407f63b743
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/bli.c
-@@ -0,0 +1,87 @@
-+// SPDX-License-Identifier: GPL-2.0
-+
-+#include <generated/utsrelease.h>
-+
-+#include <linux/efi.h>
-+#include <linux/errno.h>
-+#include <linux/unaligned.h>
-+
-+#include "efistub.h"
-+
-+static efi_guid_t loader_entry_guid =3D LINUX_EFI_LOADER_ENTRY_GUID;
-+
-+static const struct efi_hd_dev_path *
-+efi_bli_find_hd_node(const struct efi_dev_path *path)
-+{
-+	const struct efi_dev_path *node;
-+	u16 node_len;
-+
-+	for (node =3D path;
-+	     node->header.type !=3D EFI_DEV_END_PATH &&
-+	     node->header.type !=3D EFI_DEV_END_PATH2;
-+	     node =3D (const void *)node + node_len) {
-+		node_len =3D get_unaligned_le16(&node->header.length);
-+
-+		if (node_len < sizeof(node->header))
-+			return NULL;
-+
-+		if (node->header.type !=3D EFI_DEV_MEDIA ||
-+		    node->header.sub_type !=3D EFI_DEV_MEDIA_HARD_DRIVE)
-+			continue;
-+
-+		if (node_len < sizeof(node->hd))
-+			return NULL;
-+
-+		if (node->hd.partition_format !=3D EFI_HD_PARTITION_FORMAT_GPT ||
-+		    node->hd.signature_type !=3D EFI_HD_SIGNATURE_TYPE_GUID)
-+			continue;
-+
-+		return &node->hd;
-+	}
-+
-+	return NULL;
-+}
-+
-+static void efi_bli_populate_loader_part_uuid(const efi_loaded_image_t *im=
-age)
-+{
-+	static efi_guid_t device_path_guid =3D EFI_DEVICE_PATH_PROTOCOL_GUID;
-+	efi_char16_t partuuid[UUID_STRING_LEN + 1];
-+	const struct efi_hd_dev_path *hd_node;
-+	const struct efi_dev_path *path;
-+
-+	if (efi_bs_call(handle_protocol, efi_table_attr(image, device_handle),
-+			&device_path_guid, (void **)&path) !=3D EFI_SUCCESS)
-+		return;
-+
-+	hd_node =3D efi_bli_find_hd_node(path);
-+	if (!hd_node)
-+		return;
-+
-+	if (efi_snprintf(partuuid, ARRAY_SIZE(partuuid), "%pUl",
-+			 &hd_node->signature) !=3D UUID_STRING_LEN)
-+		return;
-+
-+	set_efi_var(L"LoaderDevicePartUUID", &loader_entry_guid,
-+		    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-+		    sizeof(partuuid), partuuid);
-+}
-+
-+void efi_bli_set_variables(const efi_loaded_image_t *image)
-+{
-+	static efi_char16_t loader_info[] =3D L"Linux EFI stub " UTS_RELEASE;
-+	unsigned long size =3D 0;
-+
-+	if (!image)
-+		return;
-+
-+	if (get_efi_var(L"LoaderInfo", &loader_entry_guid,
-+			NULL, &size, NULL) !=3D EFI_NOT_FOUND)
-+		return;
-+
-+	if (set_efi_var(L"LoaderInfo", &loader_entry_guid,
-+			EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-+			sizeof(loader_info), loader_info) !=3D EFI_SUCCESS)
-+		return;
-+
-+	efi_bli_populate_loader_part_uuid(image);
-+}
-diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi=
-/libstub/efi-stub.c
-index 42d6073bcd06..2a95f4ea104a 100644
---- a/drivers/firmware/efi/libstub/efi-stub.c
-+++ b/drivers/firmware/efi/libstub/efi-stub.c
-@@ -165,6 +165,7 @@ efi_status_t efi_stub_common(efi_handle_t handle,
- 	dpy =3D setup_primary_display();
-=20
- 	efi_retrieve_eventlog();
-+	efi_bli_set_variables(image);
-=20
- 	/* Ask the firmware to clear memory on unclean shutdown */
- 	efi_enable_reset_attack_mitigation();
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/=
-libstub/efistub.h
-index 880c1d0c464b..4f9e7ae28b6c 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -1072,6 +1072,8 @@ efi_status_t efi_random_alloc(unsigned long size, uns=
-igned long align,
- 			      int memory_type, unsigned long alloc_min,
- 			      unsigned long alloc_max);
-=20
-+void efi_bli_set_variables(const efi_loaded_image_t *image);
-+
- efi_status_t efi_random_get_seed(void);
-=20
- efi_status_t check_platform_features(void);
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi=
-/libstub/x86-stub.c
-index cef32e2c82d8..b762f7f37f28 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -1014,6 +1014,7 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- 	efi_random_get_seed();
-=20
- 	efi_retrieve_eventlog();
-+	efi_bli_set_variables(image);
-=20
- 	setup_graphics(boot_params);
-=20
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index c35446a0b66f..ecb34be37a87 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -957,6 +957,17 @@ extern int efi_status_to_err(efi_status_t status);
- #define   EFI_DEV_END_INSTANCE			0x01
- #define   EFI_DEV_END_ENTIRE			0xFF
-=20
-+enum efi_hd_partition_format {
-+	EFI_HD_PARTITION_FORMAT_MBR =3D 1,
-+	EFI_HD_PARTITION_FORMAT_GPT,
-+};
-+
-+enum efi_hd_signature_type {
-+	EFI_HD_SIGNATURE_TYPE_NONE,
-+	EFI_HD_SIGNATURE_TYPE_MBR,
-+	EFI_HD_SIGNATURE_TYPE_GUID,
-+};
-+
- struct efi_generic_dev_path {
- 	u8				type;
- 	u8				sub_type;
-@@ -988,6 +999,16 @@ struct efi_rel_offset_dev_path {
- 	u64				ending_offset;
- } __packed;
-=20
-+struct efi_hd_dev_path {
-+	struct efi_generic_dev_path	header;
-+	u32				partition_number;
-+	u64				partition_start;
-+	u64				partition_size;
-+	efi_guid_t			signature;
-+	u8				partition_format;
-+	u8				signature_type;
-+} __packed;
-+
- struct efi_mem_mapped_dev_path {
- 	struct efi_generic_dev_path	header;
- 	u32				memory_type;
-@@ -1007,6 +1028,7 @@ struct efi_dev_path {
- 		struct efi_pci_dev_path		pci;
- 		struct efi_vendor_dev_path	vendor;
- 		struct efi_rel_offset_dev_path	rel_offset;
-+		struct efi_hd_dev_path		hd;
- 	};
- } __packed;
-=20
---=20
-2.55.0.1032.g73a4cd73de-goog
-
+David
