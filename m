@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BDEB050E587;
-	Thu, 17 Sep 2026 16:10:48 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4064250E5B5;
+	Thu, 17 Sep 2026 16:11:01 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789661450; cv=none; b=hBQyQlJJRJIZojw2bsGkxm2zhXJINhh0+4FbUOe3Hn8W1JWcElSmNbS0LLwjxpnEl7x7WDp+w1FDEjmmGcnYj09ORGnmtJoSmPvZYwJs3QpLMg8kzsM370ZhMG93GRLmb0AEursjULbPbhKqoYl0WTIbT8kqw5jTjAUkZUyG4r0=
+	t=1789661463; cv=none; b=jyqUa6gpDs+Ei1+tNCbKGIzaLve/TjABHzUmb+MTcgtPKWAoafziMIys2xWTDOjrOwGsZht39wYmxbzyDnAT5Q95C2/bW7S15FSwaMs3+/qIMPk0UQQjXlOyIxW/MiP5stM+ztKK7OMQQVZSpp/X4PZ75RiBfnCp5H9EY1+CAwM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789661450; c=relaxed/simple;
-	bh=ed2Yyw/iZdlR8zsOttNJurPt1jD2t74hXGroQgbemrM=;
+	s=arc-20240116; t=1789661463; c=relaxed/simple;
+	bh=oEqv26NNp6DC+I1JyUl1cIrGQ+RyNw07N7F7X92kUw8=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=AXZEpisicYRfwbW8vv+a7uJ929hqy8uif2YM+HB/MHgSKxiw6DPnJscTs40eVaLx6a8Nh9voXaiTbshTFilAMZiE6g8ta0wWLToFdhhGQDCOX1nDxlfisnoPG/yhAaJUtmxKTsKrS5YF0UgSGoRKXD7KRAQYk3rY6PAn1qlb2WQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=THLOBEP8; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=MzHg4ZzYSPJD3grSota+1p2xobjHyJzvKe1Qze7LtRZCsBnOyCU4GZYxlXLt0Vrd5CzGdbNGzZwQ/79Sunj3nXlffXgxUCksKzLgBrZnAjL++FlopZ2J95S64AVauXazGbhBHzM5kseVS4UJjVxo75M6/MBuY1yDI5VFdThVulI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=F1E2m9xP; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="THLOBEP8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0C57B1F00893;
-	Thu, 17 Sep 2026 16:10:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="F1E2m9xP"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 202C21F000FF;
+	Thu, 17 Sep 2026 16:10:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789661448;
-	bh=R/dI7mlJ74lyeS1TaG8sZDLjKTD6N4MtXCnU+NQQZlI=;
+	s=k20260515; t=1789661461;
+	bh=zRS8A68HtauULKqM669Tk32r1+W1FP4YJiATZSr8tbY=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=THLOBEP8cD0Prz+aYzKFLFiDAaCtSLcp3z2JIKOlETzeJSQAq2yTCrFCM1M/MmeGF
-	 KTKc7QJcFU+PfZ+3IllL04QD7xucC6NKS5c3A2G3i1CHq6CNQX3HD1BQSCMFQ6QatW
-	 6GQeGTKLZvgUsz8oJxGD4RFahsBVfnBU8fYI5kPV0C8CnqF+k35P1xz3gxJf3QX62o
-	 78XEx6aZB7HqanYAwR5KzWbKp7yGZohBCnNIihCFc4l3NskPz2uU/MLPu/+kwebmcN
-	 rfN+PSrh/J8ohhK1Gu6aRJv9yVlWvc+e6Nuh3b2xlEsLGSY62t4dyhQiYcXvz8MYjP
-	 AlKfjqdUL5suw==
+	b=F1E2m9xPSuxmyz+NzAE+hfwooNNJ6UWahNsEskV3Vi7ws3jsEMKSCxCEVXCHESlr7
+	 inIqCePqowrK38M9njm6VSZGSl1stDGpAf2J3nZI1FCvkxyPVH7SYEaPMZMKbMbsdZ
+	 HmPM4F35utA4agtvqryVuZYZalKb7yFdnsYXMZlWtkZgl5FCS8Brml6QSTXwhVXrzu
+	 RNr/7hwpw1dxi8CXQkyy/rzRA1/FxyVbXCsGjKYaZgaJ9Z2Oo1MYE1LEozZxSH/UU2
+	 jvIi8mwqk3lwDaTSp9uaxGhd8bDwo1tPfeQ+Fbo6G3A/7OUJXD3LKyhkVqqL9kEnC9
+	 e6LMEu4cMPLMQ==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Thu, 17 Sep 2026 17:06:29 +0100
-Subject: [PATCH v3 19/20] kbuild: build rust crates in parallel with the
- rest of the build
+Date: Thu, 17 Sep 2026 17:06:30 +0100
+Subject: [PATCH v3 20/20] kbuild: compress the kernel with pigz if
+ available
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -38,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260917-build-speedup-v3-19-9ecf4163ff36@kernel.org>
+Message-Id: <20260917-build-speedup-v3-20-9ecf4163ff36@kernel.org>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
 In-Reply-To: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -75,126 +75,254 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  linux-hardening@vger.kernel.org, "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4034; i=ljs@kernel.org;
- h=from:subject:message-id; bh=ed2Yyw/iZdlR8zsOttNJurPt1jD2t74hXGroQgbemrM=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLLWCDA8Kut9aPJ82zKWj9qnUzwcVLxWrrjtosDK/TXL6
- oY/+y+zjlIWBjEuBlkxRZbnX8T3B4mEzeu84O8GM4eVCWQIAxenAEzE7xgjw8p7mrobDqbxhIYd
- i21InSK/3H6d38Ggejaje3LcKjIhCQz/87etZFm/NNik7erMlzuWrG8IW7FTVr835seijNivKx/
- 94QcA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=10146; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=oEqv26NNp6DC+I1JyUl1cIrGQ+RyNw07N7F7X92kUw8=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLLWCDBMKzOziPy24eti9mPTj2yKdPhg87fcUNzAa1aIy
+ doLhkuZO0pZGMS4GGTFFFmefxHfHyQSNq/zgr8bzBxWJpAhDFycAjCRqnuMDB+ab8/ULXUUV+OL
+ /HmyTLBM9WLX7o2sx+ueMmcXsD9mq2H4K6Dgvin1+uutN2xflfTpbKyVC/2zpUj3iEGYvm+HvlE
+ jJwA=
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-When CONFIG_RUST is specified make prepare builds all of the rust
-components before descending into the tree.
+The gzip step of a kernel build is very lengthy, especially for larger
+builds such as allmodconfig.
 
-This means nothing can be done until all of these are compiled, resulting
-in a stall at the start of every clean CONFIG_RUST build.
+gzip itself cannot be run in parallel, however an alternative tool exists
+that can, providing the same feature set as gzip itself - pigz - which
+works as a drop-in replacement.
 
-This also implicitly slows down every rust-capable LLVM allmodconfig build
-as this enables the CONFIG_RUST option.
+On a 128-core Threadripper, gzip -9 of a 36 MiB x86-64 vmlinux.bin takes
+1.6s, and with pigz it takes 0.09s, so the performance increase is
+significant.
 
-Fix this by allowing rust crates to be built alongside the C code.
+Therefore introduce the KPGZIP build variable which specifies the
+compressor to use for the kernel image and default it to pigz if available,
+or KGZIP otherwise (which itself defaults to gzip).
 
-Remove the rust build from the make prepare step, then establish a
-dependency between rust code located elsewhere in the tree upon rust
-components contained in rust/.
+Modules, packaging and the embedded kernel configuration (CONFIG_IKCONFIG)
+continue to use KGZIP which defaults to a single-threaded gzip instance.
 
-Do this by establishing a top-level list of directories containing rust
-code, KBUILD_RUST_DIRS, upon which the dependency is expressed.
+Module compression is run in parallel by make, so pigz offers no benefit
+there, packaging sits outside the build and the embedded configuration is
+too small to matter.
 
-Finally, ensure that no rust code is located elsewhere and fail the build
-if any is found to ensure that nothing is missed in future.
+pigz is executed using scripts/jobserver-exec, which reserves the job slots
+make has free - necessary, as otherwise pigz would just grab unbounded
+CPUs.
 
-Care is taken to ensure the rust/ dependency is also established for any
-module being built to account for external rust modules which rely upon it,
-and that only one rust/ build will be performed at any one time.
+The kernel image compression step is always performed at the end of the
+build so should typically have all job slots available.
 
-External rust modules builds are unaffected - make modules_prepare ...
-(where ... are other goals) will build rust/ first.
+pigz always provides byte-for-byte identical output across runs regardless
+of thread count, but pigz and gzip are not guaranteed to generate the same
+binary output, so reproducible builds must use the same tools consistently.
 
-Every Rust and C object was confirmed to be byte-for-byte identical after
-this change.
+Also update Documentation/kbuild/kbuild.rst to describe KPGZIP and
+Documentation/process/changes.rst to list the optional pigz dependency.
+
+While there, add entries for the other compressor programs.
+
+Every x86 build ends with the compression of vmlinux.bin, 36MB for
+defconfig and over 200MB for allmodconfig, no-op builds are unchanged.
 
 Whole build, 128-thread Threadripper 9980X, best of N runs:
 
                                          before   after     delta
                                          -------------------------------
-  x86 defconfig+RUST, clean                36.5s    32.6s     -3.9s (-11%)
-  x86 allmodconfig, clean                 297.0s   278.3s    -18.7s (-6%)
+  x86 defconfig, touch mm/vma.c, gcc        7.7s     6.0s     -1.7s (-22%)
+  x86 defconfig, touch mm/vma.c, clang      6.9s     5.4s     -1.5s (-21%)
+  x86 defconfig, clean, gcc                28.2s    26.3s     -1.8s (-6%)
+  x86 defconfig, clean, clang              28.7s    27.2s     -1.5s (-5%)
+  x86 allmodconfig, touch mm/vma.c, gcc    23.7s    15.4s     -8.3s (-35%)
+  x86 allmodconfig, touch mm/vma.c, clang  22.5s    15.6s     -7.0s (-31%)
+  x86 allmodconfig, clean, gcc            294.1s   278.6s     -15.5s (-5%)
+  x86 allmodconfig, clean, clang          283.9s   266.8s     -17.1s (-6%)
 
+Suggested-by: Kees Cook <kees@kernel.org>
+Link: https://zlib.net/pigz/
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- Kbuild                 |  5 +++++
- Makefile               | 13 ++++++++++++-
- scripts/Makefile.build |  5 ++++-
- 3 files changed, 21 insertions(+), 2 deletions(-)
+ Documentation/kbuild/kbuild.rst   | 17 +++++++++++++++++
+ Documentation/process/changes.rst |  8 ++++++++
+ Makefile                          |  5 ++++-
+ kernel/Makefile                   |  6 +++++-
+ scripts/Makefile.lib              |  4 ++--
+ scripts/jobserver-exec            |  3 ++-
+ tools/lib/python/jobserver.py     | 13 +++++++++++++
+ 7 files changed, 51 insertions(+), 5 deletions(-)
 
-diff --git a/Kbuild b/Kbuild
-index a6a0192dea08..9670556059dd 100644
---- a/Kbuild
-+++ b/Kbuild
-@@ -115,3 +115,8 @@ obj-$(CONFIG_NET)	+= net/
- obj-y			+= virt/
- obj-y			+= $(ARCH_DRIVERS)
- obj-$(CONFIG_DRM_HEADER_TEST)	+= include/
+diff --git a/Documentation/kbuild/kbuild.rst b/Documentation/kbuild/kbuild.rst
+index 5a9013bacfb7..e71a692a559a 100644
+--- a/Documentation/kbuild/kbuild.rst
++++ b/Documentation/kbuild/kbuild.rst
+@@ -110,6 +110,23 @@ HOSTLDLIBS
+ ----------
+ Additional libraries to link against when building host programs.
+ 
++KGZIP
++-----
++The gzip program used for compressed modules, packaging and the embedded
++kernel configuration. Defaults to gzip.
 +
-+# Rust code elsewhere in the tree depends upon rust/.
-+ifdef CONFIG_RUST
-+$(KBUILD_RUST_DIRS): | rust
-+endif
++KPGZIP
++------
++The gzip program used for the compressed kernel image. Defaults to pigz (a
++parallel implementation of gzip), run under scripts/jobserver-exec so that it
++uses the job slots make has free, if pigz is installed, otherwise to
++``KGZIP``. Set ``KPGZIP=`` on the make command line to use another program.
++
++KBZIP2, KLZOP, LZMA, LZ4, XZ, ZSTD
++----------------------------------
++The compressor programs for the other formats. Each defaults to the program
++of the same name.
++
+ .. _userkbuildflags:
+ 
+ USERCFLAGS
+diff --git a/Documentation/process/changes.rst b/Documentation/process/changes.rst
+index 0aa232b117b5..28f2ca63318e 100644
+--- a/Documentation/process/changes.rst
++++ b/Documentation/process/changes.rst
+@@ -55,6 +55,7 @@ nfs-utils              1.0.5            showmount --version
+ openssl & libcrypto    1.0.0            openssl version
+ pahole                 1.26             pahole --version
+ pcmciautils            004              pccardctl -V
++pigz (optional)        2.4              pigz --version
+ PPP                    2.4.0            pppd --version
+ procps                 3.2.0            ps --version
+ Python                 3.9.x            python3 --version
+@@ -206,6 +207,13 @@ GNU AWK
+ GNU AWK is needed if you want kernel builds to generate address range data for
+ builtin modules (CONFIG_BUILTIN_MODULE_RANGES).
+ 
++pigz (optional)
++---------------
++
++pigz is a parallel implementation of gzip. If it is installed the compressed
++kernel image is produced with it rather than with gzip, see ``KPGZIP`` in
++Documentation/kbuild/kbuild.rst.
++
+ System utilities
+ ****************
+ 
 diff --git a/Makefile b/Makefile
-index 8263fc8a86b3..ede9cfeffd56 100644
+index ede9cfeffd56..d50bcb480134 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -1425,11 +1425,14 @@ prepare0: archprepare
- 	$(Q)$(MAKE) $(build)=. prepare
- 	$(Q)$(MAKE) $(build)=scripts/mod
+@@ -568,6 +568,9 @@ LZMA		= lzma
+ LZ4		= lz4
+ XZ		= xz
+ ZSTD		= zstd
++# The kernel image is compressed with pigz, on the job slots make has free,
++# if it is installed. Everything else uses KGZIP.
++KPGZIP		:= $(if $(shell command -v pigz 2>/dev/null),$(PYTHON3) $(abs_srctree)/scripts/jobserver-exec pigz -p %PARALLELISM%,$(KGZIP))
+ TAR		= tar
  
-+ifdef CONFIG_RUST
-+export KBUILD_RUST_DIRS := drivers lib mm samples
-+endif
+ CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
+@@ -648,7 +651,7 @@ export RUSTC RUSTDOC RUSTFMT RUSTC_OR_CLIPPY_QUIET RUSTC_OR_CLIPPY BINDGEN LLVM_
+ export HOSTRUSTC KBUILD_HOSTRUSTFLAGS
+ export CPP AR NM STRIP OBJCOPY OBJDUMP READELF PAHOLE RESOLVE_BTFIDS LEX YACC AWK INSTALLKERNEL
+ export PERL PYTHON3 CHECK CHECKFLAGS MAKE UTS_MACHINE HOSTCXX
+-export KGZIP KBZIP2 KLZOP LZMA LZ4 XZ ZSTD TAR
++export KGZIP KPGZIP KBZIP2 KLZOP LZMA LZ4 XZ ZSTD TAR
+ export KBUILD_HOSTCXXFLAGS KBUILD_HOSTLDFLAGS KBUILD_HOSTLDLIBS KBUILD_PROCMACROLDFLAGS LDFLAGS_MODULE
+ export KBUILD_USERCFLAGS KBUILD_USERLDFLAGS
+ 
+diff --git a/kernel/Makefile b/kernel/Makefile
+index 1e1a31673577..c64c82c96b40 100644
+--- a/kernel/Makefile
++++ b/kernel/Makefile
+@@ -153,9 +153,13 @@ obj-$(CONFIG_SCF_TORTURE_TEST) += scftorture.o
+ 
+ $(obj)/configs.o: $(obj)/config_data.gz
+ 
++# .config is small, so it is compressed with gzip rather than the image compressor.
++quiet_cmd_gzip_config = GZIP    $@
++      cmd_gzip_config = cat $(real-prereqs) | $(KGZIP) -n -f -9 > $@
 +
- # All the preparing..
- prepare: prepare0
- ifdef CONFIG_RUST
- 	+$(Q)$(CONFIG_SHELL) $(srctree)/scripts/rust_is_available.sh
--	$(Q)$(MAKE) $(build)=rust
- endif
+ targets += config_data config_data.gz
+ $(obj)/config_data.gz: $(obj)/config_data FORCE
+-	$(call if_changed,gzip)
++	$(call if_changed,gzip_config)
  
- PHONY += remove-stale-files
-@@ -1756,6 +1759,14 @@ modules: modules_prepare
- # Target to prepare building external modules
- modules_prepare: prepare
- 	$(Q)$(MAKE) $(build)=scripts scripts/module.lds
-+ifdef CONFIG_RUST
-+# Avoid two instances of rust/ being built at any one time.
-+ifneq ($(filter modules_prepare,$(MAKECMDGOALS)),)
-+ifeq ($(filter all vmlinux modules %Image% dtbs rustdoc rusttest,$(MAKECMDGOALS)),)
-+	$(Q)$(MAKE) $(build)=rust
-+endif
-+endif
-+endif
+ filechk_cat = cat $<
  
- endif # CONFIG_MODULES
+diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
+index 2f447bc25e7b..8936925d4d50 100644
+--- a/scripts/Makefile.lib
++++ b/scripts/Makefile.lib
+@@ -332,11 +332,11 @@ quiet_cmd_ar = AR      $@
+ quiet_cmd_objcopy = OBJCOPY $@
+ cmd_objcopy = $(OBJCOPY) $(OBJCOPYFLAGS) $(OBJCOPYFLAGS_$(@F)) $< $@
  
-diff --git a/scripts/Makefile.build b/scripts/Makefile.build
-index b9093b39cc2f..77351d6006fa 100644
---- a/scripts/Makefile.build
-+++ b/scripts/Makefile.build
-@@ -360,8 +360,11 @@ quiet_cmd_rustc_o_rs = $(RUSTC_OR_CLIPPY_QUIET) $(quiet_modtag) $@
- 		$(cmd_ld_single)) \
- 	$(cmd_objtool)
+-# Gzip
++# Gzip, for the kernel image
+ # ---------------------------------------------------------------------------
  
-+rust-dir-ok = $(or $(KBUILD_EXTMOD),$(filter rust $(KBUILD_RUST_DIRS),$(firstword $(subst /, ,$@))))
+ quiet_cmd_gzip = GZIP    $@
+-      cmd_gzip = cat $(real-prereqs) | $(KGZIP) -n -f -9 > $@
++      cmd_gzip = cat $(real-prereqs) | $(KPGZIP) -n -f -9 > $@
+ 
+ # Bzip2
+ # ---------------------------------------------------------------------------
+diff --git a/scripts/jobserver-exec b/scripts/jobserver-exec
+index 21b319e6c9a5..89119acb1b9e 100755
+--- a/scripts/jobserver-exec
++++ b/scripts/jobserver-exec
+@@ -4,7 +4,8 @@
+ """
+ Determines how many parallel tasks "make" is expecting, as it is
+ not exposed via any special variables, reserves them all, runs a subprocess
+-with PARALLELISM environment variable set, and releases the jobs back again.
++with PARALLELISM environment variable set and any %PARALLELISM% in its
++arguments replaced by the count, and releases the jobs back again.
+ 
+ See:
+     https://www.gnu.org/software/make/manual/html_node/POSIX-Jobserver.html#POSIX-Jobserver
+diff --git a/tools/lib/python/jobserver.py b/tools/lib/python/jobserver.py
+index 0b1ffdf9f7a3..7e94635bf7d9 100755
+--- a/tools/lib/python/jobserver.py
++++ b/tools/lib/python/jobserver.py
+@@ -29,6 +29,10 @@ $claim child to do the actual work.
+ The end goal here is to keep the total number of build tasks under the
+ limit established by the initial ``make -j$n_proc`` call.
+ 
++A command that takes its thread count on the command line rather than from
++the environment can use the ``%PARALLELISM%`` token in its arguments, which
++is replaced by the count, or by 1 when there is no jobserver.
 +
-+# Ensure that any rust code located elsewhere from rust/ is listed in KBUILD_RUST_DIRS.
- define rule_rustc_o_rs
--	$(call cmd_and_fixdep,rustc_o_rs)
-+	$(if $(rust-dir-ok),,$(error $@: Rust code in a directory not listed in KBUILD_RUST_DIRS, see the top Makefile))$(call cmd_and_fixdep,rustc_o_rs)
- 	$(call cmd,gen_objtooldep)
- endef
+ See:
+     https://www.gnu.org/software/make/manual/html_node/POSIX-Jobserver.html#POSIX-Jobserver
+ """
+@@ -38,6 +42,8 @@ import os
+ import subprocess
+ import sys
  
++PARALLELISM_TOKEN = "%PARALLELISM%"
++
+ def warn(text, *args):
+     print(f'WARNING: {text}', *args, file = sys.stderr)
+ 
+@@ -182,6 +188,9 @@ class JobserverExec:
+         Run a command setting PARALLELISM env variable to the number of
+         available job slots (claim) + 1, e.g. it will reserve claim slots
+         to do the actual build work, plus one to monitor its children.
++
++        Any %PARALLELISM% in the command's arguments is replaced by the same
++        number, or by 1 when there is no jobserver.
+         """
+         self.open()             # Ensure that self.claim is set
+ 
+@@ -192,4 +201,8 @@ class JobserverExec:
+         if self.claim:
+             os.environ["PARALLELISM"] = str(self.claim)
+ 
++        if not isinstance(cmd, str):
++            parallelism = str(self.claim or 1)
++            cmd = [arg.replace(PARALLELISM_TOKEN, parallelism) for arg in cmd]
++
+         return subprocess.call(cmd, *args, **pwargs)
 
 -- 
 2.55.0
