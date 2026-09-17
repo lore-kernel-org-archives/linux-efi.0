@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC8104F5DE0;
-	Thu, 17 Sep 2026 17:39:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C6574EB84C;
+	Thu, 17 Sep 2026 17:41:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789666774; cv=none; b=N/uoIBUu3/VAWF8EQXud7GfnwwFDQloEIq4JMkOjkj5GaGpk2IxGIvA1XOK5WvoirkzHLrLg6jmGHW6JFqnFJ4WUPBdk1STc5v9IdSorYzWcARHdO1PrPfgSmImjwUU1SaV7kD4XFnDJjRSVUMzNQG/hrJ49Gr/2qPMaLkgLwF0=
+	t=1789666900; cv=none; b=X7kWeYGz3YgLoci7Kxer65Dhd9k40nAj1QBNiFpxFQHbrN11sjbfStV8e6/KYHpt7ognpEmoKoR0q3gV8JTbA+gvCxkAZS/cjX5sONbJoDIf4nSXM5XcOP8vVPaLm94kxNAjBiLxfT2WKMS72Yin0eX0DSd8SER3V1Gdq1jS0+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789666774; c=relaxed/simple;
-	bh=iPA+p6LHuyiHGjo+hCD0P1OFvGR8+rWfCMP122YmU/E=;
+	s=arc-20240116; t=1789666900; c=relaxed/simple;
+	bh=8U2+XmeG5Xq2jOoG1wwA14I9mRYbJ1aIXPTDRCZIMj0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=t/yW1bVW+UK1e9cUhrlaAva8nj9T6U+FdXXnZ94YYO1UKpQyLCFjBj/T/y4Qhqx8WcZiRFIxo2NAwo/XWbQKs7kDEE9KOrkjyS0DQee3QIg78Kx1k9z+KVsFLQdJOLxdjNX2ljxtcU98DErLqyJcsp01qLiMYL4Oj8NOQixvgrk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UFFYB82J; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=EM24pxh57wLYXBi8bKswO/zzwKHw5M1/MD3TkMnDrIPdlOnaKhRgy9bbSzKJK4bwjYuy0fatVdqR3GaWAVERrna/IXKXVi3NSSJ0QHDFIf21XPDO9rN8Gzfbyh9/7RXjj0BD0K+nD6O5NjF3+NKdyDRERBKYF4j7Dx7z3r81d4g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WB36KjOw; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UFFYB82J"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DB21B1F000FF;
-	Thu, 17 Sep 2026 17:39:20 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WB36KjOw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7202C1F00893;
+	Thu, 17 Sep 2026 17:41:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789666773;
-	bh=QiqLoLaMeHAvq9CreoMXDkPkVCQITFh+w2NQFDlDCNU=;
+	s=k20260515; t=1789666899;
+	bh=vt7xldXW981Vs/3xttM71tth11TJJOnWXjFdN8oXwIQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=UFFYB82JqIT2jZngugSLMZP4JXo5QIHBIIOCxt7FU+Nro2gIZV8nvb+n9AuluVPHg
-	 hItERr0YpNLVZh//ikX/iGTSxIB4+6I+cLKGCb+9yO1Gn1gYvakRTHTK8UCFe9C6la
-	 gQyYet+0VIcuaUGGlMo2UJuq3zYKloV7cy2iEzNGbDMkxA3YeIbiSRaeOHtPt2tTU+
-	 nyHWcz0Roaay3mBigf5qypMT8EjFczv69Hu+7Yljzvhc4sIejovuvH+rjjJnIDTF9M
-	 1CJwkbVf09DxQnfs7/xzR551PFlbxA+cMpBIzHpu19R2W1QO882vpP9tajV3swKbTu
-	 ng6TxIpeHV7ag==
-Date: Thu, 17 Sep 2026 18:39:18 +0100
+	b=WB36KjOw/OL//N6jizHXsujpBTjNAWiAAoaPnfaeh/XOIirkqmGVTj/UH7olmLVri
+	 GKKQQaqqIRE37gED19mdnpY+mDoOsgNbElRud0418CSQkGSF7mXE0BDc0b7WRjtSYs
+	 4icfPjYTE9W1OI4NrzDPHN0M+jAgLG76KOhQ2ESZtKMON8MQvL3/O7xV9SCPakYhDw
+	 O3jmy/4A1f3c20HNr0x08yqHyE2OZydqYtgvI53JK/ODOcIWr3wSqTnp5PPj/Jk2Zl
+	 2oV1GJ3YELEFDXW6y73rX076iLwzGzB9BGV30bF0eZlFgY+AZOHFHV0HUISkJXQlV0
+	 VPjicpdcQKK3w==
+Date: Thu, 17 Sep 2026 18:41:23 +0100
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 To: Kees Cook <kees@kernel.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -54,10 +54,10 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
 	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
 Subject: Re: [PATCH v3 01/20] kbuild: do not allocate .modinfo in vmlinux
-Message-ID: <aqwlKFJ27LSsFsb-@gremlin>
+Message-ID: <aqwl59TrUqugElwk@gremlin>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
  <20260917-build-speedup-v3-1-9ecf4163ff36@kernel.org>
- <202609171002.8C0C739@keescook>
+ <202609170950.480F90A28@keescook>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -66,20 +66,45 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <202609171002.8C0C739@keescook>
+In-Reply-To: <202609170950.480F90A28@keescook>
 
-On Thu, Sep 17, 2026 at 10:05:34AM -0700, Kees Cook wrote:
+On Thu, Sep 17, 2026 at 09:52:32AM -0700, Kees Cook wrote:
 > On Thu, Sep 17, 2026 at 05:06:11PM +0100, Lorenzo Stoakes (ARM) wrote:
+> > -# .modinfo in vmlinux.unstripped is aligned to 8 bytes for compatibility with
+> > -# tools that expect vmlinux to have sufficiently aligned sections but the
+> > -# additional bytes used for padding .modinfo to satisfy this requirement break
+> > -# certain versions of kmod with
+> > -#
+> > -#   depmod: ERROR: kmod_builtin_iter_next: unexpected string without modname prefix
+> > -#
+> > -# Strip the trailing padding bytes after extracting .modinfo to comply with
+> > -# what kmod expects to parse.
+>
+> This comment still seems useful here (afaict the stripping is still
+> happening with the "sed"). Maybe better to leave it, or future readers
+> are left wondering what the sed is for?
+
+Ack will restore!
+
+>
+> >  quiet_cmd_modules_builtin_modinfo = GEN     $@
+> > -      cmd_modules_builtin_modinfo = $(cmd_objcopy); \
+> > -                                    sed -i 's/\x00\+$$/\x00/g' $@; \
+> > -                                    chmod -x $@
+> > -
+> > -OBJCOPYFLAGS_modules.builtin.modinfo := -j .modinfo -O binary
 > > +      cmd_modules_builtin_modinfo = $(OBJCOPY) -O binary -j .modinfo --dump-section .modinfo=$@ $< $@.tmp; \
 > > +                                    rm -f $@.tmp; \
 > > +                                    sed -i 's/\x00\+$$/\x00/g' $@
 >
-> Oh, I just noticed this. I don't think the .tmp is needed. You can just
-> use /dev/null for the outfile here: no need to write anything unused to
-> disk; seems to work for binutils and llvm's objcopy.
+> Otherwise, looks good. With the comment back (or rewritten):
+>
+> Reviewed-by: Kees Cook <kees@kernel.org>
 
-Ack will fix up thanks!
+Thanks!
 
+>
+> -Kees
 >
 > --
 > Kees Cook
