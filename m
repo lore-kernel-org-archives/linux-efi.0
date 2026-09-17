@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FE494F96C5;
-	Thu, 17 Sep 2026 16:08:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51D874E0214;
+	Thu, 17 Sep 2026 16:08:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789661318; cv=none; b=KCveuRlmsZqhJSNCk8kRZ/5GfUAA0LbrOCqC2LSBLIVnOrlIWkYC94u18aBvsSJ1rZ9v9CMByudnCrKnUsTZCFW1m/qCkLlEB4MzJe/MaN8c9BBNw9/gJaTO7n1N8IKh1ec5nv36PhtyRHfpkf2i8hw2dY1/M+PYjFFyveDZRIo=
+	t=1789661332; cv=none; b=qrTSxw2rKSFDOnz7S2wq3y4GUXe4J8cKYRUQ/BvlSKeCp6GpFckpoYe8fUUlKdWLwAmjWRrDp4V47TsIVE5VALa2H/Q3I8T7fDG6YGx2prnh6dghARVIgfuE27rGZQmZwLzAyNM4L7fACtTLiBEYRp12EKtxY/Liu9B+Ca13M3k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789661318; c=relaxed/simple;
-	bh=yAbXrDXG7VdFDFRiFn8pVEd6adxTWGnW134OALwRIaA=;
+	s=arc-20240116; t=1789661332; c=relaxed/simple;
+	bh=I4N/QGvfiqwISRNIr8XvyiUONyrL6kJU9dfDNPImVZI=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=s3Gw/MzBuHwW8Kg/Fg4vARvqi4ARHsNf2MAgDD5bLw7r79jldMFhGd4Xog4gqQ9oSoPRZSmMM5nPm7yTLBqoYu7zsS7+f0v0GNgL5YrXMoLG3td3PKlUUv6yAxs8Cgt2TntdE+z3pk4jQs4aTyx2Ie+Fd83/wZuEGkyVTYYwKTY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=J28jguIn; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=QvHHSof4PsEtnJb2K1C0gZ1NHfhOXxGjKSyEP1UrcPQCG19ycImFkbpHcfp3CRsS82tvD6YtH/80Os70H50R2vFiFisIv0ohGaytYW1TFLuZ4x3IU2ikuwNHjx8RZe7MpRPL5yF7dC32K9A7zZFH8ezhHOQm7xCPu+ED8tSs2zU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZDAidKjc; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="J28jguIn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 570FD1F00893;
-	Thu, 17 Sep 2026 16:08:24 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZDAidKjc"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 798501F0089A;
+	Thu, 17 Sep 2026 16:08:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789661317;
-	bh=XFRcN9YvGWp0ap8rBqGLz/BcYo31TE+8eTevB9SR64s=;
+	s=k20260515; t=1789661330;
+	bh=kyV9tLD58BJ1dnw177aZoGUZ0P4tXoiPTGjshBkWPJc=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=J28jguIn/hZZoBVKIkql7H5GclDkG5XqgTg6LKBxAT8XuIUryEm8NTViwdtjjqkQM
-	 tHgsZQnUE6OqiFOXByPRAS9jwyWM8F0MDmyX7f0ACjdqvlS4LBkkR7xxVVexOGV/Y9
-	 NWyky9XneGDglH8/0QZfVbnrJ5FLalJGuCnJpt/WkpmHP29cYcOKSXF0OUkpkWLWKd
-	 ZZ+s0sn5NivyoM9+YxJeFcvhabkAhV+Fvaa/cpptLUuAEfRTm+A6jKAMMgbm4NDcWJ
-	 7tCBRgln5B7ytGp7nRPgez2Px02dfN1iWTpowjOJsN5o3t+ZwYNFX0uR8dyebz7Ph3
-	 Jr/kGqwjuk0ow==
+	b=ZDAidKjc1EtIxtzNUdY/iTnt7xogNeXI5HYMf+bwMPbPI/o0lRhQrYQ8y1JGmWRLy
+	 jSAtW3HYKV8XArFSiwMBr2AUi5cUismQvfYTNzazEnP2MCJ91BxCWWeGynbjwyQpqu
+	 RtOe5L2X/HI/1s0juL99bvUCLui459HjTRXl+Z9g7yjERLOEBWL+hyIt0Dk1knC3UI
+	 i342CVtyLrFhfbUxrSnjsmgcB8Dg3E09Tm7cmT5nyOjDnkYXyt8OcBwrCzCfZpKL9y
+	 jGtQtm8PqkRnRK1vD2YURbnGLkhMwEiBhepG0eAQ0SmgfO2hioga8/OkLes57mrBiY
+	 juwdb6o5Wrz1Q==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Thu, 17 Sep 2026 17:06:19 +0100
-Subject: [PATCH v3 09/20] kbuild: implement and use depcheck to check
- dependency timestamps
+Date: Thu, 17 Sep 2026 17:06:20 +0100
+Subject: [PATCH v3 10/20] kbuild: move the toolchain checks into
+ init/Kconfig.toolchain
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -38,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260917-build-speedup-v3-9-9ecf4163ff36@kernel.org>
+Message-Id: <20260917-build-speedup-v3-10-9ecf4163ff36@kernel.org>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
 In-Reply-To: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -75,573 +75,442 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  linux-hardening@vger.kernel.org, "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=15962; i=ljs@kernel.org;
- h=from:subject:message-id; bh=yAbXrDXG7VdFDFRiFn8pVEd6adxTWGnW134OALwRIaA=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLLW8P/zmKQbfvG5cHvptnPx/86V7ctUa/0cc/Jdco2ea
- J7+3djzHaUsDGJcDLJiiizPv4jvDxIJm9d5wd8NZg4rE8gQBi5OAZiIw3lGhjksXBv3m8T1S199
- k6J33mhdNydb5C4pIS0hvlW7fCXPRjIybDi7/oTRVgau6Gszq5OMlonE8TLM2Hs1NOj8ev1QvyO
- inAA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=14277; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=I4N/QGvfiqwISRNIr8XvyiUONyrL6kJU9dfDNPImVZI=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLLW8P87fnq6gJGbs/cdVfdPnqLmxo9Dt23ccr9utrNJr
+ eB0q2VZHaUsDGJcDLJiiizPv4jvDxIJm9d5wd8NZg4rE8gQBi5OAZiI5y1Ghn419SnhOtP0KzJf
+ lW5zeS32hzM6UOTx/smf4j4cZbG5MYmRoen+MesJZktCEtQe3eS6eVXhiHKM9cwFIaLXe40myu9
+ 7yg4A
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-Each object's .cmd file lists its header dependencies, which often
-consists of over a thousand dependencies.
+init/Kconfig opens with two hundred lines identifying the compiler,
+assembler, linker and rustc and probing which options they support, none of
+it to do with init.
 
-When little has changed in the tree, this is what make spends most of its
-time doing, spending over a second, single-threaded when parsing larger
-directory trees.
+Move them into their own file, sourced from the top of init/Kconfig, so
+that the next commit can add to them without growing init/Kconfig further.
 
-It performs considerably more work that is actually necessary to get the
-job done.
-
-This can be done faster in C, so implement scripts/basic/depcheck to do so.
-
-It does as little work as possible, reading the .cmd files from a
-directory's targets and running stat on each dependency only a single time.
-
-It generates a fragment holding only the saved command line for a target
-whose dependencies all exist and are older than it, and the entire .cmd
-file for any other.
-
-That way, Makefile.build simply includes the fragment and the amount of
-work make has to do is significantly reduced when there is not much work to
-do.
-
-If the operation fails, kbuild falls back to using .cmd files.
-
-The result is exactly the same as before.
-
-For drivers/gpu/drm/amd/amdgpu in an allmodconfig tree the fragment is a
-fifth of the size of the .cmd files, make reads it in 10ms instead of
-380ms, and the instance goes from 2.2s to 0.4s.
-
-Whole build, 128-thread Threadripper 9980X, best of N runs:
-
-                                         before   after     delta
-                                         -------------------------------
-  x86 defconfig, no-op make, gcc            1.1s    0.78s    -0.30s (-28%)
-  x86 defconfig, no-op make, clang          1.3s    0.94s    -0.34s (-27%)
-  x86 allmodconfig, no-op make, gcc        14.5s    12.9s     -1.6s (-11%)
-  x86 allmodconfig, no-op make, clang      15.5s    14.2s     -1.3s (-9%)
-  x86 allmodconfig, touch mm/vma.c, gcc    34.3s    33.9s    -0.33s (-1%)
-  x86 allmodconfig, touch mm/vma.c, clang  33.2s    32.2s    -0.98s (-3%)
+No functional change.
 
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- Makefile                 |   1 +
- scripts/Makefile.build   |  14 +-
- scripts/basic/.gitignore |   1 +
- scripts/basic/Makefile   |   2 +-
- scripts/basic/depcheck.c | 441 +++++++++++++++++++++++++++++++++++++++++++++++
- 5 files changed, 457 insertions(+), 2 deletions(-)
+ init/Kconfig           | 197 +-----------------------------------------------
+ init/Kconfig.toolchain | 198 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 199 insertions(+), 196 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index dd4c10afbb7f..8105123bcf4d 100644
---- a/Makefile
-+++ b/Makefile
-@@ -2237,6 +2237,7 @@ clean: $(clean-dirs)
- 	$(call cmd,rmfiles)
- 	@find . $(RCS_FIND_IGNORE) \
- 		\( -name '*.[aios]' -o -name '*.rsi' -o -name '*.ko' -o -name '.*.cmd' \
-+		-o -name '.depcheck.mk' -o -name '.depcheck.mk.tmp' \
- 		-o -name '*.ko.*' -o -name '*.o.thinlto.bc' \
- 		-o -name '*.dtb' -o -name '*.dtbo' \
- 		-o -name '*.dtb.S' -o -name '*.dtbo.S' \
-diff --git a/scripts/Makefile.build b/scripts/Makefile.build
-index 2cabfe85b798..b9093b39cc2f 100644
---- a/scripts/Makefile.build
-+++ b/scripts/Makefile.build
-@@ -592,7 +592,19 @@ $(obj)/: $(if $(KBUILD_BUILTIN), $(targets-for-builtin)) \
- 
- existing-targets := $(wildcard $(sort $(targets)))
- 
---include $(foreach f,$(existing-targets),$(dir $(f)).$(notdir $(f)).cmd)
-+cmd-files := $(foreach f,$(existing-targets),$(dir $(f)).$(notdir $(f)).cmd)
-+
-+# depcheck checks timestamps first and outputs only saved command lines of
-+# up-to-date targets, falling back to .cmd files if it fails.
-+depcheck := $(wildcard $(objtree)/scripts/basic/depcheck)
-+
-+ifneq ($(and $(depcheck),$(cmd-files)),)
-+ifeq ($(shell $(depcheck) $(obj)/.depcheck.mk $(cmd-files) && echo ok),ok)
-+cmd-files := $(obj)/.depcheck.mk
-+endif
-+endif
-+
-+-include $(cmd-files)
- 
- # Create directories for object files if they do not exist
- obj-dirs := $(sort $(patsubst %/,%, $(dir $(targets))))
-diff --git a/scripts/basic/.gitignore b/scripts/basic/.gitignore
-index 07c195f605a1..761ee14f9477 100644
---- a/scripts/basic/.gitignore
-+++ b/scripts/basic/.gitignore
-@@ -1,3 +1,4 @@
+diff --git a/init/Kconfig b/init/Kconfig
+index 8583d9f06c52..b44a9482cdc9 100644
+--- a/init/Kconfig
++++ b/init/Kconfig
+@@ -1,201 +1,6 @@
  # SPDX-License-Identifier: GPL-2.0-only
-+/depcheck
- /fixdep
- /randstruct.seed
-diff --git a/scripts/basic/Makefile b/scripts/basic/Makefile
-index fb8e2c38fbc7..ff98780e474d 100644
---- a/scripts/basic/Makefile
-+++ b/scripts/basic/Makefile
-@@ -2,7 +2,7 @@
- #
- # fixdep: used to generate dependency information during build process
+-config CC_VERSION_TEXT
+-	string
+-	default "$(CC_VERSION_TEXT)"
+-	help
+-	  This is used in unclear ways:
+-
+-	  - Re-run Kconfig when the compiler is updated
+-	    The 'default' property references the environment variable,
+-	    CC_VERSION_TEXT so it is recorded in include/config/auto.conf.cmd.
+-	    When the compiler is updated, Kconfig will be invoked.
+-
+-	  - Ensure full rebuild when the compiler is updated
+-	    include/linux/compiler-version.h contains this option in the comment
+-	    line so fixdep adds include/config/CC_VERSION_TEXT into the
+-	    auto-generated dependency. When the compiler is updated, syncconfig
+-	    will touch it and then every file will be rebuilt.
+-
+-config CC_IS_GCC
+-	def_bool $(success,test "$(cc-name)" = GCC)
+-
+-config GCC_VERSION
+-	int
+-	default $(cc-version) if CC_IS_GCC
+-	default 0
+-
+-config CC_IS_CLANG
+-	def_bool $(success,test "$(cc-name)" = Clang)
+-
+-config CLANG_VERSION
+-	int
+-	default $(cc-version) if CC_IS_CLANG
+-	default 0
+-
+-config AS_IS_GNU
+-	def_bool $(success,test "$(as-name)" = GNU)
+-
+-config AS_IS_LLVM
+-	def_bool $(success,test "$(as-name)" = LLVM)
+-
+-config AS_VERSION
+-	int
+-	# Use clang version if this is the integrated assembler
+-	default CLANG_VERSION if AS_IS_LLVM
+-	default $(as-version)
+-
+-config LD_IS_BFD
+-	def_bool $(success,test "$(ld-name)" = BFD)
+-
+-config LD_VERSION
+-	int
+-	default $(ld-version) if LD_IS_BFD
+-	default 0
+-
+-config LD_IS_LLD
+-	def_bool $(success,test "$(ld-name)" = LLD)
+-
+-config LLD_VERSION
+-	int
+-	default $(ld-version) if LD_IS_LLD
+-	default 0
+-
+-config RUSTC_VERSION
+-	int
+-	default $(rustc-version)
+-	help
+-	  It does not depend on `RUST` since that one may need to use the version
+-	  in a `depends on`.
+-
+-config RUST_IS_AVAILABLE
+-	def_bool $(success,$(srctree)/scripts/rust_is_available.sh)
+-	help
+-	  This shows whether a suitable Rust toolchain is available (found).
+-
+-	  Please see Documentation/rust/quick-start.rst for instructions on how
+-	  to satisfy the build requirements of Rust support.
+-
+-	  In particular, the Makefile target 'rustavailable' is useful to check
+-	  why the Rust toolchain is not being detected.
+-
+-config RUSTC_LLVM_VERSION
+-	int
+-	default $(rustc-llvm-version)
+-
+-config RUSTC_LLVM_MAJOR_VERSION
+-	int
+-	default $(shell,expr $(rustc-llvm-version) / 10000)
  
--hostprogs-always-y	+= fixdep
-+hostprogs-always-y	+= fixdep depcheck
+-config RUSTC_CLANG_LLVM_COMPATIBLE
+-	bool
+-	default y if CC_IS_CLANG && RUSTC_LLVM_MAJOR_VERSION = $(shell,expr $(cc-version) / 10000)
+-	help
+-	  This indicates whether Rust and Clang use LLVM of the same major
+-	  version.
+-
+-	  Operations involving handling LLVM IR or bitcode (e.g. cross-language
+-	  LTO) require the same LLVM major version to work properly. For best
+-	  compatibility it is recommended that the exact same LLVM is used.
+-
+-config ARCH_HAS_CC_CAN_LINK
+-	bool
+-
+-config CC_CAN_LINK
+-	bool
+-	default ARCH_CC_CAN_LINK if ARCH_HAS_CC_CAN_LINK
+-	default $(cc_can_link_user,$(m64-flag)) if 64BIT
+-	default $(cc_can_link_user,$(m32-flag))
+-
+-# Fixed in GCC 14, 13.3, 12.4 and 11.5
+-# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=113921
+-config GCC_ASM_GOTO_OUTPUT_BROKEN
+-	bool
+-	depends on CC_IS_GCC
+-	default y if GCC_VERSION < 110500
+-	default y if GCC_VERSION >= 120000 && GCC_VERSION < 120400
+-	default y if GCC_VERSION >= 130000 && GCC_VERSION < 130300
+-
+-config CC_HAS_ASM_GOTO_OUTPUT
+-	def_bool y
+-	depends on !GCC_ASM_GOTO_OUTPUT_BROKEN
+-	depends on $(success,echo 'int foo(int x) { asm goto ("": "=r"(x) ::: bar); return x; bar: return 0; }' | $(CC) -x c - -c -o /dev/null)
+-
+-config CC_HAS_ASM_GOTO_TIED_OUTPUT
+-	depends on CC_HAS_ASM_GOTO_OUTPUT
+-	# Detect buggy gcc and clang, fixed in gcc-11 clang-14.
+-	def_bool $(success,echo 'int foo(int *x) { asm goto (".long (%l[bar]) - .": "+m"(*x) ::: bar); return *x; bar: return 0; }' | $CC -x c - -c -o /dev/null)
+-
+-config TOOLS_SUPPORT_RELR
+-	def_bool $(success,env "CC=$(CC)" "LD=$(LD)" "NM=$(NM)" "OBJCOPY=$(OBJCOPY)" $(srctree)/scripts/tools-support-relr.sh)
+-
+-config CC_HAS_ASM_INLINE
+-	def_bool $(success,echo 'void foo(void) { asm inline (""); }' | $(CC) -x c - -c -o /dev/null)
+-
+-config CC_HAS_ASSUME
+-	bool
+-	# clang needs to be at least 19.1.0 since the meaning of the assume
+-	# attribute changed:
+-	# https://github.com/llvm/llvm-project/commit/c44fa3e8a9a44c2e9a575768a3c185354b9f6c17
+-	default y if CC_IS_CLANG && CLANG_VERSION >= 190100
+-	# supported since gcc 13.1.0
+-	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=106654
+-	default y if CC_IS_GCC && GCC_VERSION >= 130100
+-
+-config CC_HAS_NO_PROFILE_FN_ATTR
+-	def_bool $(success,echo '__attribute__((no_profile_instrument_function)) int x();' | $(CC) -x c - -c -o /dev/null -Werror)
+-
+-config CC_HAS_COUNTED_BY
+-	bool
+-	# clang needs to be at least 20.1.0 to avoid potential crashes
+-	# when building structures that contain __counted_by
+-	# https://github.com/ClangBuiltLinux/linux/issues/2114
+-	# https://github.com/llvm/llvm-project/commit/160fb1121cdf703c3ef5e61fb26c5659eb581489
+-	default y if CC_IS_CLANG && CLANG_VERSION >= 200100
+-	# supported since gcc 15.1.0
+-	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=108896
+-	default y if CC_IS_GCC && GCC_VERSION >= 150100
+-
+-config CC_HAS_COUNTED_BY_PTR
+-	bool
+-	# supported since clang 22
+-	default y if CC_IS_CLANG && CLANG_VERSION >= 220100
+-	# supported since gcc 16.0.0
+-	default y if CC_IS_GCC && GCC_VERSION >= 160000
+-
+-config CC_HAS_BROKEN_COUNTED_BY_REF
+-	bool
+-	# https://github.com/llvm/llvm-project/issues/182575
+-	default y if CC_IS_CLANG && CLANG_VERSION < 220100
+-
+-config CC_HAS_ALLOC_TOKEN
+-	def_bool $(cc-option,-falloc-token-max=123)
+-
+-config CC_HAS_MULTIDIMENSIONAL_NONSTRING
+-	def_bool $(success,echo 'char tag[][4] __attribute__((__nonstring__)) = { };' | $(CC) $(CLANG_FLAGS) -x c - -c -o /dev/null -Werror)
+-
+-config LD_CAN_USE_KEEP_IN_OVERLAY
+-	# ld.lld prior to 21.0.0 did not support KEEP within an overlay description
+-	# https://github.com/llvm/llvm-project/pull/130661
+-	def_bool LD_IS_BFD || LLD_VERSION >= 210000
+-
+-config RUSTC_HAS_SPAN_FILE
+-	def_bool RUSTC_VERSION >= 108800
+-
+-config RUSTC_HAS_UNNECESSARY_TRANSMUTES
+-	def_bool RUSTC_VERSION >= 108800
+-
+-config RUSTC_HAS_FILE_WITH_NUL
+-	def_bool RUSTC_VERSION >= 108900
+-
+-config RUSTC_HAS_FILE_AS_C_STR
+-	def_bool RUSTC_VERSION >= 109100
+-
+-config RUSTC_HAS_SUSPICIOUS_RUNTIME_SYMBOL_DEFINITIONS
+-	def_bool RUSTC_VERSION >= 109800
+-
+-config PAHOLE_VERSION
+-	int
+-	default "$(PAHOLE_VERSION)"
++source "init/Kconfig.toolchain"
  
- # randstruct: the seed is needed before building the gcc-plugin or
- # before running a Clang kernel build.
-diff --git a/scripts/basic/depcheck.c b/scripts/basic/depcheck.c
+ config CONSTRUCTORS
+ 	bool
+diff --git a/init/Kconfig.toolchain b/init/Kconfig.toolchain
 new file mode 100644
-index 000000000000..622101c33650
+index 000000000000..fac36246451f
 --- /dev/null
-+++ b/scripts/basic/depcheck.c
-@@ -0,0 +1,441 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * depcheck - check the dependency timestamps of a directory's targets so that
-+ * make reads only what it needs from their .cmd files.
-+ *
-+ * fixdep writes a .cmd file as:
-+ *
-+ *	savedcmd_dir/foo.o := <command line>
-+ *
-+ *	source_dir/foo.o := dir/foo.c
-+ *
-+ *	deps_dir/foo.o := \
-+ *	  include/linux/bar.h \
-+ *	    $(wildcard include/config/BAZ) \
-+ *
-+ *	dir/foo.o: $(deps_dir/foo.o)
-+ *
-+ *	$(deps_dir/foo.o):
-+ *
-+ * and kbuild may append rules of its own after that, such as one making the
-+ * target depend on objtool.
-+ *
-+ * For a target that exists and is newer than every dependency listed, make can
-+ * have nothing to do with the list, so it is left out and only what precedes
-+ * and follows it is passed on; for anything else the .cmd file is passed on in
-+ * full.
-+ *
-+ * Usage: depcheck <output> <.cmd files...>
-+ *
-+ * The output is a makefile fragment to include in place of the .cmd files; a
-+ * non-zero exit status means the caller should include those instead.
-+ */
-+#include <limits.h>
-+#include <stdbool.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/stat.h>
-+#include <time.h>
-+#include <unistd.h>
-+
-+#include <hash.h>
-+#include <hashtable.h>
-+#include <xalloc.h>
-+
-+/* What fixdep writes, see above. */
-+#define DEPS_PREFIX		"deps_"
-+#define DEPS_RULE_PREFIX	"$(" DEPS_PREFIX
-+#define RULE_SUFFIX		":"
-+#define LINE_CONTINUATION	" \\"
-+#define WILDCARD_OPEN		"$(wildcard "
-+#define WILDCARD_CLOSE		")"
-+#define CMD_SUFFIX		".cmd"
-+
-+/* A line of a .cmd file, without its newline. */
-+struct line {
-+	const char *text;
-+	size_t len;
-+};
-+
-+static bool is_blank(char chr)
-+{
-+	return chr == ' ' || chr == '\t';
-+}
-+
-+static bool str_ends_with(const char *str, const char *suffix)
-+{
-+	const size_t len = strlen(str), suffix_len = strlen(suffix);
-+
-+	return len >= suffix_len && !strcmp(str + len - suffix_len, suffix);
-+}
-+
-+static bool line_starts_with(const struct line *line, const char *prefix)
-+{
-+	const size_t len = strlen(prefix);
-+
-+	return line->len >= len && !memcmp(line->text, prefix, len);
-+}
-+
-+static bool line_ends_with(const struct line *line, const char *suffix)
-+{
-+	const size_t len = strlen(suffix);
-+
-+	return line->len >= len &&
-+	       !memcmp(line->text + line->len - len, suffix, len);
-+}
-+
-+static bool line_is_blank(const struct line *line)
-+{
-+	size_t i;
-+
-+	for (i = 0; i < line->len; i++)
-+		if (!is_blank(line->text[i]))
-+			return false;
-+
-+	return true;
-+}
-+
-+/* Whether the line ends in " \", continuing the list on the next line. */
-+static bool line_is_continued(const struct line *line)
-+{
-+	return line_ends_with(line, LINE_CONTINUATION);
-+}
-+
-+static void line_strip_continuation(struct line *line)
-+{
-+	if (line_is_continued(line))
-+		line->len -= strlen(LINE_CONTINUATION);
-+}
-+
-+static void line_trim(struct line *line)
-+{
-+	while (line->len && is_blank(line->text[0])) {
-+		line->text++;
-+		line->len--;
-+	}
-+	while (line->len && is_blank(line->text[line->len - 1]))
-+		line->len--;
-+}
-+
-+/* Take the next line out of [*pos, end); false once there are none left. */
-+static bool next_line(const char **pos, const char *end, struct line *line)
-+{
-+	const char *newline;
-+
-+	if (*pos >= end)
-+		return false;
-+
-+	newline = memchr(*pos, '\n', end - *pos);
-+	line->text = *pos;
-+	line->len = (newline ? newline : end) - *pos;
-+	*pos = newline ? newline + 1 : end;
-+
-+	return true;
-+}
-+
-+/* Describes a dependency file. */
-+struct dep {
-+	struct hlist_node hnode;
-+	struct timespec mtime;
-+	bool exists;
-+	char path[];
-+};
-+
-+static HASHTABLE_DEFINE(dep_table, 1U << 16);
-+
-+static const struct dep *lookup_dep(const char *path)
-+{
-+	const unsigned int key = hash_str(path);
-+	struct dep *dep;
-+	struct stat st;
-+
-+	hash_for_each_possible(dep_table, dep, hnode, key) {
-+		if (!strcmp(dep->path, path))
-+			return dep;
-+	}
-+
-+	dep = xmalloc(sizeof(*dep) + strlen(path) + 1);
-+	strcpy(dep->path, path);
-+	dep->exists = !stat(path, &st);
-+	if (dep->exists)
-+		dep->mtime = st.st_mtim;
-+	hash_add(dep_table, &dep->hnode, key);
-+
-+	return dep;
-+}
-+
-+/* Strictly newer, as make compares timestamps. */
-+static bool newer(const struct timespec *time_a, const struct timespec *time_b)
-+{
-+	if (time_a->tv_sec != time_b->tv_sec)
-+		return time_a->tv_sec > time_b->tv_sec;
-+
-+	return time_a->tv_nsec > time_b->tv_nsec;
-+}
-+
-+/*
-+ * $(wildcard include/config/FOO) is a prerequisite only while FOO is set:
-+ * unwrap it and say that it is optional.
-+ */
-+static bool line_unwrap_wildcard(struct line *line)
-+{
-+	if (!line_starts_with(line, WILDCARD_OPEN) ||
-+	    !line_ends_with(line, WILDCARD_CLOSE))
-+		return false;
-+
-+	line->text += strlen(WILDCARD_OPEN);
-+	line->len -= strlen(WILDCARD_OPEN) + strlen(WILDCARD_CLOSE);
-+
-+	return true;
-+}
-+
-+/* fixdep doubles '$' and escapes '#' in a path: undo that into path[]. */
-+static bool unescape_path(const struct line *line, char *path, size_t size)
-+{
-+	size_t i, out_len = 0;
-+
-+	if (line->len >= size)
-+		return false;
-+
-+	for (i = 0; i < line->len; i++) {
-+		const char chr = line->text[i];
-+		const char next_chr = i + 1 < line->len ? line->text[i + 1] : '\0';
-+
-+		if ((chr == '$' && next_chr == '$') || (chr == '\\' && next_chr == '#'))
-+			i++;
-+		path[out_len++] = line->text[i];
-+	}
-+	path[out_len] = '\0';
-+
-+	return true;
-+}
-+
-+/* Is the path contained in line older than the target? */
-+static bool dep_is_fresh(struct line line, const struct timespec *target)
-+{
-+	char path[PATH_MAX];
-+	const struct dep *dep;
-+	bool optional;
-+
-+	line_strip_continuation(&line);
-+	line_trim(&line);
-+	if (!line.len)
-+		return false;
-+
-+	optional = line_unwrap_wildcard(&line);
-+	if (!line.len || !unescape_path(&line, path, sizeof(path)))
-+		return false;
-+
-+	dep = lookup_dep(path);
-+	if (!dep->exists)
-+		return optional;
-+
-+	return !newer(&dep->mtime, target);
-+}
-+
-+/*
-+ * Parse a dependency list which consists of one file per line and determine if
-+ * all dependencies are 'fresh', i.e. older than the target.
-+ */
-+static bool deps_are_fresh(const char *pos, const char *end,
-+			   const struct timespec *target)
-+{
-+	struct line line;
-+
-+	while (next_line(&pos, end, &line)) {
-+		if (line_is_blank(&line))
-+			return true;
-+		if (!dep_is_fresh(line, target))
-+			return false;
-+		if (!line_is_continued(&line))
-+			return true;
-+	}
-+
-+	return true;
-+}
-+
-+/*
-+ * Find the "deps_" line in the input.
-+ *
-+ * On success returns true and *deps_off is set to its offset and *list is set
-+ * to the list's own lines start or NULL if the line is not continued.
-+ *
-+ * Otherwise returns false if the prefix cannot be found.
-+ */
-+static bool find_deps(const char *buf, size_t len, size_t *deps_off,
-+		      const char **list)
-+{
-+	const char *pos = buf, *end = buf + len;
-+	struct line line;
-+
-+	while (next_line(&pos, end, &line)) {
-+		if (!line_starts_with(&line, DEPS_PREFIX))
-+			continue;
-+
-+		*deps_off = line.text - buf;
-+		*list = line_is_continued(&line) ? pos : NULL;
-+		return true;
-+	}
-+
-+	return false;
-+}
-+
-+/*
-+ * Is this the target of a .cmd file, i.e. 'dir/.name.cmd names dir/name.'?
-+ */
-+static bool target_of(const char *cmd_path, char *target, size_t size)
-+{
-+	const char *slash = strrchr(cmd_path, '/');
-+	const char *base = slash ? slash + 1 : cmd_path;
-+	const size_t dir_len = base - cmd_path;
-+	const size_t affix_len = strlen(".") + strlen(CMD_SUFFIX);
-+	const size_t base_len = strlen(base);
-+
-+	if (base[0] != '.' || !str_ends_with(base, CMD_SUFFIX) ||
-+	    base_len <= affix_len)
-+		return false;
-+
-+	return snprintf(target, size, "%.*s%.*s", (int)dir_len, cmd_path,
-+			(int)(base_len - affix_len), base + 1) < (int)size;
-+}
-+
-+/*
-+ * Does the .cmd file's target exists and is it newer than everything in its
-+ * dependency list?
-+ *
-+ * Returns true if so and sets *deps_off to the start of the list, otherwise
-+ * returns false.
-+ */
-+static bool target_is_fresh(const char *cmd_path, const char *buf, size_t len,
-+			    size_t *deps_off)
-+{
-+	char target[PATH_MAX];
-+	struct stat st;
-+	const char *list;
-+
-+	if (!target_of(cmd_path, target, sizeof(target)) || stat(target, &st))
-+		return false;
-+	if (!find_deps(buf, len, deps_off, &list))
-+		return false;
-+	if (!list)
-+		return true;
-+
-+	return deps_are_fresh(list, buf + len, &st.st_mtim);
-+}
-+
-+static char *read_file(const char *path, size_t *len)
-+{
-+	FILE *file = fopen(path, "r");
-+	struct stat st;
-+	char *buf;
-+	size_t nr_read = 0;
-+
-+	if (!file)
-+		return NULL;
-+	if (fstat(fileno(file), &st)) {
-+		fclose(file);
-+		return NULL;
-+	}
-+
-+	buf = xmalloc(st.st_size + 1);
-+	while (nr_read < (size_t)st.st_size) {
-+		const size_t chunk = fread(buf + nr_read, 1, st.st_size - nr_read, file);
-+
-+		if (!chunk)
-+			break;
-+		nr_read += chunk;
-+	}
-+	fclose(file);
-+
-+	buf[nr_read] = '\0';
-+	*len = nr_read;
-+	return buf;
-+}
-+
-+/*
-+ * Find the end of the dependency block: the offset just past its closing
-+ * "$(deps_x):" line. Anything after that was appended by kbuild and is not for
-+ * us to judge. Returns len if the line cannot be found.
-+ */
-+static size_t deps_block_end(const char *buf, size_t len, size_t deps_off)
-+{
-+	const char *pos = buf + deps_off, *end = buf + len;
-+	struct line line;
-+
-+	while (next_line(&pos, end, &line)) {
-+		if (line_starts_with(&line, DEPS_RULE_PREFIX) &&
-+		    line_ends_with(&line, RULE_SUFFIX))
-+			return pos - buf;
-+	}
-+
-+	return len;
-+}
-+
-+/* The target is fresh: pass on everything but the dependency block. */
-+static void write_without_deps(FILE *out, const char *buf, size_t len,
-+			       size_t deps_off)
-+{
-+	const size_t tail_off = deps_block_end(buf, len, deps_off);
-+
-+	fwrite(buf, 1, deps_off, out);
-+	fputc('\n', out);
-+	fwrite(buf + tail_off, 1, len - tail_off, out);
-+}
-+
-+/*
-+ * Generate a fragment for make from one .cmd file - without the dependency
-+ * block if the target is fresh, otherwise all of it.
-+ */
-+static void process(FILE *out, const char *cmd_path)
-+{
-+	size_t len, deps_off;
-+	char *buf;
-+
-+	buf = read_file(cmd_path, &len);
-+	if (!buf)
-+		return;
-+
-+	if (target_is_fresh(cmd_path, buf, len, &deps_off))
-+		write_without_deps(out, buf, len, deps_off);
-+	else
-+		fwrite(buf, 1, len, out);
-+
-+	free(buf);
-+}
-+
-+int main(int argc, char **argv)
-+{
-+	char tmp_path[PATH_MAX];
-+	FILE *out;
-+	int i;
-+
-+	if (argc < 2) {
-+		fprintf(stderr, "usage: %s <output> <.cmd files...>\n", argv[0]);
-+		return 1;
-+	}
-+
-+	if (snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", argv[1]) >=
-+	    (int)sizeof(tmp_path)) {
-+		fprintf(stderr, "%s: path too long\n", argv[1]);
-+		return 1;
-+	}
-+
-+	out = fopen(tmp_path, "w");
-+	if (!out) {
-+		perror(tmp_path);
-+		return 1;
-+	}
-+
-+	for (i = 2; i < argc; i++)
-+		process(out, argv[i]);
-+
-+	/* Write errors are latched in the stream, so one check at the end covers them all. */
-+	if (ferror(out) || fclose(out) || rename(tmp_path, argv[1])) {
-+		perror(argv[1]);
-+		unlink(tmp_path);
-+		return 1;
-+	}
-+
-+	return 0;
-+}
++++ b/init/Kconfig.toolchain
+@@ -0,0 +1,198 @@
++# SPDX-License-Identifier: GPL-2.0-only
++config CC_VERSION_TEXT
++	string
++	default "$(CC_VERSION_TEXT)"
++	help
++	  This is used in unclear ways:
++
++	  - Re-run Kconfig when the compiler is updated
++	    The 'default' property references the environment variable,
++	    CC_VERSION_TEXT so it is recorded in include/config/auto.conf.cmd.
++	    When the compiler is updated, Kconfig will be invoked.
++
++	  - Ensure full rebuild when the compiler is updated
++	    include/linux/compiler-version.h contains this option in the comment
++	    line so fixdep adds include/config/CC_VERSION_TEXT into the
++	    auto-generated dependency. When the compiler is updated, syncconfig
++	    will touch it and then every file will be rebuilt.
++
++config CC_IS_GCC
++	def_bool $(success,test "$(cc-name)" = GCC)
++
++config GCC_VERSION
++	int
++	default $(cc-version) if CC_IS_GCC
++	default 0
++
++config CC_IS_CLANG
++	def_bool $(success,test "$(cc-name)" = Clang)
++
++config CLANG_VERSION
++	int
++	default $(cc-version) if CC_IS_CLANG
++	default 0
++
++config AS_IS_GNU
++	def_bool $(success,test "$(as-name)" = GNU)
++
++config AS_IS_LLVM
++	def_bool $(success,test "$(as-name)" = LLVM)
++
++config AS_VERSION
++	int
++	# Use clang version if this is the integrated assembler
++	default CLANG_VERSION if AS_IS_LLVM
++	default $(as-version)
++
++config LD_IS_BFD
++	def_bool $(success,test "$(ld-name)" = BFD)
++
++config LD_VERSION
++	int
++	default $(ld-version) if LD_IS_BFD
++	default 0
++
++config LD_IS_LLD
++	def_bool $(success,test "$(ld-name)" = LLD)
++
++config LLD_VERSION
++	int
++	default $(ld-version) if LD_IS_LLD
++	default 0
++
++config RUSTC_VERSION
++	int
++	default $(rustc-version)
++	help
++	  It does not depend on `RUST` since that one may need to use the version
++	  in a `depends on`.
++
++config RUST_IS_AVAILABLE
++	def_bool $(success,$(srctree)/scripts/rust_is_available.sh)
++	help
++	  This shows whether a suitable Rust toolchain is available (found).
++
++	  Please see Documentation/rust/quick-start.rst for instructions on how
++	  to satisfy the build requirements of Rust support.
++
++	  In particular, the Makefile target 'rustavailable' is useful to check
++	  why the Rust toolchain is not being detected.
++
++config RUSTC_LLVM_VERSION
++	int
++	default $(rustc-llvm-version)
++
++config RUSTC_LLVM_MAJOR_VERSION
++	int
++	default $(shell,expr $(rustc-llvm-version) / 10000)
++
++config RUSTC_CLANG_LLVM_COMPATIBLE
++	bool
++	default y if CC_IS_CLANG && RUSTC_LLVM_MAJOR_VERSION = $(shell,expr $(cc-version) / 10000)
++	help
++	  This indicates whether Rust and Clang use LLVM of the same major
++	  version.
++
++	  Operations involving handling LLVM IR or bitcode (e.g. cross-language
++	  LTO) require the same LLVM major version to work properly. For best
++	  compatibility it is recommended that the exact same LLVM is used.
++
++config ARCH_HAS_CC_CAN_LINK
++	bool
++
++config CC_CAN_LINK
++	bool
++	default ARCH_CC_CAN_LINK if ARCH_HAS_CC_CAN_LINK
++	default $(cc_can_link_user,$(m64-flag)) if 64BIT
++	default $(cc_can_link_user,$(m32-flag))
++
++# Fixed in GCC 14, 13.3, 12.4 and 11.5
++# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=113921
++config GCC_ASM_GOTO_OUTPUT_BROKEN
++	bool
++	depends on CC_IS_GCC
++	default y if GCC_VERSION < 110500
++	default y if GCC_VERSION >= 120000 && GCC_VERSION < 120400
++	default y if GCC_VERSION >= 130000 && GCC_VERSION < 130300
++
++config CC_HAS_ASM_GOTO_OUTPUT
++	def_bool y
++	depends on !GCC_ASM_GOTO_OUTPUT_BROKEN
++	depends on $(success,echo 'int foo(int x) { asm goto ("": "=r"(x) ::: bar); return x; bar: return 0; }' | $(CC) -x c - -c -o /dev/null)
++
++config CC_HAS_ASM_GOTO_TIED_OUTPUT
++	depends on CC_HAS_ASM_GOTO_OUTPUT
++	# Detect buggy gcc and clang, fixed in gcc-11 clang-14.
++	def_bool $(success,echo 'int foo(int *x) { asm goto (".long (%l[bar]) - .": "+m"(*x) ::: bar); return *x; bar: return 0; }' | $CC -x c - -c -o /dev/null)
++
++config TOOLS_SUPPORT_RELR
++	def_bool $(success,env "CC=$(CC)" "LD=$(LD)" "NM=$(NM)" "OBJCOPY=$(OBJCOPY)" $(srctree)/scripts/tools-support-relr.sh)
++
++config CC_HAS_ASM_INLINE
++	def_bool $(success,echo 'void foo(void) { asm inline (""); }' | $(CC) -x c - -c -o /dev/null)
++
++config CC_HAS_ASSUME
++	bool
++	# clang needs to be at least 19.1.0 since the meaning of the assume
++	# attribute changed:
++	# https://github.com/llvm/llvm-project/commit/c44fa3e8a9a44c2e9a575768a3c185354b9f6c17
++	default y if CC_IS_CLANG && CLANG_VERSION >= 190100
++	# supported since gcc 13.1.0
++	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=106654
++	default y if CC_IS_GCC && GCC_VERSION >= 130100
++
++config CC_HAS_NO_PROFILE_FN_ATTR
++	def_bool $(success,echo '__attribute__((no_profile_instrument_function)) int x();' | $(CC) -x c - -c -o /dev/null -Werror)
++
++config CC_HAS_COUNTED_BY
++	bool
++	# clang needs to be at least 20.1.0 to avoid potential crashes
++	# when building structures that contain __counted_by
++	# https://github.com/ClangBuiltLinux/linux/issues/2114
++	# https://github.com/llvm/llvm-project/commit/160fb1121cdf703c3ef5e61fb26c5659eb581489
++	default y if CC_IS_CLANG && CLANG_VERSION >= 200100
++	# supported since gcc 15.1.0
++	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=108896
++	default y if CC_IS_GCC && GCC_VERSION >= 150100
++
++config CC_HAS_COUNTED_BY_PTR
++	bool
++	# supported since clang 22
++	default y if CC_IS_CLANG && CLANG_VERSION >= 220100
++	# supported since gcc 16.0.0
++	default y if CC_IS_GCC && GCC_VERSION >= 160000
++
++config CC_HAS_BROKEN_COUNTED_BY_REF
++	bool
++	# https://github.com/llvm/llvm-project/issues/182575
++	default y if CC_IS_CLANG && CLANG_VERSION < 220100
++
++config CC_HAS_ALLOC_TOKEN
++	def_bool $(cc-option,-falloc-token-max=123)
++
++config CC_HAS_MULTIDIMENSIONAL_NONSTRING
++	def_bool $(success,echo 'char tag[][4] __attribute__((__nonstring__)) = { };' | $(CC) $(CLANG_FLAGS) -x c - -c -o /dev/null -Werror)
++
++config LD_CAN_USE_KEEP_IN_OVERLAY
++	# ld.lld prior to 21.0.0 did not support KEEP within an overlay description
++	# https://github.com/llvm/llvm-project/pull/130661
++	def_bool LD_IS_BFD || LLD_VERSION >= 210000
++
++config RUSTC_HAS_SPAN_FILE
++	def_bool RUSTC_VERSION >= 108800
++
++config RUSTC_HAS_UNNECESSARY_TRANSMUTES
++	def_bool RUSTC_VERSION >= 108800
++
++config RUSTC_HAS_FILE_WITH_NUL
++	def_bool RUSTC_VERSION >= 108900
++
++config RUSTC_HAS_FILE_AS_C_STR
++	def_bool RUSTC_VERSION >= 109100
++
++config RUSTC_HAS_SUSPICIOUS_RUNTIME_SYMBOL_DEFINITIONS
++	def_bool RUSTC_VERSION >= 109800
++
++config PAHOLE_VERSION
++	int
++	default "$(PAHOLE_VERSION)"
 
 -- 
 2.55.0
