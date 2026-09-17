@@ -1,273 +1,137 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2F9941835B;
-	Thu, 17 Sep 2026 20:59:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 975084A2040
+	for <linux-efi@vger.kernel.org>; Thu, 17 Sep 2026 23:20:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789678768; cv=none; b=m/jipdN84NmnIh6q8GmUM2VdnJgR2KDobZg61JCrU7Eyg72mTAIhDcq++8hYYOvJt+OULkRok7UvyP8y5DchEIzX4pxqoWBF7Vrv+sXYsgWLliT5DJVRcIp7S1Ge8A+VEqrk+7qJHUvXPF1WhhE+moTGyP41IjqgF7DYSgOiGc0=
+	t=1789687233; cv=none; b=bNjXGqbuyZiltLfK5E12DELku2NeNb5XEPkh3LWlHGDqpEQri+f1jANv/t80BCLr7mfmpxsax9Ah+QSA6mqM2y+o5y4WXAoGKiKnFXH4Io1HH7Mn+FRS2fwnx7RLqVaIFby3FycqHRcpgzSlctXVdC46DZvknCAxE6kOK6JPN6I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789678768; c=relaxed/simple;
-	bh=s16KJQRcC14LLQy4pTYvXckO3rme4Dl2pTMLZe1/3VM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=t3jY10Cnq4WLiR3iqaeGmY2ik3muaVokB2S/dRfnQwU7ALDlL8j5VnEdYggbROQpBIFvDD/g0GzL2UEhsGJTTcIII6Bbj1O213ORATqGhncyk6+2M18+yuyeQJQwSCgmCo5Sox6txBSJDMpx05iyxqBQzLmcUDv/EyuyP2vnikw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=K1iJnrT5; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789687233; c=relaxed/simple;
+	bh=/YLkONxFDQYICTHszcVcZwZtpjGEF0UwkGSRQH89tyo=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=RV1gF69kZg3YJKKvqIf4SFvl69hHDZfJYc940shwMvo+nIwfP0P5GOmJOoXXupbP1V1+9x8VIAlNFPOe+sGvqKCf0OlrFW2xIWtQcbul8cy70Gdr8p1f2rEvYBYHbA5j463ISP7E6nRga5QmWDZHbMGUHUH0xbNzWxnBmoJmCGk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KIsgnQN9; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="K1iJnrT5"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 654E71F00893;
-	Thu, 17 Sep 2026 20:59:26 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KIsgnQN9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9133C1F00898;
+	Thu, 17 Sep 2026 23:20:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789678766;
-	bh=jCN23Z098/jrBfz0bmrygNbGxnLmKn6q7+PuR1I0LGk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=K1iJnrT5zwIrpIGfCXw3tperSIg5wg+ccx1MerSVNbZKcKAO2Wen+D59D8D5DLJnc
-	 iF217QvkXDUQ+4iHuY8eEUZ7yL8xlYISWkK8SQeYTnqwssMCw1OEbjQgFp9u0lgKvJ
-	 pqHbYnMRym6T6Hhf9CzyK6P9da+oWQN2sQ93SDO+FC20DvtsVGBsMi2ArzaNwg5bVk
-	 UJIdWn+vHQPYc8juD9NnTa5TnDl/Bw97Dt4DPOYHw8xO/jPT0st5vqM2dTssTOnZXI
-	 gyAXZsmWH+tHCCKaZqYgmKl++M7jkh48ll258Xjdsminj3GIfk0yO8jAHheJBA5Nip
-	 ltqEn+yZO5xpw==
-Date: Thu, 17 Sep 2026 13:59:26 -0700
-From: Kees Cook <kees@kernel.org>
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nicolas Schier <nsc@kernel.org>,
-	Nick Desaulniers <ndesaulniers@google.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	Masahiro Yamada <masahiroy@kernel.org>,
-	Alexey Gladkov <legion@kernel.org>,
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-	"H. Peter Anvin" <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Josh Poimboeuf <jpoimboe@kernel.org>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>,
-	Gary Guo <gary@garyguo.net>,
-	=?iso-8859-1?Q?Bj=F6rn?= Roy Baron <bjorn3_gh@protonmail.com>,
-	Benno Lossin <lossin@kernel.org>,
-	Andreas Hindborg <a.hindborg@kernel.org>,
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>,
-	Danilo Krummrich <dakr@kernel.org>,
-	Daniel Almeida <daniel.almeida@collabora.com>,
-	Tamir Duberstein <tamird@kernel.org>,
-	Alexandre Courbot <acourbot@nvidia.com>,
-	Onur =?iso-8859-1?Q?=D6zkan?= <work@onurozkan.dev>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Randy Dunlap <rdunlap@infradead.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
-	llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
-	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
-	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
-	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v3 09/20] kbuild: implement and use depcheck to check
- dependency timestamps
-Message-ID: <202609171229.31BB336E1@keescook>
-References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
- <20260917-build-speedup-v3-9-9ecf4163ff36@kernel.org>
- <202609171117.35BFDCC13@keescook>
+	s=k20260515; t=1789687226;
+	bh=0wmsh21wkd7ZY/9Y9mSIaXM8UfHreJhufRu8bchqZSk=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=KIsgnQN9zT76HtR3fNU8ScaVaMKo8SrFFv9WrMMvIYYusUqR9vd8UcCWRlQx2JXn4
+	 BASMLooC/sFivbzEybmIU1nfg16PSMtJE4uUGZhmbHElRktg8XJreKH/yqE40YwiM0
+	 ipGxUJp/wYSOBQrfNSKYS0EdEKnw/HAy3xGwevLPCyj/A+zBbNLpuYvEjHgFrzYOV8
+	 d5RzHYUXUBqi8ACNTgXrcN8VSnEqjdsazYR4Q375f6lHQicCkmt5az2nzGXNykJP8b
+	 r7S1Wf16Q9kbQFgimZdjBGzAcPNJ5ltJxDwbTr2bo0QkTncTbsLaGSmQ5wMEW/5GZl
+	 XRvyMrRALTYtQ==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 00F4A1980052;
+	Thu, 17 Sep 2026 19:20:23 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Thu, 17 Sep 2026 19:20:24 -0400
+X-ME-Sender: <xms:tnWsajmaSbOGCbGLt0qnzWWLboInZNiYDjshp4l9nIifJf5Yiqaqrg>
+    <xme:tnWsahq0AO3HWWywXivnT-jRWP82rch0gEUfVkn_d1MpWKGyRhDYhEctbCNAbRn7Y
+    Y6tL6AX1WgRT90dLljAgt4ZaJAguxGS6ctI1T89NzJBUiIxMLBLUMfl>
+X-ME-Proxy-Cause: dmFkZTGJBonoOPjFOUoXy+YTM2uO97Vsgbx1nCN+CmyIQAwbdc8IykWfU6SoGa7Z6sKKTE
+    J8q704juP+4g74zb/er4ibZOsL5U6hAWe4K/1qq4QHJxEWjWFB3kH1y3ZdSTvhKh3vnzJO
+    GnR7IxfaNedbW158uD+E801gG2IPhcp7bLJ2/lFK1726f2M2FskKbulur23cZ8AI09KR6E
+    nCxgW6Ag8z9BBcQtrfIzl/e12Nj21aUR/ZDgcXIsDnuVtBt06DCJrasogV42OqyZadp9Cr
+    eYMkp/Eh76K3fVVf6mwuODlVYN/RiLS5mxNcSWlKSvKQrWJw6CnRA1N/ueUKvVogGqTOqd
+    AaUa5O9fWZX5AHEhoPQaVQHrGed10DBJL0TY7Vg2D5iQL4IEj0wFHUfSmWYtTW//GRVXbF
+    Dbyv+eoom9S2lC9o38VGzmrUe1R1KnIV5Du0uSk3zMUAXDRdpm6CsgHAtaREqNP9iKKPmf
+    uSaTwd8FQzSy8aqdRlihkIM8PcbNXKnpC6q0ltslwtknmxuVD9MiwcOFlFr7gXeNGu1se0
+    q32QBZIk3+HxgXsK+sBeaYcu2KsUc5dsuT/6FKQRYrpCcZQ+42IePW8R9ATXq6ZWM1Jq54
+    o2sOVev8N8d6Ub8u/kEAgdQCbJfJqgiKzHDv29M/vjHfdTLbT2cHFxDJFQcA
+X-ME-Proxy: <xmx:t3WsalMNoEwfPJhwb5xvoWDV4dboyUqRYRx76uOOXy01iE3vDYoFPw>
+    <xmx:t3WsaiCe7wBahRNCNtAnQHV1pMAt0QQOWSLTRNslgDyWfmLvPlCBLQ>
+    <xmx:t3WsakJvcacja-uTLxuf6evOU9o6YDkZA0I3KdZ_hnI0O28Y4tm5zg>
+    <xmx:t3WsajOmgpCh0ZeANXpXUZQ_numI25Y9is7FpdjG9KV0fFEQBAOW_Q>
+    <xmx:t3Wsaq5Tg-1z-n8qyMcrL-Jo4BytrFmvoQmeP-iLWxRuC0esRvmbYTh1>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 4A274F80080; Thu, 17 Sep 2026 19:20:22 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <202609171117.35BFDCC13@keescook>
+Date: Fri, 18 Sep 2026 01:19:59 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Rick Edgecombe" <rick.p.edgecombe@intel.com>,
+ "Kiryl Shutsemau (Meta)" <kas@kernel.org>,
+ "Zhao, Yan Y" <yan.y.zhao@intel.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+ "x86@kernel.org" <x86@kernel.org>, "Borislav Petkov" <bp@alien8.de>
+Message-Id: <0fce97e4-3c3d-4b25-aa50-b88a003fd033@app.fastmail.com>
+In-Reply-To: <27b267cdaed0c46146de4af2db8362b61e0b08a3.camel@intel.com>
+References: <20260914183745.37538-5-ardb@kernel.org>
+ <af17c380c43912ce34c228e328b3937343ce2019.camel@intel.com>
+ <aqvrUeIfpE4D-Ol0@thinkstation>
+ <27b267cdaed0c46146de4af2db8362b61e0b08a3.camel@intel.com>
+Subject: Re: [PATCH 0/3] Move memory acceptance x86 arch code into EFI stub
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Thu, Sep 17, 2026 at 11:42:50AM -0700, Kees Cook wrote:
-> On Thu, Sep 17, 2026 at 05:06:19PM +0100, Lorenzo Stoakes (ARM) wrote:
-> > This can be done faster in C, so implement scripts/basic/depcheck to do so.
-> >
-> > It does as little work as possible, reading the .cmd files from a
-> > directory's targets and running stat on each dependency only a single time.
+
+
+On Thu, 17 Sep 2026, at 20:29, Edgecombe, Rick P wrote:
+> +Yan 
 >
-> Doesn't this run the risk of missing transitive deps?
+> On Thu, 2026-09-17 at 14:32 +0100, Kiryl Shutsemau wrote:
+>> > I guess the caller could care about TDX_PAGE_ALREADY_ACCEPTED errors. But
+>> > SNP
+>> > doesn't do anything for this case. It seems like part of the problem is that
+>> > we
+>> > are passing errors back that the caller can't feasibly handle.
+>> 
+>> Maybe. I don't understand SNP model and why they don't care about errors
+>> here.
+>> 
+>> Do you have a proposal here?
 >
-> C.cmd:	C.o depends on A.c and B.c and B.h
-> B.cmd:	B.h depends on B.data and B.script
+> Yan pointed out that future TDX modules will not take an S-EPT entry lock on
+> accepting a NP S-EPT entry. However, I think this won't prevent guest caused
+> busys on re-accept attempts?
 >
-> depcheck looks at C.o and B.h's times and is happy so it drops C.cmd file,
-> but then see B.script has changed compared to B.h, so it keeps B.cmd,
-> and then the build runs and doesn't have the C.o dep list any more,
-> and C.o goes unbuilt?
 >
-> Also, I don't think this handles if_changed commands at all? The kbuild
-> rebuild condition is timestamps plus if_changed's command-line check.
+> Here is a strawman proposal. Please consider critically.
+>
+> TDX_PAGE_ALREADY_ACCEPTED: Zero memory that was re-accepted and treat it as a
+> success.
+>
+> TDX_OPERAND_BUSY host contention: Loop and blame the host for any infinite
+> loops. It can be not unlike if the host zap's the EPT and the guest gets stuck
+> on infinite EPT violations. Except that the host does not get any notification
+> of the trouble it is causing... Some sort of TDX arch change to notify the host
+> of heavy guest-host contention could be worked on in the background?
+>
+> TDX_OPERAND_BUSY guest contention: RW lock around accept. Normally take the lock
+> for read, and a single fallback attempt takes the lock for write.
+>
+> Then I think all errors accept() would want to return to the callers are
+> handled.
+>
+> The only thing I'm not sure about is TDX_PAGE_ALREADY_ACCEPTED. Some callers may
+> want a warning on that case. I think a warning is more in line with what we have
+> done in similar situations, rather than panic. But a warming would throw off the
+> EFI stub callers apparently.
 
-tl;dr: I spent way too long looking at this. I think my conclusion is
-"Hm, this makes some cases of missed Makefile deps on generated files
-harder to find, but there don't *appear* to be any obviously wrong
-instances of this in the tree."
+The memory acceptance occurs after ExitBootServices(), and so there is little the
+EFI stub can do at this point except maybe set a variable with an error message
+and reset the system. If that is better than a panic(), this is something we can
+consider.
 
-Long version:
-
-There does appear to be a problem in the case of generated targets where
-the Makefile deps are build-order correct but lack explicit deps. As
-in, a clean build generates the needed dependencies due to some prior
-explicit Makefile rule dependency, and a later source-level "#include"
-for the generated file exists (and the build doesn't fail since the
-included file got generated before the source that "#include"d it got
-built), and then the normal dep tracking (-Wp,-MMD,... -> .cmd) catches
-it and any direct changes to that dep would normally get noticed going
-forward on incremental builds.
-
-However, with the depcheck .cmd pruning, changes to transitive deps
-(either via file contents or Kconfig options) will go unnoticed during
-incremental builds without that explicit dep (but stock doesn't miss
-it). Though actually it's kind of worse because it'll get noticed on
-rebuild #N+1 for N level of transitive depth, so something will break,
-and then you build again, and the changes from 2 builds ago suddenly
-get rebuilt...
-
-I think you maybe encountered an instance of this in your series, too,
-but it got exposed due to a clean build no longer having the ordering
-correct:
-https://lore.kernel.org/lkml/20260917-build-speedup-v3-18-9ecf4163ff36@kernel.org/
-
-See the trailing diff for a demo:
-
-
-  git apply demo.diff
-  make O=b defconfig
-  # simulate a earlier-stage header generation...
-  make O=b lib/byfile_anchor.o lib/byconf_anchor.o
-  make O=b lib/
-
-  # trigger 1: the header's input file changes
-  echo FROMFILE-two > lib/byfile_gen.in
-  make O=b lib/
-
-  # trigger 2: a Kconfig value changes; no file is touched
-  ./scripts/config --file b/.config --set-str LOCALVERSION -demo2
-  make O=b lib/
-
-  # what each object ended up holding
-  strings b/lib/byfile_anchor.o | grep FROMFILE-    # FROMFILE-two   both trees
-  strings b/lib/byfile_victim.o | grep FROMFILE-    # FROMFILE-two   stock
-                                                    # FROMFILE-one   patched  <-- stale
-
-  strings b/lib/byconf_anchor.o | grep CONF-        # CONF--demo2    both trees
-  strings b/lib/byconf_victim.o | grep CONF-        # CONF--demo2    stock
-                                                    # CONF-          patched  <-- stale
+However, I'd like to avoid going off into the weeds here with something that was
+intended to simply move some logic from one place to the other. The current code
+prints an error to the UART I/O port (rather than the PV console TDX uses when
+running in the decompressor) and then loops forever. Is that something we could
+retain for this series, and then continue the above discussion in the context of
+a separate series based on top of that?
 
 
-This means adding depcheck would silently expose any current (and future)
-missing explicit deps on generated files where those files get generated
-by either an earlier build stage or an earlier rule. :(
 
-I went looking for the kind of missed Makefile dep for a generated file,
-and while it's not a very grep-able condition, I did look at stuff that
-fell into include/generated/, but it's safe due to the prepare/archprepare
-ordering AFAICT. So then I looked at places where -I had $(obj) added to
-it, and all of those seemed to have explicit Makefile deps too. Well, all
-except for arch/x86/boot/compressed/sev-handle-vc.c which includes
-"../../lib/inat.c" but that seems safe today due to ordering from
-arch/x86/lib/ being needed before arch/x86/boot/compressed/.
-
-So, yeah, it makes me nervous, and it may make incremental builds less
-idempotent. But I can't really find extant problems and the demo is
-slightly contrived, but not exactly an impossible situation.
-
--Kees
-
-
-diff --git a/lib/Makefile b/lib/Makefile
-index dfab958327c5c..aed0bd9eb7d6a 100644
---- a/lib/Makefile
-+++ b/lib/Makefile
-@@ -350,3 +350,36 @@ CONTEXT_ANALYSIS_test_context-analysis.o := y
- obj-$(CONFIG_CONTEXT_ANALYSIS_TEST) += test_context-analysis.o
- 
- subdir-$(CONFIG_FORTIFY_SOURCE) += test_fortify
-+
-+# --- depcheck demo ---
-+obj-y += byfile_anchor.o byfile_victim.o byconf_anchor.o byconf_victim.o
-+
-+quiet_cmd_byfile = GENFILE $@
-+      cmd_byfile = printf '\#define BYFILE_STR "%s"\n' "$$(cat $<)" > $@
-+
-+quiet_cmd_byconf = GENCONF $@
-+      cmd_byconf = printf '\#define BYCONF_STR "CONF-%s"\n' '$(CONFIG_LOCALVERSION)' > $@
-+
-+# Regenerated when its input file changes.
-+$(obj)/byfile_gen.h: $(src)/byfile_gen.in FORCE
-+	$(call if_changed,byfile)
-+
-+# No input file: regenerated only when its command line changes, which here
-+# means when CONFIG_LOCALVERSION changes. No file is touched.
-+$(obj)/byconf_gen.h: FORCE
-+	$(call if_changed,byconf)
-+
-+targets += byfile_gen.h byconf_gen.h
-+
-+# The anchors declare the dependency. That is what generates the headers on
-+# a clean build: fixdep only records a header once the object has compiled
-+# successfully, so on a first build there is no .cmd file to rely on. The
-+# victims include the same headers without declaring them, so the only
-+# record of that edge is the deps_ list in their .cmd files.
-+$(obj)/byfile_anchor.o: $(obj)/byfile_gen.h
-+$(obj)/byconf_anchor.o: $(obj)/byconf_gen.h
-+
-+CFLAGS_byfile_anchor.o += -I$(obj)
-+CFLAGS_byfile_victim.o += -I$(obj)
-+CFLAGS_byconf_anchor.o += -I$(obj)
-+CFLAGS_byconf_victim.o += -I$(obj)
-diff --git a/lib/byconf_anchor.c b/lib/byconf_anchor.c
-new file mode 100644
-index 0000000000000..8035eaa352a3b
---- /dev/null
-+++ b/lib/byconf_anchor.c
-@@ -0,0 +1,3 @@
-+// SPDX-License-Identifier: GPL-2.0
-+#include "byconf_gen.h"
-+const char byconf_anchor_marker[] = BYCONF_STR;
-diff --git a/lib/byconf_victim.c b/lib/byconf_victim.c
-new file mode 100644
-index 0000000000000..285a8de8bdf6e
---- /dev/null
-+++ b/lib/byconf_victim.c
-@@ -0,0 +1,3 @@
-+// SPDX-License-Identifier: GPL-2.0
-+#include "byconf_gen.h"
-+const char byconf_victim_marker[] = BYCONF_STR;
-diff --git a/lib/byfile_anchor.c b/lib/byfile_anchor.c
-new file mode 100644
-index 0000000000000..9ea0b8ad55963
---- /dev/null
-+++ b/lib/byfile_anchor.c
-@@ -0,0 +1,3 @@
-+// SPDX-License-Identifier: GPL-2.0
-+#include "byfile_gen.h"
-+const char byfile_anchor_marker[] = BYFILE_STR;
-diff --git a/lib/byfile_gen.in b/lib/byfile_gen.in
-new file mode 100644
-index 0000000000000..7da9e5e0cd83c
---- /dev/null
-+++ b/lib/byfile_gen.in
-@@ -0,0 +1 @@
-+FROMFILE-one
-diff --git a/lib/byfile_victim.c b/lib/byfile_victim.c
-new file mode 100644
-index 0000000000000..763c5ef8f1514
---- /dev/null
-+++ b/lib/byfile_victim.c
-@@ -0,0 +1,3 @@
-+// SPDX-License-Identifier: GPL-2.0
-+#include "byfile_gen.h"
-+const char byfile_victim_marker[] = BYFILE_STR;
-
-
--- 
-Kees Cook
