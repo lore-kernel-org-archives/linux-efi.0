@@ -1,183 +1,273 @@
-Received: from mail-wm2-f12.google.com (mail-wm2-f12.google.com [74.125.225.140])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B05F4E0B9E
-	for <linux-efi@vger.kernel.org>; Thu, 17 Sep 2026 20:03:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.225.140
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789675384; cv=pass; b=Zju/YPQ9H1LnScppKw1VCzQrFTuytnQ59hWp+JPCBbk9FvsF3q0y/QEvSSuBXGtC5/86WRym6mFFjuB5XJuUX+hNzX0W3X/dFF5N13tl7hljkI5PXcPnjxIQYd5PR+Etyqc+lWQ3P/bY5UoUR+ewWsugO0XP/oVMmJtNUfsUc9k=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789675384; c=relaxed/simple;
-	bh=GpHjDtqu+AzW6bYVn14IR7601Ha7EtaAYwvYSeYG9jc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=OHgHd/T8RsCf7Vr2JiLFM2wfNHOkwgc7oCkGQHFGIzJJbQSRui0h5TKLMVAp0B7za+03PJG9TY/oVK5hbDIIMH4pSpws5DF4kNsHRRLizKDzU6cJPG+XJAacqhcWub46W2Q1Tai27NzHvF/looCwWylli1m0agzhhiraMmxiFDY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=RfRoG1si; arc=pass smtp.client-ip=74.125.225.140
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2F9941835B;
+	Thu, 17 Sep 2026 20:59:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789678768; cv=none; b=m/jipdN84NmnIh6q8GmUM2VdnJgR2KDobZg61JCrU7Eyg72mTAIhDcq++8hYYOvJt+OULkRok7UvyP8y5DchEIzX4pxqoWBF7Vrv+sXYsgWLliT5DJVRcIp7S1Ge8A+VEqrk+7qJHUvXPF1WhhE+moTGyP41IjqgF7DYSgOiGc0=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789678768; c=relaxed/simple;
+	bh=s16KJQRcC14LLQy4pTYvXckO3rme4Dl2pTMLZe1/3VM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=t3jY10Cnq4WLiR3iqaeGmY2ik3muaVokB2S/dRfnQwU7ALDlL8j5VnEdYggbROQpBIFvDD/g0GzL2UEhsGJTTcIII6Bbj1O213ORATqGhncyk6+2M18+yuyeQJQwSCgmCo5Sox6txBSJDMpx05iyxqBQzLmcUDv/EyuyP2vnikw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=K1iJnrT5; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="RfRoG1si"
-Received: by mail-wm2-f12.google.com with SMTP id 5b1f17b1804b1-49ccfd61ecaso244385e9.3
-        for <linux-efi@vger.kernel.org>; Thu, 17 Sep 2026 13:03:02 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1789675380; cv=none;
-        d=google.com; s=arc-20260327;
-        b=AQEVTQ2pyY+OqkXzP0MP1pXWpEjfPr6KFKIFHlpija27wD/JW1YGZuNUmFfmOP6C35
-         yPDUSr15fDu+7y9Jso9NWIeGJuUcHFcrBRK7w9TJ82xJ4yP/2/svRKQ+ZbUjv/DOhATM
-         3Gl4TUEvpIh5Re0WpRQu8B5fZFC/N1GEHI/itm2SqLn+f2IDSxdTetIfNJ+wLI5Mwxe9
-         2gm840Ta/2oHrC6CiVU1NgXO9w0HL/i1H5ZWgkZzWfiHYFvuiUk+TSHrrzTaIQ0oeGBG
-         pjDsdgQn7f8OfdNBBL9jRB0Z/iUS0y5gCUZg4CkXEy9Ltbkz00hXllO8YKgd9vTGYeZA
-         VM3g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=25a39fQthoJQenvf3ilsmj4we8U0R1UDFLTQO2djkUo=;
-        fh=6wFh1+wCOaahoz/n5w5fPUcBtVqmZ6miK0HUL3jiyOo=;
-        b=B6EZpqZRF9KpiF6hoZnIhWcN33dzOTVp7Y2NZdCRFgOAUaLkONRHgCWwILR38Ca97L
-         DHlC5Xb4tMDSjbPRecrM7BDXN2MQD1PUTAI+YNa90arjPEexf0RSqvFwzyKz94FO8hL5
-         Aer9THJx8+WHn2JPdONNGO1Fr8QBLjpMuNjUVOqnksVVXBut+AAMSHaAgeLLuW6fumbm
-         0zpd6nqNy3gH67M83xal7A4Wi4uu8WSkjqOahm5HeMHrbVS+RlTtJdsfpU/tAI3crVTD
-         dZidajv8a8kvLPLazno0vcAJ54+yyIQWWDjDjA1meATg/Bx3pAvcw6AmuPB5evFPmzTj
-         hyJg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1789675380; x=1790280180; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=25a39fQthoJQenvf3ilsmj4we8U0R1UDFLTQO2djkUo=;
-        b=RfRoG1sioHwQsGYSkcve3ZDGfErdmSWrgCWHA2JlCBaobnXxnBfdr0TKVq27LK2zIZ
-         UOvE17R6vYGLa6zQAttig93toa0GDEpwxIgGBTum0FIhjWQ2ZvB9dyNYwvdV/otOI5vm
-         A3ZFMmlVd6uq3DhAGMGK/mu80sINzK4rP2D3RMyU2gORKLRV1tGre9kz1kts6W1QAYaT
-         9XuABFIURZMRzl1KZihvHVFw9CQ9VbWSNQiQyhE/Rv/Yb9DXy8oRagR/6b1gegQS3v8y
-         YYEboH4Y45Pq3GkmJCdeXvha1ezGt4n7sH0US7ujlIUX6kFFOMpc2oolhcFXbjqXk/zG
-         N+qw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789675380; x=1790280180;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=25a39fQthoJQenvf3ilsmj4we8U0R1UDFLTQO2djkUo=;
-        b=msvGqDwklOB9JnA6mkYyP+4coGm0Mlli/kDF+KcBjbF9Fco8Q/15qjQVr09wxGPxdC
-         0sTiz6jO7Lub4BpnpbIUd9zVPuWBj8r28te7CJDd5FoSuFLzmrZhU0UVnSUIhEYkPN18
-         0OS2aoSUMb+5gnkOqzjojD6llZ92Y/RA94S5CY5fSA+S0eI6R7o5h9comc2Vxwt7FGTg
-         lfX9Ozsdjt+UeoO1j4QGaHghA2ilM3PaE7Iz0v/Du56OkK6vuT+TNIRoyRnEV5eEKf/E
-         fi7uCwRTWViq5u1PqHJDO0czc1+GLa5rJkSwSpGQFdR4B1FvoFO3fJnll7WQ959H7Igm
-         O+ow==
-X-Forwarded-Encrypted: i=1; AKwUvBwcyogmg1fqbcARJfoLkHwaW7Kg0M3T5ho41fYeiOW4hSAp5ubJ0yRtkELWAwH0y6OS5SOYo4tOnpA=@vger.kernel.org
-X-Gm-Message-State: AFuF++n6VGPPH4yk9x8pSgYgE5HUdf/YlFSkxnLvZdVQDOwUQhVYNN1w
-	C3uMEhott0wVr69qguLXa05XO5Doq8euUHtfUMYHT1kL1fx7xIUqVOvwAE9CyXu3Su8Xy9HNH+b
-	mwwS3aeagY13KfgEbCi/zFSZtfRP2HdYvbr3hflAS
-X-Gm-Gg: AYBFou3nkb1FH5vst0EQP08tfF9jLBl9srYqEv4dDF5dlNdSX8QqwVwhnOEuJKHq0Fv
-	Atbw77rwaA9hJgRSv0fFwPd+4k3NWygr5PCt38fRc8zZfkJona5Tr1++ava6Ify/2rwLkjwUiXQ
-	8IwySxXyMozuGg0ymfxLhVtzwSs8RQN37Rsq4oXq9XEMgrjdeJJjD6LgZSHv4y2V2MuDyTbPP6R
-	o78aMgfTaA7GclDjh6oK4g0fbIhFyTWIJpfKD0uS/VqOAF26zEZfpNuSDUs8XD53IAtC5lB6UHg
-	UOTMPFT4afk1ogvWFPruVKo0efd3uMRLygAKIBXWLT/q/Qi6rpzWPXbBM+7JElqFrF2/EupViLf
-	C+mU86yo0YL/ntQt/fzzQkf9qiXUXFUtW1F1P16I6xIV990hdmys+7lQ4G7sRc8lqMpgL7Nc=
-X-Received: by 2002:a05:600c:a013:b0:49e:6891:27a8 with SMTP id
- 5b1f17b1804b1-49fc574a9bcmr72735e9.25.1789675379819; Thu, 17 Sep 2026
- 13:02:59 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="K1iJnrT5"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 654E71F00893;
+	Thu, 17 Sep 2026 20:59:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789678766;
+	bh=jCN23Z098/jrBfz0bmrygNbGxnLmKn6q7+PuR1I0LGk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=K1iJnrT5zwIrpIGfCXw3tperSIg5wg+ccx1MerSVNbZKcKAO2Wen+D59D8D5DLJnc
+	 iF217QvkXDUQ+4iHuY8eEUZ7yL8xlYISWkK8SQeYTnqwssMCw1OEbjQgFp9u0lgKvJ
+	 pqHbYnMRym6T6Hhf9CzyK6P9da+oWQN2sQ93SDO+FC20DvtsVGBsMi2ArzaNwg5bVk
+	 UJIdWn+vHQPYc8juD9NnTa5TnDl/Bw97Dt4DPOYHw8xO/jPT0st5vqM2dTssTOnZXI
+	 gyAXZsmWH+tHCCKaZqYgmKl++M7jkh48ll258Xjdsminj3GIfk0yO8jAHheJBA5Nip
+	 ltqEn+yZO5xpw==
+Date: Thu, 17 Sep 2026 13:59:26 -0700
+From: Kees Cook <kees@kernel.org>
+To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Nicolas Schier <nsc@kernel.org>,
+	Nick Desaulniers <ndesaulniers@google.com>,
+	Bill Wendling <morbo@google.com>,
+	Justin Stitt <justinstitt@google.com>,
+	Masahiro Yamada <masahiroy@kernel.org>,
+	Alexey Gladkov <legion@kernel.org>,
+	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+	"H. Peter Anvin" <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Josh Poimboeuf <jpoimboe@kernel.org>,
+	Peter Zijlstra <peterz@infradead.org>,
+	Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>,
+	Gary Guo <gary@garyguo.net>,
+	=?iso-8859-1?Q?Bj=F6rn?= Roy Baron <bjorn3_gh@protonmail.com>,
+	Benno Lossin <lossin@kernel.org>,
+	Andreas Hindborg <a.hindborg@kernel.org>,
+	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>,
+	Danilo Krummrich <dakr@kernel.org>,
+	Daniel Almeida <daniel.almeida@collabora.com>,
+	Tamir Duberstein <tamird@kernel.org>,
+	Alexandre Courbot <acourbot@nvidia.com>,
+	Onur =?iso-8859-1?Q?=D6zkan?= <work@onurozkan.dev>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Randy Dunlap <rdunlap@infradead.org>,
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
+	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
+	llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
+	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
+	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
+	linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v3 09/20] kbuild: implement and use depcheck to check
+ dependency timestamps
+Message-ID: <202609171229.31BB336E1@keescook>
+References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
+ <20260917-build-speedup-v3-9-9ecf4163ff36@kernel.org>
+ <202609171117.35BFDCC13@keescook>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
- <CAHk-=wjwtJQPW+MRAkQCcSGA1EZWehxBTUiEUUhdACCNHSKvTQ@mail.gmail.com>
- <aqwkk7FcQ0XWeqJW@gremlin> <aqxCNyxYRzN2Oher@gremlin>
-In-Reply-To: <aqxCNyxYRzN2Oher@gremlin>
-From: Nick Desaulniers <ndesaulniers@google.com>
-Date: Thu, 17 Sep 2026 13:02:48 -0700
-X-Gm-Features: AcwNN1XUt93HLe1Zu-oZLdknUZyAU05hxj4P7Ko_JzOHOx4U0fnT6yaI1XKYaw4
-Message-ID: <CAKwvOd=zbE8MZXCNCBJNpd2WWn7f+AOfxYcmCp7e-8uFSM+D9g@mail.gmail.com>
-Subject: Re: [PATCH v3 00/20] kbuild: significantly speed up kernel builds
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Nathan Chancellor <nathan@kernel.org>, 
-	Nicolas Schier <nsc@kernel.org>, Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
-	Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>, 
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, 
-	"H. Peter Anvin" <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
-	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
-	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
-	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
-	Gary Guo <gary@garyguo.net>, =?UTF-8?Q?Bj=C3=B6rn_Roy_Baron?= <bjorn3_gh@protonmail.com>, 
-	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
-	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
-	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
-	=?UTF-8?Q?Onur_=C3=96zkan?= <work@onurozkan.dev>, 
-	Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>, Kees Cook <kees@kernel.org>, 
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, linux-kbuild@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
-	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, 
-	rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
-	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <202609171117.35BFDCC13@keescook>
 
-On Thu, Sep 17, 2026 at 12:42=E2=80=AFPM Lorenzo Stoakes (ARM) <ljs@kernel.=
-org> wrote:
->
-> On Thu, Sep 17, 2026 at 06:36:18PM +0100, Lorenzo Stoakes (ARM) wrote:
-> > On Thu, Sep 17, 2026 at 10:15:26AM -0700, Linus Torvalds wrote:
-> > > On Thu, 17 Sept 2026 at 09:06, Lorenzo Stoakes (ARM) <ljs@kernel.org>=
- wrote:
-> > > >
-> > > >                 =3D=3D defconfig FULL build =3D=3D
-> > > >
-> > > >                         before    after     delta
-> > > >                       ----------------------------------
-> > > > Threadripper, gcc        32.5s    26.3s     -6.1s (-19%)
-> > > > Threadripper, clang      34.5s    27.2s     -7.3s (-21%)
-> > > > EPYC, gcc                28.7s    20.6s     -8.1s (-28%)
-> > > > EPYC, clang              39.8s    32.2s     -7.6s (-19%)
-> > > > M2, gcc                 519.3s   512.4s     -6.9s (-1%)
-> > > > M2, clang               634.5s   569.4s    -65.1s (-10%)
-> > >
-> > > There's something odd going on with that M2 gcc build. Why is it such
-> > > an odd duck?
+On Thu, Sep 17, 2026 at 11:42:50AM -0700, Kees Cook wrote:
+> On Thu, Sep 17, 2026 at 05:06:19PM +0100, Lorenzo Stoakes (ARM) wrote:
+> > This can be done faster in C, so implement scripts/basic/depcheck to do so.
 > >
-> > Ugh dear lord I think the LLM somehow corrupted the numbers... Let me
-> > re-run those myself locally and come back with the actual times!
+> > It does as little work as possible, reading the .cmd files from a
+> > directory's targets and running stat on each dependency only a single time.
 >
-> OK numbers are in:
+> Doesn't this run the risk of missing transitive deps?
 >
-> M2, gcc                 564.7s   512.1s    -52.6s (-9%)
-> M2, clang               615.1s   564.1s    -51.0s (-8%)
+> C.cmd:	C.o depends on A.c and B.c and B.h
+> B.cmd:	B.h depends on B.data and B.script
 >
-> From the v1:
+> depcheck looks at C.o and B.h's times and is happy so it drops C.cmd file,
+> but then see B.script has changed compared to B.h, so it keeps B.cmd,
+> and then the build runs and doesn't have the C.o dep list any more,
+> and C.o goes unbuilt?
 >
-> M2, gcc                 564.0s   512.4s    -51.6s (-9%)
-> M2, clang               616.1s   569.4s    -46.7s (-8%)
->
-> (Tested as per the cover letter pre-reqs, i.e. applying dependent series
-> first etc.)
->
-> Not sure on the -5s delta on the clang build :) that might have been me
+> Also, I don't think this handles if_changed commands at all? The kbuild
+> rebuild condition is timestamps plus if_changed's command-line check.
 
-Clang is faster on Thursdays.
+tl;dr: I spent way too long looking at this. I think my conclusion is
+"Hm, this makes some cases of missed Makefile deps on generated files
+harder to find, but there don't *appear* to be any obviously wrong
+instances of this in the tree."
 
-> being more disciplined this time to not use the laptop at the same time.
->
-> But broadly in line with the original numbers.
->
-> >
-> > >
-> > >              Linus
-> >
-> > --
-> > Cheers, Lorenzo
->
-> --
-> Cheers, Lorenzo
+Long version:
+
+There does appear to be a problem in the case of generated targets where
+the Makefile deps are build-order correct but lack explicit deps. As
+in, a clean build generates the needed dependencies due to some prior
+explicit Makefile rule dependency, and a later source-level "#include"
+for the generated file exists (and the build doesn't fail since the
+included file got generated before the source that "#include"d it got
+built), and then the normal dep tracking (-Wp,-MMD,... -> .cmd) catches
+it and any direct changes to that dep would normally get noticed going
+forward on incremental builds.
+
+However, with the depcheck .cmd pruning, changes to transitive deps
+(either via file contents or Kconfig options) will go unnoticed during
+incremental builds without that explicit dep (but stock doesn't miss
+it). Though actually it's kind of worse because it'll get noticed on
+rebuild #N+1 for N level of transitive depth, so something will break,
+and then you build again, and the changes from 2 builds ago suddenly
+get rebuilt...
+
+I think you maybe encountered an instance of this in your series, too,
+but it got exposed due to a clean build no longer having the ordering
+correct:
+https://lore.kernel.org/lkml/20260917-build-speedup-v3-18-9ecf4163ff36@kernel.org/
+
+See the trailing diff for a demo:
 
 
+  git apply demo.diff
+  make O=b defconfig
+  # simulate a earlier-stage header generation...
+  make O=b lib/byfile_anchor.o lib/byconf_anchor.o
+  make O=b lib/
 
---=20
-Thanks,
-~Nick Desaulniers
+  # trigger 1: the header's input file changes
+  echo FROMFILE-two > lib/byfile_gen.in
+  make O=b lib/
+
+  # trigger 2: a Kconfig value changes; no file is touched
+  ./scripts/config --file b/.config --set-str LOCALVERSION -demo2
+  make O=b lib/
+
+  # what each object ended up holding
+  strings b/lib/byfile_anchor.o | grep FROMFILE-    # FROMFILE-two   both trees
+  strings b/lib/byfile_victim.o | grep FROMFILE-    # FROMFILE-two   stock
+                                                    # FROMFILE-one   patched  <-- stale
+
+  strings b/lib/byconf_anchor.o | grep CONF-        # CONF--demo2    both trees
+  strings b/lib/byconf_victim.o | grep CONF-        # CONF--demo2    stock
+                                                    # CONF-          patched  <-- stale
+
+
+This means adding depcheck would silently expose any current (and future)
+missing explicit deps on generated files where those files get generated
+by either an earlier build stage or an earlier rule. :(
+
+I went looking for the kind of missed Makefile dep for a generated file,
+and while it's not a very grep-able condition, I did look at stuff that
+fell into include/generated/, but it's safe due to the prepare/archprepare
+ordering AFAICT. So then I looked at places where -I had $(obj) added to
+it, and all of those seemed to have explicit Makefile deps too. Well, all
+except for arch/x86/boot/compressed/sev-handle-vc.c which includes
+"../../lib/inat.c" but that seems safe today due to ordering from
+arch/x86/lib/ being needed before arch/x86/boot/compressed/.
+
+So, yeah, it makes me nervous, and it may make incremental builds less
+idempotent. But I can't really find extant problems and the demo is
+slightly contrived, but not exactly an impossible situation.
+
+-Kees
+
+
+diff --git a/lib/Makefile b/lib/Makefile
+index dfab958327c5c..aed0bd9eb7d6a 100644
+--- a/lib/Makefile
++++ b/lib/Makefile
+@@ -350,3 +350,36 @@ CONTEXT_ANALYSIS_test_context-analysis.o := y
+ obj-$(CONFIG_CONTEXT_ANALYSIS_TEST) += test_context-analysis.o
+ 
+ subdir-$(CONFIG_FORTIFY_SOURCE) += test_fortify
++
++# --- depcheck demo ---
++obj-y += byfile_anchor.o byfile_victim.o byconf_anchor.o byconf_victim.o
++
++quiet_cmd_byfile = GENFILE $@
++      cmd_byfile = printf '\#define BYFILE_STR "%s"\n' "$$(cat $<)" > $@
++
++quiet_cmd_byconf = GENCONF $@
++      cmd_byconf = printf '\#define BYCONF_STR "CONF-%s"\n' '$(CONFIG_LOCALVERSION)' > $@
++
++# Regenerated when its input file changes.
++$(obj)/byfile_gen.h: $(src)/byfile_gen.in FORCE
++	$(call if_changed,byfile)
++
++# No input file: regenerated only when its command line changes, which here
++# means when CONFIG_LOCALVERSION changes. No file is touched.
++$(obj)/byconf_gen.h: FORCE
++	$(call if_changed,byconf)
++
++targets += byfile_gen.h byconf_gen.h
++
++# The anchors declare the dependency. That is what generates the headers on
++# a clean build: fixdep only records a header once the object has compiled
++# successfully, so on a first build there is no .cmd file to rely on. The
++# victims include the same headers without declaring them, so the only
++# record of that edge is the deps_ list in their .cmd files.
++$(obj)/byfile_anchor.o: $(obj)/byfile_gen.h
++$(obj)/byconf_anchor.o: $(obj)/byconf_gen.h
++
++CFLAGS_byfile_anchor.o += -I$(obj)
++CFLAGS_byfile_victim.o += -I$(obj)
++CFLAGS_byconf_anchor.o += -I$(obj)
++CFLAGS_byconf_victim.o += -I$(obj)
+diff --git a/lib/byconf_anchor.c b/lib/byconf_anchor.c
+new file mode 100644
+index 0000000000000..8035eaa352a3b
+--- /dev/null
++++ b/lib/byconf_anchor.c
+@@ -0,0 +1,3 @@
++// SPDX-License-Identifier: GPL-2.0
++#include "byconf_gen.h"
++const char byconf_anchor_marker[] = BYCONF_STR;
+diff --git a/lib/byconf_victim.c b/lib/byconf_victim.c
+new file mode 100644
+index 0000000000000..285a8de8bdf6e
+--- /dev/null
++++ b/lib/byconf_victim.c
+@@ -0,0 +1,3 @@
++// SPDX-License-Identifier: GPL-2.0
++#include "byconf_gen.h"
++const char byconf_victim_marker[] = BYCONF_STR;
+diff --git a/lib/byfile_anchor.c b/lib/byfile_anchor.c
+new file mode 100644
+index 0000000000000..9ea0b8ad55963
+--- /dev/null
++++ b/lib/byfile_anchor.c
+@@ -0,0 +1,3 @@
++// SPDX-License-Identifier: GPL-2.0
++#include "byfile_gen.h"
++const char byfile_anchor_marker[] = BYFILE_STR;
+diff --git a/lib/byfile_gen.in b/lib/byfile_gen.in
+new file mode 100644
+index 0000000000000..7da9e5e0cd83c
+--- /dev/null
++++ b/lib/byfile_gen.in
+@@ -0,0 +1 @@
++FROMFILE-one
+diff --git a/lib/byfile_victim.c b/lib/byfile_victim.c
+new file mode 100644
+index 0000000000000..763c5ef8f1514
+--- /dev/null
++++ b/lib/byfile_victim.c
+@@ -0,0 +1,3 @@
++// SPDX-License-Identifier: GPL-2.0
++#include "byfile_gen.h"
++const char byfile_victim_marker[] = BYFILE_STR;
+
+
+-- 
+Kees Cook
