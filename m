@@ -1,66 +1,49 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB3D24D37B6;
-	Thu, 17 Sep 2026 14:33:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id BDD2754CF65;
+	Thu, 17 Sep 2026 16:01:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789655588; cv=none; b=n9kV0DMe6dm+uLPmxaSAUXOpyWhCZI9YRiqv1E2ANIa0UkS3wtvYX2BW1DJIw/LlX/dAmrvdE8/jfGw9bnAn3agXgSa8C8u7n/ubnHO4nLGuYC3ZE04bJfSXmr1TrjSRHoaUOnD7R6GQMjFXxYpoa8bnWm/MX9fTHIdDoyIGQx0=
+	t=1789660889; cv=none; b=bpUtCnjKzOI9YjF/wV6XJJqdXRGNDIbn3UdbOcWL6zuMOetp7j5/zqoIlIDplFL5FZB4RHmuTHkp2MZe1MtScf7kAjDN6elmNU1bM8B+UxIvsMqWdrxM33CHK7ciRdTW9BfmG8E8jrI9kzMrmEu+0kctqBEZREk8v2/Yd6I1Sf8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789655588; c=relaxed/simple;
-	bh=/7b9Dge+Xpm43JDEKx4r2OMUe578e0wRvbBLaw5dZ98=;
+	s=arc-20240116; t=1789660889; c=relaxed/simple;
+	bh=3nxaGPsEg8eoqMzcy20YoG9qkdjPhPlkwj7avR4Xtkc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gBftSpmGs1LjPai13FEsalLQT5ITT+IS/JVUYCtdZ72t0H5it3r1GMEtkUHOpdaFnK964oKGOoeTdi3JuXEXo9fF6rJfQLUOcNYmQ5ri+H2QgLDnCEwcFwtggpT2EQYlrF4OUN86aFuWIakcBGoWesrbUiswJfOWbzR1yHjSvig=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=h4w3XnKm; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=j8MC1jmOK2K+fnd/wJQuL1hnxTQpK7hwakDwrSr+cjLZcZoQ/mwLWhh/PborUzczFSgPSK/hZrZfNiJhI6wOXOKLWa+NNmtsxG/ekwLbkIk52sSF6FgpGfZsuGSp0iLM5t+/N3WfH634yHPxxH3j3g1gJzyKjj5DOYry4uqB2Ro=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=HvRk3lHH; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="h4w3XnKm"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A9F561F000FF;
-	Thu, 17 Sep 2026 14:32:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789655586;
-	bh=I2ExORUgMX+BoF88CQ1iPiIm+UZCCdszdxXlk48uD6I=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=h4w3XnKm6CpCBPP6zxny3WxSdq5eHBOnoxot5LhCUHJeGcoeuU7IaQSIAvaInWz8g
-	 oHRzCzcN2u5rXZnA8BwBN5B5MY03vwci3WigqJqDc1kf6T86OrB4ddM/4HDTZZQWoV
-	 MP2s55Oe1E1FrVud9JJWXPXpFBCgyVUhIsI7VkIlePqbXJN52WONNSdUfXggIJ9j0N
-	 U5i9lY0iDsScv6yl2/amtlJJYtlYjnw9GuXokt+SVh3xhwljkgeUCImquvwQHO3LCD
-	 gu2VPG0CaGQHuN2mxx+azKf+oE90lG4FG0Nkd1LvBYZbZPRFv6nU4BhGP3iIyXfp05
-	 vN8bbHIolSSrQ==
-Date: Thu, 17 Sep 2026 15:32:50 +0100
-From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-To: Kees Cook <kees@kernel.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, 
-	Linus Torvalds <torvalds@linux-foundation.org>, Nathan Chancellor <nathan@kernel.org>, 
-	Nicolas Schier <nsc@kernel.org>, Nick Desaulniers <ndesaulniers@google.com>, 
-	Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
-	Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>, 
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, 
-	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
-	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
-	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
-	Gary Guo <gary@garyguo.net>, =?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, 
-	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
-	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
-	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
-	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
-	Randy Dunlap <rdunlap@infradead.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
-	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
-	linux-riscv@lists.infradead.org, Linux-Arch <linux-arch@vger.kernel.org>, 
-	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
-	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v2 21/21] kbuild: use pigz for gzip compression if
- available
-Message-ID: <aqv5_utZj5Ma76OD@gremlin>
-References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
- <20260914-build-speedup-v2-21-39817ec5db23@kernel.org>
- <202609151758.BA5732348@keescook>
- <081b2b60-e295-4cd7-b201-d996a88c5f28@app.fastmail.com>
- <202609160809.78E97DC34F@keescook>
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="HvRk3lHH"
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 8EBA61476;
+	Thu, 17 Sep 2026 09:01:20 -0700 (PDT)
+Received: from e129823.arm.com (e129823.arm.com [10.2.213.3])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 034863F7B4;
+	Thu, 17 Sep 2026 09:01:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
+	t=1789660884; bh=3nxaGPsEg8eoqMzcy20YoG9qkdjPhPlkwj7avR4Xtkc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=HvRk3lHHAxbYc9/FMV3MR/AvVJ4syk7rVtjiM2FAGMzndUvrk1vx1uzhYG/W/uwo2
+	 z+Y+O5VzFk4npQ2CgSetJiBldjzEu7lz+44DCqBVvUNxP2F00WP802DjByw5nkT30m
+	 sEFJdsA++LcuM5wRswT/MmCIXOnO/7g7mth8ebDI=
+Date: Thu, 17 Sep 2026 17:01:20 +0100
+From: Yeoreum Yun <yeoreum.yun@arm.com>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: Yeoreum Yun <yeoreum.yun@arm.com>, linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Breno Leitao <leitao@debian.org>,
+	"sami.mujawar@arm.com" <Sami.Mujawar@arm.com>
+Subject: Re: [PATCH] firmware: efi: add a separate timeout for UpdateCapsule()
+Message-ID: <aqwO0EdIwzBQlnmW@e129823.arm.com>
+References: <20260903113238.2291844-1-yeoreum.yun@arm.com>
+ <960e985e-b338-4648-a29b-1f8a31e00599@app.fastmail.com>
+ <apl_29t7Jxr2mv9C@e129823.arm.com>
+ <44097058-9fdc-4e9f-a277-d63e3876b035@app.fastmail.com>
+ <23ce2fb0-1002-409f-bb84-f592db9d0b89@app.fastmail.com>
+ <apmFpUvkRBgMdOH2@e129823.arm.com>
+ <aqkGohQYChzkBPZ7@e129823.arm.com>
+ <b6602c6e-4c77-4dcf-8683-95b5c8fc4693@app.fastmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -69,56 +52,89 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <202609160809.78E97DC34F@keescook>
+In-Reply-To: <b6602c6e-4c77-4dcf-8683-95b5c8fc4693@app.fastmail.com>
 
-On Wed, Sep 16, 2026 at 08:27:09AM -0700, Kees Cook wrote:
-> On Wed, Sep 16, 2026 at 08:38:33AM +0200, Arnd Bergmann wrote:
-> > On Wed, Sep 16, 2026, at 03:06, Kees Cook wrote:
-> > > On Mon, Sep 14, 2026 at 10:22:20AM +0100, Lorenzo Stoakes (ARM) wrote:
-> > >
-> > > Makefile:
-> > >
-> > > KPGZIP	:= $(if $(shell command -v pigz 2>/dev/null),$(PYTHON3)
-> > > $(abs_srctree)/scripts/jobserver-exec
-> > > $(abs_srctree)/scripts/parallel-gzip,gzip)
-> > >
-> > > and the same scripts/parallel-gzip:
-> > >
-> > > 	#!/bin/sh
-> > > 	exec pigz -p ${PARALLELISM:-1} "$@"
-> > >
-> > > And then replace the /boot/ KGZIP uses with KPGZIP. Then we don't need
-> > > to change modules, config_data, new users, nor cmd_gzip, etc, which all
-> > > continue to use the regular KGZIP and the "use python" part for the
-> > > KPGZIP case becomes is a 1-time cost?
+Hi Ard,
+
+> 
+> On Tue, 15 Sep 2026, at 10:49, Yeoreum Yun wrote:
+> >> > On Thu, 3 Sep 2026, at 16:29, Ard Biesheuvel wrote:
+> >> > > On Thu, 3 Sep 2026, at 16:10, Yeoreum Yun wrote:
+> >> > >> Hi Ard,
+> >> > >>
+> >> > >>> Hello Yeoreum Yun,
+> >> > >>> 
+> >> > >>> On Thu, 3 Sep 2026, at 13:32, Yeoreum Yun wrote:
+> >> > >>> > On platforms that allows to update firmware in runtime, UpdateCapsule()
+> >> > >>> > may immediately write a firmware image to persistent storage.
+> >> > >>> > This operation can take longer than EFI_RTS_TIMEOUT.
+> >> > >>> >
+> >> > >>> > Use a separate timeout for the UpdateCapsule() runtime service. By
+> >> > >>> > default, wait indefinitely to avoid interrupting an ongoing firmware
+> >> > >>> > update. Administrators may configure an appropriate timeout, in seconds,
+> >> > >>> > through /sys/firmware/efi/capsule_update_timeout.
+> >> > >>> >
+> >> > >>> > Signed-off-by: Yeoreum Yun <yeoreum.yun@arm.com>
+> >> > >>> > ---
+> >> > >>> >  drivers/firmware/efi/efi.c              | 41 +++++++++++++++++++++++++
+> >> > >>> >  drivers/firmware/efi/runtime-wrappers.c | 14 +++------
+> >> > >>> >  include/linux/efi.h                     | 10 ++++++
+> >> > >>> >  3 files changed, 55 insertions(+), 10 deletions(-)
+> >> > >>> >
+> >> > >>> 
+> >> > >>> Given that UpdateCapsule() is rarely used these days at runtime, I
+> >> > >>> wonder if we should just call it synchronously instead of via the
+> >> > >>> EFI workqueue.
+> >> > >>> 
+> >> > >>> I assume that would also solve the timeout issue?
+> >> > >>
+> >> > >> Might be. But it would make *non-preemptible* for UpdateCapsule().
+> >> > >> AFAIK the purpose of running runtime service with efi_queue to
+> >> > >> run it in indepdent context and to be preemtible in case of arm64.
+> >> > >>
+> >> > >
+> >> > > No.
+> >> > >
+> >> > >> Since most of UpdateCapsule() will be called via capsule-loader's misc
+> >> > >> device, if UpdateCaspule() is called synchronously, It would be
+> >> > >> non-preemtible in arm64 platform.
+> >> > >>
+> >> > >> But, some platform could be preemptible while updating firmware so
+> >> > >> I think it would be better that it would be called via EFI workqueue.
+> >> > >>
+> >> > >
+> >> > > EFI runtime service invocations are preemptible on arm64, so this is
+> >> > > not a problem.
+> >> > 
+> >> > Ah wait - you're right, they are only preemptible when invoked from the
+> >> > work queue.
+> >> 
+> >> Yes. That's why I think it would be better to call via EFI workqueue
+> >> when I see arch_efi_call_virt_setup().
 > >
-> > Nice, I like the idea and this this will work. I didn't know about
-> > scripts/jobserver-exec, but this does seem like a perfect fit.
+> > Hi Ard,
 > >
-> > I checked the other compression tools we support, and found that
-> > zstd is another one that has built-in support for parallel
-> > compression, so we probably want to have it there as well.
->
-> Follow-up idea:
->
-> Having to make a dedicated wrapper script to use jobserver-exec is a bit
-> clunky, so maybe the ergonomics need to be improved there slightly?
-> Maybe we can add a simple template thingy to
-> tools/lib/python/jobserver.py's "run" to replace, say, '%PARALLELISM%'
-> automatically, then it becomes:
->
-> KPGZIP	:= $(if $(shell command -v pigz 2>/dev/null),$(PYTHON3) \
-> 		$(abs_srctree)/scripts/jobserver-exec \
-> 		pigz -p %PARALLELISM%
+> > Could there be any issues with doing it this way, or would there be
+> > a better approach?
+> >
+> 
+> Would it make sense to simply have different limits for UpdateCapsule() and
+> for everything else? How much longer than 2 minutes do you need in the
+> typical case?
 
-Nice, that seems like a good little cleanup will fold that in, do some checks
-then send the v3 out soon :)
+Although the time required to complete a firmware update depends onthe platform
+and other factors, such as whether the capsule contains a single firmware image
+or multiple images, it is generally reasonable to expect the update to complete
+within 10 minutes.
 
->
-> -Kees
->
-> --
-> Kees Cook
+If, for some reason, an update is expected to take longer than 10 minutes,
+the sysfs interface for configuring capsule_update_timeout would be useful.
 
---
-Cheers, Lorenzo
+This would allow the timeout to be adjusted as needed, for example to
+15 minutes, before capsule update. 
+
+Am I missing something?
+
+-- 
+Sincerely,
+Yeoreum Yun
