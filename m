@@ -1,80 +1,62 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1B2C3C8C5E;
-	Thu, 17 Sep 2026 19:26:48 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D1E14E36EC;
+	Thu, 17 Sep 2026 19:42:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789673209; cv=none; b=Z+yZI0oWU6suOASWhtUl/fSlogTo0WlfxAOvSeN5EjnlogORXrHhLiOOsiiNoQMwoGjToEGL1veafMfdhhryXhlzk768zWy7AyQJWlaTqZ8vbGU8OR62hXHFUn1wqVJXJ2KLJ/z4c+TVqIxUBXQ3TymtiZ0yO7cetd4LZ/pzBkI=
+	t=1789674174; cv=none; b=Z7XxIhtkGjIkF3AhYJTPjtbEV5osZVVMWilee2bfNw/SU59OfogF0glBrYtBCl4CvbzplQYwODrwg+XFLYihXKONMhdN1cXiwXYiQOsyXavD4CwnBH5txBtHor5cwk+mlgtHws0uYkaqBFx7ZMALpjtPw8qVdOq+0ilOTE8PV5o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789673209; c=relaxed/simple;
-	bh=sLNR1VrVQrg5fZCZqzVgyN90HNPd9kpNh4iWmwIstVs=;
+	s=arc-20240116; t=1789674174; c=relaxed/simple;
+	bh=k2rS+F0P3MHx+9e0fz/nBmTWD9HXaB4FKGnbXf/FFgQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kAwNutOUaUDh3u+PZSsuw6cxRddPZCsSaL79s49Qhtm4BwCVAC6xKcQXNFxY4Vfa9NyZx7J38MjKGpbSbnPm9//9//DmCScHQPcif4q4O6EvMUVdOmnXjJcNSuhtYyr2JDI7nhK5vyqKgy795A2BVCn+d9kR8lBX1DyIRX936vM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NA0+ZurD; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=T2/XsVxKp4I7MB77+M/3aazFfmYprxuSC44nrPZur1UJj/HceE2qCTbg2+vU1CHdgfMnq8v6GKQShYSEIrDNUxPCvWSe5q0yWNKs9SRsJurSNvEtK+ExxmRkZXi/xjKgv2d7xq9QEygnbcv8NYqx6M30nqXvnPcCs5Jj+k9R3/U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QEAswLsJ; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NA0+ZurD"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 43BEE1F00893;
-	Thu, 17 Sep 2026 19:26:48 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QEAswLsJ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E94031F000FF;
+	Thu, 17 Sep 2026 19:42:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789673208;
-	bh=tKOCZwNuNXOngsboEdPOUV9vT2nY2ya3k2ROGwA7c6Y=;
+	s=k20260515; t=1789674172;
+	bh=PkRN80BoSYgUIdgeE3XHmHynLUQObuBpZsM5VGJ/hZ8=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=NA0+ZurDlEpVuuCDIkpnrqgQBFewSXi8OY2zE80Fn2mcwapiTZTUaN8FcSQ/8eGhH
-	 nWFnaSmZLxyBeDWmJBstaZ4rW+XEzaRpW4W/NTbFnQMUDq0gkayC9qQGfQOStZP4Nv
-	 I70w6VaTsiMRSQFspGg3kO2C8EWhdcz7aWxn0H/WkEnpaHOLr0PsISd6Re9s9ZdV2T
-	 TPmMcPMT3rBFBRFl015oY9/BHwhGxaeUASAxazYyIF5/I4vIDcAFdjGn7423mtpHl8
-	 wsQpIGdpn9W4s5uffjjCKUDDk2VijedCAfZ+MAEA0EESn/X/3FZCd4ae7lLRXVpMG9
-	 KOCbhKCUHM3+g==
-Date: Thu, 17 Sep 2026 12:26:48 -0700
-From: Kees Cook <kees@kernel.org>
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nicolas Schier <nsc@kernel.org>,
-	Nick Desaulniers <ndesaulniers@google.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	Masahiro Yamada <masahiroy@kernel.org>,
-	Alexey Gladkov <legion@kernel.org>,
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-	"H. Peter Anvin" <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Josh Poimboeuf <jpoimboe@kernel.org>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>,
-	Gary Guo <gary@garyguo.net>,
-	=?iso-8859-1?Q?Bj=F6rn?= Roy Baron <bjorn3_gh@protonmail.com>,
-	Benno Lossin <lossin@kernel.org>,
-	Andreas Hindborg <a.hindborg@kernel.org>,
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>,
-	Danilo Krummrich <dakr@kernel.org>,
-	Daniel Almeida <daniel.almeida@collabora.com>,
-	Tamir Duberstein <tamird@kernel.org>,
-	Alexandre Courbot <acourbot@nvidia.com>,
-	Onur =?iso-8859-1?Q?=D6zkan?= <work@onurozkan.dev>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Randy Dunlap <rdunlap@infradead.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
-	llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
-	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
-	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
-	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v3 11/20] kbuild: avoid re-running compiler and linker
- probes
-Message-ID: <202609171154.BEA5134F7@keescook>
+	b=QEAswLsJV5CT5idl2b0sxECKt4RBnyFOYUhJeV8VSDp7LPI5q2uG0MitNu8vlrrGj
+	 GgP3f04l+0g2WO7Dw5awGdDXIeJH1+hlD5eteCdUqsYsZsKEHJot2zsQGiqsRqy8QV
+	 SXyJCnsalvj1JC+2CD4Ia7CbcDMentUQTCRQPyjilTKQXjJF/n1wcyHIpueWwqegca
+	 iexi0eQKo1IVM6WiNYXwgSA66Y8LNUF1DQzWeuBGNKtPcG+iwHiFB2sW9lhh+LTGNT
+	 i3DhH67X4z6x+NB5d58jYolAijG3u4bGwKbJBQaaayCSIrgwL4431CwUsDA/CZgmNo
+	 sabJIf79IKUwQ==
+Date: Thu, 17 Sep 2026 20:42:36 +0100
+From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
+	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
+	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
+	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
+	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
+	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
+	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
+	Gary Guo <gary@garyguo.net>, =?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, 
+	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
+	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
+	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
+	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
+	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
+	Randy Dunlap <rdunlap@infradead.org>, Kees Cook <kees@kernel.org>, 
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	llvm@lists.linux.dev, linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
+	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v3 00/20] kbuild: significantly speed up kernel builds
+Message-ID: <aqxCNyxYRzN2Oher@gremlin>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
- <20260917-build-speedup-v3-11-9ecf4163ff36@kernel.org>
+ <CAHk-=wjwtJQPW+MRAkQCcSGA1EZWehxBTUiEUUhdACCNHSKvTQ@mail.gmail.com>
+ <aqwkk7FcQ0XWeqJW@gremlin>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -83,73 +65,53 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260917-build-speedup-v3-11-9ecf4163ff36@kernel.org>
+In-Reply-To: <aqwkk7FcQ0XWeqJW@gremlin>
 
-On Thu, Sep 17, 2026 at 05:06:21PM +0100, Lorenzo Stoakes (ARM) wrote:
-> Each kernel make invocation begins with ~30 compiler and linker runs each
-> of which performs duplicate probe for a number of compiler and linker
-> options.
-> 
-> This is useless work - the compiler and its version is known, so use these
-> to determine which options are available, once.
-> 
-> A convention already exists for this - CC_HAS_xxx, LD_HAS_xxx in Kconfig
-> files (for example, CC_HAS_COUNTED_BY), so convert these probes to Kconfig
-> options where appropriate.
+On Thu, Sep 17, 2026 at 06:36:18PM +0100, Lorenzo Stoakes (ARM) wrote:
+> On Thu, Sep 17, 2026 at 10:15:26AM -0700, Linus Torvalds wrote:
+> > On Thu, 17 Sept 2026 at 09:06, Lorenzo Stoakes (ARM) <ljs@kernel.org> wrote:
+> > >
+> > >                 == defconfig FULL build ==
+> > >
+> > >                         before    after     delta
+> > >                       ----------------------------------
+> > > Threadripper, gcc        32.5s    26.3s     -6.1s (-19%)
+> > > Threadripper, clang      34.5s    27.2s     -7.3s (-21%)
+> > > EPYC, gcc                28.7s    20.6s     -8.1s (-28%)
+> > > EPYC, clang              39.8s    32.2s     -7.6s (-19%)
+> > > M2, gcc                 519.3s   512.4s     -6.9s (-1%)
+> > > M2, clang               634.5s   569.4s    -65.1s (-10%)
+> >
+> > There's something odd going on with that M2 gcc build. Why is it such
+> > an odd duck?
+>
+> Ugh dear lord I think the LLM somehow corrupted the numbers... Let me
+> re-run those myself locally and come back with the actual times!
 
-Yeah, I agree about the rationale here.
+OK numbers are in:
 
-It does, however, now drive a long-time annoyance of mine to the top of
-mind: the repetition of the compiler command-line options in two places:
-the Kconfig and the Makefile. I dislike that pattern so much that I really
-really worked hard to use cc-option instead where ever I possibly could
-(though it continued to add to my growing concern about the repetition
-of running those checks all the time, so I'm motivated to see something
-like what you have here actually land).
+M2, gcc			564.7s   512.1s    -52.6s (-9%)
+M2, clang		615.1s   564.1s    -51.0s (-8%)
 
-But I would really like to find a way to avoid the duplication. It's
-fragile and it's weird and it's split across 2 files that don't always
-have an obvious relationship. I really don't like it. And with it being
-used for things that are "detected" (i.e. not part of always required
-builds), that fragility means typos may go unnoticed, etc.
+From the v1:
 
-We've had a need for some kind of kconfig "append to a list" logic that
-we've been working around in places, e.g. include/linux/lsm_count.h for
-how "count the list of enabled LSMs" got dealt with. If we could have
-had:
+M2, gcc                 564.0s   512.4s    -51.6s (-9%)
+M2, clang               616.1s   569.4s    -46.7s (-8%)
 
-config LSM_LIST
-	list
-	separator " "
+(Tested as per the cover letter pre-reqs, i.e. applying dependent series
+first etc.)
 
-config SECURITY_SELINUX
-	...
-	append_to LSM_LIST
-	...
+Not sure on the -5s delta on the clang build :) that might have been me
+being more disciplined this time to not use the laptop at the same time.
 
-We could just parse CONFIG_LSM_LIST directly. And I think we can do the
-same with this:
+But broadly in line with the original numbers.
 
-config CC_OPTION_LIST
-	list
-	separator " "
+>
+> >
+> >              Linus
+>
+> --
+> Cheers, Lorenzo
 
-config CC_OPTION_ZERO_INIT_PADDING_BITS
-	string
-	default "$(cc-option-bit,-fzero-init-padding-bits=all)"
-	append_to CC_OPTION_LIST
-
-And the dump all of it into the Makefile in one via CONFIG_CC_OPTION_LIST
-
-(And we'd need to implement ld-option-bit. Though really I think
-cc-option-bit should be renamed to cc-option-str or something)
-
-But even without the new "list" Kconfig type, it'd be nicer to use the
-cc-option-bit string default method and dump all the newly created
-CC_OPTION_... strings into the makefile manually. The "append_to" idea
-could be a follow-up.
-
--Kees
-
--- 
-Kees Cook
+--
+Cheers, Lorenzo
