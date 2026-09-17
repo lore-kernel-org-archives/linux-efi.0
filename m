@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77EF0484892;
-	Thu, 17 Sep 2026 17:27:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9EF464C10E8;
+	Thu, 17 Sep 2026 17:36:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789666056; cv=none; b=E1njXjmQahx89ffjub7JjiCTMiFKzzbf4xEG05fOzKUZII20aXUwHrCk75mNbrmBds6wRnpYbUJk1v7UNn05U2GK6KE8tB2WlLx3qltLvYKcHPRO0Gov2i/4uLDB1LeCRzw299rVWZzkspsKf0du/Y+lMcgiUK1oBrFq/eS6KlM=
+	t=1789666567; cv=none; b=Kkixci2/33v898egBeTYLZ6fw060DZkoXknNlJCV2s0rv3dA+D/S/NB9yW3LXzvFxqoJ0/OGtcj4FvhZkwmGtyzpRyNWV5oBhbUY6I9oM6GTBENnkEb/7gO+q6MG2g77NtWt1jBy3nE2Hmehqfhc0tSFug0dMjlPlNIzsoJ0dFU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789666056; c=relaxed/simple;
-	bh=Jo9HhRUkUveWN+3cJfEeZubkgR8tj8yZu6St7ALQbKk=;
+	s=arc-20240116; t=1789666567; c=relaxed/simple;
+	bh=90ob/hDnCCTxyePugnGrn5AtKvqDzbY34xoSKzFkgAA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JmBqvilhfG6q4OxLsdfnYg+Dq9LGoA+g0nACryy05yqGBgMClPcEnKz6+xJtMvnZWT9GakoiXt/bZg0qc2a2/570SB1c8J8UFxFior6+gNSLkYdZRR6AkzVXfLimIElWeYJdCOs7jqbtqbSfTYaLEjq8azf8SpTe0r/bKud3qBU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IKcDKMZp; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=WFqBpVWkrXGhL7z/IJDXuwa/2FcgesPJh3Eh7PV2ZwQQJ8LzYIWxcXpmKkW+5lIVG4idOFksfLf4vOKPdfBBn1pyNpPt6eg8CkVAzGYb9F20TU8rjBCXYt/9SYBl3uwqXmW/Go2Af8JHun6XdD4vYZPBahfEZDF/5d9VPPiSosQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FA9DCRPW; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IKcDKMZp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D6ACF1F00893;
-	Thu, 17 Sep 2026 17:27:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FA9DCRPW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 35B581F00893;
+	Thu, 17 Sep 2026 17:36:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789666052;
-	bh=qMtpgJuTFFb3pSh+VD0JmC7P3/MrF5Y7JmPuGW1JHOg=;
+	s=k20260515; t=1789666566;
+	bh=A6BEPHfJejrl2NMcgOgt++Vj4JDcXR1qLSxmja4QVCQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=IKcDKMZp+ekNzsJWMv6ovbqCcUdMVOZ6MpkZcYayhKvAzV/c9ClPKNnre38GDO1dP
-	 VnUSB2NySbj0dzneUmt3pEDLT5bQcZzSnv2wWgRFQfbkywnOoydZxU0Fr3fXchDfM+
-	 X2W63kMbGbKmAF4/O+OGA5Py1tGRoL8F3H9HK41uSJlirs05rf7OQz9kYeUuNQab31
-	 /puM/JcNmprsid2hI9cqCt/rE31IWuwsMruvrzyf1LRUn6ltb6gw3/tiPWIJbxOlgq
-	 ZYgG+gfi+WPmnkiu9l/cZnTZCInU5er2bu9blhiS1YcACr8Q+pi1Vz/rYoY+ZwTY9w
-	 qdLoJ1G9LuZRg==
-Date: Thu, 17 Sep 2026 10:27:32 -0700
+	b=FA9DCRPWrubMAvnERnORM+6SiKp9G+5NEqmT8NLgc4cw8+dM5yUrexfPpKjZLgq2G
+	 T6oWf4KbCUmdYWp4a6Ywf8JfoTGT19RAZu31rQshkBuXwW7VLXnDk/VYLMkCmg4K8R
+	 bM8vXaHND7xJmLktiCGijMcbFy419jIeCIc8G471IqC7MEqrUuNGmUAmdXUYx9OW5W
+	 5Zu1pDrZCZsqA61toqo4ozSI8k4UMSZNJ+1guH3onThUccGMN57qEZxQVdY3A8ZVro
+	 LoH28RiDHXGljskteGln8hIsDd8zLZeDNYpFqe/qobZNYHPFWTpnkMXfzmbQSQAFNV
+	 i6cs5n/Bksa6A==
+Date: Thu, 17 Sep 2026 10:36:06 -0700
 From: Kees Cook <kees@kernel.org>
 To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
@@ -70,11 +70,11 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
 	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
 	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v3 02/20] kallsyms: index symbols by token to speed up
- table compression
-Message-ID: <202609171019.5DD874E@keescook>
+Subject: Re: [PATCH v3 03/20] kallsyms: output binary data to speed output
+ and kallsyms assembly
+Message-ID: <202609171034.703D529782@keescook>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
- <20260917-build-speedup-v3-2-9ecf4163ff36@kernel.org>
+ <20260917-build-speedup-v3-3-9ecf4163ff36@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -83,71 +83,14 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260917-build-speedup-v3-2-9ecf4163ff36@kernel.org>
+In-Reply-To: <20260917-build-speedup-v3-3-9ecf4163ff36@kernel.org>
 
-On Thu, Sep 17, 2026 at 05:06:12PM +0100, Lorenzo Stoakes (ARM) wrote:
-> diff --git a/scripts/kallsyms.c b/scripts/kallsyms.c
-> index 494852ade6d8..350d118c3b9e 100644
-> --- a/scripts/kallsyms.c
-> +++ b/scripts/kallsyms.c
-> @@ -58,12 +58,47 @@ static unsigned int table_size, table_cnt;
->  static int all_symbols;
->  static int pc_relative;
->  
-> +/* A dynamic array of symbols, encoded by symbol index. */
-> +struct sym_arr {
-> +	unsigned int *sym_indexes;
-> +	unsigned int cnt, cap;
-> +};
-> +
->  static int token_profit[0x10000];
-> +static struct sym_arr token_syms[0x10000];
+On Thu, Sep 17, 2026 at 05:06:13PM +0100, Lorenzo Stoakes (ARM) wrote:
+> Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 
-Nit: since you're refactoring too, can 0x10000 be a #define so it's not
-open-coded 3 places? (find_best_token() uses the value too, though
-arguably it should actually just use ARRAY_SIZE(token_profit) instead).
-
-> [...]
-> -static void compress_symbols(const unsigned char *str, int idx)
-> +static void compress_symbols(const unsigned char *str, int compressed_chr)
->  {
-> -	unsigned int i, len, size;
-> +	const unsigned int token_idx = sym_token_index(str, 0);
-> +	struct sym_arr *arr = &token_syms[token_idx];
-> +	unsigned int sym_idx, j, len, size;
->  	unsigned char *p1, *p2;
->  
-> -	for (i = 0; i < table_cnt; i++) {
-> +	/* Iterate through all symbols this token is found in and compress. */
-> +	for (j = 0; j < arr->cnt; j++) {
-> +		sym_idx = arr->sym_indexes[j];
->  
-> -		len = table[i]->len;
-> -		p1 = table[i]->sym;
-> +		len = table[sym_idx]->len;
-> +		p1 = table[sym_idx]->sym;
->  
-> -		/* find the token on the symbol */
-
-Why drop this comment? It's a little redundant to "find_token", but I
-always question comment _removal_ when it's not solving an inaccuracy.
-
-> [...]
-> @@ -536,11 +643,14 @@ static void compress_symbols(const unsigned char *str, int idx)
->  
->  		} while (p2);
->  
-> -		table[i]->len = len;
-> +		table[sym_idx]->len = len;
->  
-> -		/* increase the counts for this symbol's new tokens */
-
-Same question here: the comment is still valid?
-
-Otherwise, looks good to me.
+A clear win. :)
 
 Reviewed-by: Kees Cook <kees@kernel.org>
-
 
 -- 
 Kees Cook
