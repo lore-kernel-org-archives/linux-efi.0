@@ -1,34 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA3DB4EB840;
-	Thu, 17 Sep 2026 16:09:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4769B4E73A9;
+	Thu, 17 Sep 2026 16:09:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789661384; cv=none; b=lFUWFpj2yZSKGIqevwO8ftJ9XYGaCwAuqlvIafIbbOA/HVllfADDSy/w3AqqbidMRvLUkkXsKrchE7fp/74ZmMD/jTvplltu74yogurkDuLmUCLQTikwrdQ+S4gAoLCO2TNvEXNlv6XVB2uVtdDnQHnLTQB8FVabnVIt2l3HMwE=
+	t=1789661397; cv=none; b=kmf6HU4Z7mgF5cg0lmSyiAj6UwmJk9eLX6iJselhx/VvsOL/HisXRsRyQXDVHvET5LdafSCmbmfPh2c7hRMWHUhpguUY41eFUkMpahIIo9bxOoZ+o0A6PxsuyXz411GyW1b4pVYstpzpwv/F6g9s8IM3HBXSK1I/tewTUywvWNg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789661384; c=relaxed/simple;
-	bh=RLQvuwM41WcrPKnU42zhRNFNmVgfkGG+NjknfyWXoEs=;
+	s=arc-20240116; t=1789661397; c=relaxed/simple;
+	bh=rqaxbRFTNtA+FfHVG7vWIuOFobBK2/fgyWI6HaVRe4E=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=DJf2uVPGZvrMPR2vzlVIPsBk3EoXtdSuKdOIGd27GtJgThWXbr+fwJmZ5MQ7p3PQMzaXp8U3tW8l/tnJlMiT298pmKh/w8SyXD6scVTht0laQCjXjb/ieqkgMw8HnSJHhSkXQOpnzZ9l3VDMcW6Y9le7+eU0cwyPlpeoC5JAdc0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ScL4qLbi; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=LB8V9FkngYyGQIH+K3ZaAlmSZDI/Oxb2356UMwUKeDp77Hjatxb/lFvnbOLzhwZ+vm3BCOdhclsDmwhUxYMmBs7EzHkkghpa1FPwX6ZpXnH/ALqJULJOmNj4GrSkYp1MWlViebO7Fe30DtidtpNoHwY7JqkCH1ujMkLislag+cM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XjkJclNf; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ScL4qLbi"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 15E811F000FF;
-	Thu, 17 Sep 2026 16:09:29 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XjkJclNf"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2B84D1F00893;
+	Thu, 17 Sep 2026 16:09:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789661382;
-	bh=5xWV9qPVBA53NbkJvCBIcKASWfrmhIW9Yj44HCnJWZE=;
+	s=k20260515; t=1789661396;
+	bh=pIdXVDKtxt18Mak5g7MMon/porCKqzoMryJNJA9avpM=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=ScL4qLbiZVwfot7DpKhh+O7lMtqBadEU0+rC0KGvgjKCkr327ni5YSnvqz7A9+1Jg
-	 yZsLSIFwN1//ROP8EvzVHFkCSfT75hdjMU1xs+SAe4tYO+DpmTO2xyC2MAsLovK+a6
-	 wT1pJUGyXHT6zAhUiueVxXdlEtfvK/JadN2SYt43IGlk0gSuruQuJ+tH8ZZsGKlubP
-	 HnwcDR4pMy//z6KLBx8KfGsa0DLdVa8MWNT+tTf3HZBH6LEqqCm4NcJqnYvmpYmkIY
-	 eKB3SHl881nKnmiAvMi0wKOshjeAjhiNajeA98AuR/SeKClAdBOTQge+ZJJQptNF2e
-	 R0a35RxAy6y1Q==
+	b=XjkJclNfpn1Huwi+qn0H1ZkvhnpZDvGve9OoMIe38GyUGgH8MasxAAJZhTPoGMnOu
+	 itF+yDGufhxfWZZzIhCNJ1y64gg/DrOfAadC/4rO0epEaARURQh1TEIUHj3gxjhWbH
+	 Z3t2dBMBX+p/5F3Yr+HcgvC1AnHyF6dZecHtNTxWX8SxGn4a2uWLkJvoBiVnmtKXg5
+	 YbRE6GszaQlhb+KavsODqraZ9T2kQ+tDv7DXZDfia9N9bvQU8gVq9ykVKzOYYrDQqB
+	 4snkfEKfftHYPoUJrbzGfE4sFsQfdSqev2VDrQtHVdE2iiLzJujhGt/rJTnNl5LHiS
+	 d550Nio8DzuQg==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Thu, 17 Sep 2026 17:06:24 +0100
-Subject: [PATCH v3 14/20] kbuild: batch module finalisation
+Date: Thu, 17 Sep 2026 17:06:25 +0100
+Subject: [PATCH v3 15/20] objtool: cache relocations, do less work,
+ eliminate relocation hash
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260917-build-speedup-v3-14-9ecf4163ff36@kernel.org>
+Message-Id: <20260917-build-speedup-v3-15-9ecf4163ff36@kernel.org>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
 In-Reply-To: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -74,142 +75,413 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  linux-hardening@vger.kernel.org, "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4961; i=ljs@kernel.org;
- h=from:subject:message-id; bh=RLQvuwM41WcrPKnU42zhRNFNmVgfkGG+NjknfyWXoEs=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLLW8P83uuuzImrWs4oGRoM3LzJK1/bxdnt6PCpc/CNY/
- t7X0rcnO0pZGMS4GGTFFFmefxHfHyQSNq/zgr8bzBxWJpAhDFycAjARthJGhh33Wc9M3vecPY5L
- fvl73hYHJePz35d6B03203kt3SFeGcXIsLawonZZFHfZ9/Jb26clqf+98arCZZ5Slazrvrs+Wya
- a8AEA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=12860; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=rqaxbRFTNtA+FfHVG7vWIuOFobBK2/fgyWI6HaVRe4E=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLLW8P/f8OntZev3jsGrQm+EbWXye/VjRdoiffPIZSEPZ
+ G8vDMiK6ihlYRDjYpAVU2R5/kV8f5BI2LzOC/5uMHNYmUCGMHBxCsBEYpYwMrydmrbnvJG7TeKt
+ Ipdn32u+fXwx9cbml1a9/bMv7ZYwCepgZPg/vUAzKkG84oCJZPId8ZuO6l9v+bFpiUy/Ynl034w
+ tG9kA
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-With the .mod.S change in place, module finalisation on allmodconfig builds
-consists of a large number of very short-lived jobs.
+Instruction relocations are looked up by destination in objtool via a hash
+which is keyed on a 16-byte (OFFSET_STRIDE) window within the section being
+walked.
 
-For allmodconfig x86-64 this can be on the order of ~22,000 jobs of a few
-milliseconds in duration each.
+It iterates through each 16-byte window, looking up relocations over
+several passes, before moving on to the next 16-byte window, caching only
+when a relocation is not found saving further lookups in this case.
 
-Each job entails processing ~22k .cmd files, so the combination of heavy
-overhead and small individual job results in a lot of unnecessary and
-repeated work even with all cores being utilised.
+Improve upon this by introducing a per-section relocation cache storing the
+first relocation at or after each 64-byte window of data (an empirically
+determined index range), indexed by chunk.
 
-The solution is to batch by a number of jobs. Determining which value makes
-sense was done empirically.
+The lookup is implemented an array lookup and touches no shared state, so
+can be used from multiple threads.
 
-On a 128-thread threadripper box doing an allmodconfig build, best of
-2, *.ko, *.mod.o deleted each time:
+This relies upon the entries within a section being sorted, which is the
+case for all sections supplied to objtool by the link step during the
+kernel build.
 
-    modules per chunk    instances    wall
-    -----------------    ---------    ------
-                    1        11171    10.22s
-                    2         5586     6.72s
-                    4         2793     4.97s
-                    8         1397     4.26s
-                   16          699     4.05s
-                   32          350     4.05s
-                   64          175     4.07s
-                  128           88     4.05s
-                  256           44     4.03s
-                  512           22     4.18s
+With this in place the relocation hash is unnecessary and removed. This
+saves ~90 MiB in peak memory usage for an allmodconfig build.
 
-Wall time flattens for 16-256 module batches.
+If anything is processed out of order, fall back to a linear scan.
 
-A slower/lower core machine will do better with fewer modules-per-batch, a
-faster/higher core machine will do better with more modules-per-batch.
+DWARF sections are a special case - their relocations are never looked up
+by destination at all and only need to be on their symbol's list for
+elf_update_sym_relocs().
 
-Therefore, take the midpoint which works in the most margin in either
-direction - 128 modules per batch.
+This is meaningful in practice as on an x86-64 kernel build with
+CONFIG_DEBUG_INFO set objtool processing of vmlinux.o is dominated by DWARF
+section processing.
 
-This naturally scales with module count too as the optimum gains are
-obtained with higher module count, so fewer batches in this case costs less
-overhead.
+For an allmodconfig build ~9 million relocations were hashed, and ~8.2
+million of those were DWARF sections, which added overhead on cache miss
+and pollution of the hash table. This is now eliminated.
 
-Each instance holds only its own modules' variables and the top-level one
-reads no per-module .cmd files at all, the same rules serve both levels,
-and an instance is told its chunk with modfinal-first=<index>.
+The output of objtool before and after this change was confirmed to be
+byte-for-byte identical both for x86_64 defconfig and allmodconfig with
+gcc and clang.
 
-Only the top-level instance builds .module-common.o, to the chunks it is a
-plain prerequisite, so no two instances ever write it.
+objtool on the gcc allmodconfig vmlinux.o goes from 10.5s to 9.0s, clang
+from 9.8s to 8.3s and gcc defconfig from 2.08s to 1.79s, with peak memory
+down ~90 MiB on allmodconfig.
 
-"make modules" with every *.mod.o and *.ko deleted goes from 28.9s to 15.9s
-with clang 22. No-op "make modules" goes from 5.6s to 4.8s, as checking the
-22,000 targets is spread over the chunks too.
+objtool on vmlinux.o is on the serial tail of every build that links
+vmlinux, no-op builds are unchanged.
 
 Whole build, 128-thread Threadripper 9980X, best of N runs:
 
                                          before   after     delta
                                          -------------------------------
-  x86 allmodconfig, no-op make, gcc         2.3s     1.4s    -0.85s (-38%)
-  x86 allmodconfig, no-op make, clang       2.8s     1.8s    -0.94s (-34%)
-  x86 allmodconfig, clean, gcc            306.6s   294.1s     -12.6s (-4%)
-  x86 allmodconfig, clean, clang          290.2s   283.9s     -6.4s (-2%)
+  x86 defconfig, touch mm/vma.c, gcc        8.3s     8.2s    -0.14s (-2%)
+  x86 defconfig, touch mm/vma.c, clang      7.6s     7.3s    -0.25s (-3%)
+  x86 defconfig, clean, gcc                28.9s    28.6s    -0.22s (-1%)
+  x86 defconfig, clean, clang              29.4s    29.1s    -0.28s (-1%)
+  x86 allmodconfig, touch mm/vma.c, gcc    29.4s    28.0s     -1.4s (-5%)
+  x86 allmodconfig, touch mm/vma.c, clang  27.9s    26.2s     -1.7s (-6%)
 
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- scripts/Makefile.modfinal | 30 +++++++++++++++++++++++++++++-
- 1 file changed, 29 insertions(+), 1 deletion(-)
+ tools/objtool/elf.c                 | 204 ++++++++++++++++++++++++++++--------
+ tools/objtool/include/objtool/elf.h |  10 +-
+ 2 files changed, 162 insertions(+), 52 deletions(-)
 
-diff --git a/scripts/Makefile.modfinal b/scripts/Makefile.modfinal
-index 75e9effdf02c..4d5e6e1a0ff9 100644
---- a/scripts/Makefile.modfinal
-+++ b/scripts/Makefile.modfinal
-@@ -13,9 +13,30 @@ include $(srctree)/scripts/Makefile.lib
- # find all modules listed in modules.order
- modules := $(call read-file, modules.order)
+diff --git a/tools/objtool/elf.c b/tools/objtool/elf.c
+index a791f4ea6ec1..8524d287621b 100644
+--- a/tools/objtool/elf.c
++++ b/tools/objtool/elf.c
+@@ -316,45 +316,165 @@ struct symbol *find_global_symbol_by_name(const struct elf *elf, const char *nam
+ 	return NULL;
+ }
  
-+modfinal-chunk-size := 128
+-/* If there are multiple matches, return the first one in the range */
+-struct reloc *find_reloc_by_dest_range(const struct elf *elf, struct section *sec,
++static bool is_dwarf_section(struct section *sec)
++{
++	return !strncmp(sec->name, ".debug_", 7);
++}
 +
-+ifdef modfinal-first
++/* Index the first relocation at or after each 64 byte window of the base. */
++#define RELOC_CACHE_INDEX_SHIFT	6
 +
-+# this instance handles the chunk of modules.order starting at $(modfinal-first)
-+modules := $(wordlist $(modfinal-first), $(words $(modules)), $(modules))
-+modules := $(wordlist 1, $(modfinal-chunk-size), $(modules))
++static unsigned long reloc_cache_index(unsigned long offset)
++{
++	return offset >> RELOC_CACHE_INDEX_SHIFT;
++}
 +
- __modfinal: $(modules:%.o=%.ko)
- 	@:
++static void reloc_cache_free(struct section *rsec)
++{
++	free(rsec->reloc_cache);
++	rsec->reloc_cache = NULL;
++	rsec->nr_cache_windows = 0;
++	rsec->nr_indexed = 0;
++	rsec->sorted = false;
++}
++
++/* Grow the index to cover the base section, new windows start past the end. */
++static int reloc_cache_resize(struct section *rsec)
++{
++	const unsigned int nr_windows = reloc_cache_index(sec_size(rsec->base)) + 1;
++	unsigned int *cache;
++
++	if (nr_windows <= rsec->nr_cache_windows)
++		return 0;
++
++	cache = realloc(rsec->reloc_cache, nr_windows * sizeof(*cache));
++	if (!cache) {
++		ERROR_GLIBC("realloc");
++		return -1;
++	}
++
++	while (rsec->nr_cache_windows < nr_windows)
++		cache[rsec->nr_cache_windows++] = rsec->nr_indexed;
++	rsec->reloc_cache = cache;
++
++	return 0;
++}
++
++/*
++ * Index the next relocation. It must follow the previous one in position and
++ * offset, otherwise the section is scanned from now on.
++ */
++static int reloc_cache_add(struct section *rsec, unsigned int reloc_idx)
++{
++	const unsigned long offset = reloc_offset(&rsec->relocs[reloc_idx]);
++	const unsigned long window = reloc_cache_index(offset);
++	unsigned long first_window = 0;
++
++	if (reloc_idx != rsec->nr_indexed)
++		goto unsorted;
++
++	if (reloc_idx) {
++		const unsigned long prev = reloc_offset(&rsec->relocs[reloc_idx - 1]);
++
++		if (offset < prev)
++			goto unsorted;
++		first_window = reloc_cache_index(prev) + 1;
++	}
++
++	if (reloc_cache_resize(rsec))
++		return -1;
++	if (window >= rsec->nr_cache_windows)
++		goto unsorted;
++
++	while (first_window <= window)
++		rsec->reloc_cache[first_window++] = reloc_idx;
++	rsec->nr_indexed = reloc_idx + 1;
++
++	return 0;
++
++unsorted:
++	reloc_cache_free(rsec);
++	return 0;
++}
++
++static int init_reloc_cache(struct section *rsec)
++{
++	const unsigned int nr_relocs = sec_num_entries(rsec);
++	unsigned int reloc_idx;
++
++	rsec->sorted = true;
++	for (reloc_idx = 0; reloc_idx < nr_relocs; reloc_idx++) {
++		if (reloc_cache_add(rsec, reloc_idx))
++			return -1;
++		if (!rsec->sorted)
++			break;
++	}
++
++	return 0;
++}
++
++static bool reloc_in_range(struct reloc *reloc, unsigned long offset,
++			   unsigned int len)
++{
++	return reloc_offset(reloc) >= offset && reloc_offset(reloc) < offset + len;
++}
++
++/* The index gives a lower bound, scan on from there. */
++static struct reloc *find_reloc_sorted(struct section *rsec,
+ 				       unsigned long offset, unsigned int len)
+ {
+-	struct reloc *reloc, *r = NULL;
+-	struct section *rsec;
+-	unsigned long o;
++	const unsigned long cache_idx = reloc_cache_index(offset);
++	unsigned int reloc_idx;
  
-+else
-+
-+modfinal-chunks := $(addprefix chunk-, $(shell seq 1 $(modfinal-chunk-size) $(words $(modules))))
-+
-+PHONY += $(modfinal-chunks)
-+$(modfinal-chunks): .module-common.o
-+	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.modfinal modfinal-first=$(@:chunk-%=%)
-+
-+__modfinal: $(modfinal-chunks)
-+	@:
-+
-+endif
-+
- # modname and part-of-module are set to make c_flags define proper module flags
- modname = $(notdir $(@:.mod.o=))
- part-of-module = y
-@@ -29,8 +50,11 @@ quiet_cmd_as_mod_o = AS [M]  $@
- %.mod.o: %.mod.S FORCE
- 	$(call if_changed,as_mod_o)
+-	rsec = sec->rsec;
+-	if (!rsec)
++	if (cache_idx >= rsec->nr_cache_windows)
+ 		return NULL;
  
-+# Built by the top-level instance alone, the chunks take it as a plain file.
-+ifndef modfinal-first
- .module-common.o: $(srctree)/scripts/module-common.c FORCE
- 	$(call if_changed_rule,cc_o_c)
-+endif
+-	for_offset_range(o, offset, offset + len) {
+-		elf_hash_for_each_possible(elf, reloc, reloc, hash,
+-					   sec_offset_hash(rsec, o)) {
+-			if (reloc->sec != rsec)
+-				continue;
++	for (reloc_idx = rsec->reloc_cache[cache_idx];
++	     reloc_idx < rsec->nr_indexed; reloc_idx++) {
++		struct reloc *reloc = &rsec->relocs[reloc_idx];
  
- ifneq ($(WARN_ON_UNUSED_TRACEPOINTS),)
- cmd_check_tracepoint = $(objtree)/scripts/tracepoint-update --module $<;
-@@ -58,7 +82,11 @@ ifdef CONFIG_DEBUG_INFO_BTF_MODULES
- endif
- 	+$(call cmd,check_tracepoint)
+-			if (reloc_offset(reloc) >= offset &&
+-			    reloc_offset(reloc) < offset + len) {
+-				if (!r || reloc_offset(reloc) < reloc_offset(r))
+-					r = reloc;
+-			}
+-		}
+-		if (r && (reloc_offset(r) & OFFSET_STRIDE_MASK) == o)
+-			return r;
++		if (reloc_offset(reloc) >= offset)
++			return reloc_in_range(reloc, offset, len) ? reloc : NULL;
+ 	}
  
--targets += $(modules:%.o=%.ko) $(modules:%.o=%.mod.o) .module-common.o
-+ifdef modfinal-first
-+targets += $(modules:%.o=%.ko) $(modules:%.o=%.mod.o)
-+else
-+targets += .module-common.o
-+endif
+-	return r;
++	return NULL;
+ }
  
- # Add FORCE to the prerequisites of a target to force it to be always rebuilt.
- # ---------------------------------------------------------------------------
+-struct reloc *find_reloc_by_dest(const struct elf *elf, struct section *sec, unsigned long offset)
++/* Out of order sections, only ever DWARF or one objtool grew that way. */
++static struct reloc *find_reloc_linear(struct section *rsec,
++				       unsigned long offset, unsigned int len)
+ {
+-	return find_reloc_by_dest_range(elf, sec, offset, 1);
++	struct reloc *reloc, *first = NULL;
++
++	for_each_reloc(rsec, reloc) {
++		if (!reloc->sec || !reloc_in_range(reloc, offset, len))
++			continue;
++
++		if (!first || reloc_offset(reloc) < reloc_offset(first))
++			first = reloc;
++	}
++
++	return first;
+ }
+ 
+-static bool is_dwarf_section(struct section *sec)
++/* If there are multiple matches, return the first one in the range. */
++struct reloc *find_reloc_by_dest_range(const struct elf *elf, struct section *sec,
++				       unsigned long offset, unsigned int len)
+ {
+-	return !strncmp(sec->name, ".debug_", 7);
++	struct section *rsec = sec->rsec;
++
++	if (!rsec)
++		return NULL;
++
++	if (rsec->sorted)
++		return find_reloc_sorted(rsec, offset, len);
++
++	return find_reloc_linear(rsec, offset, len);
++}
++
++struct reloc *find_reloc_by_dest(const struct elf *elf, struct section *sec, unsigned long offset)
++{
++	return find_reloc_by_dest_range(elf, sec, offset, 1);
+ }
+ 
+ static int read_sections(struct elf *elf)
+@@ -1071,7 +1191,8 @@ struct reloc *elf_init_reloc(struct elf *elf, struct section *rsec,
+ 	set_reloc_type(elf, reloc, type);
+ 	set_reloc_addend(elf, reloc, addend);
+ 
+-	elf_hash_add(reloc, &reloc->hash, reloc_hash(reloc));
++	if (rsec->sorted && reloc_cache_add(rsec, reloc_idx))
++		return NULL;
+ 	set_sym_next_reloc(reloc, sym->relocs);
+ 	sym->relocs = reloc;
+ 
+@@ -1125,16 +1246,13 @@ struct reloc *elf_init_reloc_data_sym(struct elf *elf, struct section *sec,
+ 
+ static int read_relocs(struct elf *elf)
+ {
+-	unsigned long nr_reloc, max_reloc = 0;
++	unsigned long nr_reloc, max_reloc = 0, nr_linear = 0;
+ 	struct section *rsec;
+ 	struct reloc *reloc;
+ 	unsigned int symndx;
+ 	struct symbol *sym;
+ 	int i;
+ 
+-	if (!elf_alloc_hash(reloc, elf->num_relocs))
+-		return -1;
+-
+ 	list_for_each_entry(rsec, &elf->sections, list) {
+ 		if (!is_reloc_sec(rsec))
+ 			continue;
+@@ -1168,19 +1286,26 @@ static int read_relocs(struct elf *elf)
+ 				return -1;
+ 			}
+ 
+-			elf_hash_add(reloc, &reloc->hash, reloc_hash(reloc));
+ 			set_sym_next_reloc(reloc, sym->relocs);
+ 			sym->relocs = reloc;
+ 
+ 			nr_reloc++;
+ 		}
+ 		max_reloc = max(max_reloc, nr_reloc);
++
++		/* DWARF relocs are never looked up, so are not worth indexing. */
++		if (is_dwarf_section(rsec->base))
++			continue;
++		if (init_reloc_cache(rsec))
++			return -1;
++		if (!rsec->sorted)
++			nr_linear += nr_reloc;
+ 	}
+ 
+ 	if (opts.stats) {
+ 		printf("max_reloc: %lu\n", max_reloc);
+ 		printf("num_relocs: %lu\n", elf->num_relocs);
+-		printf("reloc_bits: %d\n", elf->reloc_bits);
++		printf("num_relocs_linear: %lu\n", nr_linear);
+ 	}
+ 
+ 	return 0;
+@@ -1327,8 +1452,7 @@ struct elf *elf_create_file(GElf_Ehdr *ehdr, const char *name)
+ 	if (!elf_alloc_hash(section,		1000) ||
+ 	    !elf_alloc_hash(section_name,	1000) ||
+ 	    !elf_alloc_hash(symbol,		10000) ||
+-	    !elf_alloc_hash(symbol_name,	10000) ||
+-	    !elf_alloc_hash(reloc,		100000))
++	    !elf_alloc_hash(symbol_name,	10000))
+ 		return NULL;
+ 
+ 	null		= elf_create_section(elf, NULL, 0, 0, SHT_NULL, 0, 0);
+@@ -1508,6 +1632,8 @@ struct section *elf_create_section(struct elf *elf, const char *name,
+ 	sec->sh.sh_type = type;
+ 	sec->sh.sh_addralign = align;
+ 	sec->sh.sh_flags = flags;
++	/* Relocations objtool adds are indexed as they come. */
++	sec->sorted = type == SHT_RELA;
+ 
+ 	if (name) {
+ 		sec->name = strdup(name);
+@@ -1633,16 +1759,6 @@ static int elf_alloc_reloc(struct elf *elf, struct section *rsec)
+ 	}
+ 
+ 	memcpy(new_relocs, old_relocs, nr_relocs_old * sizeof(struct reloc));
+-
+-	for (int i = 0; i < nr_relocs_old; i++) {
+-		struct reloc *old = &old_relocs[i];
+-		struct reloc *new = &new_relocs[i];
+-		u32 key = reloc_hash(old);
+-
+-		elf_hash_del(reloc, &old->hash, key);
+-		elf_hash_add(reloc, &new->hash, key);
+-	}
+-
+ 	free(old_relocs);
+ done:
+ 	rsec->relocs = new_relocs;
+diff --git a/tools/objtool/include/objtool/elf.h b/tools/objtool/include/objtool/elf.h
+index a82517a76a0f..ba18e188fc5f 100644
+--- a/tools/objtool/include/objtool/elf.h
++++ b/tools/objtool/include/objtool/elf.h
+@@ -59,6 +59,8 @@ struct section {
+ 	const char *name;
+ 	int idx;
+ 	bool _changed, text, rodata, noinstr, init, truncate;
++	bool sorted;
++	unsigned int *reloc_cache, nr_cache_windows, nr_indexed;
+ 	struct reloc *relocs;
+ 	unsigned long nr_alloc_relocs;
+ 	struct section *twin;
+@@ -106,7 +108,6 @@ struct symbol {
+ };
+ 
+ struct reloc {
+-	struct elf_hash_node hash;
+ 	struct section *sec;
+ 	struct symbol *sym;
+ 	unsigned long _sym_next_reloc;
+@@ -127,13 +128,11 @@ struct elf {
+ 	int symbol_name_bits;
+ 	int section_bits;
+ 	int section_name_bits;
+-	int reloc_bits;
+ 
+ 	struct elf_hash_node **symbol_hash;
+ 	struct elf_hash_node **symbol_name_hash;
+ 	struct elf_hash_node **section_hash;
+ 	struct elf_hash_node **section_name_hash;
+-	struct elf_hash_node **reloc_hash;
+ 
+ 	struct section *section_data;
+ 	struct symbol *symbol_data;
+@@ -575,9 +574,4 @@ static inline u32 sec_offset_hash(struct section *sec, unsigned long offset)
+ 	return ol;
+ }
+ 
+-static inline u32 reloc_hash(struct reloc *reloc)
+-{
+-	return sec_offset_hash(reloc->sec, reloc_offset(reloc));
+-}
+-
+ #endif /* _OBJTOOL_ELF_H */
 
 -- 
 2.55.0
