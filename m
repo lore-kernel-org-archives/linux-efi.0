@@ -1,43 +1,43 @@
 Received: from mail.avm.de (mail.avm.de [212.42.244.120])
 	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B705519913;
-	Fri, 18 Sep 2026 17:09:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E86B2494811;
+	Fri, 18 Sep 2026 19:14:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.42.244.120
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789751385; cv=none; b=LsZUY6d8tE4jwPq5UtyfMhD2RVQ1E2DucLBhHI8fRXVNmzomNHaC7+vugw6vcfHStFVDosje7IS2Hp4M7MZBshOuxu6ST2oJgLLhVb7XVlfgfkVypOuOKa9XaCik1xKE++R3Ro3okb2jPW6pEprFpSRtFimzqPMGXG04OIuekAA=
+	t=1789758881; cv=none; b=nt2QB8jKV2gn7TnUcGlqcEMal0yb59ioW9Pj9hFhhIZ+JdfXIu3KafRNQRdh6ls3QLxO0tyyOprinSjL3BzanQjXQYoqpSNZVoB8VAITNkKncvFn4XmlEe0Ov68z7wrKhLAr1jH7vYzwTLOv2M5Bc3CtZlt+af/m1M0uFMASQy4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789751385; c=relaxed/simple;
-	bh=cLlatevR+/SpRjJpDb9SSz0QigrGJ3OmsCk/osE+jMY=;
+	s=arc-20240116; t=1789758881; c=relaxed/simple;
+	bh=1jzcMguIKA5Is93mmoKDoFmH31Cg2L7H6JApxy7LOZY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=O7EBsPkKhoY5BWmO2qCYs7RmMtVpLfkpKFbNyyX3m97dTBESW8O2zuLDCvkmTMgjID0rZwZoUxfO9nB5BmaiuFfMEy6A3vYhanhmq6tEs+wzALJJ+4ZIFCKhcir/Eo+/xLjRotWihm8HbaiveN/UhpjdJEljDGAfYvI/xYHXXag=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fritz.com; spf=pass smtp.mailfrom=fritz.com; dkim=pass (2048-bit key) header.d=fritz.com header.i=@fritz.com header.b=LQDSykd5; arc=none smtp.client-ip=212.42.244.120
+	 Content-Type:Content-Disposition:In-Reply-To; b=FCdFY6acYTgj1Jr1EvadShGEJD0E1DNtQFOHVVfqBFVNWev4eeil81zNEV5i4P6QxjgvQKjBw2JtjYeys1dcLxex2bi+UKM8AY6+oVsBPgQ04qXBxcFQHtRnB43G5Nr8RUU0ExEXscpmZTse+mlNBUTEsL+eCZnb2ZRnjvcOgHI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fritz.com; spf=pass smtp.mailfrom=fritz.com; dkim=pass (2048-bit key) header.d=fritz.com header.i=@fritz.com header.b=iBvlivrQ; arc=none smtp.client-ip=212.42.244.120
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fritz.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fritz.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fritz.com header.i=@fritz.com header.b="LQDSykd5"
+	dkim=pass (2048-bit key) header.d=fritz.com header.i=@fritz.com header.b="iBvlivrQ"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=fritz.com; s=mail;
-	t=1789751370; bh=cLlatevR+/SpRjJpDb9SSz0QigrGJ3OmsCk/osE+jMY=;
+	t=1789758868; bh=1jzcMguIKA5Is93mmoKDoFmH31Cg2L7H6JApxy7LOZY=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=LQDSykd56gacw5EUr8bpoLQSK3PfoaLuuC+KH3NaLr+bO3vedzncsIsvEL2wV1fqd
-	 gmWI7Zw16BgOxN3OIKVzm/BQpgKm+TpurMQeXv2DgUKJqFB5e9pKB2ISPJQnD8b0xs
-	 hzOdst7knXiA9+BT0NItt7lSx8A+6xCMhT9pHjaKRsUugAQRL0X+r5ZOEq072FgkCF
-	 VDVZlzGrsltxUhermvWhle++FjWRW88AE/unZ/zHVIF2ppwE2ajBJiv1H4eD0kJlUf
-	 t7EPQZmpXwEAxhONfiGhcbqVAyZsHUnSJyclki+4aaiuEBh9UsURcDAv9U9EOlPmby
-	 XpoWmvL0V5Ing==
-Received: from [2001:bf0:244:244::78] (helo=mail.avm.de)
+	b=iBvlivrQxoQVIHimQxNZwvRd0auQnJ2cPYzcf290Gf4rAfq8fQ2otWjes9JeDDVOp
+	 9COorSKA8vsE3iFyF1sfG/9oTUzSzrP53FcBlUVHjsNLG9T+7V+4dQ3hfkHI7fTIVm
+	 593kNAFWpPYrvZM/jUo3fNC9lYRinwYFoQEPX4mvgebtHcg+q0/jtPkBOqmycudB5h
+	 lvIMmcnbp2bzPo2XZvx7ZrQ7jQ1t22IlI2k7ztxPumNk/OSxuesoeZCK/V7PWxcyih
+	 T2d17vKvLAtj149Sa0VK3IjL7v6HgkKxjM2do6f5PI+WEYP/REwe6UuFcKm3AGm/bC
+	 anYFuFsiSaK5w==
+Received: from [212.42.244.78] (helo=mail.avm.de)
 	by mail.avm.de with ESMTP (eXpurgate 4.57.1)
 	(envelope-from <n.schier@fritz.com>)
-	id 6aad704a-0449-7f0000032729-7f000001b198-1
-	for <multiple-recipients>; Fri, 18 Sep 2026 19:09:30 +0200
-Received: from mail-auth.fritz.com (unknown [IPv6:2001:bf0:244:244::78])
+	id 6aad8d94-0449-7f0000032729-7f000001b58c-1
+	for <multiple-recipients>; Fri, 18 Sep 2026 21:14:28 +0200
+Received: from mail-auth.fritz.com (unknown [212.42.244.78])
 	by mail.avm.de (Postfix) with ESMTPS;
-	Fri, 18 Sep 2026 19:09:30 +0200 (CEST)
-Date: Fri, 18 Sep 2026 19:09:30 +0200
+	Fri, 18 Sep 2026 21:14:28 +0200 (CEST)
+Date: Fri, 18 Sep 2026 21:14:27 +0200
 From: Nicolas Schier <n.schier@fritz.com>
-To: Nathan Chancellor <nathan@kernel.org>
-Cc: Kees Cook <kees@kernel.org>, "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
+To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>,
+	Nathan Chancellor <nathan@kernel.org>,
 	Nick Desaulniers <ndesaulniers@google.com>,
 	Bill Wendling <morbo@google.com>,
 	Justin Stitt <justinstitt@google.com>,
@@ -68,7 +68,7 @@ Cc: Kees Cook <kees@kernel.org>, "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
 	Alexandre Courbot <acourbot@nvidia.com>,
 	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>,
 	Jonathan Corbet <corbet@lwn.net>,
-	Randy Dunlap <rdunlap@infradead.org>,
+	Randy Dunlap <rdunlap@infradead.org>, Kees Cook <kees@kernel.org>,
 	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
 	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
 	llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
@@ -76,12 +76,11 @@ Cc: Kees Cook <kees@kernel.org>, "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
 	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
 	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
 	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v3 01/20] kbuild: do not allocate .modinfo in vmlinux
-Message-ID: <20260918-meek-spectral-nightingale-53d88d@l-nschier-aarch64>
+Subject: Re: [PATCH v3 04/20] kbuild: do not sort nm output where the order
+ is irrelevant
+Message-ID: <20260918-scrupulous-squirrel-from-nibiru-f017b4@l-nschier-aarch64>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
- <20260917-build-speedup-v3-1-9ecf4163ff36@kernel.org>
- <202609170950.480F90A28@keescook>
- <20260918005142.GA1585590@ax162>
+ <20260917-build-speedup-v3-4-9ecf4163ff36@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -90,75 +89,80 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260918005142.GA1585590@ax162>
+In-Reply-To: <20260917-build-speedup-v3-4-9ecf4163ff36@kernel.org>
 Organization: FRITZ! Technology GmbH
 x-ms-reactions: disallow
-X-purgate-ID: 149429::1789751370-2AFCB965-576FC76A/0/0
+X-purgate-ID: 149429::1789758868-39FD9965-1B3E940B/0/0
 X-purgate-type: clean
-X-purgate-size: 2436
+X-purgate-size: 2955
+X-Notice: Whitelisted
 X-purgate: This mail is considered clean (visit https://www.eleven.de for further information)
 X-purgate: clean
-X-pfmilter: host: postfix-mx-01  mail-id: C2325A07EE  external: no
+X-pfmilter: host: postfix-mx-01  mail-id: AB603A07F0  external: no
 
-On Thu, Sep 17, 2026 at 05:51:42PM -0700, Nathan Chancellor wrote:
-[...]
+On Thu, Sep 17, 2026 at 05:06:14PM +0100, Lorenzo Stoakes (ARM) wrote:
+> Unless instructed otherwise, nm sorts by name.
 > 
-> From 008046b33ef4b476048e3ddb2c679a453254e535 Mon Sep 17 00:00:00 2001
-> From: Nathan Chancellor <nathan@kernel.org>
-> Date: Thu, 17 Sep 2026 17:29:53 -0700
-> Subject: [PATCH] kbuild: Remove alignment on .modinfo section
+> There are places where this is unnecessary - an invocation from
+> scripts/sorttable every vmlinux link, scripts/check-function-names.sh run
+> after every vmlinux.o link, and the x86 VOFFSET and ZOFFSET listings
+> between vmlinux and bzImage.
 > 
-> Commit d50f21091358 ("kbuild: align modinfo section for Secureboot
-> Authenticode EDK2 compat") aligned .modinfo because it appeared in the
-> x86_64 compressed kernel image after commit 3e86e4d74c04 ("kbuild: keep
-> .modinfo section in vmlinux.unstripped"), breaking boot.
+> Both GNU nm and llvm-nm accept the same '-p' parameter to disable sorting
+> in these instances, so use that to prevent this unnecessary work.
 > 
-> Commit 8678591b4746 ("kbuild: Split .modinfo out from ELF_DETAILS")
-> properly addresses .modinfo appearing in unexpected contexts like
-> compressed images by moving it out of ELF_DETAILS and explicitly
-> specifying its location in every architecture's vmlinux linker script or
-> discarding it where it may appear elsewhere.
+> Each nm run on its own, x86-64, median of 5:
 > 
-> Effectively revert commit d50f21091358 ("kbuild: align modinfo section
-> for Secureboot Authenticode EDK2 compat") and its follow up fix,
-> commit a26a6c93edfe ("kbuild: Strip trailing padding bytes from
-> modules.builtin.modinfo"), as they are no longer necessary in the
-> current tree. This simplifies future cleanups.
+>                              GNU nm 2.47              llvm-nm 22
+>                           before  after   delta    before  after   delta
+>   defconfig
+>   sorttable, nm -S vmlinux 0.080s 0.039s -0.041s   0.265s 0.113s -0.152s
+>   check-function-names.sh  0.072s 0.033s -0.039s   0.244s 0.102s -0.142s
+>   VOFFSET                  0.077s 0.034s -0.043s   0.261s 0.113s -0.148s
+>   ZOFFSET                  0.007s 0.005s -0.002s   0.005s 0.005s  0.000s
+>   TOTAL                                  -0.125s                 -0.442s
 > 
-> Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+>   allmodconfig
+>   sorttable, nm -S vmlinux 0.156s 0.063s -0.093s   0.539s 0.223s -0.316s
+>   check-function-names.sh  0.149s 0.054s -0.095s   0.537s 0.217s -0.320s
+>   VOFFSET                  0.146s 0.052s -0.094s   0.524s 0.221s -0.303s
+>   ZOFFSET                  0.007s 0.005s -0.002s   0.006s 0.004s -0.002s
+>   TOTAL                                  -0.284s                 -0.941s
+> 
+> llvm-nm appears to be a lot slower than GNU nm, so these builds naturally
+> improve the most.
+> 
+> The four run one after another in the serial tail of every build that links
+> vmlinux so impact kernel builds directly.
+> 
+> In an allmodconfig the decompressor is built in parallel while the modules,
+> so only the two before the vmlinux link contribute to build time.
+> 
+> The build outputs remain unchanged.
+> 
+> Whole build, 128-thread Threadripper 9980X, best of N runs:
+> 
+>                                           before    after     delta
+>                                         ---------------------------------
+>   x86 defconfig, touch mm/vma.c, gcc        9.7s     9.5s    -0.18s (-2%)
+>   x86 defconfig, touch mm/vma.c, clang      9.3s     9.0s    -0.27s (-3%)
+>   x86 defconfig, clean, gcc                30.3s    30.1s    -0.16s (-1%)
+>   x86 defconfig, clean, clang              31.7s    31.2s    -0.55s (-2%)
+>   x86 allmodconfig, touch mm/vma.c, clang  36.4s    35.8s    -0.67s (-2%)
+> 
+> Assisted-by: LLM
+> Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 > ---
-
-[...]
+>  arch/x86/boot/Makefile            | 2 +-
+>  arch/x86/boot/compressed/Makefile | 2 +-
+>  scripts/check-function-names.sh   | 3 ++-
+>  scripts/link-vmlinux.sh           | 2 +-
+>  4 files changed, 5 insertions(+), 4 deletions(-)
 > 
-> Then this patch becomes much more obvious (at least to me)
-> 
 
-Yes, thanks.  Looks good to me and I think it's a good idea to apply 
-that patch first.
+Thanks!
 
-for Nathans patch:  Reviewed-by: Nicolas Schier <n.schier@fritz.com>
+Reviewed-by: Nicolas Schier <n.schier@fritz.com>
 
-
-[ Lorenzo's patch, updated by Nathan ]
-[...]
-> diff --git a/scripts/Makefile.vmlinux b/scripts/Makefile.vmlinux
-> index 6833b517cacb..95b523fe4f9e 100644
-> --- a/scripts/Makefile.vmlinux
-> +++ b/scripts/Makefile.vmlinux
-
-[...]
-> @@ -103,10 +100,7 @@ vmlinux: vmlinux.unstripped FORCE
->  # ---------------------------------------------------------------------------
->  
->  quiet_cmd_modules_builtin_modinfo = GEN     $@
-> -      cmd_modules_builtin_modinfo = $(cmd_objcopy); \
-> -                                    chmod -x $@
-> -
-> -OBJCOPYFLAGS_modules.builtin.modinfo := -j .modinfo -O binary
-> +      cmd_modules_builtin_modinfo = $(OBJCOPY) -O binary -j .modinfo --dump-section .modinfo=$@ $< /dev/null
-
-By shifting from "$(cmd_objcopy)" to "$(OBJCOPY) + args", 
-$(OBJCOPYFLAGS) is dropped.  It this by intention?
-
-Kind regards,
+-- 
 Nicolas
