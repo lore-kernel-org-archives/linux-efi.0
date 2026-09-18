@@ -1,35 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6801731352B;
-	Fri, 18 Sep 2026 00:51:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67771381EB9;
+	Fri, 18 Sep 2026 01:07:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789692717; cv=none; b=OPbNKWBzL0uzLPlLK+8tZvEAj6TVbygp6ZZWd+0raARYyu5ZQ8pO3V+cxdjInW7DhIyYDtMLrXVuFzh9ARqyvl2jxODUnurlC/4WsPXuWoO7Ig6q7Q9Zx2M1pQrMv0FClM0XouBGlMytRB+8AnNgwVlIEkxzdTLjZ7wMM8wk3a4=
+	t=1789693667; cv=none; b=bhmzFq/hp6ITpm/QpTKdgj72UA+JwAwhPeJqevWpRkz8b7mQizSYrGBWmfJkwUMkngNSOuA563Wal4wPvInPWBv/82yXVkrGu+mTY4Sv6cj8CkIBRN8WzLJaCpfJ3LcenUfN3nXSu5pA7U8hk4wjajxZrhrOj30PNMjwvMS5Ypc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789692717; c=relaxed/simple;
-	bh=iGPHI5UWlo9rdQOFQokdsYKHregBEoWF9Yz0lFovr4w=;
+	s=arc-20240116; t=1789693667; c=relaxed/simple;
+	bh=zd4n6T+KNJlcv49XYrrNuIpekHrLVb254IIMObQi4Ng=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=beStfcGMx+NbQR4FlnSgPhqCxPCNurS12yzvHkihRMhICSazfbhICOS1WvnEe3Cx8eaHN2DjI4S/3iKUMDeZ1zntnIos4EBOjjTk4dZwJpUlRmpizfPDu6LC9finRevChHIUMAJryKPgohdn6GhTUOqrR3FElqWwlnLfI2fKIf8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mjvcDNB+; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=icy2gm3h0MtVzBuJG2AfHXoannwRL9yjbjE3KxAsaz0B2vnfFVD/xst6mkpCLs1ScE+DVurJaczqFAUPViYveEcDW3PDSpSVt/2WsPkOwBd+2KhtkP0jFrXG09Ss+2ch46lKK9qRBifmnp9CaCXg53aGYs65a1kqNFnm93tX7fc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=k5cWkWse; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mjvcDNB+"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8230E1F000FF;
-	Fri, 18 Sep 2026 00:51:45 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="k5cWkWse"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 58B681F00893;
+	Fri, 18 Sep 2026 01:07:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789692716;
-	bh=yA3lnuWenPZEpso8xNSQIX74GwmYPRWoEfZxEhdIfSk=;
+	s=k20260515; t=1789693662;
+	bh=4K9MjrbYytfjUKZsWDZQNZLjwWqitvV2RncrKp6V+PA=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=mjvcDNB+okGYr3dG66y+BvYzLyk0Onz7snwgPiHEVmAvBEJJwHw3WccyPGdgVFjU2
-	 rEg9+TLd1v6ZQ+iEXqwp0QgnThtFX7Dq2unDSzTMGTzq4PkqgguUjCNyXb43sSeX0e
-	 xoHcVWgQm/BtOLlmWyOaxMoNLBZppCZIsiqpFvdpnut93RwJMNLKXu6zUzBIuaLfnk
-	 AIMVDnbM2rpFb+17dsTiKOTWoOV3DvZ/JxSGvXYcnwe6gPK9BPBn1YGr8OvYz0l4m1
-	 0urx7Cu8e7QeOh0SKCLMYfAw8CVZi9Z6zPuV7CleGYmLskIgGw8DRe+dfsdW4PfqWB
-	 iK6YY6+jsUF8g==
-Date: Thu, 17 Sep 2026 17:51:42 -0700
+	b=k5cWkWseKfeadwsaVPXCsS8lvGsd+tdSmPOrVtqEMbk75KqTkD4zy+7En6LhD2ywa
+	 DaRsd83TwV0mOIZho690nEmO3idWB8XQkIziKwCh0GcwjjjU70EpJbTmEi/cF0GuaP
+	 /7/pXwyCpUq0e7QXW37qfDqLOT7I2G7zCvNO2mNiHwQarbF5EybADwKGrWUy41EbBI
+	 zTDD9URKYYpbd/eKGmEPGtH9D9AREbGz+aRY2dyE64e+faqRl2rwDc8cmsA58OEqGc
+	 WurYI1M8cJohHT6NtQSs49BdhFIdDtVANA86k0AT2mqjHWvvHIV+ycSb20M+TACXFn
+	 um2yh7n0v+EZQ==
+Date: Thu, 17 Sep 2026 18:07:29 -0700
 From: Nathan Chancellor <nathan@kernel.org>
-To: Kees Cook <kees@kernel.org>, "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
+To: Kees Cook <kees@kernel.org>
+Cc: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
+	Linus Torvalds <torvalds@linux-foundation.org>,
 	Nicolas Schier <nsc@kernel.org>,
 	Nick Desaulniers <ndesaulniers@google.com>,
 	Bill Wendling <morbo@google.com>,
@@ -69,11 +70,12 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
 	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
 	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v3 01/20] kbuild: do not allocate .modinfo in vmlinux
-Message-ID: <20260918005142.GA1585590@ax162>
+Subject: Re: [PATCH v3 10/20] kbuild: move the toolchain checks into
+ init/Kconfig.toolchain
+Message-ID: <20260918010729.GB1585590@ax162>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
- <20260917-build-speedup-v3-1-9ecf4163ff36@kernel.org>
- <202609170950.480F90A28@keescook>
+ <20260917-build-speedup-v3-10-9ecf4163ff36@kernel.org>
+ <202609171149.6454DC6@keescook>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -82,153 +84,43 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <202609170950.480F90A28@keescook>
+In-Reply-To: <202609171149.6454DC6@keescook>
 
-On Thu, Sep 17, 2026 at 09:52:32AM -0700, Kees Cook wrote:
-> On Thu, Sep 17, 2026 at 05:06:11PM +0100, Lorenzo Stoakes (ARM) wrote:
-> > -# .modinfo in vmlinux.unstripped is aligned to 8 bytes for compatibility with
-> > -# tools that expect vmlinux to have sufficiently aligned sections but the
-> > -# additional bytes used for padding .modinfo to satisfy this requirement break
-> > -# certain versions of kmod with
-> > -#
-> > -#   depmod: ERROR: kmod_builtin_iter_next: unexpected string without modname prefix
-> > -#
-> > -# Strip the trailing padding bytes after extracting .modinfo to comply with
-> > -# what kmod expects to parse.
+On Thu, Sep 17, 2026 at 11:53:13AM -0700, Kees Cook wrote:
+> On Thu, Sep 17, 2026 at 05:06:20PM +0100, Lorenzo Stoakes (ARM) wrote:
+> > Move them into their own file, sourced from the top of init/Kconfig, so
+> > that the next commit can add to them without growing init/Kconfig further.
+> > 
+> > No functional change.
+> > 
+> > Assisted-by: LLM
+> > Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
+> > ---
+> >  init/Kconfig           | 197 +-----------------------------------------------
+> >  init/Kconfig.toolchain | 198 +++++++++++++++++++++++++++++++++++++++++++++++++
+> >  2 files changed, 199 insertions(+), 196 deletions(-)
 > 
-> This comment still seems useful here (afaict the stripping is still
-> happening with the "sed"). Maybe better to leave it, or future readers
-> are left wondering what the sed is for?
+> Yeah, totally right to move to a separate file. I think, however, I
+> would prefer this wasn't in init/ though. Kbuild uses scripts/ as its
+> Makefile.$topic dumping ground, and Kconfig.include also lives there. To
+> me, this new file should be scripts/Kconfig.toolchain instead. And
+> arguably, this should be included by the top-level Kconfig rather than
+> init/Kconfig...
+> 
+> I defer to kbuild folks, though.
 
-Thanks for bringing this up. I think we can actually get rid of that sed
-and comment altogether. It was added by
+We talked about this previously:
 
-  a26a6c93edfe ("kbuild: Strip trailing padding bytes from modules.builtin.modinfo")
+  https://lore.kernel.org/aqPW1FsBVYHSWl1r@gremlin/
 
-to fix
-
-  d50f21091358 ("kbuild: align modinfo section for Secureboot Authenticode EDK2 compat")
-
-but I do not think that this alignment is needed anymore since I
-properly fixed Dimitri's issue in
-
-  8678591b4746 ("kbuild: Split .modinfo out from ELF_DETAILS")
-
-So I think we could go with something like
-
-From 008046b33ef4b476048e3ddb2c679a453254e535 Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Thu, 17 Sep 2026 17:29:53 -0700
-Subject: [PATCH] kbuild: Remove alignment on .modinfo section
-
-Commit d50f21091358 ("kbuild: align modinfo section for Secureboot
-Authenticode EDK2 compat") aligned .modinfo because it appeared in the
-x86_64 compressed kernel image after commit 3e86e4d74c04 ("kbuild: keep
-.modinfo section in vmlinux.unstripped"), breaking boot.
-
-Commit 8678591b4746 ("kbuild: Split .modinfo out from ELF_DETAILS")
-properly addresses .modinfo appearing in unexpected contexts like
-compressed images by moving it out of ELF_DETAILS and explicitly
-specifying its location in every architecture's vmlinux linker script or
-discarding it where it may appear elsewhere.
-
-Effectively revert commit d50f21091358 ("kbuild: align modinfo section
-for Secureboot Authenticode EDK2 compat") and its follow up fix,
-commit a26a6c93edfe ("kbuild: Strip trailing padding bytes from
-modules.builtin.modinfo"), as they are no longer necessary in the
-current tree. This simplifies future cleanups.
-
-Signed-off-by: Nathan Chancellor <nathan@kernel.org>
----
- include/asm-generic/vmlinux.lds.h |  2 +-
- scripts/Makefile.vmlinux          | 10 ----------
- 2 files changed, 1 insertion(+), 11 deletions(-)
-
-diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
-index b2988aa12f66..26201821ea7f 100644
---- a/include/asm-generic/vmlinux.lds.h
-+++ b/include/asm-generic/vmlinux.lds.h
-@@ -855,7 +855,7 @@
- 		KLP_SYMID
- 
- #define MODINFO								\
--		.modinfo : { *(.modinfo) . = ALIGN(8); }
-+		.modinfo : { *(.modinfo) }
- 
- #ifdef CONFIG_GENERIC_BUG
- #define BUG_TABLE							\
-diff --git a/scripts/Makefile.vmlinux b/scripts/Makefile.vmlinux
-index fcae1e432d9a..6833b517cacb 100644
---- a/scripts/Makefile.vmlinux
-+++ b/scripts/Makefile.vmlinux
-@@ -102,18 +102,8 @@ vmlinux: vmlinux.unstripped FORCE
- # modules.builtin.modinfo
- # ---------------------------------------------------------------------------
- 
--# .modinfo in vmlinux.unstripped is aligned to 8 bytes for compatibility with
--# tools that expect vmlinux to have sufficiently aligned sections but the
--# additional bytes used for padding .modinfo to satisfy this requirement break
--# certain versions of kmod with
--#
--#   depmod: ERROR: kmod_builtin_iter_next: unexpected string without modname prefix
--#
--# Strip the trailing padding bytes after extracting .modinfo to comply with
--# what kmod expects to parse.
- quiet_cmd_modules_builtin_modinfo = GEN     $@
-       cmd_modules_builtin_modinfo = $(cmd_objcopy); \
--                                    sed -i 's/\x00\+$$/\x00/g' $@; \
-                                     chmod -x $@
- 
- OBJCOPYFLAGS_modules.builtin.modinfo := -j .modinfo -O binary
--- 
-
-Then this patch becomes much more obvious (at least to me)
-
-diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
-index 26201821ea7f..a6730d34e8c6 100644
---- a/include/asm-generic/vmlinux.lds.h
-+++ b/include/asm-generic/vmlinux.lds.h
-@@ -855,7 +855,7 @@
- 		KLP_SYMID
- 
- #define MODINFO								\
--		.modinfo : { *(.modinfo) }
-+		.modinfo (INFO) : { *(.modinfo) }
- 
- #ifdef CONFIG_GENERIC_BUG
- #define BUG_TABLE							\
-diff --git a/scripts/Makefile.vmlinux b/scripts/Makefile.vmlinux
-index 6833b517cacb..95b523fe4f9e 100644
---- a/scripts/Makefile.vmlinux
-+++ b/scripts/Makefile.vmlinux
-@@ -89,11 +89,8 @@ remove-section-$(CONFIG_ARCH_VMLINUX_NEEDS_RELOCS) += '.rel.*'
- 
- remove-symbols := -w --strip-unneeded-symbol='__mod_device_table__*'
- 
--# To avoid warnings: "empty loadable segment detected at ..." from GNU objcopy,
--# it is necessary to remove the PT_LOAD flag from the segment.
- quiet_cmd_strip_relocs = OBJCOPY $@
--      cmd_strip_relocs = $(OBJCOPY) $(patsubst %,--set-section-flags %=noload,$(remove-section-y)) $< $@; \
--                         $(OBJCOPY) $(addprefix --remove-section=,$(remove-section-y)) $(remove-symbols) $@
-+      cmd_strip_relocs = $(OBJCOPY) $(addprefix --remove-section=,$(remove-section-y)) $(remove-symbols) $< $@
- 
- targets += vmlinux
- vmlinux: vmlinux.unstripped FORCE
-@@ -103,10 +100,7 @@ vmlinux: vmlinux.unstripped FORCE
- # ---------------------------------------------------------------------------
- 
- quiet_cmd_modules_builtin_modinfo = GEN     $@
--      cmd_modules_builtin_modinfo = $(cmd_objcopy); \
--                                    chmod -x $@
--
--OBJCOPYFLAGS_modules.builtin.modinfo := -j .modinfo -O binary
-+      cmd_modules_builtin_modinfo = $(OBJCOPY) -O binary -j .modinfo --dump-section .modinfo=$@ $< /dev/null
- 
- targets += modules.builtin.modinfo
- modules.builtin.modinfo: vmlinux.unstripped FORCE
---
-
-Thoughts?
+I do feel like scripts/ is a better location given that these are really
+things internal to Kbuild but I also see where Lorenzo is coming from
+that scripts/ is a little weird for this to live for discoverability,
+especially if we want people to put checks here instead of in a Makefile
+directly. To be honest, it would be kind of nice to separate the Kbuild
+parts of scripts into their own directory to make it clear what Kbuild
+uses versus what users/contributors should use but that is obviously too
+big of a project to tackle as a prerequisite for this.
 
 -- 
 Cheers,
