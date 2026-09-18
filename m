@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 119255226B8;
-	Fri, 18 Sep 2026 20:02:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2596551E443;
+	Fri, 18 Sep 2026 20:16:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789761760; cv=none; b=CuWh76igegHXxFhg8YZAcblzewXqQozYHxE0xyo6Bp7aTJEngHTmrqlSXHMUtqvIPqyaIAPQNWmcC3kHhbtJxUphVzFRCsHojxfwv7q1/Yb9WfZL4IASgMcglq4md6c9LGcMduXDt4j4IrSexSV4eSa+93B8SP/b4yL2MrYyL5c=
+	t=1789762600; cv=none; b=ojt+CgmomFRMeXuwCMV5R14H7tF6whFmGWDAK0iXmAa438YioRqCEwr9qnBzdnaLEzP8hcBQW2KCDi9sHrndOeoblBpHL8viqUQIQywpvKSsWL0EetiKRmlpmTr+ysuFY04nya3aIa7OPkcMUd+ke6kIqW83aBukJ89vNNTYDNg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789761760; c=relaxed/simple;
-	bh=twYMeH7YNJ4/KELWJJu83pCKWYhBzOTbireL9fFwCkQ=;
+	s=arc-20240116; t=1789762600; c=relaxed/simple;
+	bh=cv8vVpnnj2UGKdGTLGRsq3sewTuHTVIFj4FS+qbfjPs=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=fWj82g9M7qCG0Bw/qoMZmiqd1vV2wc2ni3EQ9xu0PUY9BRpH6h9EbyKhOSpY6F8YQy7TTZvVCKj2SR4uuZ0sqczrcbOjbuUKUVmdzmQjF00FxqDrMdk5fSYBml1Dx8LTCoDw+qYmaDKSbR6yh9F4ox9plHQz8Gm7P+l17OzBCG4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lHo0ddht; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:Content-Type; b=DaH0+Z6ht5pGFdHzf5cXI9o6ckthveTukdij+oULYZTa3KIgZTyZpEb/8a2fmeutn1ya+w3pncTzm6pUErOkg2EYtAL2knwLwuPm/z3uNw8W3yzUSVUQKIdPrMBBniNJ52nYme5wjW0Uj4NevXIdDWoYd0ilMHtiXd3lUbVg++Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C+iUhoEv; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lHo0ddht"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1FF641F000FF;
-	Fri, 18 Sep 2026 20:02:29 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C+iUhoEv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 64EE61F000FF;
+	Fri, 18 Sep 2026 20:16:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789761758;
-	bh=DfXpuB3VssjezrYOYh9da35BTjf7OH9UxejBC4uYQV4=;
+	s=k20260515; t=1789762598;
+	bh=VYaubdXxcUwKWOQn0o2fbISMmeIi1yDg6KMH9HfcrUU=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=lHo0ddhtSXzPaWFlT4LKEJcI69Y8GtCiWLjac0fLbMkqFRJH9tpoJQwD4EsHWC/t3
-	 LmslvShgiarvJx3xPRx9+xt/q5aybM1srUZ7NBAdevcKzZbWgQn1UvdGiq9L4TGxbT
-	 5CRWqar8VMkouziUOguyZfeV4jqWKBfDMreqyeumJhs2MseiymlKY/IwXfk8365ZfS
-	 vEiU47/lDUt2wM0k/hdLFRy2AHxZuiK996/G4xjlyffcHzKmmjwgY+o4RamtaPfBK6
-	 L5DPTP3MuhOkpYYvzAq64SWXgl31xNAFNkjc8UnJeMSjs4DYCh54VQUzLJxZUiLTgz
-	 ABxTBAAa6+X+Q==
-Message-ID: <14a5d278-9790-4cb2-ae1f-4980cbee1bf9@kernel.org>
-Date: Fri, 18 Sep 2026 22:02:27 +0200
+	b=C+iUhoEvnenOGPfNailivpYzYDg4gP4jzv2/IuKp3jznRu06ADQgAx90OX+8tzfVM
+	 B9Yy395vy8nHpvbsNsEdnZK5BTNHynIWxmwy0l9LnA1UVoHyIG1OOQCcCRrzzuclMF
+	 //WgBqUYUiSUqV67tzfCKagvLO4BFwf5WHeCYWmAC9MqXMuul4bJCEz2EhZg1Uv2CY
+	 UD88hLIVddkWZCw39GqlrX9l/dWuu8zk1flxzWPU0XX+gPLgK5NcRtAoV8wHOegtM8
+	 Bhp5RIgTGmlvDgkT2ZcDFnxXk2SYgSfJuCQ3chKm5Usrxe2Vof2AwfYkbb2yNb8uVC
+	 I5+8TWkbDl+kg==
+Message-ID: <fb2237be-f7bc-4ad6-bcb0-7c3ef53136ef@kernel.org>
+Date: Fri, 18 Sep 2026 22:16:25 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -35,33 +35,36 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 6/9] mm/memory-failure: efi: answer whether a range is
- poisoned
-To: Harry Yoo <harry@kernel.org>, Breno Leitao <leitao@debian.org>
-Cc: sashiko-reviews@lists.linux.dev, Andrew Morton
- <akpm@linux-foundation.org>, hannes@cmpxchg.or,
- Borislav Petkov <bp@alien8.de>, Danilo Krummrich <dakr@kernel.org>,
- Brendan Jackman <brendan.jackman@linux.dev>, x86@kernel.org, kas@kernel.org,
- Suren Baghdasaryan <surenb@google.com>, Zi Yan <ziy@nvidia.com>,
- "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
- Thomas Gleixner <tglx@kernel.org>, Oscar Salvador <osalvador@suse.de>,
- "Rafael J. Wysocki" <rafael@kernel.org>, shakeel.butt@linux.dev,
- Johannes Weiner <hannes@cmpxchg.org>,
+Subject: Re: [PATCH v5 7/9] drivers/base/memory: count inherited poisoned
+ frames into the block
+To: Breno Leitao <leitao@debian.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>,
  Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Miaohe Lin <linmiaohe@huawei.com>, Ard Biesheuvel <ardb@kernel.org>,
- Michal Hocko <mhocko@suse.com>, Naoya Horiguchi <nao.horiguchi@gmail.com>,
+ Miaohe Lin <linmiaohe@huawei.com>, Naoya Horiguchi
+ <nao.horiguchi@gmail.com>, Andrew Morton <akpm@linux-foundation.org>,
+ kas@kernel.org, kexec@lists.infradead.org, Lorenzo Stoakes <ljs@kernel.org>,
+ "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
+ Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
+ Michal Hocko <mhocko@suse.com>, Thomas Gleixner <tglx@kernel.org>,
+ Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+ Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+ "H. Peter Anvin" <hpa@zytor.com>, Brendan Jackman
+ <brendan.jackman@linux.dev>, Johannes Weiner <hannes@cmpxchg.org>,
+ Zi Yan <ziy@nvidia.com>, Oscar Salvador <osalvador@suse.de>,
  Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Mike Rapoport <rppt@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>,
- Lorenzo Stoakes <ljs@kernel.org>, Dave Hansen <dave.hansen@linux.intel.com>,
- Ingo Molnar <mingo@redhat.com>, linux-mm@kvack.org,
- kexec@lists.infradead.org, linux-cxl@vger.kernel.org,
- linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, rmikey@meta.com,
- kernel-team@meta.com, driver-core@lists.linux.dev, riel@surriel.com
+ "Rafael J. Wysocki" <rafael@kernel.org>, Danilo Krummrich <dakr@kernel.org>,
+ hannes@cmpxchg.or, shakeel.butt@linux.dev, linux-efi@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-mm@kvack.org, rmikey@meta.com,
+ riel@surriel.com, harry@kernel.org, linux-cxl@vger.kernel.org,
+ driver-core@lists.linux.dev, kernel-team@meta.com
 References: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
- <20260915-hwpoison-kho-v5-6-3bc7a57bd503@debian.org>
- <20260915134535.C3FC91F00899@smtp.kernel.org>
- <edafd246-0bd8-4335-9037-77f552968b56@kernel.org>
- <aq1Xr4b7BXZForCe@gmail.com> <aq1eWgGenthqMNd7@thinkstation>
+ <20260915-hwpoison-kho-v5-7-3bc7a57bd503@debian.org>
+ <de41b78a-8471-4832-be0c-35d410a4499a@kernel.org>
+ <aqpczrtIwSG948iv@gmail.com>
+ <b8ad366a-a019-4462-9dce-f687f60ee7f2@kernel.org>
+ <aqvHHHuWJ-y4WRJZ@gmail.com>
+ <caac2cb9-8faa-49bc-ae8a-47c5fd7b7e58@kernel.org>
+ <aq1RaH0eE0hZfNpr@gmail.com>
 From: "David Hildenbrand (Arm)" <david@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=david@kernel.org; keydata=
@@ -108,26 +111,124 @@ Autocrypt: addr=david@kernel.org; keydata=
  3iyY2Nsd7JxfKu1PRhCGwXzRw5TlfEsoRI7V9A8isUCoqE2Dzh3FvYHVeX4Us+bRL/oqareJ
  CIFqgYMyvHj7Q06kTKmauOe4Nf0l0qEkIuIzfoLJ3qr5UyXc2hLtWyT9Ir+lYlX9efqh7mOY
  qIws/H2t
-In-Reply-To: <aq1eWgGenthqMNd7@thinkstation>
+In-Reply-To: <aq1RaH0eE0hZfNpr@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 9/18/26 17:53, Harry Yoo wrote:
-> On Fri, Sep 18, 2026 at 08:27:40AM -0700, Breno Leitao wrote:
->> On Wed, Sep 16, 2026 at 08:44:30AM +0200, David Hildenbrand (Arm) wrote:
+On 9/18/26 17:22, Breno Leitao wrote:
+> On Fri, Sep 18, 2026 at 02:18:03PM +0200, David Hildenbrand (Arm) wrote:
+>> On 9/17/26 15:01, Breno Leitao wrote:
 >>>
->>> David has reviewed this mail and it annoyed him.
+>>> Fair point, I'll clean up the naming in the next revision.
+>>>
+>>> I'll also add that ->empty field, which should help locate this bit
+>>> faster and may let us skip the bitmap query entirely on the happy path.
+>>>
+>>> Anything else you'd like addressed?
+>>>
+>>> Good to know this moved the needle from "David hates this feature" to
+>>> "David only hates the naming" -- I'll take that as progress.  :-P
 >>
->> Breno is curious what annoyed David here.
+>> ;)
+>>
+>> I think the crucial part is to find a way to cleanly distinguish our source of
+>> information, and also how the source does only apply to some memory.
 > 
-> Harry assumed David was annoyed by Sashiko replying with
-> every 'LGTM' email :-)
+> Right, we have two source for poisoned page information, today.
+> 
+> 1) LINUX_EFI_POISONED_MEMORY: Used to track memory block that got
+>    poisioned, and will be passed around during kexec.
+> 2) PG_hwpoison on struct page: Used by the memory subsystem to avoid
+>    touching it.
 
-Harry has reviewed David's reply and has understood his intention.
+How are both kept in sync? See below.
 
-Harry's mail looks great. Breno's mail looks great. Everything looks great.
+> 
+> And I understand that this design is fine, and we want to be easy to
+> identify what we are querying on function name. For instance,
+> I understand you confusion in range_contains_poisoned_memory() came
+> from:
+> 
+> range_contains_poisoned_memory():
+>    * What the caller reads: 
+> 	* "is any memory in this range hardware poisoned?"
+>    * What actually runs:
+> 	* "is any bit set in an EFI table that a PREVIOUS kernel wrote,
+> 	   at 2 MiB granularity, for this memory region?"
 
-Happy days, let's write more emails about how great something looks.
+Right, and we should use that only as a source for anything during early boot.
+So maybe it should hint at the "early" aspect somehow.
+
+Which brings me back to: is the bitmap kept in sync when memory gets hwpoisoned?
+
+That is: as memory gets hwpoisoned, will the bitmap get set immediately?
+
+> 
+> So, I think think this is a naming issue, and I need to think more about
+> it. Maybe appending efiposioned (on data that is coming from EFI config
+> table). Let me think more about it.
+> 
+>> Regarding this patch here, I'd assume it's sufficient.
+>>
+>> But I do wonder why we are walking pages when we have a bitmap to walk/process
+>> at hand?
+> 
+> Because the counter has to agree with the page flag, and the page flag is
+> not the bitmap.
+
+But how could they go out of sync? I'd assume only for memory holes
+(!pfn_to_online_page), but for that we don't need to test actual page flags.
+
+> 
+> PG_hwpoison in a block is the union of every source that poisoned a
+> frame; the inherited EFI table is one of them, and it is the coarse and
+> partial one.
+
+So you're saying that this code is possibly racy with other setting code? Or
+which other sources might there be if the generically called
+
+range_contains_poisoned_memory()
+
+wouldn't be able to identify it (and it only queries the bitmap?).
+
+> 
+> You might ask why I do not just count the bits set in the bitmape and
+> multiply by the frames a unit covers.
+> 
+> That was my first try. It over-counts: a bit stands for a whole 2M unit,
+> but only the frames that reach __free_pages_core() get flagged -- CMA
+> comes back through __free_pages(), the initrd and __init memory through
+> free_reserved_pages(), and KHO-preserved frames never get an initialised
+> struct page at all.
+
+Why are other hwpoisoned pages not flagged? If initrd or anything else is
+hwpoisoned, we should not be running this kernel?
+
+> 
+> And the over-count cannot be undone later. 
+
+The inconsistency is worrisome.
+I wouldn't say that I hate it but it certainly has "great, more hwpoison hacks"
+smell to it.
+
+We have enough semi-broken hwpoison ... stuff ... in our code base already. So
+I'm hoping we're not adding more to it?
+
+> If the walk itself is what bothers you, the way out is not the bitmap
+> but counting as we flag: hwpoison_boot_page() already knows the pfn, so
+> it can bump a per-block-id counter in a small memblock array that
+> memblk_nr_poison_init() then just reads.
+
+The inconsistency is what worries me.
+
+And that we have pages we are told are hwpoisoned but we seem to ignore that and
+carry on with our kernel letting it boot?
+
+> 
+> Exact by construction, no walk. Happy to go that way instead if you
+> prefer it.
+
+Let me first try to understand the semantics here.
 
 -- 
 Cheers,
