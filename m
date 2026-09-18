@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F8912C21FD;
-	Fri, 18 Sep 2026 20:00:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 119255226B8;
+	Fri, 18 Sep 2026 20:02:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789761642; cv=none; b=hG1p/uCZoRpiiLaQfkH45oyqHVwVU5+lLUcU3q0BA3UYcfJkRUjaAClWy5+S7bmsCNtnYvDr4ZPCBBhATfPVPPHI6F3o2rzAJAdmxjpilZs3hY07pIavMgBrGCz5y1W9Cdnc47Yk20sDfk9vgYDtMP1it9Xb9S/EF+gzz8BCYLk=
+	t=1789761760; cv=none; b=CuWh76igegHXxFhg8YZAcblzewXqQozYHxE0xyo6Bp7aTJEngHTmrqlSXHMUtqvIPqyaIAPQNWmcC3kHhbtJxUphVzFRCsHojxfwv7q1/Yb9WfZL4IASgMcglq4md6c9LGcMduXDt4j4IrSexSV4eSa+93B8SP/b4yL2MrYyL5c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789761642; c=relaxed/simple;
-	bh=QXNmyJLdm7eVhgJDNvEPLzg73ji34JU1iopw6Z+dg4M=;
+	s=arc-20240116; t=1789761760; c=relaxed/simple;
+	bh=twYMeH7YNJ4/KELWJJu83pCKWYhBzOTbireL9fFwCkQ=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=flICNqOEjeueVb+gFYgSIGjzwccq4yAOqdLN3Umys7o8Gdz2f/q6pU5LFw22PA+plqEJEKuQmQ1ZhAh8BXYCDv7CdDAKFjPm1q+ng2wvQudwrL7k6JbmHooInAGnjel1gcWCCOn7gwlznaFsBWEQC5mNtvJ2qQ16Q1PJMD7CY40=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jXwXVqX4; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:Content-Type; b=fWj82g9M7qCG0Bw/qoMZmiqd1vV2wc2ni3EQ9xu0PUY9BRpH6h9EbyKhOSpY6F8YQy7TTZvVCKj2SR4uuZ0sqczrcbOjbuUKUVmdzmQjF00FxqDrMdk5fSYBml1Dx8LTCoDw+qYmaDKSbR6yh9F4ox9plHQz8Gm7P+l17OzBCG4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lHo0ddht; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jXwXVqX4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 559CB1F000FF;
-	Fri, 18 Sep 2026 20:00:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lHo0ddht"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1FF641F000FF;
+	Fri, 18 Sep 2026 20:02:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789761640;
-	bh=DqRuy6t8l0KMBsc8eMIIlqtXIJciSthuiHWYk9gxWWQ=;
+	s=k20260515; t=1789761758;
+	bh=DfXpuB3VssjezrYOYh9da35BTjf7OH9UxejBC4uYQV4=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=jXwXVqX45pm1S5/YzhSxREbtC4KN6fHavNEtSUadv2NX6CDWi/5GQG5+EXoS7kNZL
-	 z96gMCf/3OX5NhSzsj/QiOO1t3h++itVSy1RLabKNoyv/ZtCjcRWT2VZI4qBrQAS59
-	 fIlbYqQnB0l/sDHT8n+jyftddKfjdRLarGpeYbecixZgXsqu+5Dfjwztm+s+Bf6KC1
-	 0KxRZ3DNN8CrfEcasmcNn8MsT0c0IdeinzkdY3X6QejS2OF1o4Ay3Uo7sTNxu6i3fk
-	 7rKhEw91gcHRrTbi0P6RtIWFjs77qURfBKonQtTPvEi2UumT9+aAFJ4AgOZUjxACRc
-	 UGT9wFAH4fr8A==
-Message-ID: <1d1e38d8-cc1a-4a53-80c7-c0ef75a70105@kernel.org>
-Date: Fri, 18 Sep 2026 22:00:31 +0200
+	b=lHo0ddhtSXzPaWFlT4LKEJcI69Y8GtCiWLjac0fLbMkqFRJH9tpoJQwD4EsHWC/t3
+	 LmslvShgiarvJx3xPRx9+xt/q5aybM1srUZ7NBAdevcKzZbWgQn1UvdGiq9L4TGxbT
+	 5CRWqar8VMkouziUOguyZfeV4jqWKBfDMreqyeumJhs2MseiymlKY/IwXfk8365ZfS
+	 vEiU47/lDUt2wM0k/hdLFRy2AHxZuiK996/G4xjlyffcHzKmmjwgY+o4RamtaPfBK6
+	 L5DPTP3MuhOkpYYvzAq64SWXgl31xNAFNkjc8UnJeMSjs4DYCh54VQUzLJxZUiLTgz
+	 ABxTBAAa6+X+Q==
+Message-ID: <14a5d278-9790-4cb2-ae1f-4980cbee1bf9@kernel.org>
+Date: Fri, 18 Sep 2026 22:02:27 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -35,25 +35,33 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 4/6] arm64: use hw_pte_t for fixmap HW PTEs
-To: Ryan Roberts <ryan.roberts@arm.com>,
- Muhammad Usama Anjum <usama.anjum@arm.com>,
- Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
- Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Andrey Ryabinin <ryabinin.a.a@gmail.com>,
- Alexander Potapenko <glider@google.com>,
- Andrey Konovalov <andreyknvl@gmail.com>, Dmitry Vyukov <dvyukov@google.com>,
- Vincenzo Frascino <vincenzo.frascino@arm.com>,
- Andrew Morton <akpm@linux-foundation.org>, Lorenzo Stoakes <ljs@kernel.org>,
+Subject: Re: [PATCH v5 6/9] mm/memory-failure: efi: answer whether a range is
+ poisoned
+To: Harry Yoo <harry@kernel.org>, Breno Leitao <leitao@debian.org>
+Cc: sashiko-reviews@lists.linux.dev, Andrew Morton
+ <akpm@linux-foundation.org>, hannes@cmpxchg.or,
+ Borislav Petkov <bp@alien8.de>, Danilo Krummrich <dakr@kernel.org>,
+ Brendan Jackman <brendan.jackman@linux.dev>, x86@kernel.org, kas@kernel.org,
+ Suren Baghdasaryan <surenb@google.com>, Zi Yan <ziy@nvidia.com>,
  "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
- Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
- Michal Hocko <mhocko@suse.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-efi@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org
-References: <20260914-pte0_arm-v1-0-bb53b663e396@arm.com>
- <20260914-pte0_arm-v1-4-bb53b663e396@arm.com>
- <829523cd-85a4-4f8e-b9f2-f3c1d7ce4fb1@arm.com>
+ Thomas Gleixner <tglx@kernel.org>, Oscar Salvador <osalvador@suse.de>,
+ "Rafael J. Wysocki" <rafael@kernel.org>, shakeel.butt@linux.dev,
+ Johannes Weiner <hannes@cmpxchg.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Miaohe Lin <linmiaohe@huawei.com>, Ard Biesheuvel <ardb@kernel.org>,
+ Michal Hocko <mhocko@suse.com>, Naoya Horiguchi <nao.horiguchi@gmail.com>,
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ Mike Rapoport <rppt@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>,
+ Lorenzo Stoakes <ljs@kernel.org>, Dave Hansen <dave.hansen@linux.intel.com>,
+ Ingo Molnar <mingo@redhat.com>, linux-mm@kvack.org,
+ kexec@lists.infradead.org, linux-cxl@vger.kernel.org,
+ linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, rmikey@meta.com,
+ kernel-team@meta.com, driver-core@lists.linux.dev, riel@surriel.com
+References: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
+ <20260915-hwpoison-kho-v5-6-3bc7a57bd503@debian.org>
+ <20260915134535.C3FC91F00899@smtp.kernel.org>
+ <edafd246-0bd8-4335-9037-77f552968b56@kernel.org>
+ <aq1Xr4b7BXZForCe@gmail.com> <aq1eWgGenthqMNd7@thinkstation>
 From: "David Hildenbrand (Arm)" <david@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=david@kernel.org; keydata=
@@ -100,48 +108,26 @@ Autocrypt: addr=david@kernel.org; keydata=
  3iyY2Nsd7JxfKu1PRhCGwXzRw5TlfEsoRI7V9A8isUCoqE2Dzh3FvYHVeX4Us+bRL/oqareJ
  CIFqgYMyvHj7Q06kTKmauOe4Nf0l0qEkIuIzfoLJ3qr5UyXc2hLtWyT9Ir+lYlX9efqh7mOY
  qIws/H2t
-In-Reply-To: <829523cd-85a4-4f8e-b9f2-f3c1d7ce4fb1@arm.com>
+In-Reply-To: <aq1eWgGenthqMNd7@thinkstation>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 9/18/26 18:03, Ryan Roberts wrote:
-> On 14/09/2026 14:51, Muhammad Usama Anjum wrote:
->> fixmap_pte() returns a pointer into bm_pte, and early_fixmap_init_pte()
->> installs those arrays as page tables. Their elements are therefore
->> HW PTEs.
+On 9/18/26 17:53, Harry Yoo wrote:
+> On Fri, Sep 18, 2026 at 08:27:40AM -0700, Breno Leitao wrote:
+>> On Wed, Sep 16, 2026 at 08:44:30AM +0200, David Hildenbrand (Arm) wrote:
+>>>
+>>> David has reviewed this mail and it annoyed him.
 >>
->> Change the element type of bm_pte to hw_pte_t so it matches the HW PTE
->> pointers returned and passed to the accessors. This is needed before
->> ARCH_HAS_HW_PTE_T makes HW PTEs and SW PTE values distinct types; the
->> array dimensions and placement are unchanged.
->>
->> Signed-off-by: Muhammad Usama Anjum <usama.anjum@arm.com>
->> ---
->>  arch/arm64/mm/fixmap.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/arch/arm64/mm/fixmap.c b/arch/arm64/mm/fixmap.c
->> index 237a9136bc73b..709a97fe327d8 100644
->> --- a/arch/arm64/mm/fixmap.c
->> +++ b/arch/arm64/mm/fixmap.c
->> @@ -31,7 +31,7 @@ static_assert(NR_BM_PMD_TABLES == 1);
->>  
->>  #define BM_PTE_TABLE_IDX(addr)	__BM_TABLE_IDX(addr, PMD_SHIFT)
->>  
->> -static pte_t bm_pte[NR_BM_PTE_TABLES][PTRS_PER_PTE] __bss_pgtbl;
->> +static hw_pte_t bm_pte[NR_BM_PTE_TABLES][PTRS_PER_PTE] __bss_pgtbl;
+>> Breno is curious what annoyed David here.
 > 
-> I think in my original proposal it was impossible to have a hw_pte value; only a
-> hw_pte pointer was possible. Being able to create hw_pte values means that it is
-> possible that a hw_pte_t pointer is not actually pointing to an entry in a HW
-> pgtable. The main motivation for this is that we want to dereference neighbours
-> of a hw pte based on it's pointer and be confident that it is safe. I think this
-> removes some of the safety.
+> Harry assumed David was annoyed by Sashiko replying with
+> every 'LGTM' email :-)
 
-If you follow some of the related discussions on the core-mm series, there is a
-path forward to go further into that direction.
+Harry has reviewed David's reply and has understood his intention.
 
-People instantiating a hw_pte_t on the stack are not really a concern right now.
+Harry's mail looks great. Breno's mail looks great. Everything looks great.
+
+Happy days, let's write more emails about how great something looks.
 
 -- 
 Cheers,
