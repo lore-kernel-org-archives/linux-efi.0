@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67771381EB9;
-	Fri, 18 Sep 2026 01:07:43 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D14F2C15A0;
+	Fri, 18 Sep 2026 01:21:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789693667; cv=none; b=bhmzFq/hp6ITpm/QpTKdgj72UA+JwAwhPeJqevWpRkz8b7mQizSYrGBWmfJkwUMkngNSOuA563Wal4wPvInPWBv/82yXVkrGu+mTY4Sv6cj8CkIBRN8WzLJaCpfJ3LcenUfN3nXSu5pA7U8hk4wjajxZrhrOj30PNMjwvMS5Ypc=
+	t=1789694498; cv=none; b=dXm/VJJv35REZ6EO1SrGDOGNhbi+5t5llnwB2QpffXVhosmxcHZrvAcqJVU8pd3B8wWMrepoeQxkN/61xRpiM9tmpB0qqrKhMPKsXXxHN6bYUSx2VfHiAZnzDlTQnYtgZWjq+iIHEh27jnw38ET3xY/0Gv7O9OF4WgB+ycXxenw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789693667; c=relaxed/simple;
-	bh=zd4n6T+KNJlcv49XYrrNuIpekHrLVb254IIMObQi4Ng=;
+	s=arc-20240116; t=1789694498; c=relaxed/simple;
+	bh=0yZCtWvChQhiTX62NQsXX3heRzS09mB7c3/SHhPSEqU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=icy2gm3h0MtVzBuJG2AfHXoannwRL9yjbjE3KxAsaz0B2vnfFVD/xst6mkpCLs1ScE+DVurJaczqFAUPViYveEcDW3PDSpSVt/2WsPkOwBd+2KhtkP0jFrXG09Ss+2ch46lKK9qRBifmnp9CaCXg53aGYs65a1kqNFnm93tX7fc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=k5cWkWse; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=nYYjMp0U+glM4iUSTbtJrYgdEDTruFWt7Jf4Nqyfz3AaBXray5bmEZdLh+owlWfaaAEx6XhDucQda1hvQu5uvri6XAIEHFLh/dr26eCMCgY7u8nGClyCWhimCSXGEPsGbUi+gJtNMqiu6Ep8EP/8gqZEVNHMAxHibhucKc126K0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aJLTUh8b; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="k5cWkWse"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 58B681F00893;
-	Fri, 18 Sep 2026 01:07:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aJLTUh8b"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9E5521F000FF;
+	Fri, 18 Sep 2026 01:21:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789693662;
-	bh=4K9MjrbYytfjUKZsWDZQNZLjwWqitvV2RncrKp6V+PA=;
+	s=k20260515; t=1789694493;
+	bh=PKIVsNOUBkTvWGBthw3StTS5zUBeSADLiIKEQwT9Z1M=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=k5cWkWseKfeadwsaVPXCsS8lvGsd+tdSmPOrVtqEMbk75KqTkD4zy+7En6LhD2ywa
-	 DaRsd83TwV0mOIZho690nEmO3idWB8XQkIziKwCh0GcwjjjU70EpJbTmEi/cF0GuaP
-	 /7/pXwyCpUq0e7QXW37qfDqLOT7I2G7zCvNO2mNiHwQarbF5EybADwKGrWUy41EbBI
-	 zTDD9URKYYpbd/eKGmEPGtH9D9AREbGz+aRY2dyE64e+faqRl2rwDc8cmsA58OEqGc
-	 WurYI1M8cJohHT6NtQSs49BdhFIdDtVANA86k0AT2mqjHWvvHIV+ycSb20M+TACXFn
-	 um2yh7n0v+EZQ==
-Date: Thu, 17 Sep 2026 18:07:29 -0700
+	b=aJLTUh8bOmPHIIxbkbTasFPdsby/oj73sfuTs4fHyGjyvO9eay/V8HiFzZVHQ9ZV1
+	 xScG95SmWMyTQLGruGQJM+5ibJCFfHGrAZvF8tTaT82cV5L8vFiCmuej5Ycx/vR/R9
+	 fLy7vVqGyzYP3I4HTgQwiPOxQccMssXco3Ji+DXMnMgHtXRnAk3Y1jiUlALO8D9xJa
+	 zBkdOQYcJ5J9kV47pIeFFXFnrrnL30ex+XvCZs+1CPOq2mehWVhq0nAs9O01FJR9UL
+	 u1/MxWsUZtUrnDJPBmwCl06z+VFrvV8GJi6qiyPK0fq3IA271K+oCOl9VN2o+oJH1Q
+	 FHWIBkcvwIYtg==
+Date: Thu, 17 Sep 2026 18:21:19 -0700
 From: Nathan Chancellor <nathan@kernel.org>
 To: Kees Cook <kees@kernel.org>
 Cc: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
@@ -70,12 +70,12 @@ Cc: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>,
 	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
 	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
 	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v3 10/20] kbuild: move the toolchain checks into
- init/Kconfig.toolchain
-Message-ID: <20260918010729.GB1585590@ax162>
+Subject: Re: [PATCH v3 11/20] kbuild: avoid re-running compiler and linker
+ probes
+Message-ID: <20260918012119.GC1585590@ax162>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
- <20260917-build-speedup-v3-10-9ecf4163ff36@kernel.org>
- <202609171149.6454DC6@keescook>
+ <20260917-build-speedup-v3-11-9ecf4163ff36@kernel.org>
+ <202609171154.BEA5134F7@keescook>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -84,43 +84,96 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <202609171149.6454DC6@keescook>
+In-Reply-To: <202609171154.BEA5134F7@keescook>
 
-On Thu, Sep 17, 2026 at 11:53:13AM -0700, Kees Cook wrote:
-> On Thu, Sep 17, 2026 at 05:06:20PM +0100, Lorenzo Stoakes (ARM) wrote:
-> > Move them into their own file, sourced from the top of init/Kconfig, so
-> > that the next commit can add to them without growing init/Kconfig further.
+On Thu, Sep 17, 2026 at 12:26:48PM -0700, Kees Cook wrote:
+> On Thu, Sep 17, 2026 at 05:06:21PM +0100, Lorenzo Stoakes (ARM) wrote:
+> > Each kernel make invocation begins with ~30 compiler and linker runs each
+> > of which performs duplicate probe for a number of compiler and linker
+> > options.
 > > 
-> > No functional change.
+> > This is useless work - the compiler and its version is known, so use these
+> > to determine which options are available, once.
 > > 
-> > Assisted-by: LLM
-> > Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
-> > ---
-> >  init/Kconfig           | 197 +-----------------------------------------------
-> >  init/Kconfig.toolchain | 198 +++++++++++++++++++++++++++++++++++++++++++++++++
-> >  2 files changed, 199 insertions(+), 196 deletions(-)
+> > A convention already exists for this - CC_HAS_xxx, LD_HAS_xxx in Kconfig
+> > files (for example, CC_HAS_COUNTED_BY), so convert these probes to Kconfig
+> > options where appropriate.
 > 
-> Yeah, totally right to move to a separate file. I think, however, I
-> would prefer this wasn't in init/ though. Kbuild uses scripts/ as its
-> Makefile.$topic dumping ground, and Kconfig.include also lives there. To
-> me, this new file should be scripts/Kconfig.toolchain instead. And
-> arguably, this should be included by the top-level Kconfig rather than
-> init/Kconfig...
+> Yeah, I agree about the rationale here.
 > 
-> I defer to kbuild folks, though.
+> It does, however, now drive a long-time annoyance of mine to the top of
+> mind: the repetition of the compiler command-line options in two places:
+> the Kconfig and the Makefile. I dislike that pattern so much that I really
+> really worked hard to use cc-option instead where ever I possibly could
+> (though it continued to add to my growing concern about the repetition
+> of running those checks all the time, so I'm motivated to see something
+> like what you have here actually land).
+> 
+> But I would really like to find a way to avoid the duplication. It's
+> fragile and it's weird and it's split across 2 files that don't always
+> have an obvious relationship. I really don't like it. And with it being
+> used for things that are "detected" (i.e. not part of always required
+> builds), that fragility means typos may go unnoticed, etc.
+> 
+> We've had a need for some kind of kconfig "append to a list" logic that
+> we've been working around in places, e.g. include/linux/lsm_count.h for
+> how "count the list of enabled LSMs" got dealt with. If we could have
+> had:
+> 
+> config LSM_LIST
+> 	list
+> 	separator " "
+> 
+> config SECURITY_SELINUX
+> 	...
+> 	append_to LSM_LIST
+> 	...
+> 
+> We could just parse CONFIG_LSM_LIST directly. And I think we can do the
+> same with this:
+> 
+> config CC_OPTION_LIST
+> 	list
+> 	separator " "
+> 
+> config CC_OPTION_ZERO_INIT_PADDING_BITS
+> 	string
+> 	default "$(cc-option-bit,-fzero-init-padding-bits=all)"
+> 	append_to CC_OPTION_LIST
+> 
+> And the dump all of it into the Makefile in one via CONFIG_CC_OPTION_LIST
+> 
+> (And we'd need to implement ld-option-bit. Though really I think
+> cc-option-bit should be renamed to cc-option-str or something)
+> 
+> But even without the new "list" Kconfig type, it'd be nicer to use the
+> cc-option-bit string default method and dump all the newly created
+> CC_OPTION_... strings into the makefile manually. The "append_to" idea
+> could be a follow-up.
 
-We talked about this previously:
+While we could certainly try to cook something like this up, we could
+also avoid the split across two files by just defining the flags in
+Kconfig directly and using them in the Makefile through their symbol,
+like we already do for -Wimplicit-fallthrough. For example, instead of
 
-  https://lore.kernel.org/aqPW1FsBVYHSWl1r@gremlin/
+  config CC_HAS_STRICT_FLEX_ARRAYS
+      def_bool $(cc-option,-fstrict-flex-arrays=3)
 
-I do feel like scripts/ is a better location given that these are really
-things internal to Kbuild but I also see where Lorenzo is coming from
-that scripts/ is a little weird for this to live for discoverability,
-especially if we want people to put checks here instead of in a Makefile
-directly. To be honest, it would be kind of nice to separate the Kbuild
-parts of scripts into their own directory to make it clear what Kbuild
-uses versus what users/contributors should use but that is obviously too
-big of a project to tackle as a prerequisite for this.
+  KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_STRICT_FLEX_ARRAYS),-fstrict-flex-arrays=3)
+
+We would just do
+
+  config CC_STRICT_FLEX_ARRAYS
+      string
+      default "-fstrict-flex-arrays=3" if $(cc-option,-fstrict-flex-arrays=3)
+
+  KBUILD_CFLAGS += $(CONFIG_CC_STRICT_FLEX_ARRAYS)
+
+While we still get the duplication (and we could look at getting rid of
+it with your cc-option-str idea or whatever), it is at least contained
+to the same location, so out of sync issues should be much rarer. I do
+diff Kconfigs so this might make certain issues with checks a little bit
+more obvious if something changes on the compiler side.
 
 -- 
 Cheers,
