@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE901547049;
-	Sat, 19 Sep 2026 17:31:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D06C1A262A;
+	Sat, 19 Sep 2026 17:42:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789839095; cv=none; b=Z5bqfmnXCRI1dNY0vqALhRDe+I5BMFbG9JdoRXjzUYQ8+0TD0DK1RlZgcbCz+QHZXew4bPcdUE5Wv5zzqTB7wMPzmOea4RpVuWfOBL8msgd62I3uRqcKRHwYkx/CMjZTvxzlLruCHDg7DwePbx1XJLzb1bag8Sel4XEJcvxFj2w=
+	t=1789839776; cv=none; b=LX5JyS/mVKatbkbkeNdg9mkm6lqsPgaa48t1OOy/cLxHC2tXRhipF2QZCGDCTcHGc/WZpRXBK/kFzgk814qfTsrIPaxi1wX+ET8NAH6Z0dsVP3ZyYi3xyUoHy0CBDFAfNjXR9l04NT7flsJuze/jfR4VCRIEqBbUypf0pMYA6Fs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789839095; c=relaxed/simple;
-	bh=Wvr8gctXgL9yDT4gE3G5DK3DvsUqV+WFYYFqDBPfmZY=;
+	s=arc-20240116; t=1789839776; c=relaxed/simple;
+	bh=gX6kP0uYz6vCcANyl/YmCbeJHsGjeKSgylWNMLy9yew=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=CqM0TPQsnh/Xv+/ZPbEmJ+AFxcFgDtiiSv63tf6gPReURQhLuAJaAUN68arvIYzDM7etNbncR7XZXcYnb0LzW9cpFHdIk5qoxW5B4nDuq8xgNpGvWv9jDETQPVVgNGwD1pnTsHqoJAcV638DOF5vNstobuuuBzl3qvKOBWK78bA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FP/+pD4u; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=iiF1KE5amVO+HuW3VIW9Dmxyh+RJapmG1anSdBzwps9ebdTl8n57vRqCpiqeY02buUuJ5JBY5rKOTerXZICpiH6iljVHBkoZYLo4YVOW2inp9m1qWnyIFmrvjXMUcVKIN48ahLU/IyBJvhNxKLmq+bjgFiXrHJC/K1kuj9F/OsQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ggnnBtdi; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FP/+pD4u"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A6DA51F000FF;
-	Sat, 19 Sep 2026 17:31:21 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ggnnBtdi"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 83AA21F000FF;
+	Sat, 19 Sep 2026 17:42:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789839093;
-	bh=fVAHOMFqAITEt//POM6bQ9UTJyR9eAZklHX2rYYlXWc=;
+	s=k20260515; t=1789839775;
+	bh=EmKMaNISpoD+G1Wl72W0nnHSvdTJBbpXkv1m5kyJz2A=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=FP/+pD4up9yLl7bTC0GWYrOoNDKwzZSUigPYwOJpywqcVMfipIDe8s3Gduvwb4og0
-	 rc+mr1eCvHL0HMLxlIIEaitz+zwOG8ZWJdZACY+xlJu/b05obHcF24GOHFsY9bD1Uq
-	 PGgQpFnBMs/q2RDut3Zs2HMHzgy3xhc6IYch5Z3BIzyPZs5Geuetp56ld++rTjKBUn
-	 +iB5hsrktSXqy6ITQW8NiAbuo+dxwOa9CnixH1MtuaPpaFglPCj/dFNjQN38IIn4FO
-	 s2V0a0EDUbG9rXe5jJ7i5uCxK4oviQ4QEgMXGwIA839jGMovwvZ690hYDBWYZmtGUV
-	 2bi5cG33lD/cw==
-Date: Sat, 19 Sep 2026 18:31:19 +0100
+	b=ggnnBtdi6oPvTc6LR8VCsrfY7orLsXOlCoJnnxw13VrUFRrRVhWMt5OAF2Opcj4ZB
+	 YcIj4CllvKnSlvek+Z3wchBQHqdTiimX32aDKEaeVtMBpKvttmHxupE66jvcdbZsDs
+	 LBKKyRaP+EZtC9uNq49fUEONC+dlrc+drK6RLUfOspsQKYhlEZ8fYPdjr2D3RUX7BE
+	 dG9EDgFG4VB868oRySp7/V9e7xeDOTmKtslQFScCq8nE7IzwsTtsZJNjWCYbxKXMcI
+	 AM6G1OmVdI7U9BlXwceEYSQcUcvmGvRTGTSUgpHsIMbGLxJBna3mI5nOv4Lu47rPgT
+	 Lizsy0etFY2yg==
+Date: Sat, 19 Sep 2026 18:42:40 +0100
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-To: Nathan Chancellor <nathan@kernel.org>
-Cc: Kees Cook <kees@kernel.org>, 
-	Linus Torvalds <torvalds@linux-foundation.org>, Nicolas Schier <nsc@kernel.org>, 
+To: Manuel Ebner <manuelebnerli@mailbox.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
+	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
 	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
 	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
 	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
@@ -48,94 +48,154 @@ Cc: Kees Cook <kees@kernel.org>,
 	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
 	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
 	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
-	Randy Dunlap <rdunlap@infradead.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
-	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
-	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
-	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v3 11/20] kbuild: avoid re-running compiler and linker
- probes
-Message-ID: <aq7GOsnTqeHPedUm@gremlin>
+	Randy Dunlap <rdunlap@infradead.org>, Kees Cook <kees@kernel.org>, 
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	llvm@lists.linux.dev, linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
+	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v3 20/20] kbuild: compress the kernel with pigz if
+ available
+Message-ID: <aq7JTyKVMljWOxer@gremlin>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
- <20260917-build-speedup-v3-11-9ecf4163ff36@kernel.org>
- <202609171154.BEA5134F7@keescook>
- <20260918012119.GC1585590@ax162>
- <202609172130.3DF0D66@keescook>
- <20260918054058.GA384222@ax162>
+ <20260917-build-speedup-v3-20-9ecf4163ff36@kernel.org>
+ <3be3dca3bee5695972e5419a1198bfee40a1ede7.camel@mailbox.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <20260918054058.GA384222@ax162>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <3be3dca3bee5695972e5419a1198bfee40a1ede7.camel@mailbox.org>
 
-On Thu, Sep 17, 2026 at 10:40:58PM -0700, Nathan Chancellor wrote:
-> On Thu, Sep 17, 2026 at 09:44:24PM -0700, Kees Cook wrote:
-> > On Thu, Sep 17, 2026 at 06:21:19PM -0700, Nathan Chancellor wrote:
-> > > While we could certainly try to cook something like this up, we could
-> > > also avoid the split across two files by just defining the flags in
-> > > Kconfig directly and using them in the Makefile through their symbol,
-> > > like we already do for -Wimplicit-fallthrough. For example, instead of
-> > >
-> > >   config CC_HAS_STRICT_FLEX_ARRAYS
-> > >       def_bool $(cc-option,-fstrict-flex-arrays=3)
-> > >
-> > >   KBUILD_CFLAGS += $(if $(CONFIG_CC_HAS_STRICT_FLEX_ARRAYS),-fstrict-flex-arrays=3)
-> > >
-> > > We would just do
-> > >
-> > >   config CC_STRICT_FLEX_ARRAYS
-> > >       string
-> > >       default "-fstrict-flex-arrays=3" if $(cc-option,-fstrict-flex-arrays=3)
-> > >
-> > >   KBUILD_CFLAGS += $(CONFIG_CC_STRICT_FLEX_ARRAYS)
-> > >
-> > > While we still get the duplication (and we could look at getting rid of
-> > > it with your cc-option-str idea or whatever), it is at least contained
-> > > to the same location, so out of sync issues should be much rarer. I do
-> > > diff Kconfigs so this might make certain issues with checks a little bit
-> > > more obvious if something changes on the compiler side.
+On Fri, Sep 18, 2026 at 04:27:39PM +0200, Manuel Ebner wrote:
+> Hi Lorenzo,
+>
+> On Thu, 2026-09-17 at 17:06 +0100, Lorenzo Stoakes (ARM) wrote:
+> > The gzip step of a kernel build is very lengthy, especially for larger
+> > builds such as allmodconfig.
 > >
-> > Yeah, and note that cc-option-bit already exists. It's just a weird name
-> > is all and there isn't an ld-option-bit.
->
-> Ah, I see. I worry that the current cc-option-bit is not sufficient for
-> all options that we may want to test because it uses '-E' to stop after
-> preprocessing (whereas some options may need to get to code generation
-> to be validated properly) and it does not use $(CLANG_FLAGS) to properly
-> set the target (so we might not get consistent results). I wonder if we
-> would be better off refactoring cc-option-bit into cc-option-str that
-> shares most of the machinery of cc-option. Then we could just add
-> ld-option-str.
->
-> > As for naming conventions, I think "CC_OPT_" would be a good prefix. And
-> > this works today with no change:
+> > ...
 > >
-> > config CC_OPT_STRICT_FLEX_ARRAYS
-> > 	string
-> > 	default "$(cc-option-bit,-fstrict-flex-arrays=3)"
+> > Whole build, 128-thread Threadripper 9980X, best of N runs:
+> >
+> >                                          before   after     delta
+> >                                          -------------------------------
+> >   x86 defconfig, touch mm/vma.c, gcc        7.7s     6.0s     -1.7s (-22%)
+> >   x86 defconfig, touch mm/vma.c, clang      6.9s     5.4s     -1.5s (-21%)
+> >   x86 defconfig, clean, gcc                28.2s    26.3s     -1.8s (-6%)
+> >   x86 defconfig, clean, clang              28.7s    27.2s     -1.5s (-5%)
+> >   x86 allmodconfig, touch mm/vma.c, gcc    23.7s    15.4s     -8.3s (-35%)
+> >   x86 allmodconfig, touch mm/vma.c, clang  22.5s    15.6s     -7.0s (-31%)
+> >   x86 allmodconfig, clean, gcc            294.1s   278.6s     -15.5s (-5%)
+> >   x86 allmodconfig, clean, clang          283.9s   266.8s     -17.1s (-6%)
 >
-> This does look pretty nice.
->
-> > (do we need "def_string" now?)
->
-> def_string would certainly make these even nicer.
+> That's good to hear.
 
-Agreed :)
-
-Done for v4 (which now cites Kees's series as a dependency and hopefully will
-sit in the kbuild tree soon, maybe after 36d4a11b56aa?).
-
-26/29 probes use cc-option-str, there were a few that had other
-conditionals but nice conversion in general!
+:)
 
 >
-> --
-> Cheers,
-> Nathan
+>
+> > Suggested-by: Kees Cook <kees@kernel.org>
+> > Link: https://zlib.net/pigz/
+> > Assisted-by: LLM
+> > Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
+> > ---
+> >  Documentation/kbuild/kbuild.rst   | 17 +++++++++++++++++
+> >  Documentation/process/changes.rst |  8 ++++++++
+> >  Makefile                          |  5 ++++-
+> >  kernel/Makefile                   |  6 +++++-
+> >  scripts/Makefile.lib              |  4 ++--
+>
+> Please add a line to
+> scripts/ver_linux
+
+Ack, done for v4!
+
+>
+> >  scripts/jobserver-exec            |  3 ++-
+> >  tools/lib/python/jobserver.py     | 13 +++++++++++++
+> >  7 files changed, 51 insertions(+), 5 deletions(-)
+> >
+> > diff --git a/Documentation/kbuild/kbuild.rst b/Documentation/kbuild/kbuild.rst
+> > index 5a9013bacfb7..e71a692a559a 100644
+> > --- a/Documentation/kbuild/kbuild.rst
+> > +++ b/Documentation/kbuild/kbuild.rst
+> > @@ -110,6 +110,23 @@ HOSTLDLIBS
+> >  ----------
+> >  Additional libraries to link against when building host programs.
+> >
+> > +KGZIP
+> > +-----
+> > +The gzip program used for compressed modules, packaging and the embedded
+>
+> Could you also add gzip to changes.rst and ver_linux while you are at it?
+> Rest looks good to me.
+
+I'd rather leave that out of this series tbh, if I listed it then I have to
+choose a minimum version that and feels out of scope.
+
+One for a follow-up?
+
+> Reviewed-by: Manuel Ebner <manuelebnerli@mailbox.org>
+
+Thanks!
+
+>
+> Thanks
+>  Manuel
+>
+> > +kernel configuration. Defaults to gzip.
+> > +
+> > +KPGZIP
+> > +------
+> > +The gzip program used for the compressed kernel image. Defaults to pigz (a
+> > +parallel implementation of gzip), run under scripts/jobserver-exec so that it
+> > +uses the job slots make has free, if pigz is installed, otherwise to
+> > +``KGZIP``. Set ``KPGZIP=`` on the make command line to use another program.
+> > +
+> > +KBZIP2, KLZOP, LZMA, LZ4, XZ, ZSTD
+> > +----------------------------------
+> > +The compressor programs for the other formats. Each defaults to the program
+> > +of the same name.
+> > +
+> >  .. _userkbuildflags:
+> >
+> >  USERCFLAGS
+> > diff --git a/Documentation/process/changes.rst b/Documentation/process/changes.rst
+> > index 0aa232b117b5..28f2ca63318e 100644
+> > --- a/Documentation/process/changes.rst
+> > +++ b/Documentation/process/changes.rst
+> > @@ -55,6 +55,7 @@ nfs-utils              1.0.5            showmount --version
+>
+> + gzip
+>
+> >  openssl & libcrypto    1.0.0            openssl version
+> >  pahole                 1.26             pahole --version
+> >  pcmciautils            004              pccardctl -V
+> > +pigz (optional)        2.4              pigz --version
+> >  PPP                    2.4.0            pppd --version
+> >  procps                 3.2.0            ps --version
+> >  Python                 3.9.x            python3 --version
+> > @@ -206,6 +207,13 @@ GNU AWK
+> >  GNU AWK is needed if you want kernel builds to generate address range data for
+> >  builtin modules (CONFIG_BUILTIN_MODULE_RANGES).
+> >
+> > +pigz (optional)
+> > +---------------
+> > +
+> > +pigz is a parallel implementation of gzip. If it is installed the compressed
+> > +kernel image is produced with it rather than with gzip, see ``KPGZIP`` in
+> > +Documentation/kbuild/kbuild.rst.
+> > +
+> >  System utilities
+> >  ****************
+> >
+> > diff --git a/Makefile b/Makefile
+> > ...
+>
 
 --
 Cheers, Lorenzo
