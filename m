@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 546593101C2;
-	Sat, 19 Sep 2026 14:40:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1481F331ECE;
+	Sat, 19 Sep 2026 14:45:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789828810; cv=none; b=N87aYBb3ifDKnMtSBQkPj8C4kCTxymw9H1WnubGdnthMrp4y78rHmhXE8tclfp3/94jtTB9slg2xmT7M7HrmyDjS6+ZR+T3+orX1GtkiY78B/B2NPgnID1IyhjlNPhIYi88mekOQ9rYYCkUIauGXEmv9CPozSME3PKM4/4UdJns=
+	t=1789829153; cv=none; b=XMKmYtGpVhHG2Uw1KY/3jOvzjGU35i/tUiB/xmbA1MoAgn4JutlETePGOBKTyon8WSTX/5zPkzwdAbW0sZmlSFwwrXUnLWvXQPST9mI18N+JWwyy1WC0aEq8DK8TuiBBHt+KPyvR+siXp6Bv2lsiZlhh4dXZNECrD15DOPZli8c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789828810; c=relaxed/simple;
-	bh=5+wsLqNiz1ftRnY/1v6UHJknDM2g9naN/MHmlwTljBQ=;
+	s=arc-20240116; t=1789829153; c=relaxed/simple;
+	bh=yKFjZGVuLKL+wLssnNWu5ofZJmRwSwShekFn0cj/2PY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=eZOKpz8QVv/zTgMT+O+t7jT3zAxjUrLcBhCwL20gFwlMUf7oNpXyyS43VSQB1Gt7XSIkcT9Z3X9Cz0IQ3uFyepGXqD5bdZCrikOuE21sc57SoXcd/SHWRPs1K5qs/CH38n+NY9FOr9b8KhlXfJsL/yvVO30vET2B98smRJzkSd0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bmle4uSt; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=U1TXadtbhPSNIiiL5eTKkONQ7bFaIlVu3czPe8xz7vmg/g85MEPmJbLg8L+zx0cc5/WuzLfdgGtEJoKfC1WrTYo7NI0esWuzR80uApsHTXaCuWhMo9rksdd1Z7OSKKaWinBbPx7+4jVEXqavMfvlxcI2LxEi07gp5fIX67oamTU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O58txMja; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bmle4uSt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9816A1F000FF;
-	Sat, 19 Sep 2026 14:39:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O58txMja"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9EB431F000FF;
+	Sat, 19 Sep 2026 14:45:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789828808;
-	bh=wjlxL5aZkP+VxdLu3dOkGnCdnF8bXwL4sZrwxhwgEoI=;
+	s=k20260515; t=1789829151;
+	bh=yKFjZGVuLKL+wLssnNWu5ofZJmRwSwShekFn0cj/2PY=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=bmle4uStbjC80tnxl/vjfpvmYYVkjjgMRY8+5/8q3PJtzA+t0bmdendomXHO0ws9H
-	 U7AkZ01hXjF9UNEcQJjw7O9/G4ZVuIuTmE9nQZ3vbmzWCvaO165TT83I/rtJG67Uk8
-	 ZFOFQWbnJPaWf/uRXVtzgN/37w3mP1J0r/35iCXOcKYjsonGbQyJWBByqZl7EDsn8A
-	 AoQzM7VokTP4qPCH98a+dd0vu239lXSc8hrSG3iX73m64ZC18rGxk7qnPGd28l/Jyx
-	 Wc2TmR6JoQ+w2Nml9DQH/pX6LYALY6ZyyxX+/DvfhQiCD1q+q2+EZx1en4Sr/c+Iwd
-	 Sv6mRmehV0F6A==
-Date: Sat, 19 Sep 2026 15:39:53 +0100
+	b=O58txMjar5lAsfa7kUjOSXJ2YRXgvUxC3UypZSJgPNilujVfOGvlYFRc6J6q0oCgz
+	 tHuDGKgXF76cMg8B4t3RVxRJxLnPIZIsNf2lMP7LYjJStrRrCryXvI3yaAug9WgDFr
+	 uSzlIXhwyLMUNfcZVh/qvDfV3HO2AQJBmksh7zqFnC4n4G9rdu3ya3wS+b0fU8o1EH
+	 HSRoaeb3d3/0DzJ4xnyocQZFMhIxN07X8dv3s5u1NAYuNgdq+GooFzeHWeROwDPSIV
+	 WnohxBmuPIlUXEfLutlDxQbDuYVvmdAV1QZ9fs+isk2iDSSuD2D7e/jXo4cPbDksqx
+	 64iZLGMq83FuA==
+Date: Sat, 19 Sep 2026 15:45:36 +0100
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 To: Nathan Chancellor <nathan@kernel.org>
 Cc: Nicolas Schier <n.schier@fritz.com>, Kees Cook <kees@kernel.org>, 
@@ -52,14 +52,16 @@ Cc: Nicolas Schier <n.schier@fritz.com>, Kees Cook <kees@kernel.org>,
 	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
 	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
 	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v3 01/20] kbuild: do not allocate .modinfo in vmlinux
-Message-ID: <aq6QwzcyvKp3CB0F@gremlin>
+Subject: Re: [PATCH v3 10/20] kbuild: move the toolchain checks into
+ init/Kconfig.toolchain
+Message-ID: <aq6gB7BY9wiFEsQ3@gremlin>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
- <20260917-build-speedup-v3-1-9ecf4163ff36@kernel.org>
- <202609170950.480F90A28@keescook>
- <20260918005142.GA1585590@ax162>
- <20260918-meek-spectral-nightingale-53d88d@l-nschier-aarch64>
- <20260918214445.GA3589065@ax162>
+ <20260917-build-speedup-v3-10-9ecf4163ff36@kernel.org>
+ <202609171149.6454DC6@keescook>
+ <20260918010729.GB1585590@ax162>
+ <aq1MG8I1BsUUDFkx@gremlin>
+ <20260918-athletic-agile-echidna-114f16@l-nschier-aarch64>
+ <20260918211248.GB235304@ax162>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -68,84 +70,40 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260918214445.GA3589065@ax162>
+In-Reply-To: <20260918211248.GB235304@ax162>
 
-On Fri, Sep 18, 2026 at 02:44:45PM -0700, Nathan Chancellor wrote:
-> On Fri, Sep 18, 2026 at 07:09:30PM +0200, Nicolas Schier wrote:
-> > Yes, thanks.  Looks good to me and I think it's a good idea to apply
-> > that patch first.
-> >
-> > for Nathans patch:  Reviewed-by: Nicolas Schier <n.schier@fritz.com>
->
-> Thanks, I have pushed this to kbuild-next-speedups as
->
->   36d4a11b56aa ("kbuild: Remove alignment on .modinfo section")
->
-> which Lorenzo can base on. I have also tentatively included the patches
-
-Ack, will rebase future revisions on this patch.
-
-> that are basically ready in my eyes based on consensus and review so far
-> for initial build testing. I do see some comments on some of those
-> patches though, so I will hold off on fully applying them until the next
-> revision. If there are any other changes that we should consider taking
-> quickly on the next revision, please feel free to point them out, it is
-> a bit hard to follow these threads sometimes :)
-
-Thanks :)
-
->
-> [1]: https://git.kernel.org/kbuild/l/kbuild-next-speedups
->
-> > [ Lorenzo's patch, updated by Nathan ]
-> > [...]
-> > > diff --git a/scripts/Makefile.vmlinux b/scripts/Makefile.vmlinux
-> > > index 6833b517cacb..95b523fe4f9e 100644
-> > > --- a/scripts/Makefile.vmlinux
-> > > +++ b/scripts/Makefile.vmlinux
-> >
-> > [...]
-> > > @@ -103,10 +100,7 @@ vmlinux: vmlinux.unstripped FORCE
-> > >  # ---------------------------------------------------------------------------
+On Fri, Sep 18, 2026 at 02:12:48PM -0700, Nathan Chancellor wrote:
+> On Fri, Sep 18, 2026 at 09:54:27PM +0200, Nicolas Schier wrote:
+> > On Fri, Sep 18, 2026 at 03:35:57PM +0100, Lorenzo Stoakes (ARM) wrote:
+> > > On Thu, Sep 17, 2026 at 06:07:29PM -0700, Nathan Chancellor wrote:
+> > > > On Thu, Sep 17, 2026 at 11:53:13AM -0700, Kees Cook wrote:
+> > > > > Yeah, totally right to move to a separate file. I think, however, I
+> > > > > would prefer this wasn't in init/ though. Kbuild uses scripts/ as its
+> > > > > Makefile.$topic dumping ground, and Kconfig.include also lives there. To
+> > > > > me, this new file should be scripts/Kconfig.toolchain instead. And
+> > > > > arguably, this should be included by the top-level Kconfig rather than
+> > > > > init/Kconfig...
+> > > >
+> > > > I do feel like scripts/ is a better location given that these are really
+> > > > things internal to Kbuild but I also see where Lorenzo is coming from
+> > > > that scripts/ is a little weird for this to live for discoverability,
+> > > > especially if we want people to put checks here instead of in a Makefile
+> > > > directly. To be honest, it would be kind of nice to separate the Kbuild
+> > > > parts of scripts into their own directory to make it clear what Kbuild
+> > > > uses versus what users/contributors should use but that is obviously too
+> > > > big of a project to tackle as a prerequisite for this.
 > > >
-> > >  quiet_cmd_modules_builtin_modinfo = GEN     $@
-> > > -      cmd_modules_builtin_modinfo = $(cmd_objcopy); \
-> > > -                                    chmod -x $@
-> > > -
-> > > -OBJCOPYFLAGS_modules.builtin.modinfo := -j .modinfo -O binary
-> > > +      cmd_modules_builtin_modinfo = $(OBJCOPY) -O binary -j .modinfo --dump-section .modinfo=$@ $< /dev/null
+> > > Yeah it just seemed really weird/surprising to me (in the sense of
+> > > 'principle of least surprise') to put that in scripts/ and it doesn't seem
+> > > that traditionally anything else like this lives there.
+> > >
+> > > But if you guys feel strongly enough I can put it there.
 > >
-> > By shifting from "$(cmd_objcopy)" to "$(OBJCOPY) + args",
-> > $(OBJCOPYFLAGS) is dropped.  It this by intention?
+> > yeah, then I'd also slightly favor scripts/ for now.
 >
-> I am not sure it matters in this case since I don't think there are
-> global OBJCOPYFLAGS, I only see instances that come from specific rules
-> but I might be missing something.
+> Alright, I think scripts/Kconfig.toolchain wins then :)
 
-OBJCOPYFLAGS is exported from the top level Makefile:
-
-655:export KBUILD_CPPFLAGS NOSTDINC_FLAGS LINUXINCLUDE OBJCOPYFLAGS KBUILD_LDFLAGS
-
-And is set by various arches e.g.:
-
-arch/csky/Makefile
-2:OBJCOPYFLAGS		:=-O binary
-
-arch/mips/Makefile
-348:OBJCOPYFLAGS		+= --remove-section=.reginfo
-
-arch/openrisc/Makefile
-20:OBJCOPYFLAGS    := -O binary -R .note -R .comment -S
-
-arch/sh/Makefile
-79:OBJCOPYFLAGS	:= -O binary -R .note -R .note.gnu.build-id -R .comment \
-		   -R .stab -R .stabstr -S
-
-arch/s390/Makefile
-123:OBJCOPYFLAGS	:= -O binary
-
-And none of this should impact .modinfo, and if it did it'd be broken as then
-.modinfo would be different for one arch and not the others.
+Ack, will switch it out for v4!
 
 >
 > --
