@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9485C2E266C;
-	Sun, 20 Sep 2026 03:46:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 523183CB541;
+	Sun, 20 Sep 2026 03:48:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789876003; cv=none; b=JozroZQhK+jNCY7AbZ/Xw3QYkcVChe79P54u+1xtvg5IvytOjtTzmGGfc13l+6dYPBavQaDCm5M63/7ziAeZKKtWsr2r2Btd06eFgOiG+w2E3lYZ3D4nSP/ZksmgOAutot94KtGBeVwpD1pPOlefQNFzbIez572/6+l7gb0l1h4=
+	t=1789876106; cv=none; b=NA/LeuJsWEIPD2wokqvLxV7hFQaQgPESwDygfcv8w3+0XIBXfZMbwsaRJtFfb/3Koum5EbX+YS1L4PBR+s7bY1BH3OvGTvn1ovHTl7r6BjHhE200XJX3PZgogJg0RqWI7BpbSDZoi+LueQNCuSRsJ+x0WqD7V/s8JxCwqy5HnNs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789876003; c=relaxed/simple;
-	bh=ZbWAqJRTY3VosimGz01P04wQqhvs31GplZgQSEgfbFw=;
+	s=arc-20240116; t=1789876106; c=relaxed/simple;
+	bh=GSrtFVQAoq72BuT4l8bSIy6B2kt0Hd5qAgqf+SK4zMM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pFQCSaknNLTw92BKf+9EYPPu8NPFsrDG4Rg75OjW8VyWPgf6N3Gv1jpBEo5PPHRl1UCE9128nhralT6yjjYTLHmLLOPoa2DZSlSwq+3+4fn2cqXtVqXajaCBuzDBsT/GHc7tioHzcLR0szWuScLtkx2IMTMYvvDVLO1pYVYHjj4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Pq1c/x2e; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=Ajp3i2J+MOgHiq4Hmw3p5FHfTHG4Z1MD8VAiCwaZr77KBEIP5rC6LU/PzuajvJCiTMDHwFxJhPz23e/xPVGoSiSBqI72HkUVFBQ60/fdE/IEDvL8iukunYpNEh/BgAqh8KkHYEgEtIRzxyTuF4xsVJNMHFvmSxPow2Z0IEO+jWs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YBC6aBoZ; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Pq1c/x2e"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3F2021F000FF;
-	Sun, 20 Sep 2026 03:46:42 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YBC6aBoZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CA2AA1F00893;
+	Sun, 20 Sep 2026 03:48:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789876002;
-	bh=RAgjdNuY0GHwXBswA5NShTSJab25cAeZ2wGxG0I/vUo=;
+	s=k20260515; t=1789876104;
+	bh=ybCr0oF8quCv/avwZgHBTOG1l69Dfvx6Rf/qRs6G0NM=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=Pq1c/x2eNDaaA3FhHkOhGuCnsEwXECeh01hVEHOpDv8HFPU3D8PLxh2wVU0nylDaJ
-	 7EaPp5slBBZUiOqsjhzEs7IgscKJPgdM3bXnpCs8IVuHJRaG5hD0rrtfwkhInaUah2
-	 UEwXWAbH8m3JDS27foafZhT7dYncShEItD34AqEMdXClbdFXPJauYFWvvxe4hWYd96
-	 N8ZnwsnLY9Xqn+sIDhK7K9lW5wcmPeM+9vJTKsXnZtJMmVVGCpp7vNL+wlt5H2W4zk
-	 L6Y0Pud3rjcJlvf9NtFTivJRz4pQVpslkC4pi8p+/DINuR9TeguqodaZGqQrIxp572
-	 Ic8aE8TCrC2FA==
-Date: Sat, 19 Sep 2026 20:46:42 -0700
+	b=YBC6aBoZFH8ZoVIjcCysvgKQWPCeAZnK7xSXqRi8+dyWiyNvuz6IjqFWVKI+gEzA3
+	 oaMZt+GfiWWPwZO+L7WtXR6zTVPWm8J5aEQddxqJ9e8w9wdXf9cgyQkwYsShqX/3y3
+	 N6q33sbNYcxGvAtrsYo3EEQ1xP8Sx7eo8YiTsMCwsBDDR8h5oUZoUzzWD7hn+yryq/
+	 dmoy7MMUFxy9hhJgZ1IuBPQFuWfx1BGqdpXi0ELNTQT7jOC3pbUc6TgXZiNsFdvHgO
+	 2IPsOuX8fnt1Lpf/zBLFIb5c3OeIqw4T36I3/T9Np3Fk0ATdmUGrQeHxMxPs1dTCJs
+	 9OLkkJAmVBHTA==
+Date: Sat, 19 Sep 2026 20:48:24 -0700
 From: Kees Cook <kees@kernel.org>
 To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
@@ -72,12 +72,11 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	linux-hardening@vger.kernel.org
 Subject: Re: [PATCH v3 09/20] kbuild: implement and use depcheck to check
  dependency timestamps
-Message-ID: <202609192045.24A5A4E876@keescook>
+Message-ID: <202609192047.17BD9B1F@keescook>
 References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
  <20260917-build-speedup-v3-9-9ecf4163ff36@kernel.org>
  <202609171117.35BFDCC13@keescook>
- <202609171229.31BB336E1@keescook>
- <aq6_JcIy6gOsN4oa@gremlin>
+ <aq6-KMkAx7q_xLO4@gremlin>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -86,29 +85,24 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aq6_JcIy6gOsN4oa@gremlin>
+In-Reply-To: <aq6-KMkAx7q_xLO4@gremlin>
 
-On Sat, Sep 19, 2026 at 06:02:46PM +0100, Lorenzo Stoakes (ARM) wrote:
-> On Thu, Sep 17, 2026 at 01:59:26PM -0700, Kees Cook wrote:
-> > So, yeah, it makes me nervous, and it may make incremental builds less
-> > idempotent. But I can't really find extant problems and the demo is
-> > slightly contrived, but not exactly an impossible situation.
+On Sat, Sep 19, 2026 at 05:57:36PM +0100, Lorenzo Stoakes (ARM) wrote:
+> On Thu, Sep 17, 2026 at 11:42:50AM -0700, Kees Cook wrote:
+> > On Thu, Sep 17, 2026 at 05:06:19PM +0100, Lorenzo Stoakes (ARM) wrote:
+> > > [...]
+> > > +static bool next_line(const char **pos, const char *end, struct line *line)
+> >
+> > There is a lot of string handling in here. I know you're going for speed,
+> > but it just feels like a python script doing all this would be much more
+> > readable without wrecking speed compared to C much. Yes, C will win out,
+> > but the maintainability of this helper does not fill me with joy. :P
 > 
-> Ack thanks for this!
-> 
-> There is definitely an issue here, your example is fine in the stock kernel
-> but one run late in v3.
-> 
-> Solution is to have depcheck treat any dependency that is itself a target
-> of the same run as never being 'fresh' (it already reads every .cmd file in
-> the directory so has all the dependency information it needs), so that's
-> fixed in v4.
-> 
-> Confirmed that it fixes the demo'd bug here, that touching a header
-> rebuilds exactly the same objects as it did before and that noop build perf
-> was not harmed by the change.
+> Well I had the LLM look at that and for an allmodconfig python's startup time
+> would take 40s of CPU time _alone_ and it'd kill the no op improvement. So C it
+> has to be :)
 
-Oh very nice! Thank you for finding a solution there. :)
+Yikes, that's huge. C it is. ;)
 
 -- 
 Kees Cook
