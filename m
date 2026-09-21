@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59B654052D1;
-	Mon, 21 Sep 2026 19:59:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85E963EDAB5;
+	Mon, 21 Sep 2026 19:59:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790020759; cv=none; b=Z8eaBT41N1GQndpujSO3CRYQdLO/5ixT5jSr4PJbaHKUL86Q5Wb8pEcqRwADPZl1tEspU45SwOpt7n+EUWaAAC+jn5dqbzsEiVmtz4UCNdiTjf/oEn1GjR63uBMwry7LV+HOq/8qvLLvBLyICwS51d4DR9MB4VH2q2/KXGoc5vw=
+	t=1790020771; cv=none; b=E1zCWNpPaH0Vw4rElXhoYvrVa2ZQ09fSviVoUdYxbBRH2gSYdYs2eRCdxBQZSNr/+z2a6paq6zQI8Nf/sQqROxIyrWQoRtQxL7oEUAQ2L5O3ao6X5q0M42YTJ0Jdh7RIBxnp4gZPLUMWXbfvn665RWscDtkLuf+XHJt/sfVjBiQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790020759; c=relaxed/simple;
-	bh=xjv9gw19jajbPTwOCvMFsEvootNb3/SGqtxLJD462n0=;
+	s=arc-20240116; t=1790020771; c=relaxed/simple;
+	bh=tDFDEt8IUs532azdvJKDW9TvNkB4b+8sjasg9lClwBs=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=fE2gnOJdJ3ea3PzUbV4zeRl/pIYR7xwRuueOWpEqa+5zZhLGhTvfc/gJVnp0CnjOnTEbLOPUmemtfoaCe1C9RV1bMqjc8qGF4lLoEbLBU4rdA6v8noRZUVNhyq93NpDDMerewAjZJdo3fDdmwe6t/flXK6U3nLbFDgKjYrbQ5Os=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LJMUchJq; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=NZNCwb4vF2RHRt54l7qKOwhDhI2PWzIdVtqzP/3569f6VHAtAQxFpj3ad+KkpKlJ5tggD8oW2iHX71lpcQKFRCYikE1eVx+TGjnmbgewa1j/ogafCVCKixAeCL3ymPP2ovKTltVvIzKzmDqTvCc49FMcqPj58xljrPKxtLY3TKY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=araOXMAq; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LJMUchJq"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5E1FE1F00893;
-	Mon, 21 Sep 2026 19:59:09 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="araOXMAq"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 542F91F000FF;
+	Mon, 21 Sep 2026 19:59:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790020758;
-	bh=OJ0j+leg3y+Dpt5s4ny9DBNrD2A1KCj7Cpe/XpV27PM=;
+	s=k20260515; t=1790020770;
+	bh=GX1kDtjAfCXSGF7xrHyk2v4uUNilnK+1K3CoVNBtw4A=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=LJMUchJq4XPhBwwniY+m7JZkvTDeHbUY5uyTkX0G05IqLNA6EH3+lQHO0F3undOJe
-	 Em9rOFh9y54stRVtWOT9ltk7rw4wzV5ISTEuKXzmn1+B53EUPrGDanCqq+wc3EY7C4
-	 JSiBlogkHgPTiFOFSqFOUxrtQIxXt9Hop5CyFNS8/BJgDIlp5TUHIKYQY2BuOiA6hc
-	 XwpOSpzVpr2LaJjGR7MSoMH4SpOYbaoCPdtbSvIv69G5xETyO/2hJaVv8rul5kt74O
-	 v/UKkHf0XTi+FrYAvK9+UHlUO6QImrQmOaU0XspiAZGlafld7GrXFInYxK88sSND0H
-	 d8kukbBC/zKGg==
+	b=araOXMAq3aGf5lhsHaF9EYdes13PfMxi/AKztAHU3Va9Nn/vDgBSHqo0RuqeabItb
+	 oNtT8BI+9WhQK8aNHeB4p9DzopBjegRomly7sPn5r0P6tX7YLA7OEiadHOlHz1p3Po
+	 0VRvp+5bka4Xj+WWdxNA/7dio0SkeoRI17P+Y0ba9o+uQWj0w05brmPZmTKxsTn9T5
+	 eP2rj5gGHKTms7HdD42p0zHYEeGtpIJcstNChorLw7RXgTT55bYgqWnIG8AhDR8Yut
+	 jAnt6ui6lqRaHEYMrQx5RSmAvq0KzO9sZYYAsJDB7eJ6B5lTlV3T9gsx0VW4f0eoni
+	 3JhTcsw/W2k5g==
 From: "Rafael J. Wysocki" <rafael@kernel.org>
 To: Linux ACPI <linux-acpi@vger.kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>,
@@ -58,10 +58,10 @@ Cc: LKML <linux-kernel@vger.kernel.org>,
  Andreas Noever <andreas.noever@gmail.com>,
  Mika Westerberg <westeri@kernel.org>, Yehezkel Bernat <YehezkelShB@gmail.com>
 Subject:
- [PATCH v1 05/17] platform/x86: yogabook: Switch to use
+ [PATCH v1 04/17] iommu/arm-smmu-v3: Switch to use
  acpi_bus_get_primary_device()
-Date: Mon, 21 Sep 2026 21:48:30 +0200
-Message-ID: <1973238.CQOukoFCf9@rafael.j.wysocki>
+Date: Mon, 21 Sep 2026 21:47:52 +0200
+Message-ID: <2073406.usQuhbGJ8B@rafael.j.wysocki>
 Organization: Linux Kernel Development - Intel
 In-Reply-To: <7995179.EvYhyI6sBW@rafael.j.wysocki>
 References: <7995179.EvYhyI6sBW@rafael.j.wysocki>
@@ -87,29 +87,22 @@ function.
 
 Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 ---
- drivers/platform/x86/lenovo/yogabook.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/platform/x86/lenovo/yogabook.c b/drivers/platform/x86/lenovo/yogabook.c
-index 1a4b2ab1f35d..8a91d440724b 100644
---- a/drivers/platform/x86/lenovo/yogabook.c
-+++ b/drivers/platform/x86/lenovo/yogabook.c
-@@ -353,13 +353,13 @@ static int yogabook_wmi_probe(struct wmi_device *wdev, const void *context)
- 		goto error_put_devs;
- 	}
- 
--	data->kbd_dev = get_device(acpi_get_first_physical_node(data->kbd_adev));
-+	data->kbd_dev = acpi_bus_get_primary_device(data->kbd_adev);
- 	if (!data->kbd_dev || !data->kbd_dev->driver) {
- 		r = -EPROBE_DEFER;
- 		goto error_put_devs;
- 	}
- 
--	data->dig_dev = get_device(acpi_get_first_physical_node(data->dig_adev));
-+	data->dig_dev = acpi_bus_get_primary_device(data->dig_adev);
- 	if (!data->dig_dev || !data->dig_dev->driver) {
- 		r = -EPROBE_DEFER;
- 		goto error_put_devs;
+diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
+index 5732f3ba0122..98f105798b89 100644
+--- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
++++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
+@@ -5307,7 +5307,7 @@ static void acpi_smmu_dsdt_probe_tegra241_cmdqv(struct acpi_iort_node *node,
+ 	adev = acpi_dev_get_first_match_dev("NVDA200C", uid, -1);
+ 	if (adev) {
+ 		/* Tegra241 CMDQV driver is responsible for put_device() */
+-		smmu->impl_dev = get_device(acpi_get_first_physical_node(adev));
++		smmu->impl_dev = acpi_bus_get_primary_device(adev);
+ 		smmu->options |= ARM_SMMU_OPT_TEGRA241_CMDQV;
+ 		dev_info(smmu->dev, "found companion CMDQV device: %s\n",
+ 			 dev_name(smmu->impl_dev));
 -- 
 2.51.0
 
