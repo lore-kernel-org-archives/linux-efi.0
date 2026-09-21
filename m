@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B3B03E49CC;
-	Mon, 21 Sep 2026 19:59:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3AA603E2ACA;
+	Mon, 21 Sep 2026 20:00:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790020797; cv=none; b=jHbtYKK3PuhgIZprPjt8RQn9tMr+zH9aoZ21rgld60JvgOqObpEARIy3vqzdZhvK+zlu6NczUGl/piYRpA4dvlrK520omZFUQWwrRfD0kn9g47Jnx5i8n0moay+YAHqbZwqsW3MxEp+tIDNs6/NmDoBRaZm+qxBXFeo+h6RJ4F8=
+	t=1790020810; cv=none; b=ZtRC8/rgHtRm6p+2b1DOh40o5WY/P9waT/mbgO6H0oeQF9ncz5kb0mOJO0gQE4K61I5oTTk1RgaGNEwkC4EBTIKGbXBJZtRpOBXKNId3Zfec1iLHLc9uIZ7S+9KjKuSnaxyMtDyqAV2VYnHtqowBULm6HYXjsbNt+gXaGQCAKO4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790020797; c=relaxed/simple;
-	bh=CGHA5rc5ODXuYZRY15loSeHcZbTvCn5CiOcGdHJ9kwY=;
+	s=arc-20240116; t=1790020810; c=relaxed/simple;
+	bh=p6v+cd79xmVsCqhGZBsut6uzEDQUrUWmD5mxe+kpuoY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=tgKrHgr98+EJ6Xj85eP7V6BfCwrTgL7zj566wV//LVjAC7kPmAuqA4MYAMROTdIPn1D1fq4HA6QNCikQFjsTl6JRe1NVOaOIEMNqKOshbdIVJ+QJ2mN5U058iM54iD+liQXc3zrskwYdjXVjlLAW7f0n4/vYT7Juy40rnRa5uao=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=e/QZ44Qo; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=mtKkhrV7NFQJx+qop3pX4ovmm37mpwbmInDP+yjyRqmZDngRm5GLdAK7IYqidGa6Pyaa4JsvebppIpVj4hDQsvIY1ZvF+KmQjsxlopH5iBRhode/IWQsIpFnTpuz8/wCppnGz5GG09kT36oHNxEus3GQuk1MMXFfKc+WEePJSBo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QGd0c8fw; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="e/QZ44Qo"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F7921F00893;
-	Mon, 21 Sep 2026 19:59:43 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QGd0c8fw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DE8C1F00898;
+	Mon, 21 Sep 2026 19:59:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790020792;
-	bh=6UjZ3rrjP9HMf//Eca0cD5Hxt1wv6E9n3d8DQuHis1c=;
+	s=k20260515; t=1790020803;
+	bh=zNolz+v90tYRAgMmlaBqFoeM8H2neYyDYxiSR5AIgyY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=e/QZ44QoHkWQu3p7iBCIv9/7xn/8Du5V/nI1YenLVuShu29wR4TbMO/TFCpNmUIfQ
-	 sA/NDjrZJJBqUNm+6p4NmRZwdQ3552p9YJguqEBwAcbguFjmUKFsUCuvLDsDjkrtBW
-	 5aP3kEn7oAeirKrSev65TnRdlMpFzbJiDHemXNlnoc8HYUVxHa3TOGTYFzoCs37Cvd
-	 FYn3/bLwkN4RcAmPSXWeCctarbfkKqlDcwehqs+0coUMpmTtd4BZAylrC+y0pehGXM
-	 FGUaBREvbn3E5lZn3jfvOvrZpzH0LCVNWt4HhB6npAdLHRzoq1+c61E9/3215+MUFX
-	 WAa9B+8VFsrVw==
+	b=QGd0c8fw9lgBVCg7SNGJk8iDmbtATr49UqOL9y0REpuGdNsIwBm8z9dfmPXKfoRTy
+	 8BCNA36oTOlq86KwdNjetlGO9UdpVztPqtaSwvaGxwpk6SyuS5gz+dNKFfIs+9QUA+
+	 FdyjITQ/V5h2UPCPit5Y+qKTcuXTn6Re3KQ89OYV+Hr25XEmJlqapXug53+e3kxC4v
+	 VVB6ui/m1Ht6wnvqI8aLOiuBzGRFA1lcBkTLy5bbGKCGgX0zHVIU9YV85NWAB+A5vF
+	 ZStGu9O/UcATHCdN8Cdo+cjrSFav42TxWXEJONc06GyjCfUBOzFEpJb/BAQpZgPtl9
+	 Y4HjCCFxBooRg==
 From: "Rafael J. Wysocki" <rafael@kernel.org>
 To: Linux ACPI <linux-acpi@vger.kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>,
@@ -57,10 +57,9 @@ Cc: LKML <linux-kernel@vger.kernel.org>,
  Binbin Zhou <zhoubinbin@loongson.cn>,
  Andreas Noever <andreas.noever@gmail.com>,
  Mika Westerberg <westeri@kernel.org>, Yehezkel Bernat <YehezkelShB@gmail.com>
-Subject:
- [PATCH v1 02/17] ACPI: amba: Switch to use acpi_bus_get_primary_device()
-Date: Mon, 21 Sep 2026 21:46:37 +0200
-Message-ID: <3362405.5fSG56mABF@rafael.j.wysocki>
+Subject: [PATCH v1 01/17] ACPI: bus: Use acpi/acpi_bus.h without CONFIG_ACPI
+Date: Mon, 21 Sep 2026 21:45:59 +0200
+Message-ID: <3717753.iIbC2pHGDl@rafael.j.wysocki>
 Organization: Linux Kernel Development - Intel
 In-Reply-To: <7995179.EvYhyI6sBW@rafael.j.wysocki>
 References: <7995179.EvYhyI6sBW@rafael.j.wysocki>
@@ -75,38 +74,97 @@ Content-Type: text/plain; charset="utf-8"
 
 From: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
 
-Replace acpi_get_first_physical_node() that is slated for removal
-with acpi_bus_get_primary_device() that takes a reference to the
-device it is about to return.
+Corrently acpi/acpi_bus.h is included in linux/acpi.h only if
+CONFIG_ACPI is set, but it contains declarations that are useful
+otherwise too.
 
-This addresses a potential use-after-free that may occur if the
-device returned by acpi_get_first_physical_node() is removed right
-after dropping its ACPI companion's physical_node_lock in that
-function.
+For consistency, modify linux/acpi.h to always include acpi/acpi_bus.h
+and update the latter to avoid exposing too much when CONFIG_ACPI is
+not set.
+
+Since acpi_has_method() is called from some code build when
+CONFIG_ACPI is unset, add a stub for it to the !CONFIG_ACPI
+block in acpi/acpi_bus.h.
 
 Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 ---
- drivers/acpi/arm64/amba.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ include/acpi/acpi_bus.h | 12 ++++++++----
+ include/linux/acpi.h    |  2 +-
+ 2 files changed, 9 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/acpi/arm64/amba.c b/drivers/acpi/arm64/amba.c
-index 1350083bce5f..7ee431d9464a 100644
---- a/drivers/acpi/arm64/amba.c
-+++ b/drivers/acpi/arm64/amba.c
-@@ -87,11 +87,12 @@ static int amba_handler_attach(struct acpi_device *adev,
- 	 * the amba device we are about to create.
- 	 */
- 	if (parent)
--		dev->dev.parent = acpi_get_first_physical_node(parent);
-+		dev->dev.parent = acpi_bus_get_primary_device(parent);
+diff --git a/include/acpi/acpi_bus.h b/include/acpi/acpi_bus.h
+index a10a591c18b2..32837f507f40 100644
+--- a/include/acpi/acpi_bus.h
++++ b/include/acpi/acpi_bus.h
+@@ -9,6 +9,8 @@
+ #ifndef __ACPI_BUS_H__
+ #define __ACPI_BUS_H__
  
- 	device_set_node(&dev->dev, acpi_fwnode_handle(adev));
++#ifdef CONFIG_ACPI
++
+ #include <linux/completion.h>
+ #include <linux/container_of.h>
+ #include <linux/device.h>
+@@ -58,7 +60,6 @@ bool acpi_dock_match(acpi_handle handle);
+ bool acpi_check_dsm(acpi_handle handle, const guid_t *guid, u64 rev, u64 funcs);
+ union acpi_object *acpi_evaluate_dsm(acpi_handle handle, const guid_t *guid,
+ 			u64 rev, u64 func, union acpi_object *argv4);
+-#ifdef CONFIG_ACPI
+ bool
+ acpi_get_physical_device_location(acpi_handle handle, struct acpi_pld_info **pld);
  
- 	ret = amba_device_add(dev, &iomem_resource);
-+	put_device(dev->dev.parent);
- 	if (ret) {
- 		dev_err(&adev->dev, "%s(): amba_device_add() failed (%d)\n",
- 		       __func__, ret);
+@@ -77,7 +78,6 @@ acpi_evaluate_dsm_typed(acpi_handle handle, const guid_t *guid, u64 rev,
+ 
+ 	return obj;
+ }
+-#endif
+ 
+ #define	ACPI_INIT_DSM_ARGV4(cnt, eles)			\
+ 	{						\
+@@ -90,8 +90,6 @@ bool acpi_dev_found(const char *hid);
+ bool acpi_dev_present(const char *hid, const char *uid, s64 hrv);
+ bool acpi_reduced_hardware(void);
+ 
+-#ifdef CONFIG_ACPI
+-
+ struct proc_dir_entry;
+ 
+ #define ACPI_BUS_FILE_ROOT	"acpi"
+@@ -942,8 +940,14 @@ int acpi_wait_for_acpi_ipmi(void);
+ 
+ int acpi_scan_add_dep(acpi_handle handle, struct acpi_handle_list *dep_devices);
+ u32 arch_acpi_add_auto_dep(acpi_handle handle);
++
+ #else	/* CONFIG_ACPI */
+ 
++static inline bool acpi_has_method(acpi_handle handle, char *name)
++{
++	return false;
++}
++
+ static inline struct device *acpi_bus_get_primary_device(struct acpi_device *adev)
+ {
+ 	return NULL;
+diff --git a/include/linux/acpi.h b/include/linux/acpi.h
+index ddacac812094..ba5234bd93a2 100644
+--- a/include/linux/acpi.h
++++ b/include/linux/acpi.h
+@@ -25,6 +25,7 @@ struct irq_domain_ops;
+ #define _LINUX
+ #endif
+ #include <acpi/acpi.h>
++#include <acpi/acpi_bus.h>
+ #include <acpi/acpi_numa.h>
+ 
+ #ifdef	CONFIG_ACPI
+@@ -35,7 +36,6 @@ struct irq_domain_ops;
+ #include <linux/mutex.h>
+ #include <linux/fw_table.h>
+ 
+-#include <acpi/acpi_bus.h>
+ #include <acpi/acpi_drivers.h>
+ #include <acpi/acpi_io.h>
+ #include <asm/acpi.h>
 -- 
 2.51.0
 
