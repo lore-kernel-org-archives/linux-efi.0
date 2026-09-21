@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D6053E1681;
-	Mon, 21 Sep 2026 19:58:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 68CB23E025C;
+	Mon, 21 Sep 2026 19:58:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790020683; cv=none; b=AnvzIJZP68pYz+mjXjc7ZMj9YJcq8VjIsLSa7GXD78vVy1cL1V9fWBbja0nDPBMLmUlbqWuxXDpQPEtXEhgBcbw+Q5OCSdXmslmrTWk7L2G5UDLSkcGhZiLnD+RHpdMGL0jjBkqhuItv8cboeii1WaKIVarPIZ5gQcWpWswe0jY=
+	t=1790020693; cv=none; b=i6AhcQo1oZZJL6vx9kHSTdBhAl/GzSihtvkPwG7ZtrlqhmuzuJhFNXj+xgNq9FXIr/aScJ38NrHb/YOuDRX3Q7fMN9iOEbERO4DGTafYovGFjoiIs8SNOeACH20OVEJSP6DdLE0x3WWGov9bcBJmSKLlnBRR0zkDqSNAB3/qXLw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790020683; c=relaxed/simple;
-	bh=PuDgcUnfUxSDQ/MUOSppfK36EcGqO6QwNGeAN9i6xwo=;
+	s=arc-20240116; t=1790020693; c=relaxed/simple;
+	bh=n2+8GPLKhhXB4YII9MNQWFiotVYFyPx3wznGcyhdjnY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=NWnW8etazWn9Si3fyOXyKHstOx9d1At+PX+E54rZxSLlb99sS28IQImHb7B1qbs/CNTT0fflwiRY6YNe7GlkhjciXD8iks7ZzWZunrc01t2oXdT3VsiMi83y0QJweIcPbjs9MdNz2wjxIcD5jjLv5PhEgwsxESid3J0sj5LGZxQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ci0EfexE; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=ksjmvFFu1JBffyEJbpp7251O5IuIcm/AU8BUbFg4DKLpHFofu7w/Nqc2WkAHaYGis1ukxj24OAB1CcAB4+FviB84R27KKrcC8XbhxpSvSOAD+pFUyNOwciHpgCiMgotgy3lP6Sasajx5rkYIHdGRpGtSw/70/jK7gkuNVbyuaPo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kLy1SWp6; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ci0EfexE"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 763B91F000FF;
-	Mon, 21 Sep 2026 19:57:52 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kLy1SWp6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6B9451F00899;
+	Mon, 21 Sep 2026 19:58:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790020681;
-	bh=n4tfQQNoh1s0SuFBn8g/TxJGhMe3ZOSgNRY3dXc6AJk=;
+	s=k20260515; t=1790020692;
+	bh=1tN8EiEXErZri4xnT56eJvdv4f/XP1BJExpmWIMGBrU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=Ci0EfexEzpXudF6A1c0TRtaS3ijsUSJzv01W1MLD2bmATKrk4YDSRg9uokuQTkYan
-	 urzbYyusNB+l570E5twrDA1odMxPLzuEshNs6shFYh7z7YT1HLPBhUZTBB8UUz/NDp
-	 DrCb4KDhJ8OUEOs7U+IbTOs/3KI0DnpxKsWjXdModl6jPM22pi7RlmvW7WL6q+E+Tu
-	 iS657fJiAxB7i8oRzIHoC0Vm/Or2EPgEm/yHGYZBleqSlxQybJDLd7bVQSOJfd0nUt
-	 Zw4WOcr1rc00S7qHzQL747+8FZYX4Y5yDELZISU2iLc8BNhPOIj3b1lrJDbfR0Vyyo
-	 W7Q5xsASeT4Ew==
+	b=kLy1SWp6TJB975WFGZpA6jNsFoxkFBjVtOK0Nt8M+P+OYJCkn0AAX26FJsOQeHw2p
+	 D4hduh6noknXe01W+WMwG6F8c6irZMR0IzAnd8Xp8VXOGToWruuGotVdqEgc6+hAtW
+	 f4PCSBcY1Zwz2gTMPpgxTFOfhOTJhnzc5/uSTzth948T5QM0CD+XSXiVENCx2uZRCX
+	 gmj/4ZjesxNLKK8dGa/dE9CNYvlykdzPiLm/nmH+9YmxPlFnat1aNAD7e9apsznIXe
+	 A83XjOeBNqqQt5BrNrC+zT+ibS0V3AqI/oMKM8uGo4x4hg/JWJRhcAbd6Q5/bVw1L3
+	 UWH64iNo2u4JA==
 From: "Rafael J. Wysocki" <rafael@kernel.org>
 To: Linux ACPI <linux-acpi@vger.kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>,
@@ -58,10 +58,10 @@ Cc: LKML <linux-kernel@vger.kernel.org>,
  Andreas Noever <andreas.noever@gmail.com>,
  Mika Westerberg <westeri@kernel.org>, Yehezkel Bernat <YehezkelShB@gmail.com>
 Subject:
- [PATCH v1 12/17] ALSA: hda: tas2781: Switch to use
+ [PATCH v1 11/17] ALSA: hda: aw88399: Switch to use
  acpi_bus_get_primary_device()
-Date: Mon, 21 Sep 2026 21:53:12 +0200
-Message-ID: <895014215.0ifERbkFSE@rafael.j.wysocki>
+Date: Mon, 21 Sep 2026 21:52:32 +0200
+Message-ID: <2568518.jE0xQCEvom@rafael.j.wysocki>
 Organization: Linux Kernel Development - Intel
 In-Reply-To: <7995179.EvYhyI6sBW@rafael.j.wysocki>
 References: <7995179.EvYhyI6sBW@rafael.j.wysocki>
@@ -87,31 +87,16 @@ function.
 
 Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 ---
- sound/hda/codecs/side-codecs/tas2781_hda_i2c.c | 3 +--
- sound/hda/codecs/side-codecs/tas2781_hda_spi.c | 3 +--
- 2 files changed, 2 insertions(+), 4 deletions(-)
+ sound/hda/codecs/side-codecs/aw88399_hda.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c b/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c
-index 5e5f46c9fb6b..161ca965c63e 100644
---- a/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c
-+++ b/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c
-@@ -100,8 +100,7 @@ static int tas2781_read_acpi(struct tasdevice_priv *p, const char *hid)
+diff --git a/sound/hda/codecs/side-codecs/aw88399_hda.c b/sound/hda/codecs/side-codecs/aw88399_hda.c
+index 11cef4923024..439ad45557a4 100644
+--- a/sound/hda/codecs/side-codecs/aw88399_hda.c
++++ b/sound/hda/codecs/side-codecs/aw88399_hda.c
+@@ -209,8 +209,7 @@ static int aw88399_hda_acpi_probe(struct aw88399_hda *aw88399)
  		return -ENODEV;
  	}
- 
--	struct device *physdev __free(put_device) =
--		get_device(acpi_get_first_physical_node(adev));
-+	struct device *physdev __free(put_device) = acpi_bus_get_primary_device(adev);
- 	ret = acpi_dev_get_resources(adev, &resources, tas2781_get_i2c_res, p);
- 	if (ret < 0) {
- 		dev_err(p->dev, "Failed to get ACPI resource.\n");
-diff --git a/sound/hda/codecs/side-codecs/tas2781_hda_spi.c b/sound/hda/codecs/side-codecs/tas2781_hda_spi.c
-index da71b57a26ee..f3ba7132d2b8 100644
---- a/sound/hda/codecs/side-codecs/tas2781_hda_spi.c
-+++ b/sound/hda/codecs/side-codecs/tas2781_hda_spi.c
-@@ -341,8 +341,7 @@ static int tas2781_read_acpi(struct tas2781_hda *tas_hda,
- 
- 	strscpy(p->dev_name, hid, sizeof(p->dev_name));
  
 -	struct device *physdev __free(put_device) =
 -		get_device(acpi_get_first_physical_node(adev));
