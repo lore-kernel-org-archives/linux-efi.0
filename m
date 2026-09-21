@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 555DB375F97;
-	Mon, 21 Sep 2026 19:58:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C9003CC32E;
+	Mon, 21 Sep 2026 19:58:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790020715; cv=none; b=R+/Tgv5tuiOuAlvxUDeolfBqT7HQIf3bj9Kh55WI554fOWJAsPcyWwkJ/JPqo9aUpFgTiwV9ynNhTDnxQYGrhPoMo871VYc+QhENTWNFkTtO2ONqAxiwr++flAq+Hu/x/VvE0fNvzhW5diARg/3NGOeByA6RjleUApUunNbRFBo=
+	t=1790020726; cv=none; b=M9JQzqcnouUvEawUjTUGBLYiLWteggXJT65PLjnp3ccr1WtptbcG0podBACBLhzj81Rb7Osd4tbGVCzRlUveQav9f+EhCzTr3zQZJ9zSrNM7m/oPv6W6WPf86gqD7FHSl04e+3b+kTf3sZzNmlFJFYnWOZ1Xf7eOeimw7kl00Xc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790020715; c=relaxed/simple;
-	bh=isHWWrxcBiXyiOc0FK87FCdZLDBe4O1mOevzLxw9ipU=;
+	s=arc-20240116; t=1790020726; c=relaxed/simple;
+	bh=9uZAGs3e8Cnvqz27ZBlqYoNAlHSPexEfJzEGqE6LPrs=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=grK1EboVdbQj/auAn4hDXti8BiZXPEKDwDbMtXJ+aqbefptIoQKt6Zms6n34twkAG8RSw0THMrQqB86jkR0Y7FbEmWPhoFAtbuWXYbQqHCsCr0EcPbQYgh2z0wtBk6foiSZQNNr4MKaNJUcyHw0/4zvDG4Wb2SFNQyXkOeOk46w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ThZj/UOP; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=qFKeNcyR0jgL+z8xXQTFloRwdCRsB4hV3k0FRy/4wPXXJH45V+tagyC86lQJuzyj5pR+Aj+H6Ruf0pQsS/G+RihusVU+yIOa8pPIKeMldYkAZhpIcni52t96ewbH4GCpGfiDYG5JlLxjapfcpprwnwlyg6tSnMjrhpQ0TAb6ELA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LD6W2Wyz; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ThZj/UOP"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8898F1F00893;
-	Mon, 21 Sep 2026 19:58:25 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LD6W2Wyz"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7C6F91F00893;
+	Mon, 21 Sep 2026 19:58:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790020714;
-	bh=eN+0DjPC2PIBDvK9KcouX9O0xXht3SUEsMqJsvIURUo=;
+	s=k20260515; t=1790020725;
+	bh=WJ8N+mrV6u3cfqGcoiPMbpRTWJEEOHp2lUrNnbxW06A=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=ThZj/UOPRjQXCwRJZ/gEI4TMK9E3OQjwyrhcH8Bf8KJ76a5XslxbM0iNnyzwdCccP
-	 cdNW/zsTGGtHNFzkkKBnEMg0H3+t1qrp8F2cpOhHE49PGKnlIgpB/QgDWeixkungrs
-	 u+fk5tmMOjmJCIlPNcTTHfclpOfmw1cQGkYPxLbE4Z73fBQmLbJU4iP0zw68bS0dLg
-	 K7ELvdntHu8ZvCIH76dHZzWSEnrq6zJF7JzAr650C9YYtR4TgWl0cjOJAFKezcqjtj
-	 NL6jgtGlEnBNoM0QGZ2UC4BgHenUWmzGV8UmnOKA+QQrAjD1vzb4+dAkIUZFZ1PaQn
-	 Ewb8KNTEGclJQ==
+	b=LD6W2WyzOksR0uOR2WulOxOo+3440yB3T3ZMsOTHOPwG4m1pEyPQOCOmNph0T4LIU
+	 Nod+IxbhEmbhGxA5ARKKzMEa+6U+beez7PC0zbeMF7v1JKQ1cNeyPncwMnfZnqnLtt
+	 xZ5BOp9K/5Pf/Ee55DqyWUNEekzivJ11F9niaNBC7trGJ6YqV3TipSMREUgAhk3jQm
+	 roY8A7XHayg9rtMl7ADBJpfS1AuOSN1bHCjgttaIS1y3nbEW1WMa19VXzEUahCNLBJ
+	 OLkpMSNuYCxAss9qlQX4y38Z8UVv48a18jH5UlbHiUhTI11KEXLou6o6HuzlAyDgF3
+	 fUNb1sQPq2V4A==
 From: "Rafael J. Wysocki" <rafael@kernel.org>
 To: Linux ACPI <linux-acpi@vger.kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>,
@@ -58,9 +58,10 @@ Cc: LKML <linux-kernel@vger.kernel.org>,
  Andreas Noever <andreas.noever@gmail.com>,
  Mika Westerberg <westeri@kernel.org>, Yehezkel Bernat <YehezkelShB@gmail.com>
 Subject:
- [PATCH v1 09/17] thunderbolt: Switch to use acpi_bus_get_primary_device()
-Date: Mon, 21 Sep 2026 21:51:06 +0200
-Message-ID: <1941270.atdPhlSkOF@rafael.j.wysocki>
+ [PATCH v1 08/17] platform/x86: x86-android-tablets: Use
+ acpi_bus_get_primary_device()
+Date: Mon, 21 Sep 2026 21:50:28 +0200
+Message-ID: <3912360.MHq7AAxBmi@rafael.j.wysocki>
 Organization: Linux Kernel Development - Intel
 In-Reply-To: <7995179.EvYhyI6sBW@rafael.j.wysocki>
 References: <7995179.EvYhyI6sBW@rafael.j.wysocki>
@@ -86,40 +87,31 @@ function.
 
 Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 ---
- drivers/thunderbolt/acpi.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ drivers/platform/x86/x86-android-tablets/core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/thunderbolt/acpi.c b/drivers/thunderbolt/acpi.c
-index 53546bc477a5..be91bc604900 100644
---- a/drivers/thunderbolt/acpi.c
-+++ b/drivers/thunderbolt/acpi.c
-@@ -17,8 +17,8 @@ static acpi_status tb_acpi_add_link(acpi_handle handle, u32 level, void *data,
- 	struct acpi_device *adev = acpi_fetch_acpi_dev(handle);
+diff --git a/drivers/platform/x86/x86-android-tablets/core.c b/drivers/platform/x86/x86-android-tablets/core.c
+index cfff7f5eac5d..2c262f117235 100644
+--- a/drivers/platform/x86/x86-android-tablets/core.c
++++ b/drivers/platform/x86/x86-android-tablets/core.c
+@@ -390,7 +390,6 @@ static int gpio_secondary_fwnode_init(struct device *parent,
+ {
+ 	const struct software_node *const *swnode;
  	struct fwnode_handle *fwnode;
- 	struct tb_nhi *nhi = data;
-+	struct device *dev = NULL;
- 	struct pci_dev *pdev;
--	struct device *dev;
+-	struct device *phys_dev;
+ 	int ret;
  
- 	if (!adev)
- 		return AE_OK;
-@@ -37,7 +37,7 @@ static acpi_status tb_acpi_add_link(acpi_handle handle, u32 level, void *data,
- 	 * USB3 ports might not even have a physical device yet if xHCI driver
- 	 * isn't bound yet.
- 	 */
--	dev = acpi_get_first_physical_node(adev);
-+	dev = acpi_bus_get_primary_device(adev);
- 	if (!dev || !dev_is_pci(dev))
- 		goto out_put;
+ 	if (!node_group)
+@@ -418,7 +417,8 @@ static int gpio_secondary_fwnode_init(struct device *parent,
+ 		if (WARN_ON(!fwnode))
+ 			return -ENOENT;
  
-@@ -74,6 +74,7 @@ static acpi_status tb_acpi_add_link(acpi_handle handle, u32 level, void *data,
- 	}
- 
- out_put:
-+	put_device(dev);
- 	fwnode_handle_put(fwnode);
- 	return AE_OK;
- }
+-		phys_dev = acpi_get_first_physical_node(to_acpi_device(dev));
++		struct device *phys_dev __free(put_device) =
++				acpi_bus_get_primary_device(to_acpi_device(dev));
+ 		if (!phys_dev)
+ 			return dev_err_probe(parent, -ENODEV,
+ 					     "No physical device for ACPI GPIO dev: %pfwP\n",
 -- 
 2.51.0
 
