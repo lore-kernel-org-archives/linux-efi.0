@@ -1,108 +1,108 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 523183CB541;
-	Sun, 20 Sep 2026 03:48:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id A7F083B3BF5;
+	Mon, 21 Sep 2026 07:38:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789876106; cv=none; b=NA/LeuJsWEIPD2wokqvLxV7hFQaQgPESwDygfcv8w3+0XIBXfZMbwsaRJtFfb/3Koum5EbX+YS1L4PBR+s7bY1BH3OvGTvn1ovHTl7r6BjHhE200XJX3PZgogJg0RqWI7BpbSDZoi+LueQNCuSRsJ+x0WqD7V/s8JxCwqy5HnNs=
+	t=1789976284; cv=none; b=HZ/vd+SDbPh//Z0G3up+iVOVWosAL8TH7lq2e/9xNYXyTTbHZPj5cLqyQXPI9CQkZ1BjP1/jvwM36YOqM74MiAtNlAhiowazvERXljP3gPaJ3KvVKjl1ieeTE7xcE//PMRFW2Ly/TrNXJV4oHwUq6D4MSMyVYAi7sr40M5gppuw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789876106; c=relaxed/simple;
-	bh=GSrtFVQAoq72BuT4l8bSIy6B2kt0Hd5qAgqf+SK4zMM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ajp3i2J+MOgHiq4Hmw3p5FHfTHG4Z1MD8VAiCwaZr77KBEIP5rC6LU/PzuajvJCiTMDHwFxJhPz23e/xPVGoSiSBqI72HkUVFBQ60/fdE/IEDvL8iukunYpNEh/BgAqh8KkHYEgEtIRzxyTuF4xsVJNMHFvmSxPow2Z0IEO+jWs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YBC6aBoZ; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789976284; c=relaxed/simple;
+	bh=nrUjuFhT3s2+v/gwSala4pCbrkVM+7IhP9tittz2bGU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=EkTxHPA9J2G54wSuw29t252701+/D82Ul1NxOIZZQMpFcJYWB5ryr8IMaDDt4n6uDwA7bKpuDDY4vtBbpC/5nKOwqCWOE0OIGZifPM9ou98tZz2cO0qYXP9v0IqDw5dVvDZEm+jg1r1OQda9zZTGG/FmqeDvtzyQgs5nuK1GdJ8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=l6ko2rle; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YBC6aBoZ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CA2AA1F00893;
-	Sun, 20 Sep 2026 03:48:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789876104;
-	bh=ybCr0oF8quCv/avwZgHBTOG1l69Dfvx6Rf/qRs6G0NM=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=YBC6aBoZFH8ZoVIjcCysvgKQWPCeAZnK7xSXqRi8+dyWiyNvuz6IjqFWVKI+gEzA3
-	 oaMZt+GfiWWPwZO+L7WtXR6zTVPWm8J5aEQddxqJ9e8w9wdXf9cgyQkwYsShqX/3y3
-	 N6q33sbNYcxGvAtrsYo3EEQ1xP8Sx7eo8YiTsMCwsBDDR8h5oUZoUzzWD7hn+yryq/
-	 dmoy7MMUFxy9hhJgZ1IuBPQFuWfx1BGqdpXi0ELNTQT7jOC3pbUc6TgXZiNsFdvHgO
-	 2IPsOuX8fnt1Lpf/zBLFIb5c3OeIqw4T36I3/T9Np3Fk0ATdmUGrQeHxMxPs1dTCJs
-	 9OLkkJAmVBHTA==
-Date: Sat, 19 Sep 2026 20:48:24 -0700
-From: Kees Cook <kees@kernel.org>
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nicolas Schier <nsc@kernel.org>,
-	Nick Desaulniers <ndesaulniers@google.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	Masahiro Yamada <masahiroy@kernel.org>,
-	Alexey Gladkov <legion@kernel.org>,
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-	"H. Peter Anvin" <hpa@zytor.com>, Paul Walmsley <pjw@kernel.org>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Josh Poimboeuf <jpoimboe@kernel.org>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>,
-	Gary Guo <gary@garyguo.net>,
-	=?iso-8859-1?Q?Bj=F6rn?= Roy Baron <bjorn3_gh@protonmail.com>,
-	Benno Lossin <lossin@kernel.org>,
-	Andreas Hindborg <a.hindborg@kernel.org>,
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>,
-	Danilo Krummrich <dakr@kernel.org>,
-	Daniel Almeida <daniel.almeida@collabora.com>,
-	Tamir Duberstein <tamird@kernel.org>,
-	Alexandre Courbot <acourbot@nvidia.com>,
-	Onur =?iso-8859-1?Q?=D6zkan?= <work@onurozkan.dev>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Randy Dunlap <rdunlap@infradead.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
-	llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
-	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
-	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
-	linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v3 09/20] kbuild: implement and use depcheck to check
- dependency timestamps
-Message-ID: <202609192047.17BD9B1F@keescook>
-References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
- <20260917-build-speedup-v3-9-9ecf4163ff36@kernel.org>
- <202609171117.35BFDCC13@keescook>
- <aq6-KMkAx7q_xLO4@gremlin>
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="l6ko2rle"
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 5BB42175A;
+	Mon, 21 Sep 2026 00:37:58 -0700 (PDT)
+Received: from [10.57.83.12] (unknown [10.57.83.12])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id DC0733F86F;
+	Mon, 21 Sep 2026 00:37:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
+	t=1789976281; bh=nrUjuFhT3s2+v/gwSala4pCbrkVM+7IhP9tittz2bGU=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=l6ko2rleUboMNNtjiHiGjklemMccKDrVkhFCxBZ8Sdh5DR4atC+hN8GMVuMwMP5mz
+	 35t8eGH82Xntk2lduJ6VuzvD4tP1J1d2XqoJr0PaLohuTpW2PjZwo3fxqWq6vXhlxV
+	 DDTrpBYl7OVsuGeT/5runOY5gbLovztguwJGGIsY=
+Message-ID: <8d36a988-f6e2-446b-92fd-dc13a4fa691a@arm.com>
+Date: Mon, 21 Sep 2026 08:37:55 +0100
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aq6-KMkAx7q_xLO4@gremlin>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 4/6] arm64: use hw_pte_t for fixmap HW PTEs
+To: "David Hildenbrand (Arm)" <david@kernel.org>,
+ Muhammad Usama Anjum <usama.anjum@arm.com>,
+ Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
+ Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Andrey Ryabinin <ryabinin.a.a@gmail.com>,
+ Alexander Potapenko <glider@google.com>,
+ Andrey Konovalov <andreyknvl@gmail.com>, Dmitry Vyukov <dvyukov@google.com>,
+ Vincenzo Frascino <vincenzo.frascino@arm.com>,
+ Andrew Morton <akpm@linux-foundation.org>, Lorenzo Stoakes <ljs@kernel.org>,
+ "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
+ Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
+ Michal Hocko <mhocko@suse.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+ linux-efi@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org
+References: <20260914-pte0_arm-v1-0-bb53b663e396@arm.com>
+ <20260914-pte0_arm-v1-4-bb53b663e396@arm.com>
+ <829523cd-85a4-4f8e-b9f2-f3c1d7ce4fb1@arm.com>
+ <1d1e38d8-cc1a-4a53-80c7-c0ef75a70105@kernel.org>
+From: Ryan Roberts <ryan.roberts@arm.com>
+Content-Language: en-GB
+In-Reply-To: <1d1e38d8-cc1a-4a53-80c7-c0ef75a70105@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Sat, Sep 19, 2026 at 05:57:36PM +0100, Lorenzo Stoakes (ARM) wrote:
-> On Thu, Sep 17, 2026 at 11:42:50AM -0700, Kees Cook wrote:
-> > On Thu, Sep 17, 2026 at 05:06:19PM +0100, Lorenzo Stoakes (ARM) wrote:
-> > > [...]
-> > > +static bool next_line(const char **pos, const char *end, struct line *line)
-> >
-> > There is a lot of string handling in here. I know you're going for speed,
-> > but it just feels like a python script doing all this would be much more
-> > readable without wrecking speed compared to C much. Yes, C will win out,
-> > but the maintainability of this helper does not fill me with joy. :P
+On 18/09/2026 21:00, David Hildenbrand (Arm) wrote:
+> On 9/18/26 18:03, Ryan Roberts wrote:
+>> On 14/09/2026 14:51, Muhammad Usama Anjum wrote:
+>>> fixmap_pte() returns a pointer into bm_pte, and early_fixmap_init_pte()
+>>> installs those arrays as page tables. Their elements are therefore
+>>> HW PTEs.
+>>>
+>>> Change the element type of bm_pte to hw_pte_t so it matches the HW PTE
+>>> pointers returned and passed to the accessors. This is needed before
+>>> ARCH_HAS_HW_PTE_T makes HW PTEs and SW PTE values distinct types; the
+>>> array dimensions and placement are unchanged.
+>>>
+>>> Signed-off-by: Muhammad Usama Anjum <usama.anjum@arm.com>
+>>> ---
+>>>  arch/arm64/mm/fixmap.c | 2 +-
+>>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>>
+>>> diff --git a/arch/arm64/mm/fixmap.c b/arch/arm64/mm/fixmap.c
+>>> index 237a9136bc73b..709a97fe327d8 100644
+>>> --- a/arch/arm64/mm/fixmap.c
+>>> +++ b/arch/arm64/mm/fixmap.c
+>>> @@ -31,7 +31,7 @@ static_assert(NR_BM_PMD_TABLES == 1);
+>>>  
+>>>  #define BM_PTE_TABLE_IDX(addr)	__BM_TABLE_IDX(addr, PMD_SHIFT)
+>>>  
+>>> -static pte_t bm_pte[NR_BM_PTE_TABLES][PTRS_PER_PTE] __bss_pgtbl;
+>>> +static hw_pte_t bm_pte[NR_BM_PTE_TABLES][PTRS_PER_PTE] __bss_pgtbl;
+>>
+>> I think in my original proposal it was impossible to have a hw_pte value; only a
+>> hw_pte pointer was possible. Being able to create hw_pte values means that it is
+>> possible that a hw_pte_t pointer is not actually pointing to an entry in a HW
+>> pgtable. The main motivation for this is that we want to dereference neighbours
+>> of a hw pte based on it's pointer and be confident that it is safe. I think this
+>> removes some of the safety.
 > 
-> Well I had the LLM look at that and for an allmodconfig python's startup time
-> would take 40s of CPU time _alone_ and it'd kill the no op improvement. So C it
-> has to be :)
+> If you follow some of the related discussions on the core-mm series, there is a
+> path forward to go further into that direction.
 
-Yikes, that's huge. C it is. ;)
+OK, as long as we have a path to the "full" solution if we ever need it, then
+sounds good to me.
 
--- 
-Kees Cook
+> 
+> People instantiating a hw_pte_t on the stack are not really a concern right now.
+> 
+
