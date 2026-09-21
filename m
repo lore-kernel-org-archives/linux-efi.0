@@ -1,205 +1,571 @@
-Received: from AM0PR83CU005.outbound.protection.outlook.com (mail-westeuropeazon11010028.outbound.protection.outlook.com [52.101.69.28])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm2-f13.google.com (mail-wm2-f13.google.com [74.125.225.141])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5AED3468C38;
-	Mon, 21 Sep 2026 10:11:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.69.28
-ARC-Seal:i=3; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789985465; cv=fail; b=B5Gh1djIs8Xo3XQK6+FIFL3e99l/9StqGmzwRqeWrRbMb/CV6bPiEMKIN0it5YrTjGQyST30udwB3jPh/Hi2QUrsDDiyWl8XQFvotdCiJm7xA/8xW0H++wpFhXt0YBqUrXb3xnnOwgd2M1ez5cyFemV+OulDmm5p/a/yxR8iHIc=
-ARC-Message-Signature:i=3; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789985465; c=relaxed/simple;
-	bh=aETYjRpJWjr3oB1l2oTB33T0Emy1Az4jez/MTNpjzfI=;
-	h=Message-ID:Date:Cc:Subject:To:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=k0q7ch34lqmC+vVrmmd6Y3cE8NeesQe+947JLwF+IAN3Mkq6a21oWXs005ypZ6kFFfJCaNpps7FfQUDurdL6EjDBLq1ECm7UJaViMIMMWRCsh4Lu4GPTphC3KGsIIYmMD5K3DckN+8sYZSYz/qBKQkfmiCFp8dBmBGeAixkYJKw=
-ARC-Authentication-Results:i=3; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=KSjYm7Od; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=KSjYm7Od; arc=fail smtp.client-ip=52.101.69.28
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4050B48D868
+	for <linux-efi@vger.kernel.org>; Mon, 21 Sep 2026 11:25:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.225.141
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789989921; cv=none; b=PY46w9jb8MwQ3QQwOfq1AQdq11F0qq0YZubtZdcSmZ501Z1NosYIrmURJ6qdvt+74NHY5aBPZ4M05LFYmRaSINXO77QRHRk2tWR7LZXTidHYJwh/82g1kb+zdvpYBQKY7WfneBOEjoXnoiXAhFfL6L8K2Te33LKwLdXXgvh6fzo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789989921; c=relaxed/simple;
+	bh=vL7H9bUFob8ldX6kiSUwQbR/mxtlpznZdS9IX5wHg4g=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=fj3ym587+C+29JEe/zP05A6pb632BWnXt9z5Yz5n4eEsZ+LdsQmNC1OW1K2q1adIv1LEmMyd9GHdAFhwgV5flhI2EdeXzPzXBvDV2G3W8fZh2JwX5r9j1dUwHoHabQMxSi+br7Yfo83CvVh2PQHpo5fSb+VrOdRFvhfljBxW/Sw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Vhw7aLhr; arc=none smtp.client-ip=74.125.225.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="KSjYm7Od";
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="KSjYm7Od"
-ARC-Seal: i=2; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=pass;
- b=nNt3sJzi7fP6XjyA2ppCkFF7+K1m2IzQ0SNDBm73MJFg6gNuq82/KCz+Y+TAk16QNn1HMZZixg33eZsp0CYsxwOEoIktgXt9V6YKTWhSvxcYD90EtAaRUZXYvZGwOJGX7Hxc1DYwu/h7W2uHpniYuWHsc9CRot2jA16CwaN8yvHtWQwF0V/10itIut1z4kGo+2HfZmvdrbsL8OZSR0S0F7SoPVyej5si3VoH5W5+WY9WdyaUqd9JjwErgF9GZY1f5YLRoOMbmUKWXd8+rriu/s72YIpzZvOxicn3gvtxwAKuG9zHktIcTvsZDpzPJymiC8KgfjgryBdFvXuCIhNagQ==
-ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=F4oj47cuKoBuocTWEpuMe6bRhgzlfgxqzYPzZ7en4FY=;
- b=Zrbcil4MA2o0TdXrm5aoFoqHYrgffPopaxeHzRXVlYXqpBaA8lRA03EwQcjDV4pWxWFM26VJUtnEJLW3ff/kyzvzb+sQDwGNyB86CMJ2tlD5lwHzCA51pwTCkkbUVVu0cAHuwU4HvEqmI5fqkVcFTBBhHkAbaoV/KqCZlAzJzfkSyKFVRyZ6pDdwPWXL1VQey0dEByP4RAoE4IsRXXRbR7fjkS9UhHiUuhLrsb5yvOyMfDHFo0nFiCdYkq3nJ1iu1y8neYFYFC576RCxVL5HBPkuwNvcZUrXAwA/6WzCswANVvt8lLT2GCtZAt3Dk0tp6ZdxcXXEav6IpGp86un2HA==
-ARC-Authentication-Results: i=2; mx.microsoft.com 1; spf=pass (sender ip is
- 4.158.2.129) smtp.rcpttodomain=lists.infradead.org smtp.mailfrom=arm.com;
- dmarc=pass (p=none sp=none pct=100) action=none header.from=arm.com;
- dkim=pass (signature was verified) header.d=arm.com; arc=pass (0 oda=1 ltdi=1
- spf=[1,1,smtp.mailfrom=arm.com] dkim=[1,1,header.d=arm.com]
- dmarc=[1,1,header.from=arm.com])
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arm.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=F4oj47cuKoBuocTWEpuMe6bRhgzlfgxqzYPzZ7en4FY=;
- b=KSjYm7Od6bd+XjJdb2pYFmrp6UqN6j+uTY+rULw1r70P1pf7Ku9g3IpEXXXfHcFJn8ZmVVrLlM1NDCk9NZ8+Z5Zp44V1Qm9JRaFtRWViclnT+N1l3LZ+sd1WH3Tr5JxB++xU6ryGeUpYqXArKLvOp1BQUO6mBSqFjGPJmD3p1VY=
-Received: from AS4P190CA0015.EURP190.PROD.OUTLOOK.COM (2603:10a6:20b:5de::19)
- by AMBPR08MB999823.eurprd08.prod.outlook.com (2603:10a6:20b:786::9) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.451.13; Mon, 21 Sep
- 2026 10:10:57 +0000
-Received: from CPH1EPF00000523.eurprd05.prod.outlook.com
- (2603:10a6:20b:5de:cafe::50) by AS4P190CA0015.outlook.office365.com
- (2603:10a6:20b:5de::19) with Microsoft SMTP Server (version=TLS1_3,
- cipher=TLS_AES_256_GCM_SHA384) id 15.21.428.12 via Frontend Transport; Mon,
- 21 Sep 2026 10:10:57 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 4.158.2.129)
- smtp.mailfrom=arm.com; dkim=pass (signature was verified)
- header.d=arm.com;dmarc=pass action=none header.from=arm.com;
-Received-SPF: Pass (protection.outlook.com: domain of arm.com designates
- 4.158.2.129 as permitted sender) receiver=protection.outlook.com;
- client-ip=4.158.2.129; helo=outbound-uk1.az.dlp.m.darktrace.com; pr=C
-Received: from outbound-uk1.az.dlp.m.darktrace.com (4.158.2.129) by
- CPH1EPF00000523.mail.protection.outlook.com (10.167.241.134) with Microsoft
- SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.21.451.8
- via Frontend Transport; Mon, 21 Sep 2026 10:10:56 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=U8zPozQgyO0BdotAodhEOQanTbZUGxGx6CQEreObegNvFSt0/VLBDRj7TKgFeukluhvdiTHYwVwAmk3LMYlpTWH8R0wORVUv9jw4KnZYjBAR3SOL9nG884moC/UVQOcytVVv5eig/91+Y8LWnfq6PVzWb5BfCwRqqISiPwUR9T1nnes3UVBEu1/cfK2LRtREsG693kGlN4LBGXwictJj9eNSnX4dT2+d5qxByoo+01DEFXzapO041HP3Ds66HSNc7qfDzU8ohiAWjIpqySDHzTq1BCX0MpNL/OZqNxZ3SlaVZI9WsgQi4Qo9YVZHXcjwr4BCDTG47AOnGIgIzT8BvA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=F4oj47cuKoBuocTWEpuMe6bRhgzlfgxqzYPzZ7en4FY=;
- b=B1Jc7+vfiqNkyGFz4OGNmgF/VawzDnBLv6wG3wEyZMl+vwDhc+4ogE1U1fdLqDRXkiqflNc3/2UJdCRO6nIogYN5wcNfR7FskMVlytMePDUXXlP3cwgcOCwLDv6TptbGzB8QAbKZzil6FemEx60mPVxSL0aEONQfXK4/fvpGrtNe2jXAqmecixMVGHiN+gYT8gPM9H8xcp5xCku+yUJaR9Hw6w5V/HaB7HKpF01sE2zQ/QW8SHz/vakqc4s2PN+havXOm/ZmjmWpNAGGJMFeOvom8TLAy91rY0PExX6i3K51PO+4GlrkHdBrCE//4zzAuKtgFfifF4pr+eaftgNQBw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=arm.com; dmarc=pass action=none header.from=arm.com; dkim=pass
- header.d=arm.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arm.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=F4oj47cuKoBuocTWEpuMe6bRhgzlfgxqzYPzZ7en4FY=;
- b=KSjYm7Od6bd+XjJdb2pYFmrp6UqN6j+uTY+rULw1r70P1pf7Ku9g3IpEXXXfHcFJn8ZmVVrLlM1NDCk9NZ8+Z5Zp44V1Qm9JRaFtRWViclnT+N1l3LZ+sd1WH3Tr5JxB++xU6ryGeUpYqXArKLvOp1BQUO6mBSqFjGPJmD3p1VY=
-Authentication-Results-Original: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=arm.com;
-Received: from VI1PR08MB3421.eurprd08.prod.outlook.com (2603:10a6:803:80::16)
- by AS2PR08MB8261.eurprd08.prod.outlook.com (2603:10a6:20b:550::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.428.13; Mon, 21 Sep
- 2026 10:10:20 +0000
-Received: from VI1PR08MB3421.eurprd08.prod.outlook.com
- ([fe80::e079:6bd:fbe0:89b4]) by VI1PR08MB3421.eurprd08.prod.outlook.com
- ([fe80::e079:6bd:fbe0:89b4%3]) with mapi id 15.21.0451.004; Mon, 21 Sep 2026
- 10:10:20 +0000
-Message-ID: <468def35-77e0-4fd7-9e4f-30d982bc17d7@arm.com>
-Date: Mon, 21 Sep 2026 11:10:18 +0100
-User-Agent: Mozilla Thunderbird
-Cc: usama.anjum@arm.com, linux-arm-kernel@lists.infradead.org,
- linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
- kasan-dev@googlegroups.com, linux-mm@kvack.org,
- Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
- Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Andrey Ryabinin <ryabinin.a.a@gmail.com>,
- Alexander Potapenko <glider@google.com>,
- Andrey Konovalov <andreyknvl@gmail.com>, Dmitry Vyukov <dvyukov@google.com>,
- Vincenzo Frascino <vincenzo.frascino@arm.com>,
- Andrew Morton <akpm@linux-foundation.org>,
- David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>,
- "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
- Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
- Michal Hocko <mhocko@suse.com>
-Subject: Re: [PATCH 0/6] arm64: distinguish HW PTE pointers from SW PTE value
- pointers
-To: Ryan Roberts <ryan.roberts@arm.com>
-References: <20260914-pte0_arm-v1-0-bb53b663e396@arm.com>
- <27fb625b-7117-4666-9a34-3b8aa9a43833@arm.com>
-From: Muhammad Usama Anjum <usama.anjum@arm.com>
-Content-Language: en-US
-In-Reply-To: <27fb625b-7117-4666-9a34-3b8aa9a43833@arm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: LO2P123CA0096.GBRP123.PROD.OUTLOOK.COM
- (2603:10a6:600:139::11) To VI1PR08MB3421.eurprd08.prod.outlook.com
- (2603:10a6:803:80::16)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Vhw7aLhr"
+Received: by mail-wm2-f13.google.com with SMTP id 5b1f17b1804b1-49b91369d18so21074285e9.0
+        for <linux-efi@vger.kernel.org>; Mon, 21 Sep 2026 04:25:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1789989912; x=1790594712; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=kLlCULrw1v/vSqZnviB/Cu2fC1Y7qRZoJjKlQFtW/cc=;
+        b=Vhw7aLhr2hs5mUDvFtaiWafzn0SQAB1KRD3UcypFgjyciceWezvD3sAcaZGlpKQf6W
+         1Pkq0qMMKHYM5Rd2B08kzj+uihssv08doCjawZjeQluEFwn+egW/I5Bx/1xkA0HW+f+X
+         vz39sSyQ+YoStFTF/niNt3RR3eGt9q/kamO/OBff7CdspOx1OC07psQyi2ANOQ/hk4Qu
+         IYXDiJ2YW9IVbqOOYm4EGJHnIxDaezKxS9oDyHdnKSsWxCDjNXdag62eGIuOUJQQOV8B
+         oaipJI8lf17IzDe+9hOp2CWXSS0kHWR+gCvGw0TzZd5MPj541wzj/ilXlfAsnpQ//tSC
+         U/iQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1789989912; x=1790594712;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=kLlCULrw1v/vSqZnviB/Cu2fC1Y7qRZoJjKlQFtW/cc=;
+        b=kjAGtg8CIeXmN+NeAQ4Op9cjAHMqwxOY13EqC7LGnnPo/CpMknsB9LyRf1CqUaf27F
+         SGbiXQJPl/2hOdsTmfWxP428opy/rsAM5/GjB7CA8Wx+3T/kW/oAOPUEcvFpJOyHJP+p
+         DUSxc4w39r9RSbhIafpFXqxI3rrM94JbXMzUmDBvmPOQIqRSePPhTi0KZZSIFMO5UZG+
+         VJYk95p++pG0YdM4j0NrHBsoVhVoXlf5PS6ssqdw0r2rrAPCzw05me3l2flruZY9lufm
+         PABfzf+6mqzUaIfDC4SB5OkubntvnRvawDVclRBSJwsAzkUzWbWJ9XBW/Md94YApqvd6
+         T49g==
+X-Forwarded-Encrypted: i=1; AKwUvBwnO1h5XiOnhuBVbzKi0cBl69KXzu0ouVpdw6eyl0rQ9O/rcEpRAsrMTigRiIl7NtW5W0+4PSpq5n8=@vger.kernel.org
+X-Gm-Message-State: AFuF++nzsUfxPGmoch0bwYU6fFBfHBZnf6etJZKD4uYahZCSlKUFc6i8
+	SCgq5am8zVXM6RhD2P88F4JJieN/OxjXK/SGXt6LdOQmJ3gPLvpQERrw3GPyhISkX0o=
+X-Gm-Gg: AYBFou1s5g/1poCOUEMA2tPy0udO1PJ3JVkgoeOdReuJTJRLQwVNTk1YyoZh2/v3wIk
+	LOWaz8nZ3K3DKbRQU18zIaZlUZc4OrzbOvCV0Oxsk8vn5DKkcd6FQ8kXBzBjpPYnE8cr/yp0s5j
+	T51u6yNtTleqLTRWK5lJwpwyZ1a5GYZMHawr/A9Orv43HeWFKfb5P3h5gkxgB1TrNt2KcXTrq9j
+	+O+d+1filNYVTCeenq+vMKbuT/uBii3zfAjVwn8qzBGvF4KuWn4i+aG1mELL5qEbMcwoKgCpUjU
+	4LK8z+G4rZJdFF5KMO6p4aLJrz8gJeQuSV84jDsm4jc1Ms22r1bpEtWEg0uZ5kl0iXOEQ3G/L1/
+	lEd+00ZQW5Nc3gLfYuBD0xJVb1kLQk7i17ARy4Cn/PVewQshd5wur5apdxZDkJMPGiGSoWlJmXA
+	DkhqqIpQbWWhUqRViwcZASL7ic+meXzD2zrQ0IRYHQc88uNDQwT6G8FWlBoswh1tzHNIfxR2tkW
+	3ubSknva2iev0ssUPuseuENBsgOG3aq5II9
+X-Received: by 2002:a05:600c:4f44:b0:49f:ce73:7a9 with SMTP id 5b1f17b1804b1-49fce730888mr97408375e9.34.1789989911838;
+        Mon, 21 Sep 2026 04:25:11 -0700 (PDT)
+Received: from ?IPV6:2a07:de40:8100:0:89a9:fd0e:583d:4a53? ([2001:af0:8000:1409:193:86:92:181])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49fd757e97esm7376075e9.8.2026.09.21.04.25.10
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 21 Sep 2026 04:25:11 -0700 (PDT)
+Message-ID: <95baacfb-d8d9-4d2f-bc89-592df6f6f8e3@suse.com>
+Date: Mon, 21 Sep 2026 13:25:09 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-TrafficTypeDiagnostic:
-	VI1PR08MB3421:EE_|AS2PR08MB8261:EE_|CPH1EPF00000523:EE_|AMBPR08MB999823:EE_
-X-MS-Office365-Filtering-Correlation-Id: a9dfeb28-c408-45b5-d1fe-08df17c8a0d4
-x-checkrecipientrouted: true
-NoDisclaimer: true
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam-Untrusted:
- BCL:0;ARA:13230040|366016|23010399003|376014|7416014|1800799024|11063799006|56012099006|4143699003|10067099003|18002099003|22082099003;
-X-Microsoft-Antispam-Message-Info-Original:
- S1gkwUjzI6hLTUdJefCqchG2z08f70MFKw7j3RZF7mdWwC199J99DvWzQ4Q2efig7Rhhbq4KPrISi7ZisnwvqfSTv4pGhsnFgVJwnOvOf/xUoZF3cdlScHCcBwBFlJ0I0Kxv6vSyytQ++XSUyM4Yg7TVbsDuixcgmu6n0QWB9tFzOfuMevYbJ2NKOlNFzXCVFhSjHg9z1u7E2MajhM/ltyuEcdEwzAr4BRGXKRNd/uTt2NG412BCXp82OPQlOMLu7KFGza1OCBTIZMzdo0Bbwx375T7+CDA/qkBNZTvEIuMdTUXDsa1pqhf3YKctV7EMKqcIPwUZ1nzXGe8s8+3CpZpRPORSv7pCIMHsIPSxn+2K7TaOO5FYC2iqEADzkZDaRmPN1rFoNRdTMmxHLsDnPVYwKQVUZqhGSr8YSNZr4OQyU7tCgM/9XjYwa53/8ocFgVbWICdQl/uQndKWRFoxYr7JA0zudfepRuEqjp1EC22/hBgOrghZcJfNcysRQnlQh1rS2DfdyqU+0yIUq31V2X8MbdAIg/WYD6riPl8NFHzS082amDq4ZpRFUO/TnVBvigojuVOQ68Jp+JOyvk6EYvGa/PsX5Cby1W+bBsXpkrXvUWcG6/+eWkCji69lvWoa
-X-Forefront-Antispam-Report-Untrusted:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR08MB3421.eurprd08.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(23010399003)(376014)(7416014)(1800799024)(11063799006)(56012099006)(4143699003)(10067099003)(18002099003)(22082099003);DIR:OUT;SFP:1101;
-X-Exchange-RoutingPolicyChecked:
- rl06URALHKu9lH9IrHbTSjPBsZzwBNyFdM/UfO3CNw/LmDVti3TwRevqN9vM5c3TOVnFOVQBuOVw9zZkGR1HLCPk+ueV5Lq9ic/5CI1m59oBMElF/d29/X4fAvkJn3tnIkcSRpVA7bgYXrtL2fbnR8/1VvcLi8e5gdinyWL1mh5oLp7gtp5yq10CGFq/EMUobT+NCdMknQUVI9LuEmb2BLEPBXpDjMHH1Yxb5Q8agjLvytM9JsiytdDLLBLZANX+fPYLbdHrJy9zQn6/ds/JITeTFuQVGK7aM+LDtg936XQJUVUmmvdzKV6xZ/JKIT5mMSx/BJ7OnZJsvc01caAtkg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS2PR08MB8261
-X-EOPAttributedMessage: 0
-X-MS-Exchange-Transport-CrossTenantHeadersStripped:
- CPH1EPF00000523.eurprd05.prod.outlook.com
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id-Prvs:
-	23fb0ac7-6f51-4db3-b85d-08df17c88ac9
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|7416014|1800799024|376014|35042699022|82310400026|14060799003|23010399003|36860700016|13003099007|10067099003|56012099006|11063799006|4143699003|18002099003|22082099003;
-X-Microsoft-Antispam-Message-Info:
-	0wSYVsyYf3fJwoYaSW1fYZ2VpU6hrN+bRHOkP0Y6ZtivbS5b44NHaScjQ8Pe/uVK++hDwB/TJswKKmffug2EI5wx4h27Y4bBfQL9/IoqeU8fTjFTOqFiowgZ0JyjQRVP7ExKj+vtx8ak2jeVu7INGBMWoQ3eTdBDoWgxgkdYGVo/DXEPjdhUx9QwXvAYcJzwiCEakXgSF1ba7E96j1D51SPjiFtmUwod5FQBN47r/1/dtcuVUrS67Bv6A+pcMEcW2AbZqwTg7S7wl/3XZryHdmsw4+35HwyD1Y91jXpd+UDSHG5xdYIuR/o5vcI2dwbQHyJ7DXil703gDFfejU+mXvECT2+chIDHk8h2S2r2hPgRwEalYZAJOeh3iRUTYHm1o0VgyGlHwq/fsTvXO0IYmWjZ8VJivNGnGFntcOVyYaLY/iHzQYVm2LC9KRvdbK6cSeDBGadWx1LvW0OZikrHm3S+lFOFMqjldAZRBsLrkjSDE8RI/JC7L3LfFsLpOkNN3UkGkvr7g4vZCbubpsRXYwcmuutsVUrb7DiEZuLCW4DLxCF1fwHpLfQM7N/9fNH7riMh4bwGtFtKjmXQhk4YQP/WwhKDVPSr9wX3N2Hk2x/Kp+/xg8xmcBEalfia4BB3xt/QXZlTLE1ybhqN2T4dG9gThwd8UWEpUrKSBu5cNAhwHz8kbsqTuOnTYa6pVugePVq+n6DRBNLNF/Mpu0VmKA==
-X-Forefront-Antispam-Report:
-	CIP:4.158.2.129;CTRY:GB;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:outbound-uk1.az.dlp.m.darktrace.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(7416014)(1800799024)(376014)(35042699022)(82310400026)(14060799003)(23010399003)(36860700016)(13003099007)(10067099003)(56012099006)(11063799006)(4143699003)(18002099003)(22082099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	l3Ri6a9lpCxi4mnZ8Lld+rn0qrvjMWcgnK8kVNLGXW7crdYil187pYpLydbxza0F9nPvP6Z1MwzWesfr8BWqib1oN5O0Ighj0gSLY0BFPBqm69qqFd0gPZD8WBX2ge+3Ty5Xjp7eMFSol8BNICAplFfVrR0VjK2eOgE/DVeEdOFSQ4DXHW8SfWg5ZA0gdYO7TjIry8yxoIbWIH4HZWK5hGNh0lbWIB6Llve9Kbm9ShNY/803m3e552EME1FtfUpNlauBiy8exx1DQ6nOQLKJ1r8asYjdqd+6lcp5C5LaCzx4NgFTv5c7dncJmtCO6KPWXVWiAeSFtLcfvg8NRtMuqFgFuk2SoSWZW4E3c1zi1h826deeO3Y6l7BO2fi/Nd1yeA5p8enOCSRNes6wxoDoDVLn3ehZ8mvFTSs2oixRJzzuNAtoiCMdqVjrmH7ol15K
-X-OriginatorOrg: arm.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Sep 2026 10:10:56.7568
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: a9dfeb28-c408-45b5-d1fe-08df17c8a0d4
-X-MS-Exchange-CrossTenant-Id: f34e5979-57d9-4aaa-ad4d-b122a662184d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=f34e5979-57d9-4aaa-ad4d-b122a662184d;Ip=[4.158.2.129];Helo=[outbound-uk1.az.dlp.m.darktrace.com]
-X-MS-Exchange-CrossTenant-AuthSource:
-	CPH1EPF00000523.eurprd05.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AMBPR08MB999823
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 13/21] modpost: emit module descriptors as assembly
+To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>,
+ Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>,
+ Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling
+ <morbo@google.com>, Justin Stitt <justinstitt@google.com>,
+ Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>,
+ Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+ Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
+ x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>,
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+ Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+ Arnd Bergmann <arnd@arndb.de>, Catalin Marinas <catalin.marinas@arm.com>,
+ Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
+ Ard Biesheuvel <ardb@kernel.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Josh Poimboeuf <jpoimboe@kernel.org>, Peter Zijlstra <peterz@infradead.org>,
+ Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>,
+ Gary Guo <gary@garyguo.net>, =?UTF-8?Q?Bj=C3=B6rn_Roy_Baron?=
+ <bjorn3_gh@protonmail.com>, Benno Lossin <lossin@kernel.org>,
+ Andreas Hindborg <a.hindborg@kernel.org>, Alice Ryhl <aliceryhl@google.com>,
+ Trevor Gross <tmgross@umich.edu>, Danilo Krummrich <dakr@kernel.org>,
+ Daniel Almeida <daniel.almeida@collabora.com>,
+ Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot
+ <acourbot@nvidia.com>, =?UTF-8?Q?Onur_=C3=96zkan?= <work@onurozkan.dev>,
+ Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>,
+ Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>,
+ linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
+ llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
+ linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
+ linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
+ linux-hardening@vger.kernel.org
+References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
+ <20260914-build-speedup-v2-13-39817ec5db23@kernel.org>
+Content-Language: en-US
+From: Petr Pavlu <petr.pavlu@suse.com>
+In-Reply-To: <20260914-build-speedup-v2-13-39817ec5db23@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On 21/09/2026 10:51 am, Ryan Roberts wrote:
-> On 14/09/2026 14:51, Muhammad Usama Anjum wrote:
->> Hi,
->>
->> The generic series introduces hw_pte_t for HW PTEs, while SW PTE values
->> use pte_t. This series enables the distinct type on arm64 so the
->> compiler can distinguish HW PTE pointers (hw_pte_t *) from SW PTE value
->> pointers (pte_t *).
->>
->> The conversion updates HW PTE pointers and accessors, including atomic
->> updates, fixmap, and early page-table construction, before selecting
->> ARCH_HAS_HW_PTE_T. Higher-level entry types remain out of scope, and
->> shared helpers retain explicit casts.
->>
->> The linked generic series is a prerequisite. Its cover contains the
->> Coccinelle script used for most pointer conversions; the remaining sites
->> were converted by hand.
->>
->> Link: https://lore.kernel.org/all/20260903103002.1091859-1-usama.anjum@arm.com/
->> Signed-off-by: Muhammad Usama Anjum <usama.anjum@arm.com>
+On 9/14/26 11:22 AM, Lorenzo Stoakes (ARM) wrote:
+> modpost generates a descriptor for every module in the form of a
+> <module>.mod.c file with .modinfo strings, the __this_module descriptor,
+> exported symbol tables and (with CONFIG_MODVERSIONS set), the CRC of
+> imported symbols.
 > 
-> I've been through this as best I can and provided some minor comments. This all
-> looks ok over all. But given the number of small changes, it would probably be
-> wise to go big on testing; what level of testing has been performed? I'd suggest
-> mm selftests (with all the magic to make all the tests actually run) at minimum
-> and all the fastpath benchmarks as a stress test.
+> These files are compiled like any other kernel C file with all of the
+> -include preamble, as well as including linux/module.h, header dependencies
+> generated by fixdep of a few hundred headers, an objtool run and if LTO is
+> being performed, a link is performed to generate native code.
 
-Sorry, it wasn't mentioned in cover letter. But mm selftests were run. I'll run
-fastpath benchmarks as well and mention clearly.
+As a side note, I'm currently working on cleaning up what linux/module.h
+includes. This was also originally motivated by an effort to reduce the
+compilation time of .mod.c files, though cleaning up that header makes
+sense in general, since it is the most explicitly included file in the
+kernel.
 
 > 
-> I think it's quite ugly (and adds a bit to the cognitive load) to have this
-> intermediate state where only ptes are converted. But I understand the need to
-> do this incrementally. Hopefully you can follow up with the other levels soon :)
+> On an x86-64 allmodconfig build 11,189 *.mod.c files are built, each
+> taking ~0.24s of CPU time to compile, and module finalisation as a whole
+> 6,300 CPU seconds, or 64 seconds of wall time when run over 128 threads.
+> 
+> It also generates ~1.3 GiB of *.mod.o.cmd files that every subsequent build
+> has to read back.
+> 
+> Avoid all this by emitting the descriptors as assembly instead.
+> 
+> The layout required (size and alignment of struct module, struct
+> modversion_info, the module's name offsets, init, and exit fields and
+> whether the architecture uses PREL32 ksymtab references) can all be derived
+> from scripts/mod/module-offsets.h.
+> 
+> The fields of __this_module are emitted in offset order rather than
+> declaration order, as CONFIG_RANDSTRUCT shuffles struct module so the name,
+> init and exit fields can land anywhere.
+> 
+> An assembly file avoids all of the issues previously mentioned so this
+> conversion results in a very significant performance win on kernel build.
+> 
+> As a consequence of this change, since module-offsets.c includes
+> linux/module.h, scripts/mod is now built after the generated headers in
+> prepare0, rather than before.
+> 
+> Also update .gitignore and make clean to handle .mod.S files, but keep
+> .mod.c files there to ensure that users do not end up with untracked
+> changes/dirty trees after the change takes effect.
+> 
+> The sections were confirmed to be byte-for-byte identical to the C version
+> produced - each of .modinfo, .gnu.linkonce.this_module, __ksymtab*,
+> __ksymtab_strings, __kcrctab*, __kflagstab*, __versions,
+> __version_ext_crcs, __version_ext_names and their relocations - for all
+> 8,135 modules of a clang allmodconfig build with CONFIG_COMPILE_TEST off
+> and CONFIG_MODVERSIONS, CONFIG_EXTENDED_MODVERSIONS and
+> CONFIG_MODULE_SRCVERSION_ALL on, and for a sample built with gcc.
 
-Yeah, I would have loved to do everything all at once. But it would have 10 times
-more complex. I'll proceed to PMD after this series which would have most complex
-conversions. Converting other PXX would be straight forward after that.
+Lowering the data to assembly loses debug information for __this_module,
+specifically that it has type `struct module`. It might be worth
+restoring that information in same way. A small hack would be to add
+something like the following to scripts/module-common.c:
 
-...
+__weak __section(".discard.this_module") struct module __this_module;
+
+> diff --git a/scripts/Makefile.modfinal b/scripts/Makefile.modfinal
+> index 01a37ec872b9..75e9effdf02c 100644
+> --- a/scripts/Makefile.modfinal
+> +++ b/scripts/Makefile.modfinal
+> @@ -20,10 +20,14 @@ __modfinal: $(modules:%.o=%.ko)
+>  modname = $(notdir $(@:.mod.o=))
+>  part-of-module = y
+>  GCOV_PROFILE := n
+> -ccflags-remove-y := $(CC_FLAGS_CFI)
+>  
+> -%.mod.o: %.mod.c FORCE
+> -	$(call if_changed_rule,cc_o_c)
+> +# modpost lays the <module>.mod.S out completely (write_mod_S_file()), so it
+> +# needs only the assembler and no dependency tracking.
+> +quiet_cmd_as_mod_o = AS [M]  $@
+> +      cmd_as_mod_o = $(CC) $(_a_flags) $(modkern_aflags) -c -o $@ $<
+> +
+> +%.mod.o: %.mod.S FORCE
+> +	$(call if_changed,as_mod_o)
+>  
+>  .module-common.o: $(srctree)/scripts/module-common.c FORCE
+>  	$(call if_changed_rule,cc_o_c)
+
+If the <module>.mod.S files are fully self-contained and do not even use
+something like KBUILD_MODNAME, would it be possible to name them
+<module>.mod.s and skip the C preprocessor as well?
+
+> diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
+> index 0fd43c8a89ea..b4550b545330 100644
+> --- a/scripts/mod/modpost.c
+> +++ b/scripts/mod/modpost.c
+> @@ -2191,30 +2042,483 @@ static void write_vmlinux_export_c_file(struct module *mod)
+>  	free(buf.p);
+>  }
+>  
+> -/* do sanity checks, and generate *.mod.c file */
+> -static void write_mod_c_file(struct module *mod)
+> +#if MOD_SIZEOF_LONG == 8
+> +#define MOD_PTR_DIRECTIVE	".quad"
+> +#else
+> +#define MOD_PTR_DIRECTIVE	".long"
+> +#endif
+> +
+> +/* See KSYM_FUNC() in include/linux/export-internal.h. */
+> +#if MOD_FUNC_PLABEL
+> +#define MOD_FUNC_PREFIX		"P%"
+> +#else
+> +#define MOD_FUNC_PREFIX		""
+> +#endif
+> +
+> +/* See __KSYM_ALIGN in include/linux/export-internal.h. */
+> +#if MOD_PREL32_RELOCATIONS || MOD_SIZEOF_LONG == 4
+> +#define KSYM_ALIGN		4
+> +#else
+> +#define KSYM_ALIGN		8
+> +#endif
+> +
+> +/* Append the body of an assembler string literal, escaped as needed. */
+> +static void buf_escaped(struct buffer *buf, const char *str)
+> +{
+> +	unsigned char chr;
+> +
+> +	while ((chr = *str++)) {
+> +		if (chr == '"' || chr == '\\')
+> +			buf_printf(buf, "\\%c", chr);
+> +		else if (isprint(chr))
+> +			buf_printf(buf, "%c", chr);
+> +		else
+> +			buf_printf(buf, "\\%03o", chr);
+> +	}
+> +}
+> +
+> +static void buf_asciz(struct buffer *buf, const char *str)
+>  {
+> -	struct buffer buf = { };
+> -	struct module_alias *alias, *next;
+> -	char fname[PATH_MAX];
+> -	int ret;
+> +	buf_printf(buf, "\t.asciz \"");
+> +	buf_escaped(buf, str);
+> +	buf_printf(buf, "\"\n");
+> +}
+>  
+> -	add_header(&buf, mod);
+> -	add_exported_symbols(&buf, mod);
+> -	add_versions(&buf, mod);
+> -	add_extended_versions(&buf, mod);
+> -	add_depends(&buf, mod);
+> +/* The equivalent of MODULE_INFO(tag, info). */
+> +static void add_asm_modinfo(struct buffer *buf, const char *tag,
+> +			    const char *info)
+> +{
+> +	buf_printf(buf, "\t.section .modinfo,\"a\",%%progbits\n");
+> +	buf_printf(buf, "\t.asciz \"%s=", tag);
+> +	buf_escaped(buf, info);
+> +	buf_printf(buf, "\"\n");
+> +}
+>  
+> -	buf_printf(&buf, "\n");
+> +/* See __KSYM_REF() in include/linux/export-internal.h. */
+> +static void add_asm_ksym_ref(struct buffer *buf, const char *prefix,
+> +			     const char *sym)
+> +{
+> +#if MOD_PREL32_RELOCATIONS
+> +	buf_printf(buf, "\t.long %s%s - .\n", prefix, sym);
+> +#else
+> +	buf_printf(buf, "\t" MOD_PTR_DIRECTIVE " %s%s\n", prefix, sym);
+> +#endif
+> +}
+> +
+> +/* The name and namespace strings a ksymtab entry refers to. */
+> +static void add_asm_kstrtab(struct buffer *buf, const struct symbol *sym)
+> +{
+> +	buf_printf(buf, "\t.section \"__ksymtab_strings\",\"aMS\",%%progbits,1\n");
+> +	buf_printf(buf, "__kstrtab_%s:\n", sym->name);
+> +	buf_asciz(buf, sym->name);
+> +	buf_printf(buf, "__kstrtabns_%s:\n", sym->name);
+> +	buf_asciz(buf, sym->namespace);
+> +	buf_printf(buf, "\t.previous\n");
+> +}
+> +
+> +/* The equivalent of SYMBOL_FLAGS(). */
+> +static void add_asm_kflagstab(struct buffer *buf, const struct symbol *sym)
+> +{
+> +	buf_printf(buf, "\t.section \"___kflagstab+%s\", \"a\"\n", sym->name);
+> +	buf_printf(buf, "__flags_%s:\n", sym->name);
+> +	buf_printf(buf, "\t.byte 0x%02x\n", get_symbol_flags(sym));
+> +	buf_printf(buf, "\t.previous\n");
+> +}
+> +
+> +/* The equivalent of KSYMTAB_FUNC()/KSYMTAB_DATA(). */
+> +static void add_asm_ksymtab(struct buffer *buf, const struct symbol *sym)
+> +{
+> +	const char *name = sym->name;
+> +
+> +	add_asm_kstrtab(buf, sym);
+> +
+> +	buf_printf(buf, "\t.section \"___ksymtab+%s\", \"a\"\n", name);
+> +	buf_printf(buf, "\t.balign %d\n", KSYM_ALIGN);
+> +	buf_printf(buf, "__ksymtab_%s:\n", name);
+> +	add_asm_ksym_ref(buf, sym->is_func ? MOD_FUNC_PREFIX : "", name);
+> +	add_asm_ksym_ref(buf, "__kstrtab_", name);
+> +	add_asm_ksym_ref(buf, "__kstrtabns_", name);
+> +	buf_printf(buf, "\t.previous\n");
+> +
+> +	add_asm_kflagstab(buf, sym);
+> +}
+> +
+> +/* The equivalent of SYMBOL_CRC(). */
+> +static void add_asm_crc(struct buffer *buf, const struct symbol *sym)
+> +{
+> +	buf_printf(buf, "\t.section \"___kcrctab+%s\",\"a\"\n", sym->name);
+> +	buf_printf(buf, "\t.balign 4\n");
+> +	buf_printf(buf, "__crc_%s:\n", sym->name);
+> +	buf_printf(buf, "\t.long 0x%08x\n", sym->crc);
+> +	buf_printf(buf, "\t.previous\n");
+> +}
+
+It would be good to avoid duplicating these symbol-related
+implementations in include/linux/export-internal.h and
+scripts/mod/modpost.c. Perhaps .vmlinux.export.c could also be lowered
+to assembly, so the implementation in include/linux/export-internal.h
+can be removed and scripts/mod/modpost.c becomes the only source of
+truth.
+
+> +
+> +static bool export_is_kept(const struct symbol *sym)
+> +{
+> +	return !trim_unused_exports || sym->used;
+> +}
+> +
+> +/* Record the CRCs of the exported symbols. */
+> +static void add_asm_crcs(struct buffer *buf, struct module *mod)
+> +{
+> +	struct symbol *sym;
+> +
+> +	list_for_each_entry(sym, &mod->exported_symbols, list) {
+> +		if (!export_is_kept(sym))
+> +			continue;
+> +
+> +		if (!sym->crc_valid)
+> +			mod_warn(mod, "EXPORT symbol '%s' version generation failed, symbol will not be versioned.\n"
+> +				 "Is '%s' prototyped in <asm/asm-prototypes.h>?\n",
+> +				 sym->name, sym->name);
+> +		add_asm_crc(buf, sym);
+> +	}
+> +}
+> +
+> +static void add_asm_exported_symbols(struct buffer *buf, struct module *mod)
+> +{
+> +	struct symbol *sym;
+> +
+> +	list_for_each_entry(sym, &mod->exported_symbols, list) {
+> +		if (export_is_kept(sym))
+> +			add_asm_ksymtab(buf, sym);
+> +	}
+> +
+> +	if (modversions)
+> +		add_asm_crcs(buf, mod);
+> +}
+
+Nit: This could be kept shorter as a single function, similarly to how
+the original C version was implemented solely as add_exported_symbols().
+
+static void add_asm_exported_symbols(struct buffer *buf, struct module *mod)
+{
+	struct symbol *sym;
+
+	list_for_each_entry(sym, &mod->exported_symbols, list) {
+		if (trim_unused_exports && !sym->used)
+			continue;
+
+		add_asm_ksymtab(buf, sym);
+
+		if (!modversions)
+			continue;
+
+		if (!sym->crc_valid)
+			mod_warn(mod, "EXPORT symbol '%s' version generation failed, symbol will not be versioned.\n"
+				 "Is '%s' prototyped in <asm/asm-prototypes.h>?\n",
+				 sym->name, sym->name);
+		add_asm_crc(buf, sym);
+	}
+}
+
+> +/*
+> + * An unresolved symbol without a module is not versioned; one without a CRC
+> + * cannot be, so warn about it.
+> + */
+> +static bool skip_unversioned(struct module *mod, const struct symbol *sym)
+> +{
+> +	if (!sym->module)
+> +		return true;
+> +	if (sym->crc_valid)
+> +		return false;
+> +
+> +	mod_warn(mod, "symbol '%s' has no CRC!\n", sym->name);
+> +	return true;
+> +}
+> +
+> +/* One struct modversion_info: the CRC, then the name padded to the end. */
+> +static void add_asm_version(struct buffer *buf, const struct symbol *sym)
+> +{
+> +	buf_printf(buf, "\t" MOD_PTR_DIRECTIVE " 0x%08x\n", sym->crc);
+> +	buf_printf(buf, "\t.ascii \"%s\"\n", sym->name);
+> +	buf_printf(buf, "\t.skip %zu\n", MOD_SIZEOF_struct_modversion_info -
+> +		   MOD_OFF_modversion_info_name - strlen(sym->name));
+> +}
+> +
+> +/*
+> + * The equivalent of:
+> + *
+> + *	static const struct modversion_info ____versions[]
+> + *	__used __section("__versions") = { { crc, "name" }, ... };
+> + *
+> + * for unresolved symbols.
+> + */
+> +static void add_asm_versions(struct buffer *buf, struct module *mod)
+> +{
+> +	struct symbol *sym;
+> +
+> +	if (!basic_modversions)
+> +		return;
+> +
+> +	buf_printf(buf, "\n\t.section __versions,\"a\",%%progbits\n");
+> +	buf_printf(buf, "\t.balign %d\n", MOD_ALIGNOF_struct_modversion_info);
+> +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
+> +		if (skip_unversioned(mod, sym))
+> +			continue;
+> +
+> +		if (strlen(sym->name) >= MOD_NAME_LEN) {
+> +			/* Only the extended table can hold it. */
+> +			if (extended_modversions)
+> +				continue;
+> +
+> +			mod_error(mod, "too long symbol '%s'\n", sym->name);
+> +			break;
+> +		}
+> +
+> +		add_asm_version(buf, sym);
+> +	}
+> +}
+> +
+> +static void add_asm_version_ext_crcs(struct buffer *buf, struct module *mod)
+> +{
+> +	struct symbol *sym;
+> +
+> +	buf_printf(buf, "\n\t.section __version_ext_crcs,\"a\",%%progbits\n");
+> +	buf_printf(buf, "\t.balign 4\n");
+> +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
+> +		if (skip_unversioned(mod, sym))
+> +			continue;
+> +
+> +		buf_printf(buf, "\t.long 0x%08x\n", sym->crc);
+> +	}
+> +}
+> +
+> +/*
+> + * A symbol without a CRC was warned about with the CRCs, and is skipped here
+> + * too so that the names line up with them.
+> + */
+> +static void add_asm_version_ext_names(struct buffer *buf, struct module *mod)
+> +{
+> +	struct symbol *sym;
+> +
+> +	buf_printf(buf, "\t.section __version_ext_names,\"a\",%%progbits\n");
+> +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
+> +		if (!sym->module || !sym->crc_valid)
+> +			continue;
+> +
+> +		buf_asciz(buf, sym->name);
+> +	}
+> +	/* The terminator of the string literal this used to be. */
+> +	buf_printf(buf, "\t.byte 0\n");
+
+This is ok since the conversion aims to be byte-identical. In the
+future, I believe the extra NUL byte should be removed and
+elf_validity_cache_index_versions() also be updated to report when
+__version_ext_names contains more names than there are CRCs in
+__version_ext_crcs.
+
+> +}
+> +
+> +/*
+> + * The equivalent of:
+> + *	static const u32 ____version_ext_crcs[] __section("__version_ext_crcs") = { crc, ... };
+> + *	static const char ____version_ext_names[] __section("__version_ext_names") = "name\0" ...;
+> + *
+> + * for unresolved symbols.
+> + */
+> +static void add_asm_extended_versions(struct buffer *buf, struct module *mod)
+> +{
+> +	if (!extended_modversions)
+> +		return;
+> +
+> +	add_asm_version_ext_crcs(buf, mod);
+> +	add_asm_version_ext_names(buf, mod);
+> +}
+
+Nit: add_asm_version_ext_crcs() and add_asm_version_ext_names() are both
+fairly short and are called only from add_asm_extended_versions(), so
+I think they could be inlined into that function. This would be similar
+to the original implementation, which does all the work in
+add_extended_versions().
+
+> +
+> +/* Clear ->seen of the modules that own symbols this one needs. */
+> +static void clear_seen_dependencies(struct module *mod)
+> +{
+> +	struct symbol *sym;
+> +
+> +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
+> +		if (sym->module)
+> +			sym->module->seen = sym->module->is_vmlinux;
+> +	}
+> +}
+> +
+> +/* The modules this one depends on, each once, comma separated. */
+> +static void collect_dependencies(struct module *mod, struct buffer *deps)
+> +{
+> +	struct symbol *sym;
+> +	bool first = true;
+> +
+> +	clear_seen_dependencies(mod);
+> +
+> +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
+> +		struct module *owner = sym->module;
+> +
+> +		if (!owner || owner->seen)
+> +			continue;
+> +
+> +		owner->seen = true;
+> +		buf_printf(deps, "%s%s", first ? "" : ",",
+> +			   get_basename(owner->name));
+> +		first = false;
+> +	}
+> +	buf_write(deps, "", 1);
+> +}
+> +
+> +static void add_asm_depends(struct buffer *buf, struct module *mod)
+> +{
+> +	struct buffer deps = { };
+> +
+> +	collect_dependencies(mod, &deps);
+> +	buf_printf(buf, "\n");
+> +	add_asm_modinfo(buf, "depends", deps.p);
+> +	free(deps.p);
+> +}
+
+Nit: Same here. I think this would be more straightforward if
+collect_dependencies() and clear_seen_dependencies() were inlined into
+add_asm_depends(), matching the original add_depends().
 
 -- 
 Thanks,
-Usama
+Petr
