@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 166B93E00A6;
-	Mon, 21 Sep 2026 19:59:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59B654052D1;
+	Mon, 21 Sep 2026 19:59:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790020748; cv=none; b=eV/ZM04cwZIVFhFW22woStrSuCD6jyg0Gcs1Iw8V/CyOVvJ60hkuvgOk41boJXMfi3IMTaTxpFMtvpgU8MZaMKVigytnRaIdEqxAC/OJZXA2dQr8S+CsF/5oSzCdNxnNEDaElDXxvYDC3d4WlyBdWubvU2JhCowN3aTFmGM1DiE=
+	t=1790020759; cv=none; b=Z8eaBT41N1GQndpujSO3CRYQdLO/5ixT5jSr4PJbaHKUL86Q5Wb8pEcqRwADPZl1tEspU45SwOpt7n+EUWaAAC+jn5dqbzsEiVmtz4UCNdiTjf/oEn1GjR63uBMwry7LV+HOq/8qvLLvBLyICwS51d4DR9MB4VH2q2/KXGoc5vw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790020748; c=relaxed/simple;
-	bh=dSl4ScKPF1XOp7cJfc/jXsaDcSkxjhT0Ieqx8OIFsoc=;
+	s=arc-20240116; t=1790020759; c=relaxed/simple;
+	bh=xjv9gw19jajbPTwOCvMFsEvootNb3/SGqtxLJD462n0=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=ji4O6bjQgcjzUfwYW5l8LYH6YkQHjIZOWezd/l/RAHERYtyF54OCKtclmSl8yQw3aerWlGtTQiFhYb5+j4B9UZ1U/kd1owpHFA4Apbl6LyiTznMBjnHQMHA35lNiKVGVePHBFfx6zD8/95NbRDpO7KAeyVp/8ZOBB/H4jE2BTyI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ICHHt2C0; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=fE2gnOJdJ3ea3PzUbV4zeRl/pIYR7xwRuueOWpEqa+5zZhLGhTvfc/gJVnp0CnjOnTEbLOPUmemtfoaCe1C9RV1bMqjc8qGF4lLoEbLBU4rdA6v8noRZUVNhyq93NpDDMerewAjZJdo3fDdmwe6t/flXK6U3nLbFDgKjYrbQ5Os=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LJMUchJq; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ICHHt2C0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 371B41F00898;
-	Mon, 21 Sep 2026 19:58:58 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LJMUchJq"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5E1FE1F00893;
+	Mon, 21 Sep 2026 19:59:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790020746;
-	bh=peND3u9iKMtv2zvMcDVYUpzbofbKohHRcq1jnaDFbnc=;
+	s=k20260515; t=1790020758;
+	bh=OJ0j+leg3y+Dpt5s4ny9DBNrD2A1KCj7Cpe/XpV27PM=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=ICHHt2C0VmIDG9URopw9qksrwfUtfgRpDtLr+UrdDLrG0zqSgNRcj9CdJDNVRufIC
-	 F3w8czv3WxRzXSCWLJ90f6yDOqd6OQiYhbq+EGOmgn03UX9fqv0buL2lF8CMp38Eyd
-	 HsNH25u/jeQ+Q40aTaQxvkI8rrLrmdUfNy5JemcL/jgGHv7MxNDyWzvr9SXR4dbvKN
-	 k8txKnaCLwKXHtCmXFSWZac9ur+5LIn4uVKC52SRzMv9JBWS0CCCuHcdk36xUZaTlh
-	 of22+Al90cbHGAdRI5Gga3ob1lfLdNdmrMT4k2g3smLeHs8dc5Eirhfj+Bn9IB8i55
-	 IBho6QPK9NEKQ==
+	b=LJMUchJq4XPhBwwniY+m7JZkvTDeHbUY5uyTkX0G05IqLNA6EH3+lQHO0F3undOJe
+	 Em9rOFh9y54stRVtWOT9ltk7rw4wzV5ISTEuKXzmn1+B53EUPrGDanCqq+wc3EY7C4
+	 JSiBlogkHgPTiFOFSqFOUxrtQIxXt9Hop5CyFNS8/BJgDIlp5TUHIKYQY2BuOiA6hc
+	 XwpOSpzVpr2LaJjGR7MSoMH4SpOYbaoCPdtbSvIv69G5xETyO/2hJaVv8rul5kt74O
+	 v/UKkHf0XTi+FrYAvK9+UHlUO6QImrQmOaU0XspiAZGlafld7GrXFInYxK88sSND0H
+	 d8kukbBC/zKGg==
 From: "Rafael J. Wysocki" <rafael@kernel.org>
 To: Linux ACPI <linux-acpi@vger.kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>,
@@ -58,10 +58,10 @@ Cc: LKML <linux-kernel@vger.kernel.org>,
  Andreas Noever <andreas.noever@gmail.com>,
  Mika Westerberg <westeri@kernel.org>, Yehezkel Bernat <YehezkelShB@gmail.com>
 Subject:
- [PATCH v1 06/17] platform/x86: serdev_helpers: Switch to use
+ [PATCH v1 05/17] platform/x86: yogabook: Switch to use
  acpi_bus_get_primary_device()
-Date: Mon, 21 Sep 2026 21:49:07 +0200
-Message-ID: <2720286.Lt9SDvczpP@rafael.j.wysocki>
+Date: Mon, 21 Sep 2026 21:48:30 +0200
+Message-ID: <1973238.CQOukoFCf9@rafael.j.wysocki>
 Organization: Linux Kernel Development - Intel
 In-Reply-To: <7995179.EvYhyI6sBW@rafael.j.wysocki>
 References: <7995179.EvYhyI6sBW@rafael.j.wysocki>
@@ -87,23 +87,29 @@ function.
 
 Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 ---
- drivers/platform/x86/serdev_helpers.h | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/platform/x86/lenovo/yogabook.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/platform/x86/serdev_helpers.h b/drivers/platform/x86/serdev_helpers.h
-index 57eac75805e2..20267e1941f1 100644
---- a/drivers/platform/x86/serdev_helpers.h
-+++ b/drivers/platform/x86/serdev_helpers.h
-@@ -74,8 +74,7 @@ get_serdev_controller(const char *serial_ctrl_hid,
- 		return ERR_PTR(-ENODEV);
+diff --git a/drivers/platform/x86/lenovo/yogabook.c b/drivers/platform/x86/lenovo/yogabook.c
+index 1a4b2ab1f35d..8a91d440724b 100644
+--- a/drivers/platform/x86/lenovo/yogabook.c
++++ b/drivers/platform/x86/lenovo/yogabook.c
+@@ -353,13 +353,13 @@ static int yogabook_wmi_probe(struct wmi_device *wdev, const void *context)
+ 		goto error_put_devs;
  	}
  
--	/* get_first_physical_node() returns a weak ref */
--	parent = get_device(acpi_get_first_physical_node(adev));
-+	parent = acpi_bus_get_primary_device(adev);
- 	acpi_dev_put(adev);
- 	if (!parent) {
- 		pr_err("error could not get %s/%s serial-ctrl physical node\n",
+-	data->kbd_dev = get_device(acpi_get_first_physical_node(data->kbd_adev));
++	data->kbd_dev = acpi_bus_get_primary_device(data->kbd_adev);
+ 	if (!data->kbd_dev || !data->kbd_dev->driver) {
+ 		r = -EPROBE_DEFER;
+ 		goto error_put_devs;
+ 	}
+ 
+-	data->dig_dev = get_device(acpi_get_first_physical_node(data->dig_adev));
++	data->dig_dev = acpi_bus_get_primary_device(data->dig_adev);
+ 	if (!data->dig_dev || !data->dig_dev->driver) {
+ 		r = -EPROBE_DEFER;
+ 		goto error_put_devs;
 -- 
 2.51.0
 
