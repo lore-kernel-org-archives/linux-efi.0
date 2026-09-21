@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 829313DBD43;
-	Mon, 21 Sep 2026 19:57:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D6053E1681;
+	Mon, 21 Sep 2026 19:58:01 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790020672; cv=none; b=eNTjhh+o9L5JFspZrDh4jUtS9np8w2p5/zXS7F9lDokcVHHUkQ1hiRuX+pBXotqQ0MbjwqVyP8sjxJLRlz6KiChgS7u9dcD/nTRuKt/s3MCiGfNSxe6BD4X+kk/MwZyqEPwnfkUZxDGhFnkquQ6Zk4tBZOOLhSCp7RXCTS+qoEk=
+	t=1790020683; cv=none; b=AnvzIJZP68pYz+mjXjc7ZMj9YJcq8VjIsLSa7GXD78vVy1cL1V9fWBbja0nDPBMLmUlbqWuxXDpQPEtXEhgBcbw+Q5OCSdXmslmrTWk7L2G5UDLSkcGhZiLnD+RHpdMGL0jjBkqhuItv8cboeii1WaKIVarPIZ5gQcWpWswe0jY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790020672; c=relaxed/simple;
-	bh=bde9OhIEBF25ZgWU/cZ3tm9o0H+1fIB6TYCUFNFJGlI=;
+	s=arc-20240116; t=1790020683; c=relaxed/simple;
+	bh=PuDgcUnfUxSDQ/MUOSppfK36EcGqO6QwNGeAN9i6xwo=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=KAams2VvygT8ecczMbaTpR9DKldPulwELYSj4KZPsmjZa6GZ9XEK7621B4PeSf5aGvAObYTws8iyDiI73ZwOf91YWYRxu2CfHpTPvd3IgcOtCgm3GMlEkSIN4lQqdURyYqLe04o3zIJxgp6baPqA6gqefhJLkDZWbwgESYyNN2Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MbARqiV7; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=NWnW8etazWn9Si3fyOXyKHstOx9d1At+PX+E54rZxSLlb99sS28IQImHb7B1qbs/CNTT0fflwiRY6YNe7GlkhjciXD8iks7ZzWZunrc01t2oXdT3VsiMi83y0QJweIcPbjs9MdNz2wjxIcD5jjLv5PhEgwsxESid3J0sj5LGZxQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ci0EfexE; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MbARqiV7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 807C41F000FF;
-	Mon, 21 Sep 2026 19:57:41 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ci0EfexE"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 763B91F000FF;
+	Mon, 21 Sep 2026 19:57:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790020670;
-	bh=9Mhs6eb7OkvMZOjYpBfupxS7w4Ah9cPyVbDMAhR1BJM=;
+	s=k20260515; t=1790020681;
+	bh=n4tfQQNoh1s0SuFBn8g/TxJGhMe3ZOSgNRY3dXc6AJk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=MbARqiV7B/zfuakxG+63SG5caSv4KSIkhdZNqBBLtdFvrpvbFYImUZ3HkRFCbqhrw
-	 qjBWyHn2eArQLhi7ERNIpORwvbfItMm0+vn9Qia1T6y8R4KSNI3f8M+ZpfYK9YRl+g
-	 Z2pp54eugw3h41rE/U9UhSYXwHMxOhBcyzmbbPydDabtRGpxv+QFLjDwN5yMzAA+Ki
-	 sPQV8T7lVBbftVjwHFoL6vK1l7sz+uBY2z1m03CdVOHHKV9E73axcA2i4qF2+uqh1+
-	 JX9Chi9bxAiot3vdNurFg4+je5ockMo707YpxprDWAN3Bvd2Co5CLiXTOcJkFeQ6cq
-	 3KXm/C+wQUm2w==
+	b=Ci0EfexEzpXudF6A1c0TRtaS3ijsUSJzv01W1MLD2bmATKrk4YDSRg9uokuQTkYan
+	 urzbYyusNB+l570E5twrDA1odMxPLzuEshNs6shFYh7z7YT1HLPBhUZTBB8UUz/NDp
+	 DrCb4KDhJ8OUEOs7U+IbTOs/3KI0DnpxKsWjXdModl6jPM22pi7RlmvW7WL6q+E+Tu
+	 iS657fJiAxB7i8oRzIHoC0Vm/Or2EPgEm/yHGYZBleqSlxQybJDLd7bVQSOJfd0nUt
+	 Zw4WOcr1rc00S7qHzQL747+8FZYX4Y5yDELZISU2iLc8BNhPOIj3b1lrJDbfR0Vyyo
+	 W7Q5xsASeT4Ew==
 From: "Rafael J. Wysocki" <rafael@kernel.org>
 To: Linux ACPI <linux-acpi@vger.kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>,
@@ -58,10 +58,10 @@ Cc: LKML <linux-kernel@vger.kernel.org>,
  Andreas Noever <andreas.noever@gmail.com>,
  Mika Westerberg <westeri@kernel.org>, Yehezkel Bernat <YehezkelShB@gmail.com>
 Subject:
- [PATCH v1 13/17] ASoC: amd: acp-es8336: Switch to use
+ [PATCH v1 12/17] ALSA: hda: tas2781: Switch to use
  acpi_bus_get_primary_device()
-Date: Mon, 21 Sep 2026 21:53:51 +0200
-Message-ID: <2063881.yKVeVyVuyW@rafael.j.wysocki>
+Date: Mon, 21 Sep 2026 21:53:12 +0200
+Message-ID: <895014215.0ifERbkFSE@rafael.j.wysocki>
 Organization: Linux Kernel Development - Intel
 In-Reply-To: <7995179.EvYhyI6sBW@rafael.j.wysocki>
 References: <7995179.EvYhyI6sBW@rafael.j.wysocki>
@@ -85,29 +85,40 @@ device returned by acpi_get_first_physical_node() is removed right
 after dropping its ACPI companion's physical_node_lock in that
 function.
 
-It also fixes a device reference counting issue that may lead to
-a premature device release if gpiod_get_optional() fails in
-st_es8336_late_probe().
-
-Fixes: 02527c3f2300 ("ASoC: amd: add Machine driver for Jadeite platform")
 Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 ---
- sound/soc/amd/acp-es8336.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ sound/hda/codecs/side-codecs/tas2781_hda_i2c.c | 3 +--
+ sound/hda/codecs/side-codecs/tas2781_hda_spi.c | 3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
 
-diff --git a/sound/soc/amd/acp-es8336.c b/sound/soc/amd/acp-es8336.c
-index 9f3f11256788..34e953d1a3a7 100644
---- a/sound/soc/amd/acp-es8336.c
-+++ b/sound/soc/amd/acp-es8336.c
-@@ -198,7 +198,7 @@ static int st_es8336_late_probe(struct snd_soc_card *card)
- 	if (!adev)
+diff --git a/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c b/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c
+index 5e5f46c9fb6b..161ca965c63e 100644
+--- a/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c
++++ b/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c
+@@ -100,8 +100,7 @@ static int tas2781_read_acpi(struct tasdevice_priv *p, const char *hid)
  		return -ENODEV;
+ 	}
  
--	codec_dev = acpi_get_first_physical_node(adev);
-+	codec_dev = acpi_bus_get_primary_device(adev);
+-	struct device *physdev __free(put_device) =
+-		get_device(acpi_get_first_physical_node(adev));
++	struct device *physdev __free(put_device) = acpi_bus_get_primary_device(adev);
+ 	ret = acpi_dev_get_resources(adev, &resources, tas2781_get_i2c_res, p);
+ 	if (ret < 0) {
+ 		dev_err(p->dev, "Failed to get ACPI resource.\n");
+diff --git a/sound/hda/codecs/side-codecs/tas2781_hda_spi.c b/sound/hda/codecs/side-codecs/tas2781_hda_spi.c
+index da71b57a26ee..f3ba7132d2b8 100644
+--- a/sound/hda/codecs/side-codecs/tas2781_hda_spi.c
++++ b/sound/hda/codecs/side-codecs/tas2781_hda_spi.c
+@@ -341,8 +341,7 @@ static int tas2781_read_acpi(struct tas2781_hda *tas_hda,
+ 
+ 	strscpy(p->dev_name, hid, sizeof(p->dev_name));
+ 
+-	struct device *physdev __free(put_device) =
+-		get_device(acpi_get_first_physical_node(adev));
++	struct device *physdev __free(put_device) = acpi_bus_get_primary_device(adev);
  	acpi_dev_put(adev);
- 	if (!codec_dev) {
- 		dev_err(card->dev, "can not find codec dev\n");
+ 	if (!physdev)
+ 		return -ENODEV;
 -- 
 2.51.0
 
