@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 956A1384223;
-	Mon, 21 Sep 2026 19:57:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D16A3AE6E5;
+	Mon, 21 Sep 2026 19:57:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790020627; cv=none; b=C4797MFxYjQ8y7wNBqvCxB2n99zo1MsnEuOp0UVMJvEQVm8ryD6Q8qpbmsMhwopjl9Quh3OvRXE7sHMZRck/uiSDirfw5ISRsozqFPDc/ALsGmcxc5rRm5dPhJ0AtY48KQSHGzRX6bFtzAhBqa1cKfIJxI+MAOGgJ69ExO0RxXU=
+	t=1790020638; cv=none; b=SRBmzPl5umdX2+aBhxdZhK7ebb6v1ygdEMUwftsg1OMgTp2h/3UGssA/n1wMxvDmbVOsza7FExn9pRKcgSuVNGcFzTuz6ZuYKRV74QtVirvYH038hbUe0816caao4SWYrkYH34rSXJLDbXm96ojb1i7/WQTlt0IhSgamULh4aSE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790020627; c=relaxed/simple;
-	bh=lf4nrMKqfTmaLb9ZWtphvO8Bl3D2lIQEhSNhaGHkryQ=;
+	s=arc-20240116; t=1790020638; c=relaxed/simple;
+	bh=iPsHQbbpQwUFp6xKd/dCzNUBdpGDy/+EYaeTWLuWMnA=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=ueZiuBE7jH7fXjO2fFSgXbtr7HYx9nq0ma/qSs+vMJu2p6fjsBZSpyIs5W93FRjReF/WxtHMfpYvIEsV5hb8W7yHUeXD5KMOLhnLgKDSeKqjrSclpW+rB7pNbKFP+7lZKOVLcxrggUuITwSUfr4GyKxMe19Umd0LGDq8uZ5OsN0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=M/i+lPJY; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=UDWGtChOfpe8Cr5j+R0TK9WcCYBXnLtaHY5aldb1/F0ArC7+oU6eJLTRrI1TsCYC0RQbnDaSFDpV1C5y4eb2DH0RbQXsnrxB6ITLKGIE/vZN1fSrPzIPcD+ozNyqNT7w8yH7j7BPAYmQm1bnH2uu2WCOdEX7z0p7OY/a/O2sVWA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IdwgEx+Y; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="M/i+lPJY"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 159021F000FF;
-	Mon, 21 Sep 2026 19:56:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IdwgEx+Y"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 87A3F1F000FF;
+	Mon, 21 Sep 2026 19:57:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790020626;
-	bh=4Qu1+WZY8bl4VhPrsVVKqjPgM7e+P4+6OSuarLl4alY=;
+	s=k20260515; t=1790020637;
+	bh=TAVGV/5Thua1TFZOVKbuRwl/jAXk2aReC7bLxrqFtsg=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=M/i+lPJY5pULFbcirUNA/QJkzvftB+OzaGhSJ+ohSAGP0lnuGEqLIhwSl6D67Pq/r
-	 7o+DTqC22yBwz2SebO8n/SLR1FYjGYiVUVfrCPcGA1rbenUNsUSNzjqM6yXgf8y/Z0
-	 tkiFy2tJs/aUGLH+zzgrHWF8sR8pYKDGIICzUDrKtotsIX3/rWkuHSU/GX5RRM4gDm
-	 bpHYi/A1p/Tzf+y4kofxlOvKBOZ7Czg5e8+Iw8ImwxKcDfsgD3qEfl4/FLtwrX0mRH
-	 +566dLnYIHsqoUXNydy8WSee7i3fKAiGqkVI52Z+uQ0TXFjY9YeV6Hl+o1/oLSIZgx
-	 piwixq3lxFW+A==
+	b=IdwgEx+YGAuylT795p2nuD/OUN0WwNll7UPKO7jtrFpUGbfB2ob36smndpAzNfWsm
+	 5ppEiNvfzHg0fKrFzZIb+itRMzh6qndqxQr8pFoZUbHgUPHz0VxFNgDSvfymhuRNYU
+	 4mS76GiBu07fKd+7HqmbT9eMiPL/Sq2FkdG2ODfs+YPG8sONNNaJ4VZY+7T14Keboq
+	 pyId8WU52CtwkRDtulypkfELySzUMCu1ynPmTUL2MNBTRPooxu4shT3wo+JwvMKNq0
+	 dZkVETyhg0G4jtY6AdWpwAZNxlY9y0DxnPh4Bg3IbGwQYr1v/pYAgOR+3rKYLwDsZI
+	 PFqJcTS8OUDfA==
 From: "Rafael J. Wysocki" <rafael@kernel.org>
 To: Linux ACPI <linux-acpi@vger.kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>,
@@ -57,9 +57,10 @@ Cc: LKML <linux-kernel@vger.kernel.org>,
  Binbin Zhou <zhoubinbin@loongson.cn>,
  Andreas Noever <andreas.noever@gmail.com>,
  Mika Westerberg <westeri@kernel.org>, Yehezkel Bernat <YehezkelShB@gmail.com>
-Subject: [PATCH v1 17/17] ACPI: bus: Drop acpi_get_first_physical_node()
-Date: Mon, 21 Sep 2026 21:56:41 +0200
-Message-ID: <9732391.rMLUfLXkoz@rafael.j.wysocki>
+Subject:
+ [PATCH v1 16/17] ASoC: loongson: Switch to use acpi_bus_get_primary_device()
+Date: Mon, 21 Sep 2026 21:55:56 +0200
+Message-ID: <2796562.BddDVKsqQX@rafael.j.wysocki>
 Organization: Linux Kernel Development - Intel
 In-Reply-To: <7995179.EvYhyI6sBW@rafael.j.wysocki>
 References: <7995179.EvYhyI6sBW@rafael.j.wysocki>
@@ -74,76 +75,40 @@ Content-Type: text/plain; charset="utf-8"
 
 From: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
 
-Fold acpi_get_first_physical_node() into acpi_primary_dev_companion()
-that is its only remaining caller and drop its signature from the
-header file.
+Replace acpi_get_first_physical_node() that is slated for removal
+with acpi_bus_get_primary_device() that takes a reference to the
+device it is about to return.
 
-No intentional functional impact.
+This addresses a potential use-after-free that may occur if the
+device returned by acpi_get_first_physical_node() is removed right
+after dropping its ACPI companion's physical_node_lock in that
+function.
 
 Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 ---
- drivers/acpi/bus.c   | 20 +++++---------------
- include/linux/acpi.h |  7 -------
- 2 files changed, 5 insertions(+), 22 deletions(-)
+ sound/soc/loongson/loongson_card.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
-index 808c6746be14..cc6989d88645 100644
---- a/drivers/acpi/bus.c
-+++ b/drivers/acpi/bus.c
-@@ -809,24 +809,14 @@ struct device *acpi_bus_get_primary_device(struct acpi_device *adev)
- }
- EXPORT_SYMBOL_GPL(acpi_bus_get_primary_device);
+diff --git a/sound/soc/loongson/loongson_card.c b/sound/soc/loongson/loongson_card.c
+index 6422cc1703b6..9f3907278462 100644
+--- a/sound/soc/loongson/loongson_card.c
++++ b/sound/soc/loongson/loongson_card.c
+@@ -196,7 +196,6 @@ static int loongson_card_parse_acpi(struct loongson_card_data *data)
+ 	struct snd_soc_card *card = &data->snd_card;
+ 	const char *codec_dai_name;
+ 	struct acpi_device *adev;
+-	struct device *phy_dev;
+ 	int i, ret;
  
--/**
-- * acpi_get_first_physical_node - Find first physical node of an ACPI device
-- * @adev:	ACPI device in question
-- *
-- * Return: First physical node of ACPI device @adev
-- */
--struct device *acpi_get_first_physical_node(struct acpi_device *adev)
--{
--	guard(mutex)(&adev->physical_node_lock);
--
--	return primary_physical_device(adev);
--}
--EXPORT_SYMBOL_GPL(acpi_get_first_physical_node);
--
- static struct acpi_device *acpi_primary_dev_companion(struct acpi_device *adev,
- 						      const struct device *dev)
- {
--	const struct device *phys_dev = acpi_get_first_physical_node(adev);
-+	const struct device *phys_dev;
-+
-+	guard(mutex)(&adev->physical_node_lock);
-+
-+	phys_dev = primary_physical_device(adev);
+ 	/* fixup platform name based on reference node */
+@@ -204,7 +203,7 @@ static int loongson_card_parse_acpi(struct loongson_card_data *data)
+ 	if (!adev)
+ 		return -ENOENT;
  
- 	return phys_dev && phys_dev == dev ? adev : NULL;
- }
-diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index ba5234bd93a2..6f69819f9c9a 100644
---- a/include/linux/acpi.h
-+++ b/include/linux/acpi.h
-@@ -105,8 +105,6 @@ static inline const char *acpi_dev_name(struct acpi_device *adev)
- 	return dev_name(&adev->dev);
- }
- 
--struct device *acpi_get_first_physical_node(struct acpi_device *adev);
--
- enum acpi_irq_model_id {
- 	ACPI_IRQ_MODEL_PIC = 0,
- 	ACPI_IRQ_MODEL_IOAPIC,
-@@ -938,11 +936,6 @@ static inline const char *acpi_dev_name(struct acpi_device *adev)
- 	return NULL;
- }
- 
--static inline struct device *acpi_get_first_physical_node(struct acpi_device *adev)
--{
--	return NULL;
--}
--
- static inline void acpi_early_init(void) { }
- static inline void acpi_subsystem_init(void) { }
+-	phy_dev = acpi_get_first_physical_node(adev);
++	struct device *phy_dev __free(put_device) = acpi_bus_get_primary_device(adev);
+ 	if (!phy_dev)
+ 		return -EPROBE_DEFER;
  
 -- 
 2.51.0
