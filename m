@@ -1,33 +1,33 @@
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id C828E3EFD2D;
-	Mon, 21 Sep 2026 08:27:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 42DF333D6D6;
+	Mon, 21 Sep 2026 08:29:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789979226; cv=none; b=RL11E5Pj0wgNTiCnQOahdDmlisKXvx1cV8aBFwoAMKFEjfNbNZa9QxMA8XI0/NPZ4z7cqEZh1VOAAN2BOCGXlLQruR/BAYIHBGLnpqhuetQEE5Noc5Wbap6NinAVGhkaeJ4KUDm/UPBGGrdrqGyJinilyhAupSo16x7elvhvzWM=
+	t=1789979372; cv=none; b=fSEz5jqtDUzLoKTZ9I3q1qp/mntu2uCE0dtXwLHpmH7gR8GdavAs9dHkc8rJUUysAbTSNLx4wB/fcNV/Dfkw4NnKjvHl+XXnWv6Sxk+x6ppV5PP8Z8s23Wp00p3/8Qrk9HnV9zjXsGuh/q9B7RAKU4i6VdP3ubPTmr+IEqBwQDA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789979226; c=relaxed/simple;
-	bh=DAIFdbL4xzUIu7ZahFa8TI9VqSq7uJsS8lo7ckS9dpo=;
+	s=arc-20240116; t=1789979372; c=relaxed/simple;
+	bh=Ad+6LLybI3uKKc7JJri+UgLlmCgPg2pPlm7qhk4O64g=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=TVO5As36gT9J7dREmf0vTOi6KD11eFYbhdsk2iNugAcdgTq85uoc4nmNVSYAcHeI5VIZNb/7GAhJQSowtuLyjsvsX5wWCsk08dZOLttjDVDvIx7mf6Em1/2vpOrnKEX4C8HYAl2K+2HaxM8rCXvjdd8hcyXkthRpOvW3ooi0pjw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=a1hlKdD8; arc=none smtp.client-ip=217.140.110.172
+	 In-Reply-To:Content-Type; b=Z+Jdgvbm2N7O+gTbKg7rDUUWf9YPrvsu/LZ1R6i+oeDw+ga749Y9IOg0M9GfMfEwAubV075c+JpnBTiY2j4Tf67QylhkjQvAqOmF/7OTNZrSGS6tt/ZpixDSVtNuBbaHlDaYxVewoegEsTqXiJW35vwwIvpa4qfPi+OwsqeDXT4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=qRXpyMvL; arc=none smtp.client-ip=217.140.110.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="a1hlKdD8"
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="qRXpyMvL"
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 9B812175A;
-	Mon, 21 Sep 2026 01:27:00 -0700 (PDT)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 2EA8E175A;
+	Mon, 21 Sep 2026 01:29:27 -0700 (PDT)
 Received: from [10.57.83.12] (unknown [10.57.83.12])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id E68713F86C;
-	Mon, 21 Sep 2026 01:26:59 -0700 (PDT)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 1ECEC3F86C;
+	Mon, 21 Sep 2026 01:29:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1789979224; bh=DAIFdbL4xzUIu7ZahFa8TI9VqSq7uJsS8lo7ckS9dpo=;
+	t=1789979370; bh=Ad+6LLybI3uKKc7JJri+UgLlmCgPg2pPlm7qhk4O64g=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=a1hlKdD8fyjBw+8gF3G8WZAD/mIi7EKGmaNrH8A7prWIORzqTVcC/DXPhIZ79c7vn
-	 1vU1HYe/zUy8NNZfs3ZXkTmRkRKFCHIJuXnY3zhDPle3JQVTsugXbliOskfQjOZptF
-	 UV56/60hoTzYfzFhV6U3gOs8WqSzLGS6eD578weE=
-Message-ID: <86d4aea6-4272-427e-9229-295489e068d7@arm.com>
-Date: Mon, 21 Sep 2026 09:26:58 +0100
+	b=qRXpyMvLHNueHE/qqmGi8wywc91oBqnC1xt/cQExQtagrEoU13hb8I0V89H6Lao7G
+	 3OHXj+U/lHUmAJ/1SxkKWWapIqk0qrE9EAGWElpxtagB8APekzbYKUgqjO/U1aCgBH
+	 42zSHCFhDH+OJ9duPe2mk552i7cOLu0tCTw7I4I0=
+Message-ID: <f790350a-02eb-46b2-b079-fc3db66f2b03@arm.com>
+Date: Mon, 21 Sep 2026 09:29:25 +0100
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -35,7 +35,7 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/6] arm64: convert between HW PTEs and SW PTE values
+Subject: Re: [PATCH 4/6] arm64: use hw_pte_t for fixmap HW PTEs
 To: Muhammad Usama Anjum <usama.anjum@arm.com>,
  Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
  Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>,
@@ -52,90 +52,45 @@ To: Muhammad Usama Anjum <usama.anjum@arm.com>,
 Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
  linux-efi@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org
 References: <20260914-pte0_arm-v1-0-bb53b663e396@arm.com>
- <20260914-pte0_arm-v1-3-bb53b663e396@arm.com>
+ <20260914-pte0_arm-v1-4-bb53b663e396@arm.com>
 From: Ryan Roberts <ryan.roberts@arm.com>
 Content-Language: en-GB
-In-Reply-To: <20260914-pte0_arm-v1-3-bb53b663e396@arm.com>
+In-Reply-To: <20260914-pte0_arm-v1-4-bb53b663e396@arm.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 14/09/2026 14:51, Muhammad Usama Anjum wrote:
-> __ptep_get() returns a SW PTE value, and __set_pte_nosync() accepts one.
-> When HW PTEs use a distinct hw_pte_t, directly reading or writing *ptep
-> as a SW PTE value no longer satisfies those interfaces.
+> fixmap_pte() returns a pointer into bm_pte, and early_fixmap_init_pte()
+> installs those arrays as page tables. Their elements are therefore
+> HW PTEs.
 > 
-> Use __pte_from_hw after READ_ONCE() to obtain a SW PTE value and add
-> __hw_pte before WRITE_ONCE() to form an HW PTE.
-> 
-> Define __hw_pte for both the wrapper and alias configurations so the
-> same accessor code works in either case.
+> Change the element type of bm_pte to hw_pte_t so it matches the HW PTE
+> pointers returned and passed to the accessors. This is needed before
+> ARCH_HAS_HW_PTE_T makes HW PTEs and SW PTE values distinct types; the
+> array dimensions and placement are unchanged.
 > 
 > Signed-off-by: Muhammad Usama Anjum <usama.anjum@arm.com>
 > ---
->  arch/arm64/include/asm/pgtable.h | 4 ++--
->  include/linux/pgtable_types.h    | 2 ++
->  2 files changed, 4 insertions(+), 2 deletions(-)
+>  arch/arm64/mm/fixmap.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/arch/arm64/include/asm/pgtable.h b/arch/arm64/include/asm/pgtable.h
-> index 4768ec59de555..67c4a6179e154 100644
-> --- a/arch/arm64/include/asm/pgtable.h
-> +++ b/arch/arm64/include/asm/pgtable.h
-> @@ -360,7 +360,7 @@ static inline pte_t pte_clear_uffd(pte_t pte)
+> diff --git a/arch/arm64/mm/fixmap.c b/arch/arm64/mm/fixmap.c
+> index 237a9136bc73b..709a97fe327d8 100644
+> --- a/arch/arm64/mm/fixmap.c
+> +++ b/arch/arm64/mm/fixmap.c
+> @@ -31,7 +31,7 @@ static_assert(NR_BM_PMD_TABLES == 1);
 >  
->  static inline void __set_pte_nosync(hw_pte_t *ptep, pte_t pte)
->  {
-> -	WRITE_ONCE(*ptep, pte);
-> +	WRITE_ONCE(*ptep, __hw_pte(pte));
-
-Would this work as an alternative? It removes the need for the new __hw_pte()
-helper. In future, converting a pte_t to a hw_pte_t won't be trivial so having a
-generic helper for it doesn't feel like a good fit.
-
-	WRITE_ONCE(hw_pte_val(*ptep), pte_val(pte));
-
-In general, I wonder if we should avoid defining both the __hw_pte() and
-__pte_from_hw() generic helpers. Conversion between sw and hw representations
-will become arch-specific in future and for arm64 that conversion will need
-extra information so it's can't just specialize these interfaces as they are.
-
->  }
+>  #define BM_PTE_TABLE_IDX(addr)	__BM_TABLE_IDX(addr, PMD_SHIFT)
 >  
->  static inline void __set_pte_complete(pte_t pte)
-> @@ -381,7 +381,7 @@ static inline void __set_pte(hw_pte_t *ptep, pte_t pte)
+> -static pte_t bm_pte[NR_BM_PTE_TABLES][PTRS_PER_PTE] __bss_pgtbl;
+> +static hw_pte_t bm_pte[NR_BM_PTE_TABLES][PTRS_PER_PTE] __bss_pgtbl;
+>  static pmd_t bm_pmd[PTRS_PER_PMD] __bss_pgtbl __maybe_unused;
+>  static pud_t bm_pud[PTRS_PER_PUD] __bss_pgtbl __maybe_unused;
 >  
->  static inline pte_t __ptep_get(hw_pte_t *ptep)
->  {
-> -	return READ_ONCE(*ptep);
-> +	return __pte_from_hw(READ_ONCE(*ptep));
+> 
 
-
-...Corresponds with:
-
-	return __pte(READ_ONCE(hw_pte_val(*ptep)));
+Ahh, so my previous comment that I thought this would break the build is wrong
+because you haven't enabled ARCH_HAS_HW_PTE_T at that point.
 
 Thanks,
 Ryan
-
->  }
->  
->  extern void __sync_icache_dcache(pte_t pteval);
-> diff --git a/include/linux/pgtable_types.h b/include/linux/pgtable_types.h
-> index ee4eace5c3e1c..b5862a16aa497 100644
-> --- a/include/linux/pgtable_types.h
-> +++ b/include/linux/pgtable_types.h
-> @@ -9,11 +9,13 @@
->  #ifdef CONFIG_ARCH_HAS_HW_PTE_T
->  typedef struct __hw_pte_t { pte_t __pte; } hw_pte_t;
->  #define __pte_from_hw(pte)	((pte).__pte)
-> +#define __hw_pte(pte)  ((hw_pte_t) { (pte) })
->  
->  #define hw_pte_val(x)  pte_val((x).__pte)
->  #else
->  #define hw_pte_t pte_t
->  #define __pte_from_hw(pte)	(pte)
-> +#define __hw_pte(pte)  (pte)
->  
->  #define hw_pte_val(x)  pte_val(x)
->  #endif
-> 
-
