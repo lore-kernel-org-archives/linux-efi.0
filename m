@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C29B3DFC6A;
-	Mon, 21 Sep 2026 19:57:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 916F03E7159;
+	Mon, 21 Sep 2026 19:57:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790020649; cv=none; b=XII3BSNa24/cbTPD6UWsvETCOx5se0LF5ngfLpUkxhBYjogZDND5kHLmAvpjLTDSjTU+yLjM/lC+aOfVHTMWvHUwdzTAZeYWTRyYp5yZfm7w3BaxSTHf/tdhHoHi9Wqv5LYYA0Evmmsla1ULbitnQPK+6i6S/rgEqhZ4+TwUvQs=
+	t=1790020661; cv=none; b=WZMCShoh3iCgkWwzNMNF/d8Br0f/INNatblArs8go27V3VP6BqQAFHYSF52iBqcM6Nx4fA8WaOzHTPtZQEMrIt8mQXaIvXywdoTvGKyYJclL0ErhnqTOhyozAirC7XhJzjiSXiuPsb2kJooU5Gx7QFpXgGS1weWg5GJyzeZxCvA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790020649; c=relaxed/simple;
-	bh=Kmm40yDf8FH9kmztNlkvqESdLseM8T4eCzuBywjV3qQ=;
+	s=arc-20240116; t=1790020661; c=relaxed/simple;
+	bh=sONjhr7sOuLHr2wKBvsikyUDQe1pbACiMGr1sMluj2c=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=l3/vAH0z1GwdpVkIRtjOmLrsKiLG9XUlFqtXpltieUMZyf0e7K56tacWdoBRgilLp0lXNsE0qFHojAWicZBH2gr5GHBIBZWt4bx14gVCShUGqvMbuxk3TKyJmru4PMtAYXrOVuwNVWFh9116CAw4mcujhphiSfg1xEc35fvX1gE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eBPbGqTS; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=tIxwJ50lHDQMgwck/imEDHqFKxmLk0QPKwBYnGmZK7A3xrZE5PKUFkXLqx0zIWAB68b2F1tOx1+27SpkWg4NmUTrj5VicfFIow9q7y+9WxsLzNT2lLaTAQWDc18s/H7wvnSYV5u4SE3SITrcPq/iVQGgIUYs0ylwk+7lIwiDlOI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lRV8I/cx; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eBPbGqTS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 63A071F000FF;
-	Mon, 21 Sep 2026 19:57:19 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lRV8I/cx"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A461B1F000FF;
+	Mon, 21 Sep 2026 19:57:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790020648;
-	bh=go+HK5V8dXGRhi+GpzpcFcbkmCcxgz1J0eAaEUWZhfc=;
+	s=k20260515; t=1790020659;
+	bh=kIqLl2fR0Y8FnAZS32z+o+xiwBvBARRJCqimT/79qTk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=eBPbGqTSwksrjwkr4sxg4GHe82m+5pK2JSUOLuofQeoEN7JhyzubEqijBqEtw46TS
-	 bPoTnDlA57zedfb5Z7p+fWJn7DwaDW7OzQfH2apBiwD+eUYWNXxyHOnIY+jjirXYET
-	 9bkk2F8LTszcnZO5VWDUCrXVO/ZPSJWnr0ZkRY6XhOH+eYGqFn5ztxBShSHxgARBMC
-	 x0xsF26npySnRmgjxsapwtfTr+nXKuTV2jBcagbONYfI5YOO3x6q9ihurNpOIbyP7c
-	 q7G0Yw1nH6sPJ8us29TpeYvn/O2n4pM9zlx/iG2wcGTkl/Bro+ideclJNV2DUEJkd/
-	 kRm35X8DqBfDQ==
+	b=lRV8I/cxEYMAz9r1D9EWEMa3f2Cm02BZ36hP2eztkqtgDxPF4HdjKCutBQDwK7SyC
+	 Qwk4Py/zVgM/smZIVVKBf1SaMl+mUyXF+G3QU9onmszrXe7RcaYiupUKWgHK/1AKHZ
+	 caXhXf5qed0b4I8Xk55EX4WchV9ty/tTRBvcyMbY4himnpN4VfIM3AmhOJ86l6mpjY
+	 NE9qm8+/5X3C4g085fpBZhy9lG73sZT+rYOlPODTSAPV0WSU1wN4qrom9OQEd25ZHz
+	 1IJwLW0huDYmNFSo74v0+hHiYl5aJz9d6Tl1h7mC1ZvORpVR0ojgoM6znH8S0BSgiB
+	 gjtvMse2uYc4w==
 From: "Rafael J. Wysocki" <rafael@kernel.org>
 To: Linux ACPI <linux-acpi@vger.kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>,
@@ -58,10 +58,10 @@ Cc: LKML <linux-kernel@vger.kernel.org>,
  Andreas Noever <andreas.noever@gmail.com>,
  Mika Westerberg <westeri@kernel.org>, Yehezkel Bernat <YehezkelShB@gmail.com>
 Subject:
- [PATCH v1 15/17] ASoC: intel: boards: Switch to use
+ [PATCH v1 14/17] ASoC: amd: acp3x-es83xx: Switch to use
  acpi_bus_get_primary_device()
-Date: Mon, 21 Sep 2026 21:55:15 +0200
-Message-ID: <15844908.tv2OnDr8pf@rafael.j.wysocki>
+Date: Mon, 21 Sep 2026 21:54:29 +0200
+Message-ID: <2310746.NgBsaNRSFp@rafael.j.wysocki>
 Organization: Linux Kernel Development - Intel
 In-Reply-To: <7995179.EvYhyI6sBW@rafael.j.wysocki>
 References: <7995179.EvYhyI6sBW@rafael.j.wysocki>
@@ -85,124 +85,28 @@ device returned by acpi_get_first_physical_node() is removed right
 after dropping its ACPI companion's physical_node_lock in that
 function.
 
+It also fixes a device reference counting issue that may lead to a
+premature device release if devm_kzalloc() fails in acp3x_es83xx_probe().
+
+Fixes: 54fcd9dd44b2 ("ASoC: amd: acp: Add machine driver that enables sound for systems with a ES8336 codec")
 Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 ---
- sound/soc/intel/boards/bytcht_es8316.c     | 4 ++--
- sound/soc/intel/boards/bytcr_rt5640.c      | 4 ++--
- sound/soc/intel/boards/bytcr_rt5651.c      | 4 ++--
- sound/soc/intel/boards/cht_bsw_rt5645.c    | 5 ++---
- sound/soc/intel/boards/sof_cirrus_common.c | 2 +-
- sound/soc/intel/boards/sof_es8336.c        | 4 ++--
- 6 files changed, 11 insertions(+), 12 deletions(-)
+ sound/soc/amd/acp/acp3x-es83xx/acp3x-es83xx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/sound/soc/intel/boards/bytcht_es8316.c b/sound/soc/intel/boards/bytcht_es8316.c
-index ea387dc74273..4d8d1d176a49 100644
---- a/sound/soc/intel/boards/bytcht_es8316.c
-+++ b/sound/soc/intel/boards/bytcht_es8316.c
-@@ -601,11 +601,11 @@ static int snd_byt_cht_es8316_mc_probe(struct platform_device *pdev)
- 		return -ENOENT;
- 	}
- 
--	codec_dev = acpi_get_first_physical_node(adev);
-+	codec_dev = acpi_bus_get_primary_device(adev);
- 	acpi_dev_put(adev);
- 	if (!codec_dev)
- 		return -EPROBE_DEFER;
--	priv->codec_dev = get_device(codec_dev);
-+	priv->codec_dev = codec_dev;
- 
- 	/* override platform name, if required */
- 	byt_cht_es8316_card.dev = dev;
-diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
-index 40da3eea5fa7..c84b9a0fe65a 100644
---- a/sound/soc/intel/boards/bytcr_rt5640.c
-+++ b/sound/soc/intel/boards/bytcr_rt5640.c
-@@ -1744,11 +1744,11 @@ static int snd_byt_rt5640_mc_probe(struct platform_device *pdev)
- 		return -ENOENT;
- 	}
- 
--	codec_dev = acpi_get_first_physical_node(adev);
-+	codec_dev = acpi_bus_get_primary_device(adev);
- 	acpi_dev_put(adev);
- 
- 	if (codec_dev) {
--		priv->codec_dev = get_device(codec_dev);
-+		priv->codec_dev = codec_dev;
- 	} else {
- 		/*
- 		 * Special case for Android tablets where the codec i2c_client
-diff --git a/sound/soc/intel/boards/bytcr_rt5651.c b/sound/soc/intel/boards/bytcr_rt5651.c
-index 62cb4856c797..a0ed56d285bc 100644
---- a/sound/soc/intel/boards/bytcr_rt5651.c
-+++ b/sound/soc/intel/boards/bytcr_rt5651.c
-@@ -943,11 +943,11 @@ static int snd_byt_rt5651_mc_probe(struct platform_device *pdev)
- 		return -ENOENT;
- 	}
- 
--	codec_dev = acpi_get_first_physical_node(adev);
-+	codec_dev = acpi_bus_get_primary_device(adev);
- 	acpi_dev_put(adev);
- 	if (!codec_dev)
- 		return -EPROBE_DEFER;
--	priv->codec_dev = get_device(codec_dev);
-+	priv->codec_dev = codec_dev;
- 
- 	/*
- 	 * swap SSP0 if bytcr is detected
-diff --git a/sound/soc/intel/boards/cht_bsw_rt5645.c b/sound/soc/intel/boards/cht_bsw_rt5645.c
-index 249be121be15..4f20928a3604 100644
---- a/sound/soc/intel/boards/cht_bsw_rt5645.c
-+++ b/sound/soc/intel/boards/cht_bsw_rt5645.c
-@@ -529,7 +529,6 @@ static int snd_cht_mc_probe(struct platform_device *pdev)
- 	const char *platform_name;
- 	struct cht_mc_private *drv;
- 	struct acpi_device *adev;
--	struct device *codec_dev;
- 	bool sof_parent;
- 	bool found = false;
- 	bool is_bytcr = false;
-@@ -583,8 +582,8 @@ static int snd_cht_mc_probe(struct platform_device *pdev)
- 		return -ENOENT;
- 	}
- 
--	/* acpi_get_first_physical_node() returns a borrowed ref, no need to deref */
--	codec_dev = acpi_get_first_physical_node(adev);
-+	struct device *codec_dev __free(put_device) = acpi_bus_get_primary_device(adev);
-+
- 	acpi_dev_put(adev);
- 	if (!codec_dev)
- 		return -EPROBE_DEFER;
-diff --git a/sound/soc/intel/boards/sof_cirrus_common.c b/sound/soc/intel/boards/sof_cirrus_common.c
-index 88fc6cb2bfd4..a4ecb1f9a615 100644
---- a/sound/soc/intel/boards/sof_cirrus_common.c
-+++ b/sound/soc/intel/boards/sof_cirrus_common.c
-@@ -168,7 +168,7 @@ static int cs35l41_compute_codec_conf(void)
- 				 cs35l41_name_prefixes[uid]);
- 			continue;
+diff --git a/sound/soc/amd/acp/acp3x-es83xx/acp3x-es83xx.c b/sound/soc/amd/acp/acp3x-es83xx/acp3x-es83xx.c
+index 3a640e652314..c522b421e1ec 100644
+--- a/sound/soc/amd/acp/acp3x-es83xx/acp3x-es83xx.c
++++ b/sound/soc/amd/acp/acp3x-es83xx/acp3x-es83xx.c
+@@ -428,7 +428,7 @@ static int acp3x_es83xx_probe(struct snd_soc_card *card)
+ 			return -ENXIO;
  		}
--		physdev = get_device(acpi_get_first_physical_node(adev));
-+		physdev = acpi_bus_get_primary_device(adev);
+ 
+-		codec_dev = acpi_get_first_physical_node(adev);
++		codec_dev = acpi_bus_get_primary_device(adev);
  		acpi_dev_put(adev);
- 		if (!physdev) {
- 			pr_devel("Cannot find physical node for HID %s UID %u (%s)\n", CS35L41_HID,
-diff --git a/sound/soc/intel/boards/sof_es8336.c b/sound/soc/intel/boards/sof_es8336.c
-index 9b016136c639..3c0d7155f059 100644
---- a/sound/soc/intel/boards/sof_es8336.c
-+++ b/sound/soc/intel/boards/sof_es8336.c
-@@ -693,11 +693,11 @@ static int sof_es8336_probe(struct platform_device *pdev)
- 		return -ENOENT;
- 	}
- 
--	codec_dev = acpi_get_first_physical_node(adev);
-+	codec_dev = acpi_bus_get_primary_device(adev);
- 	acpi_dev_put(adev);
- 	if (!codec_dev)
- 		return -EPROBE_DEFER;
--	priv->codec_dev = get_device(codec_dev);
-+	priv->codec_dev = codec_dev;
- 
- 	ret = snd_soc_fixup_dai_links_platform_name(&sof_es8336_card,
- 						    mach->mach_params.platform);
+ 		if (!codec_dev) {
+ 			dev_warn(dev, "Error cannot find codec device, will defer probe\n");
 -- 
 2.51.0
 
