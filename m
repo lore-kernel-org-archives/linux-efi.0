@@ -1,65 +1,75 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej2-f38.google.com (mail-ej2-f38.google.com [74.125.228.166])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9854A48F024;
-	Mon, 21 Sep 2026 12:49:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECE6049E5E0
+	for <linux-efi@vger.kernel.org>; Mon, 21 Sep 2026 13:33:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.228.166
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789994954; cv=none; b=T5SOWWm+g6Gs5MoyQwd3DsY3Remg+oIzR3SkOnUg9A/bNrIXbPfstC8vKatKyUSq1b0mJp998GfUMyNfSgd75L2RG4fx4xo0ycMZzZqGHzk5dIYxhhsRrivm/0DwmvyXTUuR+S+7lCi2+jsYNwl1rHz0dfXKaLFfNd8mqULZ810=
+	t=1789997613; cv=none; b=AJetZcPbPyyoCSFlGzHC6cQkIhF1zv636ywa0EHE1SSycUrB7Yy48RdAoPFwhPsyRgagZTA7SZXEZYlP/qu3cXAcdJ0zE+pWCcOWODpngC6Kz1WeySAdYDm/ezc+vpsWmgCa3bOgLxsSZRpj5tDIka1sAlRVK6RlnRWrbqwQhxU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789994954; c=relaxed/simple;
-	bh=jExRX4G5OIZIjwoiUOBNVln0eNxdFkmvZs010Fu3Un0=;
+	s=arc-20240116; t=1789997613; c=relaxed/simple;
+	bh=A9wcNuC9U23eMCWltny9C1/4A+hHO9hclqKdjl3fFpc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TR3stX5w5vbCdloWaVqwlYKRoeDYFy9NX0EgOmv0hjQ5OxVeQsCyuseNwBKg9r3J384yn3Bl61UO5BexKWIubMgJYs6KH1JgZtSRRTkkpvr45il0QCpAczMX560K23Bk0wm8L/GjgAIPpYkQIuvo0Bb7dbKSnuQ6L/HkW998+FE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CYZuZoBS; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=AFH6bPcRKM3vXTAyWbW/83qW6UiDU5AXcHP9OfS3UdJyxkfHEd0h7LmDAHBkvjkvz0t78Afcp5cNqxMMk+f1IppenkwUXZlMbzcKimWQfN1uYkObH2g2E92hwy2gwMJcUIxZD1K4Y3yvzJ6DHADJZ5zakzWs6noO9iYR2DhGd54=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=iycBymeK; arc=none smtp.client-ip=74.125.228.166
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CYZuZoBS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 27C9B1F000FF;
-	Mon, 21 Sep 2026 12:48:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789994951;
-	bh=jExRX4G5OIZIjwoiUOBNVln0eNxdFkmvZs010Fu3Un0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=CYZuZoBSJafqz1gUdp9RzqB0IKQ+dGBhAKDxXduLxsehFa3rE/j7EwJk6mle0ok2S
-	 Kn2XKnlXlvc3M6Nkpk0J+ERuWqkHl3XjoR0AByqpMedzdifr/tERuEMOci5ntShoY0
-	 3BB6RqN0IBpdZ6In9mYJSndT9jm3ItxyBjkB2Bk61tsbkX2eUJaDIJuZnF1StwBNFd
-	 ekjNCgH2frChTpdzEIuOFt157B109FY9aD3KbpoaVJIEgrkXBSKpA1ixhaL2hjPlX3
-	 J+ML1u7s3cOiw6Hi6lg1BdAOYcCvaE9THduolTNeortqDnodKZHo9g8Iq5ttNwhQvH
-	 sfLBOM3SiOd6g==
-Date: Mon, 21 Sep 2026 13:48:56 +0100
-From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-To: Petr Pavlu <petr.pavlu@suse.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
-	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
-	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
-	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
-	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
-	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
-	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
-	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
-	Gary Guo <gary@garyguo.net>, =?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, 
-	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
-	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
-	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
-	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
-	Randy Dunlap <rdunlap@infradead.org>, Kees Cook <kees@kernel.org>, 
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	llvm@lists.linux.dev, linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
-	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v2 13/21] modpost: emit module descriptors as assembly
-Message-ID: <arEnCzzQa9XDd4LT@gremlin>
-References: <20260914-build-speedup-v2-0-39817ec5db23@kernel.org>
- <20260914-build-speedup-v2-13-39817ec5db23@kernel.org>
- <95baacfb-d8d9-4d2f-bc89-592df6f6f8e3@suse.com>
- <arEZrFmXeCO4hZpP@gremlin>
- <2b27bb4b-47e3-45ed-a26a-4b9de2b20542@suse.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iycBymeK"
+Received: by mail-ej2-f38.google.com with SMTP id a640c23a62f3a-c254f560398so453330066b.1
+        for <linux-efi@vger.kernel.org>; Mon, 21 Sep 2026 06:33:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1789997609; x=1790602409; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:content-type:mime-version
+         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=RTnU8avJKar63dWMEB037hHMHXQ/IELuodQg6fpsYos=;
+        b=iycBymeKIXtl8mOdnKsW7v/neMtweuNvg3dzhms+C+QuPIYxg8rAW4wHgbLk6pSJzE
+         e55O1MmjR5q7zOTnBPZs9aHLa+rm93z4IV8J1PD3kc3s946H3VaGKFprpjBtzUrAKExx
+         xlSEimk0Jm64u0UwQ5mVQNlxq2EdZ3efIgixcbGJWmfywahZ2CRGaX+UJ0Ueq8/4ux3l
+         516bjD4xE3fm1Ldjw0QZO7ObpYra/b98SCKR/ku1A8G5LKB7H2nRL2t6K2qOD4sIEf9H
+         eDs4XymsI75Gx10mxgaBOEXg42X/k1Q+ejRaGxyG0coEij3s2tCC1YD77rA0UdvjFpvh
+         1H1g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1789997609; x=1790602409;
+        h=in-reply-to:content-disposition:content-type:mime-version
+         :references:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=RTnU8avJKar63dWMEB037hHMHXQ/IELuodQg6fpsYos=;
+        b=pXyGDzK8s04hHaUVc+5KAuYLsr7Ijmmigq0Rthps+Qzg8Endv4MHJh0+NDd7mwmAFh
+         3uWKLj/Qkh0nR+QpBY4oLedMNfr3LSpZw0ckKeni8DHbnetvFY/5yzqFJJT2SytoRRLe
+         dcUqVE7fjwPdNo7i8q0jN3cjcP3HMtYHrJxpdLBEwTyxAtZxltfXQeOA4wqqYLzuFXoo
+         lR8abtP4sEDNDidS+vXt62oTfjvV5l2WuSzWMK5ED3Xcpv6PlpcH4Me1PmLBAq73JlF/
+         p7ZYjoWI6dg0rQ/UXFMQr1hxv9H8fGpa3wRkpOTgk6HD1aMYhhLE0VRuE8eTibubV9xt
+         y1aw==
+X-Forwarded-Encrypted: i=1; AKwUvByDNeRmOXodVAfX7NS90XE9lN0xdzIMQlIKAk5v5VZHfRAmC7vvD8pVvVZomAVmkrqT8DXu+UL0AKI=@vger.kernel.org
+X-Gm-Message-State: AFuF++k7KElICYF6hgYbvWz2jCEpDCk5V9Ti3va5Gt/12URJAy6E2rkV
+	kdF+UPGhNTaO/BdWdFDvMoIaeq5DqsrLxVGCGCaplizhGE733Dibnrg1
+X-Gm-Gg: AYBFou1yHa6sEmjR907kJURbFwnfgoioVYnbR1a9mRBUF3XCiMjUfQUc/kr15VWTUR2
+	kzMEn/EMp6ojDlGN/0WZy9dDysyiCbAAebHTsQQZt1LPdrCqikA6zCIwHTa9RZqbsyMyDCgVSIB
+	JeNjeHzrlBSNLyWiHyXsm9uZ9JtUG9zfOZC9W5LRpnU8MjexRykd5jAtgPYSs9/QZX/mgGa+p/4
+	GytFdm0lRZcoA0aR5HGUHkJ+i67VU1fWHMoNKCAvrkvlHX1QF/BUwZmiXP9EroV5enxA69ln+pB
+	sWsINNowuw0NGOpikQ8jovrOyOWASG+r6+l11M2uw8Km/5msIoLSl6rrnZo4vC048P/NsPXb8xP
+	EMfjsvYplkanmMUmlcqdq/bYu0at63zmRC5oNrp3Frc35ZcSnqx0O8XuNnxAvAekPSsVqL81Wi9
+	ydNjTzcqduGCORt4ecIWCQt5jRE3LW016pxXhzBJCR2nRdRMV0N7Y0Y0N7sVsGAXpXPPJOxDnhD
+	y+3OQ==
+X-Received: by 2002:a17:906:c10b:b0:c26:19de:9139 with SMTP id a640c23a62f3a-c2a15cf8ea1mr1009022566b.44.1789997608820;
+        Mon, 21 Sep 2026 06:33:28 -0700 (PDT)
+Received: from localhost ([2c0f:3d00:6be:8900:ce5e:9212:ea4b:f30])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c2a358e31fcsm300270166b.59.2026.09.21.06.33.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 21 Sep 2026 06:33:27 -0700 (PDT)
+Date: Mon, 21 Sep 2026 16:33:22 +0300
+From: Dan Carpenter <error27@gmail.com>
+To: Muhammad Bilal <meatuni001@gmail.com>
+Cc: ardb@kernel.org, ivan.hu@canonical.com, ilias.apalodimas@linaro.org,
+	mingo@kernel.org, matt@codeblueprint.co.uk,
+	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] efi/efi_test: bound capsule_count to what the int loop
+ index can hold
+Message-ID: <arEyIsRJKRa7seUh@stanley.mountain>
+References: <20260919192410.272516-1-meatuni001@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -68,67 +78,35 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <2b27bb4b-47e3-45ed-a26a-4b9de2b20542@suse.com>
+In-Reply-To: <20260919192410.272516-1-meatuni001@gmail.com>
 
-On Mon, Sep 21, 2026 at 02:36:30PM +0200, Petr Pavlu wrote:
-> On 9/21/26 1:57 PM, Lorenzo Stoakes (ARM) wrote:
-> > (note there's a v3 see [0])
-> >
-> > [0]: https://lore.kernel.org/linux-kbuild/20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org/
->
-> Thanks, I missed it.
->
-> > On Mon, Sep 21, 2026 at 01:25:09PM +0200, Petr Pavlu wrote:
-> >> On 9/14/26 11:22 AM, Lorenzo Stoakes (ARM) wrote:
-> >>> The sections were confirmed to be byte-for-byte identical to the C version
-> >>> produced - each of .modinfo, .gnu.linkonce.this_module, __ksymtab*,
-> >>> __ksymtab_strings, __kcrctab*, __kflagstab*, __versions,
-> >>> __version_ext_crcs, __version_ext_names and their relocations - for all
-> >>> 8,135 modules of a clang allmodconfig build with CONFIG_COMPILE_TEST off
-> >>> and CONFIG_MODVERSIONS, CONFIG_EXTENDED_MODVERSIONS and
-> >>> CONFIG_MODULE_SRCVERSION_ALL on, and for a sample built with gcc.
-> >>
-> >> Lowering the data to assembly loses debug information for __this_module,
-> >> specifically that it has type `struct module`. It might be worth
-> >
-> > No, it keeps it - every module includes linux/module.h, and the extern
-> > declaration of __this_module carries the type, so all of the stuff gdb
-> > needs (e.g. ptype, p & field access), DWARF etc. is all there in the same
-> > way as with .mod.c.
-> >
-> > Have confirmed locally.
->
-> An extern declaration alone shouldn't cause its name and type to be
-> included in debug information. They should appear only when the variable
-> is referenced by some code.
+On Sun, Sep 20, 2026 at 12:24:10AM +0500, Muhammad Bilal wrote:
+> efi_runtime_query_capsulecaps() only rejects capsule_count == ULONG_MAX
+> (to stop "capsule_count + 1" wrapping the kzalloc_objs() count to
+> zero), but then walks the array with
+> "for (i = 0; i < qcaps.capsule_count; i++)"
+> using a plain int i against an unsigned long bound. A capsule_count
+> between INT_MAX and ULONG_MAX - 1 lets i wrap through INT_MIN instead
+> of ever reaching the loop bound, and capsules[i] with a negative i
+> indexes before the allocation.
+> 
+> kzalloc_objs() would have to succeed at that size for the loop to be
+> reached at all, which bounds this in practice, but the check should
+> not rely on the allocator failing first. Reject any capsule_count
+> that would not fit in the int index up front.
 
-Ack yeah sorry my mistake, I had the LLM check that and should have known
-better than to trust it without reviewing what it said (as I have done for
-the most part for everything in this series).
+No, the it's fine to rely on kzalloc failure.  Don't bother trying
+to silence this false positive.  Fix your checker instead.
 
->
-> Testing with a simple module that previously referenced __this_module
-> only in .mod.c and in no other file, such as lib/test_module.c, shows
-> that the .ko no longer contains debug information for this variable.
->
-> I've verified this behavior with GCC 16 and Clang 19.
+> 
+> Fixes: 092e72c9edab ("efi/efi_test: Prevent an Oops in efi_runtime_query_capsulecaps()")
 
-Ack confirmed locally.
+Certainly, don't add a Fixes tag.
 
-Can put a fix in module-common.c.
+> Signed-off-by: Muhammad Bilal <meatuni001@gmail.com>
+> ---
 
-The LLM came up with a reference as an alternative:
+Regards,
+dan carpenter
 
-static struct module *const __this_module_dbg __used __section(".discard.this_module") = &__this_module;
 
-Would that work? Or should we go with your original suggestion? -
-
-__weak __section(".discard.this_module") struct module __this_module;
-
->
-> --
-> Cheers,
-> Petr
-
---
-Cheers, Lorenzo
