@@ -1,148 +1,121 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3C0B3D3CE2;
-	Tue, 22 Sep 2026 04:14:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D002C383993;
+	Tue, 22 Sep 2026 04:16:28 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790050442; cv=none; b=YsLeSnOcSezApqerv8u+mmhM52KpVBOZUquR4JnQFRbfBK9jdtBlvw/BfEhFg+xhDcjXXYvCpWeF3H9KmzfhxCseTyX/7bCgmAt07UURWhJ/lF8FLZ0rJ9Q3YsAKT2Tx4uRErW3DTHIWxqFaYx3jOyjp1Osl8qc5NjlEo5nb6hE=
+	t=1790050590; cv=none; b=oVOaPGMM1Pk/LZqstaHu/ijCMu+HP3F7mLEgmp3Y/NTFrol05sOIAQG95OvIes1VOzsUPiSmQt+zphnerpjEqjt5gyLfIhbEqW1m1OLrRD1gXvHvA6b5wchDuI6POo9O9PfbdP99W8Zh0Wxjd+PB+ldMaKw6Yqv9fLazwLvNW44=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790050442; c=relaxed/simple;
-	bh=thROVI5oeFdauobN5reuRsogOQP6boITRtrDJcLge1o=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=o5MALiFBW0UK3R3GnTKAZQu4Psmj1WmSbBfvHZn4OL6w4UAJcO8/co9RkjBVBybN47jzqL7mP9DzD9CtDiuLJI4xBhFWkGjCK9f9AVMcGWGnn7Bzp5+N7RYdtdt5rDVcAT+fZ6tGqGMc6sTIEGXZczAzoBXMyIg6DRKXlzvmyH0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lNK1gNgS; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790050590; c=relaxed/simple;
+	bh=sYKvSvuhWweJzHqCA2hqtqha4VqzIFKBfyTY+5/UtU0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ixfBj8NUk64o5plDgioaNiImlcaS4mOWjfTlPS6JJsOUjRUqGgj9ijLJn37MsGVzaUyLBd5DpmtD3Wez6PyDlJYkM4AQ8e1e7eCotGw6OLejLf9x7cBt7ZMu7p0oMpHJcux293N4MEWWRCj0VgJJ0hEMSQrZjbo+cnANsjlB70k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AqZfjAj6; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lNK1gNgS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 477B01F000FF;
-	Tue, 22 Sep 2026 04:13:55 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AqZfjAj6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C0471F000FF;
+	Tue, 22 Sep 2026 04:16:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790050440;
-	bh=3JhbkvL+0f8gvXye8KGOOiOlIpLpto8LiGmguIZMevY=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=lNK1gNgShJJpusLlZPOmjVBfk/yMx/e4K7M/fOX449kJiCAMPuoIP0wPz99MYiEPk
-	 moidshyK8kQSZv4gEJRA0Pglkggl8AXaRI0oTuz6P/YUWZfwhRv3EUs0GPyRU9oD0m
-	 DPlnk9bJmyB1bKQzY9a5yXfJEZpedncnBnPic6OTPA4IOIqeGLYtMKlummlBXb/apz
-	 4XWA9rdTaHLORV4+DmBLyct59dfMpLSbNsx7Nv77bTjg5dSwhXQOoY7wM8ceFqXwFw
-	 QMwyRjlT7mGCTtVnRT9/RwXWri9F/XB/SIJLX0NjGZIjSKApwSf6ITh9Xm8iX0XsQh
-	 rOyCMTm7zwOCA==
-From: Pratyush Yadav <pratyush@kernel.org>
-To: Jonathan Corbet <corbet@lwn.net>,
-	Shuah Khan <skhan@linuxfoundation.org>,
-	Mike Rapoport <rppt@kernel.org>,
-	Pasha Tatashin <pasha.tatashin@soleen.com>,
-	Pratyush Yadav <pratyush@kernel.org>,
-	Alexander Graf <graf@amazon.com>,
-	Andrew Morton <akpm@linux-foundation.org>,
-	David Hildenbrand <david@kernel.org>,
-	Lorenzo Stoakes <ljs@kernel.org>,
-	"Liam R. Howlett" <liam@infradead.org>,
-	Vlastimil Babka <vbabka@kernel.org>,
-	Suren Baghdasaryan <surenb@google.com>,
-	Michal Hocko <mhocko@suse.com>,
-	Thomas Gleixner <tglx@kernel.org>,
-	Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>,
-	"H. Peter Anvin" <hpa@zytor.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Rob Herring <robh@kernel.org>,
-	Saravana Kannan <saravanak@kernel.org>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Baoquan He <baoquan.he@linux.dev>
-Cc: x86@kernel.org,
-	linux-doc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	kexec@lists.infradead.org,
-	linux-mm@kvack.org,
-	linux-efi@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-arch@vger.kernel.org
-Subject: [PATCH v3 4/4] kho: rename kho_scratch= commandline parameter to kho_bootmem=
-Date: Tue, 22 Sep 2026 06:13:16 +0200
-Message-ID: <20260922041321.233986-5-pratyush@kernel.org>
-X-Mailer: git-send-email 2.55.0.1082.g2b9226bbc0-goog
-In-Reply-To: <20260922041321.233986-1-pratyush@kernel.org>
-References: <20260922041321.233986-1-pratyush@kernel.org>
+	s=k20260515; t=1790050588;
+	bh=RqPZN4CQe2FjLfMYs6z6JAlBF3IuRy4nyatTd0khWuY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=AqZfjAj6n1aloLbaYNuH+qUMs6HuFlg2zq2c+COl1oIlvOOdFsofup6L1BojfFZG3
+	 eDf7jHjlOH4Vpf2PN4SueTF6bRdX1PD25MO5skdlnCWPyYnJJkZFE07FeKAYfin4yJ
+	 XzX5wMlTb2osMmCCLoZ6ixDabNJUq3SxyurfbFxoAcFWYJ2rvzsRps+mZm0tXVsHuh
+	 m/3jF8AySYckadqyTY5pfx3pTvieXguUIgtsdWE94PET+HS5kbX0l9OdqusVapFV5D
+	 u9oYzOmdi1z1acm15i6PEzdijE4SUwB/uf9cGzUAETBXJKg2qWIJrY6YfUav3ZqCJ0
+	 o/KHFOjZijkkw==
+Date: Mon, 21 Sep 2026 21:16:21 -0700
+From: Josh Poimboeuf <jpoimboe@kernel.org>
+To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
+	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
+	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
+	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
+	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
+	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
+	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Peter Zijlstra <peterz@infradead.org>, 
+	Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, Gary Guo <gary@garyguo.net>, 
+	=?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, Benno Lossin <lossin@kernel.org>, 
+	Andreas Hindborg <a.hindborg@kernel.org>, Alice Ryhl <aliceryhl@google.com>, 
+	Trevor Gross <tmgross@umich.edu>, Danilo Krummrich <dakr@kernel.org>, 
+	Daniel Almeida <daniel.almeida@collabora.com>, Tamir Duberstein <tamird@kernel.org>, 
+	Alexandre Courbot <acourbot@nvidia.com>, Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, 
+	Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>, 
+	Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
+	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
+	linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, linux-doc@vger.kernel.org, 
+	Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v3 15/20] objtool: cache relocations, do less work,
+ eliminate relocation hash
+Message-ID: <arG07kfxJCmnVPY4@jpoimboe>
+References: <20260917-build-speedup-v3-0-9ecf4163ff36@kernel.org>
+ <20260917-build-speedup-v3-15-9ecf4163ff36@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260917-build-speedup-v3-15-9ecf4163ff36@kernel.org>
 
-From: "Pratyush Yadav (Google)" <pratyush@kernel.org>
+On Thu, Sep 17, 2026 at 05:06:25PM +0100, Lorenzo Stoakes (ARM) wrote:
+> This relies upon the entries within a section being sorted, which is the
+> case for all sections supplied to objtool by the link step during the
+> kernel build.
 
-KHO now no longer uses "scratch" to describe the memory areas passed by
-previous kernel. Instead, it calls them boot memory, or bootmem in
-short. Rename the kho_scratch= commandline parameter to reflect this
-terminology change.
+This is wrong (or at least actively misleading).  Objtool doesn't *only*
+run on linked objects.  In some configs it runs on individual .o files.
+And GCC doesn't sort relocs:
 
-Signed-off-by: Pratyush Yadav (Google) <pratyush@kernel.org>
----
- Documentation/admin-guide/kernel-parameters.txt | 2 +-
- Documentation/admin-guide/mm/kho.rst            | 4 ++--
- kernel/liveupdate/kexec_handover.c              | 6 +++---
- 3 files changed, 6 insertions(+), 6 deletions(-)
+  Relocation section '.rela.text' at offset 0xc0d0 contains 724 entries:
+      Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
+      ...
+  0000000000005c50  0000009000000004 R_X86_64_PLT32         0000000000000000 _raw_spin_lock - 4
+  0000000000005c65  0000009100000004 R_X86_64_PLT32         0000000000000000 _raw_spin_unlock - 4
+  0000000000005c6d  0000019f00000004 R_X86_64_PLT32         0000000000000000 put_files_struct - 4
+  000000000000004d  0000008f00000004 R_X86_64_PLT32         0000000000000000 __x86_return_thunk - 4
+  0000000000000075  0000008f00000004 R_X86_64_PLT32         0000000000000000 __x86_return_thunk - 4
+  00000000000000cd  0000008f00000004 R_X86_64_PLT32         0000000000000000 __x86_return_thunk - 4
 
-diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 6132fa73382a..8a42a924f133 100644
---- a/Documentation/admin-guide/kernel-parameters.txt
-+++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -3031,7 +3031,7 @@ Kernel parameters
- 			"0" | "off" | "n" - kexec handover is disabled
- 			"1" | "on" | "y" - kexec handover is enabled
- 
--	kho_scratch=	[KEXEC,EARLY]
-+	kho_bootmem=	[KEXEC,EARLY]
- 			Format: ll[KMG],mm[KMG],nn[KMG] | nn%
- 
- 			Defines the size of the KHO boot memory region. The
-diff --git a/Documentation/admin-guide/mm/kho.rst b/Documentation/admin-guide/mm/kho.rst
-index a6a09b693413..902d171a780a 100644
---- a/Documentation/admin-guide/mm/kho.rst
-+++ b/Documentation/admin-guide/mm/kho.rst
-@@ -20,8 +20,8 @@ need to enable if you would like to preserve their respective state across
- kexec.
- 
- To use KHO, please boot the kernel with the ``kho=on`` command line
--parameter. You may use ``kho_scratch`` parameter to define size of the
--boot memory regions. For example ``kho_scratch=16M,512M,256M`` will reserve a
-+parameter. You may use ``kho_bootmem`` parameter to define size of the
-+boot memory regions. For example ``kho_bootmem=16M,512M,256M`` will reserve a
- 16 MiB low memory bootmem area, a 512 MiB global bootmem region, and 256 MiB
- per NUMA node bootmem regions on boot.
- 
-diff --git a/kernel/liveupdate/kexec_handover.c b/kernel/liveupdate/kexec_handover.c
-index fe4b76ff5a2c..7018e25e4eda 100644
---- a/kernel/liveupdate/kexec_handover.c
-+++ b/kernel/liveupdate/kexec_handover.c
-@@ -671,12 +671,12 @@ unsigned int kho_bootmem_cnt;
-  * The bootmem areas are scaled by default as percent of memory allocated from
-  * memblock. A user can override the scale with command line parameter:
-  *
-- * kho_scratch=N%
-+ * kho_bootmem=N%
-  *
-  * It is also possible to explicitly define size for a lowmem, a global and
-  * per-node bootmem areas:
-  *
-- * kho_scratch=l[KMG],n[KMG],m[KMG]
-+ * kho_bootmem=l[KMG],n[KMG],m[KMG]
-  *
-  * The explicit size definition takes precedence over scale definition.
-  */
-@@ -751,7 +751,7 @@ static int __init kho_parse_bootmem_size(char *p)
- 
- 	return 0;
- }
--early_param("kho_scratch", kho_parse_bootmem_size);
-+early_param("kho_bootmem", kho_parse_bootmem_size);
- 
- static void __init bootmem_size_update(void)
- {
+(JMP target relocations are emitted in a second pass, for whatever
+reason)
+
+So the hash may actually be needed as a fallback after all.  Or some
+other scheme.
+
+Either way it's overkill to have more than a single fallback.  No second
+fallback for "just in case".  Attempting to search an unhashed section
+(DWARF) can just be a fatal error instead of the "just in case"
+WARN+linear fallback thing.
+
+> @@ -1168,19 +1286,26 @@ static int read_relocs(struct elf *elf)
+>  				return -1;
+>  			}
+>  
+> -			elf_hash_add(reloc, &reloc->hash, reloc_hash(reloc));
+>  			set_sym_next_reloc(reloc, sym->relocs);
+>  			sym->relocs = reloc;
+>  
+>  			nr_reloc++;
+>  		}
+>  		max_reloc = max(max_reloc, nr_reloc);
+> +
+> +		/* DWARF relocs are never looked up, so are not worth indexing. */
+> +		if (is_dwarf_section(rsec->base))
+> +			continue;
+
+This DWARF reloc skipping is a standalone improvement, can you split
+this out to another patch?
+
 -- 
-2.55.0.1082.g2b9226bbc0-goog
-
+Josh
