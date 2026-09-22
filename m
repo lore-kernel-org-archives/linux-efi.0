@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 215FD418A33;
-	Tue, 22 Sep 2026 08:19:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 62F7841A4EE;
+	Tue, 22 Sep 2026 08:20:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790065193; cv=none; b=GQk+8Nw2lK/uaP/CbeUsgaKBCKBZfuvDaoL+3U6YlLAzvJH+ahMaGGBG5dZ8bCLrwXu05XnSJWLDz0XV9VOXXXKefxSRti5Zuy7xzX7/H8ha1y1Zm3Wuy/x3qoeYMIKuarEDUN/hq1naBOe5ONg4Czq2/XeaekEhzAwQNhcifrY=
+	t=1790065221; cv=none; b=H3gg381ZnIg2zCrdO8DA8Wly2aUXGPh6o/+uckIEIR1lfBNr8KfLrNqxCH5831/JxspeIocEwcprNvw2Tc2K6qo9fwcCa9pVEpyk3gEScvftxmbpuSNoLemigp2HiVAUDxfH9V1CvoeGJuaiPW0y0v/JmG1oaP+wDLb5kr/t6lM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790065193; c=relaxed/simple;
-	bh=NxxW+MwnQxUOfAp3KfVr2VuOhebu99ePea2AwZmEnyA=;
+	s=arc-20240116; t=1790065221; c=relaxed/simple;
+	bh=MjXcqMOa9aaX+GA+SOvHHXfb0ZNPyUilydrg52FvFzs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VSlo5CltK3jBGgstgIqf+29N+ZXDtpBkjrkKkunE9L2tGWf3Hr7zOu79ebS49dCx/QtWmCQrKliquUqzmbj77vRHVP7VnOcvxurEyyDvgNw26w+p8iGKgEhq16+YOf5mPG1BEfRGvaKKV54M7oTKstd/FGn/eRb+S4mZXWJGyK0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=oj6dB1Bm; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=Wg4tL5GsjWuwCExZSpH3boFaBHSue187xnOaVwCCAP/j1ukYcgqo/Yed05qA+4rHYggX/7PieESdX2Fewafc3AKKEeI5PM5HD7gonZa9geyWkFE27XlTFgdK8Lrw/+tWk8Lszw8FNjvpt2uN46JAmjwwe3RQ8CAT+LXU0KCcUK0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BHq0Ufby; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="oj6dB1Bm"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BAC191F000FF;
-	Tue, 22 Sep 2026 08:19:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BHq0Ufby"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E14B81F000FF;
+	Tue, 22 Sep 2026 08:20:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790065192;
-	bh=NxxW+MwnQxUOfAp3KfVr2VuOhebu99ePea2AwZmEnyA=;
+	s=k20260515; t=1790065220;
+	bh=MjXcqMOa9aaX+GA+SOvHHXfb0ZNPyUilydrg52FvFzs=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=oj6dB1BmKHYgg7PizPzvu9WcKFtaX74zYU6aeDvM/h7b6sdAHmxkMM1YF8zw9/ydh
-	 kAIo2SRJeBMoE/+xcRObhIolkxJCJ+5oqPQG9pe9GRBCMIaYQYhlNrkUgomFRJJKFM
-	 4zWTjPHXbMKGVdm7II2dLWPOsomxoG3kQFY911pg82xyXJGjrrMDWohvW9m5lPYelU
-	 BzT9ADYHWqeybQrKzJb4PL2g7u8hzjX2bsDlHP54+V/cLNalP1ydjLuvT4zrg37Pwt
-	 XXT1Doi0+dC8KDhvGSnr4AZRXezjQmzYyAfjGhXvd+kQk2CWxFCl16dQSUxZBHTcKS
-	 4bIF+c5CO0iLg==
+	b=BHq0UfbyfXC3CsFAWicoq8LHwkSmHcsYAHHGrfrWMUyluipj6vz6ijaTKolEMEM1J
+	 Nw8k+knsmJKNBRA0PAh/aY26f2NBhp5/aYkikclayWzHwHIKNNDcK/2EkY4trtOhBT
+	 zoNVU4xcJ973Tkh3rx1h2rz0/771pIacFf/zqW3Bq9+jeM8Nw0JK7LljbNJFNK4a89
+	 clh1tMUeIjQoeS+//Z73TU2t1RIYck6Ikwa62GNdjCklIlnBTsJuKZB9HX2mNY9qzj
+	 DeAwnCjRTpAyMZqU3sUXq4XjlK6DCkJGm4iAhJeAf97OpVmO74+NjYahdp9yWQj67s
+	 ielpV/G+29gtQ==
 Received: by finisterre.sirena.org.uk (Postfix, from userid 1000)
-	id 060C81AC56A7; Tue, 22 Sep 2026 09:19:48 +0100 (BST)
-Date: Tue, 22 Sep 2026 10:19:47 +0200
+	id 765281AC56A7; Tue, 22 Sep 2026 09:20:16 +0100 (BST)
+Date: Tue, 22 Sep 2026 10:20:16 +0200
 From: Mark Brown <broonie@kernel.org>
 To: "Rafael J. Wysocki" <rafael@kernel.org>
 Cc: Linux ACPI <linux-acpi@vger.kernel.org>,
@@ -66,11 +66,11 @@ Cc: Linux ACPI <linux-acpi@vger.kernel.org>,
 	Andreas Noever <andreas.noever@gmail.com>,
 	Mika Westerberg <westeri@kernel.org>,
 	Yehezkel Bernat <YehezkelShB@gmail.com>
-Subject: Re: [PATCH v1 14/17] ASoC: amd: acp3x-es83xx: Switch to use
+Subject: Re: [PATCH v1 15/17] ASoC: intel: boards: Switch to use
  acpi_bus_get_primary_device()
-Message-ID: <arI6I_BxOtpGOwia@sirena.co.uk>
+Message-ID: <arI6QPLCu5zU0N3j@sirena.co.uk>
 References: <7995179.EvYhyI6sBW@rafael.j.wysocki>
- <2310746.NgBsaNRSFp@rafael.j.wysocki>
+ <15844908.tv2OnDr8pf@rafael.j.wysocki>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -78,18 +78,18 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="wHQlndWyXpKXz6+B"
+	protocol="application/pgp-signature"; boundary="F5HyqqGHFH+LIPBo"
 Content-Disposition: inline
-In-Reply-To: <2310746.NgBsaNRSFp@rafael.j.wysocki>
+In-Reply-To: <15844908.tv2OnDr8pf@rafael.j.wysocki>
 X-Cookie: Too clever is dumb.
 
 
---wHQlndWyXpKXz6+B
+--F5HyqqGHFH+LIPBo
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Sep 21, 2026 at 09:54:29PM +0200, Rafael J. Wysocki wrote:
+On Mon, Sep 21, 2026 at 09:55:15PM +0200, Rafael J. Wysocki wrote:
 > From: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
 >=20
 > Replace acpi_get_first_physical_node() that is slated for removal
@@ -98,19 +98,19 @@ On Mon, Sep 21, 2026 at 09:54:29PM +0200, Rafael J. Wysocki wrote:
 
 Acked-by: Mark Brown <broonie@kernel.org>
 
---wHQlndWyXpKXz6+B
+--F5HyqqGHFH+LIPBo
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmqyOiMACgkQJNaLcl1U
-h9CBPQf+OX4ZAxsyOFVoLqfS85Wr2AMB3h2WUbbxm4pL+tda7ODHcsiozFiliKvi
-HHqVGJzrKF2nwXn5f7fSwL4N/9c/EYmYGdyjEWuv2KUXCd86pGCLwxM2wu7l2wbB
-L5v4Hd4hgwQz8DgGGPb/DVlGsiFmOxE+ecb6hfgapJiq7UvMXSDSY7Zsuujzran1
-HFazFt4MUr1ZmbeJJXcPBHGJHz7+pVngbiDEiDmugrMwWfiGG6cnPI3UBmd+wFPy
-9ss5nBTiAAdXUiWN+E/S2Sf4wlMUiYSDnsV+pXJntMBbBu3NLljdLdrZ8ZLNdsjt
-yLyrIm/PLgzKxV9EMoLP5LNqSu5bCw==
-=SX0f
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmqyOj8ACgkQJNaLcl1U
+h9Bx+Qf/XQKqT8zAAypC4QDplX84kvvsAuOBYTwqfb7dF3Dw7ytXEeNRU3I4BLOm
+WtgQ9XPLDynBgy2oYWyeQrAXf+LILRzJzH5IOT4uSkKBpqhZPlKLiN5IOaI533yf
+CXEY+C5CQJc8f7RGWm5TZvjJ0yFdUsaHKwiW4NY+znI0ff4cytSD5pbOIg0e4apq
+sYDmAXVgOBOff0Brn55XAi9P3Do1BuMdCfESVLVGIUrJtVJ4ivqwCU9TYBEE3moe
+6zNf5I9zG/zB+mrTrIMccaCakwoEuBlSTod32q6bobVfYweKmudduwme+sjVtS3t
+1uijSSXPHA4q8BFE/4fF7SM1yeWNnQ==
+=4Q3T
 -----END PGP SIGNATURE-----
 
---wHQlndWyXpKXz6+B--
+--F5HyqqGHFH+LIPBo--
