@@ -1,217 +1,387 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF5803939C9;
-	Tue, 22 Sep 2026 11:34:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 854C4542803;
+	Tue, 22 Sep 2026 12:26:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790076849; cv=none; b=RbQLP8M9B/9j7+punKXXIOi2MY+fwy1yxeOq5IGGZ/I/ocQw2eQ8eQkWa8E60PWQAKANNiQTuNg5s1eH8NEZ1FzrpHU1bqX20wb+5xPPU7A4C5Q97mJJFFyA4DP+XRXuthzt+U5rzg8cEXAGCyZ+Nf70/R33zHw+3dDLev1PjfQ=
+	t=1790079984; cv=none; b=FAuG0wNwH+SAmH5YPngsYTnObSjByiXqs0v2L/thLY3g9qx5BVWnl7AndPN3qWgNO+NHsWG/DAkpLf0zKz2dWw9pFzLAZO9CECavxXH+6MsUMR2aZ4FGwjMxcwxSeaGOcjIkt2nfE7nfBAFN3EvDdm/ocMUfry4jo/p5svU8b40=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790076849; c=relaxed/simple;
-	bh=dmzfc6qmGUTIypccHIyMZjitJeRkUw593gO1VcnX6ks=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=DBbfbTkeApIW08oE3XpeSHg2d3TsT8x+tr2yRQfOvjg6/O+r7lFWwbZgREjTNlfB8KxQCNK+IdSzdMfCLUtLhS10XkKpTg0+Bnzkr5MFthdzn76b/HHpCFmLvNHekhv61P/FNvHhJ6e7P5sZZGT/5mElw7/mX1ywF0m97DzMldg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=No/mihmV; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790079984; c=relaxed/simple;
+	bh=eoquj5tB5jHFfjoYkxUmwJrFBEszzIV4b41PcGRLMQE=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=nN4hJZKH6MjJWlsSXUqDx6Iyn9plC+IoI2Eqf+ezQh4M63+7CDuxrz48NueBVecrSFYE99EebjhVZddyRQmk5e2DR5PHPn3li0jp53ynaC8AqZdSzDnd68yxA2JB8aK9q+JkYLaNhYLhpjRPRLXWhcbiITM6hJqU0xatakCZFYM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=I8tZ81ca; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="No/mihmV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6C0D61F000FF;
-	Tue, 22 Sep 2026 11:33:55 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="I8tZ81ca"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7F2BE1F000FF;
+	Tue, 22 Sep 2026 12:26:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790076847;
-	bh=K0n7/b29134nS+A3GTeL665iC4ky8Dr2fCKiIHfp5lU=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=No/mihmVNqVRgSiORpP9GZrDVA8StBXiN3ICK+I68z9IfS5uPNpmcyrkzIQoHi7Eb
-	 W2iHfOjGJwMnPTk579caztzDNPQ/jGV4CuahjjY5463D/f9fhKEqcQbMCN+MzjKIgP
-	 rgQh2QlpecS019H0w4achEtS/nZafcDoy5gI/c7rMkaolkLEN5zOfSqpAZJMAK94r9
-	 HpMSYxAV9aowyRlAPS+S3uM4c9GxpLj/2HST9uuGP4M+0GOjNGpr1WNuzN/HJzPu61
-	 2TldujEpeVrMQtmEH1LZ0FA3bu3HfzIZaN/JhcXBJKXDiZm+tmnrxTXjqZ4mqhLHwJ
-	 hacM3FJVAiYkA==
-Message-ID: <ad2ed3ed-959a-4af3-a2f5-4c21e5af62d6@kernel.org>
-Date: Tue, 22 Sep 2026 13:33:51 +0200
+	s=k20260515; t=1790079982;
+	bh=ae8b3TN83ZmjDyTbv5ji+ujTP5eUZt/KYkx5I5KI/ew=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date;
+	b=I8tZ81caFRQVyU0RmyYnrBGmSPc2buytTskOhAFy/5onDCSXh+lfGso0LrvILhb3M
+	 vN59SxryJfrvqEEpiqSMANlB8LPOFWOc5GJG4WmafQPCvKTV1vvCE2phMbSXQeX0Rt
+	 URuwv9HgKAqQ040rRZ1H42KR9x6TAWTUizuddtg7vPzzqsKlECwNOHMNs3/D+R+j6F
+	 BPUPlR9e7OrrJT5YYt+w7DbuilCm2rM6E1YWUZH+xJS3HLDweWaQVG8O97c5qhhpTf
+	 db16B5IE8Zir96iWRXnDGXqYzrUkmh8rUeLUDk+vM8O2QN7zub9hX36XAJ0QnHUGPU
+	 obVjP5NPqOHzw==
+From: Pratyush Yadav <pratyush@kernel.org>
+To: George Guo <dongtai.guo@linux.dev>
+Cc: rppt@kernel.org,  pasha.tatashin@soleen.com,  pratyush@kernel.org,
+  chenhuacai@kernel.org,  ardb@kernel.org,  shuah@kernel.org,
+  ilias.apalodimas@linaro.org,  akpm@linux-foundation.org,
+  baoquan.he@linux.dev,  ruirui.yang@linux.dev,  guodongtai@kylinos.cn,
+  kernel@xen0n.name,  graf@amazon.com,  liukexin@kylinos.cn,
+  loongarch@lists.linux.dev,  linux-kernel@vger.kernel.org,
+  kexec@lists.infradead.org,  linux-mm@kvack.org,
+  linux-kselftest@vger.kernel.org,  linux-efi@vger.kernel.org
+Subject: Re: [PATCH v5 1/5] efi: add a KHO configuration table channel
+In-Reply-To: <20260904100852.26006-2-dongtai.guo@linux.dev> (George Guo's
+	message of "Fri, 4 Sep 2026 18:08:48 +0800")
+References: <20260904100852.26006-1-dongtai.guo@linux.dev>
+	<20260904100852.26006-2-dongtai.guo@linux.dev>
+Date: Tue, 22 Sep 2026 14:26:17 +0200
+Message-ID: <2vxza4p95v6e.fsf@kernel.org>
+User-Agent: Gnus/5.13 (Gnus v5.13)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 7/9] drivers/base/memory: count inherited poisoned
- frames into the block
-To: Breno Leitao <leitao@debian.org>
-Cc: Ard Biesheuvel <ardb@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Miaohe Lin <linmiaohe@huawei.com>, Naoya Horiguchi
- <nao.horiguchi@gmail.com>, Andrew Morton <akpm@linux-foundation.org>,
- kas@kernel.org, kexec@lists.infradead.org, Lorenzo Stoakes <ljs@kernel.org>,
- "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
- Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
- Michal Hocko <mhocko@suse.com>, Thomas Gleixner <tglx@kernel.org>,
- Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
- Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
- "H. Peter Anvin" <hpa@zytor.com>, Brendan Jackman
- <brendan.jackman@linux.dev>, Johannes Weiner <hannes@cmpxchg.org>,
- Zi Yan <ziy@nvidia.com>, Oscar Salvador <osalvador@suse.de>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- "Rafael J. Wysocki" <rafael@kernel.org>, Danilo Krummrich <dakr@kernel.org>,
- hannes@cmpxchg.or, shakeel.butt@linux.dev, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-mm@kvack.org, rmikey@meta.com,
- riel@surriel.com, harry@kernel.org, linux-cxl@vger.kernel.org,
- driver-core@lists.linux.dev, kernel-team@meta.com
-References: <20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org>
- <20260915-hwpoison-kho-v5-7-3bc7a57bd503@debian.org>
- <de41b78a-8471-4832-be0c-35d410a4499a@kernel.org>
- <aqpczrtIwSG948iv@gmail.com>
- <b8ad366a-a019-4462-9dce-f687f60ee7f2@kernel.org>
- <aqvHHHuWJ-y4WRJZ@gmail.com>
- <caac2cb9-8faa-49bc-ae8a-47c5fd7b7e58@kernel.org>
- <aq1RaH0eE0hZfNpr@gmail.com>
- <fb2237be-f7bc-4ad6-bcb0-7c3ef53136ef@kernel.org>
- <arE3UjqPsxctWckg@gmail.com>
-From: "David Hildenbrand (Arm)" <david@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=david@kernel.org; keydata=
- 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
- qIws/H2t
-In-Reply-To: <arE3UjqPsxctWckg@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 
-On 9/21/26 16:31, Breno Leitao wrote:
-> On Fri, Sep 18, 2026 at 10:16:25PM +0200, David Hildenbrand (Arm) wrote:
->> On 9/18/26 17:22, Breno Leitao wrote:
->>>
->>> Right, we have two source for poisoned page information, today.
->>>
->>> 1) LINUX_EFI_POISONED_MEMORY: Used to track memory block that got
->>>    poisioned, and will be passed around during kexec.
->>> 2) PG_hwpoison on struct page: Used by the memory subsystem to avoid
->>>    touching it.
->>
->> How are both kept in sync? See below.
-> 
-> The EFI table is only written when there is a memory failure. That is
-> the only thing that writes to it:
-> 
-> 	action_result() -> efi_hwpoison_record_pfn() -> set_bit()
-> 
-> You can see it on patch "mm/memory-failure: efi: record
-> hardware-poisoned frames into the poisoned-memory table"
-> 
-> Then, when the kernel kexecs into a second kernel, the EFI config table
-> is queried and the pages are poisoned from it at boot, as they are
-> getting into the buddy allocator, in __free_pages_core().
+On Fri, Sep 04 2026, George Guo wrote:
 
-I am not sure that is really the right place. That means we only poison free
-memory. Shouldn't we poison as soon as we initialize the memmap, and check
-whether any memblock allocations ended up on that poisoned memory and bail out?
+> From: George Guo <guodongtai@kylinos.cn>
+>
+> Add an architecture-agnostic EFI configuration table channel for kexec
+> handover (KHO): a LINUX_EFI_KEXEC_HANDOVER_GUID table entry pointing at
+> a struct linux_efi_kho_data that carries the KHO state FDT and scratch
+> area addresses from one kernel to the next.
+>
+> This is the channel for architectures that boot through EFI without a
+> device tree (e.g. LoongArch), where the /chosen linux,kho-fdt and
+> linux,kho-scratch properties read by early_init_dt_check_kho() are not
+> available.  Architectures with a boot FDT (arm64, riscv) keep using the
+> FDT path and do not select this.
+>
+> The design mirrors the LINUX_EFI_MEMRESERVE_TABLE_GUID channel:
+>
+>   - The EFI stub allocates and installs the table once at boot
+>     (install_kho_table(), next to install_memreserve_table()), so the
+>     config table entry is inherited across kexec for free.
+>
+>   - The reader is a common_tables[] entry in
+>     efi_config_parse_tables().  It reserves the stub-allocated table
+>     with memblock_reserve(), the same way the memreserve entries are
+>     reserved there, so the table is neither handed out by the buddy
+>     allocator nor placed on by kexec segments.  It then maps the table
+>     and calls kho_populate().  No arch-specific setup.c hook is
+>     needed.
+>
+>   - efi_kho_update() rewrites the table contents in place before a
+>     kexec; the config table array is never rebuilt and st->tables is
+>     never switched, unlike the per-arch approach it replaces.  The
+>     table stays persistently mapped from an early_initcall, the same
+>     way the memreserve root is, so the update also works on the crash
+>     kexec path.
+>
+> Gated behind CONFIG_EFI_KHO, selected by architectures that use this
+> channel.
+>
+> Signed-off-by: George Guo <guodongtai@kylinos.cn>
+> ---
+>  drivers/firmware/efi/Kconfig            | 12 ++++
+>  drivers/firmware/efi/efi.c              | 78 +++++++++++++++++++++++++
+>  drivers/firmware/efi/libstub/efi-stub.c | 25 ++++++++
+>  include/linux/efi.h                     | 36 ++++++++++++
+>  4 files changed, 151 insertions(+)
+>
+> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+> index 29e0729299f5..d6c1372484b4 100644
+> --- a/drivers/firmware/efi/Kconfig
+> +++ b/drivers/firmware/efi/Kconfig
+> @@ -314,6 +314,18 @@ config EFI_SBAT_FILE
+>  
+>  	  If unsure, leave blank.
+>  
+> +config EFI_KHO
+> +	bool
+> +	depends on EFI_STUB && EFI_GENERIC_STUB && KEXEC_HANDOVER
+> +	help
+> +	  Carry the KHO state (the KHO state FDT and the scratch area) from
+> +	  one kernel to the next across kexec via an EFI configuration table
+> +	  entry under LINUX_EFI_KEXEC_HANDOVER_GUID, for architectures that
+> +	  boot through EFI without a device tree (e.g. LoongArch).
+> +
+> +	  Architectures with a boot FDT (arm64, riscv) use the /chosen FDT
+> +	  path instead and do not select this.
 
-[...]
+I don't like adding a config for this sort of thing. Do we really need
+this? Why not just have the code always compiled and only used by
+loongarch? I don't really see we need a user decision for this sort of
+thing.
 
+> +
+>  endmenu
+>  
+>  config UEFI_CPER
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 0327a39d31fa..6380cfab1493 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -24,6 +24,7 @@
+>  #include <linux/initrd.h>
+>  #include <linux/io.h>
+>  #include <linux/kexec.h>
+> +#include <linux/kexec_handover.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/random.h>
+>  #include <linux/reboot.h>
+> @@ -62,6 +63,9 @@ unsigned long __ro_after_init efi_rng_seed = EFI_INVALID_TABLE_ADDR;
+>  static unsigned long __initdata mem_reserve = EFI_INVALID_TABLE_ADDR;
+>  static unsigned long __initdata rt_prop = EFI_INVALID_TABLE_ADDR;
+>  static unsigned long __initdata initrd = EFI_INVALID_TABLE_ADDR;
+> +#ifdef CONFIG_EFI_KHO
+> +static unsigned long __ro_after_init efi_kho_table_phys = EFI_INVALID_TABLE_ADDR;
+> +#endif
+>  
+>  extern unsigned long primary_display_table;
+>  
+> @@ -629,6 +633,9 @@ static const efi_config_table_type_t common_tables[] __initconst = {
+>  	{EFI_TCG2_FINAL_EVENTS_TABLE_GUID,	&efi.tpm_final_log,	"TPMFinalLog"	},
+>  	{EFI_CC_FINAL_EVENTS_TABLE_GUID,	&efi.tpm_final_log,	"CCFinalLog"	},
+>  	{LINUX_EFI_MEMRESERVE_TABLE_GUID,	&mem_reserve,		"MEMRESERVE"	},
+> +#ifdef CONFIG_EFI_KHO
+> +	{LINUX_EFI_KEXEC_HANDOVER_GUID,		&efi_kho_table_phys,	"KHO"		},
+> +#endif
+>  	{LINUX_EFI_INITRD_MEDIA_GUID,		&initrd,		"INITRD"	},
+>  	{EFI_RT_PROPERTIES_TABLE_GUID,		&rt_prop,		"RTPROP"	},
+>  #ifdef CONFIG_OVMF_DEBUG_LOG
+> @@ -806,6 +813,31 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
+>  		}
+>  	}
+>  
+> +#ifdef CONFIG_EFI_KHO
+> +	if (efi_kho_table_phys != EFI_INVALID_TABLE_ADDR) {
+> +		struct linux_efi_kho_data *kho;
+> +
+> +		/*
+> +		 * Reserve the stub-allocated table so it is neither handed
+> +		 * out by the buddy allocator nor placed on by kexec
+> +		 * segments, mirroring the memreserve handling above.  This
+> +		 * runs on every boot, so it also protects the table in the
+> +		 * next kernel until it reads it.
+> +		 */
 
-> 
->>> You might ask why I do not just count the bits set in the bitmape and
->>> multiply by the frames a unit covers.
->>>
->>> That was my first try. It over-counts: a bit stands for a whole 2M unit,
->>> but only the frames that reach __free_pages_core() get flagged -- CMA
->>> comes back through __free_pages(), the initrd and __init memory through
->>> free_reserved_pages(), and KHO-preserved frames never get an initialised
->>> struct page at all.
->>
->> Why are other hwpoisoned pages not flagged? If initrd or anything else is
->> hwpoisoned, we should not be running this kernel?
-> 
-> For the initrd and the image, the previous kernel's record cannot stop
-> this kernel's loader from placing them on a bad frame. If that happens
-> we consumed the poison in the relocation memcpy, long before any of this
-> code runs. That is the kexec segment placement problem, which Kiryl
-> raised on the RFC and which I split into its own series, which is landed
-> in some mm tree already.
-> 
-> https://lore.kernel.org/all/20260812-kexec_posioned-v6-0-e477887086f0@debian.org/
-> 
-> 
->>>
->>> And the over-count cannot be undone later.
->>
->> The inconsistency is worrisome.
->> I wouldn't say that I hate it but it certainly has "great, more hwpoison hacks"
->> smell to it.
->>
->> We have enough semi-broken hwpoison ... stuff ... in our code base already. So
->> I'm hoping we're not adding more to it?
->>
->>> If the walk itself is what bothers you, the way out is not the bitmap
->>> but counting as we flag: hwpoison_boot_page() already knows the pfn, so
->>> it can bump a per-block-id counter in a small memblock array that
->>> memblk_nr_poison_init() then just reads.
->>
->> The inconsistency is what worries me.
->>
->> And that we have pages we are told are hwpoisoned but we seem to ignore that and
->> carry on with our kernel letting it boot?
-> 
-> The walk exists precisely because of that inconsistency: the counter has
-> to match the frames that actually carry the flag, and the bitmap says
-> more than that.
-> 
-> If we drop the page walk, then there is change for inconsistency, but,
-> as-is, there is no inconsistency.
-> 
-> So, I am planning to keep the page walk above, when there is a poisoned
-> page in the memory block, avoiding any inconsitency.
-How about we keep it very simple and don't mix information from two different
-sources? That is, remove that bitmap scan here entirely. We should process the
-bitmap exactly once when initializing the memmap.
+Nit: this comment is too wordy. Can you please make it more concise and
+to the point?
 
-From that point on, the memmap should be our reliable source of information.
+> +		memblock_reserve(efi_kho_table_phys, sizeof(*kho));
+> +
+> +		kho = early_memremap(efi_kho_table_phys, sizeof(*kho));
+> +		if (kho) {
+> +			if (kho->fdt_addr)
 
-For this code here, just remember globally whether we hwpoisoned any page. If
-so, just walk the memmap. If not (the 99.9999% of all systems, no need to scan
-anything).
+When can kho->fdt_addr be NULL? Also, perhaps print a warning if
+early_memremap() fails?
+
+> +				kho_populate((phys_addr_t)kho->fdt_addr,
+> +					     kho->fdt_size,
+> +					     (phys_addr_t)kho->scratch_addr,
+> +					     kho->scratch_size);
+> +			early_memunmap(kho, sizeof(*kho));
+> +		}
+> +	}
+> +#endif
+> +
+>  	if (rt_prop != EFI_INVALID_TABLE_ADDR) {
+>  		efi_rt_properties_table_t *tbl;
+>  
+> @@ -1171,6 +1203,52 @@ static int __init efi_memreserve_root_init(void)
+>  }
+>  early_initcall(efi_memreserve_root_init);
+>  
+> +#ifdef CONFIG_EFI_KHO
+> +static struct linux_efi_kho_data *efi_kho_table __ro_after_init;
+> +
+> +static int __init efi_kho_table_init(void)
+> +{
+> +	if (efi_kho_table_phys == EFI_INVALID_TABLE_ADDR)
+> +		return 0;
+> +
+> +	/*
+> +	 * Keep a persistent mapping of the table, the same way
+> +	 * efi_memreserve_root_init() keeps the memreserve root mapped:
+> +	 * efi_kho_update() is also called on the crash kexec path, where
+> +	 * memremap() is no longer an option.
+> +	 */
+
+No need to mention memreserve. Just explain the reason here. And keep it
+as short and to the point as possible.
+
+> +	efi_kho_table = memremap(efi_kho_table_phys, sizeof(*efi_kho_table),
+> +				 MEMREMAP_WB);
+> +	WARN_ON_ONCE(!efi_kho_table);
+> +
+> +	return 0;
+> +}
+> +early_initcall(efi_kho_table_init);
+> +
+> +/*
+> + * Update the KHO config table in place before a kexec, so the next kernel
+> + * finds the current handover state.  Mirrors efi_mem_reserve_persistent():
+> + * the config table entry was installed once by the EFI stub and is inherited
+> + * across kexec, so only the table contents are rewritten here -- the config
+> + * table array is never rebuilt and st->tables is never switched.
+> + */
+
+This is unreadable. Please add a human touch to this.
+
+And once again, the fact that it mirrors efi_mem_reserve_persistent()
+isn't important.
+
+> +int efi_kho_update(phys_addr_t fdt_addr, u64 fdt_size,
+> +		   phys_addr_t scratch_addr, u64 scratch_size)
+> +{
+> +	struct linux_efi_kho_data *kho = efi_kho_table;
+> +
+> +	if (!kho)
+> +		return -ENODEV;
+
+Why ENODEV? Wouldn't ENOENT be a tiny bit better?
+
+> +
+> +	kho->fdt_addr		= fdt_addr;
+> +	kho->fdt_size		= fdt_size;
+> +	kho->scratch_addr	= scratch_addr;
+> +	kho->scratch_size	= scratch_size;
+> +
+> +	return 0;
+> +}
+> +#endif
+> +
+>  #ifdef CONFIG_KEXEC
+>  static int update_efi_random_seed(struct notifier_block *nb,
+>  				  unsigned long code, void *unused)
+> diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
+> index 42d6073bcd06..751f46280433 100644
+> --- a/drivers/firmware/efi/libstub/efi-stub.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub.c
+> @@ -100,6 +100,29 @@ static void install_memreserve_table(void)
+>  		efi_err("Failed to install memreserve config table!\n");
+>  }
+>  
+> +static void install_kho_table(void)
+> +{
+> +#ifdef CONFIG_EFI_KHO
+> +	struct linux_efi_kho_data *kho;
+> +	efi_guid_t kho_table_guid = LINUX_EFI_KEXEC_HANDOVER_GUID;
+> +	efi_status_t status;
+> +
+> +	status = efi_bs_call(allocate_pool, EFI_LOADER_DATA, sizeof(*kho),
+> +			     (void **)&kho);
+> +	if (status != EFI_SUCCESS) {
+> +		efi_err("Failed to allocate KHO config table!\n");
+> +		return;
+> +	}
+> +
+> +	*kho = (struct linux_efi_kho_data){};
+> +
+> +	status = efi_bs_call(install_configuration_table, &kho_table_guid,
+> +			     kho);
+> +	if (status != EFI_SUCCESS)
+> +		efi_err("Failed to install KHO config table!\n");
+> +#endif
+> +}
+> +
+>  static u32 get_supported_rt_services(void)
+>  {
+>  	const efi_rt_properties_table_t *rt_prop_table;
+> @@ -180,6 +203,8 @@ efi_status_t efi_stub_common(efi_handle_t handle,
+>  
+>  	install_memreserve_table();
+>  
+> +	install_kho_table();
+> +
+>  	status = efi_boot_kernel(handle, image, image_addr, cmdline_ptr);
+>  
+>  	free_primary_display(dpy);
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index aa15ff88539b..564b3cbd5ccb 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -422,6 +422,7 @@ void efi_native_runtime_setup(void);
+>  #define LINUX_EFI_COCO_SECRET_AREA_GUID		EFI_GUID(0xadf956ad, 0xe98c, 0x484c,  0xae, 0x11, 0xb5, 0x1c, 0x7d, 0x33, 0x64, 0x47)
+>  #define LINUX_EFI_BOOT_MEMMAP_GUID		EFI_GUID(0x800f683f, 0xd08b, 0x423a,  0xa2, 0x93, 0x96, 0x5c, 0x3c, 0x6f, 0xe2, 0xb4)
+>  #define LINUX_EFI_UNACCEPTED_MEM_TABLE_GUID	EFI_GUID(0xd5d1de3c, 0x105c, 0x44f9,  0x9e, 0xa9, 0xbc, 0xef, 0x98, 0x12, 0x00, 0x31)
+> +#define LINUX_EFI_KEXEC_HANDOVER_GUID		EFI_GUID(0xc941b6c7, 0x7b3f, 0x4af6,  0x9e, 0x50, 0xfc, 0xb3, 0xa8, 0x86, 0x8a, 0x17)
+>  
+>  #define RISCV_EFI_BOOT_PROTOCOL_GUID		EFI_GUID(0xccd15fec, 0x6f73, 0x4eec,  0x83, 0x95, 0x3e, 0x69, 0xe4, 0xb9, 0x40, 0xbf)
+>  
+> @@ -1273,6 +1274,41 @@ struct linux_efi_memreserve {
+>  
+>  void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size);
+>  
+> +#ifdef CONFIG_EFI_KHO
+> +/*
+> + * The LINUX_EFI_KEXEC_HANDOVER_GUID config table points to this structure.
+> + * It carries the kexec handover (KHO) state from the current kernel to the
+> + * next one: the addresses of the KHO state FDT and of the scratch area.
+> + *
+> + * This is the handover channel for architectures that boot through EFI
+> + * without a device tree (e.g. LoongArch), where the /chosen linux,kho-fdt
+> + * and linux,kho-scratch properties read by early_init_dt_check_kho() are not
+> + * available.  The EFI stub allocates and installs the table once at boot;
+> + * the current kernel updates its contents before a kexec, and the next
+> + * kernel reads it back and calls kho_populate().
+
+This has too much information. You need to make it more to the point.
+For example, "without a device tree" already implies there is no /chosen
+property in the first place. No need to mention the function either.
+
+The lifetime of the table is certainly useful information but again,
+should be much more clear and to the point.
+
+Also, you should document what each of the members of the struct mean.
+
+> + *
+> + * The layout is an ABI between the two kernels and carries no version
+> + * field: an incompatible change must use a new GUID.  The handover payload
+> + * itself is versioned separately by the compatible string of the KHO state
+> + * FDT, which kho_populate() checks.
+> + */
+> +struct linux_efi_kho_data {
+> +	u64 fdt_addr;
+> +	u64 fdt_size;
+> +	u64 scratch_addr;
+> +	u64 scratch_size;
+
+Note: I recently sent a series that renames scratch to bootmem [0]. It
+looks close to landing. So you likely need to rename this to
+bootmem_{addr,size}.
+
+> +} __packed;
+
+Why __packed?
+
+> +
+> +int efi_kho_update(phys_addr_t fdt_addr, u64 fdt_size,
+> +		   phys_addr_t scratch_addr, u64 scratch_size);
+> +#else
+> +static inline int efi_kho_update(phys_addr_t fdt_addr, u64 fdt_size,
+> +				 phys_addr_t scratch_addr, u64 scratch_size)
+> +{
+> +	return 0;
+> +}
+> +#endif
+> +
+>  /*
+>   * The LINUX_EFI_MOK_VARIABLE_TABLE_GUID config table can be provided
+>   * to the kernel by an EFI boot loader. The table contains a packed
 
 -- 
-Cheers,
-
-David
+Regards,
+Pratyush Yadav
