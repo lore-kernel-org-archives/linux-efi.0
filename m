@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85EE33B8950;
-	Wed, 23 Sep 2026 17:20:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B6FA83E6DFF;
+	Wed, 23 Sep 2026 17:20:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790184046; cv=none; b=m051nB2rxDvMiqTeG+N1BWRhvb4cG7MKwDI+AL+eq9FKR9zjQHb8R10/Bx8LOpcXOyZbqEDy96fCOZrbkfm9WydIRTz9YxfBFBWAlltC32I5qHqitw+VKuGDTbO8N0XK97xJE7dVuB/dM+weNXdftRONqH+qZv7UySq3HH8S1Xs=
+	t=1790184059; cv=none; b=EvqQwt3wWyBLuW+clYJRdp0m998FBJdqK/29ACyzjU1AT3+KxzX/f1IvZsdK5YqDPq1DusvRvv6u+QoQrNCI9Ymex/MIVE/5XuVBWwLqpY8whCO5qdJU5q/0rTw90OmpOzUiGYI3/yyv4pgWDfbDNYrcEiUxGSLvGt/z62qb2Wg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790184046; c=relaxed/simple;
-	bh=2ycKJa3Z+VPxjsH2ZNqIj7aez7jMdJGovrqulxA0Kxk=;
+	s=arc-20240116; t=1790184059; c=relaxed/simple;
+	bh=PDJB8j9sKc9Q/yg7cUV7TTvciusJhucipt52hAU2ZhY=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=X41/RpsrC9nD70x8QOBevtciojlvdzavcGieb/Nasx5E+ManABAh9qlVyzlEYmJMRSIzcM7aAhtiTR8fbNykQHyYDaZnifGkCB8AvE0JfEFNLeCRCRM7Jn+BRmyxeL3anPRSZOcMfedDVNqH0oMHCysfHAl0YOn55bHNl79WlkA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Qr9bHBGN; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=AeFFN2URadWO+hqWqvnlwp3Ze6tmafAMR5sEy1pMAN/80XVnGLiQqNB/da06Oc9NGVXJXo5/oiL7pCzcDokVFJ46v9Y3yxMh3b+B3+JhdAyCALza7y66BOZEFB3Z0T4RuqefigiFTiSdMLFsNmsRpt5yfXvVZm3ioECDLEI8ANk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=n4ivzPGH; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Qr9bHBGN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 50E441F000FF;
-	Wed, 23 Sep 2026 17:20:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="n4ivzPGH"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B380F1F00893;
+	Wed, 23 Sep 2026 17:20:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790184044;
-	bh=nAtazO6mnI0TAu3XSRj1hcNvKpCr7+vo326YW4gA3HQ=;
+	s=k20260515; t=1790184056;
+	bh=B1ULND6qUkIjbcoTYBYFJ2YhtgqM4e1Z1reiowbMJ8k=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=Qr9bHBGN0mF2HQTspSD3iLMXyTcdzORmlolCOHaxAer4eQhNxjF0zCmtK3Clxr7iP
-	 6RwQ49+v55ui0QH+aAZ0ihxlyxcPPhTXmXuVElYcKELkGfuc9M1g6urv3+w03OH8fG
-	 frgkaKADBOCeq512byiCkewp2+fi3lLBup4wVOUsEqGXMkcpaaLZCTuxI/fGnbFgL8
-	 8KZJwLdF1dw2EakkP8ScBh+o4Rte/vxWr1GBR7XhoRJG9xLVFquIcFEk29wtD8mSJ3
-	 +LO51la90FiWZm4NL6xGSquO+U45Omw5tZ+rq4WepLpysS5Xr9sC77yE5TMvOs0lOE
-	 zqqBzQxw4iupA==
+	b=n4ivzPGHFOaVKa0QM4qp2cl2pNZbc5XzOdstT6g/HfEo5a5jBkxSx30mSH+AdQFxy
+	 qh/4kP+atkWGJ12sRHfF5BC4Hr40Yq971TO+GkE3/7UuXYYYUHrw9CmjdZz34wiivg
+	 E1qlleJKnrfo8QwtUxJHyuKWZbPtfF51cCvHLxgEsoHy8Vp8T65suXiIZck7r6LD1h
+	 nC0g+CpMaK5vaKpiwnO0J5JTrm8C8zfj3v+u4Bz8Ol2C2vBLHCef/fj/MYg9WKN2H6
+	 HT/aItgJrz80pPqDJlwkiKjHdRx0pQd/NDS2rvmAZxi0dCVok5YDDuO/0HKCr38Akj
+	 vRAPLlEhkZvuw==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Wed, 23 Sep 2026 18:18:00 +0100
-Subject: [PATCH v4 11/22] kbuild: move the toolchain checks into
- scripts/Kconfig.toolchain
+Date: Wed, 23 Sep 2026 18:18:01 +0100
+Subject: [PATCH v4 12/22] kbuild: avoid re-running compiler and linker
+ probes
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -38,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260923-build-speedup-v4-11-73128809a4a4@kernel.org>
+Message-Id: <20260923-build-speedup-v4-12-73128809a4a4@kernel.org>
 References: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
 In-Reply-To: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -76,457 +76,445 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-hardening@vger.kernel.org, Petr Pavlu <petr.pavlu@suse.com>, 
  "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=14806; i=ljs@kernel.org;
- h=from:subject:message-id; bh=2ycKJa3Z+VPxjsH2ZNqIj7aez7jMdJGovrqulxA0Kxk=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLK2cF7m6dYWXchlHRSooTdh/6oljn5Vh33T7aLvMZzMj
- Gcrz5raUcrCIMbFICumyPL8i/j+IJGweZ0X/N1g5rAygQxh4OIUgInsaGdk6Ks6ynb6616R/UHc
- boVT89O5n2qFPzg8gT3xLvOO7mnh+Qz/8xMET0c0bWW4pBTJqVS8JW/2xu/KWxUNlKpu57rO+Nv
- IBAA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=18854; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=PDJB8j9sKc9Q/yg7cUV7TTvciusJhucipt52hAU2ZhY=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLK2cF5+cW7Oi8ofPw/7TXxRM1M57JnkyW/PVSU9Xv9yz
+ zQQ2Cv4s6OUhUGMi0FWTJHl+Rfx/UEiYfM6L/i7wcxhZQIZwsDFKQATmfGd4X+a+5E7fKf/5cZe
+ db9Y3GV04dtJfpmHWRymkRWX3Dy3bLvEyPBtR15Bo/riG8w3D/1PLmVO/bwz6f865sSpRtueTnt
+ jUcoGAA==
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-init/Kconfig opens with two hundred lines identifying the compiler,
-assembler, linker and rustc and probing which options they support, none of
-it to do with init.
+Each kernel make invocation begins with ~30 compiler and linker runs each
+of which performs duplicate probe for a number of compiler and linker
+options.
 
-Move them into their own file, sourced from the top of init/Kconfig, so
-that the next commit can add to them without growing init/Kconfig further.
+This is useless work - the compiler and its version is known, so use these
+to determine which options are available, once.
 
-Also update MAINTAINERS to put the new file in the KCONFIG entry.
+Using the newly introduced cc-option-str, track the result of each probe in
+CC_OPT_*, LD_OPT_* variables and have Makefile's simply append the symbol.
 
-No functional change intended.
+Some care has to be taken around negative options, i.e. -Wno-xxx, as gcc
+accepts an unknown -Wno- without complaint and only complains later, so
+instead probe the positive form for these cases.
+
+Use CC_HAS_* For those probes that gate a Makefile conditional rather than
+a simple option, as per the established pattern for this.
+
+This change avoids a subtle issue with ppc32 (big endian) - clang doesn't
+accept -fno-stack-clash-protection on this sub-target, so keep this option
+in the Makefile.
+
+With gcc and clang, defconfig and allmodconfig, the recorded command
+lines are unchanged, a build with nothing to do rebuilds nothing and W=1
+continues to function correctly.
+
+Doing this improves all builds, but has a particularly positive impact on
+no-op builds (builds where nothing has changed).
+
+Whole build, 128-thread Threadripper 9980X, best of N runs:
+
+                                         before   after     delta
+                                         -------------------------------
+  x86 defconfig, no-op make, gcc           0.78s    0.60s    -0.18s (-23%)
+  x86 defconfig, no-op make, clang         0.94s    0.66s    -0.28s (-30%)
+  x86 defconfig, touch mm/vma.c, gcc        8.6s     8.5s    -0.16s (-2%)
+  x86 defconfig, touch mm/vma.c, clang      8.0s     7.7s    -0.24s (-3%)
+  x86 defconfig, clean, clang              29.8s    29.4s    -0.37s (-1%)
+  x86 allmodconfig, no-op make, gcc        12.9s    12.7s    -0.23s (-2%)
+  x86 allmodconfig, no-op make, clang      14.2s    13.9s    -0.29s (-2%)
+  x86 allmodconfig, touch mm/vma.c, clang  32.2s    31.9s    -0.30s (-1%)
 
 Assisted-by: LLM
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- MAINTAINERS               |   1 +
- init/Kconfig              | 197 +--------------------------------------------
- scripts/Kconfig.toolchain | 198 ++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 200 insertions(+), 196 deletions(-)
+ Makefile                              | 23 +++++------
+ arch/arm64/kernel/pi/Makefile         |  2 +-
+ arch/riscv/kernel/pi/Makefile         |  2 +-
+ arch/x86/Kconfig                      | 17 ++++++++
+ arch/x86/Makefile                     | 12 +++---
+ drivers/firmware/efi/libstub/Makefile |  2 +-
+ scripts/Kconfig.toolchain             | 74 +++++++++++++++++++++++++++++++++++
+ scripts/Makefile.warn                 | 28 ++++++-------
+ 8 files changed, 126 insertions(+), 34 deletions(-)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 6215fcb07770..46c4f7e3061c 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -14057,6 +14057,7 @@ Q:	https://patchwork.kernel.org/project/linux-kbuild/list/
- T:	git git://git.kernel.org/pub/scm/linux/kernel/git/kbuild/linux.git
- F:	Documentation/kbuild/kconfig*
- F:	scripts/Kconfig.include
-+F:	scripts/Kconfig.toolchain
- F:	scripts/kconfig/
+diff --git a/Makefile b/Makefile
+index 554c9003a4d9..cbfee8d325a5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -946,8 +946,8 @@ KBUILD_RUSTFLAGS += -Coverflow-checks=$(if $(CONFIG_RUST_OVERFLOW_CHECKS),y,n)
+ ifdef CONFIG_CC_IS_GCC
+ # gcc-10 renamed --param=allow-store-data-races=0 to
+ # -fno-allow-store-data-races.
+-KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
+-KBUILD_CFLAGS	+= $(call cc-option,-fno-allow-store-data-races)
++KBUILD_CFLAGS	+= $(CONFIG_CC_OPT_ALLOW_STORE_DATA_RACES_PARAM)
++KBUILD_CFLAGS	+= $(CONFIG_CC_OPT_NO_ALLOW_STORE_DATA_RACES)
+ endif
  
- KCORE
-diff --git a/init/Kconfig b/init/Kconfig
-index 8583d9f06c52..352601b44b5c 100644
---- a/init/Kconfig
-+++ b/init/Kconfig
-@@ -1,201 +1,6 @@
- # SPDX-License-Identifier: GPL-2.0-only
--config CC_VERSION_TEXT
--	string
--	default "$(CC_VERSION_TEXT)"
--	help
--	  This is used in unclear ways:
--
--	  - Re-run Kconfig when the compiler is updated
--	    The 'default' property references the environment variable,
--	    CC_VERSION_TEXT so it is recorded in include/config/auto.conf.cmd.
--	    When the compiler is updated, Kconfig will be invoked.
--
--	  - Ensure full rebuild when the compiler is updated
--	    include/linux/compiler-version.h contains this option in the comment
--	    line so fixdep adds include/config/CC_VERSION_TEXT into the
--	    auto-generated dependency. When the compiler is updated, syncconfig
--	    will touch it and then every file will be rebuilt.
--
--config CC_IS_GCC
--	def_bool $(success,test "$(cc-name)" = GCC)
--
--config GCC_VERSION
--	int
--	default $(cc-version) if CC_IS_GCC
--	default 0
--
--config CC_IS_CLANG
--	def_bool $(success,test "$(cc-name)" = Clang)
--
--config CLANG_VERSION
--	int
--	default $(cc-version) if CC_IS_CLANG
--	default 0
--
--config AS_IS_GNU
--	def_bool $(success,test "$(as-name)" = GNU)
--
--config AS_IS_LLVM
--	def_bool $(success,test "$(as-name)" = LLVM)
--
--config AS_VERSION
--	int
--	# Use clang version if this is the integrated assembler
--	default CLANG_VERSION if AS_IS_LLVM
--	default $(as-version)
--
--config LD_IS_BFD
--	def_bool $(success,test "$(ld-name)" = BFD)
--
--config LD_VERSION
--	int
--	default $(ld-version) if LD_IS_BFD
--	default 0
--
--config LD_IS_LLD
--	def_bool $(success,test "$(ld-name)" = LLD)
--
--config LLD_VERSION
--	int
--	default $(ld-version) if LD_IS_LLD
--	default 0
--
--config RUSTC_VERSION
--	int
--	default $(rustc-version)
--	help
--	  It does not depend on `RUST` since that one may need to use the version
--	  in a `depends on`.
--
--config RUST_IS_AVAILABLE
--	def_bool $(success,$(srctree)/scripts/rust_is_available.sh)
--	help
--	  This shows whether a suitable Rust toolchain is available (found).
--
--	  Please see Documentation/rust/quick-start.rst for instructions on how
--	  to satisfy the build requirements of Rust support.
--
--	  In particular, the Makefile target 'rustavailable' is useful to check
--	  why the Rust toolchain is not being detected.
--
--config RUSTC_LLVM_VERSION
--	int
--	default $(rustc-llvm-version)
--
--config RUSTC_LLVM_MAJOR_VERSION
--	int
--	default $(shell,expr $(rustc-llvm-version) / 10000)
+ ifdef CONFIG_READABLE_ASM
+@@ -1011,18 +1011,20 @@ endif
+ endif
  
--config RUSTC_CLANG_LLVM_COMPATIBLE
--	bool
--	default y if CC_IS_CLANG && RUSTC_LLVM_MAJOR_VERSION = $(shell,expr $(cc-version) / 10000)
--	help
--	  This indicates whether Rust and Clang use LLVM of the same major
--	  version.
--
--	  Operations involving handling LLVM IR or bitcode (e.g. cross-language
--	  LTO) require the same LLVM major version to work properly. For best
--	  compatibility it is recommended that the exact same LLVM is used.
--
--config ARCH_HAS_CC_CAN_LINK
--	bool
--
--config CC_CAN_LINK
--	bool
--	default ARCH_CC_CAN_LINK if ARCH_HAS_CC_CAN_LINK
--	default $(cc_can_link_user,$(m64-flag)) if 64BIT
--	default $(cc_can_link_user,$(m32-flag))
--
--# Fixed in GCC 14, 13.3, 12.4 and 11.5
--# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=113921
--config GCC_ASM_GOTO_OUTPUT_BROKEN
--	bool
--	depends on CC_IS_GCC
--	default y if GCC_VERSION < 110500
--	default y if GCC_VERSION >= 120000 && GCC_VERSION < 120400
--	default y if GCC_VERSION >= 130000 && GCC_VERSION < 130300
--
--config CC_HAS_ASM_GOTO_OUTPUT
--	def_bool y
--	depends on !GCC_ASM_GOTO_OUTPUT_BROKEN
--	depends on $(success,echo 'int foo(int x) { asm goto ("": "=r"(x) ::: bar); return x; bar: return 0; }' | $(CC) -x c - -c -o /dev/null)
--
--config CC_HAS_ASM_GOTO_TIED_OUTPUT
--	depends on CC_HAS_ASM_GOTO_OUTPUT
--	# Detect buggy gcc and clang, fixed in gcc-11 clang-14.
--	def_bool $(success,echo 'int foo(int *x) { asm goto (".long (%l[bar]) - .": "+m"(*x) ::: bar); return *x; bar: return 0; }' | $CC -x c - -c -o /dev/null)
--
--config TOOLS_SUPPORT_RELR
--	def_bool $(success,env "CC=$(CC)" "LD=$(LD)" "NM=$(NM)" "OBJCOPY=$(OBJCOPY)" $(srctree)/scripts/tools-support-relr.sh)
--
--config CC_HAS_ASM_INLINE
--	def_bool $(success,echo 'void foo(void) { asm inline (""); }' | $(CC) -x c - -c -o /dev/null)
--
--config CC_HAS_ASSUME
--	bool
--	# clang needs to be at least 19.1.0 since the meaning of the assume
--	# attribute changed:
--	# https://github.com/llvm/llvm-project/commit/c44fa3e8a9a44c2e9a575768a3c185354b9f6c17
--	default y if CC_IS_CLANG && CLANG_VERSION >= 190100
--	# supported since gcc 13.1.0
--	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=106654
--	default y if CC_IS_GCC && GCC_VERSION >= 130100
--
--config CC_HAS_NO_PROFILE_FN_ATTR
--	def_bool $(success,echo '__attribute__((no_profile_instrument_function)) int x();' | $(CC) -x c - -c -o /dev/null -Werror)
--
--config CC_HAS_COUNTED_BY
--	bool
--	# clang needs to be at least 20.1.0 to avoid potential crashes
--	# when building structures that contain __counted_by
--	# https://github.com/ClangBuiltLinux/linux/issues/2114
--	# https://github.com/llvm/llvm-project/commit/160fb1121cdf703c3ef5e61fb26c5659eb581489
--	default y if CC_IS_CLANG && CLANG_VERSION >= 200100
--	# supported since gcc 15.1.0
--	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=108896
--	default y if CC_IS_GCC && GCC_VERSION >= 150100
--
--config CC_HAS_COUNTED_BY_PTR
--	bool
--	# supported since clang 22
--	default y if CC_IS_CLANG && CLANG_VERSION >= 220100
--	# supported since gcc 16.0.0
--	default y if CC_IS_GCC && GCC_VERSION >= 160000
--
--config CC_HAS_BROKEN_COUNTED_BY_REF
--	bool
--	# https://github.com/llvm/llvm-project/issues/182575
--	default y if CC_IS_CLANG && CLANG_VERSION < 220100
--
--config CC_HAS_ALLOC_TOKEN
--	def_bool $(cc-option,-falloc-token-max=123)
--
--config CC_HAS_MULTIDIMENSIONAL_NONSTRING
--	def_bool $(success,echo 'char tag[][4] __attribute__((__nonstring__)) = { };' | $(CC) $(CLANG_FLAGS) -x c - -c -o /dev/null -Werror)
--
--config LD_CAN_USE_KEEP_IN_OVERLAY
--	# ld.lld prior to 21.0.0 did not support KEEP within an overlay description
--	# https://github.com/llvm/llvm-project/pull/130661
--	def_bool LD_IS_BFD || LLD_VERSION >= 210000
--
--config RUSTC_HAS_SPAN_FILE
--	def_bool RUSTC_VERSION >= 108800
--
--config RUSTC_HAS_UNNECESSARY_TRANSMUTES
--	def_bool RUSTC_VERSION >= 108800
--
--config RUSTC_HAS_FILE_WITH_NUL
--	def_bool RUSTC_VERSION >= 108900
--
--config RUSTC_HAS_FILE_AS_C_STR
--	def_bool RUSTC_VERSION >= 109100
--
--config RUSTC_HAS_SUSPICIOUS_RUNTIME_SYMBOL_DEFINITIONS
--	def_bool RUSTC_VERSION >= 109800
--
--config PAHOLE_VERSION
--	int
--	default "$(PAHOLE_VERSION)"
-+source "scripts/Kconfig.toolchain"
+ # Explicitly clear padding bits during variable initialization
+-KBUILD_CFLAGS += $(call cc-option,-fzero-init-padding-bits=all)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_ZERO_INIT_PADDING_BITS)
  
- config CONSTRUCTORS
- 	bool
+ # While VLAs have been removed, GCC produces unreachable stack probes
+ # for the randomize_kstack_offset feature. Disable it for all compilers.
++# Probed here rather than in Kconfig as clang only accepts it for some
++# sub-targets, so the architecture's flags matter.
+ KBUILD_CFLAGS	+= $(call cc-option, -fno-stack-clash-protection)
+ 
+ # Get details on warnings generated due to GCC value tracking.
+-KBUILD_CFLAGS	+= $(call cc-option, -fdiagnostics-show-context=2)
++KBUILD_CFLAGS	+= $(CONFIG_CC_OPT_DIAGNOSTICS_SHOW_CONTEXT)
+ 
+ # Show inlining notes for __attribute__((warning/error)) call chains.
+ # GCC supports this unconditionally while Clang 23+ provides a flag.
+-KBUILD_CFLAGS	+= $(call cc-option, -fdiagnostics-show-inlining-chain)
++KBUILD_CFLAGS	+= $(CONFIG_CC_OPT_DIAGNOSTICS_SHOW_INLINING_CHAIN)
+ 
+ # Clear used registers at func exit (to reduce data lifetime and ROP gadgets).
+ ifdef CONFIG_ZERO_CALL_USED_REGS
+@@ -1033,7 +1035,7 @@ ifdef CONFIG_FUNCTION_TRACER
+ ifdef CONFIG_FTRACE_MCOUNT_USE_CC
+   CC_FLAGS_FTRACE	+= -mrecord-mcount
+   ifdef CONFIG_HAVE_NOP_MCOUNT
+-    ifeq ($(call cc-option-yn, -mnop-mcount),y)
++    ifdef CONFIG_CC_HAS_MNOP_MCOUNT
+       CC_FLAGS_FTRACE	+= -mnop-mcount
+       CC_FLAGS_USING	+= -DCC_USING_NOP_MCOUNT
+     endif
+@@ -1051,8 +1053,7 @@ ifdef CONFIG_FTRACE_MCOUNT_USE_RECORDMCOUNT
+   endif
+ endif
+ ifdef CONFIG_HAVE_FENTRY
+-  # s390-linux-gnu-gcc did not support -mfentry until gcc-9.
+-  ifeq ($(call cc-option-yn, -mfentry),y)
++  ifdef CONFIG_CC_HAS_MFENTRY
+     CC_FLAGS_FTRACE	+= -mfentry
+     CC_FLAGS_USING	+= -DCC_USING_FENTRY
+   endif
+@@ -1160,7 +1161,7 @@ NOSTDINC_FLAGS += -nostdinc
+ # the kernel uses only C99 flexible arrays for dynamically sized trailing
+ # arrays. Enforce this for everything that may examine structure sizes and
+ # perform bounds checking.
+-KBUILD_CFLAGS += $(call cc-option, -fstrict-flex-arrays=3)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_STRICT_FLEX_ARRAYS)
+ 
+ # disable invalid "can't wrap" optimizations for signed / pointers
+ KBUILD_CFLAGS	+= -fno-strict-overflow
+@@ -1243,11 +1244,11 @@ LDFLAGS_vmlinux += --build-id=sha1
+ # COMDAT-deduplicated sections. Use --force-group-allocation to resolve these
+ # groups when linking modules. The option is available from ld.bfd 2.29 and
+ # ld.lld 19.1.0.
+-KBUILD_LDFLAGS_MODULE += $(call ld-option,--force-group-allocation)
++KBUILD_LDFLAGS_MODULE += $(CONFIG_LD_OPT_FORCE_GROUP_ALLOCATION)
+ 
+ KBUILD_LDFLAGS	+= -z noexecstack
+ ifeq ($(CONFIG_LD_IS_BFD),y)
+-KBUILD_LDFLAGS	+= $(call ld-option,--no-warn-rwx-segments)
++KBUILD_LDFLAGS	+= $(CONFIG_LD_OPT_NO_WARN_RWX_SEGMENTS)
+ endif
+ 
+ ifeq ($(CONFIG_STRIP_ASM_SYMS),y)
+diff --git a/arch/arm64/kernel/pi/Makefile b/arch/arm64/kernel/pi/Makefile
+index be92d73c25b2..4a0cbedfdcd6 100644
+--- a/arch/arm64/kernel/pi/Makefile
++++ b/arch/arm64/kernel/pi/Makefile
+@@ -9,7 +9,7 @@ KBUILD_CFLAGS	:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) -fpie \
+ 		   -include $(srctree)/include/linux/hidden.h \
+ 		   -D__DISABLE_EXPORTS -ffreestanding -D__NO_FORTIFY \
+ 		   -fno-asynchronous-unwind-tables -fno-unwind-tables \
+-		   $(call cc-option,-fno-addrsig)
++		   $(CONFIG_CC_OPT_NO_ADDRSIG)
+ 
+ # this code may run with the MMU off so disable unaligned accesses
+ CFLAGS_map_range.o += -mstrict-align
+diff --git a/arch/riscv/kernel/pi/Makefile b/arch/riscv/kernel/pi/Makefile
+index bc098edac898..4c8e52b3f176 100644
+--- a/arch/riscv/kernel/pi/Makefile
++++ b/arch/riscv/kernel/pi/Makefile
+@@ -8,7 +8,7 @@ KBUILD_CFLAGS	:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) -fpie \
+ 		   -include $(srctree)/include/linux/hidden.h \
+ 		   -D__DISABLE_EXPORTS -ffreestanding \
+ 		   -fno-asynchronous-unwind-tables -fno-unwind-tables \
+-		   $(call cc-option,-fno-addrsig)
++		   $(CONFIG_CC_OPT_NO_ADDRSIG)
+ 
+ # Disable LTO
+ KBUILD_CFLAGS	:= $(filter-out $(CC_FLAGS_LTO), $(KBUILD_CFLAGS))
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index 15fd9ec5ecac..0fea2fc4ba1d 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -2364,6 +2364,23 @@ config CC_HAS_KCFI_ARITY
+ 	def_bool $(cc-option,-fsanitize=kcfi -fsanitize-kcfi-arity)
+ 	depends on CC_IS_CLANG && !RUST
+ 
++config CC_OPT_INDIRECT_BRANCH_CS_PREFIX
++	def_string "$(cc-option-str,-mindirect-branch-cs-prefix)"
++
++config CC_OPT_CF_PROTECTION_NONE
++	def_string "$(cc-option-str,-fcf-protection=none)"
++
++# with jump tables off: the compilers use NOTRACK for them, which kernel IBT
++# does not allow
++config CC_OPT_CF_PROTECTION_BRANCH
++	def_string "$(cc-option-str,-fcf-protection=branch -fno-jump-tables)"
++
++config CC_OPT_FALIGN_JUMPS
++	def_string "$(cc-option-str,-falign-jumps=1)"
++
++config CC_OPT_FALIGN_LOOPS
++	def_string "$(cc-option-str,-falign-loops=1)"
++
+ config FUNCTION_PADDING_CFI
+ 	int
+ 	default 59 if FUNCTION_ALIGNMENT_64B
+diff --git a/arch/x86/Makefile b/arch/x86/Makefile
+index 598f178102ee..aac30ba51b2f 100644
+--- a/arch/x86/Makefile
++++ b/arch/x86/Makefile
+@@ -20,7 +20,7 @@ ifdef CONFIG_CC_IS_CLANG
+ RETPOLINE_CFLAGS	:= -mretpoline-external-thunk
+ RETPOLINE_VDSO_CFLAGS	:= -mretpoline
+ endif
+-RETPOLINE_CFLAGS	+= $(call cc-option,-mindirect-branch-cs-prefix)
++RETPOLINE_CFLAGS	+= $(CONFIG_CC_OPT_INDIRECT_BRANCH_CS_PREFIX)
+ 
+ ifdef CONFIG_MITIGATION_RETHUNK
+ RETHUNK_CFLAGS		:= -mfunction-return=thunk-extern
+@@ -52,7 +52,7 @@ REALMODE_CFLAGS	:= $(CC_FLAGS_DIALECT) -m16 -g -Os \
+ 		   -DDISABLE_BRANCH_PROFILING -D__DISABLE_EXPORTS \
+ 		   -Wall -Wstrict-prototypes -march=i386 -mregparm=3 \
+ 		   -fno-strict-aliasing -fomit-frame-pointer -fno-pic \
+-		   -mno-mmx -mno-sse $(call cc-option,-fcf-protection=none)
++		   -mno-mmx -mno-sse $(CONFIG_CC_OPT_CF_PROTECTION_NONE)
+ 
+ REALMODE_CFLAGS += -ffreestanding
+ REALMODE_CFLAGS += -fno-stack-protector
+@@ -99,10 +99,10 @@ ifeq ($(CONFIG_X86_KERNEL_IBT),y)
+ #
+ #   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104816
+ #
+-KBUILD_CFLAGS += $(call cc-option,-fcf-protection=branch -fno-jump-tables)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_CF_PROTECTION_BRANCH)
+ KBUILD_RUSTFLAGS += -Zcf-protection=branch $(if $(call rustc-min-version,109300),-Cjump-tables=n,-Zno-jump-tables)
+ else
+-KBUILD_CFLAGS += $(call cc-option,-fcf-protection=none)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_CF_PROTECTION_NONE)
+ endif
+ 
+ ifeq ($(CONFIG_X86_32),y)
+@@ -138,10 +138,10 @@ else
+         KBUILD_CFLAGS += -m64
+ 
+         # Align jump targets to 1 byte, not the default 16 bytes:
+-        KBUILD_CFLAGS += $(call cc-option,-falign-jumps=1)
++        KBUILD_CFLAGS += $(CONFIG_CC_OPT_FALIGN_JUMPS)
+ 
+         # Pack loops tightly as well:
+-        KBUILD_CFLAGS += $(call cc-option,-falign-loops=1)
++        KBUILD_CFLAGS += $(CONFIG_CC_OPT_FALIGN_LOOPS)
+ 
+         # Don't autogenerate traditional x87 instructions
+         KBUILD_CFLAGS += -mno-80387
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 77a2b2d74f3f..415f63105b48 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -40,7 +40,7 @@ KBUILD_CFLAGS			:= $(subst $(CC_FLAGS_FTRACE),,$(cflags-y)) \
+ 				   -D__NO_FORTIFY \
+ 				   -ffreestanding \
+ 				   -fno-stack-protector \
+-				   $(call cc-option,-fno-addrsig) \
++				   $(CONFIG_CC_OPT_NO_ADDRSIG) \
+ 				   -D__DISABLE_EXPORTS
+ 
+ #
 diff --git a/scripts/Kconfig.toolchain b/scripts/Kconfig.toolchain
-new file mode 100644
-index 000000000000..fac36246451f
---- /dev/null
+index fac36246451f..d708a175fe48 100644
+--- a/scripts/Kconfig.toolchain
 +++ b/scripts/Kconfig.toolchain
-@@ -0,0 +1,198 @@
-+# SPDX-License-Identifier: GPL-2.0-only
-+config CC_VERSION_TEXT
-+	string
-+	default "$(CC_VERSION_TEXT)"
-+	help
-+	  This is used in unclear ways:
+@@ -144,6 +144,80 @@ config CC_HAS_ASSUME
+ config CC_HAS_NO_PROFILE_FN_ATTR
+ 	def_bool $(success,echo '__attribute__((no_profile_instrument_function)) int x();' | $(CC) -x c - -c -o /dev/null -Werror)
+ 
++config CC_OPT_ZERO_INIT_PADDING_BITS
++	def_string "$(cc-option-str,-fzero-init-padding-bits=all)"
 +
-+	  - Re-run Kconfig when the compiler is updated
-+	    The 'default' property references the environment variable,
-+	    CC_VERSION_TEXT so it is recorded in include/config/auto.conf.cmd.
-+	    When the compiler is updated, Kconfig will be invoked.
++config CC_OPT_NO_ADDRSIG
++	def_string "$(cc-option-str,-fno-addrsig)"
 +
-+	  - Ensure full rebuild when the compiler is updated
-+	    include/linux/compiler-version.h contains this option in the comment
-+	    line so fixdep adds include/config/CC_VERSION_TEXT into the
-+	    auto-generated dependency. When the compiler is updated, syncconfig
-+	    will touch it and then every file will be rebuilt.
++config CC_OPT_DIAGNOSTICS_SHOW_CONTEXT
++	def_string "$(cc-option-str,-fdiagnostics-show-context=2)"
 +
-+config CC_IS_GCC
-+	def_bool $(success,test "$(cc-name)" = GCC)
++config CC_OPT_DIAGNOSTICS_SHOW_INLINING_CHAIN
++	def_string "$(cc-option-str,-fdiagnostics-show-inlining-chain)"
 +
-+config GCC_VERSION
-+	int
-+	default $(cc-version) if CC_IS_GCC
-+	default 0
++config CC_OPT_STRICT_FLEX_ARRAYS
++	def_string "$(cc-option-str,-fstrict-flex-arrays=3)"
 +
-+config CC_IS_CLANG
-+	def_bool $(success,test "$(cc-name)" = Clang)
++# gcc-10 renamed --param=allow-store-data-races=0 to -fno-allow-store-data-races
++config CC_OPT_ALLOW_STORE_DATA_RACES_PARAM
++	def_string "$(cc-option-str,--param=allow-store-data-races=0)" if CC_IS_GCC
 +
-+config CLANG_VERSION
-+	int
-+	default $(cc-version) if CC_IS_CLANG
-+	default 0
++config CC_OPT_NO_ALLOW_STORE_DATA_RACES
++	def_string "$(cc-option-str,-fno-allow-store-data-races)" if CC_IS_GCC
 +
-+config AS_IS_GNU
-+	def_bool $(success,test "$(as-name)" = GNU)
++config CC_HAS_MNOP_MCOUNT
++	def_bool $(cc-option,-mnop-mcount)
 +
-+config AS_IS_LLVM
-+	def_bool $(success,test "$(as-name)" = LLVM)
++# s390-linux-gnu-gcc did not support -mfentry until gcc-9.
++config CC_HAS_MFENTRY
++	def_bool $(cc-option,-mfentry)
 +
-+config AS_VERSION
-+	int
-+	# Use clang version if this is the integrated assembler
-+	default CLANG_VERSION if AS_IS_LLVM
-+	default $(as-version)
++config LD_OPT_FORCE_GROUP_ALLOCATION
++	def_string "$(ld-option-str,--force-group-allocation)"
 +
-+config LD_IS_BFD
-+	def_bool $(success,test "$(ld-name)" = BFD)
++config LD_OPT_NO_WARN_RWX_SEGMENTS
++	def_string "$(ld-option-str,--no-warn-rwx-segments)"
 +
-+config LD_VERSION
-+	int
-+	default $(ld-version) if LD_IS_BFD
-+	default 0
++config CC_OPT_WNO_ADDRESS_OF_PACKED_MEMBER
++	def_string "-Wno-address-of-packed-member" if $(cc-option,-Waddress-of-packed-member)
 +
-+config LD_IS_LLD
-+	def_bool $(success,test "$(ld-name)" = LLD)
++config CC_OPT_WNO_FORMAT_OVERFLOW_NON_KPRINTF
++	def_string "-Wno-format-overflow-non-kprintf" if CC_IS_CLANG && $(cc-option,-Wformat-overflow-non-kprintf)
 +
-+config LLD_VERSION
-+	int
-+	default $(ld-version) if LD_IS_LLD
-+	default 0
++config CC_OPT_WNO_FORMAT_TRUNCATION_NON_KPRINTF
++	def_string "-Wno-format-truncation-non-kprintf" if CC_IS_CLANG && $(cc-option,-Wformat-truncation-non-kprintf)
 +
-+config RUSTC_VERSION
-+	int
-+	default $(rustc-version)
-+	help
-+	  It does not depend on `RUST` since that one may need to use the version
-+	  in a `depends on`.
++config CC_OPT_WNO_DEFAULT_CONST_INIT_UNSAFE
++	def_string "-Wno-default-const-init-unsafe" if CC_IS_CLANG && $(cc-option,-Wdefault-const-init-unsafe)
 +
-+config RUST_IS_AVAILABLE
-+	def_bool $(success,$(srctree)/scripts/rust_is_available.sh)
-+	help
-+	  This shows whether a suitable Rust toolchain is available (found).
++config CC_OPT_WNO_DANGLING_POINTER
++	def_string "-Wno-dangling-pointer" if $(cc-option,-Wdangling-pointer)
 +
-+	  Please see Documentation/rust/quick-start.rst for instructions on how
-+	  to satisfy the build requirements of Rust support.
++config CC_OPT_WVLA_LARGER_THAN
++	def_string "$(cc-option-str,-Wvla-larger-than=1)"
 +
-+	  In particular, the Makefile target 'rustavailable' is useful to check
-+	  why the Rust toolchain is not being detected.
++config CC_HAS_WSTRINGOP_OVERFLOW
++	def_bool $(cc-option,-Wstringop-overflow)
 +
-+config RUSTC_LLVM_VERSION
-+	int
-+	default $(rustc-llvm-version)
++config CC_OPT_WNO_UNTERMINATED_STRING_INITIALIZATION
++	def_string "-Wno-unterminated-string-initialization" if $(cc-option,-Wunterminated-string-initialization)
 +
-+config RUSTC_LLVM_MAJOR_VERSION
-+	int
-+	default $(shell,expr $(rustc-llvm-version) / 10000)
++config CC_OPT_WERROR_DESIGNATED_INIT
++	def_string "$(cc-option-str,-Werror=designated-init)"
 +
-+config RUSTC_CLANG_LLVM_COMPATIBLE
-+	bool
-+	default y if CC_IS_CLANG && RUSTC_LLVM_MAJOR_VERSION = $(shell,expr $(cc-version) / 10000)
-+	help
-+	  This indicates whether Rust and Clang use LLVM of the same major
-+	  version.
++config CC_OPT_WENUM_CONVERSION
++	def_string "$(cc-option-str,-Wenum-conversion)"
 +
-+	  Operations involving handling LLVM IR or bitcode (e.g. cross-language
-+	  LTO) require the same LLVM major version to work properly. For best
-+	  compatibility it is recommended that the exact same LLVM is used.
++config CC_OPT_WNO_PACKED_NOT_ALIGNED
++	def_string "-Wno-packed-not-aligned" if $(cc-option,-Wpacked-not-aligned)
 +
-+config ARCH_HAS_CC_CAN_LINK
-+	bool
++config CC_OPT_WNO_FORMAT_OVERFLOW
++	def_string "-Wno-format-overflow" if $(cc-option,-Wformat-overflow)
 +
-+config CC_CAN_LINK
-+	bool
-+	default ARCH_CC_CAN_LINK if ARCH_HAS_CC_CAN_LINK
-+	default $(cc_can_link_user,$(m64-flag)) if 64BIT
-+	default $(cc_can_link_user,$(m32-flag))
++config CC_OPT_WNO_STRINGOP_TRUNCATION
++	def_string "-Wno-stringop-truncation" if $(cc-option,-Wstringop-truncation)
 +
-+# Fixed in GCC 14, 13.3, 12.4 and 11.5
-+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=113921
-+config GCC_ASM_GOTO_OUTPUT_BROKEN
-+	bool
-+	depends on CC_IS_GCC
-+	default y if GCC_VERSION < 110500
-+	default y if GCC_VERSION >= 120000 && GCC_VERSION < 120400
-+	default y if GCC_VERSION >= 130000 && GCC_VERSION < 130300
-+
-+config CC_HAS_ASM_GOTO_OUTPUT
-+	def_bool y
-+	depends on !GCC_ASM_GOTO_OUTPUT_BROKEN
-+	depends on $(success,echo 'int foo(int x) { asm goto ("": "=r"(x) ::: bar); return x; bar: return 0; }' | $(CC) -x c - -c -o /dev/null)
-+
-+config CC_HAS_ASM_GOTO_TIED_OUTPUT
-+	depends on CC_HAS_ASM_GOTO_OUTPUT
-+	# Detect buggy gcc and clang, fixed in gcc-11 clang-14.
-+	def_bool $(success,echo 'int foo(int *x) { asm goto (".long (%l[bar]) - .": "+m"(*x) ::: bar); return *x; bar: return 0; }' | $CC -x c - -c -o /dev/null)
-+
-+config TOOLS_SUPPORT_RELR
-+	def_bool $(success,env "CC=$(CC)" "LD=$(LD)" "NM=$(NM)" "OBJCOPY=$(OBJCOPY)" $(srctree)/scripts/tools-support-relr.sh)
-+
-+config CC_HAS_ASM_INLINE
-+	def_bool $(success,echo 'void foo(void) { asm inline (""); }' | $(CC) -x c - -c -o /dev/null)
-+
-+config CC_HAS_ASSUME
-+	bool
-+	# clang needs to be at least 19.1.0 since the meaning of the assume
-+	# attribute changed:
-+	# https://github.com/llvm/llvm-project/commit/c44fa3e8a9a44c2e9a575768a3c185354b9f6c17
-+	default y if CC_IS_CLANG && CLANG_VERSION >= 190100
-+	# supported since gcc 13.1.0
-+	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=106654
-+	default y if CC_IS_GCC && GCC_VERSION >= 130100
-+
-+config CC_HAS_NO_PROFILE_FN_ATTR
-+	def_bool $(success,echo '__attribute__((no_profile_instrument_function)) int x();' | $(CC) -x c - -c -o /dev/null -Werror)
-+
-+config CC_HAS_COUNTED_BY
-+	bool
-+	# clang needs to be at least 20.1.0 to avoid potential crashes
-+	# when building structures that contain __counted_by
-+	# https://github.com/ClangBuiltLinux/linux/issues/2114
-+	# https://github.com/llvm/llvm-project/commit/160fb1121cdf703c3ef5e61fb26c5659eb581489
-+	default y if CC_IS_CLANG && CLANG_VERSION >= 200100
-+	# supported since gcc 15.1.0
-+	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=108896
-+	default y if CC_IS_GCC && GCC_VERSION >= 150100
-+
-+config CC_HAS_COUNTED_BY_PTR
-+	bool
-+	# supported since clang 22
-+	default y if CC_IS_CLANG && CLANG_VERSION >= 220100
-+	# supported since gcc 16.0.0
-+	default y if CC_IS_GCC && GCC_VERSION >= 160000
-+
-+config CC_HAS_BROKEN_COUNTED_BY_REF
-+	bool
-+	# https://github.com/llvm/llvm-project/issues/182575
-+	default y if CC_IS_CLANG && CLANG_VERSION < 220100
-+
-+config CC_HAS_ALLOC_TOKEN
-+	def_bool $(cc-option,-falloc-token-max=123)
-+
-+config CC_HAS_MULTIDIMENSIONAL_NONSTRING
-+	def_bool $(success,echo 'char tag[][4] __attribute__((__nonstring__)) = { };' | $(CC) $(CLANG_FLAGS) -x c - -c -o /dev/null -Werror)
-+
-+config LD_CAN_USE_KEEP_IN_OVERLAY
-+	# ld.lld prior to 21.0.0 did not support KEEP within an overlay description
-+	# https://github.com/llvm/llvm-project/pull/130661
-+	def_bool LD_IS_BFD || LLD_VERSION >= 210000
-+
-+config RUSTC_HAS_SPAN_FILE
-+	def_bool RUSTC_VERSION >= 108800
-+
-+config RUSTC_HAS_UNNECESSARY_TRANSMUTES
-+	def_bool RUSTC_VERSION >= 108800
-+
-+config RUSTC_HAS_FILE_WITH_NUL
-+	def_bool RUSTC_VERSION >= 108900
-+
-+config RUSTC_HAS_FILE_AS_C_STR
-+	def_bool RUSTC_VERSION >= 109100
-+
-+config RUSTC_HAS_SUSPICIOUS_RUNTIME_SYMBOL_DEFINITIONS
-+	def_bool RUSTC_VERSION >= 109800
-+
-+config PAHOLE_VERSION
-+	int
-+	default "$(PAHOLE_VERSION)"
+ config CC_HAS_COUNTED_BY
+ 	bool
+ 	# clang needs to be at least 20.1.0 to avoid potential crashes
+diff --git a/scripts/Makefile.warn b/scripts/Makefile.warn
+index 35af7d6c6d18..556fa249ca07 100644
+--- a/scripts/Makefile.warn
++++ b/scripts/Makefile.warn
+@@ -17,7 +17,7 @@ KBUILD_CFLAGS += -Werror=strict-prototypes
+ KBUILD_CFLAGS += -Wno-format-security
+ KBUILD_CFLAGS += -Wno-trigraphs
+ KBUILD_CFLAGS += -Wno-frame-address
+-KBUILD_CFLAGS += $(call cc-option, -Wno-address-of-packed-member)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WNO_ADDRESS_OF_PACKED_MEMBER)
+ KBUILD_CFLAGS += -Wmissing-declarations
+ KBUILD_CFLAGS += -Wmissing-prototypes
+ 
+@@ -30,8 +30,8 @@ KBUILD_CFLAGS-$(CONFIG_CC_NO_ARRAY_BOUNDS) += -Wno-array-bounds
+ ifdef CONFIG_CC_IS_CLANG
+ # Clang checks for overflow/truncation with '%p', while GCC does not:
+ # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=111219
+-KBUILD_CFLAGS += $(call cc-option, -Wno-format-overflow-non-kprintf)
+-KBUILD_CFLAGS += $(call cc-option, -Wno-format-truncation-non-kprintf)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WNO_FORMAT_OVERFLOW_NON_KPRINTF)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WNO_FORMAT_TRUNCATION_NON_KPRINTF)
+ 
+ # Clang may emit a warning when a const variable, such as the dummy variables
+ # in typecheck(), or const member of an aggregate type are not initialized,
+@@ -43,7 +43,7 @@ KBUILD_CFLAGS += $(call cc-option, -Wno-format-truncation-non-kprintf)
+ # disabled with this same switch, there should not be too much coverage lost
+ # because -Wuninitialized will still flag when an uninitialized const variable
+ # is used.
+-KBUILD_CFLAGS += $(call cc-option, -Wno-default-const-init-unsafe)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WNO_DEFAULT_CONST_INIT_UNSAFE)
+ else
+ 
+ # gcc inanely warns about local variables called 'main'
+@@ -54,7 +54,7 @@ endif
+ KBUILD_CFLAGS += -Wno-type-limits
+ 
+ # These result in bogus false positives
+-KBUILD_CFLAGS += $(call cc-option, -Wno-dangling-pointer)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WNO_DANGLING_POINTER)
+ 
+ # Stack Variable Length Arrays (VLAs) must not be used in the kernel.
+ # Function array parameters should, however, be usable, but -Wvla will
+@@ -62,7 +62,7 @@ KBUILD_CFLAGS += $(call cc-option, -Wno-dangling-pointer)
+ # types, so depend on GCC for now to keep stack VLAs out of the tree.
+ # https://github.com/llvm/llvm-project/issues/57098
+ # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98217
+-KBUILD_CFLAGS += $(call cc-option,-Wvla-larger-than=1)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WVLA_LARGER_THAN)
+ 
+ # disable pointer signed / unsigned warnings in gcc 4.0
+ KBUILD_CFLAGS += -Wno-pointer-sign
+@@ -73,11 +73,11 @@ KBUILD_CFLAGS += -Wno-pointer-sign
+ KBUILD_CFLAGS += -Wcast-function-type
+ 
+ # Currently, disable -Wstringop-overflow for GCC 11, globally.
+-KBUILD_CFLAGS-$(CONFIG_CC_NO_STRINGOP_OVERFLOW) += $(call cc-option, -Wno-stringop-overflow)
+-KBUILD_CFLAGS-$(CONFIG_CC_STRINGOP_OVERFLOW) += $(call cc-option, -Wstringop-overflow)
++KBUILD_CFLAGS-$(CONFIG_CC_NO_STRINGOP_OVERFLOW) += $(if $(CONFIG_CC_HAS_WSTRINGOP_OVERFLOW),-Wno-stringop-overflow)
++KBUILD_CFLAGS-$(CONFIG_CC_STRINGOP_OVERFLOW) += $(if $(CONFIG_CC_HAS_WSTRINGOP_OVERFLOW),-Wstringop-overflow)
+ 
+ # Currently, disable -Wunterminated-string-initialization as broken
+-KBUILD_CFLAGS += $(call cc-option, -Wno-unterminated-string-initialization)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WNO_UNTERMINATED_STRING_INITIALIZATION)
+ 
+ # The allocators already balk at large sizes, so silence the compiler
+ # warnings for bounds checks involving those possible values. While
+@@ -100,10 +100,10 @@ KBUILD_CFLAGS += -Werror=date-time
+ KBUILD_CFLAGS += -Werror=incompatible-pointer-types
+ 
+ # Require designated initializers for all marked structures
+-KBUILD_CFLAGS += $(call cc-option,-Werror=designated-init)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WERROR_DESIGNATED_INIT)
+ 
+ # Warn if there is an enum types mismatch
+-KBUILD_CFLAGS += $(call cc-option,-Wenum-conversion)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WENUM_CONVERSION)
+ 
+ KBUILD_CFLAGS += -Wunused
+ 
+@@ -125,12 +125,12 @@ else
+ # Suppress them by using -Wno... except for W=1.
+ KBUILD_CFLAGS += -Wno-unused-but-set-variable
+ KBUILD_CFLAGS += -Wno-unused-const-variable
+-KBUILD_CFLAGS += $(call cc-option, -Wno-packed-not-aligned)
+-KBUILD_CFLAGS += $(call cc-option, -Wno-format-overflow)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WNO_PACKED_NOT_ALIGNED)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WNO_FORMAT_OVERFLOW)
+ ifdef CONFIG_CC_IS_GCC
+ KBUILD_CFLAGS += -Wno-format-truncation
+ endif
+-KBUILD_CFLAGS += $(call cc-option, -Wno-stringop-truncation)
++KBUILD_CFLAGS += $(CONFIG_CC_OPT_WNO_STRINGOP_TRUNCATION)
+ 
+ KBUILD_CFLAGS += -Wno-override-init # alias for -Wno-initializer-overrides in clang
+ 
 
 -- 
 2.55.0
