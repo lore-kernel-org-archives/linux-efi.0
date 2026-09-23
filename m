@@ -1,34 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30FA13E49F3;
-	Wed, 23 Sep 2026 17:20:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C043B3E4C61;
+	Wed, 23 Sep 2026 17:20:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790184009; cv=none; b=H7q2mmdYiYFITjZsRKJlNaEpCjsLcFxT3uwmynU1Yf1yJGfA0XbLH3tMfJVOTNx950bwqrauY7xOC7UrraoaGZ67qJQvPyE3cNVRtjElos0OwQhrjGIYswbWKo1iyR0QNYCPgATG10QsbbBGBEIVZXBJwXoSDzeNmKjLzuY0zvg=
+	t=1790184021; cv=none; b=T04VdbXLEgp+7xC+19Wc1nwE3xilLvH+TJHrdRAaqKmFVhtyjAdgPrRx8L+76XsBuMhc0MpkS//wWK0I9wFHo9h13heU9buEWk7NyfnSmuzvXyKrn97IVDMTv990yZTJVmsltQ2mrk+o9JZ5Nn6Y68IyjYdyKSWjxcrqx3Xs+zU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790184009; c=relaxed/simple;
-	bh=+F5lZUSTLMQrVCl2UCybmkeNyplm9abX0HKB/dJhDIE=;
+	s=arc-20240116; t=1790184021; c=relaxed/simple;
+	bh=1tlfspzVyupWDtDIq9Xi6b2r8IeD5B+p03B8UkqK1dA=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=WiBraT3rLs9qoDd2tecPHX8lW3VhaG2YWWpybunmCf/V83ujlTgGQVZhZutRO6KnVAApYcN1/Oe5Q1HVSxWpy3l+3zavVpq/9JEKKkfm9GMxZqzBG/T+N+K8p8xK6GSpAtbn7XHyUI9hTCUlWrdFdY//LgQoaCNu4dpoo+owHJc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hYot5vWV; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=YuYOkJxzmJUOkwnwOTHEIwvM/s5Hs+eMzPNOHLsVT0NmooptaW1VE2FqjlxAaIeOP8DCRn3UbF9ob30DwZ3YJjYwrHbJBgdUhWCVd35mjJR4+b1P12T00xECZuW/BHvAPRPSjVWJbemNdXRtz4ch8eVyVbWLPuea2Z3XbdW8y6A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mZ46Am8b; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hYot5vWV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C107C1F000FF;
-	Wed, 23 Sep 2026 17:19:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mZ46Am8b"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 50FCE1F00893;
+	Wed, 23 Sep 2026 17:20:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790184006;
-	bh=gs/rcqthB/UiwIG1j/gcnmGn30zmYIO5jhxg0jbTloA=;
+	s=k20260515; t=1790184019;
+	bh=+rwl1Zn9bU3CF5Lv6uJecPAyTurD5CJjPcxpUYcu/S0=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=hYot5vWVjxRUWJtXmG+eqVGNfqJfJ0B5OT+EGe32rSp0tqr3P5k+HPbJ4G2gf3xz2
-	 gepQFdl4A4h7jC03ys+Cf+hiuIpMW4YupY0aj/wKrv54BF0Q5EXpEcJL+6TwZ4uCYJ
-	 y2HNPLoCbngIiPYltOheNwD5oVIWzWIgLL9aL9jTDIqFd0ieAUPrThMfLgmQY3HESU
-	 ESh5C269MTc7U64wcXWJPsDQAwcbxHjSJ4CU1/Gz18dOrox7x8soC6FM9fW1ditjrX
-	 fXTTSRPlnz7eJXUexU/96rSpnAZFWssR8ayVRfjJxyGF3BaeQgbwnSIFTWncMGPg7V
-	 mCBfHXdU2txTQ==
+	b=mZ46Am8b6Wn9IMnH8S2ELNq04sKgdTBqXyocEc8OiLB0sIiwNs/r3xJS7H+Jps8UB
+	 Nr6oNJarDDpQaWtichSPBo6WiOxV2I/l6AUnAGHuHANUHxpuu2aHkDkf4NJ3FdIYPs
+	 LCw0TVk09iax4Vzz4tQdzXYTXcEPXUz34TFC+3lcSzfEhpFGFPbjAhQeHBqIQ/Dif8
+	 ZFW0n3RzfA4QblsDN/VKZRAVIggc1iQPR5fT9pZ1lWsexJBduO/kql9jVY68tmvSvK
+	 U9JRqHbVg4kFTgLsFXUxkNb+L4jPIRFRUxVfE9wd2ZGBl0Y1yNn7XtyaJSKrxrB/bh
+	 7+S3dv4tqFp+g==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Wed, 23 Sep 2026 18:17:57 +0100
-Subject: [PATCH v4 08/22] kallsyms: reimplement mksysmap in C
+Date: Wed, 23 Sep 2026 18:17:58 +0100
+Subject: [PATCH v4 09/22] kbuild: calculate list, composite object state
+ per object
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260923-build-speedup-v4-8-73128809a4a4@kernel.org>
+Message-Id: <20260923-build-speedup-v4-9-73128809a4a4@kernel.org>
 References: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
 In-Reply-To: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -73,839 +74,98 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  linux-hardening@vger.kernel.org, Petr Pavlu <petr.pavlu@suse.com>, 
- "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+ "Lorenzo Stoakes (ARM)" <ljs@kernel.org>, 
+ Nicolas Schier <n.schier@fritz.com>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=23635; i=ljs@kernel.org;
- h=from:subject:message-id; bh=+F5lZUSTLMQrVCl2UCybmkeNyplm9abX0HKB/dJhDIE=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLK2cF7+uuCNTk7ggxOvU6/wi2RPVTzJKarZFd91+PBvt
- fXBb66pd5SwMIhxMciKKbI8/yK+P0gkbF7nBX83mDmsTCBDGLg4BWAixxMYvgo0MLddbopzSuqU
- tXvNwPcujCPJkMXoh1zNlch10Sv3MPwV4DRVEvq+bK3q0ajNk40ZQi9d2OC59Z9csLrcgfwJV41
- YAQ==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3573; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=1tlfspzVyupWDtDIq9Xi6b2r8IeD5B+p03B8UkqK1dA=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLK2cF6e9yE+QOQp734n36qPH5XC1tztqeaztH+w+1ud6
+ NnbN0xCO0pZGMS4GGTFFFmefxHfHyQSNq/zgr8bzBxWJpAhDFycAjARpuWMDD9uLjv/Tf5qzXuz
+ +M+ue27qrjt6u2Xji/mi5iLfY+4//crH8E9zWuT8XfqLT783vWcXtMFMm4/zb/0vo393ec3/ZTG
+ 5cLMCAA==
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-mksysmap is a sed script consisting of 30 patterns which link-vmlinux.sh
-uses to generate *.syms files, and which kallsyms is then called against to
-generate *.kallsyms files, with the final vmlinux build ultimately
-generating System.map.
+When each object's command line is expanded, kbuild has to figure out on
+multiple occasions whether it's built-in or part of a module and which
+composite object it belongs to.
 
-For an x86-64 allmodconfig build, this involves three nm runs over a 250
-MiB file and half a million lines written and read each time - 0.5s per
-pass for llvm-nm, and 0.2s for GNU nm, with parsing on top of that.
+This causes the time spent on each directory in the kernel tree to grow
+O(n^2) with its object count, which is especially problematic for instance
+in drivers/gpu/drm/amd/amdgpu with 310 objects.
 
-This is unnecessary, instead have kallsyms simply read the ELF file
-directly making use of the existing elf-parse library in scripts/.
+No-op builds (i.e. make -j $(nproc) when nothing has changed) are
+particularly impacted by this.
 
-This changes kallsyms such that its input is no longer the output from nm,
-but rather an ELF file.
+Fix the issue by calculating this data once and looking it up thereafter
+instead of recomputing it over and over again.
 
-However, if the input file is empty, it outputs an empty table, which
-retains the same behaviour on first pass that the build system expects.
-
-System.map is byte-identical to nm | mksysmap for GNU nm and llvm-nm on
-two x86 configurations each, and for llvm-nm on arm64, arm, s390 and
-loongarch defconfigs, so are the kallsyms tables of every pass.
-
-Relinking vmlinux, link steps included:
-
-                        before    after
-  allmodconfig clang     9.1s     7.9s
-  allmodconfig gcc       7.8s     7.6s
-  defconfig clang        3.7s     3.0s
-  defconfig gcc          3.5s     3.4s
+This has a particularly large impact on allmodconfig builds.
 
 Whole build, 128-thread Threadripper 9980X, best of N runs:
 
                                          before   after     delta
                                          -------------------------------
-  x86 defconfig, touch mm/vma.c, gcc        9.1s     8.6s    -0.43s (-5%)
-  x86 defconfig, touch mm/vma.c, clang      9.0s     8.0s     -1.1s (-12%)
-  x86 defconfig, clean, gcc                29.5s    28.9s    -0.64s (-2%)
-  x86 defconfig, clean, clang              31.2s    29.8s     -1.4s (-5%)
-  x86 allmodconfig, touch mm/vma.c, gcc    35.8s    35.0s    -0.77s (-2%)
-  x86 allmodconfig, touch mm/vma.c, clang  35.8s    33.7s     -2.0s (-6%)
+  x86 defconfig, no-op make, gcc            1.1s     1.1s    -0.02s (-2%)
+  x86 defconfig, no-op make, clang          1.3s     1.3s    -0.01s (-1%)
+  x86 allmodconfig, no-op make, gcc        15.3s    14.5s    -0.83s (-5%)
+  x86 allmodconfig, no-op make, clang      16.2s    15.5s    -0.65s (-4%)
+  x86 allmodconfig, touch mm/vma.c, gcc    35.0s    34.3s    -0.77s (-2%)
+  x86 allmodconfig, touch mm/vma.c, clang  33.7s    33.2s    -0.51s (-2%)
 
 Assisted-by: LLM
+Reviewed-by: Nicolas Schier <n.schier@fritz.com>
+Reviewed-by: Kees Cook <kees@kernel.org>
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- scripts/Makefile          |   5 +-
- scripts/kallsyms-sysmap.c | 248 ++++++++++++++++++++++++++++++++++++++++++++++
- scripts/kallsyms.c        | 162 +++++++++++++++++-------------
- scripts/kallsyms.h        |  44 ++++++++
- scripts/link-vmlinux.sh   |  15 +--
- scripts/mksysmap          |  94 ------------------
- 6 files changed, 395 insertions(+), 173 deletions(-)
+ scripts/Makefile.build | 8 ++++++++
+ scripts/Makefile.lib   | 7 +++----
+ 2 files changed, 11 insertions(+), 4 deletions(-)
 
-diff --git a/scripts/Makefile b/scripts/Makefile
-index 3434a82a119f..38d58b0a37e6 100644
---- a/scripts/Makefile
-+++ b/scripts/Makefile
-@@ -3,7 +3,7 @@
- # scripts contains sources for various helper programs used throughout
- # the kernel for the build process.
+diff --git a/scripts/Makefile.build b/scripts/Makefile.build
+index 4349108e75e1..2cabfe85b798 100644
+--- a/scripts/Makefile.build
++++ b/scripts/Makefile.build
+@@ -122,6 +122,14 @@ multi-obj-m	:= $(addprefix $(obj)/, $(multi-obj-m))
+ subdir-ym	:= $(addprefix $(obj)/, $(subdir-ym))
+ endif
  
--hostprogs-always-$(CONFIG_KALLSYMS)			+= kallsyms
-+hostprogs-always-y				+= kallsyms
- hostprogs-always-$(BUILD_C_RECORDMCOUNT)		+= recordmcount
- hostprogs-always-$(CONFIG_BUILDTIME_TABLE_SORT)		+= sorttable
- hostprogs-always-$(CONFIG_ASN1)				+= asn1_compiler
-@@ -13,6 +13,7 @@ hostprogs-always-$(CONFIG_RUST_KERNEL_DOCTESTS)		+= rustdoc_test_builder
- hostprogs-always-$(CONFIG_RUST_KERNEL_DOCTESTS)		+= rustdoc_test_gen
- hostprogs-always-$(CONFIG_TRACEPOINTS)			+= tracepoint-update
++# Cache which list each object is in and which composite objects it belongs to,
++# once per object for $(part-of-builtin), $(part-of-module) and $(modname-multi).
++$(foreach o, $(real-obj-y) $(lib-y), $(eval part-of-builtin_$o := y))
++$(foreach o, $(real-obj-m), $(eval part-of-module_$o := y))
++$(foreach m, $(multi-obj-ym), \
++	$(foreach o, $(call suffix-search, $m, .o, -objs -y -m), \
++		$(eval modname-multi_$o += $(m:.o=))))
++
+ ifndef obj
+ $(warning kbuild: Makefile.build is included improperly)
+ endif
+diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
+index 0a4fdd8bd975..2f447bc25e7b 100644
+--- a/scripts/Makefile.lib
++++ b/scripts/Makefile.lib
+@@ -2,8 +2,7 @@
  
-+kallsyms-objs := kallsyms.o kallsyms-sysmap.o elf-parse.o
- sorttable-objs := sorttable.o elf-parse.o
- tracepoint-update-objs := tracepoint-update.o elf-parse.o
+ # Finds the multi-part object the current object will be linked into.
+ # If the object belongs to two or more multi-part objects, list them all.
+-modname-multi = $(sort $(foreach m,$(multi-obj-ym),\
+-		$(if $(filter $*.o, $(call suffix-search, $m, .o, -objs -y -m)),$(m:.o=))))
++modname-multi = $(sort $(modname-multi_$*.o))
  
-@@ -30,6 +31,8 @@ rustdoc_test_builder-rust := y
- rustdoc_test_gen-rust := y
+ __modname = $(or $(modname-multi),$(basetarget))
  
- HOSTCFLAGS_tracepoint-update.o = -I$(srctree)/tools/include
-+HOSTCFLAGS_kallsyms.o = -I$(srctree)/tools/include
-+HOSTCFLAGS_kallsyms-sysmap.o = -I$(srctree)/tools/include
- HOSTCFLAGS_elf-parse.o = -I$(srctree)/tools/include
- HOSTCFLAGS_sorttable.o = -I$(srctree)/tools/include
- HOSTLDLIBS_sorttable = -lpthread
-diff --git a/scripts/kallsyms-sysmap.c b/scripts/kallsyms-sysmap.c
-new file mode 100644
-index 000000000000..a482968eba51
---- /dev/null
-+++ b/scripts/kallsyms-sysmap.c
-@@ -0,0 +1,248 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Obtain symbols from vmlinux for usage by kallsyms. Replaces mksysmap.
-+ *
-+ * To retain compatibility, it provides the same output as nm, only faster.
-+ */
-+
-+#include <ctype.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <xalloc.h>
-+
-+#include "elf-parse.h"
-+#include "kallsyms.h"
-+
-+/*
-+ * What mksysmap dropped from System.map, by name: symbols that are not needed
-+ * there, or not suitable for kallsyms.
-+ */
-+static const char *const sysmap_omit_prefixes[] = {
-+	/* local symbols for ARM, MIPS, etc. */
-+	"$",
-+	/* local labels, .LBB, .Ltmpxxx, .L__unnamed_xx, .LASANPC, etc. */
-+	".L",
-+	/* arm64 EFI stub namespace */
-+	"__efistub_",
-+	/* arm64 local symbols in PIE namespace */
-+	"__pi_$",
-+	"__pi_.L",
-+	/* arm64 local symbols in non-VHE KVM namespace */
-+	"__kvm_nvhe_$",
-+	"__kvm_nvhe_.L",
-+	/* CFI type identifiers */
-+	"__kcfi_typeid_",
-+	"__kvm_nvhe___kcfi_typeid_",
-+	"__pi___kcfi_typeid_",
-+	/* CRC from modversions */
-+	"__crc_",
-+	/* EXPORT_SYMBOL (symbol name) */
-+	"__kstrtab_",
-+	/* EXPORT_SYMBOL (namespace) */
-+	"__kstrtabns_",
-+	/* MODULE_DEVICE_TABLE (symbol name) */
-+	"__mod_device_table__",
-+};
-+
-+static const char *const sysmap_omit_suffixes[] = {
-+	/* arm */
-+	"_from_arm",
-+	"_from_thumb",
-+	"_veneer",
-+};
-+
-+static const char *const sysmap_omit_names[] = {
-+	/* for LoongArch? */
-+	"L0",
-+	/* ppc */
-+	"_SDA_BASE_",
-+	"_SDA2_BASE_",
-+};
-+
-+/* Symbols that contain the pattern anywhere are dropped. */
-+static const char *const sysmap_omit_patterns[] = {
-+	/* ppc stub */
-+	".long_branch.",
-+	".plt_branch.",
-+};
-+
-+/* __<alnum>*Thunk_: the linker's range extension thunks on arm. */
-+static bool is_range_thunk(const char *name)
-+{
-+	const char *p;
-+
-+	if (!string_starts_with(name, "__"))
-+		return false;
-+	for (p = name + 2; isalnum((unsigned char)*p); p++)
-+		;
-+	return p - name >= 7 && *p == '_' && strncmp(p - 5, "Thunk", 5) == 0;
-+}
-+
-+/* __UNIQUE_ID_modinfo_<n>: the MODULE_INFO() strings of built-in code. */
-+static bool is_modinfo_id(const char *name)
-+{
-+	static const char prefix[] = "__UNIQUE_ID_modinfo_";
-+	const char *p;
-+
-+	if (!string_starts_with(name, prefix))
-+		return false;
-+	for (p = name + strlen(prefix); isdigit((unsigned char)*p); p++)
-+		;
-+	return !*p;
-+}
-+
-+static bool sysmap_omits(const char *name, char type)
-+{
-+	size_t i;
-+
-+	/* Absolute, undefined and debugging symbols. */
-+	if (type == 'a' || type == 'N' || type == 'U' || type == 'w')
-+		return true;
-+
-+	for (i = 0; i < ARRAY_SIZE(sysmap_omit_prefixes); i++)
-+		if (string_starts_with(name, sysmap_omit_prefixes[i]))
-+			return true;
-+	for (i = 0; i < ARRAY_SIZE(sysmap_omit_suffixes); i++)
-+		if (string_ends_with(name, sysmap_omit_suffixes[i]))
-+			return true;
-+	for (i = 0; i < ARRAY_SIZE(sysmap_omit_names); i++)
-+		if (strcmp(name, sysmap_omit_names[i]) == 0)
-+			return true;
-+	for (i = 0; i < ARRAY_SIZE(sysmap_omit_patterns); i++)
-+		if (strstr(name, sysmap_omit_patterns[i]))
-+			return true;
-+
-+	return is_range_thunk(name) || is_modinfo_id(name);
-+}
-+
-+/* nm's letter for a symbol defined in a section, as BFD classifies it. */
-+static char section_symbol_type(Elf_Shdr *shdr, const char *secname)
-+{
-+	static const char *const debug_prefixes[] = {
-+		".debug", ".zdebug", ".gnu.debuglto_.debug_",
-+		".gnu.linkonce.wi.", ".line", ".stab",
-+	};
-+	const uint64_t flags = shdr_flags(shdr);
-+	size_t i;
-+
-+	if (flags & SHF_EXECINSTR)
-+		return 't';
-+	if (flags & SHF_ALLOC) {
-+		if (shdr_type(shdr) == SHT_NOBITS)
-+			return 'b';
-+		return flags & SHF_WRITE ? 'd' : 'r';
-+	}
-+	for (i = 0; i < ARRAY_SIZE(debug_prefixes); i++)
-+		if (string_starts_with(secname, debug_prefixes[i]))
-+			return 'N';
-+	if (shdr_type(shdr) != SHT_NOBITS && !(flags & SHF_WRITE))
-+		return 'n';
-+	return '?';
-+}
-+
-+/* The letter nm prints for a symbol, or 0 for one it leaves out. */
-+static char elf_symbol_type(const struct elf_file *elf, Elf_Sym *sym)
-+{
-+	unsigned int bind = sym_bind(sym), type = sym_type(sym);
-+	unsigned int shndx = sym_shndx(sym);
-+	Elf_Shdr *shdr;
-+	char c;
-+
-+	if (type == STT_SECTION || type == STT_FILE)
-+		return 0;
-+	if (shndx == SHN_COMMON)
-+		return 'C';
-+	if (shndx == SHN_UNDEF) {
-+		if (bind == STB_WEAK)
-+			return type == STT_OBJECT ? 'v' : 'w';
-+		return 'U';
-+	}
-+	if (type == STT_GNU_IFUNC)
-+		return 'i';
-+	if (bind == STB_WEAK)
-+		return type == STT_OBJECT ? 'V' : 'W';
-+	if (bind == STB_GNU_UNIQUE)
-+		return 'u';
-+	if (bind != STB_GLOBAL && bind != STB_LOCAL)
-+		return '?';
-+
-+	if (shndx == SHN_ABS) {
-+		c = 'a';
-+	} else if (shndx < elf->shnum) {
-+		shdr = elf_section(elf, shndx);
-+		c = section_symbol_type(shdr, elf_section_name(elf, shdr));
-+	} else {
-+		return '?';
-+	}
-+
-+	return bind == STB_GLOBAL ? toupper(c) : c;
-+}
-+
-+/* nm -n order: by address, then by name. */
-+static int compare_symbols(const void *a, const void *b)
-+{
-+	const struct sysmap_symbol *sa = a, *sb = b;
-+
-+	if (sa->addr != sb->addr)
-+		return sa->addr < sb->addr ? -1 : 1;
-+	return strcmp(sa->name, sb->name);
-+}
-+
-+/* The symbols "nm -n | mksysmap" would list, in that order. */
-+static struct sysmap_symbol *elf_read_symbols(const struct elf_file *elf,
-+					   size_t *nr_kept)
-+{
-+	struct sysmap_symbol *syms = xmalloc(elf->nr_syms * sizeof(*syms));
-+	size_t i, n = 0;
-+
-+	for (i = 1; i < elf->nr_syms; i++) {
-+		Elf_Sym *sym = elf_symbol(elf, i);
-+		const char *name = elf->strtab + sym_name(sym);
-+		char type = elf_symbol_type(elf, sym);
-+
-+		if (!type || sysmap_omits(name, type))
-+			continue;
-+
-+		syms[n].addr = sym_value(sym);
-+		syms[n].name = name;
-+		syms[n].type = type;
-+		n++;
-+	}
-+
-+	qsort(syms, n, sizeof(*syms), compare_symbols);
-+	*nr_kept = n;
-+	return syms;
-+}
-+
-+struct sysmap *sysmap_read(const char *path)
-+{
-+	struct sysmap *map = xcalloc(1, sizeof(*map));
-+
-+	/* The names point into the mapping; keep it until the map is freed. */
-+	if (elf_open_ro(path, (1 << ET_EXEC) | (1 << ET_DYN), &map->elf))
-+		exit(EXIT_FAILURE);
-+	map->syms = elf_read_symbols(&map->elf, &map->nr_syms);
-+	map->addr_width = elf_map_long_size(map->elf.base) * 2;
-+
-+	return map;
-+}
-+
-+void sysmap_write(const struct sysmap *map, FILE *out)
-+{
-+	size_t i;
-+
-+	for (i = 0; i < map->nr_syms; i++) {
-+		const struct sysmap_symbol *s = &map->syms[i];
-+
-+		fprintf(out, "%0*llx %c %s\n", map->addr_width, s->addr, s->type,
-+			s->name);
-+	}
-+}
-+
-+void sysmap_free(struct sysmap *map)
-+{
-+	free(map->syms);
-+	elf_close(&map->elf);
-+	free(map);
-+}
-diff --git a/scripts/kallsyms.c b/scripts/kallsyms.c
-index b615db767b1d..ecb444078c1c 100644
---- a/scripts/kallsyms.c
-+++ b/scripts/kallsyms.c
-@@ -5,7 +5,12 @@
-  * This software may be used and distributed according to the terms
-  * of the GNU General Public License, incorporated herein by reference.
-  *
-- * Usage: kallsyms [--all-symbols] [--pc-relative] in.map out.bin > out.S
-+ * Usage: kallsyms [--all-symbols] [--pc-relative] [--sysmap=out.map] in out.bin > out.S
-+ *        kallsyms --sysmap=out.map in
-+ *
-+ *      in is vmlinux; an empty file stands for the first link, which has no
-+ *  symbols yet, and gives an empty table. --sysmap also writes the symbols
-+ *  in System.map format.
-  *
-  *      The byte tables go to out.bin and are pulled into out.S with .incbin;
-  *  wider tables stay assembler source for endianness and relocations.
-@@ -21,7 +26,6 @@
-  *
-  */
+@@ -149,8 +148,8 @@ endif
+ # If $(is-kernel-object) is 'y', this object will be linked to vmlinux or modules
+ is-kernel-object = $(or $(part-of-builtin),$(part-of-module))
  
--#include <errno.h>
- #include <getopt.h>
- #include <stdbool.h>
- #include <stdio.h>
-@@ -29,10 +33,10 @@
- #include <string.h>
- #include <ctype.h>
- #include <limits.h>
--
-+#include <sys/stat.h>
- #include <xalloc.h>
+-part-of-builtin = $(if $(filter $(basename $@).o, $(real-obj-y) $(lib-y)),y)
+-part-of-module = $(if $(filter $(basename $@).o, $(real-obj-m)),y)
++part-of-builtin = $(part-of-builtin_$(basename $@).o)
++part-of-module = $(part-of-module_$(basename $@).o)
+ quiet_modtag = $(if $(part-of-module),[M],   )
  
--#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
-+#include "kallsyms.h"
- 
- #define KSYM_NAME_LEN		512
- 
-@@ -108,11 +112,13 @@ static void sym_arr_free(struct sym_arr *arr)
- 
- static void usage(void)
- {
--	fprintf(stderr, "Usage: kallsyms [--all-symbols] [--pc-relative] in.map out.bin > out.S\n");
-+	fprintf(stderr, "Usage: kallsyms [--all-symbols] [--pc-relative] [--sysmap=out.map]\n"
-+			"                in out.bin > out.S\n"
-+			"       kallsyms --sysmap=out.map vmlinux\n");
- 	exit(1);
- }
- 
--static char *sym_name(const struct sym_entry *s)
-+static char *sym_entry_name(const struct sym_entry *s)
- {
- 	return (char *)s->sym + 1;
- }
-@@ -153,37 +159,12 @@ static void check_symbol_range(const char *sym, unsigned long long addr,
- 	}
- }
- 
--static struct sym_entry *read_symbol(FILE *in, char **buf, size_t *buf_len)
-+static struct sym_entry *add_symbol(unsigned long long addr, char type,
-+				    const char *name)
- {
--	char *name, type, *p;
--	unsigned long long addr;
--	size_t len;
--	ssize_t readlen;
-+	size_t len = strlen(name);
- 	struct sym_entry *sym;
- 
--	errno = 0;
--	readlen = getline(buf, buf_len, in);
--	if (readlen < 0) {
--		if (errno) {
--			perror("read_symbol");
--			exit(EXIT_FAILURE);
--		}
--		return NULL;
--	}
--
--	if ((*buf)[readlen - 1] == '\n')
--		(*buf)[readlen - 1] = 0;
--
--	addr = strtoull(*buf, &p, 16);
--
--	if (*buf == p || *p++ != ' ' || !isascii((type = *p++)) || *p++ != ' ') {
--		fprintf(stderr, "line format error\n");
--		exit(EXIT_FAILURE);
--	}
--
--	name = p;
--	len = strlen(name);
--
- 	if (len >= KSYM_NAME_LEN) {
- 		fprintf(stderr, "Symbol %s too long for kallsyms (%zu >= %d).\n"
- 				"Please increase KSYM_NAME_LEN both in kernel and kallsyms.c\n",
-@@ -208,7 +189,7 @@ static struct sym_entry *read_symbol(FILE *in, char **buf, size_t *buf_len)
- 	sym->addr = addr;
- 	sym->len = len;
- 	sym->sym[0] = type;
--	strcpy(sym_name(sym), name);
-+	strcpy(sym_entry_name(sym), name);
- 
- 	return sym;
- }
-@@ -229,14 +210,9 @@ static int symbol_in_range(const struct sym_entry *s,
- 	return 0;
- }
- 
--static bool string_starts_with(const char *s, const char *prefix)
--{
--	return strncmp(s, prefix, strlen(prefix)) == 0;
--}
--
- static int symbol_valid(const struct sym_entry *s)
- {
--	const char *name = sym_name(s);
-+	const char *name = sym_entry_name(s);
- 
- 	/* if --all-symbols is not specified, then symbols outside the text
- 	 * and inittext sections are discarded */
-@@ -286,36 +262,55 @@ static void shrink_table(void)
- 	table_cnt = pos;
- }
- 
--static void read_map(const char *in)
-+static void add_table_entry(struct sym_entry *sym)
- {
--	FILE *fp;
--	struct sym_entry *sym;
--	char *buf = NULL;
--	size_t buflen = 0;
-+	sym->seq = table_cnt;
- 
--	fp = fopen(in, "r");
--	if (!fp) {
--		perror(in);
--		exit(1);
-+	if (table_cnt >= table_size) {
-+		table_size = table_size ? table_size * 2 : 10000;
-+		table = xrealloc(table, sizeof(*table) * table_size);
- 	}
- 
--	while (!feof(fp)) {
--		sym = read_symbol(fp, &buf, &buflen);
--		if (!sym)
--			continue;
-+	table[table_cnt++] = sym;
-+}
- 
--		sym->seq = table_cnt;
-+static bool file_is_empty(const char *path)
-+{
-+	struct stat st;
- 
--		if (table_cnt >= table_size) {
--			table_size += 10000;
--			table = xrealloc(table, sizeof(*table) * table_size);
--		}
-+	if (stat(path, &st)) {
-+		perror(path);
-+		exit(EXIT_FAILURE);
-+	}
-+
-+	return st.st_size == 0;
-+}
-+
-+/*
-+ * Read the symbols from vmlinux, writing System.map if asked to. The first
-+ * link has no symbols yet: an empty file gives an empty table.
-+ */
-+static void read_elf(const char *path, FILE *sysmap_out)
-+{
-+	struct sysmap *map;
-+	size_t i;
-+
-+	if (file_is_empty(path))
-+		return;
-+
-+	map = sysmap_read(path);
-+	if (sysmap_out)
-+		sysmap_write(map, sysmap_out);
-+
-+	for (i = 0; i < map->nr_syms; i++) {
-+		const struct sysmap_symbol *s = &map->syms[i];
-+		struct sym_entry *sym = add_symbol(s->addr, s->type, s->name);
- 
--		table[table_cnt++] = sym;
-+		if (sym)
-+			add_table_entry(sym);
- 	}
- 
--	free(buf);
--	fclose(fp);
-+	sysmap_free(map);
- }
- 
- static void output_label(const char *label)
-@@ -378,7 +373,7 @@ static int compare_names(const void *a, const void *b)
- 	const struct sym_entry *sa = *(const struct sym_entry **)a;
- 	const struct sym_entry *sb = *(const struct sym_entry **)b;
- 
--	ret = strcmp(sym_name(sa), sym_name(sb));
-+	ret = strcmp(sym_entry_name(sa), sym_entry_name(sb));
- 	if (!ret) {
- 		if (sa->addr > sb->addr)
- 			return 1;
-@@ -756,7 +751,7 @@ static void optimize_token_table(void)
- /* guess for "linker script provide" symbol */
- static int may_be_linker_script_provide_symbol(const struct sym_entry *se)
- {
--	const char *symbol = sym_name(se);
-+	const char *symbol = sym_entry_name(se);
- 	int len = se->len - 1;
- 
- 	if (len < 8)
-@@ -813,8 +808,8 @@ static int compare_symbols(const void *a, const void *b)
- 		return wa - wb;
- 
- 	/* sort by the number of prefix underscores */
--	wa = strspn(sym_name(sa), "_");
--	wb = strspn(sym_name(sb), "_");
-+	wa = strspn(sym_entry_name(sa), "_");
-+	wb = strspn(sym_entry_name(sb), "_");
- 	if (wa != wb)
- 		return wa - wb;
- 
-@@ -829,13 +824,14 @@ static void sort_symbols(void)
- 
- int main(int argc, char **argv)
- {
--	const char *out_bin_name;
--	FILE *out_bin_file;
-+	const char *in, *sysmap = NULL, *out_bin_name;
-+	FILE *sysmap_out = NULL, *out_bin_file;
- 
- 	while (1) {
- 		static const struct option long_options[] = {
- 			{"all-symbols",     no_argument, &all_symbols,     1},
- 			{"pc-relative",     no_argument, &pc_relative,     1},
-+			{"sysmap",    required_argument, NULL,           's'},
- 			{},
- 		};
- 
-@@ -843,13 +839,33 @@ int main(int argc, char **argv)
- 
- 		if (c == -1)
- 			break;
--		if (c != 0)
-+		if (c == 's')
-+			sysmap = optarg;
-+		else if (c != 0)
- 			usage();
- 	}
- 
--	if (optind + 2 != argc)
-+	if (optind + 2 != argc && !(sysmap && optind + 1 == argc))
- 		usage();
- 
-+	in = argv[optind];
-+	if (sysmap) {
-+		sysmap_out = fopen(sysmap, "w");
-+		if (!sysmap_out) {
-+			perror(sysmap);
-+			exit(EXIT_FAILURE);
-+		}
-+	}
-+
-+	if (optind + 1 == argc) {
-+		read_elf(in, sysmap_out);
-+		if (ferror(sysmap_out) || fclose(sysmap_out)) {
-+			perror(sysmap);
-+			exit(EXIT_FAILURE);
-+		}
-+		return 0;
-+	}
-+
- 	out_bin_name = argv[optind + 1];
- 	out_bin_file = fopen(out_bin_name, "w");
- 	if (!out_bin_file) {
-@@ -857,7 +873,11 @@ int main(int argc, char **argv)
- 		exit(EXIT_FAILURE);
- 	}
- 
--	read_map(argv[optind]);
-+	read_elf(in, sysmap_out);
-+	if (sysmap_out && (ferror(sysmap_out) || fclose(sysmap_out))) {
-+		perror(sysmap);
-+		exit(EXIT_FAILURE);
-+	}
- 	shrink_table();
- 	sort_symbols();
- 	optimize_token_table();
-diff --git a/scripts/kallsyms.h b/scripts/kallsyms.h
-new file mode 100644
-index 000000000000..4b2801ba6285
---- /dev/null
-+++ b/scripts/kallsyms.h
-@@ -0,0 +1,44 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+#ifndef KALLSYMS_H
-+#define KALLSYMS_H
-+
-+#include <stdbool.h>
-+#include <stddef.h>
-+#include <stdio.h>
-+#include <string.h>
-+
-+#include <array_size.h>
-+#include "elf-parse.h"
-+
-+static inline bool string_starts_with(const char *s, const char *prefix)
-+{
-+	return strncmp(s, prefix, strlen(prefix)) == 0;
-+}
-+
-+static inline bool string_ends_with(const char *s, const char *suffix)
-+{
-+	size_t len = strlen(s), suffix_len = strlen(suffix);
-+
-+	return len >= suffix_len && strcmp(s + len - suffix_len, suffix) == 0;
-+}
-+
-+/* A symbol as nm lists it. */
-+struct sysmap_symbol {
-+	unsigned long long addr;
-+	const char *name;
-+	char type;
-+};
-+
-+/* The symbols of an ELF file that System.map lists, in its order. */
-+struct sysmap {
-+	struct sysmap_symbol *syms;
-+	size_t nr_syms;
-+	int addr_width;		/* hex digits of an address */
-+	struct elf_file elf;	/* the mapping the names point into */
-+};
-+
-+struct sysmap *sysmap_read(const char *path);
-+void sysmap_write(const struct sysmap *map, FILE *out);
-+void sysmap_free(struct sysmap *map);
-+
-+#endif /* KALLSYMS_H */
-diff --git a/scripts/link-vmlinux.sh b/scripts/link-vmlinux.sh
-index ed5ff97c0667..c520741f85c2 100755
---- a/scripts/link-vmlinux.sh
-+++ b/scripts/link-vmlinux.sh
-@@ -123,11 +123,15 @@ kallsymso_changed()
- 	! cmp -s "${kallsymso_prev}.sym" "${kallsymso}.sym"
- }
- 
--# Create ${2}.o file with all symbols from the ${1} object file
-+# Create ${2}.o with the kallsyms tables for ${1} (the vmlinux, or an empty
-+# listing for the first pass); list the symbols used in ${3} if given.
- kallsyms()
- {
- 	local kallsymopt;
- 
-+	if [ -n "${3:-}" ]; then
-+		kallsymopt="--sysmap=${3}"
-+	fi
- 	if is_enabled CONFIG_KALLSYMS_ALL; then
- 		kallsymopt="${kallsymopt} --all-symbols"
- 	fi
-@@ -150,18 +154,15 @@ kallsyms()
- # Perform kallsyms for the given temporary vmlinux.
- sysmap_and_kallsyms()
- {
--	mksysmap "${1}" "${1}.syms"
--	kallsyms "${1}.syms" "${1}.kallsyms"
--
-+	kallsyms "${1}" "${1}.kallsyms" "${1}.syms"
- 	kallsyms_sysmap=${1}.syms
- }
- 
- # Create map file with all symbols from ${1}
--# See mksymap for additional details
- mksysmap()
- {
--	info NM ${2}
--	${NM} -n "${1}" | sed -f "${srctree}/scripts/mksysmap" > "${2}"
-+	info SYSMAP ${2}
-+	scripts/kallsyms --sysmap="${2}" "${1}"
- }
- 
- sorttable()
-diff --git a/scripts/mksysmap b/scripts/mksysmap
-deleted file mode 100755
-index 856b26ba2ac0..000000000000
---- a/scripts/mksysmap
-+++ /dev/null
-@@ -1,94 +0,0 @@
--#!/bin/sed -f
--# SPDX-License-Identifier: GPL-2.0-only
--#
--# sed script to filter out symbols that are not needed for System.map,
--# or not suitable for kallsyms. The input should be 'nm -n <file>'.
--#
--# System.map is used by module-init tools and some debugging
--# tools to retrieve the actual addresses of symbols in the kernel.
--#
--# readprofile starts reading symbols when _stext is found, and
--# continue until it finds a symbol which is not either of 'T', 't',
--# 'W' or 'w'.
--#
--# ---------------------------------------------------------------------------
--# Ignored symbol types
--#
--
--# a: local absolute symbols
--# N: debugging symbols
--# U: undefined global symbols
--# w: local weak symbols
--/ [aNUw] /d
--
--# ---------------------------------------------------------------------------
--# Ignored prefixes
--#  (do not forget a space before each pattern)
--
--# local symbols for ARM, MIPS, etc.
--/ \$/d
--
--# local labels, .LBB, .Ltmpxxx, .L__unnamed_xx, .LASANPC, etc.
--/ \.L/d
--
--# arm64 EFI stub namespace
--/ __efistub_/d
--
--# arm64 local symbols in PIE namespace
--/ __pi_\$/d
--/ __pi_\.L/d
--
--# arm64 local symbols in non-VHE KVM namespace
--/ __kvm_nvhe_\$/d
--/ __kvm_nvhe_\.L/d
--
--# lld arm/aarch64/mips thunks
--/ __[[:alnum:]]*Thunk_/d
--
--# CFI type identifiers
--/ __kcfi_typeid_/d
--/ __kvm_nvhe___kcfi_typeid_/d
--/ __pi___kcfi_typeid_/d
--
--# CRC from modversions
--/ __crc_/d
--
--# EXPORT_SYMBOL (symbol name)
--/ __kstrtab_/d
--
--# EXPORT_SYMBOL (namespace)
--/ __kstrtabns_/d
--
--# MODULE_DEVICE_TABLE (symbol name)
--/ __mod_device_table__/d
--
--# ---------------------------------------------------------------------------
--# Ignored suffixes
--#  (do not forget '$' after each pattern)
--
--# arm
--/_from_arm$/d
--/_from_thumb$/d
--/_veneer$/d
--
--# ---------------------------------------------------------------------------
--# Ignored symbols (exact match)
--#  (do not forget a space before and '$' after each pattern)
--
--# for LoongArch?
--/ L0$/d
--
--# ppc
--/ _SDA_BASE_$/d
--/ _SDA2_BASE_$/d
--
--# MODULE_INFO()
--/ __UNIQUE_ID_modinfo_[0-9]*$/d
--
--# ---------------------------------------------------------------------------
--# Ignored patterns
--#  (symbols that contain the pattern are ignored)
--
--# ppc stub
--/\.long_branch\./d
--/\.plt_branch\./d
+ modkern_cflags =                                          \
 
 -- 
 2.55.0
