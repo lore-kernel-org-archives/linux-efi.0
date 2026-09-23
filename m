@@ -1,35 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E3693E120B;
-	Wed, 23 Sep 2026 17:19:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACD793E1CFD;
+	Wed, 23 Sep 2026 17:19:16 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790183946; cv=none; b=HyEBpzl7YPC8PzImeVmkKVBtrfBVSn8OeXILbWBip7thyIbtcxxwiJfvf5ORUPozU85q73RCxcE2q0SFy1pXyFG3+pP85/Oe5I+L+cLHBMfKnL7KKR0WRkMztJKObEkZi5UT5mjn1c4d4nfOOcwAgNBo7BCDlX/u1NBAIB2Fg+g=
+	t=1790183957; cv=none; b=LW+dYAd+DbX4TiTr7Do3lI61QIKY26j7+INp3Qo891CdeFSlxxJw5LnHPMmjaLxd5f4wzkkQ9GsPfyeBpiVOL+uyMeT3swKluT0Rn+mw1B2s56ZP2bMHnHrkyCrmy1e4HqzcYXQn7IvTsBjfM6CIiETGKNWxl7YfQ6jf5E5Bmg8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790183946; c=relaxed/simple;
-	bh=gZEYK17Idcl8NVa0SW7AyOgW50rm3aqvYdTeONXjR9Q=;
+	s=arc-20240116; t=1790183957; c=relaxed/simple;
+	bh=wNUVaWGrUfq1J8fZ3VtZkSo4KZCUQiuLpouzmc9mPms=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Vlq77ifxu+/qRghH3c8O4fIv/qT4GXJln/Nc1kChRaS2Kpc1IgB2UNOk2WMqf1myYqi8TVnv3fPRCMy6vLmiQtyKqWlyAhswjni6JycI4kKZLtNG7vWC5xQ1ssjo2JNE4HoNSHzlQBSMeTYNHcokGC+/92QAb/NBES9shg2d0bA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=F8jHkdZx; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=NtYPu0shXWlKb5BRc/mbLw/oekTakoG6uhQDJsJkOuPFVXdl1g20LV7wE+87maX1pfdsMukG30BE7h8YquoVU3j1oaLP/2w1uSqu1g2j0U1Y2iktJjPpY8g5ax25gAIp5XeQqu+wn9TBx/mMMhcNuKwemobDTM/glvmQemMPZgo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ajlS9Rgc; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="F8jHkdZx"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E3E231F00893;
-	Wed, 23 Sep 2026 17:18:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ajlS9Rgc"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 533291F000FF;
+	Wed, 23 Sep 2026 17:19:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790183943;
-	bh=5V79d3XZb3TxVh4yBOF6BN3Hn1MWKhx5EdJyaUB1dKk=;
+	s=k20260515; t=1790183956;
+	bh=EwUTC03iMe3mqDQCwXS0ElhwJ195RFfSMSvYZMg9K5c=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=F8jHkdZx0rOJXVdma5kxOZWwUDujyYRJQ5TIxP/gCc3LuIBvqWcf1yTK2k6luUERr
-	 WiZCiStJGxC8xctVSbhJe7b9mLKR7DIho1OWq1FqvWQwTDNOTvNJFnwclBePJhbGIs
-	 V9sgZyM3uD9ctbxzGGMl6R7JSxNUnMg3PV/TIHtEo//DduW8G/jLg/e9H+oofUgHDX
-	 TSokwB6otMzGDSs7snuJctuGtA1g3nQBxDhJDn3CPMbwM8f1n+tlXaghl4ia+IxpmP
-	 0/apcGsHbtjTLeLITkEvdhcRjXG7WMVksrUQhqc5mXBIGzHZBo3wPlftMWEzC+fJHx
-	 rt37DdFpDUYKw==
+	b=ajlS9RgcgJmPHoodht9q1Tjuf5/xG6VV5yZ0cMtOxjKRN40NqZx25yf2S1S46TbTx
+	 oxL+FAeAVUQPgrWhhpeL06lXnXe1S/qond5RIz1HEwTOZuD5t9JqOgfg7JjcHEBVaT
+	 i9JEHZPLF466KVBqI6pEXknFBlyCthgTa1D6vtH8CjUGlNJYO5+ocBLw+G2PJstRaB
+	 v2GnA5/E6Mwqt/ORFNEIVMJzqBncb9oR+8w5WNLjj+Qy/uoYYXVFFuSngalJiiZ39Y
+	 26VOG4Fme44YuFKGl0jBz7vhNF4xbEu+vi+CFEZafSkhxd7KffQAzwp1GJZfn05/hq
+	 OZqSvZaZeGShQ==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Wed, 23 Sep 2026 18:17:52 +0100
-Subject: [PATCH v4 03/22] kallsyms: output binary data to speed output and
- kallsyms assembly
+Date: Wed, 23 Sep 2026 18:17:53 +0100
+Subject: [PATCH v4 04/22] sorttable: parse nm output correctly
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -37,8 +36,8 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260923-build-speedup-v4-3-73128809a4a4@kernel.org>
+Content-Transfer-Encoding: 8bit
+Message-Id: <20260923-build-speedup-v4-4-73128809a4a4@kernel.org>
 References: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
 In-Reply-To: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -76,271 +75,89 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-hardening@vger.kernel.org, Petr Pavlu <petr.pavlu@suse.com>, 
  "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=8735; i=ljs@kernel.org;
- h=from:subject:message-id; bh=gZEYK17Idcl8NVa0SW7AyOgW50rm3aqvYdTeONXjR9Q=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLK2cF568altFsNBu52iaZOWhypIPXySv5fzbGfdyWMPw
- +5nai/82VHKwiDGxSArpsjy/Iv4/iCRsHmdF/zdYOawMoEMYeDiFICJLJdnZHixcO0LeZvfpb1K
- F40+PpVMXbH409OsO1crXe9lBatYNgcy/FNjLt8y75rKEpbkj59MpuQecrz/xUjDTUbffKVP8r+
- IJ7wA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2694; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=wNUVaWGrUfq1J8fZ3VtZkSo4KZCUQiuLpouzmc9mPms=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLK2cF7yMz8as2ltfPXBEIaTk5edNbUrLlkulXbQrz9Mn
+ 6O992lyRykLgxgXg6yYIsvzL+L7g0TC5nVe8HeDmcPKBDKEgYtTACZyew4jw6bmxf1ON1g32D6L
+ KxSzr41NTJnFaaTQn2nM7rPySN3BTwz/s180n1zKz7WxfIvY/3ueffm+MzeY/j/64e4/i7m3ck/
+ z8gMA
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-kallsyms generates an assembly file that consists mostly of .byte entries
-containing compressed names, token strings and name-sorted sequence
-numbers.
+sorttable reads a list of functions from vmlinux, provided by the output of
+nm, with the -S flag specified providing function sizes.
 
-For an x86-64 build with 158k symbols that is a 37 MiB .S file which takes
-0.57s to assemble each of the two to three times it is built over a kernel
-build.
+It does so using fscanf(fp, "%16s %16s %c %*s\n", ...) reading address,
+size, type (a single character) and name.
 
-Each time it is generated it also takes kallsyms a similar amount of time
-to output it.
+However, nm outputs no size for a symbol which has none, meaning that it
+misinterprets these entries - interpreting the type character as the size,
+and, if the name is a single character, ignores the newline and swallows
+the address of the next entry.
 
-Avoid this overhead by instead outputting this data as binary and importing
-it into the assembly using the .incbin directive.
+Size-less single character names exist (e.g. the assemblers' loop counters
+left over as local absolute symbols):
 
-Tables that are wider than a byte remain part of the assembly to ensure
-endianness and relative relocations are performed correctly.
+      0000000000000001 a i
+      000000000000000f a i
+      0000000000000050 a j
+      0000000000000052 a t
+      000000000000009f a i
+      0000000000000200 a i
 
-With this change, the output assembly file shrinks from 37 MiB to 9.8 MiB,
-with a 2.6 MiB binary data file alongside it, and the object remains
-identical.
+sorttable is looking for functions and these are not that, and with nm's
+output sorted, it just so happens to be that what's swallowed is never a
+function.
 
-The generated binary file is deleted correctly on build clean along with
-all other ephemeral data.
+However the next commit in this series stops sorting nm's output, so this
+bug can results in function names being lost.
 
-On an x86-64 system with CONFIG_KALLSYMS_ALL set:
+Fix the issue by using '%*[^\n]' in fscanf() rather than '%*s' such that
+the scan cannot move past the newline.
 
-                       before   after    delta
-  scripts/kallsyms     0.24s    0.18s    0.06s
-  assemble             0.57s    0.16s    0.41s
+Then, compare the address and size fields (which are always padded to the
+same width if output by nm) - if they differ, then this is a misread, so
+simply discard the entry.
 
-Per kallsyms invocation/assembly, for a total of 0.47s time saving upon
-invocation.
-
-An incremental build on the same system was reduced from 11.15s to 9.65s,
-indicating a total of 1.5 seconds saved over the build.
-
-The kallsyms runs and their assembly are on the serial tail of every build
-that links vmlinux, no-op builds are unchanged.
-
-Whole build, 128-thread Threadripper 9980X, best of N runs:
-
-                                         before   after     delta
-                                         -------------------------------
-  x86 defconfig, touch mm/vma.c, gcc       10.6s     9.7s    -0.89s (-8%)
-  x86 defconfig, touch mm/vma.c, clang     10.5s     9.3s     -1.2s (-11%)
-  x86 defconfig, clean, gcc                31.3s    30.3s     -1.0s (-3%)
-  x86 defconfig, clean, clang              33.3s    31.7s     -1.6s (-5%)
-  x86 allmodconfig, touch mm/vma.c, gcc    38.7s    37.2s     -1.4s (-4%)
-  x86 allmodconfig, touch mm/vma.c, clang  39.1s    36.4s     -2.6s (-7%)
+It's fine to discard these, as sorttable's raison d'être is to discover
+whether a call site is contained within a function and an empty function
+can't contain anything.
 
 Assisted-by: LLM
-Reviewed-by: Kees Cook <kees@kernel.org>
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- scripts/kallsyms.c      | 84 ++++++++++++++++++++++++++++++++++++-------------
- scripts/link-vmlinux.sh |  2 +-
- 2 files changed, 64 insertions(+), 22 deletions(-)
+ scripts/sorttable.c | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
 
-diff --git a/scripts/kallsyms.c b/scripts/kallsyms.c
-index bb05de2aa580..b615db767b1d 100644
---- a/scripts/kallsyms.c
-+++ b/scripts/kallsyms.c
-@@ -5,7 +5,10 @@
-  * This software may be used and distributed according to the terms
-  * of the GNU General Public License, incorporated herein by reference.
-  *
-- * Usage: kallsyms [--all-symbols] in.map > out.S
-+ * Usage: kallsyms [--all-symbols] [--pc-relative] in.map out.bin > out.S
-+ *
-+ *      The byte tables go to out.bin and are pulled into out.S with .incbin;
-+ *  wider tables stay assembler source for endianness and relocations.
-  *
-  *      Table compression uses all the unused char codes on the symbols and
-  *  maps these to the most used substrings (tokens). For instance, it might
-@@ -105,7 +108,7 @@ static void sym_arr_free(struct sym_arr *arr)
- 
- static void usage(void)
- {
--	fprintf(stderr, "Usage: kallsyms [--all-symbols] in.map > out.S\n");
-+	fprintf(stderr, "Usage: kallsyms [--all-symbols] [--pc-relative] in.map out.bin > out.S\n");
- 	exit(1);
- }
- 
-@@ -322,6 +325,26 @@ static void output_label(const char *label)
- 	printf("%s:\n", label);
- }
- 
-+static long bin_pos(FILE *file)
-+{
-+	const long pos = ftell(file);
-+
-+	if (pos < 0) {
-+		perror("kallsyms: ftell");
-+		exit(EXIT_FAILURE);
-+	}
-+
-+	return pos;
-+}
-+
-+static void write_incbin(const char *filename, long start, long end)
-+{
-+	if (start >= end)
-+		return;
-+
-+	printf("\t.incbin \"%s\", %ld, %ld\n", filename, start, end - start);
-+}
-+
- /* uncompress a compressed symbol. When this function is called, the best table
-  * might still be compressed itself, so the function needs to be recursive */
- static int expand_symbol(const unsigned char *data, int len, char *result)
-@@ -374,11 +397,12 @@ static void sort_symbols_by_name(void)
- 	qsort(table, table_cnt, sizeof(table[0]), compare_names);
- }
- 
--static void write_src(void)
-+static void write_src(FILE *out_bin_file, const char *out_bin_name)
- {
--	unsigned int i, k, off;
-+	unsigned int i, off;
- 	unsigned int best_idx[256];
- 	unsigned int *markers, markers_cnt;
-+	long bin_start;
- 	char buf[KSYM_NAME_LEN];
- 
- 	printf("\t.section .rodata, \"a\"\n");
-@@ -393,6 +417,7 @@ static void write_src(void)
- 	markers = xmalloc(sizeof(*markers) * markers_cnt);
- 
- 	output_label("kallsyms_names");
-+	bin_start = bin_pos(out_bin_file);
- 	off = 0;
- 	for (i = 0; i < table_cnt; i++) {
- 		if ((i & 0xFF) == 0)
-@@ -416,26 +441,24 @@ static void write_src(void)
- 		/* Encode length with ULEB128. */
- 		if (table[i]->len <= 0x7F) {
- 			/* Most symbols use a single byte for the length. */
--			printf("\t.byte 0x%02x", table[i]->len);
-+			fputc(table[i]->len, out_bin_file);
- 			off += table[i]->len + 1;
- 		} else {
- 			/* "Big" symbols use two bytes. */
--			printf("\t.byte 0x%02x, 0x%02x",
--				(table[i]->len & 0x7F) | 0x80,
--				(table[i]->len >> 7) & 0x7F);
-+			fputc((table[i]->len & 0x7F) | 0x80, out_bin_file);
-+			fputc((table[i]->len >> 7) & 0x7F, out_bin_file);
- 			off += table[i]->len + 2;
- 		}
--		for (k = 0; k < table[i]->len; k++)
--			printf(", 0x%02x", table[i]->sym[k]);
-+		fwrite(table[i]->sym, 1, table[i]->len, out_bin_file);
- 
- 		/*
- 		 * Now that we wrote out the compressed symbol name, restore the
--		 * original name and print it in the comment.
-+		 * original name for the comments below.
- 		 */
- 		expand_symbol(table[i]->sym, table[i]->len, buf);
- 		strcpy((char *)table[i]->sym, buf);
--		printf("\t/* %s */\n", table[i]->sym);
- 	}
-+	write_incbin(out_bin_name, bin_start, bin_pos(out_bin_file));
- 	printf(".size kallsyms_names, . - kallsyms_names\n");
- 	printf("\n");
- 
-@@ -448,13 +471,15 @@ static void write_src(void)
- 	free(markers);
- 
- 	output_label("kallsyms_token_table");
-+	bin_start = bin_pos(out_bin_file);
- 	off = 0;
- 	for (i = 0; i < 256; i++) {
- 		best_idx[i] = off;
- 		expand_symbol(best_table[i], best_table_len[i], buf);
--		printf("\t.asciz\t\"%s\"\n", buf);
-+		fwrite(buf, 1, strlen(buf) + 1, out_bin_file);
- 		off += strlen(buf) + 1;
- 	}
-+	write_incbin(out_bin_name, bin_start, bin_pos(out_bin_file));
- 	printf(".size kallsyms_token_table, . - kallsyms_token_table\n");
- 	printf("\n");
- 
-@@ -487,12 +512,13 @@ static void write_src(void)
- 
- 	sort_symbols_by_name();
- 	output_label("kallsyms_seqs_of_names");
--	for (i = 0; i < table_cnt; i++)
--		printf("\t.byte 0x%02x, 0x%02x, 0x%02x\t/* %s */\n",
--			(unsigned char)(table[i]->seq >> 16),
--			(unsigned char)(table[i]->seq >> 8),
--			(unsigned char)(table[i]->seq >> 0),
--		       table[i]->sym);
-+	bin_start = bin_pos(out_bin_file);
-+	for (i = 0; i < table_cnt; i++) {
-+		fputc(table[i]->seq >> 16, out_bin_file);
-+		fputc(table[i]->seq >> 8, out_bin_file);
-+		fputc(table[i]->seq >> 0, out_bin_file);
-+	}
-+	write_incbin(out_bin_name, bin_start, bin_pos(out_bin_file));
- 	printf("\n");
- }
- 
-@@ -803,6 +829,9 @@ static void sort_symbols(void)
- 
- int main(int argc, char **argv)
- {
-+	const char *out_bin_name;
-+	FILE *out_bin_file;
-+
- 	while (1) {
- 		static const struct option long_options[] = {
- 			{"all-symbols",     no_argument, &all_symbols,     1},
-@@ -818,14 +847,27 @@ int main(int argc, char **argv)
- 			usage();
+diff --git a/scripts/sorttable.c b/scripts/sorttable.c
+index d7b50581c732..88e49a5c4251 100644
+--- a/scripts/sorttable.c
++++ b/scripts/sorttable.c
+@@ -322,10 +322,23 @@ static int parse_symbols(const char *fname)
+ 		return -1;
  	}
  
--	if (optind >= argc)
-+	if (optind + 2 != argc)
- 		usage();
+-	while (fscanf(fp, "%16s %16s %c %*s\n", addr_str, size_str, &type) == 3) {
++	while (fscanf(fp, "%16s %16s %c%*[^\n]", addr_str, size_str, &type) == 3) {
+ 		uint64_t addr;
+ 		uint64_t size;
  
-+	out_bin_name = argv[optind + 1];
-+	out_bin_file = fopen(out_bin_name, "w");
-+	if (!out_bin_file) {
-+		perror(out_bin_name);
-+		exit(EXIT_FAILURE);
-+	}
++		/*
++		 * nm outputs size-less entries with a missing 2nd value, which
++		 * means fscanf() just misread its fields.
++		 *
++		 * These don't matter as a call site cannot be in an empty
++		 * function, so just skip them.
++		 *
++		 * nm pads address and size to the same width, so if their
++		 * widths differ, this is a misread.
++		 */
++		if (strlen(size_str) != strlen(addr_str))
++			continue;
 +
- 	read_map(argv[optind]);
- 	shrink_table();
- 	sort_symbols();
- 	optimize_token_table();
--	write_src();
-+	write_src(out_bin_file, out_bin_name);
-+
-+	/* Write errors are latched in the stream, so one check at the end covers them all. */
-+	if (ferror(out_bin_file) || fclose(out_bin_file)) {
-+		perror(out_bin_name);
-+		exit(EXIT_FAILURE);
-+	}
- 
- 	return 0;
- }
-diff --git a/scripts/link-vmlinux.sh b/scripts/link-vmlinux.sh
-index ab0b8125c8cb..e88604150d2c 100755
---- a/scripts/link-vmlinux.sh
-+++ b/scripts/link-vmlinux.sh
-@@ -132,7 +132,7 @@ kallsyms()
- 	fi
- 
- 	info KSYMS "${2}.S"
--	scripts/kallsyms ${kallsymopt} "${1}" > "${2}.S"
-+	scripts/kallsyms ${kallsymopt} "${1}" "${2}.bin" > "${2}.S"
- 
- 	info AS "${2}.o"
- 	${CC} ${NOSTDINC_FLAGS} ${LINUXINCLUDE} ${KBUILD_CPPFLAGS} \
+ 		/* Only care about functions */
+ 		if (type != 't' && type != 'T' && type != 'W')
+ 			continue;
 
 -- 
 2.55.0
