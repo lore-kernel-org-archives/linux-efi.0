@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C043B3E4C61;
-	Wed, 23 Sep 2026 17:20:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 373B635E1AF;
+	Wed, 23 Sep 2026 17:20:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790184021; cv=none; b=T04VdbXLEgp+7xC+19Wc1nwE3xilLvH+TJHrdRAaqKmFVhtyjAdgPrRx8L+76XsBuMhc0MpkS//wWK0I9wFHo9h13heU9buEWk7NyfnSmuzvXyKrn97IVDMTv990yZTJVmsltQ2mrk+o9JZ5Nn6Y68IyjYdyKSWjxcrqx3Xs+zU=
+	t=1790184033; cv=none; b=hjZJzMB1XJkCqAaGEmRFqo0nk/k1RhTO/q2zZ9HFuFOpu5MgEjC1RbcGWGhR/+5twgmkDJMbOtaocyIGiSh2Q/kFuGTBu8TM8U8OVDIty56I7efs2pWPIfSb/vhpDGGQtq2Pdm/yGK4l2YxEOqScBe7FMV8d1DcxuxQsy+LVAGk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790184021; c=relaxed/simple;
-	bh=1tlfspzVyupWDtDIq9Xi6b2r8IeD5B+p03B8UkqK1dA=;
+	s=arc-20240116; t=1790184033; c=relaxed/simple;
+	bh=vu58Bnv++YVBx3hdKWip/gCDhzfsNmxCWv+mVy6NYn8=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=YuYOkJxzmJUOkwnwOTHEIwvM/s5Hs+eMzPNOHLsVT0NmooptaW1VE2FqjlxAaIeOP8DCRn3UbF9ob30DwZ3YJjYwrHbJBgdUhWCVd35mjJR4+b1P12T00xECZuW/BHvAPRPSjVWJbemNdXRtz4ch8eVyVbWLPuea2Z3XbdW8y6A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mZ46Am8b; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:To:Cc; b=g/0VXnkXMdUYIpIFOuf8uuZYqZepfQXnixLFP/gokkVp/sCPOqhNDloLI6VMYjk3KPDiL92aovX5piMWBVu/9LiWmywPlJ/T9QqB4+9/RQ+xktsECWCl7U9mD9YtskFS9H+pew5kb8U6VrZ6ku3jA5nXqdEnJQgql455bifvcN4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NYM+0xGj; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mZ46Am8b"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 50FCE1F00893;
-	Wed, 23 Sep 2026 17:20:07 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NYM+0xGj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DF9CF1F00898;
+	Wed, 23 Sep 2026 17:20:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790184019;
-	bh=+rwl1Zn9bU3CF5Lv6uJecPAyTurD5CJjPcxpUYcu/S0=;
+	s=k20260515; t=1790184031;
+	bh=dE0Cp7cVTXt7sFMVwoXw+v3pYGTpA10+0QkTPfn3kfU=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=mZ46Am8b6Wn9IMnH8S2ELNq04sKgdTBqXyocEc8OiLB0sIiwNs/r3xJS7H+Jps8UB
-	 Nr6oNJarDDpQaWtichSPBo6WiOxV2I/l6AUnAGHuHANUHxpuu2aHkDkf4NJ3FdIYPs
-	 LCw0TVk09iax4Vzz4tQdzXYTXcEPXUz34TFC+3lcSzfEhpFGFPbjAhQeHBqIQ/Dif8
-	 ZFW0n3RzfA4QblsDN/VKZRAVIggc1iQPR5fT9pZ1lWsexJBduO/kql9jVY68tmvSvK
-	 U9JRqHbVg4kFTgLsFXUxkNb+L4jPIRFRUxVfE9wd2ZGBl0Y1yNn7XtyaJSKrxrB/bh
-	 7+S3dv4tqFp+g==
+	b=NYM+0xGjuWTB7BmzeoSH81K+tWskYgZY7DLSJpUsBBJRDj24N16j46sry8j6gBK+B
+	 Qzm037TBmGqorPDC7okGGNtV96YC5T0dEsFT5jqIsL2j0qBFMTlzoMcmC9904Bnycb
+	 BOBkvDajMkPtdezLPu3rZzkKwZtDOYVDfMSfBw88evVqcFqHWM58DSXvk4WQ5O3ITF
+	 DQ3s6+nPR5wgoSc5Bg/KfcY64+rMPoJhfWBowcCBkCxiIyJw0UTGUI3RWLLmujegD/
+	 cxdWBwoPgBS485iq271d2woPnyHj6RXUrkxmN50TpAtI67GXOElYWqpjFRC0DDCBbk
+	 eu4Hq+FlQT0Qg==
 From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Date: Wed, 23 Sep 2026 18:17:58 +0100
-Subject: [PATCH v4 09/22] kbuild: calculate list, composite object state
- per object
+Date: Wed, 23 Sep 2026 18:17:59 +0100
+Subject: [PATCH v4 10/22] kbuild: implement and use depcheck to check
+ dependency timestamps
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -38,7 +38,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260923-build-speedup-v4-9-73128809a4a4@kernel.org>
+Message-Id: <20260923-build-speedup-v4-10-73128809a4a4@kernel.org>
 References: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
 In-Reply-To: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
 To: Linus Torvalds <torvalds@linux-foundation.org>, 
@@ -74,98 +74,620 @@ Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
  linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
  linux-hardening@vger.kernel.org, Petr Pavlu <petr.pavlu@suse.com>, 
- "Lorenzo Stoakes (ARM)" <ljs@kernel.org>, 
- Nicolas Schier <n.schier@fritz.com>
+ "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3573; i=ljs@kernel.org;
- h=from:subject:message-id; bh=1tlfspzVyupWDtDIq9Xi6b2r8IeD5B+p03B8UkqK1dA=;
- b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLK2cF6e9yE+QOQp734n36qPH5XC1tztqeaztH+w+1ud6
- NnbN0xCO0pZGMS4GGTFFFmefxHfHyQSNq/zgr8bzBxWJpAhDFycAjARpuWMDD9uLjv/Tf5qzXuz
- +M+ue27qrjt6u2Xji/mi5iLfY+4//crH8E9zWuT8XfqLT783vWcXtMFMm4/zb/0vo393ec3/ZTG
- 5cLMCAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=17217; i=ljs@kernel.org;
+ h=from:subject:message-id; bh=vu58Bnv++YVBx3hdKWip/gCDhzfsNmxCWv+mVy6NYn8=;
+ b=owGbwMvMwCV2fu7ZrsZH9SKMp9WSGLK2cF5u2dp/dt2+ySf+tj9hWb1OgulQ6LcXZ/Nsd3JaZ
+ omm7tO93FHKwiDGxSArpsjy/Iv4/iCRsHmdF/zdYOawMoEMYeDiFICJqNxi+GfePOPRZZl7i822
+ 32/akrx1cnXEAb2/bPuPtGpVH9NiPczAyLDGUEOL/+unqysTizLu/ekxCF7IxyHyrXJ53Rllt7M
+ ZPmwA
 X-Developer-Key: i=ljs@kernel.org; a=openpgp;
  fpr=E7F417BF5214569E89D04F46CF9DCD8A81E27F14
 
-When each object's command line is expanded, kbuild has to figure out on
-multiple occasions whether it's built-in or part of a module and which
-composite object it belongs to.
+Each object's .cmd file lists its header dependencies, which often
+consists of over a thousand dependencies.
 
-This causes the time spent on each directory in the kernel tree to grow
-O(n^2) with its object count, which is especially problematic for instance
-in drivers/gpu/drm/amd/amdgpu with 310 objects.
+When little has changed in the tree, this is what make spends most of its
+time doing, spending over a second, single-threaded when parsing larger
+directory trees.
 
-No-op builds (i.e. make -j $(nproc) when nothing has changed) are
-particularly impacted by this.
+It performs considerably more work that is actually necessary to get the
+job done.
 
-Fix the issue by calculating this data once and looking it up thereafter
-instead of recomputing it over and over again.
+This can be done faster in C, so implement scripts/basic/depcheck to do so.
 
-This has a particularly large impact on allmodconfig builds.
+It does as little work as possible, reading the .cmd files from a
+directory's targets and running stat on each dependency only a single time.
+
+It generates a fragment holding only the saved command line for a target
+whose dependencies all exist and are older than it, and the entire .cmd
+file for any other.
+
+A dependency that is also a target of the same directory (e.g. header
+generated by an if_changed rule) may get remade later in the same make run,
+so do not treat a target as fresh.
+
+That way, Makefile.build simply includes the fragment and the amount of
+work make has to do is significantly reduced when there is not much work to
+do.
+
+If the operation fails, kbuild falls back to using .cmd files.
+
+The result is exactly the same as before.
+
+For drivers/gpu/drm/amd/amdgpu in an allmodconfig tree the fragment is a
+fifth of the size of the .cmd files, make reads it in 10ms instead of
+380ms, and the instance goes from 2.2s to 0.4s.
 
 Whole build, 128-thread Threadripper 9980X, best of N runs:
 
                                          before   after     delta
                                          -------------------------------
-  x86 defconfig, no-op make, gcc            1.1s     1.1s    -0.02s (-2%)
-  x86 defconfig, no-op make, clang          1.3s     1.3s    -0.01s (-1%)
-  x86 allmodconfig, no-op make, gcc        15.3s    14.5s    -0.83s (-5%)
-  x86 allmodconfig, no-op make, clang      16.2s    15.5s    -0.65s (-4%)
-  x86 allmodconfig, touch mm/vma.c, gcc    35.0s    34.3s    -0.77s (-2%)
-  x86 allmodconfig, touch mm/vma.c, clang  33.7s    33.2s    -0.51s (-2%)
+  x86 defconfig, no-op make, gcc            1.1s    0.78s    -0.30s (-28%)
+  x86 defconfig, no-op make, clang          1.3s    0.94s    -0.34s (-27%)
+  x86 allmodconfig, no-op make, gcc        14.5s    12.9s     -1.6s (-11%)
+  x86 allmodconfig, no-op make, clang      15.5s    14.2s     -1.3s (-9%)
+  x86 allmodconfig, touch mm/vma.c, gcc    34.3s    33.9s    -0.33s (-1%)
+  x86 allmodconfig, touch mm/vma.c, clang  33.2s    32.2s    -0.98s (-3%)
 
 Assisted-by: LLM
-Reviewed-by: Nicolas Schier <n.schier@fritz.com>
-Reviewed-by: Kees Cook <kees@kernel.org>
 Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
 ---
- scripts/Makefile.build | 8 ++++++++
- scripts/Makefile.lib   | 7 +++----
- 2 files changed, 11 insertions(+), 4 deletions(-)
+ Makefile                 |   1 +
+ scripts/Makefile.build   |  15 +-
+ scripts/basic/.gitignore |   1 +
+ scripts/basic/Makefile   |   2 +-
+ scripts/basic/depcheck.c | 481 +++++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 498 insertions(+), 2 deletions(-)
 
+diff --git a/Makefile b/Makefile
+index ab3ba78376f7..554c9003a4d9 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2241,6 +2241,7 @@ clean: $(clean-dirs)
+ 	$(call cmd,rmfiles)
+ 	@find . $(RCS_FIND_IGNORE) \
+ 		\( -name '*.[aios]' -o -name '*.rsi' -o -name '*.ko' -o -name '.*.cmd' \
++		-o -name '.depcheck.mk' -o -name '.depcheck.mk.tmp' \
+ 		-o -name '*.ko.*' -o -name '*.o.thinlto.bc' \
+ 		-o -name '*.dtb' -o -name '*.dtbo' \
+ 		-o -name '*.dtb.S' -o -name '*.dtbo.S' \
 diff --git a/scripts/Makefile.build b/scripts/Makefile.build
-index 4349108e75e1..2cabfe85b798 100644
+index 2cabfe85b798..819cc1f750e8 100644
 --- a/scripts/Makefile.build
 +++ b/scripts/Makefile.build
-@@ -122,6 +122,14 @@ multi-obj-m	:= $(addprefix $(obj)/, $(multi-obj-m))
- subdir-ym	:= $(addprefix $(obj)/, $(subdir-ym))
- endif
+@@ -592,7 +592,20 @@ $(obj)/: $(if $(KBUILD_BUILTIN), $(targets-for-builtin)) \
  
-+# Cache which list each object is in and which composite objects it belongs to,
-+# once per object for $(part-of-builtin), $(part-of-module) and $(modname-multi).
-+$(foreach o, $(real-obj-y) $(lib-y), $(eval part-of-builtin_$o := y))
-+$(foreach o, $(real-obj-m), $(eval part-of-module_$o := y))
-+$(foreach m, $(multi-obj-ym), \
-+	$(foreach o, $(call suffix-search, $m, .o, -objs -y -m), \
-+		$(eval modname-multi_$o += $(m:.o=))))
+ existing-targets := $(wildcard $(sort $(targets)))
+ 
+--include $(foreach f,$(existing-targets),$(dir $(f)).$(notdir $(f)).cmd)
++cmd-files := $(wildcard $(foreach f,$(existing-targets),$(dir $(f)).$(notdir $(f)).cmd))
 +
- ifndef obj
- $(warning kbuild: Makefile.build is included improperly)
- endif
-diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
-index 0a4fdd8bd975..2f447bc25e7b 100644
---- a/scripts/Makefile.lib
-+++ b/scripts/Makefile.lib
-@@ -2,8 +2,7 @@
++# depcheck checks timestamps first and outputs only saved command lines of
++# up-to-date targets, falling back to .cmd files if it fails. A directory
++# whose targets all lie elsewhere may not exist in the output tree.
++depcheck := $(wildcard $(objtree)/scripts/basic/depcheck)
++
++ifneq ($(and $(depcheck),$(cmd-files),$(wildcard $(obj))),)
++ifeq ($(shell $(depcheck) $(obj)/.depcheck.mk $(cmd-files) && echo ok),ok)
++cmd-files := $(obj)/.depcheck.mk
++endif
++endif
++
++-include $(cmd-files)
  
- # Finds the multi-part object the current object will be linked into.
- # If the object belongs to two or more multi-part objects, list them all.
--modname-multi = $(sort $(foreach m,$(multi-obj-ym),\
--		$(if $(filter $*.o, $(call suffix-search, $m, .o, -objs -y -m)),$(m:.o=))))
-+modname-multi = $(sort $(modname-multi_$*.o))
+ # Create directories for object files if they do not exist
+ obj-dirs := $(sort $(patsubst %/,%, $(dir $(targets))))
+diff --git a/scripts/basic/.gitignore b/scripts/basic/.gitignore
+index 07c195f605a1..761ee14f9477 100644
+--- a/scripts/basic/.gitignore
++++ b/scripts/basic/.gitignore
+@@ -1,3 +1,4 @@
+ # SPDX-License-Identifier: GPL-2.0-only
++/depcheck
+ /fixdep
+ /randstruct.seed
+diff --git a/scripts/basic/Makefile b/scripts/basic/Makefile
+index fb8e2c38fbc7..ff98780e474d 100644
+--- a/scripts/basic/Makefile
++++ b/scripts/basic/Makefile
+@@ -2,7 +2,7 @@
+ #
+ # fixdep: used to generate dependency information during build process
  
- __modname = $(or $(modname-multi),$(basetarget))
+-hostprogs-always-y	+= fixdep
++hostprogs-always-y	+= fixdep depcheck
  
-@@ -149,8 +148,8 @@ endif
- # If $(is-kernel-object) is 'y', this object will be linked to vmlinux or modules
- is-kernel-object = $(or $(part-of-builtin),$(part-of-module))
- 
--part-of-builtin = $(if $(filter $(basename $@).o, $(real-obj-y) $(lib-y)),y)
--part-of-module = $(if $(filter $(basename $@).o, $(real-obj-m)),y)
-+part-of-builtin = $(part-of-builtin_$(basename $@).o)
-+part-of-module = $(part-of-module_$(basename $@).o)
- quiet_modtag = $(if $(part-of-module),[M],   )
- 
- modkern_cflags =                                          \
+ # randstruct: the seed is needed before building the gcc-plugin or
+ # before running a Clang kernel build.
+diff --git a/scripts/basic/depcheck.c b/scripts/basic/depcheck.c
+new file mode 100644
+index 000000000000..119075353f3b
+--- /dev/null
++++ b/scripts/basic/depcheck.c
+@@ -0,0 +1,481 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * depcheck - check the dependency timestamps of a directory's targets so that
++ * make reads only what it needs from their .cmd files.
++ *
++ * fixdep writes a .cmd file as:
++ *
++ *	savedcmd_dir/foo.o := <command line>
++ *
++ *	source_dir/foo.o := dir/foo.c
++ *
++ *	deps_dir/foo.o := \
++ *	  include/linux/bar.h \
++ *	    $(wildcard include/config/BAZ) \
++ *
++ *	dir/foo.o: $(deps_dir/foo.o)
++ *
++ *	$(deps_dir/foo.o):
++ *
++ * and kbuild may append rules of its own after that, such as one making the
++ * target depend on objtool.
++ *
++ * For a target that exists and is newer than every dependency listed, make can
++ * have nothing to do with the list, so it is left out and only what precedes
++ * and follows it is passed on; for anything else the .cmd file is passed on in
++ * full.
++ *
++ * Usage: depcheck <output> <.cmd files...>
++ *
++ * The output is a makefile fragment to include in place of the .cmd files; a
++ * non-zero exit status means the caller should include those instead.
++ */
++#include <limits.h>
++#include <stdbool.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/stat.h>
++#include <time.h>
++#include <unistd.h>
++
++#include <hash.h>
++#include <hashtable.h>
++#include <xalloc.h>
++
++/* What fixdep writes, see above. */
++#define DEPS_PREFIX		"deps_"
++#define DEPS_RULE_PREFIX	"$(" DEPS_PREFIX
++#define RULE_SUFFIX		":"
++#define LINE_CONTINUATION	" \\"
++#define WILDCARD_OPEN		"$(wildcard "
++#define WILDCARD_CLOSE		")"
++#define CMD_SUFFIX		".cmd"
++
++/* A line of a .cmd file, without its newline. */
++struct line {
++	const char *text;
++	size_t len;
++};
++
++static bool is_blank(char chr)
++{
++	return chr == ' ' || chr == '\t';
++}
++
++static bool str_ends_with(const char *str, const char *suffix)
++{
++	const size_t len = strlen(str), suffix_len = strlen(suffix);
++
++	return len >= suffix_len && !strcmp(str + len - suffix_len, suffix);
++}
++
++static bool line_starts_with(const struct line *line, const char *prefix)
++{
++	const size_t len = strlen(prefix);
++
++	return line->len >= len && !memcmp(line->text, prefix, len);
++}
++
++static bool line_ends_with(const struct line *line, const char *suffix)
++{
++	const size_t len = strlen(suffix);
++
++	return line->len >= len &&
++	       !memcmp(line->text + line->len - len, suffix, len);
++}
++
++static bool line_is_blank(const struct line *line)
++{
++	size_t i;
++
++	for (i = 0; i < line->len; i++)
++		if (!is_blank(line->text[i]))
++			return false;
++
++	return true;
++}
++
++/* Whether the line ends in " \", continuing the list on the next line. */
++static bool line_is_continued(const struct line *line)
++{
++	return line_ends_with(line, LINE_CONTINUATION);
++}
++
++static void line_strip_continuation(struct line *line)
++{
++	if (line_is_continued(line))
++		line->len -= strlen(LINE_CONTINUATION);
++}
++
++static void line_trim(struct line *line)
++{
++	while (line->len && is_blank(line->text[0])) {
++		line->text++;
++		line->len--;
++	}
++	while (line->len && is_blank(line->text[line->len - 1]))
++		line->len--;
++}
++
++/* Take the next line out of [*pos, end); false once there are none left. */
++static bool next_line(const char **pos, const char *end, struct line *line)
++{
++	const char *newline;
++
++	if (*pos >= end)
++		return false;
++
++	newline = memchr(*pos, '\n', end - *pos);
++	line->text = *pos;
++	line->len = (newline ? newline : end) - *pos;
++	*pos = newline ? newline + 1 : end;
++
++	return true;
++}
++
++/* Describes a dependency file. */
++struct dep {
++	struct hlist_node hnode;
++	struct timespec mtime;
++	bool exists;
++	char path[];
++};
++
++static HASHTABLE_DEFINE(dep_table, 1U << 16);
++
++/* The targets of this run's .cmd files: anything make may remake this time. */
++struct target {
++	struct hlist_node hnode;
++	char path[];
++};
++
++static HASHTABLE_DEFINE(target_table, 1U << 12);
++
++static void add_target(const char *path)
++{
++	struct target *target = xmalloc(sizeof(*target) + strlen(path) + 1);
++
++	strcpy(target->path, path);
++	hash_add(target_table, &target->hnode, hash_str(path));
++}
++
++static bool is_target(const char *path)
++{
++	const unsigned int key = hash_str(path);
++	struct target *target;
++
++	hash_for_each_possible(target_table, target, hnode, key) {
++		if (!strcmp(target->path, path))
++			return true;
++	}
++
++	return false;
++}
++
++static const struct dep *lookup_dep(const char *path)
++{
++	const unsigned int key = hash_str(path);
++	struct dep *dep;
++	struct stat st;
++
++	hash_for_each_possible(dep_table, dep, hnode, key) {
++		if (!strcmp(dep->path, path))
++			return dep;
++	}
++
++	dep = xcalloc(1, sizeof(*dep) + strlen(path) + 1);
++	strcpy(dep->path, path);
++	dep->exists = !stat(path, &st);
++	if (dep->exists)
++		dep->mtime = st.st_mtim;
++	hash_add(dep_table, &dep->hnode, key);
++
++	return dep;
++}
++
++/* Strictly newer, as make compares timestamps. */
++static bool newer(const struct timespec *time_a, const struct timespec *time_b)
++{
++	if (time_a->tv_sec != time_b->tv_sec)
++		return time_a->tv_sec > time_b->tv_sec;
++
++	return time_a->tv_nsec > time_b->tv_nsec;
++}
++
++/*
++ * $(wildcard include/config/FOO) is a prerequisite only while FOO is set:
++ * unwrap it and say that it is optional.
++ */
++static bool line_unwrap_wildcard(struct line *line)
++{
++	if (!line_starts_with(line, WILDCARD_OPEN) ||
++	    !line_ends_with(line, WILDCARD_CLOSE))
++		return false;
++
++	line->text += strlen(WILDCARD_OPEN);
++	line->len -= strlen(WILDCARD_OPEN) + strlen(WILDCARD_CLOSE);
++
++	return true;
++}
++
++/* fixdep doubles '$' and escapes '#' in a path: undo that into path[]. */
++static bool unescape_path(const struct line *line, char *path, size_t size)
++{
++	size_t i, out_len = 0;
++
++	if (line->len >= size)
++		return false;
++
++	for (i = 0; i < line->len; i++) {
++		const char chr = line->text[i];
++		const char next_chr = i + 1 < line->len ? line->text[i + 1] : '\0';
++
++		if ((chr == '$' && next_chr == '$') || (chr == '\\' && next_chr == '#'))
++			i++;
++		path[out_len++] = line->text[i];
++	}
++	path[out_len] = '\0';
++
++	return true;
++}
++
++/* Is the path contained in line older than the target? */
++static bool dep_is_fresh(struct line line, const struct timespec *target)
++{
++	char path[PATH_MAX];
++	const struct dep *dep;
++	bool optional;
++
++	line_strip_continuation(&line);
++	line_trim(&line);
++	if (!line.len)
++		return false;
++
++	optional = line_unwrap_wildcard(&line);
++	if (!line.len || !unescape_path(&line, path, sizeof(path)))
++		return false;
++
++	/* A target can get 'remade' so its timestamp is meaningless. */
++	if (is_target(path))
++		return false;
++
++	dep = lookup_dep(path);
++	if (!dep->exists)
++		return optional;
++
++	return !newer(&dep->mtime, target);
++}
++
++/*
++ * Parse a dependency list which consists of one file per line and determine if
++ * all dependencies are 'fresh', i.e. older than the target.
++ */
++static bool deps_are_fresh(const char *pos, const char *end,
++			   const struct timespec *target)
++{
++	struct line line;
++
++	while (next_line(&pos, end, &line)) {
++		if (line_is_blank(&line))
++			return true;
++		if (!dep_is_fresh(line, target))
++			return false;
++		if (!line_is_continued(&line))
++			return true;
++	}
++
++	return true;
++}
++
++/*
++ * Find the "deps_" line in the input.
++ *
++ * On success returns true and *deps_off is set to its offset and *list is set
++ * to the list's own lines start or NULL if the line is not continued.
++ *
++ * Otherwise returns false if the prefix cannot be found.
++ */
++static bool find_deps(const char *buf, size_t len, size_t *deps_off,
++		      const char **list)
++{
++	const char *pos = buf, *end = buf + len;
++	struct line line;
++
++	while (next_line(&pos, end, &line)) {
++		if (!line_starts_with(&line, DEPS_PREFIX))
++			continue;
++
++		*deps_off = line.text - buf;
++		*list = line_is_continued(&line) ? pos : NULL;
++		return true;
++	}
++
++	return false;
++}
++
++/*
++ * Is this the target of a .cmd file, i.e. 'dir/.name.cmd names dir/name.'?
++ */
++static bool target_of(const char *cmd_path, char *target, size_t size)
++{
++	const char *slash = strrchr(cmd_path, '/');
++	const char *base = slash ? slash + 1 : cmd_path;
++	const size_t dir_len = base - cmd_path;
++	const size_t affix_len = strlen(".") + strlen(CMD_SUFFIX);
++	const size_t base_len = strlen(base);
++
++	if (base[0] != '.' || !str_ends_with(base, CMD_SUFFIX) ||
++	    base_len <= affix_len)
++		return false;
++
++	return snprintf(target, size, "%.*s%.*s", (int)dir_len, cmd_path,
++			(int)(base_len - affix_len), base + 1) < (int)size;
++}
++
++/*
++ * Does the .cmd file's target exists and is it newer than everything in its
++ * dependency list?
++ *
++ * Returns true if so and sets *deps_off to the start of the list, otherwise
++ * returns false.
++ */
++static bool target_is_fresh(const char *cmd_path, const char *buf, size_t len,
++			    size_t *deps_off)
++{
++	char target[PATH_MAX];
++	struct stat st;
++	const char *list;
++
++	if (!target_of(cmd_path, target, sizeof(target)) || stat(target, &st))
++		return false;
++	if (!find_deps(buf, len, deps_off, &list))
++		return false;
++	if (!list)
++		return true;
++
++	return deps_are_fresh(list, buf + len, &st.st_mtim);
++}
++
++static char *read_file(const char *path, size_t *len)
++{
++	FILE *file = fopen(path, "r");
++	struct stat st;
++	char *buf;
++	size_t nr_read = 0;
++
++	if (!file)
++		return NULL;
++	if (fstat(fileno(file), &st)) {
++		fclose(file);
++		return NULL;
++	}
++
++	buf = xmalloc(st.st_size + 1);
++	while (nr_read < (size_t)st.st_size) {
++		const size_t chunk = fread(buf + nr_read, 1, st.st_size - nr_read, file);
++
++		if (!chunk)
++			break;
++		nr_read += chunk;
++	}
++	fclose(file);
++
++	buf[nr_read] = '\0';
++	*len = nr_read;
++	return buf;
++}
++
++/*
++ * Find the end of the dependency block: the offset just past its closing
++ * "$(deps_x):" line. Anything after that was appended by kbuild and is not for
++ * us to judge. Returns len if the line cannot be found.
++ */
++static size_t deps_block_end(const char *buf, size_t len, size_t deps_off)
++{
++	const char *pos = buf + deps_off, *end = buf + len;
++	struct line line;
++
++	while (next_line(&pos, end, &line)) {
++		if (line_starts_with(&line, DEPS_RULE_PREFIX) &&
++		    line_ends_with(&line, RULE_SUFFIX))
++			return pos - buf;
++	}
++
++	return len;
++}
++
++/* The target is fresh: pass on everything but the dependency block. */
++static void write_without_deps(FILE *out, const char *buf, size_t len,
++			       size_t deps_off)
++{
++	const size_t tail_off = deps_block_end(buf, len, deps_off);
++
++	fwrite(buf, 1, deps_off, out);
++	fputc('\n', out);
++	fwrite(buf + tail_off, 1, len - tail_off, out);
++}
++
++/*
++ * Generate a fragment for make from one .cmd file - without the dependency
++ * block if the target is fresh, otherwise all of it.
++ */
++static void process(FILE *out, const char *cmd_path)
++{
++	size_t len, deps_off;
++	char *buf;
++
++	buf = read_file(cmd_path, &len);
++	if (!buf)
++		return;
++
++	if (target_is_fresh(cmd_path, buf, len, &deps_off))
++		write_without_deps(out, buf, len, deps_off);
++	else
++		fwrite(buf, 1, len, out);
++
++	free(buf);
++}
++
++int main(int argc, char **argv)
++{
++	char tmp_path[PATH_MAX];
++	FILE *out;
++	int i;
++
++	if (argc < 2) {
++		fprintf(stderr, "usage: %s <output> <.cmd files...>\n", argv[0]);
++		return 1;
++	}
++
++	if (snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", argv[1]) >=
++	    (int)sizeof(tmp_path)) {
++		fprintf(stderr, "%s: path too long\n", argv[1]);
++		return 1;
++	}
++
++	out = fopen(tmp_path, "w");
++	if (!out) {
++		perror(tmp_path);
++		return 1;
++	}
++
++	for (i = 2; i < argc; i++) {
++		char target[PATH_MAX];
++
++		if (target_of(argv[i], target, sizeof(target)))
++			add_target(target);
++	}
++
++	for (i = 2; i < argc; i++)
++		process(out, argv[i]);
++
++	/* Write errors are latched in the stream, so one check at the end covers them all. */
++	if (ferror(out) || fclose(out) || rename(tmp_path, argv[1])) {
++		perror(argv[1]);
++		unlink(tmp_path);
++		return 1;
++	}
++
++	return 0;
++}
 
 -- 
 2.55.0
