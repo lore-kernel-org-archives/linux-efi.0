@@ -1,38 +1,38 @@
-Received: from mta0.migadu.com (out-47.mta0.migadu.com [91.218.175.47])
+Received: from mta0.migadu.com (out-66.mta0.migadu.com [91.218.175.66])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A6EAB3EEAD8
-	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:36:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57D9744E04A
+	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:37:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.66
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790289422; cv=none; b=S4yI/D1gKL8nLyoii17ZkLlB4HfImax+1MJuygSyo1mw58esBmGymWgqKBf7HN4JwA6dRXnO/2+LNapQF1DpPlwu3MkPbuGJLQ9F0qmOrWiOCJngKEPqjsviutLngSXXMREBd3g6Yh+HdyWR94Sq8EkeLj5U1imlCMR+//16Ig0=
+	t=1790289435; cv=none; b=TDbyCaFVQgcXTetQWeeukHb6yYFRO3o44EePp8M27AqAB0mBaEmkh6DE6g9r4GEIfbjHuiFAkJjmB/HBpH5szFNW4xGPyv4FQjnGwYmgIcF9dv5x/eGmoB7pNwK3gAk+b3EugldKnU0eE2uzYu0FJWPEfgcSmD6BjI7csvu7XHU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790289422; c=relaxed/simple;
-	bh=FS6X8NELcqU5nbWh3I09msuFV9zg7bXT/RgrskATLK0=;
+	s=arc-20240116; t=1790289435; c=relaxed/simple;
+	bh=JW/Vn2A47AYSv3sW5euV7F0XbCTyJijc9wnRv49/hJY=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=XUsT4h/5gX3VrMbGaA+MI1YrqSSSkXy5PVKsHoPo9oErtbhUHNqAcivttMoamr3Yroi1J/fbvwURlMI3WQgyFifZzzqzBLlPsH7ka8AGBkkY33SfXrnrJ7aeJ39VvCbI2WAbCN0fq7wCrgWfeUPOgdqlnefcfS0hfH2vX30y3oM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=h2vbVBmr; arc=none smtp.client-ip=91.218.175.47
+	 In-Reply-To:To:Cc; b=j//DQZswLDgHNSRii6m5nyQdBo35EjVNU0IgjC00wjZAX8jh+KYjzmm4JRI76CuvqC65qY8VWkItzi/yAVOgqQycG5ZDNS04k0Lk8wLNGy0VX3Bsces1QqA69SQazkyV6rmfbCBIJ810HH8zBdO/TNofwTTQxSKUohtsMcC/CMw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=FLvaY0s3; arc=none smtp.client-ip=91.218.175.66
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="h2vbVBmr"
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="FLvaY0s3"
 X-Envelope-To: linux-efi@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=FS6X8NELcqU5nbWh3I09msuFV9zg7bXT/RgrskATLK0=;
+DKIM-Signature: a=rsa-sha256; bh=JW/Vn2A47AYSv3sW5euV7F0XbCTyJijc9wnRv49/hJY=;
  c=simple/simple; d=linux.dev;
  h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1790289417; v=1; x=1790894217;
- b=h2vbVBmrUf6CKo9+hwvLD/wWovRqY0MHNpVqWgoQNLKygQ5UcSuux6EX/2nAArXo3KC1l1E+
- /16r/QUcOIQiWZFEtS/vYkflWwLGu+vy9AvVCmrNdB4/zUGT5rGcnJy5ErrUedWC2f2RFpobkz/
- btvYEhubQc9RHLrFUFFpoASw=
+ t=1790289431; v=1; x=1790894231;
+ b=FLvaY0s3mkUP85gPeDDs8QqSX0/fEpr2GtyXd1H8YgxwfWG469agUAc38lIhLIukcDyiNYQE
+ ZDZDPSh/Pkbq+O02GcpKcVpgiyBd8gbnDhg4+cFMbDTvbutv61nDnCCQX9NOTWbI2v3EJGwsWZA
+ BF9QDvldh7MIRoJLQUkVq+U4=
 X-Envelope-To: linux-efi@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id 8b68d55e8478d9d6;
-	Thu, 24 Sep 2026 22:36:56 +0000
-X-Mizu-Trace-ID: 8b68d55e8478d9d6
+Received: by smtp.migadu.com with ESMTPS id c0ec6671ff65d07e;
+	Thu, 24 Sep 2026 22:37:11 +0000
+X-Mizu-Trace-ID: c0ec6671ff65d07e
 X-Migadu-Flow: FLOW_OUT
 From: "Jose Fernandez (Anthropic)" <jose.fernandez@linux.dev>
-Date: Thu, 24 Sep 2026 22:35:48 +0000
-Subject: [PATCH v2 4/9] compiler_types: Let notrace keep the function
- prefix NOPs
+Date: Thu, 24 Sep 2026 22:35:49 +0000
+Subject: [PATCH v2 5/9] arm64: ftrace: Make the CALL_OPS prefix layout
+ configurable
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -41,7 +41,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260924-b4-arm64-callops-kcfi-v2-4-587865b6d991@linux.dev>
+Message-Id: <20260924-b4-arm64-callops-kcfi-v2-5-587865b6d991@linux.dev>
 References: <20260924-b4-arm64-callops-kcfi-v2-0-587865b6d991@linux.dev>
 In-Reply-To: <20260924-b4-arm64-callops-kcfi-v2-0-587865b6d991@linux.dev>
 To: Steven Rostedt <rostedt@goodmis.org>, 
@@ -83,42 +83,250 @@ Cc: Leon Hwang <leon.hwang@linux.dev>,
  "Jose Fernandez (Anthropic)" <jose.fernandez@linux.dev>
 X-Mailer: b4 0.15.2
 
-Let notrace keep the prefix NOPs when the architecture defines
-CC_USING_PATCHABLE_FUNCTION_PREFIX. kCFI callers check the type hash
-at a fixed offset before the entry point, so a notrace function needs
-the same prefix NOPs as any other. Record the entry in a section the
-linker drops, so ftrace never sees it. Clang 21 takes a section name
-as a third argument of the attribute. Nothing defines the macro yet,
-so no functional change.
+The arm64 ftrace code assumes two NOPs before every function in
+several places. Replace the hardcoded count with a Kconfig value named
+CONFIG_ARM64_FUNCTION_PREFIX_NOPS that defaults to 2. Compute the ops
+literal address with one formula in both the assembly that reads it
+and the C code that writes it. kCFI kernels with CALL_OPS need three
+NOPs, or five with ThinLTO and BTI, and the reader and the writer stay
+in sync either way.
+
+Also make ftrace_call_adjust() look at each site's bytes and refuse
+the ones that do not match the expected layout instead of patching
+them. The two instructions to patch must be NOPs and the literal must
+fall within the prefix NOPs. Log a refused site and leave it untraced.
+
+No functional change for the layouts compilers generate today.
 
 Reviewed-by: Ben Cressey <ben@cressey.dev>
 Reviewed-by: Florent Revest (Anthropic) <florent.revest@linux.dev>
 Assisted-by: LLM
 Signed-off-by: Jose Fernandez (Anthropic) <jose.fernandez@linux.dev>
 ---
- include/linux/compiler_types.h | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ arch/arm64/Kconfig               |   5 ++
+ arch/arm64/include/asm/ftrace.h  |  16 ++++++
+ arch/arm64/kernel/entry-ftrace.S |  16 +++---
+ arch/arm64/kernel/ftrace.c       | 120 ++++++++++++++++++++++-----------------
+ 4 files changed, 98 insertions(+), 59 deletions(-)
 
-diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
-index c5921f1390079..43dafaa061942 100644
---- a/include/linux/compiler_types.h
-+++ b/include/linux/compiler_types.h
-@@ -211,6 +211,15 @@ struct ftrace_likely_data {
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index b5a51b0ef9440..9fbcf12a3808b 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -276,6 +276,11 @@ config GCC_SUPPORTS_DYNAMIC_FTRACE_WITH_ARGS
+ 	def_bool CC_IS_GCC
+ 	depends on $(cc-option,-fpatchable-function-entry=2)
  
- #if defined(CC_USING_HOTPATCH)
- #define notrace			__attribute__((hotpatch(0, 0)))
-+#elif defined(CC_USING_PATCHABLE_FUNCTION_PREFIX) && !defined(__BINDGEN__)
++config ARM64_FUNCTION_PREFIX_NOPS
++	int
++	default 2 if DYNAMIC_FTRACE_WITH_CALL_OPS
++	default 0
++
+ config 64BIT
+ 	def_bool y
+ 
+diff --git a/arch/arm64/include/asm/ftrace.h b/arch/arm64/include/asm/ftrace.h
+index 1621c84f44b32..5a7a515bf7cdc 100644
+--- a/arch/arm64/include/asm/ftrace.h
++++ b/arch/arm64/include/asm/ftrace.h
+@@ -24,6 +24,22 @@
+ #define FTRACE_PLT_IDX		0
+ #define NR_FTRACE_PLTS		1
+ 
++#ifdef CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS
 +/*
-+ * Not for bindgen: its libclang may not support the section argument
-+ * (Clang >= 21), and leaving the attribute out does not change the ABI.
++ * ftrace_caller reads the callsite's ftrace_ops literal at
++ * ALIGN_DOWN(LR, 8) - FTRACE_CALL_OPS_BIAS. See ftrace_call_ops_adjust()
++ * for the layouts this serves.
 + */
-+#define notrace								\
-+	__attribute__((patchable_function_entry(CC_USING_PATCHABLE_FUNCTION_PREFIX, \
-+						 CC_USING_PATCHABLE_FUNCTION_PREFIX, \
-+						 ".discard.patchable_function_entries")))
- #elif defined(CC_USING_PATCHABLE_FUNCTION_ENTRY)
- #define notrace			__attribute__((patchable_function_entry(0, 0)))
- #else
++#define FTRACE_PREFIX_NOPS	CONFIG_ARM64_FUNCTION_PREFIX_NOPS
++#if FTRACE_PREFIX_NOPS == 2 || FTRACE_PREFIX_NOPS == 3
++#define FTRACE_CALL_OPS_BIAS	16
++#elif FTRACE_PREFIX_NOPS == 5
++#define FTRACE_CALL_OPS_BIAS	24
++#else
++#error "Unsupported number of function prefix NOPs"
++#endif
++#endif /* CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS */
++
+ /*
+  * Currently, gcc tends to save the link register after the local variables
+  * on the stack. This causes the max stack tracer to report the function
+diff --git a/arch/arm64/kernel/entry-ftrace.S b/arch/arm64/kernel/entry-ftrace.S
+index 025140caafe74..95727fee3cc55 100644
+--- a/arch/arm64/kernel/entry-ftrace.S
++++ b/arch/arm64/kernel/entry-ftrace.S
+@@ -39,17 +39,17 @@ SYM_CODE_START(ftrace_caller)
+ #ifdef CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS
+ 	/*
+ 	 * The literal pointer to the ops is at an 8-byte aligned boundary
+-	 * which is either 12 or 16 bytes before the BL instruction in the call
+-	 * site. See ftrace_call_adjust() for details.
++	 * before the BL instruction in the call site. See ftrace_call_adjust()
++	 * and <asm/ftrace.h> for details.
+ 	 *
+-	 * Therefore here the LR points at `literal + 16` or `literal + 20`,
+-	 * and we can find the address of the literal in either case by
+-	 * aligning to an 8-byte boundary and subtracting 16. We do the
+-	 * alignment first as this allows us to fold the subtraction into the
+-	 * LDR.
++	 * Therefore here the LR points at `literal + FTRACE_CALL_OPS_BIAS` or
++	 * `literal + FTRACE_CALL_OPS_BIAS + 4`, and we can find the address of
++	 * the literal in either case by aligning to an 8-byte boundary and
++	 * subtracting FTRACE_CALL_OPS_BIAS. We do the alignment first as this
++	 * allows us to fold the subtraction into the LDR.
+ 	 */
+ 	bic	x11, x30, 0x7
+-	ldr	x11, [x11, #-(4 * AARCH64_INSN_SIZE)]		// op
++	ldr	x11, [x11, #-FTRACE_CALL_OPS_BIAS]		// op
+ 
+ #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
+ 	/*
+diff --git a/arch/arm64/kernel/ftrace.c b/arch/arm64/kernel/ftrace.c
+index e1a3c0b3a0514..0d922fa63f71b 100644
+--- a/arch/arm64/kernel/ftrace.c
++++ b/arch/arm64/kernel/ftrace.c
+@@ -60,6 +60,73 @@ int ftrace_regs_query_register_offset(const char *name)
+ }
+ #endif
+ 
++#ifdef CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS
++/*
++ * The address of the ops literal for a callsite whose `BL <caller>` is at
++ * @pc, exactly as ftrace_caller derives it from the return address.
++ */
++static unsigned long ftrace_call_ops_literal(unsigned long pc)
++{
++	return ALIGN_DOWN(pc + AARCH64_INSN_SIZE, 8) - FTRACE_CALL_OPS_BIAS;
++}
++
++/*
++ * addr is the first of the FTRACE_PREFIX_NOPS NOPs before a function:
++ *
++ * addr-04:		.word		// kCFI type hash, address-taken and non-local only
++ * addr+00:		NOP		// FTRACE_PREFIX_NOPS of these, two hold the literal
++ * func+00:	func:	BTI	C	// only if BTI and the function may be called indirectly
++ * func+04:		NOP		// patched to MOV X9, LR
++ * func+08:		NOP		// patched to BL <caller>
++ *
++ * The compiler aligns whatever comes first to 8 bytes. ftrace_caller reads
++ * the literal at ALIGN_DOWN(LR, 8) - FTRACE_CALL_OPS_BIAS, with LR at
++ * func+8, or func+12 after a BTI:
++ *
++ *	NOPs	BIAS	literal at
++ *	2	16	func - 8
++ *	3	16	func - 8, or func - 12 if func % 8 == 4 (no hash, no BTI)
++ *	5	24	func - 16, or func - 12 / func - 20 if func % 8 == 4
++ *
++ * Return the address of the NOP to be patched to BL, or 0 when the two
++ * NOPs are not there or the literal would fall outside the prefix.
++ */
++static unsigned long ftrace_call_ops_adjust(unsigned long addr)
++{
++	unsigned long func = addr + FTRACE_PREFIX_NOPS * AARCH64_INSN_SIZE;
++	unsigned long pc = func + AARCH64_INSN_SIZE;
++	unsigned long literal;
++	u32 nop = aarch64_insn_gen_nop();
++
++	if (IS_ENABLED(CONFIG_ARM64_BTI_KERNEL) &&
++	    aarch64_insn_is_bti(le32_to_cpu(*(__le32 *)func)))
++		pc += AARCH64_INSN_SIZE;
++
++	/* Objects built with only the prefix NOPs have nothing to patch. */
++	if (le32_to_cpu(*(__le32 *)(pc - AARCH64_INSN_SIZE)) != nop ||
++	    le32_to_cpu(*(__le32 *)pc) != nop) {
++		pr_warn_ratelimited("ftrace: no patchable entry at %ps\n",
++				    (void *)func);
++		return 0;
++	}
++
++	/* The literal would overlap the type hash or the entry point. */
++	literal = ftrace_call_ops_literal(pc);
++	if (literal < addr || literal + sizeof(u64) > func) {
++		pr_warn_ratelimited("ftrace: cannot trace %ps: no room for the ops literal\n",
++				    (void *)func);
++		return 0;
++	}
++
++	return pc;
++}
++#else
++static unsigned long ftrace_call_ops_adjust(unsigned long addr)
++{
++	return 0;
++}
++#endif /* CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS */
++
+ unsigned long ftrace_call_adjust(unsigned long addr)
+ {
+ 	/*
+@@ -91,56 +158,7 @@ unsigned long ftrace_call_adjust(unsigned long addr)
+ 	if (!IS_ENABLED(CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS))
+ 		return addr + AARCH64_INSN_SIZE;
+ 
+-	/*
+-	 * When using patchable-function-entry with pre-function NOPs, addr is
+-	 * the address of the first pre-function NOP.
+-	 *
+-	 * Starting from an 8-byte aligned base, the compiler has either
+-	 * generated:
+-	 *
+-	 * addr+00:		NOP		// Literal (first 32 bits)
+-	 * addr+04:		NOP		// Literal (last 32 bits)
+-	 * addr+08:	func:	NOP		// To be patched to MOV X9, LR
+-	 * addr+12:		NOP		// To be patched to BL <caller>
+-	 *
+-	 * Or:
+-	 *
+-	 * addr+00:		NOP		// Literal (first 32 bits)
+-	 * addr+04:		NOP		// Literal (last 32 bits)
+-	 * addr+08:	func:	BTI	C
+-	 * addr+12:		NOP		// To be patched to MOV X9, LR
+-	 * addr+16:		NOP		// To be patched to BL <caller>
+-	 *
+-	 * We must adjust addr to the address of the NOP which will be patched
+-	 * to `BL <caller>`, which is at either addr+12 or addr+16 depending on
+-	 * whether there is a BTI.
+-	 */
+-
+-	if (!IS_ALIGNED(addr, sizeof(unsigned long))) {
+-		WARN_RATELIMIT(1, "Misaligned patch-site %pS\n",
+-			       (void *)(addr + 8));
+-		return 0;
+-	}
+-
+-	/* Skip the NOPs placed before the function entry point */
+-	addr += 2 * AARCH64_INSN_SIZE;
+-
+-	/* Skip any BTI */
+-	if (IS_ENABLED(CONFIG_ARM64_BTI_KERNEL)) {
+-		u32 insn = le32_to_cpu(*(__le32 *)addr);
+-
+-		if (aarch64_insn_is_bti(insn)) {
+-			addr += AARCH64_INSN_SIZE;
+-		} else if (insn != aarch64_insn_gen_nop()) {
+-			WARN_RATELIMIT(1, "unexpected insn in patch-site %pS: 0x%08x\n",
+-				       (void *)addr, insn);
+-		}
+-	}
+-
+-	/* Skip the first NOP after function entry */
+-	addr += AARCH64_INSN_SIZE;
+-
+-	return addr;
++	return ftrace_call_ops_adjust(addr);
+ }
+ 
+ /* Convert fentry_ip to the symbol address without kallsyms */
+@@ -368,7 +386,7 @@ static const struct ftrace_ops *arm64_rec_get_ops(struct dyn_ftrace *rec)
+ static int ftrace_rec_set_ops(const struct dyn_ftrace *rec,
+ 			      const struct ftrace_ops *ops)
+ {
+-	unsigned long literal = ALIGN_DOWN(rec->ip - 12, 8);
++	unsigned long literal = ftrace_call_ops_literal(rec->ip);
+ 	return aarch64_insn_write_literal_u64((void *)literal,
+ 					      (unsigned long)ops);
+ }
 
 -- 
 2.52.0
