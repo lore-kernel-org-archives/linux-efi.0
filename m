@@ -1,47 +1,47 @@
-Received: from SN4PR2101CU001.outbound.protection.outlook.com (mail-southcentralusazon11012024.outbound.protection.outlook.com [40.93.195.24])
+Received: from BL0PR03CU003.outbound.protection.outlook.com (mail-eastusazon11012019.outbound.protection.outlook.com [52.101.53.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA6DA379998;
-	Thu, 24 Sep 2026 13:53:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.93.195.24
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B95F937B01F;
+	Thu, 24 Sep 2026 13:53:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.53.19
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790258025; cv=fail; b=MTccOAeLG2+KKw70Fs0T9v4Eu+JTIdqTDRldB4TqD4D2tcJ5K2m+n7bnOjl8Oo7Z5/SdToV9im58YNbesMOBqN39eepcsVOuXiFQH1U6a7Tgqn3+oUjNhToZBdo3iMg2UXenqU6nMK3hhbMZq3yB+7tyAnIdLR7gFPxu1WPfTsE=
+	t=1790258026; cv=fail; b=G5A/SMV9HUPixN/dvRvPVu6H/rUJ4FWSCs5rBrWCBHi+8naL9Fkf8bkLhO0e+ng3o6JXmTqiybaezL9wfVC7STjZThL6+beAZBHo3yqmFVAgWSOUWHT1oW3PfEwi/4KYFeb9w8Pg6EfUgEFQPdIOMXneTmSfrwZdzfOac10H+68=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790258025; c=relaxed/simple;
-	bh=o0aakCXgWlXcwYHRPX/P5yctsjN84yPdmoa3KYaeFqI=;
+	s=arc-20240116; t=1790258026; c=relaxed/simple;
+	bh=3KfMnlyJDfi3ZUHL4ggBGJ+B447clshB3XX7oXphiXI=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=VXh38PsCcRXljFTSTyytdNgHPu59NHQbCsMrqUut8qeGN3B3t+JFU8A74wz7+7SoVj5MuVF8xDD6GAqGfQ9mPns1UCmy1VMPp3VhNFnM6vJwLVe1hfQn8ZNwSZkxzR3o6q3Wq16lxqUm7loFaPGq3/6xuImi7UybTxzC9J1eSC0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=gitM5XEl; arc=fail smtp.client-ip=40.93.195.24
+	 Content-Type:MIME-Version; b=TfMwLqoRQB5RTb2gSiKCzcHhiwTEMU7O4Hlp3UInkfjehyKJcl0RFu44x1NhMi4gPhI31g3Ndkp6qukUq45TXlSbatXIyhGjzmjPLTMBPTPMjksM2kfd9iDckKCLUKEKML4ec+NgjeE4zVte0NHBlRENDfeZu9bZRu4W+xn2490=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=RmTnXoBh; arc=fail smtp.client-ip=52.101.53.19
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="gitM5XEl"
+	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="RmTnXoBh"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=HvaZ235Cm1nDokEcqZEPAM97YS9Yj81oWqa0E5J0Mv92BUEwQypIuiAu71Xtd80RMMpf1NamukOnXIQUr0n7CmL5CljmHzkPY1IgQOJ1VEKqHoZcme/LNB5n1g6yZilHnWcMhrpdUtAYwmzaj4U3sU3rH1m70e7i0UlNHT6pTxJSZ98mk8mO0jPKzWxRqvdcl3zWNxEWbLWc8meF0di9l/emaiHNnqjhcyFQjiBv7kVvn9s4BKuc5crn51uoGX/RI9mWU7R0nUp/CR0MGyuwVO8IJrqcwiWvubsp02jctHQXdi82jgcaMjWT1xMDzDwzC9NRKgG3nBtC+tNAHrdPvw==
+ b=SVggcphgHEIipdmWNT76tsZwAfdvwvMeJx0cGCNmP8wprDzISR8hESnTqWpTvTGwkB+aAMm3hdjL79omBe5G9XtgaiR3rkuUDuB4vyDiBY0p65ge21W2bWacTWkmImOJhGUmb2anflu5L3Csyxm7dRlBdEq6ofjOT26zQtyL2cQqdOkaZ4zCYMhXIFfmBlbojLJHOg862L6y6slVbfhIr8tzrIequpALP6j4ER3BhVZvBqhpK6RJYabytUnAOgeKvSYuIfFJcyVyE4zKKxO92fLxjjBxMchFpNMtvvk/xahOX8g/QAMZuePQJSADVdA63p23Md/A/6WS73x+wtbRoQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Q+xYb/2yGUtggpHSNIt25jKx7MUFBT6MZ8MqIld4cR8=;
- b=nwbsvGVrL8kuJ3GQl/yRKwlWXsy4jKBKaut/m+t52r/320s0MQY/2elvwFCHbEx/pgwNFZqWZXmwoBhmlULU6jcG1DwYB2X1YY94O5BuxvCwHkWL6x+R066uEwwehRIJhPjXySOlL587eZCWci81vQe1CNOomuILm7121kqPvCbCLn+qz7wQG4zHZatoLfvdLScdw5EERXsEGftPOGPSWFJf/zU1JSUFrRY8roMM0wIYF5xEPfVbASSaDbo0P92Ox9QKGYSynv0mJDGzkQVsR0y+pskTw7yDFmZmxnrltrM0gyPM299j+HaV6Ek3cX2xYUxsqk1hV+RNvKFEzxRylg==
+ bh=H7K5V/q/fUz06iuOwo7oLdNJVoNwR+GZ5zXNVLVWbKE=;
+ b=n+lsLg2DQS6U2LwnL86hSztHO1BCZQyPT6+vkpQGflkEfd7b115CWP1aP8ZDGr0ajI3VXHoHGa5nK5Pas8251MR0dj5VMVsXCjJVw8laMV8dRlafiByY9zvQ7DRhd4PNTSOthvEnZ5YTLlLfqX5Hc8Sx9w7mNlSiHlLwYog1vOg0QiaY+9b0kC5mEF1aSurT3vly35L6YUg8Xmpeg9ycX46LjmCl6CTUf5zLZbm4P+D3UZpUO4JzMOZvwsVtyWGt0P5u9+9B9KlnxjTNNn7aiOY8EJ7QCII/rkOFe4x2IkLE0pOmV4g7VQBQql8xY92JAmNCsJOzNXG7HvsRATGmgQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
  dkim=pass header.d=nvidia.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Q+xYb/2yGUtggpHSNIt25jKx7MUFBT6MZ8MqIld4cR8=;
- b=gitM5XElNyW9Z+1l8xhrJl/wAV9+T2nKk5g+yL0V0HLB55e2R3Thp7mLkdiY9ptJjSyC1NAWfvVUN5rN+C2FxrLhOkGwAOAoCGtyga/AtqfP9KDPFUqCxpWxxaf0eMYVaQczB9LyGJQx75ZrlljU6dWe9yYW4wEBdg0CfwPrC8aftHEGVwxxNRzgQVtWZ1TG8bYA5h7f/cP8EiMn4gjClCyCclKoglvMY0L4GApUSg3Gh8Ody//EXhhKjLBi6YWw6vLnQ0P0zf/ifH+kbzgPozbrwjpR3PqJok9PP9iCP7ZF3Ci2WEKMang3zJA2dzxvyBJ02cF6rIqti5X8NR47Ow==
+ bh=H7K5V/q/fUz06iuOwo7oLdNJVoNwR+GZ5zXNVLVWbKE=;
+ b=RmTnXoBh40Lyft8rLzzVOMLZWsx4E0vnXfHHxdxbxhR8v59lvc28sVcdXewzlnt4V1k7dZQ1cSnaPsWC9AvRtAc2JxvDx8UZUhQbkMyTyEqp+3dHqVceY6tFH+MswA56PeuKdJupmz9tKpuyL1+0EcpGauw+h20E6G8QkgDZgWfz9sZiHUy8KbteRPXlQHtgyhl3xv91yZ2gmY9QZUK9z/URaqb5WmlPmUMh5OMZeCnlPyh3+MKLH9I1JCH3Qh62jpNcV6XlxMLu/PgUf/LYUoTAVlWIH/sg2pv+PGYXwXqOU8HnD8EwoVw3c1imtNBfcLzNiqQTPDUed6Mr9LZHaA==
 Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=nvidia.com;
 Received: from CHBPR12MB731189.namprd12.prod.outlook.com
- (2603:10b6:610:33d::12) by PH8PR12MB7375.namprd12.prod.outlook.com
- (2603:10b6:510:215::12) with Microsoft SMTP Server (version=TLS1_2,
+ (2603:10b6:610:33d::12) by PH7PR12MB7186.namprd12.prod.outlook.com
+ (2603:10b6:510:202::15) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.451.18; Thu, 24 Sep
- 2026 13:53:32 +0000
+ 2026 13:53:37 +0000
 Received: from CHBPR12MB731189.namprd12.prod.outlook.com
  ([fe80::b0e5:123d:fe06:e10d]) by CHBPR12MB731189.namprd12.prod.outlook.com
  ([fe80::b0e5:123d:fe06:e10d%6]) with mapi id 15.21.0451.014; Thu, 24 Sep 2026
- 13:53:32 +0000
+ 13:53:37 +0000
 From: Jason Gunthorpe <jgg@nvidia.com>
 To: Alexandre Ghiti <alex@ghiti.fr>,
 	Albert Ou <aou@eecs.berkeley.edu>,
@@ -72,15 +72,15 @@ Cc: Alexandre Ghiti <alexghiti@rivosinc.com>,
 	Ross Philipson <ross.philipson@gmail.com>,
 	Sami Tolvanen <samitolvanen@google.com>,
 	Song Shuai <songshuaishuai@tinylab.org>
-Subject: [PATCH 12/16] arm64: drtm: Add macro definitions for DEN0113
-Date: Thu, 24 Sep 2026 10:53:15 -0300
-Message-ID: <12-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
+Subject: [PATCH 06/16] arm64/efi: Use CONFIG_EFI_STUB_IMAGE_INFO for code_size
+Date: Thu, 24 Sep 2026 10:53:09 -0300
+Message-ID: <6-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
 In-Reply-To: <0-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
 References:
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: PH0PR07CA0079.namprd07.prod.outlook.com
- (2603:10b6:510:f::24) To CHBPR12MB731189.namprd12.prod.outlook.com
+X-ClientProxiedBy: PH7P220CA0101.NAMP220.PROD.OUTLOOK.COM
+ (2603:10b6:510:32d::17) To CHBPR12MB731189.namprd12.prod.outlook.com
  (2603:10b6:610:33d::12)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -89,270 +89,254 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CHBPR12MB731189:EE_|PH8PR12MB7375:EE_
-X-MS-Office365-Filtering-Correlation-Id: e7561368-3f48-4b33-8d29-08df1a43336a
+X-MS-TrafficTypeDiagnostic: CHBPR12MB731189:EE_|PH7PR12MB7186:EE_
+X-MS-Office365-Filtering-Correlation-Id: 055cc95f-b60e-4f32-a79a-08df1a4334d3
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|7416014|376014|23010399003|366016|1800799024|921020|11063799006|56012099006|10067099003|18002099003|22082099003|3023799007;
+	BCL:0;ARA:13230040|1800799024|366016|23010399003|7416014|376014|921020|10067099003|56012099006|11063799006|18002099003|22082099003|3023799007;
 X-Microsoft-Antispam-Message-Info:
-	pBW0KnwF+KfFrqXw58FmEOwz0+ar7u1T3ZwQh7FpAO8HTg5AfNVznUMvTnSx4Y/TGyO8Q9/vo47/UQMg48epdrIKPasxnUHLKIyCBELVUEQe4ZD6i1BVLblvCXa/Tw9sPrZEQALkODR+WaLIeVlJJUDhbHKn9dbm7AjYaLlv9PCbG2pEF5fw2VDrf+25tzP61Zg1R9Su06zLoro8bfiFo4t4hNlJ70X1H6fhOpY5UvsLPFYY11CzBdgFHac6MknGg/rwpLcRASkgJcFF4C+e8IFylrvPgFV/M/EwFXSsuEITIw/k+JDC58JqY87XkfsX7GdB/ZhltysXVr/eV9bGBSAWAYBaqwvyde8CR9UVL2plsBRmMH+1BdpHHgR6z7XJDh9YpqgIv0ZlJVhEIonWwriY0/b5AbXVAWWm8nGIk8n4PkVQ/fzQhZv2zM2+uq3Nv2VYdXHhFGD0d2ZnqRM7Fzbk09h0tl6Zu9koTJunpxLKEJCRGIJxzVERzyOwxZwnxVdZUlEO/VJuB84C2hglZpnNtTPetNdsTqazFI2rOfl8CfMHs+kf80/Ug9RPebp8uHs4vMCVlmUbpx3QbO4PiqX6KLm07Mwu5GwAz8MAju3UxLoXnHYztAIjK9gIqbJkxLMHPNqrCgP30GhkcFNWSieBTiJe8SG4+daUfvTVnzOr9fxuV+mMhIgxR0JNlOVoyLOLPs++A4v3lYguEyI3Pw==
+	8yzoWn5mgObXcCjhu3mVPOav3pxyPZmMAOSr8Zm2h2uStzCrzTUZv9uZ6C3OWfK3Ur+hdR5D+hsXj1fCAtKOJdlRMVzqwhNq/kC1/N/hfB84o++wHx6ET/04j8rofb+DO+wC5wAd1e5MdgoX4UCTtyOmgjyJHi37TEKvKnxs73SWLPhY1RVvCE28yjE8FC2u+Lh6r3eX9rfEUQOrEn4BV4LJp+ilmtdjAvV48bok1zbFgUk9VtzoRs0oXNCOb4qO8WzGHqzILD1cCh5XkQ3KzTKg8BJ5Es1j5RxF1n58cvYhAanSQ5bWawuafUggvjNzJ2gjjlq0tpMGUBwpEasAg9FuHxayYYqjaHfHskxS9XfsEgc+DcX16nri6ZUpGr6dLBoSV94fqPc++vwoj55G67ZG52WiB8h7exJcD2Hbn5CStswWd/YtrEUtwDG4GXicwYo/xJZjqD5QN43st+0sKWXEPz5flDXRLWwBWNCJRtrWTd2RKx61WBp0SvGafg2yGAKLTrR79AxZzze0t7k3pJeH4P8s36MhyzQD6V2Z3aJa2m0O1EAhnx+VQsYPF+1UD6Al2pX/qpv9mzfjC72PJ7Xh7Z8r4TAPsRGPwQDjKUXZXyhP4YskpfBJAm3SMB5cH/GaWdHyHOi7W/FfGB/d1Qj9H6W1BPfcT2IDPuU4rTbKuvmokgYdRtlRvGKqOusZSTfzzb4or8GPHEs1GMR60g==
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CHBPR12MB731189.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(23010399003)(366016)(1800799024)(921020)(11063799006)(56012099006)(10067099003)(18002099003)(22082099003)(3023799007);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CHBPR12MB731189.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(23010399003)(7416014)(376014)(921020)(10067099003)(56012099006)(11063799006)(18002099003)(22082099003)(3023799007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?/TD3LeCSzvyazax3wwTBHyAIMX+YjjMUOvJ/xvAmG4uXI5YycPBm33w+D9Wc?=
- =?us-ascii?Q?aar3Cui5TOynVqqMaE++OpwTTeLpPuNTikzlDh+QBJlgOc7lkcKqhKQHQtkD?=
- =?us-ascii?Q?BtiUUt9AmTNGhih72hc3FiAxgXcesHSIbYaZjGAHF9Ji2sZlGkEYgxAaDqhy?=
- =?us-ascii?Q?c5rxUHkGamlqHq/H0VriPXnnDr/iQ5zUCdwn+HmKH8h5bQx/ii4lLIOIzAYr?=
- =?us-ascii?Q?JJklZL8fQyueilDmALhVYndCZkng6bAH0Li6S/1V/EvTSeePOGlnrjGUbRqm?=
- =?us-ascii?Q?1UZr3Aka3l43Hlkw4/qZP6eter9++gFMYDfTeWG1auZaFwzFcL85zc4PAQpq?=
- =?us-ascii?Q?/2GGB81eVHpatm+heaB59UaFdo0ofhsmHFMM8UORV0KL/PqGyllcRn378RPU?=
- =?us-ascii?Q?1Fg4H483e9Y+f02szmf22GvNHFAibhqwE2q32BpOac+fLKNev9I9HL2ukbsn?=
- =?us-ascii?Q?mlT54Zq2E2E7B9mf9USYJYF/RG482v3wKibfHvvrmKPkbcLmIzgNQLHqQX3a?=
- =?us-ascii?Q?ocALGREKkIQSUbTLY0kfrp420G9DOJpQGJQrxN7TjD91geMfIJd4NiX9iqze?=
- =?us-ascii?Q?A7+9kDnGPZLgeVSnUpT4I39+/1c1qWjZhwB30E5T2/2f32isxG8FiBLCi4BU?=
- =?us-ascii?Q?/8GLPwj2lzDUO60HFnRAMqGZbMHcjO51ABqjeNMToZOM94B6MclIQNH/TRNw?=
- =?us-ascii?Q?zN/XsxXFxXJG2lwCx8JqCmw0XhY1Ag13tbFzVdRoJesKxoPmziFn6PoNv7j3?=
- =?us-ascii?Q?jorvMzJT/dlndB4CSmQzaFWA8XZNiM8pMNkBjnHbdyu1GzDN28HpsYA+YvXP?=
- =?us-ascii?Q?VmRKXlRPCZkCZ3+8jM4BRR9XEMjul/ftqSSbbHyPOIIxbWCsuxKEEFLfnt5w?=
- =?us-ascii?Q?BWJpDZUvQniYQ5zi8gP+wsytn0ZFwhiFr82eWZUrLB8m5xQbYUKpdysTB4q+?=
- =?us-ascii?Q?LfStqrMzTpHgyvuOETUI9YarafAsBbK3jdedhjRg1s77CAeE5kU4FIeO6e8f?=
- =?us-ascii?Q?3NpM1GtQP2XU3KHqvkzbxn1x1doj7dTAxb8YDBUGaPrERQY3gAXAcnlggksC?=
- =?us-ascii?Q?UH5zY6lhPcwRUNMcjbJyk0yEKO91jSC20uPhxOY8wqqVKro5lVkFVrcmACRT?=
- =?us-ascii?Q?nQ/hcA5T8R/11MnJYrXErLf4E8idQDaxSlVXfhgSNEzwpAOJ3WmKWfZ5k67b?=
- =?us-ascii?Q?Lh/xz4bRO+LnI8E3s8IBbKPe1He0AsTa/YJ26odVPhG2ScroSKOAugh0ePu/?=
- =?us-ascii?Q?uuQry5PCWxv5ze86vt6y/+29ozE3IPyCLCW+2jrCfub6FOBP8/DBcIoJhiQX?=
- =?us-ascii?Q?rSp/fr7a35OgAjOFjx3+F6ae8QTSaBNst+0I5aqHPD5adbZKsdU/pRQSYlc2?=
- =?us-ascii?Q?20NB88VuO18LsX2aYLhXxjlGcjgoSqMNmva1djhzET4B1RIBXaR3eF22MbJd?=
- =?us-ascii?Q?ze6PXvfcHnDH6DCKlDS24myfQQy5UjAVIOBcxOTatLpztQhJNiQo2x3l113B?=
- =?us-ascii?Q?rrYUN1MrbDqVloj1xRbq+Xvys5zAPMLSKO9pUS5mfmupX1vwx3R5AfhBK5A5?=
- =?us-ascii?Q?MyuCx1iGr09dJvSi2F9CEzsNle/5cWjsPKjR1fOqYSEWxiTP1qOUONKJB9Ws?=
- =?us-ascii?Q?cJEGINLLggIIO50vz627S6owTKYHB/6TZufIDMChUbyd2eZE3Qk1yP6B87gL?=
- =?us-ascii?Q?mglYaRtxU0MEdwRyOy4TQu3Ve7vRnb3Ihd1MzhzWfaNOigfb?=
+	=?us-ascii?Q?iKF6yxefO4v923hb3qndMuxL25COqzTpZkWujEDGt/mV1Kq1nlsvPCITcsoj?=
+ =?us-ascii?Q?SKNvEVWvzi6aPzwBFp0gcAiyPBIvyARqAh6F7DVDm5ntpj+p2wTda1qVyhDX?=
+ =?us-ascii?Q?CJyZLsibhSkChBev8iExPsO4+aQIQi+NiiZGkDvFWTk6vD8xDyuQtbRiP8Px?=
+ =?us-ascii?Q?MMpFYLNgG8uonIXvo93qaU0ELM4AnCXPRDdGAreuROfzzK4POxlJGxhIwk6A?=
+ =?us-ascii?Q?LTV2Vx+ORMrThj7CjdI5KD9BiaK7k5iyTx40VBVctvJp1GUzwFlBeZWmJftS?=
+ =?us-ascii?Q?Fvv9ivVDRPJb+aDqBaCi7zFcxux5kQ1wiV3OSHFoeqq6sJW16Wv53e1yUtwr?=
+ =?us-ascii?Q?/8ZM68+GsChgH6IxOd3bLzfOCz5q8U+4dO+zYgYs4nIrJ9HFpCV6xY73j1kC?=
+ =?us-ascii?Q?ijopEtVTFeUWIDdd3Xt0QmfnIUGWS8BKS5Fq5WqSY0iWPl7vcW7saxrbFT2T?=
+ =?us-ascii?Q?fdNUih5i0bcVKfnpjY+jFyLL/cq51goeJZNSkfSNYPAdlVnzZD+jyQBfI2Up?=
+ =?us-ascii?Q?ObgTPbqeb04XaWpdlzJbleFhW7I9iR9lQ0hZAvIRtd3PFCOx3+6qIAMjsWHZ?=
+ =?us-ascii?Q?w53hjGnYOCAT6GB7J7g6VapfCpKPZmVPkIdrncw6Qw6xrUngqkzfTkO5ypaR?=
+ =?us-ascii?Q?4r5fcuyl9ZISY4SLI3j6X/X5eMbJLMl3rHuODkCQ2RXuVToFRlP9cK2CCKv2?=
+ =?us-ascii?Q?9obwTHhfgHrp1WgvdjSmkBilCd0aRaaCF/yb1vg9/D7w9rnE0LBl494uwVrO?=
+ =?us-ascii?Q?NZXG/LP4FzzbnH6ZFbo/itoHh8muTy8sbtBsxYsaBg0ls91nZbKEFA1n9SNf?=
+ =?us-ascii?Q?ARJW7pB1SBh5ATSDYHQJ3EyBOfXgdKUoQIYQiAYy+fH2lrtA/3aLLzhaacFZ?=
+ =?us-ascii?Q?mt9jrhrkjv4YypaNCxQTdFM/0HmkzuTq4IpfiE7zcvcPBwTPYzjI6ZxNg+Lm?=
+ =?us-ascii?Q?p7z4/e/hOTuJ4iybab84A6Yg/B8T8Qk+QevtMx0//DXk3oNREitbmJH+tJRu?=
+ =?us-ascii?Q?5Szgb63Eg0e+qqWmLY6XwxygbtR407GsvPd1qdccTT+IZ7LdZaFRbaq6iNFq?=
+ =?us-ascii?Q?gqazOq1aTCFUohbDsDb+jgpAHHU2juXe7Ub1PCXYHWHA7vjDvw1G/qUmyJO3?=
+ =?us-ascii?Q?3u+51Cwm/hPIczeFpIRdOmW/9eaa7pAWhEU8G3hrWcyGVm+qbw5ZsMn0mkik?=
+ =?us-ascii?Q?4di4JaxThNh8qvmQqzC2o75hEA0MZKyOt7RR8k5IGbLCVJzfVov6v5c84VH6?=
+ =?us-ascii?Q?5NBMJKj9ZPoEGm9Z7ide46FHR+H5IBOqbtowkrhlQqVUoKlzJ0JrSCAGOhlu?=
+ =?us-ascii?Q?xwNjLUd15q12pZCIm4ZfDD4lH9hUTG7OUzJ2RvZm0bT5ZC4L4jR03f5wh/i7?=
+ =?us-ascii?Q?csq45zImcoF291d5U89uqYYFf2Qmejjf7nba/JKOiZ4mpMnr+pk5CilUzxt6?=
+ =?us-ascii?Q?AXGqAlgqhNa65qc5MVPVqUoCCIK7th1xxUaBX3U0+jfciOi/zPqzI56k8ySc?=
+ =?us-ascii?Q?5Zkk8fJZL0KyG1yzacMOJ3t09vYCzZDSSyS5FeZiKsayRw9iJi0t2/fDr4Sx?=
+ =?us-ascii?Q?Po0mcPpWEroqwbclG3grIFhRLF/3RkfGimdDpux+5cRq+CSV0nX+TiDEYLhH?=
+ =?us-ascii?Q?Hw8umWdKdArIqxNhGbcEONW1nlwKcuKwjumbxLuxALptSWH16aX5tazyU27p?=
+ =?us-ascii?Q?4imU5mBgnSmlIYWuSjlBXZl2tBNz0nX/IOwdZMXgXQWcGrmj?=
 X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: e7561368-3f48-4b33-8d29-08df1a43336a
+X-MS-Exchange-CrossTenant-Network-Message-Id: 055cc95f-b60e-4f32-a79a-08df1a4334d3
 X-MS-Exchange-CrossTenant-AuthSource: CHBPR12MB731189.namprd12.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Sep 2026 13:53:23.9882
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Sep 2026 13:53:26.3596
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Nmw2galrf5OlIKZWAa6dyGL1KzLLfotDJMIB2lYodv+V19p1YQl/2uePYf7MevzF
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH8PR12MB7375
+X-MS-Exchange-CrossTenant-UserPrincipalName: row396Yztt5BFAOIB4sWTdIR5ccatC32T6B5YwmpC2Q6lPdZpbQaxRlSgmnc98dB
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR12MB7186
 
-Taken from rev 1.4b of the spec, following the SMCC register layout and
-constant names.
+Pass code_size to zboot through struct efi_image_info instead of the
+custom objcopy trick and remove the objcopy way.
+
+The linker still computes code_size, it just gets placed into the struct.
 
 Signed-off-by: Jason Gunthorpe <jgg@nvidia.com>
 ---
- arch/arm64/include/asm/drtm.h | 196 ++++++++++++++++++++++++++++++++++
- 1 file changed, 196 insertions(+)
- create mode 100644 arch/arm64/include/asm/drtm.h
+ arch/arm64/Kconfig                          |  1 +
+ arch/arm64/boot/Makefile                    |  3 ---
+ arch/arm64/include/asm/image.h              | 11 +++++++++++
+ arch/arm64/kernel/image-vars.h              |  8 +++-----
+ arch/arm64/kernel/vmlinux.lds.S             |  4 ++++
+ drivers/firmware/efi/libstub/Makefile.zboot |  2 +-
+ drivers/firmware/efi/libstub/arm64-stub.c   |  5 ++++-
+ drivers/firmware/efi/libstub/arm64.c        |  4 ++--
+ drivers/firmware/efi/libstub/zboot.lds      |  3 ---
+ 9 files changed, 26 insertions(+), 15 deletions(-)
 
-diff --git a/arch/arm64/include/asm/drtm.h b/arch/arm64/include/asm/drtm.h
-new file mode 100644
-index 00000000000000..d6dd04a4ebcea5
---- /dev/null
-+++ b/arch/arm64/include/asm/drtm.h
-@@ -0,0 +1,196 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/* Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES
-+ *
-+ * Definitions from ARM DEN 0113 "DRTM Architecture for Arm"
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index b5a51b0ef9440a..4a752835ce1116 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -2532,6 +2532,7 @@ config EFI
+ 	select EFI_PARAMS_FROM_FDT
+ 	select EFI_RUNTIME_WRAPPERS
+ 	select EFI_STUB
++	select EFI_STUB_IMAGE_INFO
+ 	select EFI_GENERIC_STUB
+ 	imply IMA_SECURE_AND_OR_TRUSTED_BOOT
+ 	default y
+diff --git a/arch/arm64/boot/Makefile b/arch/arm64/boot/Makefile
+index b5a08333bc57b5..cfbad0c210fa04 100644
+--- a/arch/arm64/boot/Makefile
++++ b/arch/arm64/boot/Makefile
+@@ -51,7 +51,4 @@ EFI_ZBOOT_BFD_TARGET	:= elf64-littleaarch64
+ EFI_ZBOOT_MACH_TYPE	:= ARM64
+ EFI_ZBOOT_FORWARD_CFI	:= $(CONFIG_ARM64_BTI_KERNEL)
+ 
+-EFI_ZBOOT_OBJCOPY_FLAGS	= --add-symbol zboot_code_size=0x$$( \
+-				$(NM) vmlinux|grep _kernel_codesize|cut -d' ' -f1)
+-
+ include $(srctree)/drivers/firmware/efi/libstub/Makefile.zboot
+diff --git a/arch/arm64/include/asm/image.h b/arch/arm64/include/asm/image.h
+index 9ba85173f85765..4a220c71f76c6a 100644
+--- a/arch/arm64/include/asm/image.h
++++ b/arch/arm64/include/asm/image.h
+@@ -5,6 +5,8 @@
+ 
+ #define ARM64_IMAGE_MAGIC	"ARM\x64"
+ 
++#define EFI_IMAGE_INFO_SIZE	8
++
+ #define ARM64_IMAGE_FLAG_BE_SHIFT		0
+ #define ARM64_IMAGE_FLAG_PAGE_SIZE_SHIFT	(ARM64_IMAGE_FLAG_BE_SHIFT + 1)
+ #define ARM64_IMAGE_FLAG_PHYS_BASE_SHIFT \
+@@ -54,6 +56,15 @@ struct arm64_image_header {
+ 	__le32 res5;
+ };
+ 
++/*
++ * This struct is filled in by the linker, see EFI_IMAGE_INFO.
++ * Any change requires updating arch/arm64/kernel/vmlinux.lds.S
 + */
-+#ifndef __ASM_DRTM_H
-+#define __ASM_DRTM_H
-+
-+#include <linux/arm-smccc.h>
-+#include <linux/bits.h>
-+
-+/* Offset 0x02 is reserved by DEN0113. */
-+#define ARM_DRTM_SMC_FN_BASE                                      \
-+	ARM_SMCCC_CALL_VAL(ARM_SMCCC_FAST_CALL, ARM_SMCCC_SMC_64, \
-+			   ARM_SMCCC_OWNER_STANDARD, 0x110)
-+#define ARM_DRTM_SMC_VERSION			(ARM_DRTM_SMC_FN_BASE + 0x00)
-+#define ARM_DRTM_SMC_FEATURES			(ARM_DRTM_SMC_FN_BASE + 0x01)
-+#define ARM_DRTM_SMC_UNPROTECT_MEMORY		(ARM_DRTM_SMC_FN_BASE + 0x03)
-+#define ARM_DRTM_SMC_DYNAMIC_LAUNCH		(ARM_DRTM_SMC_FN_BASE + 0x04)
-+#define ARM_DRTM_SMC_CLOSE_LOCALITY		(ARM_DRTM_SMC_FN_BASE + 0x05)
-+#define ARM_DRTM_SMC_GET_ERROR			(ARM_DRTM_SMC_FN_BASE + 0x06)
-+#define ARM_DRTM_SMC_SET_ERROR			(ARM_DRTM_SMC_FN_BASE + 0x07)
-+#define ARM_DRTM_SMC_SET_TCB_HASH		(ARM_DRTM_SMC_FN_BASE + 0x08)
-+#define ARM_DRTM_SMC_LOCK_TCB_HASHES		(ARM_DRTM_SMC_FN_BASE + 0x09)
-+#define ARM_DRTM_SMC_ENABLE_SECURE_INTERRUPTS	(ARM_DRTM_SMC_FN_BASE + 0x0a)
-+
-+#define ARM_DRTM_FEATURE_SELECTOR	BIT_U64(63)
-+#define ARM_DRTM_FEATURE_TPM		0x01
-+#define ARM_DRTM_FEATURE_MIN_MEMORY	0x02
-+#define ARM_DRTM_FEATURE_DMA_PROTECTION	0x03
-+#define ARM_DRTM_FEATURE_BOOT_PE	0x04
-+#define ARM_DRTM_FEATURE_TCB_HASH	0x05
-+#define ARM_DRTM_FEATURE_IMAGE_AUTH	0x06
-+
-+#define ARM_DRTM_VERSION_MAJOR_MASK	GENMASK_U32(30, 16)
-+#define ARM_DRTM_VERSION_MINOR_MASK	GENMASK_U32(15, 0)
-+#define ARM_DRTM_VERSION_MAJOR		1
-+#define ARM_DRTM_VERSION_MIN_MINOR	1
-+
-+#define ARM_DRTM_TPM_ALG_MASK		GENMASK_U64(15, 0)
-+#define ARM_DRTM_TPM_HASHING		BIT_U64(32)
-+#define ARM_DRTM_PCR_SCHEMA_MASK	GENMASK_U64(36, 33)
-+#define ARM_DRTM_PCR_SCHEMA_DEFAULT	BIT_U64(33)
-+#define ARM_DRTM_PCR_SCHEMA_AUTHORITIES	BIT_U64(34)
-+
-+#define ARM_DRTM_DLME_DATA_PAGES_MASK	GENMASK_U64(31, 0)
-+#define ARM_DRTM_NW_DCE_PAGES_MASK	GENMASK_U64(63, 32)
-+#define ARM_DRTM_PAGE_SIZE		4096
-+
-+#define ARM_DRTM_DMA_PROTECTION_MASK	GENMASK_U64(7, 0)
-+#define ARM_DRTM_DMA_PROTECTION_COMPLETE BIT_U64(0)
-+#define ARM_DRTM_DMA_PROTECTION_REGION	BIT_U64(1)
-+#define ARM_DRTM_MAX_REGIONS_MASK	GENMASK_U64(23, 8)
-+#define ARM_DRTM_TCB_HASH_COUNT_MASK	GENMASK_U64(7, 0)
-+#define ARM_DRTM_IMAGE_AUTH_SUPPORTED	BIT_U64(0)
-+
-+#define ARM_DRTM_LAUNCH_HASH_FIRMWARE	0
-+#define ARM_DRTM_LAUNCH_HASH_TPM	BIT_U32(0)
-+#define ARM_DRTM_LAUNCH_PCR_DEFAULT	0
-+#define ARM_DRTM_LAUNCH_PCR_AUTHORITIES	BIT_U32(1)
-+#define ARM_DRTM_LAUNCH_DMA_COMPLETE	0
-+#define ARM_DRTM_LAUNCH_DMA_REGION	BIT_U32(3)
-+#define ARM_DRTM_LAUNCH_NO_AUTH		0
-+#define ARM_DRTM_LAUNCH_AUTH		BIT_U32(6)
-+#define ARM_DRTM_LAUNCH_KEEP_SECURE_IRQS 0
-+#define ARM_DRTM_LAUNCH_DISABLE_SECURE_IRQS BIT_U32(7)
-+
-+#define ARM_DRTM_SUCCESS		0
-+#define ARM_DRTM_NOT_SUPPORTED		-1
-+#define ARM_DRTM_INVALID_PARAMETERS	-2
-+#define ARM_DRTM_DENIED			-3
-+#define ARM_DRTM_NOT_FOUND		-4
-+#define ARM_DRTM_INTERNAL_ERROR		-5
-+#define ARM_DRTM_MEM_PROTECT_INVALID	-6
-+#define ARM_DRTM_OUT_OF_RESOURCES	-8
-+#define ARM_DRTM_INVALID_DATA		-9
-+#define ARM_DRTM_SECONDARY_PE_NOT_OFF	-10
-+#define ARM_DRTM_ALREADY_CLOSED		-11
-+#define ARM_DRTM_TPM_ERROR		-12
-+
-+/* Algorthim IDs are defined by TCG, in the kernel they are TPM_ALG_* */
-+
-+#define ARM_DRTM_PARAMETERS_REVISION	2
-+
-+#ifndef __ASSEMBLY__
-+
-+#include <linux/bitfield.h>
-+#include <linux/build_bug.h>
-+#include <linux/stddef.h>
-+#include <linux/types.h>
-+
-+struct arm_drtm_parameters {
-+	__le16 revision;
-+	__le16 reserved;
-+	__le32 launch_features;
-+	__le64 dlme_region_address;
-+	__le64 dlme_region_size;
-+	__le64 dlme_image_start;
-+	__le64 dlme_entry_point_offset;
-+	__le64 dlme_image_size;
-+	__le64 dlme_data_offset;
-+	__le64 nw_dce_region_address;
-+	__le64 nw_dce_region_size;
-+	__le64 protection_table_address;
-+	__le64 protection_table_size;
++struct efi_image_info {
++	__le64 code_size;
 +};
-+static_assert(sizeof(struct arm_drtm_parameters) == 88);
++static_assert(sizeof(struct efi_image_info) == EFI_IMAGE_INFO_SIZE);
 +
-+static inline s32 arm_drtm_version(u16 *major, u16 *minor)
-+{
-+	struct arm_smccc_res res;
-+	u32 version;
-+
-+	arm_smccc_1_1_smc(ARM_DRTM_SMC_VERSION, 0, 0, 0, 0, 0, 0, 0,
-+			  &res);
-+	version = res.a0;
-+	/*
-+	 * For this command only the output is specified as w0 a 32 bit value.
-+	 * All others use x0 a 64 bit value. The -ve error and version are
-+	 * overlayed together with the 32 bit sign bit telling them apart.
-+	 */
-+	if (version & BIT(31))
-+		return version;
-+
-+	*major = FIELD_GET(ARM_DRTM_VERSION_MAJOR_MASK, version);
-+	*minor = FIELD_GET(ARM_DRTM_VERSION_MINOR_MASK, version);
-+	return ARM_DRTM_SUCCESS;
-+}
-+
-+static inline s64 arm_drtm_features(u64 function_or_feature, u64 *value)
-+{
-+	struct arm_smccc_res res;
-+	s64 status;
-+
-+	arm_smccc_1_1_smc(ARM_DRTM_SMC_FEATURES, function_or_feature,
-+			  0, 0, 0, 0, 0, 0, &res);
-+	status = res.a0;
-+	if (status >= 0 && value)
-+		*value = res.a1;
-+	return status;
-+}
-+
-+static inline s64 arm_drtm_unprotect_memory(void)
-+{
-+	struct arm_smccc_res res;
-+
-+	arm_smccc_1_1_smc(ARM_DRTM_SMC_UNPROTECT_MEMORY, 0, 0, 0, 0, 0, 0, 0,
-+			  &res);
-+	return res.a0;
-+}
-+
-+static inline s64
-+arm_drtm_dynamic_launch(struct arm_drtm_parameters *params_addr)
-+{
-+	struct arm_smccc_res res;
-+
-+	arm_smccc_1_1_smc(ARM_DRTM_SMC_DYNAMIC_LAUNCH,
-+			  (unsigned long)params_addr, 0, 0, 0, 0, 0, 0, &res);
-+	return res.a0;
-+}
-+
-+static inline s64 arm_drtm_close_locality(u32 locality)
-+{
-+	struct arm_smccc_res res;
-+
-+	arm_smccc_1_1_smc(ARM_DRTM_SMC_CLOSE_LOCALITY, locality,
-+			  0, 0, 0, 0, 0, 0, &res);
-+	return res.a0;
-+}
-+
-+static inline s64 arm_drtm_get_error(s64 *error_code)
-+{
-+	struct arm_smccc_res res;
-+	s64 status;
-+
-+	arm_smccc_1_1_smc(ARM_DRTM_SMC_GET_ERROR, 0, 0, 0, 0, 0, 0, 0,
-+			  &res);
-+	status = res.a0;
-+	if (status != ARM_DRTM_SUCCESS)
-+		return status;
-+
-+	*error_code = res.a1;
-+	return ARM_DRTM_SUCCESS;
-+}
-+
-+static inline s64 arm_drtm_enable_secure_interrupts(void)
-+{
-+	struct arm_smccc_res res;
-+
-+	arm_smccc_1_1_smc(ARM_DRTM_SMC_ENABLE_SECURE_INTERRUPTS,
-+			  0, 0, 0, 0, 0, 0, 0, &res);
-+	return res.a0;
-+}
-+
-+#endif /* !__ASSEMBLY__ */
-+#endif /* __ASM_DRTM_H */
+ #endif /* __ASSEMBLER__ */
+ 
+ #endif /* __ASM_IMAGE_H */
+diff --git a/arch/arm64/kernel/image-vars.h b/arch/arm64/kernel/image-vars.h
+index 14beb7b9d304c1..13c0b77627d82e 100644
+--- a/arch/arm64/kernel/image-vars.h
++++ b/arch/arm64/kernel/image-vars.h
+@@ -35,8 +35,10 @@ PROVIDE(__efistub_caches_clean_inval_pou = __pi_caches_clean_inval_pou);
+ 
+ PROVIDE(__efistub__text			= _text);
+ PROVIDE(__efistub__end			= _end);
+-PROVIDE(__efistub___inittext_end       	= __inittext_end);
+ PROVIDE(__efistub__edata		= _edata);
++#ifdef CONFIG_EFI_STUB_IMAGE_INFO
++PROVIDE(__efistub_efi_image_info_offset = __efi_image_info_offset);
++#endif
+ #if defined(CONFIG_EFI_EARLYCON) || defined(CONFIG_SYSFB)
+ PROVIDE(__efistub_sysfb_primary_display	= sysfb_primary_display);
+ #endif
+@@ -150,10 +152,6 @@ KVM_NVHE_ALIAS(kvm_protected_mode_initialized);
+ 
+ #endif /* CONFIG_KVM */
+ 
+-#ifdef CONFIG_EFI_ZBOOT
+-_kernel_codesize = ABSOLUTE(__inittext_end - _text);
+-#endif
+-
+ /*
+  * LLD will occasionally error out with a '__init_end does not converge' error
+  * if INIT_IDMAP_DIR_SIZE is defined in terms of _end, as this results in a
+diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
+index af1d720209764f..8305b47995954b 100644
+--- a/arch/arm64/kernel/vmlinux.lds.S
++++ b/arch/arm64/kernel/vmlinux.lds.S
+@@ -282,6 +282,10 @@ SECTIONS
+ 		CON_INITCALL
+ 		INIT_RAM_FS
+ 		*(.init.altinstructions .init.bss)	/* from the EFI stub */
++		EFI_IMAGE_INFO(
++			/* code_size */
++			EFI_IMAGE_INFO_OFFSET(__inittext_end);
++		)
+ 	}
+ 	.exit.data : {
+ 		EXIT_DATA
+diff --git a/drivers/firmware/efi/libstub/Makefile.zboot b/drivers/firmware/efi/libstub/Makefile.zboot
+index 6eebac66b73b18..de89d3d84465b5 100644
+--- a/drivers/firmware/efi/libstub/Makefile.zboot
++++ b/drivers/firmware/efi/libstub/Makefile.zboot
+@@ -35,7 +35,7 @@ efi-zboot-objcopy-flags-$(CONFIG_EFI_STUB_IMAGE_INFO) = \
+ 		awk '$$3 == "_efi_image_info_offset" { print $$1 }')
+ 
+ # avoid eager evaluation to prevent references to non-existent build artifacts
+-OBJCOPYFLAGS_vmlinuz.o = -I binary -O $(EFI_ZBOOT_BFD_TARGET) $(EFI_ZBOOT_OBJCOPY_FLAGS) \
++OBJCOPYFLAGS_vmlinuz.o = -I binary -O $(EFI_ZBOOT_BFD_TARGET) \
+ 			  $(efi-zboot-objcopy-flags-y) \
+ 			  --rename-section .data=.gzdata,load,alloc,readonly,contents
+ $(obj)/vmlinuz.o: $(obj)/vmlinuz FORCE
+diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+index 2c38693561475c..1d3fc8ac13efa7 100644
+--- a/drivers/firmware/efi/libstub/arm64-stub.c
++++ b/drivers/firmware/efi/libstub/arm64-stub.c
+@@ -9,6 +9,7 @@
+ 
+ #include <linux/efi.h>
+ #include <asm/efi.h>
++#include <asm/image.h>
+ #include <asm/memory.h>
+ #include <asm/sections.h>
+ 
+@@ -21,6 +22,7 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 				 efi_loaded_image_t *image,
+ 				 efi_handle_t image_handle)
+ {
++	const struct efi_image_info *info;
+ 	unsigned long kernel_size, kernel_codesize, kernel_memsize;
+ 
+ 	if (image->image_base != _text) {
+@@ -33,7 +35,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 			SEGMENT_ALIGN >> 10);
+ 
+ 	kernel_size = _edata - _text;
+-	kernel_codesize = __inittext_end - _text;
++	info = efi_get_image_info((unsigned long)_text);
++	kernel_codesize = le64_to_cpu(info->code_size);
+ 	kernel_memsize = kernel_size + (_end - _edata);
+ 	*reserve_size = kernel_memsize;
+ 	*image_addr = (unsigned long)_text;
+diff --git a/drivers/firmware/efi/libstub/arm64.c b/drivers/firmware/efi/libstub/arm64.c
+index e57cd3de0a00f4..67d66fdea77122 100644
+--- a/drivers/firmware/efi/libstub/arm64.c
++++ b/drivers/firmware/efi/libstub/arm64.c
+@@ -88,11 +88,11 @@ efi_status_t check_platform_features(void)
+ #define DCTYPE	"cvau"
+ #endif
+ 
+-u32 __weak code_size;
+-
+ void efi_cache_sync_image(unsigned long image_base,
+ 			  unsigned long alloc_size)
+ {
++	const struct efi_image_info *info = efi_get_image_info(image_base);
++	unsigned long code_size = le64_to_cpu(info->code_size);
+ 	u32 ctr = read_cpuid_effective_cachetype();
+ 	u64 lsize = 4 << cpuid_feature_extract_unsigned_field(ctr,
+ 						CTR_EL0_DminLine_SHIFT);
+diff --git a/drivers/firmware/efi/libstub/zboot.lds b/drivers/firmware/efi/libstub/zboot.lds
+index cc55aa8fb0630f..c7c2f4dd144301 100644
+--- a/drivers/firmware/efi/libstub/zboot.lds
++++ b/drivers/firmware/efi/libstub/zboot.lds
+@@ -2,7 +2,6 @@
+ 
+ ENTRY(__efistub_efi_zboot_header);
+ 
+-PROVIDE(zboot_code_size = ABSOLUTE(0));
+ PROVIDE(efi_zboot_image_info_offset = ABSOLUTE(0));
+ 
+ SECTIONS
+@@ -23,8 +22,6 @@ SECTIONS
+ 		*(.rodata* .init.rodata* .srodata*)
+ 
+ 		. = ALIGN(4);
+-		__efistub_code_size = .;
+-		LONG(zboot_code_size);
+ 		__efistub_efi_image_info_offset = .;
+ 		LONG(efi_zboot_image_info_offset);
+ 
 -- 
 2.43.0
 
