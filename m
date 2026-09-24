@@ -1,85 +1,85 @@
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 383B6453A54
-	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:42:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F2E03BCD21
+	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:49:08 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790289763; cv=none; b=hfiW4cHFZ9EcbJ4DHxKNn8poepppJOxq3p1nIhonj8k4j4SzNhw+iow60aocyIjyzUfO8icjwpmrDE44T5j9MyplqVEp/33Q+gYaN+Tfh78/aTZESslE5EfKkksPp1teoHrQ0nG2usL4u4mUJD8axnpBPGMStAJyY/xidqMUD4g=
+	t=1790290149; cv=none; b=pe5j7ZdF9runWWa5q1Ayq9x6ALPgUl0/FFup4cAb2agcrBjhIKjPuJdyYLKmPpvjEIn6dVHYk+/cPeHx3gUNJ9GqQzVicISInqLwiXB9NpOpxbqoqkAf/2KME7AH3wjuuF2R9qoPOdOlIUQA27FQGkXRSIU4xHLfXqwQizOtCeA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790289763; c=relaxed/simple;
-	bh=2G1FOvOSJrV6/l8sO+qjbSBFUO9X0CWF5KTVr1JnZkM=;
+	s=arc-20240116; t=1790290149; c=relaxed/simple;
+	bh=EsE+bP4ImbF198tRF/p/BEO5nlCx3+LrGeUaFu0gIWU=;
 	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=q+BoumGHSDs1yVT5Gq7P1zyijzPLaHS9miXln9HzepWACRMx0YjqMahe6JW3IBknNRKgCtx5E0nYcx557I6KCZt7YApohtfCmAaE5fpnJejqyd86uA0mx/ec5/QmyKXkKVtX7xVOlWlpg5h/Kg1Ns9GJwwWoRDVmuO01fCYwppE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=eaJiYBco; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=gG3maEZM; arc=none smtp.client-ip=205.220.168.131
+	 MIME-Version:Content-Type; b=m6M73dLVNpAcZs1Fa+CrPRKhS6f/wjom3rXt21+YXf0LUmF5egU4Ui9OfdUtFB1OEhMLEume7vZagxJc/MjEYe5eWg3695Rdzz3tGTyT3U7EilG85UrYTwJaFwhxewzLbh8Zy1yTDJlpjjOOQsWITUOcqbO2zXIATCk2cXsuCQE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=UnwyqbzY; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=TE/W4E2Y; arc=none smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="eaJiYBco";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="gG3maEZM"
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="UnwyqbzY";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="TE/W4E2Y"
 Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68OMOtCt2766792
-	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:42:37 GMT
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68OMOo8j2766698
+	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:49:07 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	81QaywXThCj9GvWcrqbFC8hrrggxf6pFQEEvB0A8Stc=; b=eaJiYBcoVJ7qevSl
-	dhfq+tXf9Yrht/mLq/jwiRTObIgOPPAp4gq7bt1mDqjTW0V6kXIW+8178jTvvqEY
-	/g72Tu5uLFr9TmxDOZ/WTOw4Db3jptMoLUpu03x0RYDq28zhhqtQH8+V6kNLVLAO
-	1Ua+MyDrNoK2wgREaJE/EZogzihYwOq1s6HaLVkWSmzeuJh3HKsCfCtwvHP6+Jd8
-	ENol9vchyHUhmq3K8SCqt3P2t3zGBv8XLggSyAt3yjEQk8zBoVPz6YK9sKvOoTjx
-	qeijDJMaDaBEWWHG3mt12b/Lo717uv1T508Ea2fRW/yjOhQsk+HBOm2Y6914Juvl
-	Prcy/g==
-Received: from mail-dy1-f200.google.com (mail-dy1-f200.google.com [74.125.82.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gw94k8tme-1
+	oo8YGRfyp+kAVxf53tgrQWeKF/gkFQ1vpq3RnEKr7OY=; b=UnwyqbzYYs+KvHQI
+	pdaCx1jtw5ZY0g35b3TDHY1cZfUiyOOybRzb2dGrJpMmxlONRNVSQrHCIK6+AoC7
+	QnvuyVkfsbutTtg/yDMfBQUkcTg+g9F3yaain8P0Plp1XMrZxMEFtivmZwU0CQSe
+	ofHBo1aKp2Fj7gieTJXChc0guhXjz78g5/YQm8yV6jdF4DVlAjn/ZKGezuK1U1zf
+	EgGFGjtO6diq8oxU1+jfEQZtkOeEUAA1QQjM+IUboDFRrPF9yqUpJATk3M3VjNOY
+	A8FRKURil3a5aaVAiLtj8asDhAlxSaEDtDqf0iqQI5xndVjM8Dveu39DfcoA+QTX
+	4xyL3w==
+Received: from mail-dy1-f198.google.com (mail-dy1-f198.google.com [74.125.82.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gw94k8u4u-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:42:37 +0000 (GMT)
-Received: by mail-dy1-f200.google.com with SMTP id 5a478bee46e88-33310847fcaso426106eec.1
-        for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 15:42:37 -0700 (PDT)
+	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:49:07 +0000 (GMT)
+Received: by mail-dy1-f198.google.com with SMTP id 5a478bee46e88-30c0d568830so506408eec.1
+        for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 15:49:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1790289756; x=1790894556; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1790290147; x=1790894947; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:mime-version:organization
          :references:in-reply-to:message-id:subject:cc:to:from:date:from:to
          :cc:subject:date:message-id:reply-to:content-type;
-        bh=81QaywXThCj9GvWcrqbFC8hrrggxf6pFQEEvB0A8Stc=;
-        b=gG3maEZMC0pbufO8LL5QOq0FfxjoTxszo+qJRi0KYCzyZCnePkWLIQGKfUtcl/KTdQ
-         XjIIP4d1fDStjCZtJK9dsFhzYqlQfBj62tM06gZ9fuECG7YBftIZ78IOog6jWcOcuiSo
-         /5mMrN9O7ofxmffmpI05i4EMNqB9IWBf1KgF6KIBYQro5JMrRozz7UdnFaUUr3VsbfBW
-         kCvnHHspLUSOy0tdNscpUYBF3SKsf958SmJCMRsUDNlDI/GD92uWfL4eXPW4W3XFOfpy
-         82xm6J1T77jrZruDN8xxqCS6SIJD47hkJXLXaWxDaaBoyb9FmZtoNxk4esbVzM6dqf3l
-         1mQQ==
+        bh=oo8YGRfyp+kAVxf53tgrQWeKF/gkFQ1vpq3RnEKr7OY=;
+        b=TE/W4E2YA7DdQDjtoKa9Ohy5kUi+xAKvSnseMcMtfdSdbuoPntoIv73orzyxWN4IuC
+         2oePRdpPasRiq6vVsCfUbvmsX2alW+qlKKX0UKAX89xkaWkb0KhGwesg2bQuV15mUiZV
+         U2KpG4683JUoUkaXslkWhxiLu2r2Lh1CUKo+LPzK756B6CRK28mQsWOX4r5+PV3v73zw
+         sI25zXrD+7mkZw05ruaX+DWfies/8zF5Pgr72KoohmGqNLICIVEvNz0tLj85efg6EmvC
+         CiYpSFon1t0TmqgQxUDzlKxZ/q/X30MN8Zgc5bl05DNJYB2dvA8lm0jlnRGzcFXobNGl
+         XvaQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790289756; x=1790894556;
+        d=1e100.net; s=20260707; t=1790290147; x=1790894947;
         h=content-transfer-encoding:content-type:mime-version:organization
          :references:in-reply-to:message-id:subject:cc:to:from:date:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=81QaywXThCj9GvWcrqbFC8hrrggxf6pFQEEvB0A8Stc=;
-        b=CnJcsqP1ynJgDIdqzdXS9aeb27QnJ7ZDk3p4cQxnGr96jRBAqFktRPU6epHiPEckgh
-         Kl/cB67lYdO/6SgE3E6bCsUYolpR/b2IBa7nUAcJg8O5yioN4q7AYyTVQMxEg1Q+ilwu
-         D4fOtlh28jeD7CEvEK6F9NJW/JSSpv4H7PlFV0HZthySQde/noRj3HAVCLfQJXGK1/ja
-         IHu3eAvsoLNTTn0ChaCmY4ReAZcdH5ie2f+x/Cespc5NhADtQvdRoKtlsAKb/460wLv4
-         CK84AzTUG0VE7QLuRYhl6ZCzH49UCAiH3sImvT480a4ZjGVoFIfbL6UvffMOpeNzkOQD
-         w+PQ==
-X-Forwarded-Encrypted: i=1; AKwUvBwMWOqI9wjfxp+mX/RRKJ8wCSMZPjSiVNvYq+a4NcQiPc/gCWcr3juhGYxrBZatA4my0CoVNWddXFc=@vger.kernel.org
-X-Gm-Message-State: AFuF++kq2J47w5490zyg5rMbSDuJB3JijWjlG5wD9TBgHecit1ZGZpl3
-	rvBL5FafYvERsAV0FrEH/5RoHKEFlqm7J5mxvWAuQOPnCByURBZ5hTu8iy9q2nfpbTR8LCg4UGc
-	WsW4OsfcZILajxB07EGRWWsFmvIGFq2aWXsuPS7dlnhArgJR3O/4dx49NUfIPN2Q=
-X-Gm-Gg: AYBFou3007E7kTj1MTb+jblYGvtib7KDaCX+kpjcjeG4e02MLEQ2fnpFnWNG8oyyas6
-	CsbvrIStm4BMnNIX/WICnsfvpRrH5+6CUcl1jk8uGSBego9/Sd9VPZUabTDOz2PVWsPPa+QjNF9
-	HWzUY4XWN2LUmC+MawrBDolVe0AnjcIit7pFQL9We/E8GNuo8KD5YnB3R3Mk2qHnWy2LPo7TK9D
-	rIfGZywAtCxWhXqbSnPI+FPD3jJJrKXM5Wc+Rueub8mF+rgaxBD+6lOE5GiruLnKoh2YfJTNK8k
-	RAUeDkAZOktUx3kFtg5HlRhFXkkSbckkE6fDtlfgT8jpibkY9LOQaonvyx7tHdfX0M6KY1NqXc6
-	jBjJt1BXJrB+QsBwlCN9VT/udYFMGM0OwLZFybRqU/xicj5tBmPCMKA==
-X-Received: by 2002:a05:693c:601c:b0:341:4f3:8f84 with SMTP id 5a478bee46e88-341973cf3cfmr120999eec.13.1790289756368;
-        Thu, 24 Sep 2026 15:42:36 -0700 (PDT)
-X-Received: by 2002:a05:693c:601c:b0:341:4f3:8f84 with SMTP id 5a478bee46e88-341973cf3cfmr120917eec.13.1790289752160;
-        Thu, 24 Sep 2026 15:42:32 -0700 (PDT)
+        bh=oo8YGRfyp+kAVxf53tgrQWeKF/gkFQ1vpq3RnEKr7OY=;
+        b=Avua/goBs/lFu4CC/czcw40krlt35tfsKTIcc8gtCb8w5C/4NzSg3dFvgaoc7FSr3C
+         P6LgqrHvNntXfW+ANLsCt/KTIjYCa+XCWg1wt1fB4G9rtvFmvsWDi5sGnUv1ZaP51fvt
+         Y1uLtVK+Usca7OyhnWVkPGlIo5/xza+skD0tG7oJ612T10YkhpRyQm6+3bQptHgaOmEg
+         BwWGvJgZDAxKfjb1PQJX6QFZtJp+UEKh2KdkYpSsYPi3o1u6L1afRuby63ORi4u6ecAW
+         a7mPTFQpqcsG7zKrZtUlx5PxfFxdHC2Fs6f8O/ozS+mwS8mVY+zAse1OZGTN/nnYwgE2
+         p0Wg==
+X-Forwarded-Encrypted: i=1; AKwUvBzSXz4bbmgaSlc3BOeFjWTtA6hDdqi5Buji/Xh1rFErHWQ6Z1DeKSQrxw1PZ8S/i2yaEyZuDmUn09U=@vger.kernel.org
+X-Gm-Message-State: AFuF++ksFVSCEKljew+oblnixQ1qjDrf0Ud0BuhVhcJG9SaSSbXWHLlq
+	SFef8gwCkZAXOUT2XsYiWDeUvNfG4B7yTalsQiVOWKi86AysvZgorSCsYESMf1f5oBxCO7a4rzv
+	FDAUoF7wYjZFNS/xQ7dP/Itczz7bHaddrfyZ2dufLY0l5q15HSmCZmS+8SUOlKWo=
+X-Gm-Gg: AYBFou0kGkenKS0gZeh51L8AzbukpHse/Ddw0AvlY/dj7j5H5diyIVVUs2VRS8tsK4v
+	NFuZ1kkpPaNa4lT79AAcDHKB1+3aEjwp4goNIuk8cN306tCwPv67JaJRxS8gQ1/2vUIQx/aFJi0
+	mY6Z0a7FVi1s10I721XJpUKD3yujKyfK18fkxNhZqV5pLB/lAFu8G1Uvxj57tkTwWmBkNkS5Ryy
+	t8QyHA9L4p5obzh+8Joy1zoHYI+Ynid5CrVV9epKpolP8szljhiox7B8Dq9OfRIJQrohN8eurXQ
+	c0aEBUb0DYek65oJCdV3dlYOEl3UmJQs5yliRpeJQ70EaoqIFC0zHT/BgK7wDzgomkF1LPX0Gst
+	12pXIGIsDWdAzlniGSayCobXkPWJvzldbeH9Qis1VnwwtZGPZ0d3S2g==
+X-Received: by 2002:a05:7301:8614:b0:33b:dcbc:6046 with SMTP id 5a478bee46e88-33ffe341a5fmr3054545eec.7.1790290146789;
+        Thu, 24 Sep 2026 15:49:06 -0700 (PDT)
+X-Received: by 2002:a05:7301:8614:b0:33b:dcbc:6046 with SMTP id 5a478bee46e88-33ffe341a5fmr3054509eec.7.1790290146115;
+        Thu, 24 Sep 2026 15:49:06 -0700 (PDT)
 Received: from localhost (i-global254.qualcomm.com. [199.106.103.254])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-34145d0fc9fsm1538764eec.25.2026.09.24.15.42.29
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3414407d18fsm1417100eec.10.2026.09.24.15.49.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Sep 2026 15:42:31 -0700 (PDT)
-Date: Thu, 24 Sep 2026 15:42:27 -0700
+        Thu, 24 Sep 2026 15:49:05 -0700 (PDT)
+Date: Thu, 24 Sep 2026 15:49:02 -0700
 From: Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>
 To: Jason Gunthorpe <jgg@nvidia.com>
 Cc: Alexandre Ghiti <alex@ghiti.fr>, Albert Ou <aou@eecs.berkeley.edu>,
@@ -110,12 +110,11 @@ Cc: Alexandre Ghiti <alex@ghiti.fr>, Albert Ou <aou@eecs.berkeley.edu>,
         Sami Tolvanen <samitolvanen@google.com>,
         Song
  Shuai <songshuaishuai@tinylab.org>
-Subject: Re: [PATCH 01/16] efi/libstub: Fix error unwind freeing fdt in
- allocate_new_fdt_and_exit_boot()
-Message-ID: <20260924154227.00001cbe@oss.qualcomm.com>
-In-Reply-To: <1-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
+Subject: Re: [PATCH 03/16] efi/libstub: Free cmdline_ptr in efi_pe_entry
+Message-ID: <20260924154902.0000528b@oss.qualcomm.com>
+In-Reply-To: <3-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
 References: <0-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
-	<1-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
+	<3-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
 Organization: Qualcomm
 X-Mailer: Claws Mail 4.4.0 (GTK 3.24.51; x86_64-w64-mingw32)
 Precedence: bulk
@@ -126,86 +125,68 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-X-Authority-Analysis: v=2.4 cv=aaj0Dhot c=1 sm=1 tr=0 ts=6ab5a75d cx=c_pps
- a=PfFC4Oe2JQzmKTvty2cRDw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+X-Authority-Analysis: v=2.4 cv=aaj0Dhot c=1 sm=1 tr=0 ts=6ab5a8e3 cx=c_pps
+ a=wEP8DlPgTf/vqF+yE6f9lg==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
  a=kj9zAlcOel0A:10 a=VdqzKS8jKosA:10 a=s4-Qcg_JpJYA:10
  a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=YMgV9FUhrdKAYTUUvYB2:22
- a=Ikd4Dj_1AAAA:8 a=EUspDBNiAAAA:8 a=7U2iMG9xLqzP7ZOKqLsA:9
- a=+jEqtf1s3R9VXZ0wqowq2kgwd+I=:19 a=CjuIK1q_8ugA:10 a=6Ab_bkdmUrQuMsNx7PHu:22
-X-Proofpoint-GUID: 0TpWhZIZudnbDtJXayd7rmcReCAETWj4
-X-Proofpoint-ORIG-GUID: 0TpWhZIZudnbDtJXayd7rmcReCAETWj4
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI0MDA5MiBTYWx0ZWRfX4QEVkyK599q6
- 1KQZ7Qqqadr9mVHlxIf7KQw+HZlHz1i4IfnlShKnvs0VrwWyxoFJ6Y9VIK9xI94c923ukg34H/1
- 5dJVRsvlp/vz+c8UDhycZt+n+yyIgQ+uBCGdfI3TZgyAE0phK9XF6poPLJcAQaei0KUvbxp6t04
- 153dkNAR5Niydos7X2Zk2mUXWSqTRG3eDBrzaWj5YouM/MQheHADCc91UamXLP3C7bCY5vlfq7n
- noMRB5hYvfWN4K3tykY5XC183RytCzsRoCIUsSEIbX2Dv2OMrpQlNPTOI43sC2xQPmikfo6zr0I
- XmJgKrSsXRfdKWuYh1O0gCAtajtuujKHRjj5IJLujjhDkw93rofYbi9g5w41zTJp78xalwqJt5D
- VEY9KpBovwvpWJc01c+J9UY6YvGPctw/iMsOJUNYBLpH+THlr1OoRfL4e6a/WiaEemzdB4qLc+i
- 89z25CrfRMAVOHfDDFQ==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI0MDA5MiBTYWx0ZWRfX9Ui9cLjwAzGX
- AxXjgHHtoisXIknZW8ktjEaG9i/wK/xUv58RAycrP/G4UdTr/5tgz0pKL0KpfvYv6V0lFGc7NBx
- KgP/O8Zbup5acj5kcS4nK2tXiaWU1DM=
+ a=Ikd4Dj_1AAAA:8 a=xhtQj0KKqAk-GveBB2QA:9 a=CjuIK1q_8ugA:10
+ a=bBxd6f-gb0O0v-kibOvt:22
+X-Proofpoint-GUID: FZeI_MqpijieHedkWzmES3TeZ95ry4yx
+X-Proofpoint-ORIG-GUID: FZeI_MqpijieHedkWzmES3TeZ95ry4yx
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI0MDA5MyBTYWx0ZWRfX91PUL/0jHa3C
+ JgLuhinW0FeuW8Cjpaxfk9wKS/SC40W0iQ3mdMhgVZSLoGvRN1UybCQ+OF10H0FoKTZ5ciT/Rt3
+ Oz9ZHJ4I0dCYxsGw88cg6wzeoAv+PvKAqAOkvPkdYpdqv45HyzjqGWctpAZQDbDAXfQgcmfAnhd
+ 5FC8ZjLjrVvrpBrd+C8VvGHIPiHnMbd3aqntzjSqSvqUzF7BpflCCNvnLXXnXeFpocRdeHdiUdT
+ /6YM0zZyvLFDe3bTep47aZ/5abV8HfGI0VxyVKbTKySlvbQcxFPu9tyqAucd6nEemIlaHs/vJRs
+ YdyGnLGqv9Viy95VSZl+Ndvk21zBUlo2o119ruUluFq8kluSByFoHQ0Av45L7bTqtXmONkdNI3j
+ hBHTVcRRlIbFswAHNBw6mxfVJlieCbIB0JW6+WmTel7/mDyvScw/fp5Ht4TpADq9CRUdOgkB56d
+ f2fcMRWriDpLp8gh/3w==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI0MDA5MyBTYWx0ZWRfX4PSo8Lwo3RCn
+ eeXRihbJaoQk22W2CFzKVS/r2AQvCPJpM6UNReivEEjNSqSXaEZuS5Z6krsFZ6B0jaODLtXQn2E
+ ryf8cREAxEWaQPNOzxdFr+3g6zROKnw=
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-09-24_06,2026-09-21_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
  suspectscore=0 malwarescore=0 priorityscore=1501 spamscore=0 bulkscore=0
- clxscore=1011 phishscore=0 impostorscore=0 adultscore=0 lowpriorityscore=0
+ clxscore=1015 phishscore=0 impostorscore=0 adultscore=0 lowpriorityscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609240092
+ reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609240093
 
-On Thu, 24 Sep 2026 10:53:04 -0300
+On Thu, 24 Sep 2026 10:53:06 -0300
 Jason Gunthorpe <jgg@nvidia.com> wrote:
 
-> Sashiko says fdt_addr can point to either an allocated fdt or the fdt from
-> get_fdt() which is memory owned by FW.
+> Sashiko points out that efi_handle_cmdline() allocates this memory and
+> hands it over to the caller. If efi_pe_entry() ever returns it should be
+> freed. Add a __free annotation.
 > 
-> Only the allocated fdt should be freed on the error unwind path. Use a
-> dedicated variable for the allocation's size so that the free does not get
-> confused.
-> 
-> Fixes: 4fc8e738ff3e ("efi: libstub: remove DT dependency from generic stub")
+> Fixes: 42c8ea3dca09 ("efi: libstub: Factor out EFI stub entrypoint into separate file")
 > Signed-off-by: Jason Gunthorpe <jgg@nvidia.com>
 > ---
->  drivers/firmware/efi/libstub/fdt.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  drivers/firmware/efi/libstub/efi-stub-entry.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-> index 23b3543d3041b0..5b2dd709d7b151 100644
-> --- a/drivers/firmware/efi/libstub/fdt.c
-> +++ b/drivers/firmware/efi/libstub/fdt.c
-> @@ -229,6 +229,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(void *handle,
->  	u32 desc_ver;
->  	efi_status_t status;
->  	struct exit_boot_struct priv;
-> +	unsigned long fdt_size_allocated = 0;
->  	unsigned long fdt_addr = 0;
->  	unsigned long fdt_size = 0;
->  
-> @@ -257,6 +258,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(void *handle,
->  			efi_err("Failed to load device tree!\n");
->  			goto fail;
->  		}
-> +		fdt_size_allocated = fdt_size;
-Hmm. I argued with myself for a while on this.  Which one of fdt_size and fdt_size_allocate
-is the appropriate one to pass to the call?  In the end I didn't get a good answer so
-oh I guess this is as good as the other way around.
+> diff --git a/drivers/firmware/efi/libstub/efi-stub-entry.c b/drivers/firmware/efi/libstub/efi-stub-entry.c
+> index aa85e910fe595e..83fade2b0d3b84 100644
+> --- a/drivers/firmware/efi/libstub/efi-stub-entry.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub-entry.c
+> @@ -40,7 +40,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+>  	unsigned long image_addr;
+>  	unsigned long image_size = 0;
+>  	/* addr/point and size pairs for memory management*/
+> -	char *cmdline_ptr = NULL;
+> +	char *cmdline_ptr __free(efi_pool) = NULL;
 
-Bug looks real to me and this fixes it I think. Give I know this code very little
-take this tag with a pinch of salt.
+Can we move this down to just above the call to efi_handle_cmdline that
+does the constructor side of this?
 
-Reviewed-by: Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>
+I see none of the efi stuff follow those guidance note that went in cleanup.h.
 
->  	}
->  
->  	if (fdt_addr) {
-> @@ -334,7 +336,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(void *handle,
->  	efi_free(MAX_FDT_SIZE, *new_fdt_addr);
->  
->  fail:
-> -	efi_free(fdt_size, fdt_addr);
-> +	efi_free(fdt_size_allocated, fdt_addr);
->  	if (!efi_novamap)
->  		efi_bs_call(free_pool, priv.runtime_map);
->  
+Ah well, not my problem :)
+
+J
+
+>  	efi_guid_t loaded_image_proto = LOADED_IMAGE_PROTOCOL_GUID;
+>  	unsigned long reserve_addr = 0;
+>  	unsigned long reserve_size = 0;
 
