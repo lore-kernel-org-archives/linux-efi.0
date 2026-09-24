@@ -1,38 +1,38 @@
-Received: from mta1.migadu.com (out-66.mta1.migadu.com [95.215.58.66])
+Received: from mta1.migadu.com (out-128.mta1.migadu.com [95.215.58.128])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6A6A442385
-	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:37:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.66
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C38E43F8DE
+	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:37:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.128
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790289447; cv=none; b=hQlTrxRXHfUP58klLrVDwEoSlLJYKX/WRpWmjmTxR5Qa1QZXMeXTNp2oh6FJzIpLZty4RTGkQsk/2Jk0K/zvN2KIqFZGZdo2Ke0AWocYTBkRTCX59ENVXbu1mTXEWgRDgVj3RqpFSTeO8OD/4tH6c8mCx7Qy/LiANczmZ+ekvxA=
+	t=1790289461; cv=none; b=SG7b+2SvosRR+ico+5IgEglSnaB3ZzPjMWg4PeIK92ODXj8G2tpAzs08+KzCvfW03K3mizcksZrk/F//s51Wui6Qeq8z3/cHeKHYh6oFtMqA4zcPrBZdB2+wgz25D2W7PcKLCpkIUKOJc7rKQua6hQYziTVEG8ouV+zbAFgRBsI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790289447; c=relaxed/simple;
-	bh=tZJ/wAc28PZRoYc+gt5SIvQmNZsWYF2NkAMRmp4Gagw=;
+	s=arc-20240116; t=1790289461; c=relaxed/simple;
+	bh=oXghULZQP5z/j8O8DwSIl930v8B9ioftFHOPhE8OqdI=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=sAuz+YNHsFoGk3Bx9liJTEbbP6CkvDuGUl06CJJnr/U5AAhIY/ozm/HQQuA+BQYrjZ9lP9U2HUs/dtbeeLmDQVCAmAro1cDPSFbb/ZgK5bf7XDkG7KwgMpiybBFWp88F+paf6m+ibm99X2gH+tdoPcJ3z5yLy9cI6lyETmx1Lg0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=bQQpNlyt; arc=none smtp.client-ip=95.215.58.66
+	 In-Reply-To:To:Cc; b=UWwGBSAeNKDlhAdEnY1EznaeHTV+FUVcXWHPSH6h5zVzV8H56vHOGCbtIVs4d7TfOa3A7py6rVYCIzu56KJDot2SskzTvYBv2n8BFPLpalDru6ez2WESqnMZs4Mtiec/0kQOM0ijjRqnFJ5QJkmsO1K9LWogmilPL10LOvOQW6E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=CcDI26Iv; arc=none smtp.client-ip=95.215.58.128
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="bQQpNlyt"
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="CcDI26Iv"
 X-Envelope-To: linux-efi@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=tZJ/wAc28PZRoYc+gt5SIvQmNZsWYF2NkAMRmp4Gagw=;
+DKIM-Signature: a=rsa-sha256; bh=oXghULZQP5z/j8O8DwSIl930v8B9ioftFHOPhE8OqdI=;
  c=simple/simple; d=linux.dev;
  h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1790289442; v=1; x=1790894242;
- b=bQQpNlytiRhPmulr7zR8GJLjTFICEjRYuC4AQc8hnH2K+YzECPDaa/Guel+bZRZIRq7+q2Bu
- 91yZ1eX6WeDjwdX90IjZtfRs4qfgE8pmG0W5nHJS/jDR/8naHiJOfJz+VLXdj0BFAH1Qiwv2Z8I
- IR2BUn+zpMRBK5UoETWikJlE=
+ t=1790289457; v=1; x=1790894257;
+ b=CcDI26Iv4yqUM7MsZi2u5++MU0dWHzKK2a0dIg4C+t/Ay5XfGwAgy6cF0rWlH7QKNGawsTUb
+ wiKym6gayWGrWD3rHa4CCWsqXvcc4uXj3vHn7BlMlfImnRwbGMKfOJbhuYHyv4R9uurDOweoZIz
+ FTN4ITV8K4PxeD+N6qrFq2IE=
 X-Envelope-To: linux-efi@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id 157ee26d80a48e9b;
-	Thu, 24 Sep 2026 22:37:22 +0000
-X-Mizu-Trace-ID: 157ee26d80a48e9b
+Received: by smtp.migadu.com with ESMTPS id 20557c2abfba67fe;
+	Thu, 24 Sep 2026 22:37:36 +0000
+X-Mizu-Trace-ID: 20557c2abfba67fe
 X-Migadu-Flow: FLOW_OUT
 From: "Jose Fernandez (Anthropic)" <jose.fernandez@linux.dev>
-Date: Thu, 24 Sep 2026 22:35:50 +0000
-Subject: [PATCH v2 6/9] arm64: cfi: Use CONFIG_ARM64_FUNCTION_PREFIX_NOPS
- for the type hash offset
+Date: Thu, 24 Sep 2026 22:35:51 +0000
+Subject: [PATCH v2 7/9] arm64: ftrace: Support CALL_OPS on kernels built
+ with kCFI
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -41,7 +41,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260924-b4-arm64-callops-kcfi-v2-6-587865b6d991@linux.dev>
+Message-Id: <20260924-b4-arm64-callops-kcfi-v2-7-587865b6d991@linux.dev>
 References: <20260924-b4-arm64-callops-kcfi-v2-0-587865b6d991@linux.dev>
 In-Reply-To: <20260924-b4-arm64-callops-kcfi-v2-0-587865b6d991@linux.dev>
 To: Steven Rostedt <rostedt@goodmis.org>, 
@@ -83,81 +83,186 @@ Cc: Leon Hwang <leon.hwang@linux.dev>,
  "Jose Fernandez (Anthropic)" <jose.fernandez@linux.dev>
 X-Mailer: b4 0.15.2
 
-Make cfi_get_offset(), SYM_TYPED_FUNC_START and the BPF JIT use
-CONFIG_ARM64_FUNCTION_PREFIX_NOPS instead of hardcoding four bytes. kCFI
-kernels with CALL_OPS need three NOPs, or five with ThinLTO and BTI.
+CALL_OPS and kCFI have been mutually exclusive on arm64 since commit
+baaf553d3bc3 ("arm64: Implement HAVE_DYNAMIC_FTRACE_WITH_CALL_OPS").
+kCFI checks the type hash at a fixed offset before the entry point, so
+every function needs the same number of prefix NOPs. Before clang 21,
+prefix NOPs came only with an entry in ftrace's table, and untraced
+functions had none. Since commit 9315e22b0c0a ("arm64: ftrace: allow
+DIRECT_CALLS without CALL_OPS") a kCFI kernel can attach BPF
+trampolines. But without CALL_OPS, a trampoline out of BL range is
+reached through ftrace_caller, ~10 ns more per call than on a CALL_OPS
+kernel, plus ~4 ns for every extra ftrace_ops registered.
 
-CONFIG_ARM64_FUNCTION_PREFIX_NOPS is 0 on every CFI kernel today, so no
-functional change.
+Clang 21 added a third argument to -fpatchable-function-entry that names
+the section the entries go to [1]. Point it at a section the linker
+scripts already drop and a function gets prefix NOPs with no entry in
+ftrace's table. When CFI and CALL_OPS are both enabled, compile every
+object with
+-fpatchable-function-entry=M,M,.discard.patchable_function_entries,
+where M is CONFIG_ARM64_FUNCTION_PREFIX_NOPS.
+
+Gate CALL_OPS under CFI on ARM64_CFI_PERMITS_CALL_OPS, which needs
+clang 21 or newer and RUST off. rustc has its own flag for the prefix
+NOPs and this patch does not pass it, so Rust functions would have no
+prefix and a different hash offset.
+
+M is 3 because the ops pointer needs an aligned 8-byte slot inside the
+prefix NOPs, and the 4-byte hash puts the NOPs at offset 4. A traced
+function, with the two entry NOPs from CC_FLAGS_FTRACE, then looks
+like this:
+
+  func-16:            .word <hash>    // kCFI type hash
+  func-12:            NOP
+  func-08:            NOP             // ops pointer, 8 bytes
+  func-04:            NOP             //
+  func+00:    func:   NOP             // To be patched to MOV X9, LR
+  func+04:            NOP             // To be patched to BL <caller>
+
+Size of .text in vmlinux on a defconfig-based config with clang 21.1.4:
+
+  Kernel                 || .text bytes | Delta       | Delta
+  =======================++=============+=============+=======
+  kCFI, base             ||  21,023,888 |             |
+  kCFI, M = 3            ||  22,031,504 |  +1,007,616 | +4.8%
+  -----------------------++-------------+-------------+-------
+
+Numbers below are from a KVM guest on a Graviton4 host, v7.3-rc1 with
+and without this series. The workload is a fentry program on
+__arm64_sys_getpid, 20M calls per pass, six passes per boot, six
+boots, each cell the call with the program attached minus the call
+without it. The in-range rows are the same kernels booted with nokaslr.
+
+  Kernel            | Trampoline   | Extra      || Per-call cost (ns)
+                    | vs. BL range | ftrace_ops || Median | Min  | Max
+  ==================+==============+============++========+======+======
+  kCFI, base        | out of range |          0 ||   32.9 | 32.6 | 33.4
+  kCFI, base        | out of range |         16 ||   92.6 | 92.4 | 96.3
+  kCFI, base        | in range     |          0 ||   21.3 | 21.0 | 21.8
+  ------------------+--------------+------------++--------+------+------
+  kCFI, this series | out of range |          0 ||   22.7 | 22.0 | 22.9
+  kCFI, this series | out of range |         16 ||   22.1 | 21.9 | 22.4
+  kCFI, this series | in range     |          0 ||   22.4 | 22.1 | 22.6
+  ------------------+--------------+------------++--------+------+------
+
+Out of range this saves ~10 ns per call and the cost stops growing
+with extra ftrace_ops. In range both kernels branch straight to
+the trampoline and the numbers roughly match.
+
+ftracetest and the BPF trampoline, struct_ops and kprobe_multi
+selftests pass with CFI enforcing.
+
+[1] https://github.com/llvm/llvm-project/pull/131230
 
 Reviewed-by: Ben Cressey <ben@cressey.dev>
 Reviewed-by: Florent Revest (Anthropic) <florent.revest@linux.dev>
 Assisted-by: LLM
 Signed-off-by: Jose Fernandez (Anthropic) <jose.fernandez@linux.dev>
 ---
- arch/arm64/include/asm/cfi.h     |  8 ++++++++
- arch/arm64/include/asm/linkage.h | 11 +++++++++++
- arch/arm64/net/bpf_jit_comp.c    |  8 ++++++--
- 3 files changed, 25 insertions(+), 2 deletions(-)
+ arch/arm64/Kconfig                    | 15 ++++++++++++++-
+ arch/arm64/Makefile                   | 12 +++++++++++-
+ arch/arm64/kernel/pi/Makefile         |  2 ++
+ arch/arm64/kernel/vdso/Makefile       |  2 +-
+ drivers/firmware/efi/libstub/Makefile |  2 +-
+ 5 files changed, 29 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm64/include/asm/cfi.h b/arch/arm64/include/asm/cfi.h
-index ab90f0351b7ae..03f02d4614c23 100644
---- a/arch/arm64/include/asm/cfi.h
-+++ b/arch/arm64/include/asm/cfi.h
-@@ -4,4 +4,12 @@
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 9fbcf12a3808b..6e5fa009c11af 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -190,7 +190,8 @@ config ARM64
+ 	select HAVE_DYNAMIC_FTRACE_WITH_DIRECT_CALLS \
+ 		if DYNAMIC_FTRACE_WITH_ARGS
+ 	select HAVE_DYNAMIC_FTRACE_WITH_CALL_OPS \
+-		if (DYNAMIC_FTRACE_WITH_ARGS && !CFI && \
++		if (DYNAMIC_FTRACE_WITH_ARGS && \
++		    (!CFI || ARM64_CFI_PERMITS_CALL_OPS) && \
+ 		    (CC_IS_CLANG || !CC_OPTIMIZE_FOR_SIZE))
+ 	select FTRACE_MCOUNT_USE_PATCHABLE_FUNCTION_ENTRY \
+ 		if DYNAMIC_FTRACE_WITH_ARGS
+@@ -276,8 +277,20 @@ config GCC_SUPPORTS_DYNAMIC_FTRACE_WITH_ARGS
+ 	def_bool CC_IS_GCC
+ 	depends on $(cc-option,-fpatchable-function-entry=2)
  
- #define __bpfcall
- 
-+#ifdef CONFIG_CFI
-+static inline int cfi_get_offset(void)
-+{
-+	return 4 + 4 * CONFIG_ARM64_FUNCTION_PREFIX_NOPS;
-+}
-+#define cfi_get_offset cfi_get_offset
-+#endif /* CONFIG_CFI */
++config CC_HAS_PATCHABLE_FUNCTION_ENTRY_SECTION
++	# The section argument needs clang 21 or later:
++	# https://github.com/llvm/llvm-project/pull/131230
++	def_bool $(cc-option,-fpatchable-function-entry=1$(comma)1$(comma).discard.patchable_function_entries)
 +
- #endif /* _ASM_ARM64_CFI_H */
-diff --git a/arch/arm64/include/asm/linkage.h b/arch/arm64/include/asm/linkage.h
-index d1f7a16729d25..14bc3c67c38b3 100644
---- a/arch/arm64/include/asm/linkage.h
-+++ b/arch/arm64/include/asm/linkage.h
-@@ -39,6 +39,17 @@
- 	SYM_START(name, SYM_L_WEAK, SYM_A_NONE)		\
- 	bti c ;
- 
-+/*
-+ * The compiler emits CONFIG_ARM64_FUNCTION_PREFIX_NOPS NOPs between a C
-+ * function's kCFI type hash and its entry point. Callers check the hash
-+ * at that offset.
-+ */
-+#define __CFI_TYPE(name)				\
-+	.4byte __kcfi_typeid_##name ASM_NL		\
-+	.rept CONFIG_ARM64_FUNCTION_PREFIX_NOPS ASM_NL	\
-+	nop ASM_NL					\
-+	.endr
++config ARM64_CFI_PERMITS_CALL_OPS
++	def_bool y
++	depends on CFI
++	depends on CC_HAS_PATCHABLE_FUNCTION_ENTRY_SECTION
++	depends on !RUST
 +
- #define SYM_TYPED_FUNC_START(name)				\
- 	SYM_TYPED_START(name, SYM_L_GLOBAL, SYM_A_ALIGN)	\
- 	bti c ;
-diff --git a/arch/arm64/net/bpf_jit_comp.c b/arch/arm64/net/bpf_jit_comp.c
-index c18e005a41dbe..7ad14d9847138 100644
---- a/arch/arm64/net/bpf_jit_comp.c
-+++ b/arch/arm64/net/bpf_jit_comp.c
-@@ -185,8 +185,12 @@ static inline void emit_bti(u32 insn, struct jit_ctx *ctx)
+ config ARM64_FUNCTION_PREFIX_NOPS
+ 	int
++	default 3 if DYNAMIC_FTRACE_WITH_CALL_OPS && CFI
+ 	default 2 if DYNAMIC_FTRACE_WITH_CALL_OPS
+ 	default 0
  
- static inline void emit_kcfi(u32 hash, struct jit_ctx *ctx)
- {
--	if (IS_ENABLED(CONFIG_CFI))
--		emit_u32_data(hash, ctx);
-+	if (!IS_ENABLED(CONFIG_CFI))
-+		return;
-+
-+	emit_u32_data(hash, ctx);
-+	for (int i = 0; i < CONFIG_ARM64_FUNCTION_PREFIX_NOPS; i++)
-+		emit(A64_NOP, ctx);
- }
+diff --git a/arch/arm64/Makefile b/arch/arm64/Makefile
+index 6b005c8fef706..653c1ed6ef38f 100644
+--- a/arch/arm64/Makefile
++++ b/arch/arm64/Makefile
+@@ -142,7 +142,17 @@ CHECKFLAGS	+= -D__aarch64__
  
- /*
+ ifeq ($(CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS),y)
+   KBUILD_CPPFLAGS += -DCC_USING_PATCHABLE_FUNCTION_ENTRY
+-  CC_FLAGS_FTRACE := -fpatchable-function-entry=4,2
++  prefix_nops := $(CONFIG_ARM64_FUNCTION_PREFIX_NOPS)
++  CC_FLAGS_FTRACE := -fpatchable-function-entry=$(shell expr $(prefix_nops) + 2),$(prefix_nops)
++  ifeq ($(CONFIG_CFI),y)
++    # Every object gets the prefix NOPs and no ftrace entry by default.
++    # CC_FLAGS_FTRACE comes later for traced objects and overrides the
++    # -fpatchable-function-entry.
++    CFI_PREFIX_CFLAGS := -fpatchable-function-entry=$(prefix_nops),$(prefix_nops),.discard.patchable_function_entries \
++			 -DCC_USING_PATCHABLE_FUNCTION_PREFIX=$(prefix_nops)
++    KBUILD_CFLAGS += $(CFI_PREFIX_CFLAGS)
++    export CFI_PREFIX_CFLAGS
++  endif
+ else ifeq ($(CONFIG_DYNAMIC_FTRACE_WITH_ARGS),y)
+   KBUILD_CPPFLAGS += -DCC_USING_PATCHABLE_FUNCTION_ENTRY
+   CC_FLAGS_FTRACE := -fpatchable-function-entry=2
+diff --git a/arch/arm64/kernel/pi/Makefile b/arch/arm64/kernel/pi/Makefile
+index be92d73c25b21..df9f78dd9daec 100644
+--- a/arch/arm64/kernel/pi/Makefile
++++ b/arch/arm64/kernel/pi/Makefile
+@@ -18,6 +18,8 @@ CFLAGS_map_range.o += -mstrict-align
+ KBUILD_CFLAGS	:= $(filter-out $(CC_FLAGS_SCS), $(KBUILD_CFLAGS))
+ # disable LTO
+ KBUILD_CFLAGS	:= $(filter-out $(CC_FLAGS_LTO), $(KBUILD_CFLAGS))
++# the discard section holds absolute relocations, which relacheck rejects
++KBUILD_CFLAGS	:= $(filter-out $(CFI_PREFIX_CFLAGS), $(KBUILD_CFLAGS))
+ 
+ hostprogs	:= relacheck
+ 
+diff --git a/arch/arm64/kernel/vdso/Makefile b/arch/arm64/kernel/vdso/Makefile
+index 7dec05dd33b70..44f4a6622ccd2 100644
+--- a/arch/arm64/kernel/vdso/Makefile
++++ b/arch/arm64/kernel/vdso/Makefile
+@@ -38,7 +38,7 @@ ccflags-y += -DDISABLE_BRANCH_PROFILING -DBUILD_VDSO
+ CC_FLAGS_REMOVE_VDSO := $(CC_FLAGS_FTRACE) -Os $(CC_FLAGS_SCS) \
+ 			$(RANDSTRUCT_CFLAGS) $(KSTACK_ERASE_CFLAGS) \
+ 			$(GCC_PLUGINS_CFLAGS) \
+-			$(CC_FLAGS_LTO) $(CC_FLAGS_CFI) \
++			$(CC_FLAGS_LTO) $(CC_FLAGS_CFI) $(CFI_PREFIX_CFLAGS) \
+ 			-Wmissing-prototypes -Wmissing-declarations
+ 
+ CC_FLAGS_ADD_VDSO := -O2 -mcmodel=tiny -fasynchronous-unwind-tables
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 77a2b2d74f3f6..9fb4e23da4535 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -53,7 +53,7 @@ KBUILD_CFLAGS := $(filter-out $(RANDSTRUCT_CFLAGS), $(KBUILD_CFLAGS))
+ # remove SCS flags from all objects in this directory
+ KBUILD_CFLAGS := $(filter-out $(CC_FLAGS_SCS), $(KBUILD_CFLAGS))
+ # disable CFI
+-KBUILD_CFLAGS := $(filter-out $(CC_FLAGS_CFI), $(KBUILD_CFLAGS))
++KBUILD_CFLAGS := $(filter-out $(CC_FLAGS_CFI) $(CFI_PREFIX_CFLAGS), $(KBUILD_CFLAGS))
+ # disable LTO
+ KBUILD_CFLAGS := $(filter-out $(CC_FLAGS_LTO), $(KBUILD_CFLAGS))
+ 
 
 -- 
 2.52.0
