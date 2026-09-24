@@ -1,85 +1,85 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F2E03BCD21
-	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:49:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A542141F7F2
+	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:53:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790290149; cv=none; b=pe5j7ZdF9runWWa5q1Ayq9x6ALPgUl0/FFup4cAb2agcrBjhIKjPuJdyYLKmPpvjEIn6dVHYk+/cPeHx3gUNJ9GqQzVicISInqLwiXB9NpOpxbqoqkAf/2KME7AH3wjuuF2R9qoPOdOlIUQA27FQGkXRSIU4xHLfXqwQizOtCeA=
+	t=1790290400; cv=none; b=tMDSTlyWWcWDB9EldbWvWfowRt1l/VD1xJwzB6PKQgiXer+kEpfRao97c9DVhLRkCIrAx7/CNJNQIcLrTu3k3p0neejIgDva7TqjfyQOkI80MdBkbQkXWTUYrK5ZFyJhm72uzAUhs4XkxA2YTajQKZRppiGC0SoJ96wtQ+mm4lI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790290149; c=relaxed/simple;
-	bh=EsE+bP4ImbF198tRF/p/BEO5nlCx3+LrGeUaFu0gIWU=;
+	s=arc-20240116; t=1790290400; c=relaxed/simple;
+	bh=kqsES4KHoZs1msV6+8Gynms+M5zjnX0qZVcy11wRno0=;
 	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=m6M73dLVNpAcZs1Fa+CrPRKhS6f/wjom3rXt21+YXf0LUmF5egU4Ui9OfdUtFB1OEhMLEume7vZagxJc/MjEYe5eWg3695Rdzz3tGTyT3U7EilG85UrYTwJaFwhxewzLbh8Zy1yTDJlpjjOOQsWITUOcqbO2zXIATCk2cXsuCQE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=UnwyqbzY; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=TE/W4E2Y; arc=none smtp.client-ip=205.220.168.131
+	 MIME-Version:Content-Type; b=V4SG2O+ed+7LKe8h9RfFj2MqHnbCbPfGpR8Bnz9vHvKqCQyemepmgWjQsYhvKpWZssGr97xmoCtsyBgGU67I6CVeq15KekFh+h3OynVRqZUWOPuOmX5uAJqtMk/ZDWr0V9pDEtfzkswGqV3/NbMxWdItaIC1S7mrV9lSUtP6Csg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=ezYnMi7m; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=XU6juQGf; arc=none smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="UnwyqbzY";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="TE/W4E2Y"
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68OMOo8j2766698
-	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:49:07 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="ezYnMi7m";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="XU6juQGf"
+Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68OMPLWJ3467674
+	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:53:15 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	oo8YGRfyp+kAVxf53tgrQWeKF/gkFQ1vpq3RnEKr7OY=; b=UnwyqbzYYs+KvHQI
-	pdaCx1jtw5ZY0g35b3TDHY1cZfUiyOOybRzb2dGrJpMmxlONRNVSQrHCIK6+AoC7
-	QnvuyVkfsbutTtg/yDMfBQUkcTg+g9F3yaain8P0Plp1XMrZxMEFtivmZwU0CQSe
-	ofHBo1aKp2Fj7gieTJXChc0guhXjz78g5/YQm8yV6jdF4DVlAjn/ZKGezuK1U1zf
-	EgGFGjtO6diq8oxU1+jfEQZtkOeEUAA1QQjM+IUboDFRrPF9yqUpJATk3M3VjNOY
-	A8FRKURil3a5aaVAiLtj8asDhAlxSaEDtDqf0iqQI5xndVjM8Dveu39DfcoA+QTX
-	4xyL3w==
-Received: from mail-dy1-f198.google.com (mail-dy1-f198.google.com [74.125.82.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gw94k8u4u-1
+	26IKywfxXF+ovz3cISEJ2vKRNs4eRXW7AlvCnEjLpWg=; b=ezYnMi7mMpeuODcw
+	+WiLkeryjucsr3GUsliA6Q/qo9TCIvd1SSF+jrBzrQsbydlvqplcNShv16zQgQxI
+	MZGRtlLbh1SH7v/AkrkJ4rsQTrubeuk55FyS3UYZA3e7Vb0jZYtOfaHJsc0CxZih
+	etk7fMNAWWFGjHVbtpCZkh0C3smj0TUga8KPoHo0DhbMcC5s48nWQxTTlwwPM23X
+	QjeAe/CIUE+1ffljI8bI50OGKNhfgBFjYbh7Tg1yB5i7NO5Vh63G1a/eoj//OtUr
+	RfEUshvbHxlSjE1ljTH7HJPpxS/ad+gFcAm607wb7wN25GasXfj7gfZwpl42yLDA
+	g5fLXw==
+Received: from mail-dy1-f197.google.com (mail-dy1-f197.google.com [74.125.82.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4gw4652bg0-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:49:07 +0000 (GMT)
-Received: by mail-dy1-f198.google.com with SMTP id 5a478bee46e88-30c0d568830so506408eec.1
-        for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 15:49:07 -0700 (PDT)
+	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 22:53:15 +0000 (GMT)
+Received: by mail-dy1-f197.google.com with SMTP id 5a478bee46e88-32850005b6bso430448eec.0
+        for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 15:53:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1790290147; x=1790894947; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1790290394; x=1790895194; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:mime-version:organization
          :references:in-reply-to:message-id:subject:cc:to:from:date:from:to
          :cc:subject:date:message-id:reply-to:content-type;
-        bh=oo8YGRfyp+kAVxf53tgrQWeKF/gkFQ1vpq3RnEKr7OY=;
-        b=TE/W4E2YA7DdQDjtoKa9Ohy5kUi+xAKvSnseMcMtfdSdbuoPntoIv73orzyxWN4IuC
-         2oePRdpPasRiq6vVsCfUbvmsX2alW+qlKKX0UKAX89xkaWkb0KhGwesg2bQuV15mUiZV
-         U2KpG4683JUoUkaXslkWhxiLu2r2Lh1CUKo+LPzK756B6CRK28mQsWOX4r5+PV3v73zw
-         sI25zXrD+7mkZw05ruaX+DWfies/8zF5Pgr72KoohmGqNLICIVEvNz0tLj85efg6EmvC
-         CiYpSFon1t0TmqgQxUDzlKxZ/q/X30MN8Zgc5bl05DNJYB2dvA8lm0jlnRGzcFXobNGl
-         XvaQ==
+        bh=26IKywfxXF+ovz3cISEJ2vKRNs4eRXW7AlvCnEjLpWg=;
+        b=XU6juQGf7Jy7Os1ANyiyNQh7NR4rsA7Rb+ZlCY2maWIXP2DKl/L8kAWPtlNYKR8HKN
+         as4YcDYFpyR88b6pSfe+j8xkC1DwR790iqAThBFJq48HXv2bZIkU3zgMeeSBIYPoqkEe
+         57G/iF1sSG1qOHeXojtEKFerosp3yMUnxjcN5/G5rE2fgxqDTn/Y6CSD2EeEKc/JF1tD
+         /XH1EMN+ioB/XbdoleWjfHHtWgyB6bMvO1LCSNSb4STjSm/rONDJT5l2dIX9Hmv/d4ig
+         SsjHRetnv9jOfs4nIDri69dTJH1UHDgDl6b32LeCNyDksawIUWbt3Vx7FzZXD4t1k+OL
+         CrrQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790290147; x=1790894947;
+        d=1e100.net; s=20260707; t=1790290394; x=1790895194;
         h=content-transfer-encoding:content-type:mime-version:organization
          :references:in-reply-to:message-id:subject:cc:to:from:date:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=oo8YGRfyp+kAVxf53tgrQWeKF/gkFQ1vpq3RnEKr7OY=;
-        b=Avua/goBs/lFu4CC/czcw40krlt35tfsKTIcc8gtCb8w5C/4NzSg3dFvgaoc7FSr3C
-         P6LgqrHvNntXfW+ANLsCt/KTIjYCa+XCWg1wt1fB4G9rtvFmvsWDi5sGnUv1ZaP51fvt
-         Y1uLtVK+Usca7OyhnWVkPGlIo5/xza+skD0tG7oJ612T10YkhpRyQm6+3bQptHgaOmEg
-         BwWGvJgZDAxKfjb1PQJX6QFZtJp+UEKh2KdkYpSsYPi3o1u6L1afRuby63ORi4u6ecAW
-         a7mPTFQpqcsG7zKrZtUlx5PxfFxdHC2Fs6f8O/ozS+mwS8mVY+zAse1OZGTN/nnYwgE2
-         p0Wg==
-X-Forwarded-Encrypted: i=1; AKwUvBzSXz4bbmgaSlc3BOeFjWTtA6hDdqi5Buji/Xh1rFErHWQ6Z1DeKSQrxw1PZ8S/i2yaEyZuDmUn09U=@vger.kernel.org
-X-Gm-Message-State: AFuF++ksFVSCEKljew+oblnixQ1qjDrf0Ud0BuhVhcJG9SaSSbXWHLlq
-	SFef8gwCkZAXOUT2XsYiWDeUvNfG4B7yTalsQiVOWKi86AysvZgorSCsYESMf1f5oBxCO7a4rzv
-	FDAUoF7wYjZFNS/xQ7dP/Itczz7bHaddrfyZ2dufLY0l5q15HSmCZmS+8SUOlKWo=
-X-Gm-Gg: AYBFou0kGkenKS0gZeh51L8AzbukpHse/Ddw0AvlY/dj7j5H5diyIVVUs2VRS8tsK4v
-	NFuZ1kkpPaNa4lT79AAcDHKB1+3aEjwp4goNIuk8cN306tCwPv67JaJRxS8gQ1/2vUIQx/aFJi0
-	mY6Z0a7FVi1s10I721XJpUKD3yujKyfK18fkxNhZqV5pLB/lAFu8G1Uvxj57tkTwWmBkNkS5Ryy
-	t8QyHA9L4p5obzh+8Joy1zoHYI+Ynid5CrVV9epKpolP8szljhiox7B8Dq9OfRIJQrohN8eurXQ
-	c0aEBUb0DYek65oJCdV3dlYOEl3UmJQs5yliRpeJQ70EaoqIFC0zHT/BgK7wDzgomkF1LPX0Gst
-	12pXIGIsDWdAzlniGSayCobXkPWJvzldbeH9Qis1VnwwtZGPZ0d3S2g==
-X-Received: by 2002:a05:7301:8614:b0:33b:dcbc:6046 with SMTP id 5a478bee46e88-33ffe341a5fmr3054545eec.7.1790290146789;
-        Thu, 24 Sep 2026 15:49:06 -0700 (PDT)
-X-Received: by 2002:a05:7301:8614:b0:33b:dcbc:6046 with SMTP id 5a478bee46e88-33ffe341a5fmr3054509eec.7.1790290146115;
-        Thu, 24 Sep 2026 15:49:06 -0700 (PDT)
+        bh=26IKywfxXF+ovz3cISEJ2vKRNs4eRXW7AlvCnEjLpWg=;
+        b=U+Q2sRu05GnKtUOsrLI4+ZS6z9ehvczH2byaIaVFxg2Sq0dvwkaxEUz8JthhUn8CGP
+         UBoVxu/FDEuh3z1cGvV2ey5RFRlc5AAkBXHJ81LLX5nEXYi8jAPhHX/IjIsvkbdl4xR/
+         XgWRa3Jmlmeb99FnukMiHW4OFWF2A/W9y6wxaUNoliHIA+81vXmOgMJ4wimi0nfb87eS
+         Hs1ZObpZOONMDpsQjYWStY6pVMER8Dp8YNcWTSWfV4GSPUvW0Og/zEBfqjCuy8fIdhwZ
+         KEbxEZK5HFKO5RfvXVbhdHr/2lmafW0t9ptEwE9bugcE9yc6PE2L1OU7EMAuFwzYted0
+         ZX9A==
+X-Forwarded-Encrypted: i=1; AKwUvBzSSSLN6V1P2KVQRRHam2t7IQSmgDfS4jWIdgawsrIWFaAsN0jvVfXEOqwwH6phpMqDCPUuWAeDoQs=@vger.kernel.org
+X-Gm-Message-State: AFuF++kwnm4XJ53KDE1/pQLkFhNYYWelVwHvGadT3n3h6IWuo8Ku8stX
+	z481pj9gCSHUK71NuMqJuHB5KFMooV4+DEHTSRb3K5LTCBQ+y/tkNqQNUhrxXH4Ni8Lr2MUeOd+
+	P04NDua1iXGrB+X/8VZoPAA3XBda7mrd5u/vsf5cEgpt/rlFq91YELZmnGzj9r9Q=
+X-Gm-Gg: AYBFou1SCzYbp27LAQYpRf4d2NhuLO6FdbwJaBIaHjQ/p0f7kcSjYTrVoG6w555l3Nf
+	8RX+Q9xeNoZqBxLVmQFE2ot/Oye99t0ZQrFbStw9nl19SpFJ14UMTx4WGLghxHkJfA/cotixuRA
+	a53Xme7acEUhZiaCFQY87dOeEwgshq5gDOwbUy1ZGSoMD0p6UfmgLcIG8zkFRvnifoVLOKdb8y8
+	tkcW8d4zn8HrRSZGX18dmZK8HSiMxNhuhiiG6DWS+q/HGKzVKOQ7dQb7C+ytftkTwZ57zBRODL4
+	E5h3GzzdKY4abIbDThOGmmAZh6QW2h6CXb6v1B3hvQv5T4X4oz+F/XdN9UqMm7IjXadJTnO31PN
+	GRA7jDi5xfmOa2Om09FmOPTbJnC+iHP+zYr5XVbsFGXSCIApMXIWKnQ==
+X-Received: by 2002:a05:701b:204f:20b0:13b:3132:6e99 with SMTP id a92af1059eb24-14503f966ecmr3398039c88.20.1790290393077;
+        Thu, 24 Sep 2026 15:53:13 -0700 (PDT)
+X-Received: by 2002:a05:701b:204f:20b0:13b:3132:6e99 with SMTP id a92af1059eb24-14503f966ecmr3398015c88.20.1790290392489;
+        Thu, 24 Sep 2026 15:53:12 -0700 (PDT)
 Received: from localhost (i-global254.qualcomm.com. [199.106.103.254])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3414407d18fsm1417100eec.10.2026.09.24.15.49.03
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-145ad8e43d2sm1524306c88.12.2026.09.24.15.53.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Sep 2026 15:49:05 -0700 (PDT)
-Date: Thu, 24 Sep 2026 15:49:02 -0700
+        Thu, 24 Sep 2026 15:53:12 -0700 (PDT)
+Date: Thu, 24 Sep 2026 15:53:07 -0700
 From: Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>
 To: Jason Gunthorpe <jgg@nvidia.com>
 Cc: Alexandre Ghiti <alex@ghiti.fr>, Albert Ou <aou@eecs.berkeley.edu>,
@@ -109,12 +109,14 @@ Cc: Alexandre Ghiti <alex@ghiti.fr>, Albert Ou <aou@eecs.berkeley.edu>,
  <ross.philipson@gmail.com>,
         Sami Tolvanen <samitolvanen@google.com>,
         Song
- Shuai <songshuaishuai@tinylab.org>
-Subject: Re: [PATCH 03/16] efi/libstub: Free cmdline_ptr in efi_pe_entry
-Message-ID: <20260924154902.0000528b@oss.qualcomm.com>
-In-Reply-To: <3-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
+ Shuai <songshuaishuai@tinylab.org>,
+        Will Deacon <will@kernel.org>
+Subject: Re: [PATCH 04/16] vmlinux.lds: Move DATA_LE32() from arm64 to the
+ common linker script
+Message-ID: <20260924155307.00007dfc@oss.qualcomm.com>
+In-Reply-To: <4-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
 References: <0-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
-	<3-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
+	<4-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
 Organization: Qualcomm
 X-Mailer: Claws Mail 4.4.0 (GTK 3.24.51; x86_64-w64-mingw32)
 Precedence: bulk
@@ -125,68 +127,107 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-X-Authority-Analysis: v=2.4 cv=aaj0Dhot c=1 sm=1 tr=0 ts=6ab5a8e3 cx=c_pps
- a=wEP8DlPgTf/vqF+yE6f9lg==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+X-Authority-Analysis: v=2.4 cv=Wrq+otfv c=1 sm=1 tr=0 ts=6ab5a9db cx=c_pps
+ a=Uww141gWH0fZj/3QKPojxA==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
  a=kj9zAlcOel0A:10 a=VdqzKS8jKosA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=YMgV9FUhrdKAYTUUvYB2:22
- a=Ikd4Dj_1AAAA:8 a=xhtQj0KKqAk-GveBB2QA:9 a=CjuIK1q_8ugA:10
- a=bBxd6f-gb0O0v-kibOvt:22
-X-Proofpoint-GUID: FZeI_MqpijieHedkWzmES3TeZ95ry4yx
-X-Proofpoint-ORIG-GUID: FZeI_MqpijieHedkWzmES3TeZ95ry4yx
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI0MDA5MyBTYWx0ZWRfX91PUL/0jHa3C
- JgLuhinW0FeuW8Cjpaxfk9wKS/SC40W0iQ3mdMhgVZSLoGvRN1UybCQ+OF10H0FoKTZ5ciT/Rt3
- Oz9ZHJ4I0dCYxsGw88cg6wzeoAv+PvKAqAOkvPkdYpdqv45HyzjqGWctpAZQDbDAXfQgcmfAnhd
- 5FC8ZjLjrVvrpBrd+C8VvGHIPiHnMbd3aqntzjSqSvqUzF7BpflCCNvnLXXnXeFpocRdeHdiUdT
- /6YM0zZyvLFDe3bTep47aZ/5abV8HfGI0VxyVKbTKySlvbQcxFPu9tyqAucd6nEemIlaHs/vJRs
- YdyGnLGqv9Viy95VSZl+Ndvk21zBUlo2o119ruUluFq8kluSByFoHQ0Av45L7bTqtXmONkdNI3j
- hBHTVcRRlIbFswAHNBw6mxfVJlieCbIB0JW6+WmTel7/mDyvScw/fp5Ht4TpADq9CRUdOgkB56d
- f2fcMRWriDpLp8gh/3w==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI0MDA5MyBTYWx0ZWRfX4PSo8Lwo3RCn
- eeXRihbJaoQk22W2CFzKVS/r2AQvCPJpM6UNReivEEjNSqSXaEZuS5Z6krsFZ6B0jaODLtXQn2E
- ryf8cREAxEWaQPNOzxdFr+3g6zROKnw=
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=rJkE3RaqiGZ5pbrm-msn:22
+ a=VwQbUJbxAAAA:8 a=Ikd4Dj_1AAAA:8 a=Qd5iYfxjV735tpeAhwAA:9 a=CjuIK1q_8ugA:10
+ a=PxkB5W3o20Ba91AHUih5:22
+X-Proofpoint-ORIG-GUID: ZWPFqKUe-sbUlC_2LmIe-NRSu90S0ap1
+X-Proofpoint-GUID: ZWPFqKUe-sbUlC_2LmIe-NRSu90S0ap1
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI0MDA5MyBTYWx0ZWRfX/kEir4m6hqEz
+ /Ak6lmEjLSsQu6h6uXcNEtIVM/kqWbIoDgCied4NlUk4XUUfrO8xHDt+qRbbU6YkORjdYu9+uZD
+ qTfZVWSOIbxzmdHZmSlYHAlMvVOvtIuvvgOSqfYNvLwuLdvtlhCnqOE2pxLzYXc1uvKNAHpu5Ql
+ wFLaPr6ugkysUE5O9e4JP20SEILuCc47bXWA55HZUZEzBzBGCDiQhD90kpV1SpWYzFn1HtCfNw0
+ Tgjg6gM8svZl16NNr9P5d4VbVxZ8LiIRh+DoncV17XOCC9C+8qpL7yep6MRY+4M2y7r1f/cO86q
+ lkzABOgi9aID0r8iwwlEdELGoraUrlUHcYuj+g2MC/Eo6r3JwXRPzW6PjGxugExrjmMuVWAbKoH
+ LQuMfmnZyPSknvhnFDpSV+o22w0Cbu/0b4zTB03QtqkBuOOeqxtPA1uEVZkYiQb9a6sMVXN/5VQ
+ JpL/LsRhZorpM7ZlU4A==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI0MDA5MyBTYWx0ZWRfXwV+W0xr/TLVN
+ oOaEmvQW2PGTVyEtYhToKxSpISVgafBtGkGLoDalNvJ7tVxn5GyP1f6GO65UmLAxTgcpN4l7ynY
+ ELGxtvvBvJbrSLRXlzr++St2UKBpQRo=
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-09-24_06,2026-09-21_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- suspectscore=0 malwarescore=0 priorityscore=1501 spamscore=0 bulkscore=0
- clxscore=1015 phishscore=0 impostorscore=0 adultscore=0 lowpriorityscore=0
+ spamscore=0 lowpriorityscore=0 adultscore=0 impostorscore=0 bulkscore=0
+ suspectscore=0 priorityscore=1501 clxscore=1015 malwarescore=0 phishscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
  reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609240093
 
-On Thu, 24 Sep 2026 10:53:06 -0300
+On Thu, 24 Sep 2026 10:53:07 -0300
 Jason Gunthorpe <jgg@nvidia.com> wrote:
 
-> Sashiko points out that efi_handle_cmdline() allocates this memory and
-> hands it over to the caller. If efi_pe_entry() ever returns it should be
-> freed. Add a __free annotation.
+> Other arches may want to use this to get consistent fixed endian output.
+
+You will have to grab it quickly!
+https://lore.kernel.org/all/20260918145217.1669-10-will@kernel.org/#Z31arch:arm64:kernel:image.h
+drops that definition as part of ripping out arm64 big endian support.
+
++CC Will for awareness.
+
 > 
-> Fixes: 42c8ea3dca09 ("efi: libstub: Factor out EFI stub entrypoint into separate file")
 > Signed-off-by: Jason Gunthorpe <jgg@nvidia.com>
 > ---
->  drivers/firmware/efi/libstub/efi-stub-entry.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  arch/arm64/kernel/image.h         | 14 --------------
+>  include/asm-generic/vmlinux.lds.h | 15 +++++++++++++++
+>  2 files changed, 15 insertions(+), 14 deletions(-)
 > 
-> diff --git a/drivers/firmware/efi/libstub/efi-stub-entry.c b/drivers/firmware/efi/libstub/efi-stub-entry.c
-> index aa85e910fe595e..83fade2b0d3b84 100644
-> --- a/drivers/firmware/efi/libstub/efi-stub-entry.c
-> +++ b/drivers/firmware/efi/libstub/efi-stub-entry.c
-> @@ -40,7 +40,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
->  	unsigned long image_addr;
->  	unsigned long image_size = 0;
->  	/* addr/point and size pairs for memory management*/
-> -	char *cmdline_ptr = NULL;
-> +	char *cmdline_ptr __free(efi_pool) = NULL;
-
-Can we move this down to just above the call to efi_handle_cmdline that
-does the constructor side of this?
-
-I see none of the efi stuff follow those guidance note that went in cleanup.h.
-
-Ah well, not my problem :)
-
-J
-
->  	efi_guid_t loaded_image_proto = LOADED_IMAGE_PROTOCOL_GUID;
->  	unsigned long reserve_addr = 0;
->  	unsigned long reserve_size = 0;
+> diff --git a/arch/arm64/kernel/image.h b/arch/arm64/kernel/image.h
+> index 7bc3ba89790191..1bff6b061b6cab 100644
+> --- a/arch/arm64/kernel/image.h
+> +++ b/arch/arm64/kernel/image.h
+> @@ -14,26 +14,12 @@
+>  #include <asm/image.h>
+>  
+>  /*
+> - * There aren't any ELF relocations we can use to endian-swap values known only
+> - * at link time (e.g. the subtraction of two symbol addresses), so we must get
+> - * the linker to endian-swap certain values before emitting them.
+> - *
+>   * Note that, in order for this to work when building the ELF64 PIE executable
+>   * (for KASLR), these values should not be referenced via R_AARCH64_ABS64
+>   * relocations, since these are fixed up at runtime rather than at build time
+>   * when PIE is in effect. So we need to split them up in 32-bit high and low
+>   * words.
+>   */
+> -#ifdef CONFIG_CPU_BIG_ENDIAN
+> -#define DATA_LE32(data)				\
+> -	((((data) & 0x000000ff) << 24) |	\
+> -	 (((data) & 0x0000ff00) << 8)  |	\
+> -	 (((data) & 0x00ff0000) >> 8)  |	\
+> -	 (((data) & 0xff000000) >> 24))
+> -#else
+> -#define DATA_LE32(data) ((data) & 0xffffffff)
+> -#endif
+> -
+>  #define DEFINE_IMAGE_LE64(sym, data)				\
+>  	sym##_lo32 = DATA_LE32((data) & 0xffffffff);		\
+>  	sym##_hi32 = DATA_LE32((data) >> 32)
+> diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
+> index b2988aa12f6645..1786a8e4323b9f 100644
+> --- a/include/asm-generic/vmlinux.lds.h
+> +++ b/include/asm-generic/vmlinux.lds.h
+> @@ -56,6 +56,21 @@
+>  #define LOAD_OFFSET 0
+>  #endif
+>  
+> +/*
+> + * There aren't any ELF relocations we can use to endian-swap values known only
+> + * at link time (e.g. the subtraction of two symbol addresses), so we must get
+> + * the linker to endian-swap certain values before emitting them.
+> + */
+> +#ifdef CONFIG_CPU_BIG_ENDIAN
+> +#define DATA_LE32(data)				\
+> +	((((data) & 0x000000ff) << 24) |	\
+> +	 (((data) & 0x0000ff00) << 8)  |	\
+> +	 (((data) & 0x00ff0000) >> 8)  |	\
+> +	 (((data) & 0xff000000) >> 24))
+> +#else
+> +#define DATA_LE32(data) ((data) & 0xffffffff)
+> +#endif
+> +
+>  /*
+>   * Only some architectures want to have the .notes segment visible in
+>   * a separate PT_NOTE ELF Program Header. When this happens, it needs
 
