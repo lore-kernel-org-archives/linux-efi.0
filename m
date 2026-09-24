@@ -1,246 +1,148 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9DA95473C8C
-	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 11:05:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B6C545D92F
+	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 11:07:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790247949; cv=none; b=JtFGXaQ2HRFxLhbDIqg7dm+OOzT3sYWvf3jEuJwOyfxE9z4ziYaxCx5JPUeL7YFfKBLL7zzvjaJil1lzQtYMgkxf7Co8Jof4llEACYP5HJzdDauKasd0hV02sXk6Ud8zkKpNiFX6cxBRRAsxYu4vZGbReM8C22wmbLlCnhZmgJc=
+	t=1790248025; cv=none; b=n3DdTMZoo/BMvElDMx3rvPBj47lfmn+oWNGdOOx1Jwi5v88ghGANvWSRyNseaZKLAjVYWA0uMXkcN/KX8apxs8SMgFzFCyHTBPslurWLBxHZiMnQ+ozUEwKTHTfEolIJ0Z6Dx2hfYGX6cMsVvp9dpI9i7feV+pur2OJ7s/EJJHE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790247949; c=relaxed/simple;
-	bh=utgzeSBA2M5zFswMKeucmOMbeeXxVlgSipgD4gD3Mwk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=heLJPbJ6c2XUjZzCfl5bfuQX1AqxFOZCv4km30Lg0/a/5vcyOCNd/TkNJByW3K+Lfn4N2MD7ILsKx0DKIbRggQipwO6R/pg899XEzJ92ZQM1XGP48mOwLFes/6PtZHB4O85LtZBWHgm0pIvpzRsD3LF0RFZPOmJaGCRYgsA/mUw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=h1+LEzJm; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1790248025; c=relaxed/simple;
+	bh=yrI+URhESve6HspNSDzOp1zvNel+JG1IKi2qkoCondc=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=hkkQVDr2XUV93rvngtyMnCJY2I+JJm0StooATtfawgsN5E6e1FDba2Pu2w/WebGrn/HSY2bCEz/vMMCvci1pjm9PNMZV251fbjqOu36wKa9XZA5+xHaXgok8uJLBsjV6edeM85jGzurTvrWbb8Db4TdHr6LSVxivode/Q66k3bA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=brd0+XcZ; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="h1+LEzJm"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1790247945;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=VatXkwlXsOSuDvfRkV4aLa2L93mcMP86Fr//ozUJyQE=;
-	b=h1+LEzJm+gpJkuZ1mMlmplUVxQGc8/3RcONZamCJqbCPRAHpYtlNtf807lequDuHktjX8P
-	LB/PD/K6b1ys6Jj6qEGjUJQ9uDZa3YrCWyGnYl8Xeycb270bN8CzSCHFBMeq0jiO3yjrbd
-	CT5dR5nqGBVXTamt8wkdrB/IFqLC1DM=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-96-pUiPnD3PNj6bE5Gs_CNgxw-1; Thu,
- 24 Sep 2026 07:05:39 -0400
-X-MC-Unique: pUiPnD3PNj6bE5Gs_CNgxw-1
-X-Mimecast-MFC-AGG-ID: pUiPnD3PNj6bE5Gs_CNgxw_1790247937
-Received: from mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.93])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 1CB541977302;
-	Thu, 24 Sep 2026 11:05:37 +0000 (UTC)
-Received: from localhost (headnet03.pony-001.prod.iad2.dc.redhat.com [10.2.32.114])
-	by mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id B8A6C180057E;
-	Thu, 24 Sep 2026 11:05:35 +0000 (UTC)
-Date: Thu, 24 Sep 2026 08:05:34 -0300
-From: "Luis Claudio R. Goncalves" <lgoncalv@redhat.com>
-To: Prashant Singh <singhpra@juniper.net>
-Cc: Ard Biesheuvel <ardb@kernel.org>, Jeremy Kerr <jk@ozlabs.org>,
-	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-	Jonathan Corbet <corbet@lwn.net>, linux-doc@vger.kernel.org,
-	Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
-	Clark Williams <clrkwllms@kernel.org>,
-	Steven Rostedt <rostedt@goodmis.org>,
-	linux-rt-devel@lists.linux.dev
-Subject: Re: [PATCH v2] efivarfs: add nostatfs mount option to skip
- QueryVariableInfo()
-Message-ID: <arUD_p0Vn4qyBH_e@redhat.com>
-References: <20260919044124.8268-1-singhpra@juniper.net>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="brd0+XcZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E16391F00893;
+	Thu, 24 Sep 2026 11:06:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1790248019;
+	bh=V83SDi+TUKENS52JUz3LtD47/hn1tvgx9IbuoycR/fs=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=brd0+XcZ+T/++LOIA8GlDMksB2c6WU9A6TT+j/FD6hT2mnAX4p7ZMC28gJLwIZgTM
+	 kxZT49ruolfPZuPDZD+srOdTGi8ucS1YuuWvZphubO3ONKH34eIqreEvxF1vvE4TVh
+	 gQ+6ZvR7H4o04QgdQ6AghgsokUd3RM7FnM/ZPY8eEtfZ7rIUKY5MUdeLNusqKgdRj0
+	 HKV2TD6a6d/eqjI/APsysiaQMxF9gvDniZoIuesNMrTnJO2LRQwNkrraAm8JOpcWy1
+	 ZnzxoVz3ntVoTmoOeJyFRZ7r/NQtrQKWDV64bgH5JO5aJMZJs0eguD8rvStpKkIFtz
+	 DtNdVUMgnezcA==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 6A3231980058;
+	Thu, 24 Sep 2026 07:06:57 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Thu, 24 Sep 2026 07:06:57 -0400
+X-ME-Sender: <xms:UAS1aixT8NOaKJwLfpkEB33FUo1rJI0RVZdIEGnWfZqYkrKef3yHEg>
+    <xme:UAS1apHFK9gEOhNU2twu2mTvTQS9P3JuzXlvD9cjkOB9prvPTTnuclMWcL97yktkg
+    grCa6I5ljFXgOl6PrIP8tcc6ouOFyXa1VRiwMo1J3DXHtRGLDwWHTM>
+X-ME-Proxy-Cause: dmFkZTF7LK1rs7PqibZaYl6YD5o4BdJnxPzTa9Znv2PsJIIQl0yV0gEmFLbqPJxoOQaArn
+    QgwNXR9LaaoW0zNd6tnIr5ccKRJm/GPwwrxIoXCpg8RW5k+7LrI6NGaxnSc4qJ3oES3emt
+    qtDjzkAA+tjZ9GbhCiJpPXdkxHXehMrK+JVb6QdlGSIBvPlVPcpxhOGm9ZYaOccfy2db3M
+    yH6IuoEI4E/PfcvNbNV2+9Yj/CrNhWhF3DvF8HlRJKiPUC68asHg/cVucKXVSjXBmvDwQh
+    uCqVjTdooIOAAsVlKDLul9RfKct4b31VO5BzEln4RP+j/3ZEqSUfqsEKl5y8Nv6+WVUbex
+    CSvWF2xpJE0qwupL4w9rNVt8iXQvnVFSGXN8zt6qM9i7G1kroqzpVQTT8N5S0/SKi02gxj
+    AMcp3xLJ8Y3zfJSgize8E/J1Z/TMFCpTaPxgg96cfx/CW6GjzkWBS/UhpjrTbt8GYxHyy5
+    pXqWzBGmYzEw6IO6paV9s/T7JoHRihDSNPOA3f3ukdL8nlj1mtkOPJnobhNs9T3qVmKdKH
+    9osBF6Btx2OTod3oS9SVg/DF91tfLAwVQ8/RE+i4w+CDaZPHrWIDp1gZKuF4QjvzHYxmPQ
+    OEBXpfgh3xn75yDDwWgZ/D6a2gtfFyf9aH/+WQl4dX94ZrjJ00IvB0e/nR2A
+X-ME-Proxy: <xmx:UQS1aubkipL416tQEisSo9bDGL2N9HqxD33ITnBAy2_nrv4oJmetVg>
+    <xmx:UQS1as1naPVe8n80heAOWYjq-YYW7pQvb_JInvMSey5rM4OzuNTALQ>
+    <xmx:UQS1asdznUlqyMk9KJXQFQ7XjTFHpd2Rm70VQlc26IS2ap6x_DII3Q>
+    <xmx:UQS1alH8rzZ2IS6YdvmoblTLbxQhl60VyHYoUC2YCyZQLLsyHwkZmw>
+    <xmx:UQS1al3HXeFmRqHM7vo-gjotzAIQzlIy8FXVlj0aL44kS-Qc5ScjsQXF>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 1D23BF80080; Thu, 24 Sep 2026 07:06:56 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20260919044124.8268-1-singhpra@juniper.net>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.93
+Date: Thu, 24 Sep 2026 13:06:35 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: jaidevshastri@vt.edu, "Ilias Apalodimas" <ilias.apalodimas@linaro.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Message-Id: <501132b4-eba0-4bf8-a9c0-0c209e1bee3a@app.fastmail.com>
+In-Reply-To: <20260921-mb-efi-capsule-v1-1-fbf2a2032afb@vt.edu>
+References: <20260921-mb-efi-capsule-v1-1-fbf2a2032afb@vt.edu>
+Subject: Re: [PATCH] efi: capsule: publish capsule_pending after efi_reset_type
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Fri, Sep 18, 2026 at 09:41:24PM -0700, Prashant Singh wrote:
-> QueryVariableInfo() is an EFI runtime service that, on some firmware,
-> takes tens of milliseconds and runs with preemption disabled, stalling
-> the CPU that services it. efivarfs_statfs() calls it (rate-limited since
-> commit b2326338dc68 ("efivarfs: Rate limit statfs() handler")) to report
-> the variable-store used/available capacity, so any statfs(2) -- e.g.
-> every "df" -- can inject that stall into unrelated latency-sensitive
-> workloads on the same CPU.
-> 
-> Add a "nostatfs" mount option: when set, statfs(2) skips
-> QueryVariableInfo() entirely and reports zero used/available. It is set
-> by default on CONFIG_PREEMPT_RT so real-time kernels do not take the
-> stall out of the box.
+Hello Jaidev,
 
-I tested the patch and was quite satisfied with the results, but upon a
-comment from colleagues I ran a few more tests and noticed (confirmed their
-hunch) that fwupd complains about not being able to get the free space in
-efivars:
-
-  # fwupdmgr get-devices | grep efivars
-  │     Update Error:       getting efivars free space is not supported
-  │ │   Update Error:       getting efivars free space is not supported
-  ...
-
-I was not able to establish whether that would prevent specific operations
-due to the HW I had available for such test.
-
-One idea that I have been musing over is whether or not it would be interesting
-to create a static view of the efivars statfs data when first mounting it
-and updating this data whenever efivars is modified (create/write/delete).
-Does that sound reasonable?
-
-Luis
- 
-> Tested on an Intel Xeon E5-2628L v4, 6.12 kernel with CONFIG_PREEMPT_RT
-> not set (so reporting defaults to enabled and nostatfs must be passed
-> explicitly), via "strace -T -e trace=statfs df" on the efivarfs mount.
-> 
-> Default mount: statfs() calls QueryVariableInfo() and returns the real
-> store capacity, ~66-129 ms per call:
-> 
->   statfs("/sys/firmware/efi/efivars", {f_type=EFIVARFS_MAGIC,
->       f_bsize=1, f_blocks=90024, f_bfree=33387, f_bavail=28267, ...})
->       = 0 <0.129124>
-> 
-> With -o nostatfs: no firmware call, capacity reported as zero, ~11 us per
-> call:
-> 
->   statfs("/sys/firmware/efi/efivars", {f_type=EFIVARFS_MAGIC,
->       f_bsize=1, f_blocks=0, f_bfree=0, f_bavail=0, ...}) = 0 <0.000011>
-> 
-> Signed-off-by: Prashant Singh <singhpra@juniper.net>
+On Tue, 22 Sep 2026, at 03:09, Jaidev Shastri via B4 Relay wrote:
+> From: Jaidev Shastri <jaidevshastri@vt.edu>
+>
+> efi_capsule_update_locked() sets capsule_pending and then
+> efi_reset_type, both with plain stores. efi_capsule_pending() reads them
+> from the reboot path without capsule_mutex.
+>
+> The comment above efi_capsule_pending() covers a caller that misses the
+> update entirely. It does not cover the other outcome: with neither the
+> stores nor the loads ordered, a caller can observe capsule_pending set
+> and efi_reset_type still -1, and the reboot path then acts on a capsule
+> with an invalid reset type.
+>
+> Write efi_reset_type first and publish the flag with
+> smp_store_release(), paired with smp_load_acquire() in
+> efi_capsule_pending(). A caller that misses the update entirely still
+> behaves as documented.
+>
+> Found with MBCheck, a static herd7-based memory consistency checker.
+>
+> Signed-off-by: Jaidev Shastri <jaidevshastri@vt.edu>
 > ---
-> Changes since v1:
->   - Per review, dropped the fs.efivarfs sysctl / cached-capacity approach
->     entirely; instead add a simple "nostatfs" mount option that skips
->     QueryVariableInfo() in statfs() and reports zero, set by default on
->     CONFIG_PREEMPT_RT.
-> 
-> v1: https://lore.kernel.org/all/20260917071600.5587-1-singhpra@juniper.net/
-> 
->  Documentation/filesystems/efivarfs.rst | 10 ++++++++++
->  fs/efivarfs/internal.h                 |  1 +
->  fs/efivarfs/super.c                    | 20 +++++++++++++++++---
->  3 files changed, 28 insertions(+), 3 deletions(-)
-> 
-> diff --git a/Documentation/filesystems/efivarfs.rst b/Documentation/filesystems/efivarfs.rst
-> index f646c3f0980f..3ead638c796a 100644
-> --- a/Documentation/filesystems/efivarfs.rst
-> +++ b/Documentation/filesystems/efivarfs.rst
-> @@ -37,6 +37,16 @@ accidentally.
->            |4_bytes_of_attributes + efivar_data|
->            +-----------------------------------+
->  
-> +Mount options
-> +=============
-> +
-> +nostatfs
-> +      Do not report the variable-store used/available capacity in
-> +      ``statfs(2)``; report zero instead. Obtaining the capacity requires the
-> +      ``QueryVariableInfo()`` EFI runtime service, which on some firmware takes
-> +      tens of milliseconds and runs with preemption disabled, stalling the
-> +      calling CPU. This option is set by default on ``CONFIG_PREEMPT_RT``.
-> +
->  *See also:*
->  
->  - Documentation/admin-guide/acpi/ssdt-overlays.rst
-> diff --git a/fs/efivarfs/internal.h b/fs/efivarfs/internal.h
-> index f913b6824289..0cb053884b4b 100644
-> --- a/fs/efivarfs/internal.h
-> +++ b/fs/efivarfs/internal.h
-> @@ -11,6 +11,7 @@
->  struct efivarfs_mount_opts {
->  	kuid_t uid;
->  	kgid_t gid;
-> +	bool nostatfs;		/* skip QueryVariableInfo() in statfs() */
->  };
->  
->  struct efivarfs_fs_info {
-> diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-> index 8d33f11db2a1..fbdaa4915d30 100644
-> --- a/fs/efivarfs/super.c
-> +++ b/fs/efivarfs/super.c
-> @@ -74,6 +74,8 @@ static int efivarfs_show_options(struct seq_file *m, struct dentry *root)
->  	if (!gid_eq(opts->gid, GLOBAL_ROOT_GID))
->  		seq_printf(m, ",gid=%u",
->  				from_kgid_munged(&init_user_ns, opts->gid));
-> +	if (opts->nostatfs)
-> +		seq_puts(m, ",nostatfs");
->  	return 0;
->  }
->  
-> @@ -82,13 +84,19 @@ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
->  	const u32 attr = EFI_VARIABLE_NON_VOLATILE |
->  			 EFI_VARIABLE_BOOTSERVICE_ACCESS |
->  			 EFI_VARIABLE_RUNTIME_ACCESS;
-> +	struct efivarfs_fs_info *sfi = dentry->d_sb->s_fs_info;
->  	u64 storage_space, remaining_space, max_variable_size;
->  	u64 id = huge_encode_dev(dentry->d_sb->s_dev);
->  	efi_status_t status;
->  
-> -	/* Some UEFI firmware does not implement QueryVariableInfo() */
-> +	/*
-> +	 * Some UEFI firmware does not implement QueryVariableInfo(); the
-> +	 * nostatfs mount option also disables this (preempt-disabled,
-> +	 * potentially slow) call entirely, reporting zero used/available.
-> +	 */
->  	storage_space = remaining_space = 0;
-> -	if (efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
-> +	if (!sfi->mount_opts.nostatfs &&
-> +	    efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
->  		static DEFINE_RATELIMIT_STATE(_rs, 2 * HZ, 5);
->  		static u64 storage, remaining;
->  		static DEFINE_SPINLOCK(lock);
-> @@ -323,12 +331,13 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
->  }
->  
->  enum {
-> -	Opt_uid, Opt_gid,
-> +	Opt_uid, Opt_gid, Opt_nostatfs,
->  };
->  
->  static const struct fs_parameter_spec efivarfs_parameters[] = {
->  	fsparam_uid("uid", Opt_uid),
->  	fsparam_gid("gid", Opt_gid),
-> +	fsparam_flag("nostatfs", Opt_nostatfs),
->  	{},
->  };
->  
-> @@ -350,6 +359,9 @@ static int efivarfs_parse_param(struct fs_context *fc, struct fs_parameter *para
->  	case Opt_gid:
->  		opts->gid = result.gid;
->  		break;
-> +	case Opt_nostatfs:
-> +		opts->nostatfs = true;
-> +		break;
->  	default:
->  		return -EINVAL;
->  	}
-> @@ -526,6 +538,8 @@ static int efivarfs_init_fs_context(struct fs_context *fc)
->  
->  	sfi->mount_opts.uid = GLOBAL_ROOT_UID;
->  	sfi->mount_opts.gid = GLOBAL_ROOT_GID;
-> +	/* QueryVariableInfo() stalls the CPU; default nostatfs on PREEMPT_RT. */
-> +	sfi->mount_opts.nostatfs = IS_ENABLED(CONFIG_PREEMPT_RT);
->  
->  	fc->s_fs_info = sfi;
->  	fc->ops = &efivarfs_context_ops;
-> 
-> base-commit: 9b87fdc9af2fbfcdb5c24a64139685ef80f6573f
-> -- 
-> 2.34.1
-> 
-> 
----end quoted text---
+>  drivers/firmware/efi/capsule.c | 11 +++++++++--
+>  1 file changed, 9 insertions(+), 2 deletions(-)
+>
 
+I think the tool's conclusion is correct that concurrent execution
+of efi_capsule_pending() and efi_capsule_update() may result in the
+re-ordering and subsequent misreporting of the EFI reset type.
+
+However, in practice, efi_capsule_pending() is only called on the
+reboot path after all other CPUs have been stopped, so there is
+really nothing to fix here.
+
+
+
+> diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
+> index dd6252638..2129007d8 100644
+> --- a/drivers/firmware/efi/capsule.c
+> +++ b/drivers/firmware/efi/capsule.c
+> @@ -50,7 +50,8 @@ static DEFINE_MUTEX(capsule_mutex);
+>   */
+>  bool efi_capsule_pending(int *reset_type)
+>  {
+> -	if (!capsule_pending)
+> +	/* Pairs with the smp_store_release() in efi_capsule_update_locked(). */
+> +	if (!smp_load_acquire(&capsule_pending))
+>  		return false;
+> 
+>  	if (reset_type)
+> @@ -173,8 +174,14 @@ efi_capsule_update_locked(efi_capsule_header_t *capsule,
+> 
+>  	status = efi.update_capsule(&capsule, 1, sglist_phys);
+>  	if (status == EFI_SUCCESS) {
+> -		capsule_pending = true;
+>  		efi_reset_type = reset;
+> +		/*
+> +		 * efi_capsule_pending() reads the flag without capsule_mutex
+> +		 * and then the reset type, which is stored above. Publish the
+> +		 * flag with release semantics so that a reader that sees it
+> +		 * also sees the matching reset type.
+> +		 */
+> +		smp_store_release(&capsule_pending, true);
+>  	}
+> 
+>  	return efi_status_to_err(status);
+>
+> ---
+> base-commit: 93f51579e7df248780214094418f205253383cc5
+> change-id: 20260921-mb-efi-capsule-d111fa00ae80
+>
+> Best regards,
+> --  
+> Jaidev Shastri <jaidevshastri@vt.edu>
