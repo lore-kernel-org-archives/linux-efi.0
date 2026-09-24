@@ -1,108 +1,153 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F366E479861
-	for <linux-efi@vger.kernel.org>; Thu, 24 Sep 2026 11:36:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 475E43218BA;
+	Thu, 24 Sep 2026 11:46:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790249790; cv=none; b=ri7wai76kNdRDcJ00IvDQlhj0CltaMJf/0CRIG6h71MpF3D9n+RSP9b7LCcQBIJYcpDIzxkaFfM4ySUVNHWprj7fMUEdrMwAiTi9VONTk2KL7weqLlgQtHG5qlz/+3VVMKQlkKyL+hpgmnzVO/uiNGK93p2GG4VMqXFjmw1bwA0=
+	t=1790250409; cv=none; b=q3qWXuiNB6IWI4/Ect44eKgs8iVNvS7qAvmXoZxsOFm5P8l9vyzfA9iHa07giINrnbbCg8DtL2zeVSoUfdbd/2f2trlOaw/XXdSPE/bz0Re9T3J+pKcPC/8dLj6VMYPYvnJNE2YLYxsJAF1TAktOPywcBThcO9ztBw5ESW3Cbq8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790249790; c=relaxed/simple;
-	bh=uVrulD/F0j3S8RA4z8aCS0H4Nuujjp5LUwI0loMt11w=;
+	s=arc-20240116; t=1790250409; c=relaxed/simple;
+	bh=nwzMs4xFWD6XOvQBWlN0Ck4M/lHKtAstP0FW+sr7FPM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cHowjRU67/9ExuRCkrn2AUyi1NSVdG3FfE9TlOvWCkjrafeIpHmT30Hh1200PdVC3Xw/r1O1dL6dxh6b7CsmzBABiRQIQ96a+T91E8kYaU2VN09xB0hvc7vrkl8XWaJFecZhbzsqiLpJ4ChtdH4dJBHds5GneRQ2qKkTrUHBR5g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NXn3oqzr; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=ktrP7R1ZishojgbdfkK0jzKgOtAcE9wejFksngoEiZho6VNntMbI0Fo093R/D7m+I+jJA/7yKXwtlCeJ2yoe7pB0fHrKtE7lR+DnorNjAMqWyHlEYxVVtCJGDfVCbbNi+psE9iSn+PKxxk80Ykt6JwzSBBC0rl39gmrZz9/tjrM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C2ZZjtfa; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NXn3oqzr"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1790249784;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1mf9xwiSyUF66+L2SDy4YOfYehECWpWxm+Cowj/qDtc=;
-	b=NXn3oqzry8T7lcpL5Tvzq5CG080Ygu1fysij9fwjcN6d3XqBQcLPiczRkJV0eOt0+LhyW7
-	VTvCsVHqBn/8XP0uBy32VR133rpIAzNNphg1rGDWAvypgM6hHv9ixy3zMOwB8CSoD4U+Sd
-	oTer71m/yciAXi8lCUXNwordUqG1OKA=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-461-YqsBf8vJO7Cgm7jHq14hEw-1; Thu,
- 24 Sep 2026 07:36:19 -0400
-X-MC-Unique: YqsBf8vJO7Cgm7jHq14hEw-1
-X-Mimecast-MFC-AGG-ID: YqsBf8vJO7Cgm7jHq14hEw_1790249777
-Received: from mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.93])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 9BDD719560A2;
-	Thu, 24 Sep 2026 11:36:16 +0000 (UTC)
-Received: from localhost (headnet03.pony-001.prod.iad2.dc.redhat.com [10.2.32.114])
-	by mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id A71621800299;
-	Thu, 24 Sep 2026 11:36:15 +0000 (UTC)
-Date: Thu, 24 Sep 2026 08:36:14 -0300
-From: "Luis Claudio R. Goncalves" <lgoncalv@redhat.com>
-To: Steve McIntyre <93sam@debian.org>
-Cc: Prashant Singh <singhpra@juniper.net>, Ard Biesheuvel <ardb@kernel.org>,
-	Jeremy Kerr <jk@ozlabs.org>, linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org, Jonathan Corbet <corbet@lwn.net>,
-	linux-doc@vger.kernel.org,
-	Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
-	Clark Williams <clrkwllms@kernel.org>,
-	Steven Rostedt <rostedt@goodmis.org>,
-	linux-rt-devel@lists.linux.dev
-Subject: Re: [PATCH v2] efivarfs: add nostatfs mount option to skip
- QueryVariableInfo()
-Message-ID: <arULLk3ERQmADDBU@redhat.com>
-References: <20260919044124.8268-1-singhpra@juniper.net>
- <arUD_p0Vn4qyBH_e@redhat.com>
- <20260924111913.GN3447081@tack.einval.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C2ZZjtfa"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3F5711F00893;
+	Thu, 24 Sep 2026 11:46:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1790250407;
+	bh=QguTDCtcZFBrUjcoOQ2Wz86gy5PkZ7tI+mbiZ0He4tw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=C2ZZjtfadKsgmmtE6a7a/Bq54lk4EKawfSp9fOl2cu1OxJtfeAZl50DrZQAZGGBYV
+	 x11u4amuSRlEw+PcWzv9b2uIzAJoz0t1WbTk6WrLJ6isNp77ImFoPnxbVQYiVswviN
+	 rr2L9J1UeDj8BTP47GVxDPUi3YrSnls7//ZTpjjqIW0fe65XpOGLw829UTOnEUI1iH
+	 ofqTi3qOH43x9adS89ocr2DYCPpWlIJd6qsGWQL7TeBxU9ZAGwcxQZy8mEIg+mzAWT
+	 34xHAECBF2C/Maw4vhQjMScryrB1cU04PF4zJ3cQ95C4SivYUw+ZYlJVJMpyKPykfR
+	 6Glmzkwvj3pPg==
+Received: from phl-compute-09.internal (phl-compute-09.internal [10.202.2.49])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 9ACC3198003A;
+	Thu, 24 Sep 2026 07:46:44 -0400 (EDT)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-09.internal (MEProxy); Thu, 24 Sep 2026 07:46:45 -0400
+X-ME-Sender: <xms:pA21agEIK5eesbtjIGqnX-aM7ZC8C_blTl-puqYKwk8m_iOWseJCZQ>
+    <xme:pA21alvOT4ahFuL-2XL2yuqzHJ-Bsph9OP4Og6KtmW8jpKMIcHN-T7VqIo9aLulli
+    jjY1ixAKeaAlgAuLwq0dmRgr2yWOKoyGLmveTVb13O1V0ZO0nMtTl-x>
+X-ME-Received: <xmr:pA21aukvAExvvwrlLlGBri3fB2aPs5LZwLRsACzItHe6UlC9tR8tgTFC-zU>
+X-ME-Proxy-Cause: dmFkZTEcOZ07bQFcLSp3gnDeHBJY9VHvfMOdJMNGSYJt1XwbpXgRVIGKMXFbu7UciwVjn7
+    7qQRY6imOe9A0uQF9KkGzivPcSBvE88LF8s6cjVFR//tBApRVM8wchvpG9D0aG59qYOdWg
+    1K3CpHwypUQyTZfdg8v1VA3R4btiCJtgPimY7Od2IngXDfvCSpXPVkiv+GTG3eXa/1jJzi
+    m/hQV9gUWY5Oudef4NizUeTrliHd+gg9W/LvmDyrn3nj3uSlbIoLre0H4E+LnJGqf4us1U
+    m/6sxg5wfzpCTJkpXblYHZQX2ezHrefd+W65EvtdTmtaj/OFGjSMFYIVVYY7yN7vhpvVTZ
+    LE2p2dn+ad3LU5nd01+WhwCfTgejYBgifVg3I9WVStJ2ynM/0uYHq2+1isB9kg0nsr50O6
+    dkK6sJv7aoQAIVcUFs/9Zh2M2UDnesHKeGlMdL11IPEmCeHojhAg3snpstIHXFQoIhdX4/
+    0oyvw3viq+OVIrCKqhOkkNetMjftR1AH+y5bst9G0Q3+D1EkdbHPpoXkIEPTsh9O2/sGAX
+    1x9AJmkdcZt7rqG0JZh2Ov+WNb0IGygL9ftwYR7ECMZBOtfS6Jgb1lLaCJemUDWqaKgMdD
+    zZjeZUeHHaMb/X8zfgWSD6PMttDA8tahXrm3jSw0q7AbyEZkJTZBgbjrEIpA
+X-ME-Proxy: <xmx:pA21agPRIEeAWCX8stX6NJUoes-llOVvwq_sV8nwR8K0B72CCxW5Gg>
+    <xmx:pA21aixQTLrGi--h997NFGngCV8i-_x1mzAzxr94OYk6Ml0PBQWvxg>
+    <xmx:pA21atvOfA4-PsRzsEknF72rnlcUB8iysI91SWAy1CoXntdNJcaD7A>
+    <xmx:pA21albaC30ooolnMbNye3oK48QFl6WoJblSJhD4mlBnW68IU7FJKQ>
+    <xmx:pA21as2tJ_NsFIGYcH1D7M_q82BkAiH4GpI8frdnuyC1DcyWxFm07gqj>
+Feedback-ID: i10464835:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 24 Sep 2026 07:46:43 -0400 (EDT)
+Date: Thu, 24 Sep 2026 12:46:42 +0100
+From: Kiryl Shutsemau <kas@kernel.org>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: Yan Y Zhao <yan.y.zhao@intel.com>, 
+	Rick Edgecombe <rick.p.edgecombe@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, 
+	Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH 0/3] Move memory acceptance x86 arch code into EFI stub
+Message-ID: <arUNjv0rSaAM2xmk@thinkstation>
+References: <20260914183745.37538-5-ardb@kernel.org>
+ <af17c380c43912ce34c228e328b3937343ce2019.camel@intel.com>
+ <aqvrUeIfpE4D-Ol0@thinkstation>
+ <27b267cdaed0c46146de4af2db8362b61e0b08a3.camel@intel.com>
+ <aqyd+rhamNei92Nz@yzhao56-desk.sh.intel.com>
+ <aqzMGEVpDRPUyPUA@yzhao56-desk.sh.intel.com>
+ <aq0VWfqv2_SgOvV9@thinkstation>
+ <b9ff9e11-d7da-4e34-9744-e3adcc786276@app.fastmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20260924111913.GN3447081@tack.einval.com>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.93
+In-Reply-To: <b9ff9e11-d7da-4e34-9744-e3adcc786276@app.fastmail.com>
 
-On Thu, Sep 24, 2026 at 12:19:23PM +0100, Steve McIntyre wrote:
-> Hey all,
+On Wed, Sep 23, 2026 at 04:34:47PM +0200, Ard Biesheuvel wrote:
 > 
-> On Thu, Sep 24, 2026 at 08:05:34AM -0300, Luis Claudio R. Goncalves wrote:
-> >On Fri, Sep 18, 2026 at 09:41:24PM -0700, Prashant Singh wrote:
+> 
+> On Fri, 18 Sep 2026, at 12:45, Kiryl Shutsemau wrote:
+> > On Fri, Sep 18, 2026 at 01:28:56PM +0800, Yan Zhao wrote:
+> >> On Fri, Sep 18, 2026 at 10:12:10AM +0800, Yan Zhao wrote:
+> >> > On Fri, Sep 18, 2026 at 02:29:55AM +0800, Edgecombe, Rick P wrote:
+> >> > > +Yan 
+> >> > > 
+> >> > > On Thu, 2026-09-17 at 14:32 +0100, Kiryl Shutsemau wrote:
+> >> > > > > I guess the caller could care about TDX_PAGE_ALREADY_ACCEPTED errors. But
+> >> > > > > SNP
+> >> > > > > doesn't do anything for this case. It seems like part of the problem is that
+> >> > > > > we
+> >> > > > > are passing errors back that the caller can't feasibly handle.
+> >> > > > 
+> >> > > > Maybe. I don't understand SNP model and why they don't care about errors
+> >> > > > here.
+> >> > > > 
+> >> > > > Do you have a proposal here?
+> >> > > 
+> >> > > Yan pointed out that future TDX modules will not take an S-EPT entry lock on
+> >> > > accepting a NP S-EPT entry. However, I think this won't prevent guest caused
+> >> > > busys on re-accept attempts?
+> >> > Re-accept attempts may occur due to:
+> >> > (a) two concurrent ACCEPT TDCALLs, where the one that arrives slightly later
+> >> >     returns either TDACCEPT_ALREADY_ACCEPTED or TDX_OPERAND_BUSY.
+> >> > (b) two successive ACCEPT TDCALLs on the same GPA.
+> >> > 
+> >> > Since Linux guest always invokes ACCEPT TDCALL before a memory access, and
+> >> > accept_memory() always checks the unaccepted_table->bitmap before invoking the
+> >> > ACCEPT TDCALL, case (b) should be impossible in practice, right?
+> >> > 
+> >> > Is case (a) a valid scenario, and does it actually occur in a Linux guest?
+> >> Case (a) should be prevented by the unaccepted_memory_lock in accept_memory(),
+> >> right?
 > >
-> >I tested the patch and was quite satisfied with the results, but upon a
-> >comment from colleagues I ran a few more tests and noticed (confirmed their
-> >hunch) that fwupd complains about not being able to get the free space in
-> >efivars:
+> > Right, for accept_memory().
 > >
-> >  # fwupdmgr get-devices | grep efivars
-> >  │     Update Error:       getting efivars free space is not supported
-> >  │ │   Update Error:       getting efivars free space is not supported
-> >  ...
+> > The lock itself is dropped around the TDCALL, but the range stays on
+> > accepting_list until the bits are cleared, and the overlap check is done
+> > in unit_size granularity, so a second caller for the same unit spins
+> > until the first one is done and then finds the bits clear. Both (a) and
+> > (b) are covered there.
 > >
-> >I was not able to establish whether that would prevent specific operations
-> >due to the HW I had available for such test.
+> > There is a second ACCEPT issuer that does not look at the bitmap at
+> > all: shared->private conversion in tdx_enc_status_changed().
+> >
+> > It does not need the bitmap because the memory came from the page
+> > allocator or memblock and got accepted before it was handed out. It also
+> > has no per-range serialization; mem_enc_lock is only taken for read. So
+> > ALREADY_ACCEPTED on that path means either the guest converted the same
+> > range twice (a double-free class of bug) or the VMM acked MapGPA(shared)
+> > but never removed the private page. Either way the page there is the one
+> > the guest accepted earlier, and the failure already comes back as -EIO
+> > rather than a panic.
+> >
 > 
-> fwupd will refuse to do some of its updates if it can't read the
-> efivars free space, in particular updates of the secure boot keyrings
-> like KEK/DB/DBX.
-
-In this case, corroborating with Sashiko findings, it is necessary to have
-a way to override that default in kernels with PREEMPT_RT enabled. To be used
-where this is required for firmware updates.
-
-Luis
-
-> -- 
-> Steve McIntyre, Cambridge, UK.                                93sam@debian.org
+> Is there any way we could make some progress here?
 > 
-> 
----end quoted text---
+> Ultimately, the thing I am after is to get rid of the call from the
+> decompressor to EFI stub's snprintf(), which I want to remove. For
+> the time being, I am more than happy leaving the memory acceptance where
+> it is, and just dropping the call to snprintf().
 
+Please go ahead with the move. Rick's questions are about what
+tdx_accept_memory() should return, not about where the caller lives,
+and can be sorted out separately.
+
+-- 
+  Kiryl Shutsemau / Kirill A. Shutemov
