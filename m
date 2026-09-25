@@ -1,343 +1,178 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from BN1PR04CU002.outbound.protection.outlook.com (mail-eastus2azon11010050.outbound.protection.outlook.com [52.101.56.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9186935F602;
-	Fri, 25 Sep 2026 12:14:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790338477; cv=none; b=tTWZiQyTq05sQCGnlDpmP3hvZ05XEb71yANkG6gF2J9xtFMObsGfBfOR7O+0GiArGYWtQNy9kXwIbyok3zoLfTDxvg5V7CwGuYJEWqx+Hz+bM7+zgWd/mFzhxHi3wU32oLwByvufGOrwwWyxOxtw+q6BDxpV+9IwtPO3Gj63BRw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790338477; c=relaxed/simple;
-	bh=ddS6EtYbyPBCw7wCkDFEw/NfPASSKbIXnb55T4G1WpE=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=GzVXOl3B4kiM4cQ8j2YG9fYBAs0B+OUUrpSUkFeeIwvdJf/PL3lXPmr4aABTs3wDFNVMBtDrEX6sC+nIu+/+DliJJzRySW52CMeV/KROCVP1rimJOI7f0zZ8XI+EXfeBDdiru4mEe/v+ptHvrks06AnpyoEhPM5kYpHIQRTo3KU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Gc2YFf6P; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87B67372B32;
+	Fri, 25 Sep 2026 12:59:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.56.50
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1790341195; cv=fail; b=uVo9eapUc8gkNt/S0iwATzKVP8GqJMsRvW6/6jOsDnG+WobweOQZ97kob+EZfcylesG6K76kxkPdDcNyHnkvW6DMRf55IYFkvVyTqkLdg1wf+cf7D2+ho89CGkT57RvELs0mAqhPM/p82Vp3oyW4cI8Y1Gs5YQ0fZsJkjrtvJQk=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1790341195; c=relaxed/simple;
+	bh=WpGgiEq8wqSwxnmhWYP6UhPVHQBujwWNo0Rkhj2AjeY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
+	 Content-Disposition:In-Reply-To:MIME-Version; b=NCqloO3GWo9KsOKZ1ynV6Nb15I/lecAV1NmLTdbqmmS59mocpEF4+jLXO3p95BU/lm+CVuL4to7M0XXQznrcLX4Z339thZpA4Bilu4GWzsKSLfLW/jK5XgehXYiXbvzRkULi8NDdmkk15wGUgczLDr4Nopu4t2sG9a40Ow1HXRc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=dAro/vxC; arc=fail smtp.client-ip=52.101.56.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Gc2YFf6P"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 34CD31F00898;
-	Fri, 25 Sep 2026 12:14:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790338475;
-	bh=IahDHAQF7RfDObHvj4rGyzlzFJnRRjAI2g4CtB30gI8=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=Gc2YFf6Pi1Dsz+74QHVbGsexpdMLXU5cA/TvsZSl1qz+7aMvvHXyKHQg9g/frshPj
-	 h+jj3T+gfLtKeFwBuIUhzR1FOI/M4Mp9glhQMm5FbrnS07ZsvghXHj8Rka7V8TxU40
-	 wSc1IDzayQnvSyGQnuzbSjeaOFwWIME378Cy//pzFfBuzN6KJfA0FnlVRPSi2wxE/P
-	 4rtu7aIZrN+h5pHASY5d6pxq6fX/eY8yIKv/be98igaUswsPNlmYRdzLg35ppsNUEu
-	 xFwMSevW1tf31nXTRMFiOLyj0zS/dtqTFIFGjtnXYhFLlRJ7cdjEtch8e3r1vewqxJ
-	 WDidVIJYlAX+g==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id BB207198004A;
-	Fri, 25 Sep 2026 08:14:32 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Fri, 25 Sep 2026 08:14:32 -0400
-X-ME-Sender: <xms:pWW2aiCQzrBzkt2I7YVYwfxzTu27KAFzbeoda4dI8ym42QkilmmGMQ>
-    <xme:pWW2anXxflYzxFcLQnHvOTUB_7KpUo4wvXBQfUs_mWX94ZAvwxVDWwefIzYN3iGQ5
-    nYF84e-ysaJEDYAHsMDYrlI_A9ThwO6aHyL8tw4QjbO0JyJ7ZQ7q-1e>
-X-ME-Proxy-Cause: dmFkZTFyygE7+hGtxC3ACXIARRMAb82zW5/8US7NbRjR/GomXcS8O1Ux0Gwn/xb9W9m7/Q
-    OXwu2dd9yjEim1CR7HvhgbiA33/QjThBcCjOsTPuRrkUZS0bX0MrCxcOeQZE0m1aWO7kaO
-    nZghqBxbcz43d4Avb3MhHyv8dmhsJ7vbjyp1G8IeDufmvq7izZZjgdNo8EhBCoJBdpR9fN
-    TrIU5SL6dXqm/Kg4HdDVsHSxrzSbvD4tRbiZ7c3n/9KC54Of3d+b0BzhMtuvMwympAazWZ
-    3SRR3cujbyLS9C3sAiGWsf8xbajY7huETyk2MjUNQbq9x9KIhH7hCSXoS0WhqPDW0GdAWO
-    YMjVlbEbMcb5F8fcD6lirA522ehVkoIiD+XZGQUqZbPA2B9/kx7w7QUa+ZZO1jb9T3Kj8E
-    h9/CD9UEf38mSNIuv2bcmtIle2kjClef3kn+gqZ2zYalrIWIelOb/aB6hGqtoaHxpR237j
-    LCZksX930kQsHKPya8gYUp9dO2qwF2v5FuDKNkIiQbQlKSBv8bvEX27wQPN2veX9aroeLo
-    6VUWUPVmXqqrXN/soDb3rCOYwsqpqxsmuNxRxNM/OarWszLmmL8to9lYPBb0kIhX3neNBl
-    Lde+Gt0TAKwLGLoWs27QqeZXDSGa7Hiz0g2plMuNnn5SIb1fkysowVvAcnmw
-X-ME-Proxy: <xmx:qGW2aqLSiJtuF5utrYHWMPeES7R2HnnQ7K6pFgT-w69WSYW438zLww>
-    <xmx:qGW2at_anXx3QJyqcd26y0j7a5UmzHeP75EnikyzfM0sX1PEy0Q-TQ>
-    <xmx:qGW2ahKv1SQnFn7HXRm6CYY4EiicjZ3k1_jTeP_L5WHgIZffCJHRJg>
-    <xmx:qGW2asG7CD_096kscy5mhIm77L1DUuFY7UlrnxHv84qVHB7T0MV40Q>
-    <xmx:qGW2alzK_Vbdx4GEcGozso-Fxu4A3PcC9bo17SlmoHpVKwVAo2xk1VsT>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id B0BDBF80086; Fri, 25 Sep 2026 08:14:29 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="dAro/vxC"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=qZWVupCuy1DwI4CBNHC7CR8CBgPuxhnKLzQtjP7hpKgZ4o0e3w7BGItIWlQlOUGS/CZRZ0S3ymgH2eembZ/pPbNClqq21j+Er+DK9p3GZMABXoirTqC64RnvZ4LuIeinBcuCyE2AJdWNUEzli5xOG5d/3eTgv+3N/4+MS5qcqe2gPoyVFUgmlmvazO5tI2aPQHwQRuhDyPzFFs8IM3D35N+Vz9PNATX3Ai89i9L6cG2B8/kEyC6raZNLJCPeTdWxRgiFhwdrtyaqT/E2E4tX4FY6IkNHxOe0RxUXdqDtWDDXKrrCOOwhNXiEdVUGKIb/n3Y/t6Md0aXotQ/j0U+V8Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=gY8SQn1sQtQmyRMtW8IO4cO3YMtlEBJJwOS/MpFHpaU=;
+ b=Fbo+UowfiYBnYJfoJNnP0LADgV51BnO9foVuy0QX3hjAwsc0ilZyCfxG7Vm4H2HTDPA3uKI5CzVWwkuJEKuAFIzpGaGCQ8EnkS9ntsyPsSUcZy2UX2l7sCfL6H6w3JaCzj6nFoikhW6x2KIEXy9+uQQBJtiBKBAyh6q1ebmHF0oJCdt3uZE9Qvx/EAOe8NHWKp2x+ryc9Ze5/pPF5OoVpdeLVDDi+9P88FbYZASUkehMxBeiMbzgre17F4LCuFNnLenXTIsG8TNB+z8dGX2HQT1+9wQ5qq8Aa8cL4ZXfweUFMsWUvMMWc4qBkfP/6AlIDMNwt3SxMAyKYniIlDduMQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
+ dkim=pass header.d=nvidia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=gY8SQn1sQtQmyRMtW8IO4cO3YMtlEBJJwOS/MpFHpaU=;
+ b=dAro/vxCR3ZysiXSqcfYvdmk94K9u/NZexZ6kKGDTdTd9eCKk5xt07s3/W4NoUtfRAuv98y2qQ7jD+pznQrz0+0jdYaTNBFYHRLOMLRYyOPgJdo0GWuWEkLdJfIcbCn1b7pKxHKDaL2Z1+vq6tfDua/5Q3/c/drwXWbEGTdw3L3Vk6KPeooRcM0z7w54KuqkyD8x2EqV9jH3r6h8REx1pEqx+s8VrjuQA3643Y9zjy29viTAgzzWWM+3d6s5neWJpcwV1ZzZNMqIaFq8+feKh1IzoKtQSoLfvYjAZGK+GmZxAxe6oe9lWHdKXXl6+ACmdTtrb2PNvU7ICQoYj8LXng==
+Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nvidia.com;
+Received: from LY0PR12MB325698.namprd12.prod.outlook.com
+ (2603:10b6:408:3bb::14) by PH0PR12MB7486.namprd12.prod.outlook.com
+ (2603:10b6:510:1e9::6) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.451.19; Fri, 25 Sep
+ 2026 12:59:47 +0000
+Received: from LY0PR12MB325698.namprd12.prod.outlook.com
+ ([fe80::b65f:1548:5b35:e2b5]) by LY0PR12MB325698.namprd12.prod.outlook.com
+ ([fe80::b65f:1548:5b35:e2b5%5]) with mapi id 15.21.0451.014; Fri, 25 Sep 2026
+ 12:59:47 +0000
+Date: Fri, 25 Sep 2026 09:59:45 -0300
+From: Jason Gunthorpe <jgg@nvidia.com>
+To: Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>
+Cc: Alexandre Ghiti <alex@ghiti.fr>, Albert Ou <aou@eecs.berkeley.edu>,
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Jonathan Corbet <corbet@lwn.net>, David Sterba <dsterba@suse.com>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-doc@vger.kernel.org, linux-efi@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	Mark Rutland <mark.rutland@arm.com>,
+	Palmer Dabbelt <palmer@dabbelt.com>, Paul Walmsley <pjw@kernel.org>,
+	Randy Dunlap <rdunlap@infradead.org>,
+	Simon Glass <sjg@chromium.org>,
+	Shuah Khan <skhan@linuxfoundation.org>,
+	Nick Terrell <terrelln@fb.com>, Will Deacon <will@kernel.org>,
+	Alexandre Ghiti <alexghiti@rivosinc.com>,
+	Conor Dooley <conor.dooley@microchip.com>,
+	linux-integrity@vger.kernel.org,
+	Palmer Dabbelt <palmer@rivosinc.com>, patches@lists.linux.dev,
+	Ross Philipson <ross.philipson@gmail.com>,
+	Sami Tolvanen <samitolvanen@google.com>,
+	Song Shuai <songshuaishuai@tinylab.org>
+Subject: Re: [PATCH 03/16] efi/libstub: Free cmdline_ptr in efi_pe_entry
+Message-ID: <20260925125945.GN9354@nvidia.com>
+References: <0-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
+ <3-v1-27d06b313981+8b-arm64_drtm_jgg@nvidia.com>
+ <20260924154902.0000528b@oss.qualcomm.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260924154902.0000528b@oss.qualcomm.com>
+X-ClientProxiedBy: PH0PR07CA0085.namprd07.prod.outlook.com
+ (2603:10b6:510:f::30) To LY0PR12MB325698.namprd12.prod.outlook.com
+ (2603:10b6:408:3bb::14)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Fri, 25 Sep 2026 14:14:09 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Prashant Singh" <singhpra@juniper.net>, "Jeremy Kerr" <jk@ozlabs.org>
-Cc: "Sebastian Andrzej Siewior" <bigeasy@linutronix.de>,
- "Clark Williams" <clrkwllms@kernel.org>,
- "Steven Rostedt" <rostedt@goodmis.org>, "Jonathan Corbet" <corbet@lwn.net>,
- "Shuah Khan" <skhan@linuxfoundation.org>,
- "Randy Dunlap" <rdunlap@infradead.org>,
- "Luis Claudio R. Goncalves" <lgoncalv@redhat.com>,
- "Steve McIntyre" <93sam@debian.org>, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
- linux-rt-devel@lists.linux.dev
-Message-Id: <17ae71e4-c044-4354-938e-3e8021615e6d@app.fastmail.com>
-In-Reply-To: <20260925113145.7396-1-singhpra@juniper.net>
-References: <20260925113145.7396-1-singhpra@juniper.net>
-Subject: Re: [PATCH v3] efivarfs: add nostatfs mount option to skip QueryVariableInfo()
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: LY0PR12MB325698:EE_|PH0PR12MB7486:EE_
+X-MS-Office365-Filtering-Correlation-Id: 9a3586fd-cb47-4951-456e-08df1b04e0de
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|1800799024|23010399003|366016|376014|7416014|56012099006|11063799006|4143699003|10067099003|22082099003|18002099003;
+X-Microsoft-Antispam-Message-Info:
+	bd45l8a6+3JSVM2BocLqRVv7s0WhaFpc59mAV/8qTDsagbzKgkVbvdEVXW1sMBa2DtT9tZ1AiShZOCpSRu5Zj3j2AhXLScIMYDwy+d0KIsoSLn0zI8u8k3+awPmHOEhG8gaY3k5pEZ1RAP/diSROTUd3u6CGOiujR76ovRZFOZx7TP+S9jSoGj8RDirT9eE03dK5QjR/Vn37ZZ5Upvbbt/etpF+JcICPuWgNKtTrq33AGwpiQilQCJmz8qprQDcPUoDgbohasaawwYyKyJp/ETPADWVsx9j6gyY0EvGKnR86cNme9EHK7l/fYZbhSQlR8SmBTi3/n0/SIs77bzwInneLyVBx4jWf4MPi9/6Du7DxKGljbjjKxguH4g7fHvGdgv8IfAGLMXmfIw9ac+4EMvBeZe7XRFezSrcPEdvyTYOSituT0CkUQ4pqIVjoSHe81Fr1VF/r/ODu0KswagC8/oHwQRPSJbh1OPdz1KnMbeoISTeJOR/0XjTAMXd4b1elBbg2iThKJbuLdMPoc0OSvoAsqC/80bbJZ0TARXgLQbi1qeKnAB8ON7BAJD07NkxUD8g4BZ3F8kDkLZRxlF/7/TzDe/nS+pAGMntGMVL1p4f+lW6SfocM1N+JjlGcBKNaToI6NsJhTSDkU4vGrp+DDpdj4vuRwQRAHIssPDjzhJc=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:LY0PR12MB325698.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(23010399003)(366016)(376014)(7416014)(56012099006)(11063799006)(4143699003)(10067099003)(22082099003)(18002099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?9174e60iO/U1g2vZ34+JVZRfVBLj+NAIm7nRH/YwZwNVfhJyAbrm1bHjMdZf?=
+ =?us-ascii?Q?ffWUPxXQJEGrZEw9Hml9OnFNdngQt53rziqJC4aHQ5iqVjWHc9bIz/GtN4vv?=
+ =?us-ascii?Q?B4GxHLYRFysSBCeQphSman33sH8DVs+myRI4NZtiNtuXq621Nn7KUcBe1HgK?=
+ =?us-ascii?Q?du1P5O4/x7Cla72X1axPbKPKJTBoRd859f7e7fXDeQ2B1Tzv3hjIQ5MKS8Qb?=
+ =?us-ascii?Q?NJBqndtfzF2/Gm54i36G1aEfInRmtrPq9QdWAE1yZm/bnuuGDNo2pLNPGvGX?=
+ =?us-ascii?Q?OFHzmy/KLPDJ/QgZ5Qu/QLY0MJoV/zMFjfyQfDV5y0ehoOIsCZA+PGG0IWYC?=
+ =?us-ascii?Q?aixnPL4OlbQzUT6jfUj0FrMLNJGgiLnGbGyER1RVqF5pepcnN02WyzIH1hlC?=
+ =?us-ascii?Q?iwuZ9T61cIMoAXnp9fgOmKScynErK2eOIT1tPtDJNUsQQ8S4uuFK9jh73PWe?=
+ =?us-ascii?Q?I5HY/W5T2r/RAdgnqjILlF8Ev8Cz0zEk2OhKOygXmyuTzmuVkh4TJMBp5XtL?=
+ =?us-ascii?Q?z2dnugB4JWpr1S3mC9/F6IRiB1f+uawUZjG02WEWB+LZeULs3fgfyMQSc536?=
+ =?us-ascii?Q?fe3hcEh0PHhle+jiayup8aStdBzI0CgL9Y1WA+9U7xWY3oR5i3xcimVKUPp4?=
+ =?us-ascii?Q?pwdXcF7QLuaZi6ijhbieXWSxAOX6grSuRJ6RtzwPGANkWgZzF4NYfmh9mZkQ?=
+ =?us-ascii?Q?iMWBtwRzlYCIlINoCduoRcXrjaXmX/YJX3A8grDURVreQNu4FM9ySVLd1wAd?=
+ =?us-ascii?Q?zlFDvpkzDCqWN9I8Jz1p+/dQlpYc5xXT2/qF5W8rqYmgB07Lr04PHk5IrLyN?=
+ =?us-ascii?Q?CGF0OaSTFvV/q0+FFeD5I0uh9r6wrBmi33GdgtDyr1h1Vq/ThnJTm7wX1Pjf?=
+ =?us-ascii?Q?D8aV0c984VfrDkUP9oXjwgRsLT3glCdQTb+uQjzSkkIQSpHs+zyHTrlT9/+X?=
+ =?us-ascii?Q?bpZ28+Avnk4MDrxWRP56GBr7Bi/5VSHLaT8kUHg58+tIAHQz+T8T7r/7BYG5?=
+ =?us-ascii?Q?eaioQuWBDDzMrEHet4fakLGZkD26P6MwRT4f2d9VI/b5nUydhhQmkZzSiX9E?=
+ =?us-ascii?Q?I1j+lCt+CDmnpq/0GlsVc2gaGaXQ9ZW7hVstNvciXslbzalfWLqwDcIWfzK7?=
+ =?us-ascii?Q?mdmiwzr4aiBw9KaY8l7YerMRsJLg1U2rE95V3yxeHYdn12dlP80Yq+Xrd7i7?=
+ =?us-ascii?Q?U/pyOuGtME2v+sWHZGPpFC/+bMQqS4YUaHGavmowk9KZVYBtbDiy+aO89A1d?=
+ =?us-ascii?Q?AntFQAz2GaRicz0BsqB6PTNHPUUnKcl6mHbPhVMPBPcyRYVl3suhJ2lSYEHx?=
+ =?us-ascii?Q?4gP76lzH12npuPFn2Gijbp9KeML+HZBJCLU8eg+RXEU0wLAYfaJvzBDo/UyQ?=
+ =?us-ascii?Q?uFt7NlzFaIv1+jpDw4ojY2HeaHgYTPiXPN3K5KZpRPm4tvVHkPSVgAORNIz3?=
+ =?us-ascii?Q?S0uqtFUyDT253F70hpenwSIFc+SoP8OFGDkTWwK00XNN0+hgDkfW+RIME2M5?=
+ =?us-ascii?Q?/rr9v6/RaDUtoqY5GaODwQIm+B7msRBbvTdkejy1BGq5GS4p8WwSQqDxpihy?=
+ =?us-ascii?Q?mAWfvUaeurBa0WqdFwxS+AOk5GCfNyRTUohREyV3ULhUSsOUmJyEwiRgYi5k?=
+ =?us-ascii?Q?ZFCTPkg5R4LkJY7+/V7DS48TUFZSvi3QgkjoeFbfyYEeYyDMag63K8CRzqzT?=
+ =?us-ascii?Q?g8uqxkl/ru06E2OWs4e3RZtS4nYXnqIxHP38120FXHxDkr4c?=
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9a3586fd-cb47-4951-456e-08df1b04e0de
+X-MS-Exchange-CrossTenant-AuthSource: LY0PR12MB325698.namprd12.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Sep 2026 12:59:47.7080
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: jhVtn7Kc9QS1xKM8u+Y+7p1hOHgu9nCv44P10gaNRBrkW+BhX3dGHJPjW7KdNT8d
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR12MB7486
 
-Hello Prashant,
+On Thu, Sep 24, 2026 at 03:49:02PM -0700, Jonathan Cameron wrote:
+> On Thu, 24 Sep 2026 10:53:06 -0300
+> Jason Gunthorpe <jgg@nvidia.com> wrote:
+> 
+> > Sashiko points out that efi_handle_cmdline() allocates this memory and
+> > hands it over to the caller. If efi_pe_entry() ever returns it should be
+> > freed. Add a __free annotation.
+> > 
+> > Fixes: 42c8ea3dca09 ("efi: libstub: Factor out EFI stub entrypoint into separate file")
+> > Signed-off-by: Jason Gunthorpe <jgg@nvidia.com>
+> > ---
+> >  drivers/firmware/efi/libstub/efi-stub-entry.c | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/drivers/firmware/efi/libstub/efi-stub-entry.c b/drivers/firmware/efi/libstub/efi-stub-entry.c
+> > index aa85e910fe595e..83fade2b0d3b84 100644
+> > --- a/drivers/firmware/efi/libstub/efi-stub-entry.c
+> > +++ b/drivers/firmware/efi/libstub/efi-stub-entry.c
+> > @@ -40,7 +40,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+> >  	unsigned long image_addr;
+> >  	unsigned long image_size = 0;
+> >  	/* addr/point and size pairs for memory management*/
+> > -	char *cmdline_ptr = NULL;
+> > +	char *cmdline_ptr __free(efi_pool) = NULL;
+> 
+> Can we move this down to just above the call to efi_handle_cmdline that
+> does the constructor side of this?
+> 
+> I see none of the efi stuff follow those guidance note that went in
+> cleanup.h.
 
-Thanks for respinning this.
+Yeah, I stuck with what was there.. It looks kind of weird that way:
 
-On Fri, 25 Sep 2026, at 13:31, Prashant Singh wrote:
-> QueryVariableInfo() is an EFI runtime service that, on some firmware,
-> takes tens of milliseconds and runs with preemption disabled, stalling
-> the CPU that services it. efivarfs_statfs() calls it (rate-limited since
-> commit b2326338dc68 ("efivarfs: Rate limit statfs() handler")) to report
-> the variable-store used/available capacity, so any statfs(2) -- e.g.
-> every "df" -- can inject that stall into unrelated latency-sensitive
-> workloads on the same CPU.
->
-> Add a negatable "nostatfs" mount option: with nostatfs, statfs(2) skips
-> QueryVariableInfo() and reports zero used/available; with statfs it
-> reports the capacity as before. It defaults to nostatfs on
-> CONFIG_PREEMPT_RT so real-time kernels do not take the stall out of the
-> box, but statfs can be passed there to force reporting back on -- e.g.
-> for tools such as fwupd that need the efivars free space to update Secure
-> Boot key databases.
->
-> The option can also be toggled on a live mount via remount, so reporting
-> can be enabled only for the duration of a firmware update without
-> unmounting the boot-time efivarfs mount:
->
->   mount -o remount,statfs   /sys/firmware/efi/efivars   # reporting on
->   mount -o remount,nostatfs /sys/firmware/efi/efivars   # reporting off
->
-> Tested on an Intel Xeon E5-2628L v4, 6.12 kernel, via
-> "strace -T -e trace=statfs df" on the efivarfs mount.
->
-> Cost of the firmware call (CONFIG_PREEMPT_RT not set, so reporting is
-> enabled by default). Default mount calls QueryVariableInfo() and returns
-> the real store capacity, ~66-129 ms per call:
->
->   statfs("/sys/firmware/efi/efivars", {f_type=EFIVARFS_MAGIC,
->       f_bsize=1, f_blocks=90024, f_bfree=33387, f_bavail=28267, ...})
->       = 0 <0.129124>
->
-> With -o nostatfs the firmware call is skipped, capacity reported as
-> zero, ~11 us per call:
->
->   statfs("/sys/firmware/efi/efivars", {f_type=EFIVARFS_MAGIC,
->       f_bsize=1, f_blocks=0, f_bfree=0, f_bavail=0, ...}) = 0 <0.000011>
->
-> PREEMPT_RT default and live remount toggle (CONFIG_PREEMPT_RT=y). The
-> boot-time mount defaults to nostatfs (mount shows nostatfs); no firmware
-> call, capacity zero:
->
->   statfs(... f_blocks=0, f_bfree=0, f_bavail=0, ...) = 0 <0.000018>
->
-> Enabling reporting in place with "mount -o remount,statfs" (mount now
-> shows statfs) takes the ~70 ms firmware call and returns the real
-> capacity, without unmounting:
->
->   statfs(... f_blocks=90024, f_bfree=30315, f_bavail=25195, ...)
->       = 0 <0.070293>
->
-> Disabling it again with "mount -o remount,nostatfs" returns to the fast,
-> zero-capacity path:
->
->   statfs(... f_blocks=0, f_bfree=0, f_bavail=0, ...) = 0 <0.000014>
->
-> An unrelated remount that does not respecify the option preserves it: a
-> "mount -o remount,rw" after "remount,statfs" leaves the mount showing
-> statfs.
->
-> Suggested-by: Ard Biesheuvel <ardb@kernel.org>
-> Suggested-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-> Signed-off-by: Prashant Singh <singhpra@juniper.net>
-> ---
-> Changes since v2:
-> - Make the flag negatable (fsparam_flag_no): "statfs" forces reporting
->   back on, "nostatfs" skips QueryVariableInfo(). Default stays nostatfs
->   on PREEMPT_RT. This lets fwupd get the efivars free space it needs for
->   Secure Boot key (KEK/DB/DBX) updates on an RT kernel by mounting with
->   -o statfs (Luis Claudio R. Goncalves, Steve McIntyre).
-> - Support toggling the option on a live mount via remount, so reporting
->   can be enabled just for a firmware update without unmounting efivarfs
->   (Sebastian Andrzej Siewior). Options not respecified on remount are
->   preserved.
-> - Read/write nostatfs with READ_ONCE()/WRITE_ONCE(): statfs() reads it
->   without s_umount while remount can update it.
+	char *cmdline_ptr __free(efi_pool) = NULL;
+	status = efi_handle_cmdline(image, &cmdline_ptr);
+	if (status != EFI_SUCCESS)
+		return status;
 
-Why? There is no memory ordering or tearing issue here, but only a
-fundamental race where a remount and a statfs() might occur at the
-same time.
-
-> - Add PREEMPT_RT + remount test data to the commit message.
->
-> Changes since v1:
-> - Replace the sysctl with a mount option named "nostatfs", per review
->   (Ard Biesheuvel).
->
-> v1: https://lore.kernel.org/all/20260917071600.5587-1-singhpra@juniper.net/
-> v2: https://lore.kernel.org/all/20260919044124.8268-1-singhpra@juniper.net/
->
->  Documentation/filesystems/efivarfs.rst | 16 +++++++++
->  fs/efivarfs/internal.h                 |  1 +
->  fs/efivarfs/super.c                    | 46 +++++++++++++++++++++++---
->  3 files changed, 58 insertions(+), 5 deletions(-)
->
-> diff --git a/Documentation/filesystems/efivarfs.rst 
-> b/Documentation/filesystems/efivarfs.rst
-> index f646c3f0980f..cd81ee84115b 100644
-> --- a/Documentation/filesystems/efivarfs.rst
-> +++ b/Documentation/filesystems/efivarfs.rst
-> @@ -37,6 +37,22 @@ accidentally.
->            |4_bytes_of_attributes + efivar_data|
->            +-----------------------------------+
-> 
-> +Mount options
-> +=============
-> +
-> +statfs / nostatfs
-> +      Control whether ``statfs(2)`` reports the variable-store used/available
-> +      capacity. Obtaining it requires the ``QueryVariableInfo()`` EFI runtime
-> +      service, which on some firmware takes tens of milliseconds and runs with
-> +      preemption disabled, stalling the calling CPU. With ``nostatfs`` the call
-> +      is skipped and ``statfs(2)`` reports zero. The default is to report,
-> +      except on ``CONFIG_PREEMPT_RT`` where it defaults to ``nostatfs``; pass
-> +      ``statfs`` there to force reporting back on (e.g. for tools such as fwupd
-> +      that need the free space for firmware updates). The option can also be
-> +      flipped on a live mount with ``mount -o remount,statfs`` /
-> +      ``mount -o remount,nostatfs``, so reporting can be enabled only for the
-> +      duration of a firmware update without unmounting efivarfs.
-> +
->  *See also:*
-> 
->  - Documentation/admin-guide/acpi/ssdt-overlays.rst
-> diff --git a/fs/efivarfs/internal.h b/fs/efivarfs/internal.h
-> index f913b6824289..0cb053884b4b 100644
-> --- a/fs/efivarfs/internal.h
-> +++ b/fs/efivarfs/internal.h
-> @@ -11,6 +11,7 @@
->  struct efivarfs_mount_opts {
->  	kuid_t uid;
->  	kgid_t gid;
-> +	bool nostatfs;		/* skip QueryVariableInfo() in statfs() */
->  };
-> 
->  struct efivarfs_fs_info {
-> diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-> index 8d33f11db2a1..d2e1f31a72d1 100644
-> --- a/fs/efivarfs/super.c
-> +++ b/fs/efivarfs/super.c
-> @@ -74,6 +74,15 @@ static int efivarfs_show_options(struct seq_file *m, 
-> struct dentry *root)
->  	if (!gid_eq(opts->gid, GLOBAL_ROOT_GID))
->  		seq_printf(m, ",gid=%u",
->  				from_kgid_munged(&init_user_ns, opts->gid));
-> +	/*
-> +	 * Always show nostatfs (it makes statfs() report zero capacity, which
-> +	 * is otherwise surprising); only show statfs where it is not the
-> +	 * default, i.e. on PREEMPT_RT.
-> +	 */
-> +	if (opts->nostatfs)
-> +		seq_puts(m, ",nostatfs");
-> +	else if (IS_ENABLED(CONFIG_PREEMPT_RT))
-> +		seq_puts(m, ",statfs");
-
-Please drop this else branch - it should be sufficient for the 'nostatfs'
-to disappear from the mount options to understand what is going on.
-
->  	return 0;
->  }
-> 
-> @@ -82,13 +91,19 @@ static int efivarfs_statfs(struct dentry *dentry, 
-> struct kstatfs *buf)
->  	const u32 attr = EFI_VARIABLE_NON_VOLATILE |
->  			 EFI_VARIABLE_BOOTSERVICE_ACCESS |
->  			 EFI_VARIABLE_RUNTIME_ACCESS;
-> +	struct efivarfs_fs_info *sfi = dentry->d_sb->s_fs_info;
->  	u64 storage_space, remaining_space, max_variable_size;
->  	u64 id = huge_encode_dev(dentry->d_sb->s_dev);
->  	efi_status_t status;
-> 
-> -	/* Some UEFI firmware does not implement QueryVariableInfo() */
-> +	/*
-> +	 * Some UEFI firmware does not implement QueryVariableInfo(); the
-> +	 * nostatfs mount option also disables this (preempt-disabled,
-> +	 * potentially slow) call entirely, reporting zero used/available.
-> +	 */
->  	storage_space = remaining_space = 0;
-> -	if (efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
-> +	if (!READ_ONCE(sfi->mount_opts.nostatfs) &&
-> +	    efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
->  		static DEFINE_RATELIMIT_STATE(_rs, 2 * HZ, 5);
->  		static u64 storage, remaining;
->  		static DEFINE_SPINLOCK(lock);
-> @@ -323,12 +338,13 @@ static int efivarfs_callback(efi_char16_t 
-> *name16, efi_guid_t vendor,
->  }
-> 
->  enum {
-> -	Opt_uid, Opt_gid,
-> +	Opt_uid, Opt_gid, Opt_statfs,
->  };
-> 
->  static const struct fs_parameter_spec efivarfs_parameters[] = {
->  	fsparam_uid("uid", Opt_uid),
->  	fsparam_gid("gid", Opt_gid),
-> +	fsparam_flag_no("statfs", Opt_statfs),
->  	{},
->  };
-> 
-> @@ -350,6 +366,9 @@ static int efivarfs_parse_param(struct fs_context 
-> *fc, struct fs_parameter *para
->  	case Opt_gid:
->  		opts->gid = result.gid;
->  		break;
-> +	case Opt_statfs:
-> +		opts->nostatfs = result.negated;
-> +		break;
->  	default:
->  		return -EINVAL;
->  	}
-> @@ -402,11 +421,17 @@ static int efivarfs_get_tree(struct fs_context 
-> *fc)
-> 
->  static int efivarfs_reconfigure(struct fs_context *fc)
->  {
-> +	struct efivarfs_fs_info *sfi = fc->root->d_sb->s_fs_info;
-> +	struct efivarfs_fs_info *new_sfi = fc->s_fs_info;
-> +
->  	if (!efivar_supports_writes() && !(fc->sb_flags & SB_RDONLY)) {
->  		pr_err("Firmware does not support SetVariableRT. Can not remount with rw\n");
->  		return -EINVAL;
->  	}
-> 
-> +	/* statfs() reads nostatfs locklessly (no s_umount); pair with WRITE_ONCE. */
-> +	WRITE_ONCE(sfi->mount_opts.nostatfs, new_sfi->mount_opts.nostatfs);
-> +
->  	return 0;
->  }
-> 
-> @@ -524,8 +549,19 @@ static int efivarfs_init_fs_context(struct fs_context *fc)
->  	if (!sfi)
->  		return -ENOMEM;
-> 
-> -	sfi->mount_opts.uid = GLOBAL_ROOT_UID;
-> -	sfi->mount_opts.gid = GLOBAL_ROOT_GID;
-> +	if (fc->purpose == FS_CONTEXT_FOR_RECONFIGURE) {
-> +		/* Preserve options not respecified on remount. */
-> +		struct efivarfs_fs_info *old = fc->root->d_sb->s_fs_info;
-> +
-> +		sfi->mount_opts.uid = old->mount_opts.uid;
-> +		sfi->mount_opts.gid = old->mount_opts.gid;
-> +		sfi->mount_opts.nostatfs = READ_ONCE(old->mount_opts.nostatfs);
-> +	} else {
-> +		sfi->mount_opts.uid = GLOBAL_ROOT_UID;
-> +		sfi->mount_opts.gid = GLOBAL_ROOT_GID;
-> +		/* QueryVariableInfo() stalls the CPU; default nostatfs on PREEMPT_RT. */
-> +		sfi->mount_opts.nostatfs = IS_ENABLED(CONFIG_PREEMPT_RT);
-> +	}
-> 
-
-Why do we need this? Does remount otherwise forget its options? Does this
-mean that before this patch, remounting with only a different guid would
-reset the uid specified at mount time to the default? If so, please fix
-that in a separate (preceding) patch.
-
- 
+Jason
