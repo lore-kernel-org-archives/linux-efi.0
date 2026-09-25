@@ -1,104 +1,97 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB89C455603
-	for <linux-efi@vger.kernel.org>; Fri, 25 Sep 2026 07:50:49 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC60D36E489;
+	Fri, 25 Sep 2026 07:51:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790322651; cv=none; b=uv6Xtb2V5zC9cMZswHJ6Ybl3hajhTexq5JIC6xjdwDcODLRD1f14QSPmd4lTXr3A0n+zx9wjULevOhg7NKYlkt544Ms0bhNfiPem79yslNq6iONaev/JzeU/HX19zuKIAVJ2dv9eKDuAEocjwlrubZtJu2XCARpEO9/9SK0TdNM=
+	t=1790322718; cv=none; b=HSIGKh0qr14nF+sx58KHjoMoSrjp7/vCkYtlsmUyYSa2S/HxmvRLlYU5QsH6U+tEZzM8uts+i0MVgsyOPVrp7WKkcGPEBGPvkWuZcOg1+OYs3XEt8AHaMJ6+EQIa8BHqalFxtMlImwShMAdFAHSSiUPz9F1ICINRD3oTab5uX98=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790322651; c=relaxed/simple;
-	bh=etvYMdjIKmKo0vypJIIrSrdY9PtMT/S+xJavh4Imy7c=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=sUBC6FJ9xUl3r0K+jf3dnNyeoF1bOTvipfS8utZ77mifQhIVbRIwg4tHYm3f/7/fYzTHAlO6q0bVraRrHEa3MLZKIPYWTz3dCW4VuXL1FNG0F1vBpZwHx9qrmwWW1AOQI8XA+QKE811DAW6ba4sXRv6AJzCQrZfUZJsHCIbeMEc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CN3d9N80; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790322718; c=relaxed/simple;
+	bh=kHVPFXbJ8EqkKfRf8xzGYsQcndBVosP2b9IUPfJiLdo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=hUFDOi7VTm8DrDs/AYWL5FqVRSRQ4YPF7g0cTXQ12u8eDiPOlsw+jQmBAPzrUy69XeRqcFfiI6ZzWagROKe0UmnVz3Jw2sRp4NdyOjbLdw0exUrDZjkTIzmN7Taf+c35yWQ53Z1HrqGtCr4fidihahiONrNbbCb7JEaySYdLASc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Lpp3ptlz; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CN3d9N80"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BB6121F000FF;
-	Fri, 25 Sep 2026 07:50:48 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Lpp3ptlz"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A90A71F000FF;
+	Fri, 25 Sep 2026 07:51:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790322649;
-	bh=t2Dx/d45eW/YSr1SSo2BR+xcaKZ/ss9Th88yiSDyPFU=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=CN3d9N8015i+DdLjif2urqc4z8yblX07qO7q5cIwjy4GWuX7dRab49Xelylr9j1xJ
-	 ru/l+ayN21db+dp9EG1AoaCtYLytJFWjnfJ95MFemVE9PA8fSLyRFWejwuK/PlTHfA
-	 YMDn5dAvV8UAPOZQQ9mto7xXLDn1N2M04qpSSPTgMW4VvfwofbEi+z0+2PE5NUNxk8
-	 4Nw/ZX8hdI/356I+fnxTRGM9roCMfxAL7vaZ8Cp94LvgS9PbboqWHrUIImfTS9JDiJ
-	 brcLEbnN4iWAxyIYAMQOM/mt4WiYY4pNheYXb5YaOKb9LXwErvCpcCbezbvu07FZzt
-	 FKpDBhfYzBxgA==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 33C8B1980062;
-	Fri, 25 Sep 2026 03:50:47 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Fri, 25 Sep 2026 03:50:47 -0400
-X-ME-Sender: <xms:1Se2akdImMzz2JmVrIhbv1x22F7ZoWPiNQ6vcYqsEjbqabYYlK673g>
-    <xme:1Se2ahBkyfwgo2J_1iO2UKnwMHBdfKrx45kK2MRW2F_W9CkgrbO9GRmgt6zl6LCST
-    4iby97QxQBi7v1riqW8MlAcMTnWxmChCatU8eF2RQE42bdkNspEpCG1mw>
-X-ME-Proxy-Cause: dmFkZTEauvpc3Xgpv/TCnf4kDS4S+hfiJ+BbESf1ZndveM7HOh1njdCDrq7KMMr/U8bq6C
-    PNJb9YEQJDxJFvIJ0vji9MPQpdxZ3pmpmbyXady5AXyjkwjy0GXCKYeYLToKgN0Mm+gvtD
-    /lYmVPNRmdVrhNEI12bxPQH5PNLolit6ZujMY8uiFYo+DDDODouf1aVtkFqocomJph1j9k
-    hYJVeUouoCED9AxZc5c1G48vLSMp4ajZq+oH83mNyLo/2ZSnKpRBwjzS/QwIA5VE3g+boz
-    EnBF6MMECdCx2lhgunHdF9dcqKuEqGyYngxrGd79tvQu332KMczwJChtSqM3dXM5vNWfJz
-    OiFAhlRyRqLG3cWQix+J+jGj8GLtlvaxG2ep4gUkaleyMqBRisMFdwP6SmJnkU9TlCfxTO
-    rDPnFzza298B7dEv5qgsYnXNp1Y7e1OcgY2mtyY09tO7hNQfkt+qlN43VEcTIzYUbamfRj
-    lA9rrMymYfWD/DT3+bmZyFZoCs02elMBhC8tLilZdBZCKB18DrHiUhigxkShP3c/HIk5GQ
-    7Jay04oLQRmrM4+NdsuHtIimeHH4ifB1Owjjupt+FkqKwgx27T9EUxKakd6v2glNUJ1it8
-    KnZCV1PlRtkf88Z1y9uVvEMyNxkofMGIw3LP+XkFLIWrGFx/4QcxW6wAas0g
-X-ME-Proxy: <xmx:1ye2apYqRCA-pIqtGEedGRLjVBPWLPezoqzNPdDD2nVYCT8hZ7V7cA>
-    <xmx:1ye2aoBBa8Wz_ss1yRsnI3HRLdqgMMydyDjEBmkmCga2gSuFuuzKTA>
-    <xmx:1ye2apne7FtJshXZtRddHabf8RLAKWqseGhhSsGB4tZU-EFiIS4_uQ>
-    <xmx:1ye2ahz7cGrtsGAdC9_Q4QR3kPHqMbIXSwNg5upLcSRKYsk6-XuvWw>
-    <xmx:1ye2arQwbw6lsVPnogS4FIZLhavD0F4IDrnaEH7xqjSKYgTXz3pmFoHG>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 97C63F80080; Fri, 25 Sep 2026 03:50:45 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=k20260515; t=1790322717;
+	bh=kq3SqEusRgNdp0z9oySPm66wZTMWFLa2zSE1QTiVlbA=;
+	h=From:To:Cc:Subject:Date;
+	b=Lpp3ptlzyt4eBDfPN/C9Yjt6ic8WkJj7sXKTeu2jXx1vCtkDGNGCiBswOGzaqo1Jg
+	 eVBgdR1CIoEQdH4XnIiyEpEg9Fy+fzCUKz19TKYo+d1jv4ZMBwpujUr2d59HALbJgY
+	 NnYiXbUr30W3WbAzNf25Msztw9h9QSgbSswJEju9WH2nerlsJ4XGpbAzg2U9/yVTCI
+	 ku7pp7gMVTWZabX4ugYDzTcgpSB5zAeDpXsbOE9oIkxpIecGKW9Ao47apnVOqq3nUu
+	 uXN3ekgmTAHx4zS1vDHzLhw6hiLtJa+4JvBQ3Oh4n7/dKehGHj3HCxH6/zLIDmGqXg
+	 zq5Id+8sYTRLg==
+From: Ard Biesheuvel <ardb@kernel.org>
+To: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org,
+	x86@kernel.org,
+	Ard Biesheuvel <ardb@kernel.org>,
+	"Kiryl Shutsemau (Meta)" <kas@kernel.org>,
+	Borislav Petkov <bp@alien8.de>,
+	"Edgecombe, Rick P" <rick.p.edgecombe@intel.com>
+Subject: [PATCH v2 0/3] Move memory acceptance x86 arch code into EFI stub
+Date: Fri, 25 Sep 2026 09:51:38 +0200
+Message-ID: <20260925075137.44298-5-ardb@kernel.org>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Fri, 25 Sep 2026 09:50:25 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Rick Edgecombe" <rick.p.edgecombe@intel.com>,
- "Kiryl Shutsemau (Meta)" <kas@kernel.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- "Yan Y Zhao" <yan.y.zhao@intel.com>, "x86@kernel.org" <x86@kernel.org>,
- "Borislav Petkov" <bp@alien8.de>
-Message-Id: <aa7a1571-f91f-42ca-aa12-3122f453cad0@app.fastmail.com>
-In-Reply-To: <fe5b400e19742ae3666cd7b3e4bd22164024293f.camel@intel.com>
-References: <20260914183745.37538-5-ardb@kernel.org>
- <af17c380c43912ce34c228e328b3937343ce2019.camel@intel.com>
- <aqvrUeIfpE4D-Ol0@thinkstation>
- <27b267cdaed0c46146de4af2db8362b61e0b08a3.camel@intel.com>
- <aqyd+rhamNei92Nz@yzhao56-desk.sh.intel.com>
- <aqzMGEVpDRPUyPUA@yzhao56-desk.sh.intel.com> <aq0VWfqv2_SgOvV9@thinkstation>
- <b9ff9e11-d7da-4e34-9744-e3adcc786276@app.fastmail.com>
- <arUNjv0rSaAM2xmk@thinkstation>
- <fe5b400e19742ae3666cd7b3e4bd22164024293f.camel@intel.com>
-Subject: Re: [PATCH 0/3] Move memory acceptance x86 arch code into EFI stub
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2033; i=ardb@kernel.org; h=from:subject; bh=kHVPFXbJ8EqkKfRf8xzGYsQcndBVosP2b9IUPfJiLdo=; b=owGbwMvMwCn83sBh/rljoYmMp9WSGLK2aXDucPkt/fBlamik7rtA77obVuvvHQ9OeTNpdd6mf T9iHSvUO6ayMAhzMsiKKbLsVM7pfu0i+k5foTIHZg4rE8gQBi5OAZjI1wrGGo5vHVpXjxnu7Ekv 4NCUZHz3prp8ssuG0v3P2L4Gbvp0/rzovrkz/CZdP/zp6KGdp9eYnGKsD5uVvSJsV918FangTYr Nhy7vPbZ17yx25YgZv79dvFZy91rrr0QWHk3/I4wy+suCLb2UAA==
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+Content-Transfer-Encoding: 8bit
 
+This is a follow-up to [0].
 
+Move arch_accept_memory(), which is only called by the EFI stub and
+never by the decompressor on a non-EFI boot, into the EFI stub, and
+avoid relying directly on decompressor APIs such as error().
 
-On Fri, 25 Sep 2026, at 01:30, Edgecombe, Rick P wrote:
-> On Thu, 2026-09-24 at 12:46 +0100, Kiryl Shutsemau wrote:
->> > Is there any way we could make some progress here?
->> > 
->> > Ultimately, the thing I am after is to get rid of the call from the
->> > decompressor to EFI stub's snprintf(), which I want to remove. For
->> > the time being, I am more than happy leaving the memory acceptance where
->> > it is, and just dropping the call to snprintf().
->> 
->> Please go ahead with the move. Rick's questions are about what
->> tdx_accept_memory() should return, not about where the caller lives,
->> and can be sorted out separately.
->
-> Yep. I tried to do a quick smoke test and got a similar build error as Boris. I
-> guess you will send a new revision?
->
+Instead, call tdx_panic() on a failure to accept memory in a TDX guest.
 
-Yes, thanks for testing.
+This makes the decompressor's implementation of panic() obsolete, and
+allows it to be removed. This is a prerequisite for dropping the
+implementation of snprintf() from the EFI stub entirely, which is what
+the series containing [0] implements.
+
+Changes since v1 [1]:
+- Add missing stub for early_is_sevsnp_guest() when SEV support is
+  compiled out but TDX support is built in.
+- Use native_cpuid() in EFI stub code so it does not get paravirtualized
+- Set __NO_FORTIFY when including tdx-shared.c so the decompressor/stub
+  version does not get instrumented. Needed for the memcpy() in
+  tdx_panic().
+
+[0] http://lore.kernel.org/r/20260909115530.1924665-13-ardb+git@google.com
+[1] https://lore.kernel.org/all/20260914183745.37538-5-ardb@kernel.org/
+
+Cc: Kiryl Shutsemau (Meta) <kas@kernel.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Edgecombe, Rick P <rick.p.edgecombe@intel.com>
+
+Ard Biesheuvel (3):
+  x86/tdx: Share tdx_panic() with the EFI stub
+  x86/boot: Move unaccepted memory handling out of the decompressor
+  x86/boot: Drop unused implementation of panic()
+
+ arch/x86/boot/compressed/error.c        | 19 ---------
+ arch/x86/boot/compressed/error.h        |  1 -
+ arch/x86/boot/compressed/mem.c          | 42 --------------------
+ arch/x86/boot/compressed/sev.h          |  2 -
+ arch/x86/boot/compressed/tdx-shared.c   |  2 +
+ arch/x86/coco/tdx/tdx-shared.c          | 31 +++++++++++++++
+ arch/x86/coco/tdx/tdx.c                 | 35 ----------------
+ arch/x86/include/asm/sev.h              |  2 +
+ arch/x86/include/asm/shared/tdx.h       |  1 +
+ drivers/firmware/efi/libstub/x86-stub.c | 39 ++++++++++++++++++
+ 10 files changed, 75 insertions(+), 99 deletions(-)
+
+-- 
+2.53.0
+
