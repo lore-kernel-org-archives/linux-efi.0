@@ -1,173 +1,101 @@
-Received: from mail-dy2-f41.google.com (mail-dy2-f41.google.com [74.125.229.41])
+Received: from mail-oi2-f13.google.com (mail-oi2-f13.google.com [74.125.231.205])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66BB04248BB
-	for <linux-efi@vger.kernel.org>; Sat, 26 Sep 2026 10:51:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.229.41
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790419901; cv=none; b=JTeNgVwCFPanu9SLvLVwJBhYnB2bx3NhIW9zQjiFso1mJRdl3BvtjUzrUvwClZY/QoL/5AI9C+yijXKB5CD8wLEEZ6eQPvSz94qpapCsu1cNeaYCcdGeaB7uCTfgH8qR0IbPgxNi5goS30Xr2ZNHL8PvzKU63y3/Bb+M8dyOXeo=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790419901; c=relaxed/simple;
-	bh=jW735kAcsD/2b21ceEtLlnICfYOZRCFHJbsmuxuCW2E=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=E518ehBpXQ7tlaEwgbFTGE4u2VMnMQAxjYBQIFmTM1QMj0QoPD9KTuO1MFx8pSzNjSMN2dtLx/3ppqRBkhUDj7SUzgDqiLUicb+hN91zguk3gOYgKDmQ4x+/OV1OgHXJU++U+8r/JyloNg3RdJii61hkROkHF2zcGMxIhB8udDk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TiFCA0e0; arc=none smtp.client-ip=74.125.229.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A43C280A56
+	for <linux-efi@vger.kernel.org>; Sat, 26 Sep 2026 12:46:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.231.205
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1790426799; cv=pass; b=ZNGQhkDYIfwAYuYIgejrsUdp41G5uGEW7HY8EAa9BoxRm7avl0djfqe0aJZ/TEPJ8JJSIEDIp4Qox+gjNLT4NtL+Ny1SuApANHJHFCXMeTkzuCsbTesiTvMI1pgmiiMQ8PSXKEQIOJG0eY/qR28GzC00GmjnnJRrsxX73XayJwQ=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1790426799; c=relaxed/simple;
+	bh=Q/M0zAfCMSWd/uxVr21+FZg60PEdHKRNk2wvwX2jaWc=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To:Content-Type; b=uY5VODThG/npZnP+t6qu5EeUoYAGSaNy20Fci8+4JxM1dbYo4dusS+UfGq7jx+1H/zvg/yiR/rekp0A0l95LMmbCwWLdSkJHON32uhgw9ZiSvTRmKx+hlBKiz1wpq+j9EjHPQy3ne4ZQDkuDjzZQt2hOzZOpCmlXkDkcvkBOvbo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=QETit0Na; arc=pass smtp.client-ip=74.125.231.205
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TiFCA0e0"
-Received: by mail-dy2-f41.google.com with SMTP id 5a478bee46e88-3437a48f386so222768eec.3
-        for <linux-efi@vger.kernel.org>; Sat, 26 Sep 2026 03:51:38 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QETit0Na"
+Received: by mail-oi2-f13.google.com with SMTP id 5614622812f47-4c112aaaf04so1060701b6e.1
+        for <linux-efi@vger.kernel.org>; Sat, 26 Sep 2026 05:46:38 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1790426797; cv=none;
+        d=google.com; s=arc-20260327;
+        b=bgzPwgk/ZWBO0Cn33rw7pSYB0RqGQU5Ig4Qc3WgWRc4XJ+VJY5iokbJ7yEID7MigmZ
+         X8MFW0DYLrCeLE/28uZqwDUa9AYxxhU+m055L6XOeM+ak3Yk7WPNVtn6/lBHyWhidfNg
+         dYJzB/d67HbEjRWVu+veo+ilcBC9pZhu+XJarhmHhy53Rqz8SWAcZPhjUHqSNZNxhYHq
+         4/TArEn4bZqffkqV1BwEOxjExRTombCB4f/aTeWj84463vorOi8GtKwwNePe+OLUHgSM
+         Wcu4GYXsRllkblkUihicBEOJU4Wqp+kjE1To2UrnQ+yM+GhfZ+MZNh/IWKZMIXUaEXZJ
+         BikQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :mime-version:dkim-signature;
+        bh=Q/M0zAfCMSWd/uxVr21+FZg60PEdHKRNk2wvwX2jaWc=;
+        fh=HiT+Tw3NUeDXLyxUjpPQhIZv7DeshVrPD5FcU9aQong=;
+        b=Pw9UPo1mp+wysZTQ0dRCg/d0Gp8KWbIPWFYGKYOAFlFhsIN1izVGh0xDXxLHNTW9Jc
+         wB0tZiw0pgdHNap6ciw9ZkeCWbt36m+Wqt8SyR902nF25VEg6z+HQ7mwEK1mzyIMG4kc
+         pieBUZXAl2xhC6+dF1SKXFw7IvehIhIi8koXnXA0TC7HzDhPz1X9ZmBK6eEZmyDV0yre
+         X41uskX1BMDZt/CkUo5i1A6ZRPVIUu8ykczmvamQIc8pWD0G/IoTjCbHJfGvcmogvEeb
+         XCFiny5Z5j+Wuvjmc/LQFtvhgdrodzdlSgj2fveRTzGyUYV8bH1vw0JmgxjGGsgz4X6J
+         qA0w==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1790419898; x=1791024698; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=kyhzvPKJ7yjFZH8EyKop+R4jPDKS3cxEfo32yPynS28=;
-        b=TiFCA0e0tnsRFaq+PNr5M7G8AO3ztY/pJewjNBhIdOX8ATWL6Dza4o9I/mvmESi+Yu
-         XFkVgc32KA7BUWDc/uExN3esp+jbyWcGTt6IN3d4QOOAdO+3OobJT+7lJOkR0bTsTiZo
-         Ns7p8DukFxDbABveBInc12L5cf5n6n1LSVWkLnnBKl5jTaFhpaTPenxea50SDojTjZrl
-         HkmMErPcw+WgsqzkibqqddV2FyGTy/QstqGLe64h5QSgOJpw3PzwS0PmgJ+dr14qHalp
-         L+my3WUSPfqn3Qj7IdQDvXpj7BO4xtvCJu2auil6yE/PHrzyUGzwJ1+22TI5lFxNlJuJ
-         +tmg==
+        d=gmail.com; s=20251104; t=1790426797; x=1791031597; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:to:subject:message-id:date
+         :from:mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=Q/M0zAfCMSWd/uxVr21+FZg60PEdHKRNk2wvwX2jaWc=;
+        b=QETit0NaIuOrEAChCBV51ZxhflJX60cc3HPb8QX1LiWP1u7GEFLPLAcP4TpvhW/oZR
+         ai9053OkDzjadyJuFLd9HjmsCQlkUGppmTfSPImFtLzxlum9OVpHO+bmOo7AXTCQNxl+
+         0m0hEyUlbkdPlQBoMaNqBNxl35XnVyBFh8vO+Ruvr/39Q9wy+AkQYDLsj1aoXQ4MOjQ1
+         l55j7yV97gf1jfpjdDCQNevpMjyt7NXH3kMnKQZ3PtaHbsdh8ASp6fcNDV0XK8Vpzhku
+         LDyn+Ifeq429EDZb0fEYOyTGB205HVlVioqtzvg0cYJtrHE4imyudH0Y859lyMWF5Olw
+         eG8w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790419898; x=1791024698;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=kyhzvPKJ7yjFZH8EyKop+R4jPDKS3cxEfo32yPynS28=;
-        b=i88UidYYJoqxe+xZEY3y39zh4bzWFgLRnQhuvOC+MtIMR62ZVxQVNO64R5TyZekYT2
-         dcRRmfBzkCEDvflNp8IoToBkjjPgwreFkge7CgrethpyzHL9aaXDKWY5hzzs2/9+N3U+
-         CgYK0AR3OyD8ixE4U//Jm0qSShdt+sUVzIBVx+lI+hhaAY2Hz8xAI3kpvQZtfrMGZoV6
-         3LgWCdujgJwspUkKJFQExqYN3ZaFMQS/uGQJ9HfxFm8BNg7n/87nUjAQu0dvCNUwKBsC
-         nTjJwwcmJ7kRiIcaimPVcCkm374d29FOilyU3vxMuQAOmjEYlTu5yXm253ohcn+FPcJ6
-         8hqg==
-X-Gm-Message-State: AFq9FYKMzl91mDfGCNOq5sCv+S37V5HwIXhRfBWDbTKgm1RTNZ92CFLO
-	L63JWdY390H5ssyDUoqNS+HtfrljkMEoXnWDkR9CFVSBqSVE+LrfXYJ931ci5Fui
-X-Gm-Gg: AYBFou1++K0RESKHlbWZaDmjuywZoaI13RssRiOAI61gwXkQPdqOJudaiGAzf9/N5w0
-	bEcZ+4FRzjVSna1EjY2GmGjh079wV3lzoid5ZmttKwmAFoIMpwMt1n8e/p2h/wlnUqwZPP/T2cu
-	HOjr19NlPzls/3VO+eQiYIAQmlmpcCgzywa9WgQahdbH3dMY9V3pMMXKvDwRxLiXNvh/mwI7/tK
-	hF+8qsDT6qqsxafZ4LfyWuSFcoh4lnVSAcUDOcIcRfx8+6lthPRVxd+MQ0L/SdcBGGQ/R2bg3Lm
-	PrCdHscySehBDZiCphHK3av0feUHzwY8H2LtK+YBHXXxEZgfOtnEKoqUogkOERFBPXuzkz1qMXo
-	OkNZapUxs4BCA2IxK5cP8vOn8n87JmDAvFZPeQCFEZj1XEz642UVkJZsZSu+g5Kyqv5BHZNmM5r
-	Jo311jbUpMRkHS/ljxFFeY+P0moncRWskDfUSQgiVCXD81VrsxTw2MDNTvADut48+MKVG1mT1Si
-	jRpbhGmO7ptwSgZ/gXSJKg=
-X-Received: by 2002:a05:7300:2728:b0:33b:f206:845 with SMTP id 5a478bee46e88-3427304f495mr2392858eec.32.1790419897292;
-        Sat, 26 Sep 2026 03:51:37 -0700 (PDT)
-Received: from DESKTOP-7QP7L26 ([45.190.211.172])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3414504fae2sm13834603eec.20.2026.09.26.03.51.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 26 Sep 2026 03:51:36 -0700 (PDT)
-From: dev12124 <joaoanandalima@gmail.com>
-To: linux-efi@vger.kernel.org
-Cc: ardb@kernel.org,
-	dev12124 <joaoanandalima@gmail.com>
-Subject: [PATCH] security: Fix the Capsule-Loader with Lock Mutex, Verifications, factory default initialization and return
-Date: Sat, 26 Sep 2026 07:51:28 -0300
-Message-ID: <20260926105128.1113-1-joaoanandalima@gmail.com>
-X-Mailer: git-send-email 2.55.0.windows.3
+        d=1e100.net; s=20260707; t=1790426797; x=1791031597;
+        h=content-transfer-encoding:content-type:to:subject:message-id:date
+         :from:mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=Q/M0zAfCMSWd/uxVr21+FZg60PEdHKRNk2wvwX2jaWc=;
+        b=YppUX/V1MJCfH1RdyipsJMVsbwsVYCTITDlyU4CuV5v4+VHiVzEVvMf2PNSHPDeCHE
+         0wRo9pP6p1v8KSVR0REXvyQhoYnu/ich3cUlVGNl1rvkRoV+NcMEp4fG1cM0OrXvfPNL
+         Cp6VuKjsiGq71dr7uUhGHRFLP+LI+afYJUu8IT+gaRetnHDpsI8iEcFLa+v8K345kCRL
+         TKZqif8xdolDN06qvUs9r4O6lSdM9E08f4WVp7D+/R+Tct0aLu4OJYvl/8nhtiU24l9N
+         sbuabbNW/eVGUcAxiYrL+R5TZMiH2nnEeTIZjrufgi73WNDx246/cDL0J/yVdIwCXCBa
+         xmQw==
+X-Forwarded-Encrypted: i=1; AKwUvBzGEmWmVoMgQNPoGa5675cUH2tH+mKxP1scl7qGXg96msJm1c2ygHbpNph9/fPu8d92+icRD9XYXwg=@vger.kernel.org
+X-Gm-Message-State: AFuF++k9XtlBshmqpm9H/I5RqznQLbBxWNZIFr9KgYcvwkkBP5UMXcp9
+	3sVfGvnb8JDxt6BZxuuampohK3bspYialoGQW/mn4s5im6tlYHO5/L9wgdlHpIcBVKjK8+b+YLF
+	9nGtsBV9+c2rrRYsW+3V8f/5rB4itHoo=
+X-Gm-Gg: AYBFou1h7nMF6+fpkcZwECxkabN0wXkYs4niE/9ivriGKpk9SO1niGXH3j0bTi8FoDB
+	8pFsu6qq51L1cgR9r2gYL/AgEOsuXn0gsQYW76XmItdiqGxxhU28XI6HXWuly3Bb6TMbvNwX5dr
+	mjg3ja48ic8/b3sM4T2JbPiouyyeQzmS67sfdWq86DXHovi4ud23aoiZYdiSg6ItvekymgAqtHk
+	Bl9XZlhODS77TRbt43BsSzROfnJ9o4Ql8Q1g7X/fNqrqqpkEGuTE9hEmHSf2A+ArvBQeFLn2f6r
+	NdL8BfhUyHMLcOaYjxq3n2VDCFB2l24GaPY9JQ4v54T/icQsfd2CQ1Un
+X-Received: by 2002:a05:6808:3a09:b0:4cb:818f:d572 with SMTP id
+ 5614622812f47-4d72962202dmr9717048b6e.26.1790426797222; Sat, 26 Sep 2026
+ 05:46:37 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: MaeeFilho FL <joaoanandalima@gmail.com>
+Date: Sat, 26 Sep 2026 09:46:26 -0300
+X-Gm-Features: AclHuK91iSpp7C6tIzpIIc0jwuxDMR2F_jRk4TAgdThXM_keAj6Bt0yVqavesWM
+Message-ID: <CAFA5sMfFW6ua+RTsFyPif_02=3anRia-07Zep6+7DpDSfsTdAw@mail.gmail.com>
+Subject: Re: [PATCH 00/16] arm64: DRTM, boot portion
+To: jgunthorpe@nvidia.com, linux-efi@vger.kernel.org, ardb@kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
----
- drivers/firmware/efi/capsule-loader.c | 67 +++++++++++++++++++++++----
- 1 file changed, 58 insertions(+), 9 deletions(-)
+The entire architecture of this series looks incredibly solid.
+Isolating mutable values out of the measured range via unique sections
+and implementing the DEN0113 launch protocol cleanly inside the EFI
+stub is a massive improvement for early-boot defense against
+adversarial firmware.
 
-diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index 8e8f81f0a..6d4d9fec5 100644
---- a/drivers/firmware/efi/capsule-loader.c
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -18,6 +18,59 @@
- #include <linux/vmalloc.h>
- 
- #define NO_FURTHER_WRITE_ACTION -1
-+#define CAPSULE_HELP_SUCCESS 0
-+
-+/** 
-+ * A Structure for Mutex. 
-+ **/
-+static DEFINE_MUTEX(capsule_mutex);
-+
-+/** 
-+  * capsule_help_open - A Helper under the Functions,
-+  * with Lock Mutex, Variables Protected, Security in the Memory.
-+  **/
-+static int capsule_help_open(struct capsule_info *cap_info, struct mutex *mtxPointer) 
-+{
-+
-+	// Lock the Pointer
-+	mutex_lock(mtxPointer);
-+
-+    /** Fixing the weak allocation issue that carried a risk 
-+	 of the driver writing out of bounds.
-+	   A Initial Secure Space (e.g 1024 pointers) */
-+	cap_info->pages = kcalloc(1024, sizeof(void *), GFP_KERNEL);
-+
-+	/** Check if the allocation failed for
-+	  Memory Loss */
-+	if (!cap_info->pages) {
-+       mutex_unlock(mtxPointer);
-+	   return -ENOMEM;
-+	}
-+
-+	/**
-+	   Now, the Logic of the Physhics Address 
-+	**/
-+	cap_info->phys = kcalloc(1024, sizeof(phys_addr_t), GFP_KERNEL);
-+
-+	/** Check if the Allocation failed for
-+	  Memory Loss */
-+    if (!cap_info->phys) {
-+		kfree(cap_info->pages);
-+		cap_info->pages = NULL;
-+		mutex_unlock(mtxPointer);
-+		return -ENOMEM;
-+	}
-+
-+	/** Initializes the rest 
-+	     to factory defaults  */
-+    cap_info->index = 0;
-+	cap_info->page_bytes_remain = 0;
-+	cap_info->count = 0;
-+
-+	/** Return the Success */
-+	return CAPSULE_HELP_SUCCESS;
-+}
-+
- 
- /**
-  * efi_free_all_buff_pages - free all previous allocated buffer pages
-@@ -281,22 +334,18 @@ static int efi_capsule_release(struct inode *inode, struct file *file)
- static int efi_capsule_open(struct inode *inode, struct file *file)
- {
- 	struct capsule_info *cap_info;
-+    
-+	int ret;
- 
- 	cap_info = kzalloc_obj(*cap_info);
- 	if (!cap_info)
- 		return -ENOMEM;
- 
--	cap_info->pages = kzalloc(sizeof(void *), GFP_KERNEL);
--	if (!cap_info->pages) {
--		kfree(cap_info);
--		return -ENOMEM;
--	}
- 
--	cap_info->phys = kzalloc_obj(phys_addr_t);
--	if (!cap_info->phys) {
--		kfree(cap_info->pages);
-+	ret = capsule_help_open(cap_info, &capsule_mutex);
-+	if (ret != CAPSULE_HELP_SUCCESS) {
- 		kfree(cap_info);
--		return -ENOMEM;
-+		return ret;
- 	}
- 
- 	file->private_data = cap_info;
--- 
-2.55.0.windows.3
-
+Reviewed-by: Jo=C3=A3o Guilherme da Silva Freitas Lima <joaoanandalima@gmai=
+l.com>
+Acked-by: Jo=C3=A3o Guilherme da Silva Freitas Lima <joaoanandalima!gmail.c=
+om>
