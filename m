@@ -1,73 +1,46 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98B6B4973BE
-	for <linux-efi@vger.kernel.org>; Mon, 28 Sep 2026 10:10:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB46948A8C2;
+	Mon, 28 Sep 2026 10:27:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790590221; cv=none; b=HcrMsbnbyKWLWHO0WeQuQh8OOiV9YeESKTU7ZrZGiHsBepbVGSA+cl9kGzpajyys1FOM5bzfQncncUaLI3janiz3iF3xjrYFZYZSihpM6FDNcSY8EjY3AvGk6/M2tbcQvQkPsGXK288NNGimoSCxKIGMXtL1cjgibFwyiCTPMYk=
+	t=1790591254; cv=none; b=BSZBv6Hm2LTrRaw/DelcFMRq72DFTpM01swUTuIXJjAcobSxdFGJHqHCG+0br4/VFWXNw59GQNg9zO5RwxrMX59ljZx0XLIMF4+A37FRLEOip1PYm5V7CXZGDrpK2uAXqbL37PCQPCICxFEGXW+XLzjJD61JPJVA+pyEY75uAIY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790590221; c=relaxed/simple;
-	bh=txQ4KpuyJ7cs2vkk03a5vTTrtEUv5gVDltpopjXfHWc=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=Yb6lovtPqPCpUdvaQyl2hJDafLCo5/Pnn+F8Z8CvG6LwB22494aDqIEjnzAU5gF0FJqZ8V4zuJP/C2ebCBFdVu7bFwoivylqEjYoGjmFAraoNvc6UBscJvJGuqlSdyz3K7n76QNbWXmDlyIlBSqsslEboaZt2+Rz/lIiOcTRAiI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ys0tWLWY; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790591254; c=relaxed/simple;
+	bh=QVR1P0y6tBOU7MA30g/VzPqDJvUjUfNZb/v6wwESHA0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=eiNDK5+AUCFeRreA3AOMyJWuaBMoiWQcxQMYc9McyA3a2q8zRFTyV7Nzssbp00Bv0rC4xjsCIBzNkG2YSw0vOBT8KuawCPgTWGsM3u5I498ij5ZyxfKRqG2HI8YsU1vNQCSGNvjUwjM3iVfDr7H8guW5IerHypyB16n4UGJpToY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OzqgRwAW; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ys0tWLWY"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E3AC61F00893;
-	Mon, 28 Sep 2026 10:10:18 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OzqgRwAW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E6A661F000FF;
+	Mon, 28 Sep 2026 10:27:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790590219;
-	bh=txQ4KpuyJ7cs2vkk03a5vTTrtEUv5gVDltpopjXfHWc=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=Ys0tWLWY3v+ZQK28QG1pyHpAASLTw4aTWdLSkYQQFp63snezKRjWRWgymjkKv0YH+
-	 mKJNFE2m/GTa32PiDKF9Fsxdwtv0QM2PtYymR2yNO+Ck+qzctZbQQWQhx4puoe7t7U
-	 0T7/AR9YHS5t9fHxbqbqT7vtCYtXojQm66jXr3j+sNxPcdxJc5ugKL4L9V7opy8Y3D
-	 764O5jY27T7taJpc8dugPxeCJ56lwk8IQZ3hDJrALkCCQFfu+Hl0Bb7A0fxV/oC4Su
-	 S5HuLjNdLjFa5feSLC8ajxJt0hB2ASTv8z5qphaJd5TxB8Pq37GpEQ88kPtr+JV1Wr
-	 Xt8mLpznvsPuw==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 39566198004A;
-	Mon, 28 Sep 2026 06:10:17 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Mon, 28 Sep 2026 06:10:17 -0400
-X-ME-Sender: <xms:Bz26aloCG07u0U2myyaiNVhlzldhZEgSyEPmtjtA3bopu0UGB5Y4vQ>
-    <xme:Bz26aiewI5iXGQvRRKIlms32ZgQ0OfDd1YUHiRbLi036iTWno-iX0pFc2wZsKN7Qq
-    34ueYk_UUyf-0J7hChPlScO6fkVUiMqujFRz-Tbqsm1bpUOYvNVnZZ->
-X-ME-Proxy-Cause: dmFkZTFWUO2MCgJ6y1ADJckI3qL7si/effMEkeNnaAKyB9B2DsqpuLQySpWC/xF1iJ3glJ
-    SUam2bgDErxbIuvO7+XRIrYLYMwidztoDz5PU+B+uGPhuR8zJVmQqpHPvKhP99UMT5fA38
-    0Ayu/jKm8+MPoz9cXpw1JcfW6l1L6D4tw0OVa1VZ5t/3MBM/k6/duU541d2zmgIeI6buVI
-    n2yEEVp3V33dF0MeLdZXrkSMhypcNDHehf1ZW0s9TLaQp2Be2s2AtTCbmDsO+GiDop7zrR
-    cVHa98L8lav/8IXbjBuYMPzFs+whl3ndFtgVhat4JA1up2w5dn9rZ9qSYSawCiPMAjLzWI
-    hoaCU22aKoMEngDvlOyr3mOatFaj0U7HP36IzXdFrGFaVN/g8aT3IRwaaz1oxfDTI+HsfI
-    0UxNK2PGMx2ilNCmukx4CX1CtFhShRfOzOXkvN4Xw/i41BxVRyjmka/QdDtqtWwBXFwRmv
-    Sn6UuxvRgfcE4R7R21e4jHWcqIq6Sb3KuOqlMPAHZP5xhaUJ/ms4YYkUBRrWVrS9ABKjpW
-    M/fyRSSJFmgMAzrAfuLreQomc0E0xFEy7qeVZFWhLtuFqFoXRM/fyaiogMRdfSkvqBYj+E
-    vUGJ2gZfeppP48MIfGNP4ZrY+FTSUG94/X6uZb04U9BzK5agM5XjSBC2LZrA
-X-ME-Proxy: <xmx:CT26ajSEJa3sXkqrXTb-RVdlYUcbUlR6ug3e25wzSAdyrua0egKX5w>
-    <xmx:CT26au1h_bf-JEW-B8PUX2vPt_k_wjopoGWFC8FAS7M_aTB32jATOw>
-    <xmx:CT26aov7Mz03Y7yeHt_drQh9GRojb76OnEK8OMk7JeNfUdzAtnlEnQ>
-    <xmx:CT26akj3rb-m31mi0o6OpYY0CCsD7hfAhG6sHkW6L1aobOUr459OYQ>
-    <xmx:CT26ap-3KeMJagQrnnBKf15aibtmS89xUZRs2hKxGAchTN0qyZrBwMis>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 439EDF80080; Mon, 28 Sep 2026 06:10:15 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=k20260515; t=1790591253;
+	bh=TltTu2GayBcfZmAW/CasQEAr+MrcpVQ2RS6PHdIKOjE=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=OzqgRwAW2du0wry5dUBxZL9MehZUleJZMRlmpYlVPOoiM+XZovcKfb+l9d0ULqXhN
+	 /evsjS2W/ZmZ5zewM9GSw2V76GYCu3GdsS3jJY/YTygNOaSdZgWuOs4jLYAR12fv74
+	 hCPsFZxAp6CWzOlyfPJ/ct9VfBH9SiiODcj2abhbIhH3FWFT6tuj3OqeOQw4MwisZG
+	 vTLnG/wwwIJ8B9owNvNarYH/mlAbg+Ki85wkyqMoirQn0Y5y8wJZGXFysM/x3GPn0g
+	 zFXr3xk4S977/s1ZHRhet7memdb3QCRLN0k7otSVIhiwun/+mPw7WuF7EI2NO0++Dc
+	 n/+ddCJkwxBtg==
+Message-ID: <564b7a1a-7273-48a8-9015-92f0166eac79@kernel.org>
+Date: Mon, 28 Sep 2026 12:27:29 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Mon, 28 Sep 2026 12:09:55 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Vincent Mailhol" <mailhol@kernel.org>, "Borislav Petkov" <bp@alien8.de>
-Cc: "Kiryl Shutsemau" <kirill@shutemov.name>,
- "Ard Biesheuvel" <ardb+git@google.com>, linux-efi@vger.kernel.org,
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 01/10] x86/boot: Drop pointless re-implementation of
+ panic()
+To: Ard Biesheuvel <ardb@kernel.org>, Borislav Petkov <bp@alien8.de>
+Cc: Kiryl Shutsemau <kirill@shutemov.name>,
+ Ard Biesheuvel <ardb+git@google.com>, linux-efi@vger.kernel.org,
  linux-kernel@vger.kernel.org, x86@kernel.org
-Message-Id: <08f0833e-12fb-4d74-9d0b-beda435f7e65@app.fastmail.com>
-In-Reply-To: 
- <CAMZ6RqJCMt3zoDQ2iWXWJvxSifB0cV20FayX=yxoG30QdJ8aQA@mail.gmail.com>
 References: <20260909115530.1924665-12-ardb+git@google.com>
  <20260909115530.1924665-13-ardb+git@google.com>
  <20260909191410.GAaqGwAsCewrdVZZ0s@fat_crate.local>
@@ -80,37 +53,53 @@ References: <20260909115530.1924665-12-ardb+git@google.com>
  <862d50e1-2072-407b-882d-5e3074a3c225@app.fastmail.com>
  <20260913181105.GAaqbnOUDX2YNFW8iQ@fat_crate.local>
  <CAMZ6RqJCMt3zoDQ2iWXWJvxSifB0cV20FayX=yxoG30QdJ8aQA@mail.gmail.com>
-Subject: Re: [PATCH v2 01/10] x86/boot: Drop pointless re-implementation of panic()
-Content-Type: text/plain
+ <08f0833e-12fb-4d74-9d0b-beda435f7e65@app.fastmail.com>
+From: Vincent Mailhol <mailhol@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=mailhol@kernel.org; keydata=
+ xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
+ JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
+ fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
+ F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
+ 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
+ YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
+ dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
+ zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
+In-Reply-To: <08f0833e-12fb-4d74-9d0b-beda435f7e65@app.fastmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-
-
-On Mon, 28 Sep 2026, at 11:44, Vincent Mailhol wrote:
-> Hi Borislav,
->
-> On Sun. 13 Sept. 2026 at 20:11, Borislav Petkov <bp@alien8.de> wrote:
->> On Sun, Sep 13, 2026 at 06:35:33PM +0200, Ard Biesheuvel wrote:
->> > The reason I want to get rid of panic() is because snprintf() is going
->> > to be removed from the EFI stub.
+On 28/09/2026 at 12:09, Ard Biesheuvel wrote:
+> On Mon, 28 Sep 2026, at 11:44, Vincent Mailhol wrote:
+>> Hi Borislav,
 >>
->> Ok, I'll queue it into x86/boot and give you an immutable tag it doesn't look
->> like something urgent to me.
->
-> I had a look at tip/x86/boot but could not find this patch yet, nor an
-> immutable tag containing it.
->
-> Just checking whether it is still queued on your side, thanks!
->
->
-> And, by the way:
->
-> Reviewed-by: Vincent Mailhol <mailhol@kernel.org>
->
+>> On Sun. 13 Sept. 2026 at 20:11, Borislav Petkov <bp@alien8.de> wrote:
+>>> On Sun, Sep 13, 2026 at 06:35:33PM +0200, Ard Biesheuvel wrote:
+>>>> The reason I want to get rid of panic() is because snprintf() is going
+>>>> to be removed from the EFI stub.
+>>>
+>>> Ok, I'll queue it into x86/boot and give you an immutable tag it doesn't look
+>>> like something urgent to me.
+>>
+>> I had a look at tip/x86/boot but could not find this patch yet, nor an
+>> immutable tag containing it.
+>>
+>> Just checking whether it is still queued on your side, thanks!
+>>
+>>
+>> And, by the way:
+>>
+>> Reviewed-by: Vincent Mailhol <mailhol@kernel.org>
+>>
+> 
+> Thanks.
+> 
+> Latest is here:
+> https://lore.kernel.org/linux-efi/20260925075137.44298-5-ardb@kernel.org/
 
-Thanks.
+Ha! I missed that new version. Thanks for the link. I will test it.
 
-Latest is here:
-https://lore.kernel.org/linux-efi/20260925075137.44298-5-ardb@kernel.org/
 
+Yours sincerely,
+Vincent Mailhol
 
