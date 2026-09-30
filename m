@@ -1,48 +1,50 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 90AB22EA732;
-	Wed, 30 Sep 2026 18:45:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2482F353A65;
+	Wed, 30 Sep 2026 18:45:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790793922; cv=none; b=m1QfBbRrfQq5RpRGnPNvFAQBev5ELbBs06T+WQF6FPn3Fx82gZpA7kqPC8Hk4XKZMhP+1j67NmbmBH7Rz+QpnTcFdfZVrb5JhwaGeQYQPWiO7KWgKibQ+b91Z757FRBf9PBNiH3DI9ccLjlgF+T8Pc1+ARCt1OLBawOdmtZA2Y4=
+	t=1790793928; cv=none; b=UP+ljyLP5s8KfV9PNEvGV94JKSU8G7Tt7o08TSfhjaeP+WAsi3dXV1Ry6L82g1J3fx03HTDSBijel/GNEL87ZavWOPLn+jcjk7r5kD03/e1nZ144UfRltDxUnqBn14rJWeqtRHIjIESsWv61oDYFCNbk+IT67puT1LQwXlW6Cv0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790793922; c=relaxed/simple;
-	bh=tx9mQZnBRw8YetRzFdodW780rTrp63sKO+q7f6epAws=;
+	s=arc-20240116; t=1790793928; c=relaxed/simple;
+	bh=D2Q4ndQ5kq6cv7G5VBHOSS9RO2v8HcOkQIbLvf8sGx4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=bqeTuJeiMeuQeAQh2H2Q05pvmNWIWzqqXbSSYUXdcs25gJZAyn5P2fK4aWnFnkVGxAAYoAKbpzA/mAGJX3UtTEAa09/zoR0RDm4puWNB2RDocnMmsIENaLTDDFq7JyiVGCmykoZtGe0+n0xRVqnH6h5Ohy7RUTXLld+y375IIyk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hSWKQUAU; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=Sj9xl+V9mqkKnP0olua2SBJvlAY//5gMLhBpiOfN/N3Bza30DhEKk3AXaix0LVJkfPZ2id6VnbyeoyFRiLXjwzJ6FVBCKAMccd1n/yBTu8aoN445LMVPcf7OMUGYrMfjrxbsXu9dnPOIK2PKGd0jIAh4M6+EOrspFHHacJ52+9Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AmEbGLAU; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hSWKQUAU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 597EC1F00898;
-	Wed, 30 Sep 2026 18:45:15 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AmEbGLAU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 375A31F0089B;
+	Wed, 30 Sep 2026 18:45:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790793920;
-	bh=vA5hsqCvhvz/T3rPXSDNs/An5ZWBLUxtfQ5Oe7HS6yk=;
+	s=k20260515; t=1790793926;
+	bh=fIo75/ZA2hb+/w3b7P/tnJ5SIXlHwF5f78Uc4xRp+f0=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=hSWKQUAUMSVWY8REIbJ+wlwC5u8T4148msWaoNWgoJXh7xwPaFnhSYKH7JRmLBqyX
-	 L+Apd5Y0CEHCGhWFZurBxVDtbOdZ7mRVGJfBrmENkww9WZN+EnYt5a6Yb+EHj/bTW5
-	 Bcql1ZBb6HCDvzztw7mt0DTRzVW9o+OLh1OjbFcgpDcFOAPr0MMXeUCmoEWvCg7Jyu
-	 FIr3MpKTblh9NuPJSfCrNy/TMXxrBH1knMccsawQ5HMi+0rHt4ocTepOR5CC/IhROD
-	 uoXGPt0OdxtCj9AKFkxpAdhoqxOi8ZzhTtQbrYUe5N708o11e6kzedWOmIFqn3FJ0J
-	 NO20Z3rDtLZtA==
+	b=AmEbGLAUyUsgx7rwtTy2/gQiIBpEUL0KnmdkdTDXgNbaQEPv1IFdcd3vHYzvSBbPv
+	 TCI50eYEQSO4uTA4b4w0EJaSZ8uM3f38Owwbj9quB2NvbGPnpEiUk9tR96DTcCa+Ka
+	 qeI6qqAUjxUu0JR6nVkXkuHo3QG2pwzRLAXFDyKSaoO4R/yHl4982hC2hVhp851ReI
+	 xH1mk20PuZXfQMtlMIorGwok616c7c993aAIiNp4fZWpJg/5pL/0VGJthdg9ptvCrD
+	 9UGcImRb2H6Xqjqc0uid32emjNsvLZ3Rr1JmDfh0GAU2UatLWLd4xb+fAQ6+Pg7bu/
+	 U6kUKNJt4dImw==
 From: "Rafael J. Wysocki" <rafael@kernel.org>
-To: Linux ACPI <linux-acpi@vger.kernel.org>, iommu@lists.linux.dev
-Cc: linux-arm-kernel@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>,
+To: Linux ACPI <linux-acpi@vger.kernel.org>, linux-sound@vger.kernel.org
+Cc: LKML <linux-kernel@vger.kernel.org>,
  Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
- Sudeep Holla <sudeep.holla@kernel.org>, Ard Biesheuvel <ardb@kernel.org>,
+ Sudeep Holla <sudeep.holla@kernel.org>, linux-arm-kernel@lists.infradead.org,
+ Ard Biesheuvel <ardb@kernel.org>,
  Ilias Apalodimas <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
  Will Deacon <will@kernel.org>, "Joerg Roedel (AMD)" <joro@8bytes.org>,
  Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
- Robin Murphy <robin.murphy@arm.com>, David Rhodes <david.rhodes@cirrus.com>,
- Richard Fitzgerald <rf@opensource.cirrus.com>, linux-sound@vger.kernel.org,
- patches@opensource.cirrus.com, Shenghao Ding <shenghao-ding@ti.com>,
- Kevin Lu <kevin-lu@ti.com>, Baojun Xu <baojun.xu@ti.com>,
- Sen Wang <sen@ti.com>
+ Robin Murphy <robin.murphy@arm.com>, iommu@lists.linux.dev,
+ David Rhodes <david.rhodes@cirrus.com>,
+ Richard Fitzgerald <rf@opensource.cirrus.com>, patches@opensource.cirrus.com,
+ Shenghao Ding <shenghao-ding@ti.com>, Kevin Lu <kevin-lu@ti.com>,
+ Baojun Xu <baojun.xu@ti.com>, Sen Wang <sen@ti.com>
 Subject:
- [PATCH v2 2/5] iommu/arm-smmu-v3: Switch to use acpi_bus_get_primary_device()
-Date: Wed, 30 Sep 2026 20:43:03 +0200
-Message-ID: <3636226.QJadu78ljV@rafael.j.wysocki>
+ [PATCH v2 4/5] ALSA: hda: tas2781: Switch to use
+ acpi_bus_get_primary_device()
+Date: Wed, 30 Sep 2026 20:42:36 +0200
+Message-ID: <8782185.NyiUUSuA9g@rafael.j.wysocki>
 Organization: Linux Kernel Development - Intel
 In-Reply-To: <4766532.LvFx2qVVIh@rafael.j.wysocki>
 References: <4766532.LvFx2qVVIh@rafael.j.wysocki>
@@ -82,22 +84,38 @@ Thanks!
 v1 -> v2: No changes
 
 ---
- drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ sound/hda/codecs/side-codecs/tas2781_hda_i2c.c | 3 +--
+ sound/hda/codecs/side-codecs/tas2781_hda_spi.c | 3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-index 5732f3ba0122..98f105798b89 100644
---- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-+++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-@@ -5307,7 +5307,7 @@ static void acpi_smmu_dsdt_probe_tegra241_cmdqv(struct acpi_iort_node *node,
- 	adev = acpi_dev_get_first_match_dev("NVDA200C", uid, -1);
- 	if (adev) {
- 		/* Tegra241 CMDQV driver is responsible for put_device() */
--		smmu->impl_dev = get_device(acpi_get_first_physical_node(adev));
-+		smmu->impl_dev = acpi_bus_get_primary_device(adev);
- 		smmu->options |= ARM_SMMU_OPT_TEGRA241_CMDQV;
- 		dev_info(smmu->dev, "found companion CMDQV device: %s\n",
- 			 dev_name(smmu->impl_dev));
+diff --git a/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c b/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c
+index 5e5f46c9fb6b..161ca965c63e 100644
+--- a/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c
++++ b/sound/hda/codecs/side-codecs/tas2781_hda_i2c.c
+@@ -100,8 +100,7 @@ static int tas2781_read_acpi(struct tasdevice_priv *p, const char *hid)
+ 		return -ENODEV;
+ 	}
+ 
+-	struct device *physdev __free(put_device) =
+-		get_device(acpi_get_first_physical_node(adev));
++	struct device *physdev __free(put_device) = acpi_bus_get_primary_device(adev);
+ 	ret = acpi_dev_get_resources(adev, &resources, tas2781_get_i2c_res, p);
+ 	if (ret < 0) {
+ 		dev_err(p->dev, "Failed to get ACPI resource.\n");
+diff --git a/sound/hda/codecs/side-codecs/tas2781_hda_spi.c b/sound/hda/codecs/side-codecs/tas2781_hda_spi.c
+index da71b57a26ee..f3ba7132d2b8 100644
+--- a/sound/hda/codecs/side-codecs/tas2781_hda_spi.c
++++ b/sound/hda/codecs/side-codecs/tas2781_hda_spi.c
+@@ -341,8 +341,7 @@ static int tas2781_read_acpi(struct tas2781_hda *tas_hda,
+ 
+ 	strscpy(p->dev_name, hid, sizeof(p->dev_name));
+ 
+-	struct device *physdev __free(put_device) =
+-		get_device(acpi_get_first_physical_node(adev));
++	struct device *physdev __free(put_device) = acpi_bus_get_primary_device(adev);
+ 	acpi_dev_put(adev);
+ 	if (!physdev)
+ 		return -ENODEV;
 -- 
 2.51.0
 
