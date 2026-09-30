@@ -1,50 +1,51 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1AED33CEB9E;
-	Wed, 30 Sep 2026 18:45:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B98323D3CEF;
+	Wed, 30 Sep 2026 18:45:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790793935; cv=none; b=usiY7nDLlB/w8mvtap8xgN9qfgn+nIguyttOF+R5P8p/DQZ/UXAPtiVTboIOCHE2+1Y1YmHQFNMhpQiG/l3Fnh/E7DeAJJg/eyqJ+2KeqMFR3msfsMG1mVs38tSyKpL+3aO6xG5m9u95pVVlZl7712EEIbRGibY6PrkCr9uw/x8=
+	t=1790793943; cv=none; b=BgFSyPIivW96io8Fa2cE1WLnLj42FVWG10IPp3xJepQCYTYUvQBY3AJ73vTlG3PRR+DspBA2udIIXORK2COi6a7laNfQkC9D0OOem3hF9gSFxnYi6wrOIaCyIroTt0N7eTuED2a+PXm+wZdNC3vaqFN5BoqgpaMslENhKPseH/A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790793935; c=relaxed/simple;
-	bh=YFgc6DGiz2RmNvUaXDR9d24S8CqeC+7+p1aF+2BYRYk=;
+	s=arc-20240116; t=1790793943; c=relaxed/simple;
+	bh=oBb+17du6NRtxN3osGyM9CWUvAswLCoR9Oit+aa25a0=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Dkrx24ny4cnXUBo5T0N06GNfC3a5Zbd03ac1HCYY01VLAw8AseAQcmQIMFakdEIVhNmxIb4vTDe/3+7sTDhG0UXnD5d5oRRxPO5qfg6o8LErAZDHoRTMDuX0J0thvmiSAp6f2jNmrPKmi9DWuj9cv7xFMnDLJprw2EN6Prnc2yA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RG1fLF31; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=V5fQ7PDFsye46Zr0Sr6eGJqfnT/J2gc3iDm6YprgxUAmuS2/cgwYnBC9uDinvhCvSAk/H5tTzQ1PGLhBOJ5Bgpvcw54ktLOyN4IuhsJENn2GGf9qMrOqJUXrqFnT0+P8YVuTilFxW9vOx1anRpdNAm2gbDbnJjwnb2tr138z1Uw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nvAgqC7+; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RG1fLF31"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1575F1F00898;
-	Wed, 30 Sep 2026 18:45:28 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nvAgqC7+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0C88A1F00898;
+	Wed, 30 Sep 2026 18:45:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790793933;
-	bh=4L9KB743dJyhVBRNiNV8YEwpftY1J+e9ffJPm3qRbXs=;
+	s=k20260515; t=1790793941;
+	bh=sPUa1UDCepLgjEsxDYzNytI1H2lpA7WtjDbyVIjlxxw=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=RG1fLF31K6zig5yEi5YRjknLKdChfwUOp2jevRATPbks1co7p1huVxFGG6TvhDK+G
-	 sbNzoLGi3xrD14lz9/X68Uqc4xc6dW1j+u0izKmyeNJsM5XlKaie9JYt8n9leWE2SO
-	 97qzMCTfJp7GPxjzN7fw7lesKHTIX7YkgN+kAwztGNBUmZAeWVxm5vROXr0SawjKTT
-	 6ob4egvQNlW6Bn0DGov74p826B/bqu5rTy12ySNIwDi9v5FgaA2saLDkJIsQ5q0+OI
-	 KSSsWizGOySibRN+fB16hubKDwmpBEygTLzTUReovxGDST2C1yzPejNmJm1lGnYJzM
-	 gB36thUB6B11Q==
+	b=nvAgqC7+qL/txwB6g/TswQeMlYhqV9aY8pC6/L455ocIF2QraBN9yB7ixoNUQzQIr
+	 AZAPONZ6gWyHGW+LUosU4Ts3onnbq40wLFrUX8c7cCSHYH4zzVUbRZJEqxjRAcrjPA
+	 9AQV4IbWrLJihN0wZ00K4jZ/nIhS0I8wz/cZoqbpKlcoz3D06Azuxd+oZUA2Hr39lY
+	 oLvpXENea7TXznnfd+XhNSaCzUrunYcm36OlagR3IJ1dNarLnGsIGsoq/7FG/FCetw
+	 j+HOMAH5/1q4RgX1yyjE2C9vH76CtofXW4PAT2wIWT8AjJrCHMudpX8MaWGWGGGKPa
+	 A01KTsF5lw4eg==
 From: "Rafael J. Wysocki" <rafael@kernel.org>
-To: Linux ACPI <linux-acpi@vger.kernel.org>, linux-sound@vger.kernel.org
+To: Linux ACPI <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org
 Cc: LKML <linux-kernel@vger.kernel.org>,
  Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
  Sudeep Holla <sudeep.holla@kernel.org>, linux-arm-kernel@lists.infradead.org,
  Ard Biesheuvel <ardb@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>, linux-efi@vger.kernel.org,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
  Will Deacon <will@kernel.org>, "Joerg Roedel (AMD)" <joro@8bytes.org>,
  Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
  Robin Murphy <robin.murphy@arm.com>, iommu@lists.linux.dev,
  David Rhodes <david.rhodes@cirrus.com>,
- Richard Fitzgerald <rf@opensource.cirrus.com>, patches@opensource.cirrus.com,
- Shenghao Ding <shenghao-ding@ti.com>, Kevin Lu <kevin-lu@ti.com>,
- Baojun Xu <baojun.xu@ti.com>, Sen Wang <sen@ti.com>
+ Richard Fitzgerald <rf@opensource.cirrus.com>, linux-sound@vger.kernel.org,
+ patches@opensource.cirrus.com, Shenghao Ding <shenghao-ding@ti.com>,
+ Kevin Lu <kevin-lu@ti.com>, Baojun Xu <baojun.xu@ti.com>,
+ Sen Wang <sen@ti.com>
 Subject:
- [PATCH v2 3/5] ALSA: hda: cs35l41: Switch to use
+ [PATCH v2 1/5] efi/dev-path-parser: Switch to use
  acpi_bus_get_primary_device()
-Date: Wed, 30 Sep 2026 20:42:15 +0200
-Message-ID: <6200303.MhkbZ0Pkbq@rafael.j.wysocki>
+Date: Wed, 30 Sep 2026 20:41:40 +0200
+Message-ID: <3974502.kQq0lBPeGt@rafael.j.wysocki>
 Organization: Linux Kernel Development - Intel
 In-Reply-To: <4766532.LvFx2qVVIh@rafael.j.wysocki>
 References: <4766532.LvFx2qVVIh@rafael.j.wysocki>
@@ -84,23 +85,25 @@ Thanks!
 v1 -> v2: No changes
 
 ---
- sound/hda/codecs/side-codecs/cs35l41_hda.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/firmware/efi/dev-path-parser.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/sound/hda/codecs/side-codecs/cs35l41_hda.c b/sound/hda/codecs/side-codecs/cs35l41_hda.c
-index 62296be45c55..32abb71dd401 100644
---- a/sound/hda/codecs/side-codecs/cs35l41_hda.c
-+++ b/sound/hda/codecs/side-codecs/cs35l41_hda.c
-@@ -1926,8 +1926,7 @@ static int cs35l41_hda_read_acpi(struct cs35l41_hda *cs35l41, const char *hid, i
- 	}
- 
- 	cs35l41->dacpi = adev;
--	struct device *physdev __free(put_device) =
--		get_device(acpi_get_first_physical_node(adev));
-+	struct device *physdev __free(put_device) = acpi_bus_get_primary_device(adev);
- 	if (!physdev) {
- 		acpi_dev_put(adev);
+diff --git a/drivers/firmware/efi/dev-path-parser.c b/drivers/firmware/efi/dev-path-parser.c
+index 13ea141c0def..e0f864cbaa8c 100644
+--- a/drivers/firmware/efi/dev-path-parser.c
++++ b/drivers/firmware/efi/dev-path-parser.c
+@@ -37,9 +37,9 @@ static long __init parse_acpi_path(const struct efi_dev_path *node,
+ 	if (!adev)
  		return -ENODEV;
+ 
+-	phys_dev = acpi_get_first_physical_node(adev);
++	phys_dev = acpi_bus_get_primary_device(adev);
+ 	if (phys_dev) {
+-		*child = get_device(phys_dev);
++		*child = phys_dev;
+ 		acpi_dev_put(adev);
+ 	} else
+ 		*child = &adev->dev;
 -- 
 2.51.0
 
