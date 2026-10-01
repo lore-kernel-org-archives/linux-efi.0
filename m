@@ -1,132 +1,104 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id C13B5511180;
-	Thu,  1 Oct 2026 11:08:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C31004E4C30;
+	Thu,  1 Oct 2026 18:22:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790852907; cv=none; b=VDmc2nblp9dxepOpMWuTox3FUjywZu73qVdyuvg4KJrXSRxuLvJCC6L7qX9q1bYT0BUQ6sZuDtcLO/t5XfngieQj6bufQkK9wXpFoFgdu55ULqdd7ALzA78Vi23LVcNzfOYB1YnxG7l5ZENEAfo2t/C2ERpf6tULx0GTcSubqeg=
+	t=1790878958; cv=none; b=HiqZzI477jk4G1ByLu+lC+Wx+sUyhr7E0kiL4VQyKuh6RGkHUJ6x4t31rE5BmArYruAeIpNgCcznAPudfaaLxu8ehO7FCJHNLaeHWJjy9Myp5qI9yQLyJYfmT7dqdcPddJKgqd0TTowyinDdidBMJfHwlam3/hga2Z4lqP8xOZg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790852907; c=relaxed/simple;
-	bh=756vPQ/U2HqARpKFmioH59ZHD/jvMRybv2zdUwtJ7QE=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=uPmDN/Y0AfTl8vKtDyub/sHYswfWEFUul+sw5bIlb3JWSWogoHI6RWZsY/Po4JZbF5o/EVkZFF4jxXfHv6gVdKjeevjMglmbbAM7wUUV9HBkLsvE0dXB8YGrzeTP3WoD9g/Lia8CPr1Srzhc//zI+Wk+2J05auavjFb58cybGxg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=MgJCuqrw; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+	s=arc-20240116; t=1790878958; c=relaxed/simple;
+	bh=Y94ugADCjd5S4s4n0Tg88CMgCId4+Gj9yqv40QY1BOI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=TuG6/e2kn1ClrvuqVZ/fMkZXAsDSIL5TzG42Fp4CPRvXYMSfx7asWrgFKr2psChnE+akPTvpsJ0e3w+VyTTmUluJn7V09rudPDbrkKtmcVh2adgTPRh1aAg+2C39jlOE0dA9oY8LaiWOwX7zY7ffZU/5ZT3eIJtgyTKy/XEYFzE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=pass smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=aRC3uOe/; arc=none smtp.client-ip=198.175.65.18
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="MgJCuqrw"
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 9D2A2497;
-	Thu,  1 Oct 2026 04:08:21 -0700 (PDT)
-Received: from e142392.cambridge.arm.com (usa-sjc-imap-foss1.foss.arm.com [10.121.207.14])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 750E13F959;
-	Thu,  1 Oct 2026 04:08:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1790852905; bh=756vPQ/U2HqARpKFmioH59ZHD/jvMRybv2zdUwtJ7QE=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=MgJCuqrwOr1ieJjj6sTN2msgmjC7iS2oLeK438Q5jropr1Yl5jfrJSAMEPgnTiNkR
-	 umFQXQ13adZTBLlsLVPKEJpmqvGA/q0vX8o4oIlZPyMbSKGmZXWph+RVvklWpuOxZk
-	 F8cckDf8Ky4ID24zj41VzzzB1wX2wAiAesd7s9sc=
-From: =?UTF-8?q?Kristina=20Mart=C5=A1enko?= <kristina.martsenko@arm.com>
-To: linux-arm-kernel@lists.infradead.org,
-	linux-acpi@vger.kernel.org,
-	kvmarm@lists.linux.dev,
-	linux-efi@vger.kernel.org
-Cc: Catalin Marinas <catalin.marinas@arm.com>,
-	Will Deacon <will@kernel.org>,
-	Mark Rutland <mark.rutland@arm.com>,
-	Ryan Roberts <ryan.roberts@arm.com>,
-	David Hildenbrand <david@kernel.org>,
-	Lorenzo Stoakes <ljs@kernel.org>,
-	Linu Cherian <linu.cherian@arm.com>,
-	Anshuman Khandual <anshuman.khandual@arm.com>,
-	Lorenzo Pieralisi <lpieralisi@kernel.org>,
-	Hanjun Guo <guohanjun@huawei.com>,
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="aRC3uOe/"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1790878952; x=1822414952;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=Y94ugADCjd5S4s4n0Tg88CMgCId4+Gj9yqv40QY1BOI=;
+  b=aRC3uOe/R8CtPtEa3mEnIy9j1FhMlbb3DsC4klRU/LDOCFa1loKp7EsO
+   8hnpjC1gcQXIyjR0jqKK1arOzi2f5r9rMB7VxzJ8SzLcJk76MIiqBNap/
+   GBMZn2u+vQcEweepe0mBBHE2UiAvcwmxp/zu1/CrnFyXvP6YL15DzAvzg
+   NyXAg8WJr6LJTholLPq/Hvm1Ej3YFfDwR9sgwfc2rPsOv/LCEp6vYmFY6
+   Y+vexe0P9f4r+ZIsp0r2DHPLPCo2Ut9CrFidMPxu0d4Fyldel5esrZOGR
+   brR/8HwnzFfoMRwXO6YyT0rtLpM4Zjj7hbx/kYO0ZI5TxFewS7BZPVi0n
+   g==;
+X-CSE-ConnectionGUID: fWfy4Qt5RpKA/wTZt5dm/w==
+X-CSE-MsgGUID: dJc8kIsdR2GNqqsRjjCRaQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11922"; a="90704757"
+X-IronPort-AV: E=Sophos;i="6.27,135,1787036400"; 
+   d="scan'208";a="90704757"
+Received: from fmviesa002.fm.intel.com ([10.60.135.142])
+  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Oct 2026 11:22:20 -0700
+X-CSE-ConnectionGUID: L5g60cWbRa2/8tjijxT4Ww==
+X-CSE-MsgGUID: StWR2umvRNqgnHBGcd2t7Q==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.27,135,1787036400"; 
+   d="scan'208";a="302298846"
+Received: from abityuts-desk1.ger.corp.intel.com (HELO localhost) ([10.245.244.27])
+  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Oct 2026 11:22:14 -0700
+Date: Thu, 1 Oct 2026 21:22:12 +0300
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: "Rafael J. Wysocki" <rafael@kernel.org>
+Cc: Linux ACPI <linux-acpi@vger.kernel.org>,
+	LKML <linux-kernel@vger.kernel.org>,
 	Sudeep Holla <sudeep.holla@kernel.org>,
-	Marc Zyngier <maz@kernel.org>,
-	Oliver Upton <oupton@kernel.org>,
-	Fuad Tabba <fuad.tabba@linux.dev>,
-	Joey Gouly <joey.gouly@arm.com>,
-	Steffen Eiden <seiden@linux.ibm.com>,
-	Suzuki K Poulose <suzuki.poulose@arm.com>,
-	Zenghui Yu <yuzenghui@huawei.com>,
+	linux-arm-kernel@lists.infradead.org,
 	Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Subject: [RFC 12/12] arm64: tlbid: Add documentation
-Date: Thu,  1 Oct 2026 12:06:55 +0100
-Message-ID: <20261001110655.461473-13-kristina.martsenko@arm.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20261001110655.461473-1-kristina.martsenko@arm.com>
-References: <20261001110655.461473-1-kristina.martsenko@arm.com>
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	linux-efi@vger.kernel.org, Will Deacon <will@kernel.org>,
+	"Joerg Roedel (AMD)" <joro@8bytes.org>,
+	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
+	Robin Murphy <robin.murphy@arm.com>, iommu@lists.linux.dev,
+	David Rhodes <david.rhodes@cirrus.com>,
+	Richard Fitzgerald <rf@opensource.cirrus.com>,
+	linux-sound@vger.kernel.org, patches@opensource.cirrus.com,
+	Shenghao Ding <shenghao-ding@ti.com>, Kevin Lu <kevin-lu@ti.com>,
+	Baojun Xu <baojun.xu@ti.com>, Sen Wang <sen@ti.com>
+Subject: Re: [PATCH v2 0/5] ACPI: Replace acpi_get_first_physical_node() with
+ acpi_bus_get_primary_device()
+Message-ID: <ar6k1MMzNDTbdLvO@ashevche-desk.local>
+References: <4766532.LvFx2qVVIh@rafael.j.wysocki>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <4766532.LvFx2qVVIh@rafael.j.wysocki>
+Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
+ krs, Bertel Jungin Aukio 5, 02600 Espoo
 
-Add documentation to describe how the kernel manages TLBI domains. The
-bitmap approach is based on ideas from Miko Lenczewski.
+On Wed, Sep 30, 2026 at 08:30:47PM +0200, Rafael J. Wysocki wrote:
+> Hi All,
+> 
+> This is a partial resend of
+> 
+> https://lore.kernel.org/linux-acpi/7995179.EvYhyI6sBW@rafael.j.wysocki/
+> 
+> that only includes patches that have not been ACKed and the last one that
+> depends on all of the others.  It is based on linux-next.
+> 
+> This series replaces acpi_get_first_physical_node(), which is inherently racy
+> and therefore generally unsafe to use, with acpi_bus_get_primary_device(), that
+> doesn't have this problem, everywhere in the code.
+> 
+> I will appreciate ACKs from maintainers of the code updated by the patches, so
+> I can pick them up and get rid of the problematic interface in one go.
 
-Also document booting requirements for TLBI domains.
+The whole lot is straightforward,
+Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-Signed-off-by: Kristina Martšenko <kristina.martsenko@arm.com>
----
- Documentation/arch/arm64/booting.rst | 10 ++++++++++
- arch/arm64/mm/tlbid.c                | 18 ++++++++++++++++++
- 2 files changed, 28 insertions(+)
-
-diff --git a/Documentation/arch/arm64/booting.rst b/Documentation/arch/arm64/booting.rst
-index 13ef311dace8..6a2c46cc4b22 100644
---- a/Documentation/arch/arm64/booting.rst
-+++ b/Documentation/arch/arm64/booting.rst
-@@ -568,6 +568,16 @@ Before jumping into the kernel, the following conditions must be met:
- 
-     - HCRX_EL2.EnASR (bit 2) must be initialised to 0b1.
- 
-+  For CPUs with TLBI domains (FEAT_TLBID):
-+
-+  - If EL3 is present and the kernel is entered at EL2:
-+
-+    - SCR_EL3.VTLBIDEn (bit 56) must be initialised to 0b1.
-+
-+  - If EL2 is present and the kernel is entered at EL1:
-+
-+    - HFGRTR2_EL2.nTLBIDIDR_EL1 (bit 30) must be initialised to 0b1.
-+
- The requirements described above for CPU mode, caches, MMUs, architected
- timers, coherency and system registers apply to all CPUs.  All CPUs must
- enter the kernel in the same exception level.  Where the values documented
-diff --git a/arch/arm64/mm/tlbid.c b/arch/arm64/mm/tlbid.c
-index c748e710e2ee..2b3e41e6ac22 100644
---- a/arch/arm64/mm/tlbid.c
-+++ b/arch/arm64/mm/tlbid.c
-@@ -19,6 +19,24 @@
- 
- #include <asm/mmu.h>
- 
-+/*
-+ * FEAT_TLBID enables a TLB invalidation to target a subset of CPUs instead of
-+ * the whole Inner Shareable domain. It can improve performance on systems with
-+ * many CPUs.
-+ *
-+ * A system with FEAT_TLBID contains a number of TLBI domains. Each domain
-+ * contains a number of CPUs. Domain 0 is always present and contains all CPUs.
-+ *
-+ * For each CPU we maintain a bitmap of domains that the CPU belongs to. For
-+ * each mm we maintain a bitmap of domains that contain all the CPUs that the
-+ * mm has been installed on. When an mm is installed on a new CPU we reduce its
-+ * bitmap to only include domains that include the new CPU.
-+ *
-+ * When issuing a TLBI we use the smallest domain for the mm instead of
-+ * broadcasting to all CPUs. The domain bitmap is ordered by size, with the
-+ * highest bit corresponding to the smallest domain.
-+ */
-+
- DEFINE_STATIC_KEY_FALSE(tlbid_enabled);
- 
- static u16 *domain_ids;
 -- 
-2.43.0
+With Best Regards,
+Andy Shevchenko
+
 
