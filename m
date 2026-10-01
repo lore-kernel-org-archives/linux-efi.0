@@ -1,76 +1,77 @@
 Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60EA33749FA;
-	Thu,  1 Oct 2026 06:21:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 210494825DB;
+	Thu,  1 Oct 2026 06:22:07 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790835709; cv=none; b=iMRKOmvARbvYgZHC4t7FShJZRgoGEB6zX/xBfzQz01e3ZNw7Bqnn5773WcLFW2kMfgXAyR4BnEnscd3WcxRClI4yfIzvBLv3IjwyZSm8A4jnO87Gn2M+rvUcwO3Pu9lnK6Zt/EFzaGqYZgrOaAdB00zPNdgTIwa54XsViIPZkG0=
+	t=1790835729; cv=none; b=hVWvNDQuSI3QYNtiScoHoMX4Flm4ZWtZMch+jOVYBv8JFNDN7OCFXjxSHI7G47G9Hp492La0q5B0K6LAbcdBNDBZl4bupndfv0t1tYNHacDl6OVPu6duN6RgKBW2DSktoqhauGsD4SinNR2w9Xg3X1jGvyGkZER13cyu6g5I2Hk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790835709; c=relaxed/simple;
-	bh=+v19fspQo6RqCAOXqc92x40I0rbiMxUdPLzoun4FxlQ=;
+	s=arc-20240116; t=1790835729; c=relaxed/simple;
+	bh=JLVfBy4PHGJcEXFtlZjO4AUqTcGC3kK+OYZ+6qwyXzc=;
 	h=Date:Message-ID:From:To:Cc:Subject:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=hHcURsJP9GmakYbYmc8Kb+lCqRth7tMHqMO4D4RMjsKlUMF7VSFFutzyB4a33ldxJP6Qw131v1tgIunFR07hAYv0ZtVAavotGlSqohXEI330ONB58C4FYpFoYjBcz0V8yD2FYxTtVGZQ6c8j8+4QduDab0i6q8hYeU4V0IwmqJk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=yD+m+xKy; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=gaopvcIS; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=ktvli22g; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=nPaAN4jt; arc=none smtp.client-ip=195.135.223.130
+	 MIME-Version:Content-Type; b=tPpyCZZDwzGOOfoYdtgvA/on9cnRQzk6SlxA7jOeHmnGxmWMEgtc1Wue95RmCCIegELUpE5mYmmlQb8tquipeUD8k3U6bpWYe+Ol+SAYQ5uSLGYID05duPq3JVaCOSuCH5uoLtIcr/oJGsGJpXA+8HFBC6xBuLUYD/h4cH/dcJE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=RCG3wBH7; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=yQVNmWeg; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=Von0o+4F; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=jRo71syp; arc=none smtp.client-ip=195.135.223.130
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="yD+m+xKy";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="gaopvcIS";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="ktvli22g";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="nPaAN4jt"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="RCG3wBH7";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="yQVNmWeg";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="Von0o+4F";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="jRo71syp"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id CF80621F5A;
-	Thu,  1 Oct 2026 06:21:36 +0000 (UTC)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id E38BD21F47;
+	Thu,  1 Oct 2026 06:21:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1790835701; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	t=1790835722; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=b5uPq6Sw9e1GVSid52TMaijlXpM/bbx4l5Q+dHa1Mj0=;
-	b=yD+m+xKyXZD5Nl2heLBQdqq4Vpm7m/YYCE+8cmIzQHTRSPz4hbBFqwfjYKTAF9SZPPYk1R
-	LLfGmHyzXRKPWmc/s2wRz4C9DsA5NCmN3wACGOpNNhCXd7g0tR4thU32n0FdGiJalZyunr
-	3QS1OIbgd1UQLrNhgcMzTvFf7CP5b7I=
+	bh=KxxiZzxGZtQ8dDeTk0eXVZPKYhiMQRKmZl768e9bcnY=;
+	b=RCG3wBH7ZIBH7ayF9NFLIPS+N6xcHrRcW9VIgjVuBRi8uwTUP/wNU3YpgXy5bU5sVS484k
+	D5dY08bCkqTPG84zogJFBsiNv8qRia0RjolotJcynlJEBCepKJFXsGnRdqx+2nxkikEO/+
+	e1nqPuOXWMrIHxc8oGl/c1U2NtOwUI0=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1790835701;
+	s=susede2_ed25519; t=1790835722;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=b5uPq6Sw9e1GVSid52TMaijlXpM/bbx4l5Q+dHa1Mj0=;
-	b=gaopvcISW7aUYJkJFmgPYdrUJIFDx1gXiLHur8En/t1JhMCEilU5PakxNIJNmZy6sjLbx4
-	8/YsJvwwXjLRmgDQ==
+	bh=KxxiZzxGZtQ8dDeTk0eXVZPKYhiMQRKmZl768e9bcnY=;
+	b=yQVNmWeg/u9xr6T0GTRr1ZNG081meJgF3ZbGctj0aANClaeIM4skr91VjY2Zgc7v6v27dH
+	uYVCkQanyQzTRnCg==
 Authentication-Results: smtp-out1.suse.de;
-	none
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=Von0o+4F;
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=jRo71syp
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1790835696; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	t=1790835717; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=b5uPq6Sw9e1GVSid52TMaijlXpM/bbx4l5Q+dHa1Mj0=;
-	b=ktvli22gindUY8O/AJ2eojCIf6ReFubzVRo5BmZXNIC0HuJrAP88QlZvQMbnt9ryPEzv6p
-	3G404bxhG1V5DoXt/HlLlljZ66FZLuyxUL8Bc3sGE94+q+XivK0F4CDcuGfekyXT49KV/h
-	2dTeUnQM1EbpONRSMrSTskedBMAgKMU=
+	bh=KxxiZzxGZtQ8dDeTk0eXVZPKYhiMQRKmZl768e9bcnY=;
+	b=Von0o+4Ft6+iTVsOUFDw9cx2GkVBZT2RUH30hS7UXQRZK0tkHg43lH4Pp5eqi2yosKFd/K
+	GF1uEpF1x++KJrlUEjpIobs5Q+uBjpgwOiFp67K54FCNVfNoszjtGveqGAwlE02lcRpKpH
+	7PCqKHGg2gnDaShMnMGMSJGwPKQkvBo=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1790835696;
+	s=susede2_ed25519; t=1790835717;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=b5uPq6Sw9e1GVSid52TMaijlXpM/bbx4l5Q+dHa1Mj0=;
-	b=nPaAN4jtMq3aKF55aSboX+E1o0E2K/DiJCxQEd4VRHPlyTsAiv3gY19HemvVyKVHSFZVyK
-	PpYqiI0EwtTc8qCQ==
+	bh=KxxiZzxGZtQ8dDeTk0eXVZPKYhiMQRKmZl768e9bcnY=;
+	b=jRo71syp0Kw3ym1aQ17uSom5aDCHEFaPziWSbSKyygsIrzLjUSZ4IyMXlDcyPk9jCEFmAe
+	nOpJt8cMZwsj9jBw==
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E5039136A5;
-	Thu,  1 Oct 2026 06:21:35 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 3392B1368E;
+	Thu,  1 Oct 2026 06:21:57 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id LSOhMO/7vWpdXQAAD6G6ig
-	(envelope-from <tiwai@suse.de>); Thu, 01 Oct 2026 06:21:35 +0000
-Date: Thu, 01 Oct 2026 08:21:35 +0200
-Message-ID: <87zewy2b68.wl-tiwai@suse.de>
+	id BatoBQX8vWovXgAAD6G6ig
+	(envelope-from <tiwai@suse.de>); Thu, 01 Oct 2026 06:21:57 +0000
+Date: Thu, 01 Oct 2026 08:21:56 +0200
+Message-ID: <87y0ci2b5n.wl-tiwai@suse.de>
 From: Takashi Iwai <tiwai@suse.de>
 To: "Rafael J. Wysocki" <rafael@kernel.org>
 Cc: Linux ACPI <linux-acpi@vger.kernel.org>,
@@ -95,10 +96,10 @@ Cc: Linux ACPI <linux-acpi@vger.kernel.org>,
 	Kevin Lu <kevin-lu@ti.com>,
 	Baojun Xu <baojun.xu@ti.com>,
 	Sen Wang <sen@ti.com>
-Subject: Re: [PATCH v2 3/5] ALSA: hda: cs35l41: Switch to use acpi_bus_get_primary_device()
-In-Reply-To: <6200303.MhkbZ0Pkbq@rafael.j.wysocki>
+Subject: Re: [PATCH v2 4/5] ALSA: hda: tas2781: Switch to use acpi_bus_get_primary_device()
+In-Reply-To: <8782185.NyiUUSuA9g@rafael.j.wysocki>
 References: <4766532.LvFx2qVVIh@rafael.j.wysocki>
-	<6200303.MhkbZ0Pkbq@rafael.j.wysocki>
+	<8782185.NyiUUSuA9g@rafael.j.wysocki>
 User-Agent: Wanderlust/2.15.9 (Almost Unreal) Emacs/30.2 Mule/6.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -107,30 +108,36 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0 (generated by SEMI-EPG 1.14.7 - "Harue")
 Content-Type: text/plain; charset=US-ASCII
-X-Spamd-Result: default: False [-3.29 / 50.00];
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: E38BD21F47
+X-Rspamd-Action: no action
+X-Spamd-Result: default: False [-3.51 / 50.00];
 	BAYES_HAM(-3.00)[100.00%];
 	MID_CONTAINS_FROM(1.00)[];
 	NEURAL_HAM_LONG(-1.00)[-1.000];
-	NEURAL_HAM_SHORT(-0.19)[-0.966];
+	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	NEURAL_HAM_SHORT(-0.20)[-0.993];
 	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	ARC_NA(0.00)[];
 	MIME_TRACE(0.00)[0:+];
 	RCVD_VIA_SMTP_AUTH(0.00)[];
 	RCPT_COUNT_TWELVE(0.00)[23];
-	ARC_NA(0.00)[];
 	RCVD_TLS_ALL(0.00)[];
-	URIBL_BLOCKED(0.00)[imap1.dmz-prg2.suse.org:helo,suse.de:email,suse.de:mid,intel.com:email];
-	TO_DN_SOME(0.00)[];
-	FROM_HAS_DN(0.00)[];
 	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	URIBL_BLOCKED(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.de:mid,suse.de:email,suse.de:dkim,intel.com:email];
 	FROM_EQ_ENVFROM(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
 	RCVD_COUNT_TWO(0.00)[2];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.de:email,suse.de:mid]
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.de:mid,suse.de:email,suse.de:dkim];
+	DKIM_TRACE(0.00)[suse.de:+]
 X-Spam-Flag: NO
-X-Spam-Score: -3.29
+X-Spam-Score: -3.51
 X-Spam-Level: 
 
-On Wed, 30 Sep 2026 20:42:15 +0200,
+On Wed, 30 Sep 2026 20:42:36 +0200,
 Rafael J. Wysocki wrote:
 > 
 > From: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
