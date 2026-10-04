@@ -1,57 +1,57 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0472E414A04
-	for <linux-efi@vger.kernel.org>; Sun,  4 Oct 2026 07:59:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 48397242910;
+	Sun,  4 Oct 2026 08:01:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791100753; cv=none; b=MIY1KJj0QSXht+2/k/gTBQJnek8W6DtXifyd/Eh2rOjvk+fcD89xHcEszN/kr1R76uS1zTT28vnu2+fUIEYMpKbarjFXvLOTkdDLRFzvggMtcSKdhqv+oEzL6VUa5bWgMh4cfy4aXvnbGMX5gIH40Vggrq3XGSCKjY1fXbkwIzA=
+	t=1791100879; cv=none; b=F3nwidsUrPEszSKJk73MX19lDT7DmtqIaFiYBVOpWYAbX+m5UhyXRWCg77OPUwO1caM7ZT2awVtZPL8sRHrVN3q6bqOoZPRZsGIIE2orMk1W8bvDS5AFTCmRY42k0vV8SfUOPcyxZwLW/750pDftzdfPUK5IKNuE/wvfCD95gBk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791100753; c=relaxed/simple;
-	bh=ip5zwZmfrhsFTFJJSlPPKEZZ+EmEl88CikM38xxmG+g=;
+	s=arc-20240116; t=1791100879; c=relaxed/simple;
+	bh=9M3x7X8al5SvKY4/uuzHfOHfRDjeMR648jQnVaDLq+w=;
 	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=Pw0qTzJ9hhajvtCwYaRAot1ButzNFVqKXa2VU4+3VXUMCwRb30B+VrrzCVKwAnCpss+uToYN9dX6pP2k+8UkejJvEsJb51KR5Sam7M/Gi3jx9bUeEn47VcgbTSbLEgx23cE9Wo0Zq4J6eIfT6FvrFJuZQ+G+3l26dkMGI02PvQE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eTIY7hjK; arc=none smtp.client-ip=100.103.45.18
+	 Subject:Content-Type; b=SYTlqtC5/128R6kjCU17KwXIPXrp25xTEtkIpkIx+p1V/xji9rlFxtXiM9bmXb4idT2/i3WgcmyG+tEXrkXBpN10PWPE6OBbHvG+qRC4yuFWIBKGYR+LMD1kp9kXBdPJmgH/eZR0KNCovkToKfSceBpouqSoh8isAoTkkpSYC8g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DB3jQL0Z; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eTIY7hjK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7CBC31F00893;
-	Sun,  4 Oct 2026 07:59:10 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DB3jQL0Z"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C2CC71F00893;
+	Sun,  4 Oct 2026 08:01:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1791100751;
-	bh=ip5zwZmfrhsFTFJJSlPPKEZZ+EmEl88CikM38xxmG+g=;
+	s=k20260515; t=1791100877;
+	bh=F9kBSf7wm8l5Shredw3rUxbEz7kCjNDe52nqsiHGf7c=;
 	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=eTIY7hjKl6/ZEFLqsHkTJZfahJrWYIhbkVRAtXOQZnxggiX+r1VbgU6aR+qSzp69T
-	 HPZhLNysQoNXZI/VUt4xhevnzGmbvd3qGHpnrs3Aob4coSNRQGfFcQrAoUTSSdqRo7
-	 gnjOGwwkW8xHiMdktBH3cIjVOQUBbuN/pPhuoU/PpT7tqkT7LU4ppu8C3a1en6Ge5i
-	 fzQ79JE6bARUNP3HqejO7VJiemYT7O8i6DkykDJ+mBrv6h5tTwuniM3tKlBDr5S0Jn
-	 iSGRg2Xdi6eMrvYoFugiBjlB85c9JhiViIlB4/LU0+7/oBzXY1Ms9YKjFQ9Bm8juws
-	 FrTigHwsKHx5g==
+	b=DB3jQL0Z5l9B2Qktkhd2yiwYXiFgT+WC5v0pCYcP8ijR3Oa+7tzqOvuuFM2Wyd7lz
+	 GJvqAZTm0YLxyyPMbbzbiPjMI3aHVKOFH9cyS4wvrCGy84Z+lhgYE9oKzejTZBp8N3
+	 35clbC7Z6dShfZiZebtBXN7KQ/o6b96h/ifyWnujmhk2xPhlkhLKvFzKI1r/2TWaML
+	 zEiwoyk8jbgnN69zWoq7jtQ9A8TmuzSNd+7il9unnfZvnW0LBU4E//qpWRUr6Pmj8L
+	 Que8kKANCoY8ewm87Zpym+10wTp1T2ph4aU08AWoLU+r0GFoI83aWYc0CH6yOqjAMu
+	 WzgraX0Ssl6kw==
 Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id E26DF198003A;
-	Sun,  4 Oct 2026 03:59:08 -0400 (EDT)
+	by mailfauth.ams.internal (Postfix) with ESMTP id 5220E198003A;
+	Sun,  4 Oct 2026 04:01:14 -0400 (EDT)
 Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Sun, 04 Oct 2026 03:59:08 -0400
-X-ME-Sender: <xms:SQfCap6qTSTVetAJBUV8gdXl9JhptjSuK4NWLF2OzYPImCobNmJMQA>
-    <xme:SQfCahttkmV9PZoaZLcGPxAa9_lpSOWAIszXqlwor--k032meahulYqFHOcxOg42e
-    casPIKhOkQyTc4aRWyQnbdZn7wV_ApxjmX6u7vDBRFvhBYRxTg5a2g>
-X-ME-Proxy-Cause: dmFkZTGcfh3kb6i3UZvVBmS3UPTh4zYgtegthaQzX1uGiLADSMtq8j1AbGaOmxoTrrlmkL
-    sQwsJ7+WXfIEVRZYxb+1XrepinD4fxRoREBJuZwfE4l3nIcCaNg43EqxpVBclLJeIpXR/w
-    4vfOKKVzmBldF2SNSvypKRJ+eItI3rzAmsKdWlNoi3lEoL1ek8QppdLQNN7aN7BX/hsGhL
-    7hjll2pb1buxolwdq04sgfey1ognkma879vWRNTga7zK4/wP1HGVw8bougW0bBc/UZsZmo
-    PMfLcQ/OAQe7K/Bmy21dQHZWvwbnfjmHnGmJO56ie91GWlhMtaxon/qiU3x93hIHtgXsTe
-    Z+p6rUHxORFmbmaphIxW2xzG9eZB40SC/v7Hnzh3xRhXgUMC3Y+4znbIQDtNSmcjzfP+aG
-    E/1Fsnv4WoQIXPG0mZMhRJ70rsU0p/8c4eBDf4Kvp3N62cppUcWrdBW8gb7h3pgAJL3kDJ
-    8PTHKCTfsywseebdNy76QsBQ1F/28pAVgkgoBEtVyhAshX+ic6bt0TCFPRKXUvEbLh+DW7
-    1gknJlECY3tTspLKHiSU8lk54fyrRy293EeoKXgQI5ejnpx7RAjY08opmGFy796T2OnKws
-    XXbXs30tXvqgPVMQRlxbb2up38w4aW4OH+fNwESJI2fd09DWZlRC8tFZ9Vdw
-X-ME-Proxy: <xmx:TAfCanJI787GI1WvB8JnVrFUpc5M50bmnZYKZMRMXNLRXb2CIWiDgQ>
-    <xmx:TAfCalhZRUM02qYes0s2xQarV8O9UT2WGVzWD1Jgd09Vit6UW_LfYA>
-    <xmx:TAfCal26skyv5yIwCd1d0u5HewZtodtm2oFjHPRxsCYmR1wDywnE5A>
-    <xmx:TAfCargLrMq9kb6n0h57JXF5dA8N3nFtevEYm6oY7R3rHtHH5-0W5A>
-    <xmx:TAfCam9Sk8_ObNI9INf30KjmKxfaM0kOW_iTKe24d4qicTf2KcDv79L2>
+  by ams-compute-02.internal (MEProxy); Sun, 04 Oct 2026 04:01:14 -0400
+X-ME-Sender: <xms:xwfCakEod5fFvxOBBv2kiOyyZv7rRjgxgGbSFAP-Ei9-6ZhIlQsAAQ>
+    <xme:xwfCaoJdYeHsNYdVgnotXfcdIuESrAJ4RkR86I-blYp4IDhYMMR8gYhBDwuoACyJY
+    LmLcYCthRMkizG0pRkcCyemUaAhs8047u6A4WY86E0FDpCznFAxRs-m>
+X-ME-Proxy-Cause: dmFkZTF7bRBgwhxff1sp0njzeucjRIZKeidM1lEvn3ZkcmfabbQS21vmUcl/545EvBZxYC
+    zmeS4tx/0rEzZEMw3ccK+pwEOxmlfLHDn+oPtpWd5pOzFhWZ8qx0nN1aELo4ar9rn24ijj
+    lt8/erIwFtrzSrAHD113d22ZYP8CFMJmR/vDmycv/nC2SeWpI9uH5xe/IEscARpoJxgo46
+    FJv1pR6b9wBRLtsf81TURnFMk8GOO51bYmfLKA142e69wg5DdI/KUAwLwfVSgyRCgJF6WE
+    BL4Qhsvf7BTn5Mh2kVIGZnS/KllKOa3Dm3r+PB37qaKuRaOSVAsz9QxnDOVGQ8hf8CEFfH
+    abwBjdSx8Nnjut7m2nkZzlH/6bsc6PLml+YXqrkIsy4Iy73vIjS5gdD+w8R3Dd1VLIalF1
+    JZSd7edsqIb/gBKQZ+h2jjgU7KLM4Oab/A+4fazFPOH7jaIruJVZPUOjtHfXOzaCMIvYnm
+    KoB1sgpVxHBxni6yuuQtuYamVXhQkBMYmc6YAILTmxYTiLqIp5uG4kv5XNQGD+yuXfuZPa
+    VOR95jGwFdW5IhZKkce6jsBhvCmzs5QONFECOW1LQbtAT5T0vCOwUOZRHeO66Qs3wQ5U9Y
+    WnTO5s8R+uyUsgLdrKlklFCL/KmCKg7R1uJkRPbFIAtlS31F8Yj98JDGX+CQ
+X-ME-Proxy: <xmx:ygfCagMBEWJ0TC2y822tslwIkU9EGr4a1dl-1HA3EO5TxVYrvxKbfw>
+    <xmx:ygfCaiYyM5Cb-YEttx2FGt_2OddfYJxKFQQ18bowOg7B7FbeVTizRA>
+    <xmx:ygfCal-k0-OvCYXRuNIn0hf10SL5f1xA9E2t3rIZVUvQCHqbxEAXbg>
+    <xmx:ygfCal2FAGmTPivKNvlif1cvHitcH4BsqFj2VPgq_nCxLp66pfjdTw>
+    <xmx:ygfCau2iEO2Il_VijwzWz-tuMXBEdpbKieehYZzfHoRW9wkRi8MjCKIw>
 Feedback-ID: ice86485a:Fastmail
 Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id BE055F80086; Sun,  4 Oct 2026 03:59:05 -0400 (EDT)
+	id 05795F80096; Sun,  4 Oct 2026 04:01:11 -0400 (EDT)
 X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -59,81 +59,61 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Sun, 04 Oct 2026 09:58:44 +0200
+Date: Sun, 04 Oct 2026 10:00:50 +0200
 From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Prashant Singh" <singhpra@juniper.net>,
- "Sebastian Andrzej Siewior" <bigeasy@linutronix.de>
-Cc: "Jeremy Kerr" <jk@ozlabs.org>, "Clark Williams" <clrkwllms@kernel.org>,
- "Steven Rostedt" <rostedt@goodmis.org>, "Jonathan Corbet" <corbet@lwn.net>,
- "Shuah Khan" <skhan@linuxfoundation.org>,
- "Randy Dunlap" <rdunlap@infradead.org>,
- "Luis Claudio R. Goncalves" <lgoncalv@redhat.com>,
- "Steve McIntyre" <93sam@debian.org>, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
- linux-rt-devel@lists.linux.dev
-Message-Id: <4491d728-64f6-4ab1-aae2-22bce34a9b18@app.fastmail.com>
-In-Reply-To: <20261001012011.30525-1-singhpra@juniper.net>
-References: <20260928203445.72318-1-singhpra@juniper.net>
- <20260929074312.v3jT8uel@linutronix.de>
- <59d5452c-42b1-4784-a593-5e549a2a0f12@app.fastmail.com>
- <20260929151401.doOQX7D0@linutronix.de>
- <20260930013500.10273-1-singhpra@juniper.net>
- <20260930063217.eWGJ_JpZ@linutronix.de>
- <20261001012011.30525-1-singhpra@juniper.net>
-Subject: Re: [PATCH v4] efivarfs: add nostatfs mount option to skip QueryVariableInfo()
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+To: =?UTF-8?Q?Kristina_Mart=C5=A1enko?= <kristina.martsenko@arm.com>,
+ linux-arm-kernel@lists.infradead.org,
+ "Linux ACPI" <linux-acpi@vger.kernel.org>, kvmarm@lists.linux.dev,
+ linux-efi@vger.kernel.org
+Cc: "Catalin Marinas" <catalin.marinas@arm.com>,
+ "Will Deacon" <will@kernel.org>, "Mark Rutland" <mark.rutland@arm.com>,
+ "Ryan Roberts" <ryan.roberts@arm.com>,
+ "David Hildenbrand" <david@kernel.org>, "Lorenzo Stoakes" <ljs@kernel.org>,
+ "Linu Cherian" <linu.cherian@arm.com>,
+ "Anshuman Khandual" <anshuman.khandual@arm.com>,
+ "Lorenzo Pieralisi" <lpieralisi@kernel.org>,
+ "Hanjun Guo" <guohanjun@huawei.com>,
+ "Sudeep Holla" <sudeep.holla@kernel.org>, "Marc Zyngier" <maz@kernel.org>,
+ "Oliver Upton" <oupton@kernel.org>, "Fuad Tabba" <fuad.tabba@linux.dev>,
+ "Joey Gouly" <joey.gouly@arm.com>, "Steffen Eiden" <seiden@linux.ibm.com>,
+ "Suzuki K Poulose" <suzuki.poulose@arm.com>,
+ "Zenghui Yu" <yuzenghui@huawei.com>,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>
+Message-Id: <52231d93-98f9-4413-9e0d-4bc7ec7666db@app.fastmail.com>
+In-Reply-To: <20261001110655.461473-9-kristina.martsenko@arm.com>
+References: <20261001110655.461473-1-kristina.martsenko@arm.com>
+ <20261001110655.461473-9-kristina.martsenko@arm.com>
+Subject: Re: [RFC 08/12] efi/arm: Check return value of init_new_context()
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
 
-On Thu, 1 Oct 2026, at 03:20, Prashant Singh wrote:
-> Thanks Ard and Sebastian for the comments.
+On Thu, 1 Oct 2026, at 13:06, Kristina Mart=C5=A1enko wrote:
+> init_new_context() will soon be able to return an error. Check for
+> errors before continuing.
 >
-...
->>AFAICT, that would potentially leave KCSAN instrumentation on the reboot
->>path, which might trigger and interfere with the reboot. So instead,
->>I'd like to put this in efi_reboot_required if we can. If it is needed
->>in more places to address an actual KCSAN splat, I don't mind. If it is
->>just to make Sashiko happy, then we shouldn't bother.
+> Signed-off-by: Kristina Mart=C5=A1enko <kristina.martsenko@arm.com>
+> ---
+>  drivers/firmware/efi/arm-runtime.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 >
-> Could you please clarify what you mean by efi_reboot_required here? nostatfs
-> is only read in efivarfs_statfs(), efivarfs_show_options() and
-> efivarfs_init_fs_context(), none of which run on the reboot path, so I'm
-> not sure how it would apply.
->
+> diff --git a/drivers/firmware/efi/arm-runtime.c=20
+> b/drivers/firmware/efi/arm-runtime.c
+> index 3167cab62014..7ef29cd0bfb7 100644
+> --- a/drivers/firmware/efi/arm-runtime.c
+> +++ b/drivers/firmware/efi/arm-runtime.c
+> @@ -55,7 +55,8 @@ static bool __init efi_virtmap_init(void)
+>=20
+>  	efi_mm.pgd =3D pgd_alloc(&efi_mm);
+>  	mm_init_cpumask(&efi_mm);
+> -	init_new_context(NULL, &efi_mm);
+> +	if (init_new_context(NULL, &efi_mm))
+> +		return false;
+>=20
 
-Apologies, I managed to completely confuse myself here. Forget what I said
-here, please :-)
+Can we make this a WARN_ON() so any failures are not misidentified
+as invalid or missing virtual mappings?
 
-> On the annotation itself: an internal review flagged a potential KCSAN
-> data race rather than an observed splat -- statfs() can run concurrently
-> with a remount updating the flag, so it is a genuine (benign) concurrent
-> access. I ran concurrent statfs/remount loops on separate CPUs under
-> KCSAN and didn't trigger a report in a bounded run, which could be
-> expected given KCSAN samples accesses, so it doesn't disprove the race.
-> Since KCSAN only needs one side of the pair marked, data_race() on the
-> write covers both readers and the reads stay plain. I'm happy to drop it
-> entirely if you'd prefer to keep the benign race unannotated.
->
+With that,
 
-No, let's keep it as you suggest.
-
->>Please keep this description _here_ where you have it. Once this is
->>merged, you could send another patch, extending the documentation with
->>the statfs option (I think the workqueue change is in).
->
-> Sure -- I'll keep it in Documentation/filesystems/efivarfs.rst for now
-> and send a follow-up extending Documentation/core-api/real-time/hardware.rst
-> once this is merged.
->
->>You still have the problem that someone reading the variable leads to
->>the same problem but this requires a privileged user. And if I am not
->>mistaken, someone sent patches to have efi-runtime runtime disabled/
->>enabled.
->
-> Agreed -- the variable-read path is the same, but needs a privileged
-> user unlike the unprivileged statfs()/df trigger.
->
-
-Indeed - this is only about anyone with read permissions on the mount
-point being able to trigger this. And looking at your results, the
-rate limit we added recently might be a bit too permissive as well.
+Acked-by: Ard Biesheuvel <ardb@kernel.org>
