@@ -1,284 +1,223 @@
-Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com [209.85.128.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCBE04915B5
-	for <linux-efi@vger.kernel.org>; Wed,  7 Oct 2026 10:38:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.125.188.122
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791369526; cv=pass; b=FWZsl9dCYLUQCA0kOe7AD+bPc4fdLiH0tjOO4oyM25IaoGEs0WHR95f9EgqzRwRYzdTGh0ehFemqjpmIgB+34MBqqC5d2k5LTXX4GwO2upDfZPYWblFADnWHHveM28BbHflHvwHW/k8crU7V61awL9xh1gjDStEvDowLTSqDZu0=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791369526; c=relaxed/simple;
-	bh=mtJBgn6in8wzem2JAyNu6wrzK0bRyVrRNtx68bFbips=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=os/sj7daNXMmFBiNn28FkI2W1K6R0KBSLUaitToLJgtl9QgKvah+MqNKymWeTkQmrzu5t51T9jJUm0l2pr0VdezDe4Q6RCfuIie+4QSD40svYnnBEgAP9bvy7wGn1qQvYtjbux6yQVQFYssRNxtz41ke5vxtU0jeeHgdo8/iU/Q=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=canonical.com; spf=pass smtp.mailfrom=canonical.com; dkim=pass (4096-bit key) header.d=canonical.com header.i=@canonical.com header.b=WQ7eOzq2; arc=pass smtp.client-ip=185.125.188.122
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=canonical.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=canonical.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E7B73B0AD0
+	for <linux-efi@vger.kernel.org>; Wed,  7 Oct 2026 15:51:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.72
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1791388319; cv=none; b=JtpeKx14K83p94msklIiezorvpluvny7InQWXsuQl5NQ6i8n/8CNcl6Ajug19eNO0CPPS85uWCYp7x4MzG+h6UqzEnpn3SWfxMuSkFxNH6cFbctUSHRPHLS1B3TdddSlatHIW0ZcimWiI/IMK6fSg57jBvEuao+eO3Mp1oDAI8U=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1791388319; c=relaxed/simple;
+	bh=0QvwrHmtY1bT7Sj4nc5v0Fr/Uwi/3NWgcRb8TqGS9xI=;
+	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=LDplHBE/Rn/iAqR/TgA5q9w9jKF5M7UbmDhfiNuBOnwV4qs9oA+aeWT3gcPw5UDbTjvNcYD0XemFFD/ShFljiL55+ROBVHM1bU4JVx3eZC0eDYVnJug92slGKWqmDcq8LW2i+LqeokJORcMrMaPUJoosGLarz8HDsG7i4N6Uvz0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=omQ6XJEo; arc=none smtp.client-ip=209.85.128.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (4096-bit key) header.d=canonical.com header.i=@canonical.com header.b="WQ7eOzq2"
-Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com [209.85.218.69])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 611403FCF0
-	for <linux-efi@vger.kernel.org>; Wed,  7 Oct 2026 10:38:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-	s=20251003; t=1791369481;
-	bh=cmc54HmmpdHlv+8/JD67MSRGD2aOFG6+FX+TpShyqMo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type;
-	b=WQ7eOzq20Nzp+h3jDEZpRb4PVOuQtPJawnIGpB19S76AMZogXAPIfskw5UZM84YQP
-	 MbAgx9s1gBi6gQgiRxNj1fwOaPiXGfKj8KaDh/0+9li2OlQ0CzHWvP1PUcfd3xqHla
-	 VX+YAe2t3uYDdgwgW1UoIkteFAdNuzeoAi5a009tDwnuvgeT+RFzRLf0qgOc7sjDq9
-	 zt1MPKrN3XCitGx2TL3QIygT+qKaMiEakSwe/V7ZaqNzIrS4RyXxFC/m17nqUWeA/H
-	 DT0l+QsashCz5QiRFX5C2g1FRsXVDejj0RgRAy5E926PyCX5gjswwbtKm4snP/QikK
-	 8tGPsG9kXJNYvYiIUWD8ETnuuZPaFWAl/XkK+KOxY1b2HLqSVvk/FubHX7N6yGbzz1
-	 GL7PXx1V4ginarhNdpBBD1iBWeUTQ1Ew9SveusL2QA0BA0Z4HYpllSPFkUwcmDepqM
-	 W7FZIcNQV99jiMj0SLdES2MKhSiXihhGyvV3LJoMqzwxcEspl9v4/F7Qy5mbT1iEDh
-	 G+fPUcI6UQmK1yE/pduIchLw3OAkpiSdvb42lHgSJAFgctGMeNHNbihTP/L+5eqmf9
-	 4xBYuRrcV0ZFFtP5ZccJt+/mr8QfNcES3YOKuFafwoLySfQjlfn7TccJqEYGtFQZuk
-	 Csn9nK6drLET4uF6OhiRkXcA=
-Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-c2e7daa588bso136178966b.0
-        for <linux-efi@vger.kernel.org>; Wed, 07 Oct 2026 03:38:01 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1791369481; cv=none;
-        d=google.com; s=arc-20260327;
-        b=D22ZHwCIw++CnBMTuiC4Ys2tOmERkpe9Ow8jgMrmIAzizFKIAyJ5fWAma0lE5m+c3V
-         uUCGay8G7qdPmFwGIloFlKFckCCjJZyMZIkACYIya/0EqzzYqQcb5LunD+tZp0Yg/PnV
-         zOlPv2h9fUCeBEHKN89ptKNJRP84VDZK3n4EmVOeGeRGHI82/Ubhf9rOHsvhsgXvEmeY
-         eGhvu8rvrwGAdVCmKiOK9T2jGcRByM2TVnhzN5FRnUmeBRgdGjLQbpsW+ofjQaV065Yc
-         Em/+uSL1QEG9caihD9XHTIzfuiSADTFujfhQORemZWBYOFdl4Mzg6T5fmftIpaHAe6cT
-         eo5A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version;
-        bh=cmc54HmmpdHlv+8/JD67MSRGD2aOFG6+FX+TpShyqMo=;
-        fh=Yg4lC43asEXlnQ7Cwe+Q3q6lj3ONFYxEC0PVRw4T4Wo=;
-        b=KSTs1WRlK//wJTlLViXCMliGiHXmgAZo2WCzkzoPfYIZo8TqvIjV03IzOEvh576UUz
-         /qm0ipidltKaaNW1VJmB+itUb8bsgTikkZV/6v9/nS5dKlU6vjEHhnIsBOm98Ktcq7Ni
-         gcFGft5JmJ3rHXDinPqaXrwMKWqrFhHnsVVVKtTHTD3ypTuiJotuATXxs1lqGRLVkikB
-         IpPEyDmqcWt0GljI7Z9SdKbx3qfZ+SQ3vJrjrE1Oemz1v5DtqdeACPhDYxBoI4UuifEo
-         weu8coTsPDqfVcC+rGZFppW5uALVZLK298VLzdttiS9Ta+2rSu6hz92sNArrA0ZmD8zT
-         ap8g==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="omQ6XJEo"
+Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-4a16dc2323cso32570515e9.3
+        for <linux-efi@vger.kernel.org>; Wed, 07 Oct 2026 08:51:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20251104; t=1791388316; x=1791993116; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:from:subject
+         :message-id:mime-version:date:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=/VN6OColaIjJBJsVDlcT5thoRApK+kp/gfO0shyen4Y=;
+        b=omQ6XJEo9vpP1uwM8rP/W5dnU4yGReyOcXXJ1PrIjvfJGFFUGuFdtlC8iPUxTcJa19
+         qt9Rq64uG7zGFU2vgPF6r8bBYdwZpb3nRyTWfqKvw3SzyeVIZdyEPD2DdxaUSOu6HG/Z
+         DfRFIEWGgV3fi4TpVmC6yFYelawB0uFOXdydljyV6q9J0gJL9nU8677E1bjmkI3tiYOa
+         2csB+i/A9iiZi7XyZYasvDmADa3YLEt77zPH4YM7w2qLp92rHWOSp60URQngBrVD1wZN
+         IB954kw++hrzECqN+yJtMoZHqiiQtgslWfczckwhSrONywh3/LM8O87bdycBJ3HCI1rH
+         fVTw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791369481; x=1791974281;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=cmc54HmmpdHlv+8/JD67MSRGD2aOFG6+FX+TpShyqMo=;
-        b=AMWWPqGWP3mHa/vgmOFyMURHZewEpYBaHhnisQFGicJ72ubCD2NUTu0VWOkdad4H45
-         25YWPVZ7g6OKZo1hF0XSa9FcvLWPF6GyRQVYombaw9r1jpOXCI9SWcDpuCg8yK1JH9Zw
-         aohkHOEsSBQeqkseNf0IS0nJX9+mSIrGO1tg2goEenUALwcFgGsihtsu3VWEHXrd4o8N
-         /xXGP12N39BTfhoeIUVmB2Q7aNPRDCXx53/r06ZD+RHrdIh6dz5SavrCYmX8Kz/vcLDL
-         0UEdCVnUH4/m+zUErOOPPwr1fiTnKjA5njxYB3EwKJJoaH7k0r55Kg8RItJaWvIvN9Fk
-         aFQg==
-X-Forwarded-Encrypted: i=1; AKwUvByXrytzbFwf2nbnrNsgJCDtHB4pi1GZcOv6DBWlXXEATuZuTUbQ+NLrSdMFtEJMHbgoHXg2k8waBhY=@vger.kernel.org
-X-Gm-Message-State: AFuF++kOy4wSI/Ppt6ISyjXu0r0z1AnCb2Uo8rj37tza6WXK2LJzgbr5
-	vS23xcWHxOjrUSkv0AKFLDETUlCY89uU6JpXG9AcIC9UcoOdP26S3Gdr4xa662o4HJby2mXuq8C
-	/H/OaPUYyd29fW0AqO1c2KaR026En+qjTjUWTPO3sa0KzBkoTVI0DrIfXY5fxetK45NihRsblAh
-	CKd1gsmRdAqPQMsR6YFEGY5fjhKFa7uE7pf1rqx9RoyWKxqMuc6Edb
-X-Gm-Gg: AYBFou2dHL7G/tFtWvcRVNkFjk3QnfrrnEmzbfuKxtOdoj2WIUGHH0zzCCRVcFGb6SY
-	YZx0zkqnKlf03g0ywdYB+RQnSWwxzT3dL++aSQ4yK2AHwbi2UXsBdrgddsZ8JakBdNiwiL/ql05
-	gazLz0jJvPH4qu9X0yGG/IbgCXXThNroq7+QYAY7dkm8sByKbPwQiI9MYO5Id11PJnQ5j7SBWU9
-	IBIaGzLktvvfWu84w==
-X-Received: by 2002:a17:907:720a:b0:c2e:4b90:3c55 with SMTP id a640c23a62f3a-c317bb32151mr185464666b.5.1791369480956;
-        Wed, 07 Oct 2026 03:38:00 -0700 (PDT)
-X-Received: by 2002:a17:907:720a:b0:c2e:4b90:3c55 with SMTP id
- a640c23a62f3a-c317bb32151mr185463666b.5.1791369480593; Wed, 07 Oct 2026
- 03:38:00 -0700 (PDT)
+        d=1e100.net; s=20260707; t=1791388316; x=1791993116;
+        h=content-transfer-encoding:content-type:cc:to:from:subject
+         :message-id:mime-version:date:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=/VN6OColaIjJBJsVDlcT5thoRApK+kp/gfO0shyen4Y=;
+        b=XxqzvCf9IMjoL7tCDsUrnFJYKqx7kl7aXVNJjwgIL2+3DdP53yUPomfHFGLrrGBHB1
+         UJtF5BmiH0UY/WZj4NzbmsjnQ57Udg0ZJUEmmvlGnpt2ir5YMgzPfwosJJhrsO+irVZE
+         XT9cXv8i/zXDozXba8Ai5LqT+j1iic/av7G4cqwD+8uMz6SD/TV8DbKr+MeTVv4PB5Rk
+         eYKzgvd2Cvv7Y+YKdPPYzMOLBAamRJwbAZ9Aaqcw4h4nDyBTfTRVVFJBq6qDyf+ygFf2
+         puICmepaFl+BrULbYMQzVIH7GE/cTfSDp1xCta7ldodTFwLhwzbxeX2ytYS/1/VCxHz9
+         WOJw==
+X-Gm-Message-State: AFuF++mpjyImsu5jiekb0aLx5aP2X1qM0sS28sNBUCi0Hrz3v+0dlIhQ
+	WPfKVU45m4k/T94Hjptxjq/sDh2eY8BwVsIQaol4mS9s7XDL84Bwh+e69DM3WuuBmAgC0/jG5Fq
+	IVOEh6/nfOIH7oxlvVsETfqK8bYNct7iZBJnRlf1qUZnPwGNYFgYLx51wshqkFMAT7TKTE4Rj/z
+	3J91O1EuLstuz6sukFle6Ra8BgUqmtyg==
+X-Received: from wmpl35.prod.google.com ([2002:a05:600c:8a3:b0:4a1:7a28:e547])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:3b99:b0:4a0:1c10:1372
+ with SMTP id 5b1f17b1804b1-4a1806501eamr54767885e9.27.1791388314433; Wed, 07
+ Oct 2026 08:51:54 -0700 (PDT)
+Date: Wed,  7 Oct 2026 17:51:31 +0200
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-References: <20250625-more-qseecom-v4-0-aacca9306cee@oss.qualcomm.com> <20250625-more-qseecom-v4-7-aacca9306cee@oss.qualcomm.com>
-In-Reply-To: <20250625-more-qseecom-v4-7-aacca9306cee@oss.qualcomm.com>
-From: Tobias Heider <tobias.heider@canonical.com>
-Date: Wed, 7 Oct 2026 12:37:47 +0200
-X-Gm-Features: AclHuK8eKzgj3HJdIk9MQwD1iZnSbhGYtbY2krS3CF9VuPiN8gJrqeCrxO3qntA
-Message-ID: <CAARv3RQ2-Cnr-Zu_57cz4bBOaNVji14cGQo5eGB7QXjBjEwofQ@mail.gmail.com>
-Subject: Re: [PATCH v4 7/8] firmware: qcom: scm: rework QSEECOM allowlist
-To: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
-Cc: Bjorn Andersson <andersson@kernel.org>, Maximilian Luz <luzmaximilian@gmail.com>, 
-	Konrad Dybcio <konradybcio@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Ard Biesheuvel <ardb@kernel.org>, Johan Hovold <johan@kernel.org>, Steev Klimaszewski <steev@kali.org>, 
-	linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-efi@vger.kernel.org, 
-	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>, 
-	Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.56.0.360.g66cac248cb-goog
+Message-ID: <20261007155130.2112665-2-ardb+git@google.com>
+Subject: [PATCH] efi: Constify sysfs attributes
+From: Ard Biesheuvel <ardb+git@google.com>
+To: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, 
+	"=?UTF-8?q?Thomas=20Wei=C3=9Fschuh?=" <linux@weissschuh.net>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-Hi Dmitry,
+From: Ard Biesheuvel <ardb@kernel.org>
 
-I think making the list more generic would be great. Currently onboarding n=
-ew
-devices always requires a kernel/driver rebuild on top of the device-tree w=
-hich
-isn't ideal. If we could allow all of sc8280xp, x1e80100 and glymur by defa=
-ult
-adding new devices to our Ubuntu images would be a lot easier.
+Implement Thomas's suggestions to constify sysfs kobject attributes.
 
-Since this seems to have stalled a while ago I was wondering if you
-had any plans to
-continue this work. Is there a technical reason this never went anywhere?
+Cc: Thomas Wei=C3=9Fschuh <linux@weissschuh.net>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/x86/platform/efi/efi.c | 11 ++++---
+ drivers/firmware/efi/efi.c  | 34 +++++++++++---------
+ include/linux/efi.h         |  3 +-
+ 3 files changed, 27 insertions(+), 21 deletions(-)
 
-- Tobias
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 0c39adb96b91..d8fe93770c2a 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -891,7 +891,7 @@ bool efi_is_table_address(unsigned long phys_addr)
+=20
+ #define EFI_ATTR_SHOW(name) \
+ static ssize_t name##_show(struct kobject *kobj, \
+-				struct kobj_attribute *attr, char *buf) \
++			   const struct kobj_attribute *attr, char *buf) \
+ { \
+ 	return sprintf(buf, "0x%lx\n", EFI_FIELD(name)); \
+ }
+@@ -900,11 +900,12 @@ EFI_ATTR_SHOW(fw_vendor);
+ EFI_ATTR_SHOW(runtime);
+ EFI_ATTR_SHOW(config_table);
+=20
+-struct kobj_attribute efi_attr_fw_vendor =3D __ATTR_RO(fw_vendor);
+-struct kobj_attribute efi_attr_runtime =3D __ATTR_RO(runtime);
+-struct kobj_attribute efi_attr_config_table =3D __ATTR_RO(config_table);
++const struct kobj_attribute efi_attr_fw_vendor =3D __KOBJ_ATTR_RO(fw_vendo=
+r);
++const struct kobj_attribute efi_attr_runtime =3D __KOBJ_ATTR_RO(runtime);
++const struct kobj_attribute efi_attr_config_table =3D __KOBJ_ATTR_RO(confi=
+g_table);
+=20
+-umode_t efi_attr_is_visible(struct kobject *kobj, struct attribute *attr, =
+int n)
++umode_t efi_attr_is_visible(struct kobject *kobj, const struct attribute *=
+attr,
++			    int n)
+ {
+ 	if (attr =3D=3D &efi_attr_fw_vendor.attr) {
+ 		if (efi_enabled(EFI_PARAVIRT) ||
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index e08ce813a3d4..93d6ffd9bc0d 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -155,21 +155,21 @@ static ssize_t systab_show(struct kobject *kobj,
+ 	return str - buf;
+ }
+=20
+-static struct kobj_attribute efi_attr_systab =3D __ATTR_RO_MODE(systab, 04=
+00);
++static const struct kobj_attribute efi_attr_systab =3D __ATTR_RO_MODE(syst=
+ab, 0400);
+=20
+ static ssize_t fw_platform_size_show(struct kobject *kobj,
+-				     struct kobj_attribute *attr, char *buf)
++				     const struct kobj_attribute *attr, char *buf)
+ {
+ 	return sprintf(buf, "%d\n", efi_enabled(EFI_64BIT) ? 64 : 32);
+ }
+=20
+-extern __weak struct kobj_attribute efi_attr_fw_vendor;
+-extern __weak struct kobj_attribute efi_attr_runtime;
+-extern __weak struct kobj_attribute efi_attr_config_table;
+-static struct kobj_attribute efi_attr_fw_platform_size =3D
+-	__ATTR_RO(fw_platform_size);
++extern __weak const struct kobj_attribute efi_attr_fw_vendor;
++extern __weak const struct kobj_attribute efi_attr_runtime;
++extern __weak const struct kobj_attribute efi_attr_config_table;
++static const struct kobj_attribute efi_attr_fw_platform_size =3D
++	__KOBJ_ATTR_RO(fw_platform_size);
+=20
+-static struct attribute *efi_subsys_attrs[] =3D {
++static const struct attribute *const efi_subsys_attrs[] =3D {
+ 	&efi_attr_systab.attr,
+ 	&efi_attr_fw_platform_size.attr,
+ 	&efi_attr_fw_vendor.attr,
+@@ -178,15 +178,16 @@ static struct attribute *efi_subsys_attrs[] =3D {
+ 	NULL,
+ };
+=20
+-umode_t __weak efi_attr_is_visible(struct kobject *kobj, struct attribute =
+*attr,
++umode_t __weak efi_attr_is_visible(struct kobject *kobj,
++				   const struct attribute *attr,
+ 				   int n)
+ {
+ 	return attr->mode;
+ }
+=20
+ static const struct attribute_group efi_subsys_attr_group =3D {
+-	.attrs =3D efi_subsys_attrs,
+-	.is_visible =3D efi_attr_is_visible,
++	.attrs_const =3D efi_subsys_attrs,
++	.is_visible_const =3D efi_attr_is_visible,
+ };
+=20
+ struct blocking_notifier_head efivar_ops_nh;
+@@ -401,12 +402,15 @@ static void __init efi_debugfs_init(void)
+ static inline void efi_debugfs_init(void) {}
+ #endif
+=20
+-static ssize_t efi_runtime_show(struct kobject *kobj, struct kobj_attribut=
+e *attr, char *buf)
++static ssize_t efi_runtime_show(struct kobject *kobj,
++				const struct kobj_attribute *attr,
++				char *buf)
+ {
+ 	return sprintf(buf, "%d\n", efi_enabled(EFI_RUNTIME_SERVICES));
+ }
+=20
+-static ssize_t efi_runtime_store(struct kobject *kobj, struct kobj_attribu=
+te *attr,
++static ssize_t efi_runtime_store(struct kobject *kobj,
++				 const struct kobj_attribute *attr,
+ 				 const char *buf, size_t count)
+ {
+ 	int ret;
+@@ -424,8 +428,8 @@ static ssize_t efi_runtime_store(struct kobject *kobj, =
+struct kobj_attribute *at
+ 	return count;
+ }
+=20
+-static struct kobj_attribute efi_runtime_attr =3D
+-	__ATTR(runtime_enable, 0644, efi_runtime_show, efi_runtime_store);
++static const struct kobj_attribute efi_runtime_attr =3D
++	__KOBJ_ATTR(runtime_enable, 0644, efi_runtime_show, efi_runtime_store);
+=20
+ static int __init efipostcore_init(void)
+ {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index ecb34be37a87..fda81d7c4850 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1353,7 +1353,8 @@ bool efi_config_table_is_usable(const efi_guid_t *gui=
+d, unsigned long table)
+ 	return xen_efi_config_table_is_usable(guid, table);
+ }
+=20
+-umode_t efi_attr_is_visible(struct kobject *kobj, struct attribute *attr, =
+int n);
++umode_t efi_attr_is_visible(struct kobject *kobj, const struct attribute *=
+attr,
++			    int n);
+=20
+ int ovmf_log_probe(unsigned long ovmf_debug_log_table);
+=20
+--=20
+2.56.0.360.g66cac248cb-goog
 
-On Wed, Jun 25, 2025 at 12:55=E2=80=AFAM Dmitry Baryshkov
-<dmitry.baryshkov@oss.qualcomm.com> wrote:
->
-> From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
->
-> Listing individual machines in qcom_scm_qseecom_allowlist doesn't scale.
-> Allow it to function as allow and disallow list at the same time by the
-> means of the match->data and list the SoC families instead of devices.
->
-> In case a particular device has buggy or incompatible firmware user
-> still can disable QSEECOM by specifying qcom_scm.qseecom=3Doff kernel
-> param and (in the longer term) adding machine-specific entry to the
-> qcom_scm_qseecom_allowlist table.
->
-> Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-> Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-> Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
-> ---
->  drivers/firmware/qcom/qcom_scm.c           | 49 ++++++++++++++----------=
-------
->  include/linux/firmware/qcom/qcom_qseecom.h |  1 +
->  2 files changed, 24 insertions(+), 26 deletions(-)
->
-> diff --git a/drivers/firmware/qcom/qcom_scm.c b/drivers/firmware/qcom/qco=
-m_scm.c
-> index 5bf59eba2a863ba16e59df7fa2de1c50b0a218d0..025f834e95b537b76d41b59b6=
-3871a4ce5bed717 100644
-> --- a/drivers/firmware/qcom/qcom_scm.c
-> +++ b/drivers/firmware/qcom/qcom_scm.c
-> @@ -1981,6 +1981,7 @@ int qcom_scm_qseecom_app_send(u32 app_id, void *req=
-, size_t req_size,
->  }
->  EXPORT_SYMBOL_GPL(qcom_scm_qseecom_app_send);
->
-> +static unsigned long qcom_qseecom_disable =3D QCOM_QSEECOM_QUIRK_DISABLE=
-;
->  static unsigned long qcom_qseecom_ro_uefi =3D QCOM_QSEECOM_QUIRK_RO_UEFI=
-VARS;
->
->  static char *qseecom =3D "auto";
-> @@ -1989,32 +1990,20 @@ module_param(qseecom, charp, 0);
->
->  /*
->   * We do not yet support re-entrant calls via the qseecom interface. To =
-prevent
-> - * any potential issues with this, only allow validated machines for now=
-. Users
-> + * any potential issues with this, only allow validated platforms for no=
-w. Users
->   * still can manually enable or disable it via the qcom_scm.qseecom modp=
-aram.
-> + *
-> + * To disable QSEECOM for a particular machine, add compatible entry and=
- set
-> + * data to &qcom_qseecom_disable.
->   */
->  static const struct of_device_id qcom_scm_qseecom_allowlist[] __maybe_un=
-used =3D {
-> -       { .compatible =3D "asus,vivobook-s15" },
-> -       { .compatible =3D "asus,zenbook-a14-ux3407qa" },
-> -       { .compatible =3D "asus,zenbook-a14-ux3407ra" },
-> -       { .compatible =3D "dell,xps13-9345" },
-> -       { .compatible =3D "hp,elitebook-ultra-g1q" },
-> -       { .compatible =3D "hp,omnibook-x14" },
-> -       { .compatible =3D "huawei,gaokun3" },
-> -       { .compatible =3D "lenovo,flex-5g" },
-> -       { .compatible =3D "lenovo,thinkpad-t14s" },
-> -       { .compatible =3D "lenovo,thinkpad-x13s", },
->         { .compatible =3D "lenovo,yoga-c630", .data =3D &qcom_qseecom_ro_=
-uefi, },
-> -       { .compatible =3D "lenovo,yoga-slim7x" },
-> -       { .compatible =3D "microsoft,arcata", },
-> -       { .compatible =3D "microsoft,blackrock" },
-> -       { .compatible =3D "microsoft,romulus13", },
-> -       { .compatible =3D "microsoft,romulus15", },
-> -       { .compatible =3D "qcom,sc8180x-primus" },
-> +       { .compatible =3D "qcom,sc8180x", },
-> +       { .compatible =3D "qcom,sc8280xp", },
->         { .compatible =3D "qcom,sc8280xp-crd", .data =3D &qcom_qseecom_ro=
-_uefi, },
-> -       { .compatible =3D "qcom,x1e001de-devkit" },
-> -       { .compatible =3D "qcom,x1e80100-crd" },
-> -       { .compatible =3D "qcom,x1e80100-qcp" },
-> -       { .compatible =3D "qcom,x1p42100-crd" },
-> +       { .compatible =3D "qcom,sdm845", .data =3D &qcom_qseecom_disable,=
- },
-> +       { .compatible =3D "qcom,x1e80100", },
-> +       { .compatible =3D "qcom,x1p42100", },
->         { }
->  };
->
-> @@ -2046,12 +2035,22 @@ static bool qcom_scm_qseecom_machine_is_allowed(s=
-truct device *scm_dev,
->         match =3D of_match_node(qcom_scm_qseecom_allowlist, np);
->         of_node_put(np);
->
-> -       if (match && match->data)
-> +       if (!match) {
-> +               dev_info(scm_dev, "qseecom: untested machine, skipping\n"=
-);
-> +               return false;
-> +       }
-> +
-> +       if (match->data)
->                 *quirks =3D *(unsigned long *)(match->data);
->         else
->                 *quirks =3D 0;
->
-> -       return match;
-> +       if (*quirks & QCOM_QSEECOM_QUIRK_DISABLE) {
-> +               dev_info(scm_dev, "qseecom: disabled by the quirk\n");
-> +               return false;
-> +       }
-> +
-> +       return true;
->  }
->
->  static void qcom_scm_qseecom_free(void *data)
-> @@ -2086,10 +2085,8 @@ static int qcom_scm_qseecom_init(struct qcom_scm *=
-scm)
->
->         dev_info(scm->dev, "qseecom: found qseecom with version 0x%x\n", =
-version);
->
-> -       if (!qcom_scm_qseecom_machine_is_allowed(scm->dev, &quirks)) {
-> -               dev_info(scm->dev, "qseecom: untested machine, skipping\n=
-");
-> +       if (!qcom_scm_qseecom_machine_is_allowed(scm->dev, &quirks))
->                 return 0;
-> -       }
->
->         /*
->          * Set up QSEECOM interface device. All application clients will =
-be
-> diff --git a/include/linux/firmware/qcom/qcom_qseecom.h b/include/linux/f=
-irmware/qcom/qcom_qseecom.h
-> index 8d6d660e854fdb0fabbef10ab5ee6ff23ad79826..d48044ece20cc9ebac3357a64=
-2dc671c349d4343 100644
-> --- a/include/linux/firmware/qcom/qcom_qseecom.h
-> +++ b/include/linux/firmware/qcom/qcom_qseecom.h
-> @@ -52,5 +52,6 @@ static inline int qcom_qseecom_app_send(struct qseecom_=
-client *client,
->  }
->
->  #define QCOM_QSEECOM_QUIRK_RO_UEFIVARS         BIT(0)
-> +#define QCOM_QSEECOM_QUIRK_DISABLE             BIT(1)
->
->  #endif /* __QCOM_QSEECOM_H */
->
-> --
-> 2.39.5
->
->
