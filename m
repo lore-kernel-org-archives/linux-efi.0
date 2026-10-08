@@ -1,47 +1,47 @@
-Received: from CH5PR02CU005.outbound.protection.outlook.com (mail-northcentralusazon11012009.outbound.protection.outlook.com [40.107.200.9])
+Received: from SN4PR2101CU001.outbound.protection.outlook.com (mail-southcentralusazon11012018.outbound.protection.outlook.com [40.93.195.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1F544AA57C;
-	Thu,  8 Oct 2026 13:26:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.200.9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F384492E53;
+	Thu,  8 Oct 2026 13:26:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.93.195.18
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791465990; cv=fail; b=RzNV6nxCi7MtevoyQ5HPCZrcnDrh96ztq/Vht0s9IgtFw/VOEo7Ya58LmppQ+bXzA6WpyjWZ3uZCxY+tG1CJqpcZaJ5KG1j6G3Yv+w49SroeSyxnGk7ECBO18o9/JzcWWFOJtWHbfUmdX+d6M0QWjbF8miIfK2ATCJzxblGl3no=
+	t=1791465991; cv=fail; b=qw6zwBpiyvdO0Is8uv8KwMZcJoLgDegVG++/S3JNtKw3W/KBE72utp8OTe1UBzzwMzAPd2uugsy0GK/QHkWbm9BpUTWAuysIBXUqX483ZkCnwQ3xrv8lkZWCM78ui0o4SDf/X43cDAiZ7CYrQOHrxnHgQa13iox8fYRZg7PFNkQ=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791465990; c=relaxed/simple;
-	bh=e7GoBoYtTrcsLrsaHXlFEO1B4WtLuZp0y5BhA9Y8wfw=;
+	s=arc-20240116; t=1791465991; c=relaxed/simple;
+	bh=9+D9JkBc8P7g2L6kVhDrwZAPe5Ynn53Scvsk7Mwf/Oo=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=S1NVszXc6T84u0g/+b6FWEhECKgbOAaAc5YNxz0sTAY0GisczsB4DW8zFiEGRSLvLs5f1u+o/4LHTAVgoE9nDwdPoiRvWbnNx/bMIEnclsJLgQSqviJify88g4sugGnXvuX9b65k1nElZckDmXaR+MKn6GZySpOthYCsVoztetg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=lg2hfTFv; arc=fail smtp.client-ip=40.107.200.9
+	 Content-Type:MIME-Version; b=hmMZp/vDLlGmA2QxMEhwhZwK3Dd08ectV8KAWGlY/Ed3evJ3BQwxShJTSZCqayFaOOS6OaQtBBh6dgPuyE6jnDczpqYBbOdVhmzPmRvZa0gPzvVIT8WFUttcNyWPnAVqAHnThxTCH0DLvROfEQe7kvI+TzaKQmt9lFuLLnGE6zw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=sJ0doNZH; arc=fail smtp.client-ip=40.93.195.18
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="lg2hfTFv"
+	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="sJ0doNZH"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=RdI58ZEdGnntokxwtmx6SyXjEXt8GWV7axsnvvdb1/asoCp7RGO2NP7CGzEJfSNL3kAhBqh6OMWxEdVS3mL9jcV8ccmuhLq8ks+r4n4PkeBRpEW9ktpY/bt6yQKA/1c+LUoG+A4/OrPCUL1EtOnx6JsYw+PJ15TqChW07IOYXpvnv9cstVM2lFPq12wL9l3KVST8yowVjsJEP2HocUnbIleb+W8lB9428U3kSHV7CZn19I40NLp1yKdVIEmCn9kHiZmntP46d4Nvlk5XliGkUBNISHw8PRP4yDm2gPrqO7xQDpeGAN4nBs70SHldnZZddw4x1CSOrpB0Cua8KNNHlA==
+ b=b9/lzB+TYuFIKpsUIYL/N+4SODrXvelfpFiDLFMIlXcq1FI8A50C8SfCmZIWwd99umeSpwhq7LOE+NTeGUTYwFZkVZfHr12aN9dnDcj2ASUxrV5+GW28VXKS0huSVT+Gr2x8H0QtiWAojaew+yjWmAR29uJ0RI1DIoq/aWzw11GazHMdEFyuQj3kEC6y2m1xZC9ZCrE2rMktXwbOJhTlBv6acOITkP+o9+12hgTmB5jAv+6G5UdzKjvKGEOvlvf8lh9uvkaZexhl4pyV0a2NQ7/TNnw8Rt92UZJKgY9xE1qy+j2Rymj0fIxVtk/u1SGquE0LFnAHV0kp8cZMDrSn+w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Ty3x9j43JJiWJdKDZLtcN5SYdGlS/WIIbtC12z8fy1w=;
- b=roqtWPQ3taWNFWZek0a/e3MOphp6edg+orJ1Eun6vSS7TMmsx4c3YQuvsVaP3XkeVK7WPHEhR35FLpxsHrpa5sv6shaUbx26JxGXKOf22j/C7QmiFRs7CUwaEYhG4dfZadqd1na+seNMsAEnsc9wsvXljym5VEv/IlmOTpR4Ql0e8xhF7Efm28dvZ4nv81y9k8sLeJS1/O+jH+OXIFpt2WKoZxpn0Y6OqmgmxkRFKSrcK3IWeA2jwWrZTPESfXgKfEx+nqmqS1xZu2wM5+tCG5VEaSyCnN0J3xlGBMzV2OxABI7HFkbS3XgnHWFDsK4ttXHvsvHN+bWIPT4Tma7t6g==
+ bh=9z5vu/SJUlPt4hLk/cVwYWX+9HUv/RMUy/Ty/N5EJZU=;
+ b=itgi8eieMmzGFFEGnIU1lftQf1wlthEzBZ2rMUJ/Sb66mf+aheF38EjNcBwGk+HMavy2LARWA0bt0Kv97y6GfHg71MoofP7lQgsBrCbs4OwPtC6qBF7HWvzMHLHAcH59TJfQSAr4M6RDR8g/IfIdksW9R/nRTvFiRjB2M3rprYne9z89gUU8dD8vSEKFU8KoHlgVpjXNePjraOypNovAAHraZcgNay1I58HZNTm/eM23trAuynM3ACbSYjkcTDwxLvzRcYW833gdadVCwTHvju7CMp8fT2b48X9raC+Xi1pmzsfUBB4e4oRGSQbfvpBg/cRMHN0eIN80O8Yqq100QA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
  dkim=pass header.d=nvidia.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Ty3x9j43JJiWJdKDZLtcN5SYdGlS/WIIbtC12z8fy1w=;
- b=lg2hfTFvrONz/nxVwOxecpHWfxZUY5dX4MTH55AmTC/Tzf3du8MqwLsUQlje296Pglg+n2MqKztnwyd2BEKyg9KD2Q4KEG1oKIH7tk9b+owC2cQEHw3QZ2MkflyPNSQ1VflkvF1Uny326BcYod5wiqZL35lPP/3kbDp6olY0FXXWpF8Vung6lmKCI9NG6Sa1YEQPw+NUHApurU6SUTYGXiz2FDh10v4HRzmjpHMJcn81KngfxyYVcUXUDJthfw6vPIsEUQgABME+EPimn2HGZWwi0gOpNe47lw4mErWPxDAH5Fp3CLHsmGLtcNlRRVCI+Jn50F5mdNYfCb/y5u7BMg==
+ bh=9z5vu/SJUlPt4hLk/cVwYWX+9HUv/RMUy/Ty/N5EJZU=;
+ b=sJ0doNZH5oj0SFmj/VZvBdrYvghdhMCFFBe9o7pZZ5WtFqSVUP5r5h2M/3GrrKr0E2ONud7tb5w1LulOGlDtCTV752pMxvWRZKL/M95N37WyKB1wMysz/LEjJq72gZzpig3qaSQ/TKfnsROpuAO2F6eAno6Ey3+MY2O1gE+YniycSb8X+axZIErBmcHz9OW64YjEskE96xPOguP5bcsFrkAKgy6hSKfJIzOowm1zOJnOVHP0t37IEy5jJ/7GozR3m5QonAlCt+/Zl1/lN/zjyLCxlhtOD+XL9exYXZzg1kzvz2F1WODy6koOGyAC1bSpfCayMZtYLnd2pbWZo8Ux+g==
 Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=nvidia.com;
 Received: from CH8PR12MB9741.namprd12.prod.outlook.com (2603:10b6:610:27a::21)
- by CY8PR12MB7587.namprd12.prod.outlook.com (2603:10b6:930:9a::16) with
+ by DS2PR12MB9592.namprd12.prod.outlook.com (2603:10b6:8:27c::15) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.451.26; Thu, 8 Oct
- 2026 13:26:17 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.496.17; Thu, 8 Oct
+ 2026 13:26:23 +0000
 Received: from CH8PR12MB9741.namprd12.prod.outlook.com
  ([fe80::43a6:8d0:7081:65d7]) by CH8PR12MB9741.namprd12.prod.outlook.com
  ([fe80::43a6:8d0:7081:65d7%5]) with mapi id 15.21.0472.016; Thu, 8 Oct 2026
- 13:26:17 +0000
+ 13:26:23 +0000
 From: Matthew Garrett <matthewg@nvidia.com>
 To: mjg59@srcf.ucam.org
 Cc: keyrings@vger.kernel.org,
@@ -51,16 +51,16 @@ Cc: keyrings@vger.kernel.org,
 	linux-pm@vger.kernel.org,
 	linux-efi@vger.kernel.org,
 	Matthew Garrett <matthewg@nvidia.com>
-Subject: [PATCH 10/17] tpm: Move the bounds-checked response reader to a header
-Date: Thu,  8 Oct 2026 06:20:26 -0700
-Message-ID: <20261008132532.1155166-11-matthewg@nvidia.com>
+Subject: [PATCH 12/17] tpm: Add signing with the kernel signing key
+Date: Thu,  8 Oct 2026 06:20:28 -0700
+Message-ID: <20261008132532.1155166-13-matthewg@nvidia.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20261008132532.1155166-1-matthewg@nvidia.com>
 References: <20261008132532.1155166-1-matthewg@nvidia.com>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: FR2P281CA0082.DEUP281.PROD.OUTLOOK.COM
- (2603:10a6:d10:9b::9) To CH8PR12MB9741.namprd12.prod.outlook.com
+X-ClientProxiedBy: FR4P281CA0219.DEUP281.PROD.OUTLOOK.COM
+ (2603:10a6:d10:e4::9) To CH8PR12MB9741.namprd12.prod.outlook.com
  (2603:10b6:610:27a::21)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -69,320 +69,232 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CH8PR12MB9741:EE_|CY8PR12MB7587:EE_
-X-MS-Office365-Filtering-Correlation-Id: bcbf5575-dc95-4069-0de7-08df253fbb6d
+X-MS-TrafficTypeDiagnostic: CH8PR12MB9741:EE_|DS2PR12MB9592:EE_
+X-MS-Office365-Filtering-Correlation-Id: 23668b82-008c-4490-b14f-08df253fbf48
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|23010399003|1800799024|376014|366016|10067099003|11063799006|56012099006|3023799007|22082099003|18002099003;
+	BCL:0;ARA:13230040|376014|23010399003|366016|1800799024|56012099006|11063799006|10067099003|18002099003|22082099003|3023799007;
 X-Microsoft-Antispam-Message-Info:
-	sLdRpMhl0OcAkc/1EBjP/eVBAUp4IgG4SPYHMySHlS6aJMGKa6jcn1y/YKBVRIEYNcLqOdstmpvZehLgmaqtIIB0ri8hBjgJ0+Wxyt8xz0UCxNeB9EfqcgaBidWPhhSBtbry4hiPNM2fZhAK+NAatPejKXR2qT/054+VogVoOXzZmW3h/guB1j9021/bmiOqvO/u+vY5O7FgE/TF8tDp5SPzPiVZvlXcWRXWU4rI9eW5qnLBgr2xcKGZsPhV9rWv/ui8c+m9PLLjghjLzxNeyQy174rqPBpDX6guyTEEPfwQBhc3ZCyRLLQVnFOyIwICSRNdJGjNsypHCA7hebvYjo7Coxni+BvacsCtNmcbpKcmCqj/KaWsGR0Pyd9qz2gmaNaZQNYvpBdmiVk/v5iGqM/cU113+IEjjpY9IlEOVNSOTXUdfjrZF6EC8wz8y/1qVvYHC4CoT47X+xsaVd7kgU54sNsrJdfLzissjBEOMEYskLzH0uX9ttpECVsa12R8014wcFrUeWs+ItL4gawf/V6NtO6Vhk26ugr6Dp5o+8r8hC3I7CyDNsYxFvCQHXJYVgfE/zc4OzvPAWzRel/n+DFlGoRbHunyvS3L2/5t7iWtgB0zjoHgbiQ0OuBino5TynQwMBi9WzIwMinuzs8f+iEWI7hdYoTcYC+D0EpPDbU=
+	o/7vnE6fl/bsgmFOR9HIy8zs1a8Qpa9Puk4tlgd34EgOx20RqEWXbdl6ESPefBrhji7Cgv4QiuAp6dnFKSOXsyr2O+RP74V2eqjVO/2RqBrG/IB4VszqqFPsIj4UGk01ZxtxPJnUyYfObXSOb8uQauZMvt6ZYyp27CVlScf/nRKLbQxYR5oB//y3cB8ewwGeb0jQ2zdaUNiw+NlbGLQ/2Lm3ON6deJlqZgdSYVidw0a7pUvrMDm8dkQ+/V/hY0mmS3Gs8DzU2suqoUT2wVIduHKyjeRPs6TRMMYkYmQh+o9TsLxv4qUAyil9PxC8j4YOlnhvDxVCRl/lcBuB/inmAjzBgNdm6RDQLQnSrVkm6nl/uffdMmqHW+SG/SPKpT5frdHHDlvxH49axGe6Pqx4kNM647sUC1SxbmpcfMFHvzaHy85HHk+S7n8J6Y8ojwgGfxB6Nrd+KdTmgBnpLQLjJArg/aZSsF0KpDw5Gti2dM+lkASuWgZxiPwMMjgfQUO4nrFfZnH0gLbBofR3nWeBD4iPGwA8ewsaHRy581mY495mz1AL+tlSJyO5uEDR1nhoAtJ1rzjWtHYsUSE9FM7qyz7gj+NFzwz/ATgQfOBc1dMqtF/AFue4XRrfh7DtPDHJfREfLMdcQhLR4b5OQxQxug==
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CH8PR12MB9741.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(1800799024)(376014)(366016)(10067099003)(11063799006)(56012099006)(3023799007)(22082099003)(18002099003);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CH8PR12MB9741.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(23010399003)(366016)(1800799024)(56012099006)(11063799006)(10067099003)(18002099003)(22082099003)(3023799007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?cfI9sFrXhTwhb2uErtTQvWC1PhTQrTo4CwE1O10GiulJXnGfeQK1R2BShr1g?=
- =?us-ascii?Q?C3UogGEbBYw/7JZXy50Tc7ZyN9/6qweebZBC4DdHFPkW+h1Ed66vuCILx58s?=
- =?us-ascii?Q?Hs1Vc576GDSsP/2brqdVnv3iylKyIkNh7VLUqNy3iCxFvTy2iAZZ0i0pswDm?=
- =?us-ascii?Q?hlz/dJUzYlAFLHB3dZ6dfouHB0TJ3ag8N4Wz9aYlUjOR/dZy2bcGvdpvILa4?=
- =?us-ascii?Q?Hi5AAm3wKPRcyO1gaQAPqS3i8TJb6XVZs0MjUdjpil6UWaHp5/D04JcbCJ39?=
- =?us-ascii?Q?J8qrzoKjGh1Gc/wdsrDbmgxEv8lqDFAw7zroNXyYrNNU0KXn1P1doRbJJyqY?=
- =?us-ascii?Q?EbR6fl2nsvr5ANeyACAnihRZdniD+5XsAxpH8imAhgdpXZUojQP4qhfy6ueU?=
- =?us-ascii?Q?17gnYjd5xQeuNU7hpQRvoBcVP2l3ww9Ge+5xN93JoHG1CiEblTpV/Wfr4GRe?=
- =?us-ascii?Q?Jh+pf7tGTXyy8cPxt/uxsdve0vlYuXHecAIe97ZIi8Xl+if6SYpLxo2w5ejV?=
- =?us-ascii?Q?PNceyWS03aavzitRAA7rSGE54Ax4U9bWl6usOc6w3pIGknpqc8pDFwcUHzQj?=
- =?us-ascii?Q?91x4WOwAJH5MuhP6+ybJiydgjwxf6YYy6R2i3STMv50eFPyfTSIiejjhaBp6?=
- =?us-ascii?Q?d6lH/E4EJJxD4Ous4OPfvrPmGaGnjFIcZKYE/Kmp3ae8dkIDiAwnUoLDDpwK?=
- =?us-ascii?Q?XvMqaGMWzmBafhaLvXIDp6C4DoSpo1qXqoVlhayZKJpn7SZffMe7PJRXlEyF?=
- =?us-ascii?Q?eyQWc/8OR1uwwWmKb1Rwt6jworRuQ+h37KZofgWbnpeK7e77lcSzEZRE8OC/?=
- =?us-ascii?Q?+1cfbAtCMEMkT95C/KkrEZ8OYMs3aA9Gq4NHGFzHjGdTWAacosKIup3tGIxY?=
- =?us-ascii?Q?Sklzr7lEuiiZpX8Je+CYDibdP4SYu6A6oXg36CIfo0ijRRrZ17RTNnlY6VF4?=
- =?us-ascii?Q?xrXoeIlJuuSw/UlKLNTTeCm6z6ZVdfrjKmaKZw2GzdNFae/LYqTwotEY6iMu?=
- =?us-ascii?Q?khkBOUV0V6MtIwE21pQ7eWH7LA0SDlRA5KuNV0ZwVcKqKEZJEkc4pvkIklk1?=
- =?us-ascii?Q?xCGtu5loi/eI79xpQmrgtNcq61YfPZfHVofb5iAOlorzr4pXb+eTNCyfYbZ1?=
- =?us-ascii?Q?Xvdg2T3+Hhh8nXQe04H9uG8fXNI4ZfPpci1AKji+ZBFKLu9+I1tjR/rqalrb?=
- =?us-ascii?Q?aS+yXjWmkoxLe627uNPYG3vCOUByy3D8STdRpgKXKg1TRy6bKa9Rbt3IPSGW?=
- =?us-ascii?Q?mwk6jAZAvuGmmf2N/OrZnhLNkvb/hvWUZCbwrZHndoS01y4e1U76bsUFm+TQ?=
- =?us-ascii?Q?nCAcBcIjYUTNgTUlIqIehP76mgmD0xu7QqCgTnUGt9eJJSXTj8VmUnVLOMRk?=
- =?us-ascii?Q?ege8jbEwuGMXYaTjzET55jg+HBRz7zKlDiLMviG0T833MhsRaBkMq/EU0Qz8?=
- =?us-ascii?Q?cBOJb0DGxSEPe1OC2qBVys0gC9ivMNHImrBZ4vxgCkk44IOq0GFK52wK7+33?=
- =?us-ascii?Q?tjrw3zI6Sqp7fO+kzuso721Oc7ARdR3xZgvzcsHrreCj/wX/PebeLH522bCT?=
- =?us-ascii?Q?hZYgaseazXS+ch+516PAddY+YbTKTmX5t64FJsLmZVmB6pVRcHK7CDy0UXKe?=
- =?us-ascii?Q?CRlJ0c5HF2L4SrlWgJD4jUJ1PZ1GKQn5JbQVAffCCwaufBfegI2rCdW9RlnT?=
- =?us-ascii?Q?uGphE4NSXO4Zj/JjFD2ca6X4qP+vpKd/DGfXJ9CXJljDEmq13EuawGBF7s9S?=
- =?us-ascii?Q?6D6TcwBgYQ=3D=3D?=
+	=?us-ascii?Q?LGUMgIdTqNzra4R7yOmGgrqCob3uK/Q2/FJ/FcOb24HBvDIA1Wvzt88Ve1aN?=
+ =?us-ascii?Q?A86pFPM/AXVOfRu+Ygv4m6NI2H7q2o7imNCy4QOozFRLzFluK0+txUjdXmPE?=
+ =?us-ascii?Q?RPYpwCPI5raUr8fwaX1a1rwW3i6I+Be8p1OwoOPEcJeIF1v0WYUIh9e53mTG?=
+ =?us-ascii?Q?rPQ9rpWy2a+gdcu8GhTqMZVmkpUGt4q8Ln/pTdoS/zX3bcysskQdlmmiA8RM?=
+ =?us-ascii?Q?GQ5MDGVswkNAUXJVHbnyLAVOYgx3+fDMu8WSoxWzfrxnLjrUwo6wThOo7u2z?=
+ =?us-ascii?Q?MavHxzZR1Sd68a9ycr6jJOplGIJjlrzjuY5C9+BYd5dN2vfzXJkt+3mvIlRj?=
+ =?us-ascii?Q?q1+49qDbCsiInEAQaKw0h/FQ77hBORwtijzcjsYfnjBOSKhuclyxF8rUzAqz?=
+ =?us-ascii?Q?q6qIuHDylU5vr/zQzlgJYcvZBXC7AmKB41CHZ79PpOqvJTExA+/dDf8CAl0l?=
+ =?us-ascii?Q?cT0vZtXBonDBegHCFyEXc9wrQ6JJudTGVtulg+cEZJPEA76UfHLZNaYmJdOZ?=
+ =?us-ascii?Q?sdL8NYnGHzPJ4X6MmcZ4GPogkq87BvHj8+i2nfAQ7BjjUfwbvKczYPnQaTyk?=
+ =?us-ascii?Q?N5BUWKm3FoOxdrjuNkoiiEGe/X66r0Y/zxnFGtJTe1LdEmVRSr6//l+sfTHU?=
+ =?us-ascii?Q?obEK0N7pv38Btww3vzT+84UyTOCq+P3WJmVurwtjIyI5xUtn3M/tkIXc+0t/?=
+ =?us-ascii?Q?Y0SFUZcEaJ0GGewksA/sC0JGJFcSQ1+uwTx7yq3z7ktMyvoFCPaYDYxUb0Hy?=
+ =?us-ascii?Q?Jql3mnhaTQr0wVprTnKhVFSeO+vtlz4X8Uy8qEKTV0TddNJXgHiEUsr3fMKv?=
+ =?us-ascii?Q?QcCRQGmG3XhoSIpLO4pqNyAVW/dyMfSyh06K2BtBp8dLleOAwKu4PEJe6eXp?=
+ =?us-ascii?Q?vO6Nxq1qtOWSgr/1xGMmYWZMpzHrSxHkiY9PbIq8XaBh+ENlC1IAVxBObTJt?=
+ =?us-ascii?Q?f58+QROLJ+EtdBq4am9avR+pEWuR8Gd/r8DYQWxC86DjFhU1wmN7pKzWz9R6?=
+ =?us-ascii?Q?rat+UTN3hfJ36csjS1uOeI09QLR9xlGuIcCs/dfxwPD1Vb1DV8zYEWxrN5c5?=
+ =?us-ascii?Q?9kna6r+rRJfvpBZzH3AVmHfcCuIYdTQmh7uOdfLGPQMrOlXHde5pC/FhtCIh?=
+ =?us-ascii?Q?QecALTuO9XiApcVQRdIhG17uqLtlWp2BBiwDYB5KCEU2qTl/oE6j/54Esfzf?=
+ =?us-ascii?Q?F80uOocDXt86ZeZdmYTqS3oLpu+p/Ra7sWBpucrCLKcpTSSA/aRHkU6d8nwq?=
+ =?us-ascii?Q?JaxcFk0ydl+HelAjm4w5Jq6hJYnQ+iqeXzuyArhbxcB4nirSe1xD6fsNBZ+P?=
+ =?us-ascii?Q?tUOZ1p2i553l7X9ZRTupCHdWGNlewGXPAUITDIKLXynklY26IPdxTmPiJhw3?=
+ =?us-ascii?Q?E7UY1Qe8WMuQIFJI751cgaljQFyecF4sv1sSYtJq+xcEDeGBBDvANi5xMYPO?=
+ =?us-ascii?Q?B7+icCW0hgRRpeLsJ8jgGTDKAg2w//u/QTFWxU40Y0R2YSMlTlkERqFJ4BI/?=
+ =?us-ascii?Q?QDQP65iYCtCFHMle8U4j0lEu6/iPSSsJooJc1Mza681KsE41kZXuPYLh9xUt?=
+ =?us-ascii?Q?V9G9ATnRH33Qpa0i6NJVtmbLsQxXs3HVj8/tueJLi8SEtmbyrI9nmOE5vqSO?=
+ =?us-ascii?Q?h/HSInN8flvg2VvGYcueN+kWeA8wl9P9KKWQhmPhwkiic2bkMow9RWABXoUp?=
+ =?us-ascii?Q?fZGFVP4fl/dN96k0o3iEdGF/6ZWGNLp16kV9B8ap7xThtaUU2XKfn261WCOK?=
+ =?us-ascii?Q?RqjmHExQzA=3D=3D?=
 X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: bcbf5575-dc95-4069-0de7-08df253fbb6d
+X-MS-Exchange-CrossTenant-Network-Message-Id: 23668b82-008c-4490-b14f-08df253fbf48
 X-MS-Exchange-CrossTenant-AuthSource: CH8PR12MB9741.namprd12.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2026 13:26:16.9446
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2026 13:26:23.2982
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: BzjeKTyA3mDaBj9qeQZsqyciAVOa2o5HOMVCIpuxaTGcC1htuc7jGWPvjUB9fpaI2hUUeHYf6XIxvCl1+lOUgQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY8PR12MB7587
+X-MS-Exchange-CrossTenant-UserPrincipalName: AnK6AgDX3Eq2EDaMv7sRR8Qplcq86RDAKmHbo+KbBNSvBGwRYDVhCO1UmKO+c25WA1Yb4rWaGwRv8SMt2VTknA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS2PR12MB9592
 
-"tpm: Add NV define, undefine and write helpers" added some helper code
-to reduce duplication in parsing TPM responses. This could be useful
-elsewhere, so move it out to a header and add some additional features
-that will be used shortly.
+Add tpm2_kernel_key_sign(), which signs a SHA-256 digest with a key
+created by tpm2_kernel_key_create() using TPM2_Sign, and
+tpm2_kernel_key_destroy(), which flushes the key and erases its auth
+value.
 
 Signed-off-by: Matthew Garrett <matthewg@nvidia.com>
 ---
- drivers/char/tpm/tpm2-ak.c  |  89 +-----------------------
- drivers/char/tpm/tpm2-rsp.h | 132 ++++++++++++++++++++++++++++++++++++
- 2 files changed, 134 insertions(+), 87 deletions(-)
- create mode 100644 drivers/char/tpm/tpm2-rsp.h
+ drivers/char/tpm/tpm2-kernel-key.c | 98 ++++++++++++++++++++++++++++++
+ include/linux/tpm.h                | 16 +++++
+ include/linux/tpm_command.h        |  2 +
+ 3 files changed, 116 insertions(+)
 
-diff --git a/drivers/char/tpm/tpm2-ak.c b/drivers/char/tpm/tpm2-ak.c
-index ad24d36b1728..18968c8d2b48 100644
---- a/drivers/char/tpm/tpm2-ak.c
-+++ b/drivers/char/tpm/tpm2-ak.c
-@@ -15,6 +15,7 @@
- #include <linux/slab.h>
- #include <linux/unaligned.h>
- #include "tpm.h"
-+#include "tpm2-rsp.h"
- 
- /*
-  * Restricted signing key whose private part never leaves the TPM.  NO_DA
-@@ -36,96 +37,10 @@
- static const u8 tpm2_kernel_ak_seed[EC_PT_SZ] =
- 	"Linux kernel attestation key v1";
- 
--/* Bounds-checked reader for TPM response data */
--struct tpm2_rsp {
--	const u8 *data;
--	u32 len;
--	u32 off;
--	bool err;
--};
--
--static const u8 *tpm2_rsp_bytes(struct tpm2_rsp *r, u32 count)
--{
--	const u8 *p;
--
--	if (r->err || r->len - r->off < count) {
--		r->err = true;
--		return NULL;
--	}
--
--	p = &r->data[r->off];
--	r->off += count;
--	return p;
--}
--
--static u16 tpm2_rsp_u16(struct tpm2_rsp *r)
--{
--	const u8 *p = tpm2_rsp_bytes(r, sizeof(u16));
--
--	return p ? get_unaligned_be16(p) : 0;
--}
--
--static u32 tpm2_rsp_u32(struct tpm2_rsp *r)
--{
--	const u8 *p = tpm2_rsp_bytes(r, sizeof(u32));
--
--	return p ? get_unaligned_be32(p) : 0;
--}
--
--/* Initialise a reader over the response held in @buf */
--static void tpm2_rsp_init(struct tpm2_rsp *r, struct tpm_buf *buf)
--{
--	struct tpm_header *head = (struct tpm_header *)buf->data;
--
--	r->data = buf->data;
--	r->len = min_t(u32, be32_to_cpu(head->length), TPM_BUFSIZE);
--	r->off = TPM_HEADER_SIZE;
--	r->err = r->len < TPM_HEADER_SIZE;
--}
--
--/* Read a TPM2B_ECC_PARAMETER, left-padding it to EC_PT_SZ bytes */
--static void tpm2_rsp_ecc_param(struct tpm2_rsp *r, u8 *out)
--{
--	u16 len = tpm2_rsp_u16(r);
--	const u8 *p;
--
--	if (len > EC_PT_SZ) {
--		r->err = true;
--		return;
--	}
--
--	p = tpm2_rsp_bytes(r, len);
--	if (!p)
--		return;
--
--	memset(out, 0, EC_PT_SZ - len);
--	memcpy(out + EC_PT_SZ - len, p, len);
--}
--
- /* Parse and validate the TPM2B_PUBLIC of the kernel AK */
- static int tpm2_parse_kernel_ak_public(struct tpm2_rsp *r, u8 *x, u8 *y)
- {
--	u16 size = tpm2_rsp_u16(r);
--	u32 end = r->off + size;
--
--	if (tpm2_rsp_u16(r) != TPM_ALG_ECC ||
--	    tpm2_rsp_u16(r) != TPM_ALG_SHA256 ||
--	    tpm2_rsp_u32(r) != TPM2_OA_KERNEL_AK ||
--	    tpm2_rsp_u16(r) != 0 ||			/* authPolicy */
--	    tpm2_rsp_u16(r) != TPM_ALG_NULL ||		/* symmetric */
--	    tpm2_rsp_u16(r) != TPM_ALG_ECDSA ||		/* scheme */
--	    tpm2_rsp_u16(r) != TPM_ALG_SHA256 ||	/* scheme hash */
--	    tpm2_rsp_u16(r) != TPM2_ECC_NIST_P256 ||
--	    tpm2_rsp_u16(r) != TPM_ALG_NULL)		/* kdf */
--		return -EINVAL;
--
--	tpm2_rsp_ecc_param(r, x);
--	tpm2_rsp_ecc_param(r, y);
--
--	if (r->err || r->off != end)
--		return -EINVAL;
--
--	return 0;
-+	return tpm2_rsp_ecdsa_public(r, TPM2_OA_KERNEL_AK, x, y);
+diff --git a/drivers/char/tpm/tpm2-kernel-key.c b/drivers/char/tpm/tpm2-kernel-key.c
+index 27815525bc3f..89c11c78097a 100644
+--- a/drivers/char/tpm/tpm2-kernel-key.c
++++ b/drivers/char/tpm/tpm2-kernel-key.c
+@@ -402,3 +402,101 @@ int tpm2_kernel_key_create(struct tpm_chip *chip, struct tpm2_kernel_key *key,
+ 	return rc;
  }
+ EXPORT_SYMBOL_GPL(tpm2_kernel_key_create);
++
++/**
++ * tpm2_kernel_key_sign() - sign a digest with a kernel signing key
++ * @chip:	the TPM chip
++ * @key:	a key created by tpm2_kernel_key_create()
++ * @digest:	the SHA-256 digest to sign
++ * @r:		filled with the R component of the ECDSA signature
++ * @s:		filled with the S component of the ECDSA signature
++ *
++ * The key is authorized with its auth value through an HMAC session, so
++ * the auth value is never sent to the TPM in the clear.  The caller must
++ * hold the chip's ops lock.
++ *
++ * Return:
++ * * 0		- OK
++ * * -errno	- A system error
++ * * TPM_RC	- A TPM error
++ */
++int tpm2_kernel_key_sign(struct tpm_chip *chip, struct tpm2_kernel_key *key,
++			 const u8 digest[SHA256_DIGEST_SIZE],
++			 u8 r[EC_PT_SZ], u8 s[EC_PT_SZ])
++{
++	struct tpm_buf *buf __free(kfree) = NULL;
++	struct tpm2_rsp rsp;
++	int rc;
++
++	rc = tpm2_start_auth_session(chip, false);
++	if (rc && rc != -EBUSY)
++		return rc;
++
++	buf = kzalloc(TPM_BUFSIZE, GFP_KERNEL);
++	if (!buf) {
++		tpm2_end_auth_session(chip);
++		return -ENOMEM;
++	}
++
++	tpm_buf_init(buf, TPM_BUFSIZE);
++	tpm_buf_reset(buf, TPM2_ST_SESSIONS, TPM2_CC_SIGN);
++
++	rc = tpm_buf_append_name(chip, buf, key->handle, NULL);
++	if (rc)
++		return rc;
++
++	tpm_buf_append_hmac_session(chip, buf, TPM2_SA_CONTINUE_SESSION,
++				    key->auth, sizeof(key->auth));
++
++	/* digest */
++	tpm_buf_append_u16(buf, SHA256_DIGEST_SIZE);
++	tpm_buf_append(buf, digest, SHA256_DIGEST_SIZE);
++	/* inScheme: use the key's scheme */
++	tpm_buf_append_u16(buf, TPM_ALG_NULL);
++	/* validation: a NULL ticket, as the key is not restricted */
++	tpm_buf_append_u16(buf, TPM2_ST_HASHCHECK);
++	tpm_buf_append_u32(buf, TPM2_RH_NULL);
++	tpm_buf_append_u16(buf, 0);
++
++	rc = tpm_buf_fill_hmac_session(chip, buf);
++	if (rc)
++		return rc;
++
++	rc = tpm_transmit_cmd(chip, buf, 0, "signing with kernel key");
++	rc = tpm_buf_check_hmac_response(chip, buf, rc);
++	if (rc) {
++		if (rc < 0)
++			tpm2_end_auth_session(chip);
++		return rc;
++	}
++
++	tpm2_rsp_init(&rsp, buf);
++	/* parameterSize */
++	tpm2_rsp_u32(&rsp);
++	if (tpm2_rsp_u16(&rsp) != TPM_ALG_ECDSA ||
++	    tpm2_rsp_u16(&rsp) != TPM_ALG_SHA256)
++		return -EIO;
++	tpm2_rsp_ecc_param(&rsp, r);
++	tpm2_rsp_ecc_param(&rsp, s);
++
++	return rsp.err ? -EIO : 0;
++}
++EXPORT_SYMBOL_GPL(tpm2_kernel_key_sign);
++
++/**
++ * tpm2_kernel_key_destroy() - unload a kernel signing key
++ * @chip:	the TPM chip
++ * @key:	a key created by tpm2_kernel_key_create()
++ *
++ * Flushes the key from the TPM and erases its auth value.  The caller must
++ * hold the chip's ops lock.
++ */
++void tpm2_kernel_key_destroy(struct tpm_chip *chip,
++			     struct tpm2_kernel_key *key)
++{
++	if (key->handle)
++		tpm2_flush_context(chip, key->handle);
++
++	memzero_explicit(key, sizeof(*key));
++}
++EXPORT_SYMBOL_GPL(tpm2_kernel_key_destroy);
+diff --git a/include/linux/tpm.h b/include/linux/tpm.h
+index 7ee553688906..505ea6f4bb46 100644
+--- a/include/linux/tpm.h
++++ b/include/linux/tpm.h
+@@ -388,6 +388,11 @@ struct tpm2_key_provenance {
+ #ifdef CONFIG_TCG_TPM2_KERNEL_KEY
+ int tpm2_kernel_key_create(struct tpm_chip *chip, struct tpm2_kernel_key *key,
+ 			   struct tpm2_key_provenance *prov);
++int tpm2_kernel_key_sign(struct tpm_chip *chip, struct tpm2_kernel_key *key,
++			 const u8 digest[SHA256_DIGEST_SIZE],
++			 u8 r[EC_PT_SZ], u8 s[EC_PT_SZ]);
++void tpm2_kernel_key_destroy(struct tpm_chip *chip,
++			     struct tpm2_kernel_key *key);
+ #else
+ static inline int tpm2_kernel_key_create(struct tpm_chip *chip,
+ 					 struct tpm2_kernel_key *key,
+@@ -395,6 +400,17 @@ static inline int tpm2_kernel_key_create(struct tpm_chip *chip,
+ {
+ 	return -EOPNOTSUPP;
+ }
++static inline int tpm2_kernel_key_sign(struct tpm_chip *chip,
++				       struct tpm2_kernel_key *key,
++				       const u8 digest[SHA256_DIGEST_SIZE],
++				       u8 r[EC_PT_SZ], u8 s[EC_PT_SZ])
++{
++	return -EOPNOTSUPP;
++}
++static inline void tpm2_kernel_key_destroy(struct tpm_chip *chip,
++					   struct tpm2_kernel_key *key)
++{
++}
+ #endif
  
- /**
-diff --git a/drivers/char/tpm/tpm2-rsp.h b/drivers/char/tpm/tpm2-rsp.h
-new file mode 100644
-index 000000000000..3ee1f0f2e6ad
---- /dev/null
-+++ b/drivers/char/tpm/tpm2-rsp.h
-@@ -0,0 +1,132 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * Bounds-checked reader for data returned by the TPM.  Reading past the
-+ * end of the data sets an error flag and returns zeros, so a sequence of
-+ * reads can be checked once at the end.
-+ */
-+#ifndef __TPM2_RSP_H__
-+#define __TPM2_RSP_H__
-+
-+#include <linux/tpm.h>
-+#include <linux/unaligned.h>
-+
-+struct tpm2_rsp {
-+	const u8 *data;
-+	u32 len;
-+	u32 off;
-+	bool err;
-+};
-+
-+static inline void tpm2_rsp_init_data(struct tpm2_rsp *r, const u8 *data,
-+				      u32 len)
-+{
-+	r->data = data;
-+	r->len = len;
-+	r->off = 0;
-+	r->err = false;
-+}
-+
-+/* Initialise a reader over the parameters of the response held in @buf */
-+static inline void tpm2_rsp_init(struct tpm2_rsp *r, struct tpm_buf *buf)
-+{
-+	struct tpm_header *head = (struct tpm_header *)buf->data;
-+
-+	r->data = buf->data;
-+	r->len = min_t(u32, be32_to_cpu(head->length), TPM_BUFSIZE);
-+	r->off = TPM_HEADER_SIZE;
-+	r->err = r->len < TPM_HEADER_SIZE;
-+}
-+
-+static inline const u8 *tpm2_rsp_bytes(struct tpm2_rsp *r, u32 count)
-+{
-+	const u8 *p;
-+
-+	if (r->err || r->len - r->off < count) {
-+		r->err = true;
-+		return NULL;
-+	}
-+
-+	p = &r->data[r->off];
-+	r->off += count;
-+	return p;
-+}
-+
-+static inline u8 tpm2_rsp_u8(struct tpm2_rsp *r)
-+{
-+	const u8 *p = tpm2_rsp_bytes(r, sizeof(u8));
-+
-+	return p ? *p : 0;
-+}
-+
-+static inline u16 tpm2_rsp_u16(struct tpm2_rsp *r)
-+{
-+	const u8 *p = tpm2_rsp_bytes(r, sizeof(u16));
-+
-+	return p ? get_unaligned_be16(p) : 0;
-+}
-+
-+static inline u32 tpm2_rsp_u32(struct tpm2_rsp *r)
-+{
-+	const u8 *p = tpm2_rsp_bytes(r, sizeof(u32));
-+
-+	return p ? get_unaligned_be32(p) : 0;
-+}
-+
-+/* Read a TPM2B, returning its contents and setting @len */
-+static inline const u8 *tpm2_rsp_tpm2b(struct tpm2_rsp *r, u16 *len)
-+{
-+	*len = tpm2_rsp_u16(r);
-+	return tpm2_rsp_bytes(r, *len);
-+}
-+
-+/* Read a TPM2B_ECC_PARAMETER, left-padding it to EC_PT_SZ bytes */
-+static inline void tpm2_rsp_ecc_param(struct tpm2_rsp *r, u8 *out)
-+{
-+	u16 len = tpm2_rsp_u16(r);
-+	const u8 *p;
-+
-+	if (len > EC_PT_SZ) {
-+		r->err = true;
-+		return;
-+	}
-+
-+	p = tpm2_rsp_bytes(r, len);
-+	if (!p)
-+		return;
-+
-+	memset(out, 0, EC_PT_SZ - len);
-+	memcpy(out + EC_PT_SZ - len, p, len);
-+}
-+
-+/*
-+ * Parse a TPM2B_PUBLIC for an ECDSA-SHA256 P-256 signing key with no
-+ * symmetric algorithm, KDF or policy, checking that it has exactly the
-+ * object attributes @attrs, and return its public point.
-+ */
-+static inline int tpm2_rsp_ecdsa_public(struct tpm2_rsp *r, u32 attrs,
-+					u8 *x, u8 *y)
-+{
-+	u16 size = tpm2_rsp_u16(r);
-+	u32 end = r->off + size;
-+
-+	if (tpm2_rsp_u16(r) != TPM_ALG_ECC ||
-+	    tpm2_rsp_u16(r) != TPM_ALG_SHA256 ||
-+	    tpm2_rsp_u32(r) != attrs ||
-+	    tpm2_rsp_u16(r) != 0 ||			/* authPolicy */
-+	    tpm2_rsp_u16(r) != TPM_ALG_NULL ||		/* symmetric */
-+	    tpm2_rsp_u16(r) != TPM_ALG_ECDSA ||		/* scheme */
-+	    tpm2_rsp_u16(r) != TPM_ALG_SHA256 ||	/* scheme hash */
-+	    tpm2_rsp_u16(r) != TPM2_ECC_NIST_P256 ||
-+	    tpm2_rsp_u16(r) != TPM_ALG_NULL)		/* kdf */
-+		return -EINVAL;
-+
-+	tpm2_rsp_ecc_param(r, x);
-+	tpm2_rsp_ecc_param(r, y);
-+
-+	if (r->err || r->off != end)
-+		return -EINVAL;
-+
-+	return 0;
-+}
-+
-+#endif
+ #ifdef CONFIG_TCG_TPM2_HMAC
+diff --git a/include/linux/tpm_command.h b/include/linux/tpm_command.h
+index cef85f532b6c..9ff2f67c55c6 100644
+--- a/include/linux/tpm_command.h
++++ b/include/linux/tpm_command.h
+@@ -191,6 +191,7 @@ enum tpm2_structures {
+ 	TPM2_ST_SESSIONS	= 0x8002,
+ 	TPM2_ST_ATTEST_SESSION_AUDIT = 0x8016,
+ 	TPM2_ST_CREATION	= 0x8021,
++	TPM2_ST_HASHCHECK	= 0x8024,
+ };
+ 
+ /* Indicates from what layer of the software stack the error comes from */
+@@ -238,6 +239,7 @@ enum tpm2_command_codes {
+ 	TPM2_CC_CREATE			= 0x0153,
+ 	TPM2_CC_LOAD			= 0x0157,
+ 	TPM2_CC_SEQUENCE_UPDATE		= 0x015C,
++	TPM2_CC_SIGN			= 0x015D,
+ 	TPM2_CC_UNSEAL			= 0x015E,
+ 	TPM2_CC_CONTEXT_LOAD		= 0x0161,
+ 	TPM2_CC_CONTEXT_SAVE		= 0x0162,
 -- 
 2.43.0
 
