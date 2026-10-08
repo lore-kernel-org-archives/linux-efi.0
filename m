@@ -1,108 +1,124 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85D534AFE25
-	for <linux-efi@vger.kernel.org>; Thu,  8 Oct 2026 14:43:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1580B4A4829;
+	Thu,  8 Oct 2026 15:56:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791470620; cv=none; b=P12tJKLu6bZGT/czwVuD1e5eGJDIUlSKFM+ZgaPBVhjeHZ71PMGFfzMcUHOMJwTr2OoMbMeR/VeZd3mXHgS760xqd9AnQ+yGBULgDYtqVSw5J+mesZA5uJ9A9u8YBHe8/XRtiktDWZJ3vyZPlUIRnefTAK5mUkMjQg1o1epyfIo=
+	t=1791475007; cv=none; b=ePXukucp544rBjKUKhmO6lQXrCWLntvCEYGfS0oQaB4K6A9roMeQ1faLwhz2TRFo8lP5CmxffLYfsNTq1Ytj7rRSQZh/Ta5CQATGWOdyKtPSqpYwrNS06ccisbEjd3CX4S1LxLA/xefQEStehiXZ+WQxMTe5OaVdGb/nfQ6Sy/w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791470620; c=relaxed/simple;
-	bh=yde/+5LcQoOeRRuVFg6M0zfcbx+JRpuc+eBL1JOnXGg=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=uLRLpJ0gsMaHtbMheLlOzcOq6+03+Jn7NzTIdmgEun53gqJgR2abGKkHSOtRdVlvAbI2LEZInvNggYeGzbcqOBzh3hkJ4e6BfFyv7weVyVglfGTBDma6cB+9OV/znw4hucqOCJ5/EhkEA+RjApBUZBQdoUAgh7kl3Cs5u3sU0u0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aP1It7DP; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1791475007; c=relaxed/simple;
+	bh=4T7+kwqeLF1iaqtHRRItlcp3UQ9M8yFbOlUgCboL7Zo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=SVh6JWh3QJGIWb8GTxcOej+sfd/CJDeVkaH0SV818eRxqqGthsrLWugbFWTG15Tpdkn0ARVe400fePf5g3xP2WXmkfYqBcP2nf6TlhxmTbUJbYi6rkr5yvKJQNsGAH9VfPzKLJ1dIBi2us4wEsHjqfPYUEzB+c5ZH59FK+IQAk8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DOopBNKS; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aP1It7DP"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F7ED1F00893;
-	Thu,  8 Oct 2026 14:43:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DOopBNKS"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 082A71F000FF;
+	Thu,  8 Oct 2026 15:56:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1791470616;
-	bh=7uOTQ1zSN0z7Rn1oQH6H1RzY+ERxySKobdm9Rl2nHfU=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=aP1It7DPCrIMdFkdblgnMKDvFt7KLo1gQtO3du63W1C9VLGlJfI60IKWCVfM+E/Lb
-	 6GFwqytavh4Kl57EHcZQ1mDXeCmyPYJuXS+x2pwFBGmJhX8CBgklWra8GFwLY0yDnP
-	 VUjHYVEwx5mVBt/i7mkZqPu8/CLrNWc/xCx2+oNCzWub9m22WnZyhu6IRxXD0vgbs/
-	 a68eZsLTlyJlBAnRdNAj5kvWMdqXHa0J2guDouIcWDiVk1SMcqyVGKlwcvCP0Mb3Z/
-	 BVe0FH0274mebxwcZLAbh/aU6EpAs17MGHeYwy3TM5d3aJgeksUyXMyQyMd5PnIZrs
-	 loQl00Xn/8pbw==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id F00E1198003A;
-	Thu,  8 Oct 2026 10:43:33 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Thu, 08 Oct 2026 10:43:33 -0400
-X-ME-Sender: <xms:E6zHarU2u8vRSLjo8VAUSohrBwE9U3EBsC4RdR8buuSDAC8Ueb7alQ>
-    <xme:E6zHaua8RzJIskHqMh0dfNFdIA345_M6dUUjASJO7FJyU739ne97ouM_Rh2u4Qu-x
-    kthebfPSNQMVScOF_gD0p3ClaUiN8EE0mMK3kFALEjCI0bDUsbf7RM>
-X-ME-Proxy-Cause: dmFkZTFLFdKRhLlrwTLld4Wy5+ue4G3ql742LJUzSxdwwyFPrUuXhuYXx1lwJPeWTickYH
-    Tgv/MSlKKx6Td3p8bJv42iB4/T7U3vr3Trz7BwNIgpquWNijRyc23PKDK/qFoYIIj2gHwk
-    t+LQ310KAqqtJTt8v8YqH8FPKmUuavezeULfNoLP7hIFXsiIk08mtpm14CGs23/9P31oxP
-    V6iGIORVZ0TRkkY5nvgOQOvm52JfeAVU/w4szt5HvqUgvfGS6bM9pr7goD5IDia+VLYAmc
-    PoXzIxjCPlIhYoT3y+SOkxZ+lwkTYWFGjDMOI/Wj3qrSOiaWu0E04B98xG+1LpMfCbpVAv
-    wtzCrGkgg1C6vx8b5i95bsAM79pwvgW1RThVmddTf4HMRZuBFtRR2TeDp7lJ1OIK3Fmksm
-    R1gsIXUGpyWQOgXqYsq4QnEJ1hvEmvMZ5KvPykRK6K5QnlWk87U+b+xu3HDpD4KV2+owAi
-    0JgkqV/3kz+nkpOJercxkOAsziGL2cg7F5IRr2ygqMkiTYJW9n5K/wGHH++z796K82K6GF
-    AOvUIUOhaHlOizyZObBe4uyf/3bcPQc8lw1QtV0n7DiiP/xk0qQdLAyrGEXDbtGz6yL9R2
-    J2HijVcfCbKnqWwGCJsqLPMRI1Q+gz0atfEE8U8J/Ez0KhSds0cqn9bc6Duw
-X-ME-Proxy: <xmx:FazHaq4iMK2edHhv9xCbhdzbexPdBVyTRyTKfVmH4gW1iZRhNiWdLg>
-    <xmx:FazHaldVvQtgn-UHB0A9DZbvMxuJOIkaX5g_Rbx-6D1xqe9Q8INM5Q>
-    <xmx:FazHaosWCH-96-sqVyADPPZ5vDl7Q__PpQOR-tbmE4J0WsdSbKXgIg>
-    <xmx:FazHatlM1dcnPHi6PwjSaAX5COxKNGjw3ulIPy7S-Kpklaf1DX8i4g>
-    <xmx:FazHajS8gViJBAb-_b8-7IXtTmBwzzew1Xm3_ccNenXJilkFDF28Dhie>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id C0189F80096; Thu,  8 Oct 2026 10:43:31 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=k20260515; t=1791475005;
+	bh=t/k6GBykoXXVVoctwLm8isejRieFbFuiEFi85fJbtkw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=DOopBNKS6yal4lzmfYSh/GV3nywKxLzLrX2CjGpOtbTLj+Bo+jGJPN8a/2xVmqxXl
+	 I2UOMs6WCThc+spuZ6DNCeAQWMC5t+dIXmzb4Olg5kQw5a6T0AC4uAT4+gmYPq7nW+
+	 eg5cakOMYQKJhFbrrS5x9xHBxW32txP0bRr5v2cPturlh5Gm9k3Suil89ips4jn5vu
+	 8txFCM4DnlAIIYeFF2XzCssFGXolLNkJzk76BwNaTLEuB0PFFJ4UnqcKY6H4WBqoHv
+	 Cwa2tKcDW9yWOAu5MRqcbLOKFPl5Ervl2qpLBFBEekQwz/hEVTsuUyAz/4TPQl4cH+
+	 ACEkDx1UqtTVw==
+Date: Thu, 8 Oct 2026 18:56:41 +0300
+From: Jarkko Sakkinen <jarkko@kernel.org>
+To: Matthew Garrett <matthewg@nvidia.com>
+Cc: mjg59@srcf.ucam.org, keyrings@vger.kernel.org,
+	James.Bottomley@hansenpartnership.com,
+	linux-integrity@vger.kernel.org, rafael@kernel.org,
+	linux-pm@vger.kernel.org, linux-efi@vger.kernel.org
+Subject: Re: [RFC] Make hibernation work with lockdown
+Message-ID: <ase9OQGWtEvDp0qH@kernel.org>
+References: <20261008132532.1155166-1-matthewg@nvidia.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Thu, 08 Oct 2026 16:43:11 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Kees Cook" <kees@kernel.org>
-Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- "Nathan Chancellor" <nathan@kernel.org>, "Nicolas Schier" <nsc@kernel.org>,
- "Nick Desaulniers" <ndesaulniers@google.com>,
- "Bill Wendling" <morbo@google.com>, "Justin Stitt" <justinstitt@google.com>,
- linux-efi@vger.kernel.org, llvm@lists.linux.dev,
- linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Message-Id: <31318d3b-1738-49d2-8017-d4ebf98aa22f@app.fastmail.com>
-In-Reply-To: <20261006204210.i.137-kees@kernel.org>
-References: <20261006204210.i.137-kees@kernel.org>
-Subject: Re: [PATCH v1 0/3] efi/libstub: Build the x86 stub from KBUILD_CFLAGS
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261008132532.1155166-1-matthewg@nvidia.com>
 
+On Thu, Oct 08, 2026 at 06:20:16AM -0700, Matthew Garrett wrote:
+> Hibernation writes out the full system state to disk in an unencrypted 
+> and unauthenticated manner. Resuming from hibernate reads that data and 
+> throws it directly into RAM, then jumps into it. This is effectively an 
+> entirely unauthenticated mechanism for putting whatever you want into 
+> kernel space. This violates the assumptions around lockdown (root can 
+> write whatever they want to the swap partition and then trigger a 
+> resume), and as such lockdown blocks hibernate.
+> 
+> This has made many people unhappy.
+> 
+> This patchset seeks to solve this problem. In order for hibernation to 
+> be trustworthy we need to be able to prove that the image was generated 
+> by the kernel and not modified after that. This is not an easy task, and 
+> requires some infrastructural framework. To that end, this patchset does 
+> the following:
+> 
+> 1) Co-opts a TPM NV index for the kernel's sole use. This is currently a 
+> placeholder and we should register one explicitly from an appropriate 
+> range in order to ensure that we don't conflict with userland.
+> 
+> 2) Does something horrifying with PCR 5 in order to prove that a given 
+> kernel supports (1). We need to extend and cap a PCR before userland is 
+> running in order to prove that the kernel has support for this feature, 
+> but since we don't currently cap any PCRs there's nothing stopping 
+> userland from doing the same and so achieving the same state. The way 
+> around this is to rely on a feature of PCR 5 - it is extended as a 
+> result of ExitBootServices being called, and since the boot stub can 
+> execute code before that happens we can perform the proof extension 
+> there and then have it implicitly capped by the firmware's extension.
+> 
+> 3) Adds support for audited TPM sessions in the kernel, allowing us to 
+> generate signed digests of the commands that were executed in that 
+> session and their results
+> 
+> 4) Adds support for generating a predictable AK that can be used to sign 
+> digests from those audit sessions
+> 
+> 5) Adds support for generating a TPM signing key in such a session, and 
+> using the signed digest to prove that the session took place in the 
+> kernel
+> 
+> 6) Signs the hibernation image with such a key
+> 
+> An old kernel that doesn't implement (1) won't be able to mimic the same 
+> PCR 5 value. Userland won't be able to mimic the NV index value because 
+> the kernel will block it. This means that the only way that key could 
+> have been created is by the kernel, and so we can trust that the image 
+> was generated by the kernel.
+> 
+> QUESTIONS:
+> 
+> 1) I haven't tried to make the key management generic, since this isn't 
+> intended to ever be exposed to userland in any way. Should it be 
+> integrated into the trusted keys layer anyway?
 
-On Tue, 6 Oct 2026, at 22:42, Kees Cook wrote:
-> Hi!
->
-> The x86 EFI stub builds from its own short list of compiler flags instead
-> of KBUILD_CFLAGS, so options added kernel-wide reach it only when someone
-> remembers to add them there too (e.g. for -fms-extensions). Swap it
-> around to remove unwanted options instead, as we do for all the other
-> architectures.
->
-> This will let Clang's -fexperimental-late-parse-attributes reach the
-> stub build so that __counted_by() will get parsed without error[1].
->
-> Thanks!
->
-> -Kees
->
-> Link: https://lore.kernel.org/all/202610060642.7C4125F@keescook [1]
->
-> Kees Cook (3):
->   efi/libstub: Declare the x86 stub's assembly entry points
->   efi/libstub: Build the x86 stub from KBUILD_CFLAGS
->   efi/libstub: Disable kernel stack erasing in the common flags
->
+If we don't have a use case, I don't think so...
 
-Thanks. I've queued this up but with a tweak applied to patch #1,
-as it broke the GCC i386 build due to the fact that 'asmlinkage'
-evaluates to __attribute__((regparm(0))), and apparently, GCC
-still thinks that differs from a function without the attribute,
-even when it is the default. (Clang built fine)
+> 
+> 2) Filtering TPM commands from userland isn't ideal - anyone able to 
+> poke commands into the TPM directly is in a position to violate the 
+> assumptions here. Is there any way we can get a secret into the kernel 
+> that can be used as an auth value? It would need to be impossible to 
+> obtain from userland and it would need to be consistent over platform 
+> reboots.
 
+We could generate a primary key and a keyedhash key that would be stored
+outside kernel while data is at rest. Then during power on they could be
+read to the kernel memory.
+
+I did not consider who would create the files in the first place.
+
+I neither did look at the code yet meaning that my comments should
+definitely be taken with a grain of salt. Just writing down a remark.
+
+Br, Jarkko
