@@ -1,549 +1,122 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from lamorak.hansenpartnership.com (lamorak.hansenpartnership.com [198.37.111.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A3B303955CC;
-	Thu,  8 Oct 2026 16:38:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 257D23AEF4F;
+	Thu,  8 Oct 2026 16:45:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.37.111.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791477503; cv=none; b=RZzasvTpZCPPSXOAgrk2xqbhvtNYoiOrWI8/DbtijBSOuasC2aVbtl8b9mvd7BofeH3ouGqJGn7QYFeI9lWL92d9EQssr/NntaRjmYQq8f+ShPKd3StJ3AHkZRjpAqrTPWNKEOIuW3KIkDQsRROpB2yREUEg61cKI51YTacZUh8=
+	t=1791477922; cv=none; b=jBzboD3glNzDkZVJPPi5jOoWTX2y8CA+uJVbst08mp3G8Bt2OUj1LqI7yEANpjPzA8ys870XFqsJe+8qtKZz3haTtLQD7ih+/KfGxuskvygSU1C4Z8mzLMlyPCQajOYxMoqLKIZboDPZ3o09sQzGkSesHaWXZIWAKZQgJkDY8p0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791477503; c=relaxed/simple;
-	bh=U3TBQh6pLLMuQoKggalQmj80cT8D6i/THhezGMV+bK4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=F36A9WLdqP0fk3qyPVwoKhaAvV/CKFEf1ILhDFonCLTNCo06/5XETe9mc2YmQc9BdECjF9ovplSPeminoGb+zV3q/9jDz7oCdzU2g4nTQPLuBmu+gV23hY56bvuMLH9NWBbCXMaG2Mj5yPZx6ibRaCSsTtWQzHoNa0QisglZQnk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EENGJ8wS; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1791477922; c=relaxed/simple;
+	bh=OMOHRU+xJ2Adb/yorn/o8MTrvtiwSFZIvb8OuMXMjtU=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=RhgqpcRQLUPscuWv1QTOA5iMLMk+hnOcask7f2SjQJhUlnMxTjirAHjS1MNAVgNdBy6dW/SnhVvRuD38KkFOOMsaWe7/IxXE+6GhYCJzmxQOETog6xdCmKv+RwwN84WAyQPwP8VzcvQ8ThCeeceHl/MJSjhbzdvPjE5Vy7kXzOQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com; spf=pass smtp.mailfrom=HansenPartnership.com; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=b+x2uL2y; arc=none smtp.client-ip=198.37.111.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=HansenPartnership.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EENGJ8wS"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id C08291F000FF;
-	Thu,  8 Oct 2026 16:38:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1791477501;
-	bh=8Y90LqNa/uUaQxnybM+eP5fRuaiHz4S57iFQZ/4qGjQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=EENGJ8wSh28xKbQ0RrnSjhZeBIn9JPVUnw0oW/kwnres1VzBVB8Z7VTDS6/SoIFRZ
-	 qUG4zTZW1zfvhFcuboqaDQZjbYG9jhVjRKUMS0xgcrRptKE8FSZ0HrMyd0RfBqxbW0
-	 M68ro+ejOdzrlPqy1QlNiJQD3BQx23ui4W0nsy/sqQgv6R9pwdtziCQA6LI4tGU6Z7
-	 xFdXj5v7RIYx4QNmPBLZqRlQmiViKZ4mAQK4AolpLDt/1ICxhPc+6iHokusI5QAJgq
-	 RTUw9VsPRq61z4PGWPQ5aNABw8h98bOUGSqIC0EJETkcHx8SDZN0mkwZqaXrY9MywC
-	 TdbvZlbkvGnJw==
-Date: Thu, 8 Oct 2026 19:38:17 +0300
-From: Jarkko Sakkinen <jarkko@kernel.org>
-To: Matthew Garrett <matthewg@nvidia.com>,
-	Ross Philipson <ross.philipson@gmail.com>
-Cc: mjg59@srcf.ucam.org, keyrings@vger.kernel.org,
-	James.Bottomley@hansenpartnership.com,
-	linux-integrity@vger.kernel.org, rafael@kernel.org,
-	linux-pm@vger.kernel.org, linux-efi@vger.kernel.org
-Subject: Re: [PATCH 02/17] efi: Add a mechanism to modify TPM state depending
- on kernel security features
-Message-ID: <asfG-baBltbhdv0z@kernel.org>
+	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="b+x2uL2y"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+	d=hansenpartnership.com; s=20151216; t=1791477919;
+	bh=OMOHRU+xJ2Adb/yorn/o8MTrvtiwSFZIvb8OuMXMjtU=;
+	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
+	b=b+x2uL2yKevnqmEtBmzLXT4bnxSilmpKkdmGLyxQrGTfNyQ+lB1m9mlngDU6GKBlK
+	 3eElE2FdK1ydIYgz8g13MbanUril0+VVNPVg6DhQpofD9b2VAkg27VoZLxQ9qpNpVM
+	 oSxoj63ircJlfBX76wJ/3hPw3/NMMIBnAm0qK68M=
+Received: from [10.23.23.248] (unknown [80.188.228.74])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519MLKEM768 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by lamorak.hansenpartnership.com (Postfix) with ESMTPSA id 080821C0025;
+	Thu, 08 Oct 2026 12:45:17 -0400 (EDT)
+Message-ID: <c5d1b69763362db8a681d00d3325dd673c4db08b.camel@HansenPartnership.com>
+Subject: Re: [PATCH 05/17] tpm: Add a kernel attestation key and signed
+ audit digest retrieval
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
+To: Matthew Garrett <matthewg@nvidia.com>, mjg59@srcf.ucam.org
+Cc: keyrings@vger.kernel.org, linux-integrity@vger.kernel.org, 
+	rafael@kernel.org, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org
+Date: Thu, 08 Oct 2026 18:45:15 +0200
+In-Reply-To: <20261008132532.1155166-6-matthewg@nvidia.com>
 References: <20261008132532.1155166-1-matthewg@nvidia.com>
- <20261008132532.1155166-3-matthewg@nvidia.com>
+	 <20261008132532.1155166-6-matthewg@nvidia.com>
+Autocrypt: addr=James.Bottomley@HansenPartnership.com;
+ keydata=mQENBE58FlABCADPM714lRLxGmba4JFjkocqpj1/6/Cx+IXezcS22azZetzCXDpm2MfNE
+ lecY3qkFjfnoffQiw5rrOO0/oRSATOh8+2fmJ6el7naRbDuh+i8lVESfdlkoqX57H5R8h/UTIp6gn
+ 1mpNlxjQv6QSZbl551zQ1nmkSVRbA5TbEp4br5GZeJ58esmYDCBwxuFTsSsdzbOBNthLcudWpJZHU
+ RfMc0ew24By1nldL9F37AktNcCipKpC2U0NtGlJjYPNSVXrCd1izxKmO7te7BLP+7B4DNj1VRnaf8
+ X9+VIApCi/l4Kdx+ZR3aLTqSuNsIMmXUJ3T8JRl+ag7kby/KBp+0OpotABEBAAG0N0phbWVzIEJvd
+ HRvbWxleSA8SmFtZXMuQm90dG9tbGV5QEhhbnNlblBhcnRuZXJzaGlwLmNvbT6JAVgEEwEIAEICGw
+ MGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAhkBFiEE1WBuc8i0YnG+rZrfgUrkfCFIVNYFAml2ZBI
+ FCS3GUMIACgkQgUrkfCFIVNZKjQf/deRzlXZClKxTC/Ee2yEPqqS7mm/INUA49KdQQ5oIhSxkUBy0
+ 9J4qjMIo5F8ZFkFTqikBqeL35LKu7O7rn8WETfX8Bxvos3HUsl3jHo34DES4MUFIpoQPgtiLRGwLb
+ K0cVCAArR2u2qj4ABmTRrs1I1kvdjEw6gatOuXtEe/j5O2fvfzTq9GBr0Q3n2IAsFXi4hLlx6VPE8
+ tyWUZ8BWJKtih3JAeUiXFvASL3McV0rV9RnU0VbjEQEhSE7PMYhWpnDC9AyBb0lXJllQRvC3NSkUB
+ 8KVQgNNxRPss0WE/nBoZ4dFA42jTyzTz8lNylxZoAWV7WJb3QxVg4oCodRVrxxrQhSmFtZXMgQm90
+ dG9tbGV5IDxqZWpiQGtlcm5lbC5vcmc+iQFVBBMBCAA/AhsDBgsJCAcDAgYVCAIJCgsEFgIDAQIeA
+ QIXgBYhBNVgbnPItGJxvq2a34FK5HwhSFTWBQJgS5mYBQkbNYS9AAoJEIFK5HwhSFTWBpwIAL5Bk3
+ 5FB34U6iHmDzzgdCbxLTs43T/YQyJpcGIvopBvnI/fDY8oSG6Df64/O6B+1R+A8TDp6ZG5ysUWnCC
+ 6GuIaEHemBYkitMPglR6+sGCMQY7O0mlsPvdssvKK1KI9Bno4VU6ogaF2qVzefSqg1Djmf/DcsxWP
+ rI/jdJ8FB5AYR2rjIdDFc+zRdAJuavo1/anyY2wgpFh/3R8IOYAEfWV9nGgYkf9+tA4EIn1sxE0I3
+ L5oW2N3mbyRrkzuBwO8ztMCwqEPk7moWzhokcZqMXiAIahaZdkashJC+s2X2RZSGCy+g+pvY5NN4B
+ BVG5XwLgVBqbHMTcxE0fbmPqz+q6O0LEphbWVzIEJvdHRvbWxleSA8amVqYkBoYW5zZW5wYXJ0bmV
+ yc2hpcC5jb20+iQFXBBMBCABBFiEE1WBuc8i0YnG+rZrfgUrkfCFIVNYFAmODZ5ACGwMFCRs1hL0F
+ CwkIBwICIgIGFQoJCAsCBBYCAwECHgcCF4AACgkQgUrkfCFIVNZu0Af/TzvL2/NdgAcw9uN3x60H8
+ jc4QUq14VpxcFEFEMpcj1morkX/G93V+56HBBaXZj+yK8PhxIA/SIz+sU7C/0YvKuvzakP8ZX/7WJ
+ e32SOUtjfr/VTaqjIBzNj6OxLvZpmNbBw7s6DwhhNpHOWqJ/1ml+PtDRDV71IB58yVqQjp1xlNKVl
+ ZppcJ5908EJzsFnRIVjiQiDSKoppqB2BCibBbrWcln7CiWMyOC/cco6SIn6twH+f7+aivJ3xGcOE2
+ a9gBKF5rNi9TBoX9oyPmshv/TDmnohsVrH7AYXlGYfZTk15SWEiROh1QX8/uD9wl/gcIv5EDUpT/F
+ L2jzOsA5663bw==
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.56.2 
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261008132532.1155166-3-matthewg@nvidia.com>
 
-On Thu, Oct 08, 2026 at 06:20:18AM -0700, Matthew Garrett wrote:
-> "tpm: Define a kernel-owned TPM NV index that can't be modified by
-> userland" adds support for restricting a TPM NV index to kernel use,
-> allowing us to perform TPM operations in-kernel that can be proven to be
-> owned by the kernel. But previous kernels didn't implement this
-> restriction, and so an identical proof can be generated by booting an
-> old kernel and setting up this NV index in userland. We need some way to
-> differentiate these situations, which means we need some way to change the
-> TPM state in a way that userland can't mimic.
-> 
-> Thankfully the combination of the TCG specification and our EFI boot
-> stub give us a mechanism to achieve this. The EFI boot stub runs before
-> ExitBootServices is called, and ExitBootServices is (according to the
-> spec) supposed to extend PCR 5. If we perform an extension of PCR 5
-> before ExitBootServices is called, our extension will be followed by the
-> ExitBootServices extension before any userland code runs. Userland code
-> on an old kernel will be able to perform the same extension, but only
-> after ExitBootServices is called, and so will end up with a different
-> PCR 5 value because the order of extension events matters.
-> 
-> Obviously this depends on the platform actually extending PCR 5 on
-> ExitBootServices, which is something we can't fundamentally depend on
-> because firmware. So, let's be careful. After performing the extension,
-> read the SHA 1 and SHA 256 banks (because we can't guarantee the
-> firmware is using both) and put those in a config table to pass up to
-> the runtime kernel. It can then read these values and read PCR 5. If the
-> values are identical then the firmware didn't perform an extension and
-> userland could fake the same setup, so flag this as a firmware bug and
-> don't enable anything. If the firmware only extended one bank then
-> that's still sufficient - we will end up having to rely on that single
-> bank, but that's still sufficient to demonstrate that we're on a new
-> kernel (at least, until SHA 1 is broken more than it currently is).
-> 
-> Signed-off-by: Matthew Garrett <matthewg@nvidia.com>
-> ---
->  drivers/firmware/efi/Kconfig                  |  15 ++
->  drivers/firmware/efi/Makefile                 |   1 +
->  drivers/firmware/efi/efi.c                    |   3 +
->  .../firmware/efi/libstub/efi-stub-helper.c    |   6 +
->  drivers/firmware/efi/libstub/efistub.h        |  10 +-
->  drivers/firmware/efi/libstub/tpm.c            | 170 ++++++++++++++++++
->  drivers/firmware/efi/tpm-security.c           |  98 ++++++++++
->  include/linux/efi.h                           |  24 +++
->  8 files changed, 326 insertions(+), 1 deletion(-)
->  create mode 100644 drivers/firmware/efi/tpm-security.c
-> 
-> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-> index 29e0729299f5..c411fd4b6c93 100644
-> --- a/drivers/firmware/efi/Kconfig
-> +++ b/drivers/firmware/efi/Kconfig
-> @@ -180,6 +180,21 @@ config RESET_ATTACK_MITIGATION
->  	  have been evicted, since otherwise it will trigger even on clean
->  	  reboots.
->  
-> +config KERNEL_TPM_SECURITY
-> +	bool "Prove that the kernel supported certain security features"
-> +	depends on EFI_STUB && TCG_TPM_KERNEL_NVINDEX=y
-> +	help
-> +	  Have the EFI stub extend a fixed value into TPM PCR 5 in order to
-> +	  indicate that the kernel implements specific security
-> +	  functionality. This depends on the firmware extending PCR 5 when
-> +	  ExitBootServices is called - a failure to do this by the firmware
-> +	  will be logged.
-> +
-> +	  At present, this feature proves that the kernel implements kernel
-> +	  NV index reservation.
-> +
-> +	  If unsure, say N.
-> +
->  config EFI_RCI2_TABLE
->  	bool "EFI Runtime Configuration Interface Table Version 2 Support"
->  	depends on X86 || COMPILE_TEST
-> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-> index 8efbcf699e4f..79f7a2c977f1 100644
-> --- a/drivers/firmware/efi/Makefile
-> +++ b/drivers/firmware/efi/Makefile
-> @@ -30,6 +30,7 @@ obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
->  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
->  obj-$(CONFIG_LOAD_UEFI_KEYS)		+= mokvar-table.o
->  obj-$(CONFIG_OVMF_DEBUG_LOG)		+= ovmf-debug-log.o
-> +obj-$(CONFIG_KERNEL_TPM_SECURITY)	+= tpm-security.o
->  
->  obj-$(CONFIG_SYSFB)			+= sysfb_efi.o
->  
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 0327a39d31fa..f8e2ecca9102 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -648,6 +648,9 @@ static const efi_config_table_type_t common_tables[] __initconst = {
->  #endif
->  #ifdef CONFIG_EFI_GENERIC_STUB
->  	{LINUX_EFI_PRIMARY_DISPLAY_TABLE_GUID,	&primary_display_table			},
-> +#endif
-> +#ifdef CONFIG_KERNEL_TPM_SECURITY
-> +	{LINUX_EFI_PCR5_LOG_GUID,		&efi_pcr5_log,		"PCR5"		},
->  #endif
->  	{},
->  };
-> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> index f27f2e1f0019..996313f59827 100644
-> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> @@ -435,6 +435,12 @@ efi_status_t efi_exit_boot_services(void *handle, void *priv,
->  	if (efi_disable_pci_dma)
->  		efi_pci_disable_bridge_busmaster();
->  
-> +	/*
-> +	 * This installs a configuration table, so must happen before the
-> +	 * final memory map is retrieved.
-> +	 */
-> +	efi_tpm_record_pcr5();
-> +
->  	status = efi_get_memory_map(&map, true);
->  	if (status != EFI_SUCCESS)
->  		return status;
-> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-> index fd91fc15ec81..e4012bce6013 100644
-> --- a/drivers/firmware/efi/libstub/efistub.h
-> +++ b/drivers/firmware/efi/libstub/efistub.h
-> @@ -862,6 +862,7 @@ typedef u32 efi_tcg2_event_log_format;
->  #define INITRD_EVENT_TAG_ID 0x8F3B22ECU
->  #define LOAD_OPTIONS_EVENT_TAG_ID 0x8F3B22EDU
->  #define EV_EVENT_TAG 0x00000006U
-> +#define EV_EFI_ACTION 0x80000007U
->  #define EFI_TCG2_EVENT_HEADER_VERSION	0x1
->  
->  struct efi_tcg2_event {
-> @@ -898,7 +899,8 @@ union efi_tcg2_protocol {
->  							       efi_physical_addr_t,
->  							       u64,
->  							       const efi_tcg2_event_t *);
-> -		void *submit_command;
-> +		efi_status_t (__efiapi *submit_command)(efi_tcg2_protocol_t *,
-> +							u32, u8 *, u32, u8 *);
->  		void *get_active_pcr_banks;
->  		void *set_active_pcr_banks;
->  		void *get_result_of_set_active_pcr_banks;
-> @@ -1169,6 +1171,12 @@ efi_enable_reset_attack_mitigation(void) { }
->  
->  void efi_retrieve_eventlog(void);
->  
-> +#ifdef CONFIG_KERNEL_TPM_SECURITY
-> +void efi_tpm_record_pcr5(void);
-> +#else
-> +static inline void efi_tpm_record_pcr5(void) { }
-> +#endif
-> +
->  struct sysfb_display_info *alloc_primary_display(void);
->  struct sysfb_display_info *__alloc_primary_display(void);
->  void free_primary_display(struct sysfb_display_info *dpy);
-> diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
-> index a5c6c4f163fc..f03490a6a544 100644
-> --- a/drivers/firmware/efi/libstub/tpm.c
-> +++ b/drivers/firmware/efi/libstub/tpm.c
-> @@ -9,6 +9,8 @@
->   */
->  #include <linux/efi.h>
->  #include <linux/tpm_eventlog.h>
-> +#include <crypto/sha1.h>
-> +#include <crypto/sha2.h>
->  #include <asm/efi.h>
->  
->  #include "efistub.h"
-> @@ -194,3 +196,171 @@ void efi_retrieve_eventlog(void)
->  	efi_retrieve_tcg2_eventlog(version, log_location, log_last_entry,
->  				   truncated, final_events_table);
->  }
-> +
-> +#ifdef CONFIG_KERNEL_TPM_SECURITY
-> +#define PCR5_INDEX	5
-> +
-> +static const char pcr5_event[] = "Linux kernel TPM NVIndex support";
-> +static efi_guid_t pcr5_guid = LINUX_EFI_PCR5_LOG_GUID;
-> +
-> +static const struct {
-> +	u16	hash_alg;
-> +	u16	digest_size;
-> +} pcr5_banks[] = {
-> +	{ TPM_ALG_SHA1,		SHA1_DIGEST_SIZE },
-> +	{ TPM_ALG_SHA256,	SHA256_DIGEST_SIZE },
-> +};
-> +
-> +struct tpm2_pcr_read_cmd {
-> +	__be16	tag;
-> +	__be32	size;
-> +	__be32	cc;
-> +	__be32	count;
-> +	__be16	hash;
-> +	u8	size_of_select;
-> +	u8	select[3];
-> +} __packed;
-> +
-> +/* digest is sized for the largest bank; smaller digests are shorter */
-> +struct tpm2_pcr_read_rsp {
-> +	__be16	tag;
-> +	__be32	size;
-> +	__be32	rc;
-> +	__be32	update_counter;
-> +	__be32	count;
-> +	__be16	hash;
-> +	u8	size_of_select;
-> +	u8	select[3];
-> +	__be32	digest_count;
-> +	__be16	digest_size;
-> +	u8	digest[TPM2_MAX_DIGEST_SIZE];
-> +} __packed;
-> +
-> +static efi_status_t efi_tpm_extend_pcr5(efi_tcg2_protocol_t *tcg2)
-> +{
-> +	struct efi_tcg2_event *evt __free(efi_pool) = NULL;
-> +	u32 size = sizeof(*evt) + sizeof(pcr5_event) - 1;
-> +	efi_status_t status;
-> +
-> +	status = efi_bs_call(allocate_pool, EFI_LOADER_DATA, size,
-> +			     (void **)&evt);
-> +	if (status != EFI_SUCCESS)
-> +		return status;
-> +
-> +	*evt = (struct efi_tcg2_event){
-> +		.event_size			= size,
-> +		.event_header.header_size	= sizeof(evt->event_header),
-> +		.event_header.header_version	= EFI_TCG2_EVENT_HEADER_VERSION,
-> +		.event_header.pcr_index		= PCR5_INDEX,
-> +		.event_header.event_type	= EV_EFI_ACTION,
-> +	};
-> +	memcpy(evt + 1, pcr5_event, sizeof(pcr5_event) - 1);
-> +
-> +	return efi_call_proto(tcg2, hash_log_extend_event, 0,
-> +			      (unsigned long)pcr5_event,
-> +			      sizeof(pcr5_event) - 1, evt);
-> +}
-> +
-> +static efi_status_t efi_tpm_read_pcr5(efi_tcg2_protocol_t *tcg2,
-> +				      u16 hash_alg, u16 digest_size,
-> +				      struct tpm2_pcr_read_rsp *rsp)
-> +{
-> +	struct tpm2_pcr_read_cmd cmd = {
-> +		.tag		= cpu_to_be16(TPM2_ST_NO_SESSIONS),
-> +		.size		= cpu_to_be32(sizeof(cmd)),
-> +		.cc		= cpu_to_be32(TPM2_CC_PCR_READ),
-> +		.count		= cpu_to_be32(1),
-> +		.hash		= cpu_to_be16(hash_alg),
-> +		.size_of_select	= sizeof(cmd.select),
-> +		.select		= { BIT(PCR5_INDEX) },
-> +	};
-> +	u32 rsp_size = sizeof(*rsp) - sizeof(rsp->digest) + digest_size;
-> +	efi_status_t status;
-> +
-> +	status = efi_call_proto(tcg2, submit_command, sizeof(cmd), (u8 *)&cmd,
-> +				sizeof(*rsp), (u8 *)rsp);
-> +	if (status != EFI_SUCCESS)
-> +		return status;
-> +
-> +	/*
-> +	 * A TPM without the requested bank active returns an empty
-> +	 * selection and no digests, so check that we got back exactly
-> +	 * what we asked for.
-> +	 */
-> +	if (be32_to_cpu(rsp->size) != rsp_size || rsp->rc ||
-> +	    be32_to_cpu(rsp->count) != 1 ||
-> +	    be16_to_cpu(rsp->hash) != hash_alg ||
-> +	    rsp->size_of_select != sizeof(rsp->select) ||
-> +	    rsp->select[0] != BIT(PCR5_INDEX) ||
-> +	    be32_to_cpu(rsp->digest_count) != 1 ||
-> +	    be16_to_cpu(rsp->digest_size) != digest_size)
-> +		return EFI_NOT_FOUND;
-> +
-> +	return EFI_SUCCESS;
-> +}
-> +
-> +/*
-> + * Extend a fixed value into PCR 5 and publish the resulting value of each
-> + * supported PCR bank in a configuration table, so that the kernel can
-> + * later verify that the firmware extended PCR 5 when ExitBootServices()
-> + * was called.
+On Thu, 2026-10-08 at 06:20 -0700, Matthew Garrett wrote:
+[...]
+> +/**
+> + * tpm2_create_kernel_ak() - create the kernel attestation key
+> + * @chip:	the TPM chip
+> + * @handle:	set to the transient handle of the AK on success
+> + * @x:		if not NULL, filled with the X coordinate of the AK
+> public key
+> + * @y:		if not NULL, filled with the Y coordinate of the AK
+> public key
+> + *
+> + * Creates the kernel AK as a primary key in the owner hierarchy
+> using a
+> + * fixed template, so the same key is returned on every call until
+> the
+> + * TPM is cleared.=C2=A0 The owner hierarchy must have an empty auth
+> value.
+> + * The caller must hold the chip's ops lock and is responsible for
+> + * flushing @handle with tpm2_flush_context().
+> + *
+> + * Return:
+> + * * 0		- OK
+> + * * -errno	- A system error
+> + * * TPM_RC	- A TPM error
 > + */
-> +void efi_tpm_record_pcr5(void)
-> +{
-> +	efi_guid_t tcg2_guid = EFI_TCG2_PROTOCOL_GUID;
-> +	struct linux_efi_pcr5_log *log;
-> +	struct tpm2_pcr_read_rsp rsp;
-> +	efi_tcg2_protocol_t *tcg2 = NULL;
-> +	efi_status_t status;
-> +	int i;
-> +
-> +	status = efi_bs_call(locate_protocol, &tcg2_guid, NULL, (void **)&tcg2);
-> +	if (status != EFI_SUCCESS || !tcg2)
-> +		return;
-> +
-> +	status = efi_tpm_extend_pcr5(tcg2);
-> +	if (status != EFI_SUCCESS) {
-> +		efi_warn("Failed to extend PCR 5: 0x%lx\n", status);
-> +		return;
-> +	}
-> +
-> +	status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
-> +			     struct_size(log, digests, ARRAY_SIZE(pcr5_banks)),
-> +			     (void **)&log);
-> +	if (status != EFI_SUCCESS) {
-> +		efi_err("Unable to allocate memory for PCR 5 log\n");
-> +		return;
-> +	}
-> +
-> +	memset(log, 0, struct_size(log, digests, ARRAY_SIZE(pcr5_banks)));
-> +	for (i = 0; i < ARRAY_SIZE(pcr5_banks); i++) {
-> +		struct linux_efi_pcr5_digest *d = &log->digests[log->count];
-> +
-> +		/* inactive banks are simply not recorded */
-> +		status = efi_tpm_read_pcr5(tcg2, pcr5_banks[i].hash_alg,
-> +					   pcr5_banks[i].digest_size, &rsp);
-> +		if (status != EFI_SUCCESS)
-> +			continue;
-> +
-> +		d->hash_alg = pcr5_banks[i].hash_alg;
-> +		d->digest_size = pcr5_banks[i].digest_size;
-> +		memcpy(d->digest, rsp.digest, d->digest_size);
-> +		log->count++;
-> +	}
-> +
-> +	if (!log->count) {
-> +		efi_warn("Failed to read PCR 5\n");
-> +		goto err_free;
-> +	}
-> +
-> +	status = efi_bs_call(install_configuration_table, &pcr5_guid, log);
-> +	if (status != EFI_SUCCESS) {
-> +		efi_err("Unable to install PCR 5 log table\n");
-> +		goto err_free;
-> +	}
-> +	return;
-> +
-> +err_free:
-> +	efi_bs_call(free_pool, log);
-> +}
-> +#endif
-> diff --git a/drivers/firmware/efi/tpm-security.c b/drivers/firmware/efi/tpm-security.c
-> new file mode 100644
-> index 000000000000..aee497da0a55
-> --- /dev/null
-> +++ b/drivers/firmware/efi/tpm-security.c
-> @@ -0,0 +1,98 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Verify that the firmware measured the ExitBootServices() invocation
-> + * into PCR 5, by comparing the current value of PCR 5 against the value
-> + * recorded by the EFI stub immediately before it called
-> + * ExitBootServices().
-> + */
-> +
-> +#define pr_fmt(fmt) "efi: " fmt
-> +
-> +#include <linux/efi.h>
-> +#include <linux/init.h>
-> +#include <linux/io.h>
-> +#include <linux/tpm.h>
-> +
-> +#define PCR5_INDEX	5
-> +
-> +unsigned long __initdata efi_pcr5_log = EFI_INVALID_TABLE_ADDR;
-> +bool kernel_tpm_security_available __ro_after_init;
-> +
-> +static int __init efi_tpm_check_pcr5(void)
-> +{
-> +	struct linux_efi_pcr5_log *log;
-> +	unsigned int recorded = 0, changed = 0;
-> +	struct tpm_chip *chip;
-> +	size_t size;
-> +	u32 count;
-> +	int i, rc;
-> +
-> +	if (efi_pcr5_log == EFI_INVALID_TABLE_ADDR)
-> +		return 0;
-> +
-> +	log = memremap(efi_pcr5_log, sizeof(*log), MEMREMAP_WB);
-> +	if (!log) {
-> +		pr_err("Failed to map PCR 5 log\n");
-> +		return 0;
-> +	}
-> +	count = log->count;
-> +	memunmap(log);
-> +
-> +	size = struct_size(log, digests, count);
-> +	log = memremap(efi_pcr5_log, size, MEMREMAP_WB);
-> +	if (!log) {
-> +		pr_err("Failed to map PCR 5 log\n");
-> +		return 0;
-> +	}
-> +
-> +	chip = tpm_default_chip();
-> +	if (!chip) {
-> +		pr_warn("No TPM available to verify PCR 5\n");
-> +		goto out;
-> +	}
-> +
-> +	if (!tpm_is_tpm2(chip)) {
-> +		pr_warn("PCR 5 log requires a TPM 2.0\n");
-> +		goto out_put;
-> +	}
-> +
-> +	for (i = 0; i < count; i++) {
-> +		struct linux_efi_pcr5_digest *d = &log->digests[i];
-> +		struct tpm_digest digest = { .alg_id = d->hash_alg };
-> +
-> +		if (d->digest_size > sizeof(d->digest)) {
-> +			pr_err("Invalid PCR 5 log entry for bank 0x%04x\n",
-> +			       d->hash_alg);
-> +			continue;
-> +		}
-> +
-> +		rc = tpm_pcr_read(chip, PCR5_INDEX, &digest);
-> +		if (rc) {
-> +			pr_err("Failed to read PCR 5 bank 0x%04x: %d\n",
-> +			       d->hash_alg, rc);
-> +			continue;
-> +		}
-> +
-> +		recorded++;
-> +		if (memcmp(digest.digest, d->digest, d->digest_size))
-> +			changed++;
-> +	}
-> +
-> +	if (!recorded)
-> +		goto out_put;
-> +
-> +	if (!changed)
-> +		pr_err(FW_BUG "Firmware failed to extend PCR 5 for ExitBootServices\n");
-> +	else if (changed != recorded)
-> +		pr_err(FW_BUG "Firmware only extended one PCR bank in ExitBootServices\n");
-> +
-> +	if (changed)
-> +		kernel_tpm_security_available = true;
-> +
-> +out_put:
-> +	put_device(&chip->dev);
-> +out:
-> +	memunmap(log);
-> +	return 0;
-> +}
-> +late_initcall(efi_tpm_check_pcr5);
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index aa15ff88539b..6d51a4bffbd8 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -23,6 +23,7 @@
->  #include <linux/pstore.h>
->  #include <linux/range.h>
->  #include <linux/reboot.h>
-> +#include <linux/tpm_command.h>
->  #include <linux/uuid.h>
->  
->  #include <asm/page.h>
-> @@ -422,6 +423,7 @@ void efi_native_runtime_setup(void);
->  #define LINUX_EFI_COCO_SECRET_AREA_GUID		EFI_GUID(0xadf956ad, 0xe98c, 0x484c,  0xae, 0x11, 0xb5, 0x1c, 0x7d, 0x33, 0x64, 0x47)
->  #define LINUX_EFI_BOOT_MEMMAP_GUID		EFI_GUID(0x800f683f, 0xd08b, 0x423a,  0xa2, 0x93, 0x96, 0x5c, 0x3c, 0x6f, 0xe2, 0xb4)
->  #define LINUX_EFI_UNACCEPTED_MEM_TABLE_GUID	EFI_GUID(0xd5d1de3c, 0x105c, 0x44f9,  0x9e, 0xa9, 0xbc, 0xef, 0x98, 0x12, 0x00, 0x31)
-> +#define LINUX_EFI_PCR5_LOG_GUID			EFI_GUID(0xb38f9ff0, 0xb8ef, 0xe28f,  0x80, 0x8d, 0xe2, 0x9a, 0xa7, 0xef, 0xb8, 0x8f)
->  
->  #define RISCV_EFI_BOOT_PROTOCOL_GUID		EFI_GUID(0xccd15fec, 0x6f73, 0x4eec,  0x83, 0x95, 0x3e, 0x69, 0xe4, 0xb9, 0x40, 0xbf)
->  
-> @@ -631,6 +633,28 @@ typedef struct {
->  
->  extern unsigned long __ro_after_init efi_rng_seed;		/* RNG Seed table */
->  
-> +/*
-> + * The value of PCR 5 as read by the EFI stub immediately before calling
-> + * ExitBootServices(), published via the LINUX_EFI_PCR5_LOG_GUID
-> + * configuration table.  There is one entry for each supported PCR bank
-> + * that was active.
-> + */
-> +struct linux_efi_pcr5_digest {
-> +	u16	hash_alg;	/* TPM_ALG_* of the PCR bank */
-> +	u16	digest_size;
-> +	u8	digest[TPM2_MAX_DIGEST_SIZE];
-> +};
-> +
-> +struct linux_efi_pcr5_log {
-> +	u32				count;
-> +	struct linux_efi_pcr5_digest	digests[];
-> +};
-> +
-> +#ifdef CONFIG_KERNEL_TPM_SECURITY
-> +extern unsigned long efi_pcr5_log;
-> +extern bool kernel_tpm_security_available;
-> +#endif
-> +
->  /*
->   * All runtime access to EFI goes through this structure:
->   */
-> -- 
-> 2.43.0
-> 
-> 
+> +int tpm2_create_kernel_ak(struct tpm_chip *chip, u32 *handle, u8 *x,
+> u8 *y)
 
-It looks correct and that is good enough at this point of time.
+Oof, there's a lot of duplication in here.  Basically you're creating a
+signing primary key (technically it's not an attestation key because
+they're supposed to be non-primary; this isn't a criticism because the
+only consumer is the machine owner who doesn't need to use privacy
+preserving AKs because they know all about the TPM in their own
+machine).  The primary generation routines that exist in tpm2-
+sessions.c:tpm2_create_primary() et al. already does most of this.  The
+only real current difference is that it creates an encryption key not a
+signing key, but that could have an additional bool argument
+(signing=3Dtrue/encryption=3Dfalse) rather than duplicating the entire
+routine set.
 
-Ross, you might want to skim this (not sure, just in case).
+Regards,
 
-Br, Jarkko
+James
