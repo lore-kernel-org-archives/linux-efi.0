@@ -1,86 +1,109 @@
-Received: from mail-pl1-f226.google.com (mail-pl1-f226.google.com [209.85.214.226])
+Received: from mail-oa1-f42.google.com (mail-oa1-f42.google.com [209.85.160.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95EE73E5EEB
-	for <linux-efi@vger.kernel.org>; Fri,  9 Oct 2026 08:33:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.226
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791534789; cv=none; b=FldkqGFN3mkQ5K7u18zujlEoEqQQpqWzY+lvDazneLbyECtI7IsXEzD+u874/fT2MJ4unwsIg7Ogi7A5BR9ivbfiPgU/bQP0o1s+kx0bHzZ2GWQfhsB5lgBLsplf+AWXLv6mbYsYsFo9tP/znggzCCRSrlY1GfB03+yeF1twX+M=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791534789; c=relaxed/simple;
-	bh=J4a7upmFwO+cU/sHwsmNf67cBdZkLVJd4Qid6QJFvAs=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Evt1ZCGUG0aVtByzMZJej/mzex31qQQtxGAJEqZjFr5tMnGm7Re2hzJp3+zrmegwGQrT9POrEtut0Jbztcwlop2OEBXH7eDnSsx36lCJsoq9Gxe1KaZevzEOsUTRxGe6lWnfZ9rjovQPfLjrwFgu/9uy+ER32MegmpwA1/RzFIY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=srcf.ucam.org; spf=pass smtp.mailfrom=cavan.codon.org.uk; arc=none smtp.client-ip=209.85.214.226
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=srcf.ucam.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cavan.codon.org.uk
-Received: by mail-pl1-f226.google.com with SMTP id d9443c01a7336-2d560775ca2so19788185ad.1
-        for <linux-efi@vger.kernel.org>; Fri, 09 Oct 2026 01:33:08 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791534788; x=1792139588;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9CAC440961C
+	for <linux-efi@vger.kernel.org>; Fri,  9 Oct 2026 08:43:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.160.42
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1791535394; cv=pass; b=V1XD0asVaIopXyx5Gl82B7OofQmJEuY2aSHxWSoUr1jFwWKkUZM5c+E3hhXHu9/mUwez842S78V82HLwL17GeT7zhNvW1WklDPeRpJL2LdRM9zh7eApMiXnDfjzEvpxVTiRB+A6KsctvuEOQ5B5HnuOfD90Ugy9hG8gQe0rb+O4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1791535394; c=relaxed/simple;
+	bh=qAkai9AbESmrM4xIkF06nrF8EZpWdyV4GK1L9zcF+P0=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To:Cc:Content-Type; b=gg80esIcGT7RJg0639zZPWgqKP/IPTDeLxd/QpXy5WUwxtG1t02NI2GXOjeE3ED0ix94n3zJXE9kEl7+U4u3YamjB3NjDpC4X7S7djVr2DtQwyyrsBZeO+MnyvJ4Vi7flkKjnr4efUVJ92JDN2YnyUZgogywBvfASb6Yt6mzfDI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Db3nxIrk; arc=pass smtp.client-ip=209.85.160.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Db3nxIrk"
+Received: by mail-oa1-f42.google.com with SMTP id 586e51a60fabf-49e08af5fd4so2762514fac.1
+        for <linux-efi@vger.kernel.org>; Fri, 09 Oct 2026 01:43:08 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1791535387; cv=none;
+        d=google.com; s=arc-20260327;
+        b=K0uMPcs3lm8Jh8p1w59dHxI2bNHAtZwuvTg8q2OBbAQMIGqLmj7G5URRnEvhgApXUV
+         92TGUZifkQrXpn03kRyrfVfh5n5n0pXD1635LxwxTbdhlZfulcyEbhY27F3MujzmDUDo
+         6TYq6WpRQlmKB37PrPabeaoUY3VKqUDQwvNpG31MYtcfmiPwGOOkzUkWhOA14eENQ6bj
+         hiV3ng3w5gZwrOCxfa6Xhb+mZp4gPoQex2e3cL4+xhGvPF4Z/QvX74cTnH9RXus1ojP2
+         kIPTMJpLDb2/vgA9pzU+CwWEIZhamJd6OBfEFrv4GUwL5i9KG7FyP8uC5GPWNrCh/WAt
+         9DyQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :mime-version:dkim-signature;
+        bh=qAkai9AbESmrM4xIkF06nrF8EZpWdyV4GK1L9zcF+P0=;
+        fh=95jYXLw2eUellArN83NN/2VrhkJOV5kFX1vaJOIodPw=;
+        b=p9pOPfccBal3AxNLugOOpAFlHazVV8W7ThPGsSM05/xxx4fPPd/eJPvJ+Q74ignG1u
+         ioTZy8B5gL60z/y8LbWgbcfYW2tcpduQ+PQuh48l7eBiB+q9h3+Y69niTmAdFMDmEaB2
+         UhPjcRTEiL5K2sblx3lNowvASlBuK7J/hYZVyD34PjrENZkldvNn0GdFvYpcHmSUGEHE
+         P+edUdegxtdZMeIczwLNJ4JPZ0gmI7pON2ipkhGhmirYI1qS7z9bGpEvANOokgcDK9Hl
+         M4UcKhJOJEgJLjH/I9zz2m8LLLBiHZL315MxP4BS5bz5Q0hPcn6TZPFrnxB8fkDu621/
+         ppJA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1791535387; x=1792140187; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:mime-version:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=5SJdflHLsTV8n6Eka/t1oY8KzfLbWWcjpATxg+lrvcw=;
-        b=Pc/bwZOV7X8lrA0uIobCyIGHjMHpR3QgrCufc2VgqTVlt3QPcZTMDqNBfBm++/Qaq6
-         KxnLWBnGa07v7rBLdL4kAOUTfuQWQoaYaqVbpHu7KeDXxn6C2s6mchHThsPLGeiS4F07
-         Otr6TW6gVgP0PT3LyyIWzQGFdnglpkC/aeXoPJzQu/FG416VTNvul7DUxZSHfpRBNSRO
-         OGS/pN3yr/bwqkRX2iRoP4nZEI85gvHQj0PrL/dYiWbVA07DLne8M1OH5JMEXViNeKHx
-         oeD5IDru5m3o6eybsZf4Ao61Ea2P/0BU0OJVQ9duiqLfBMQl23p5BjqFLaJGpN/mNHGW
-         Rnlw==
-X-Forwarded-Encrypted: i=1; AKwUvBz4/VsFuJHliOclBe930FQKylEeJSG/ws51H6weexR9Rbi0JdbPgiHdDQG7a8gKyvbzpYO51/OTbdU=@vger.kernel.org
-X-Gm-Message-State: AFq9FYL2TFOdaRmtWcaH0DJCczd4wUwrq/PI41GE3axGp4V8AbdtEMfL
-	bg8HEfBeREKu1mE4evU5oOcoL/uwypirkGQ6pQZ2C9xOGv3UP+z+gUrzEEajUvfP04zXcjjZv4K
-	rfVEgNSboBWSfhVuGpPsr6PGKNOtrVDUaPK+J
-X-Gm-Gg: AYBFou0ySLFGzEdxUQXB0jnAYwyZIvq00jXgoQwGp2izCz85Frw4xgnJwroh+kqppHd
-	l1dwlRxA2gIOz+Mg9tZa3MIHmaB0Vm3+nZxM6G4mt8E4J/uXxDZMBRIfzZoCLDqE1qDkZ57y4Rn
-	WG6EfABHTx3mLLIlBvGyPiNRurgPze8sKrX1vDb7iJHsaE1yUQdHrIovLPVIkJcapPue34trUyt
-	tx+XEdS2j0Uv2e5NrHf/p2E02h2rlnwSTn0HoDINHGeAI/Li9Zs0l1SSf0o8rYYq866mkWfQLoq
-	nxDTk9IoTpEsCyspxLX2chN6Z3SQAumPoizRF85jNmoH57W/aggw3KRTmSI3Dc1pt7Br0tiSCsl
-	a1Y93bMxwTjJ/Sfbo74s9utsdrCpFa5QErcQuZh5U
-X-Received: by 2002:a17:903:32cd:b0:2e2:d7d6:6563 with SMTP id d9443c01a7336-2e842ce162fmr8538245ad.43.1791534787870;
-        Fri, 09 Oct 2026 01:33:07 -0700 (PDT)
-Received: from cavan.codon.org.uk (207-53-253-74.PUBLIC.monkeybrains.net. [207.53.253.74])
-        by smtp-relay.gmail.com with ESMTPS id d9443c01a7336-2e841f88d23sm606575ad.22.2026.10.09.01.33.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 09 Oct 2026 01:33:07 -0700 (PDT)
-X-Relaying-Domain: codon.org.uk
-Received: by cavan.codon.org.uk (Postfix, from userid 1000)
-	id 2332C12862DD; Fri, 09 Oct 2026 01:33:07 -0700 (PDT)
-Date: Fri, 9 Oct 2026 01:33:07 -0700
-From: Matthew Garrett <mjg59@srcf.ucam.org>
-To: Jarkko Sakkinen <jarkko@kernel.org>
-Cc: Matthew Garrett <matthewg@nvidia.com>, keyrings@vger.kernel.org,
-	James.Bottomley@hansenpartnership.com,
-	linux-integrity@vger.kernel.org, rafael@kernel.org,
-	linux-pm@vger.kernel.org, linux-efi@vger.kernel.org
-Subject: Re: [PATCH 01/17] tpm: Define a kernel-owned TPM NV index that can't
- be modified by userland
-Message-ID: <asimw1D5J0ZqM4i3@srcf.ucam.org>
-References: <20261008132532.1155166-1-matthewg@nvidia.com>
- <20261008132532.1155166-2-matthewg@nvidia.com>
- <asfDZiuFKCuuRysC@kernel.org>
+        bh=qAkai9AbESmrM4xIkF06nrF8EZpWdyV4GK1L9zcF+P0=;
+        b=Db3nxIrkXy40IVlqOK7jq8F3qZ8l+ykcDsFu8SbfqLyZ+Ke7Zkv3iKHXPGo8D6eDhA
+         yt5HYdeKkD0AXMdarK2lkO0r5rKkjNK2KUw5bFqi7BfqL3uJBmK15ztBVEjlwSEFqAee
+         MxiTF+XXWaBD+kuqrJMwP3rSPofv2mMuZxfNY0G64wcobuNhbFl7bLaVF+YbnGzf0CJF
+         rrahL9f9O1+l9KYIyQJEvCxRi56CoP4RfHDbz62tGWi7lzGItSfvExmnPjwfBEeLuBwn
+         tgtG95kyTDuBRlYOUVVvNqYrXK7/z1a8pv8E0A1gDFBMQpdNsmaLqK6608sagl0pWBC6
+         ih2w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1791535387; x=1792140187;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=qAkai9AbESmrM4xIkF06nrF8EZpWdyV4GK1L9zcF+P0=;
+        b=c4uxve8K8I9XScvyMQgunY12yM3zFiiuu38IyDFgMRpbqSnGIGqqxvm0AfrVjabx4o
+         ZmNhadQ5y60kvgrr0ETssizlDKajZNUhN3IzZE/VJqr6FLHj7FulOxTXr1tIRLL9WYYm
+         5etTjz+4L8mJudPnOvczPrqR6zAAfAEpYMUolOlpfAil0eiAsgWf/h15QhsqEVtTHt11
+         gPk/aUhPgdOPJ526NXB1bEescn335SO9v8lMX3Yg1GI5RzOBCK1vhlYBbOtBb5fWQA87
+         DurJbTV5RGXBAKStjchcd4K7RDTqWqm59IxOmMDurDBAPFIhUQZL47K84ZupQV9fyjG8
+         w+kg==
+X-Forwarded-Encrypted: i=1; AKwUvByDrGGPTs9HaVP61PfmgFvfVYpVhSfbDeERPXr8eIDcUBpz6D6zFKctHm1ooTOgdoNhqpkAnEE2ix8=@vger.kernel.org
+X-Gm-Message-State: AFq9FYJE3FLRP9oQN+KNv8jMr24d126qYnCj59iXTu0PcwihGhFduoT1
+	jAnFvSTS+ZdmT/xfMKTK92p3KSogzvEUNxhvp120FnkhqlYPrGh1Rk0tzz8p+JFXI06yLsRXlmI
+	llvHEJJwokO1feRRcxfAYZV9n/n2qJ7o=
+X-Gm-Gg: AYBFou0x+a4M4jfgYpCDkhosQNpwdTKyTKLT+Ui0byubVcBW4QbwWc2NtLX1+cl2w75
+	+gH07wf2Fvd3ayeD4TIwYdsBAYrdCVnxGl8hc1SuMUGMhUJ7Rl2lY01V/1aTfM0IS1F57+7I14M
+	NaQ1ngKoHVD0Yeli/dUa1VL124qM0R6gs2mW01oLxPeZs0NypR7Jg05b5qnWmdJcSYETlQpT0GQ
+	A/VRuj8Hd/jYIVJHXPC6JGMgx5h6OhYsTKPqHRwp+2QAeybK/8KtjijvgJSKOLDaFl1DDTx0odc
+	EKLuWzVNtBR0aMIC89sD4FTc+eKcvvJXMjizWjNbRyA8W8KCGa5htcQ8u+dRsj+YNyU=
+X-Received: by 2002:a05:6871:580a:b0:499:f1a8:3ab9 with SMTP id
+ 586e51a60fabf-4a2a8ac1d29mr913849fac.48.1791535387330; Fri, 09 Oct 2026
+ 01:43:07 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <asfDZiuFKCuuRysC@kernel.org>
+From: MaeeFilho FL <joaoanandalima@gmail.com>
+Date: Fri, 9 Oct 2026 05:43:03 -0300
+X-Gm-Features: AclHuK8D7bC1DTyUeb58TSqJecI2U3HsXQZM7EwBwNebsAbq75ZmHussbpT2z-M
+Message-ID: <CAFA5sMc+CSN1J=r+fXkD_0=wacVVFwk6xkgv-rMRFoyYv+xWkg@mail.gmail.com>
+Subject: Re: [PATCH v5] efivarfs: add nostatfs mount option to skip QueryVariableInfo()
+To: Prashant Singh <singhpra@juniper.net>, Ard Biesheuvel <ardb@kernel.org>, Jeremy Kerr <jk@ozlabs.org>, 
+	Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Cc: Clark Williams <clrkwllms@kernel.org>, Steven Rostedt <rostedt@goodmis.org>, 
+	Jonathan Corbet <corbet@lwn.net>, Shuah Khan <skhan@linuxfoundation.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, "Luis Claudio R. Goncalves" <lgoncalv@redhat.com>, 
+	Steve McIntyre <93sam@debian.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-doc@vger.kernel.org, linux-rt-devel@lists.linux.dev
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Oct 08, 2026 at 07:23:02PM +0300, Jarkko Sakkinen wrote:
+Hi Prashant, Ard, Sebastian,
 
-> > +static bool tpm2_dev_cmd_is_blocked(const u8 *buf, size_t bufsiz)
-> 
-> This function could have less generic name.
-> 
-> tpm2_dev_is_kernel_nv_change?
-> 
-> I'm not a huge fan of this name either but it does say quite clearly
-> what the function does at least. Just a suggestion.
+Thanks for addressing the feedback in v5. The cleanup of the commit log
+and the implementation of the single data_race() wrapper for lockless
+reconfigure path looks clean, robust, and production-ready.
 
-I left it that way on the assumption that it might get extended at some 
-point - maybe that's not a big concern.
+This addresses the concurrency behavior gracefully without injecting
+dead memory barriers, preserving deterministic boundaries for real-time
+environments.
+
+Reviewed-by: Jo=C3=A3o Guilherme da Silva Freitas Lima <joaoanandalima@gmai=
+l.com>
