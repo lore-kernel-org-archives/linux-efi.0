@@ -1,45 +1,45 @@
 Received: from lamorak.hansenpartnership.com (lamorak.hansenpartnership.com [198.37.111.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41BCC33EB10;
-	Sat, 10 Oct 2026 09:22:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB231364029;
+	Sat, 10 Oct 2026 09:34:15 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.37.111.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791624161; cv=none; b=cha+g2SfrX4SlYqacek7TNVxe+qg6bCKJCm6UB277BATgqgrf8bUyOlSkrCASGJ6iIgw2AP5Q46zdTmC/Tv9xDSJiNXifzYPe4cLJnFJUge12GAk2q6E8hydSvsEghDMJq5zqgkyiYBWsjsGWerOD2WcwCi6MicbzY3f3GWnF/M=
+	t=1791624857; cv=none; b=r4Nf0sdJFM6u6jRjzc9JR+WKW++D2G+DvvTW2BfOtIsnTjft2bq0nd7P5Iwj8j68NMpX4ZG5iiLgMTVB0Hyl6vwCMW/n1O5LZ3yDlfo45F/yt6Fqb/499KEvIYNy1ULjlOOk112vIgOxrZSRFrniKzheD8St76EUhnwXl+x4iIQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791624161; c=relaxed/simple;
-	bh=NAaEPaB+o1Dm/fm+7bezAR2jI1G44dpDFT9mWVuNpkY=;
+	s=arc-20240116; t=1791624857; c=relaxed/simple;
+	bh=UEcdoc2+ODoZqDFaeaKA/50ko2AM9A38LXx4npVCzPs=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=B24xzj5SDAsV/O9JNQrt6xIy4H4LDOVCN7e/ntLFqoAVdtAnQKifJ6ynYVYB6vN05A/TBYRcD65khe0FSocNNVMEnbiFK2xzHBf9EPjwH6L4EzllFOzHiNtLkZ6UfAD0/GdwpyQTxeu1l3rZZgqUMRwKoC4Jr2dKqwVDhKELLH0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com; spf=pass smtp.mailfrom=HansenPartnership.com; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=ad+GAUPS; arc=none smtp.client-ip=198.37.111.173
+	 Content-Type:MIME-Version; b=IvxPl09BTjm+Jklk6jaKmGim9xJSUnbBTGOQgZ/Mi74DEVCuETpXwzymA+4SQ58R4iiIi9DnQlVSRvNAN1EsLNAPsnqQyzZuQUMSAodO0WP2CL4Aj0nbgYSyZ5wc7loNDh66Fcn49JRSz/lVXGcUvkY/uANQmxymb148CXIc3k4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com; spf=pass smtp.mailfrom=HansenPartnership.com; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=ZFGuHu/n; arc=none smtp.client-ip=198.37.111.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=HansenPartnership.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="ad+GAUPS"
+	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="ZFGuHu/n"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-	d=hansenpartnership.com; s=20151216; t=1791624157;
-	bh=NAaEPaB+o1Dm/fm+7bezAR2jI1G44dpDFT9mWVuNpkY=;
+	d=hansenpartnership.com; s=20151216; t=1791624854;
+	bh=UEcdoc2+ODoZqDFaeaKA/50ko2AM9A38LXx4npVCzPs=;
 	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-	b=ad+GAUPS4Jx2gG2f5gc+BjCLeBUGhqY0SmbZvdyQx241DPA+80DRKcZv+SHJKQ23I
-	 4nNm34PbIVmflPKJbNfZ0cHH26p25vVinpZBquZGXeQLaOr/0nm7uJd8iBlQCM1WIJ
-	 T1l881uZ/CUVeQeqfa1Cjgw09Z+fzP6UhrfUCTWM=
+	b=ZFGuHu/n334Rzsi4Lw7MgRk8JZqV5bDcxJarcVfI3NoXl6/6zVz+obi8BuXFeCcJS
+	 Ss5JUQuTpc6F2IXOIay2WIEAJJtWbtz2e9AuT/1TgayEPGOVPNrXZwP3f2zbYfjp9F
+	 UyEvJL5J0euyyddcemQYxnNTPCrGUKpfj3Cuh1Yk=
 Received: from [10.23.23.39] (unknown [80.188.228.74])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519MLKEM768 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by lamorak.hansenpartnership.com (Postfix) with ESMTPSA id 814011C01AF;
-	Sat, 10 Oct 2026 05:22:36 -0400 (EDT)
-Message-ID: <435907614242e82ecde1767a967a3110fca6fb37.camel@HansenPartnership.com>
-Subject: Re: [PATCH 01/17] tpm: Define a kernel-owned TPM NV index that
- can't be modified by userland
+	by lamorak.hansenpartnership.com (Postfix) with ESMTPSA id 40A131C0347;
+	Sat, 10 Oct 2026 05:34:13 -0400 (EDT)
+Message-ID: <0e47c22afbce2f94673bcc77d640cd9da410c2f2.camel@HansenPartnership.com>
+Subject: Re: [PATCH 13/17] tpm: Add verification of kernel signing key
+ provenance
 From: James Bottomley <James.Bottomley@HansenPartnership.com>
 To: Matthew Garrett <matthewg@nvidia.com>, mjg59@srcf.ucam.org
 Cc: keyrings@vger.kernel.org, linux-integrity@vger.kernel.org, 
 	rafael@kernel.org, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org
-Date: Sat, 10 Oct 2026 11:22:34 +0200
-In-Reply-To: <20261008132532.1155166-2-matthewg@nvidia.com>
+Date: Sat, 10 Oct 2026 11:34:10 +0200
+In-Reply-To: <20261008132532.1155166-14-matthewg@nvidia.com>
 References: <20261008132532.1155166-1-matthewg@nvidia.com>
-		 <20261008132532.1155166-2-matthewg@nvidia.com>
+	 <20261008132532.1155166-14-matthewg@nvidia.com>
 Autocrypt: addr=James.Bottomley@HansenPartnership.com;
  keydata=mQENBE58FlABCADPM714lRLxGmba4JFjkocqpj1/6/Cx+IXezcS22azZetzCXDpm2MfNE
  lecY3qkFjfnoffQiw5rrOO0/oRSATOh8+2fmJ6el7naRbDuh+i8lVESfdlkoqX57H5R8h/UTIp6gn
@@ -78,52 +78,29 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
 On Thu, 2026-10-08 at 06:20 -0700, Matthew Garrett wrote:
-> TPM NV indexes can be used for various purposes, including using them
-> as PCRs without depleting the limited number of hardware PCRs. It
-> would be beneficial to have one that's under control of the kernel in
-> order to be able to prove whether certain TPM operations occurred
-> within the kernel or not.
+> Add tpm2_kernel_key_verify(), which checks the provenance produced by
+> tpm2_kernel_key_create() and returns the public key it shows the
+> kernel
+> created. It checks that:
+>=20
+> * The session audit attestation is signed by this TPM's kernel AK
+>=20
+> * Replaying the logged cpHash and rpHash pairs from a zero digest
+> reproduces the attested session digest
+>=20
+> * Each logged rpHash matches the recorded response parameters, and
+> the commands were PCR_Read, NV_Read, and CreateLoaded in that order
+>=20
+> * PCR 5 was read, and held the value it holds now
 
-I've been thinking about using this as an approach to creating keys
-which can only be unsealed by the kernel.  The "natural" way would be
-via localities, but non trusted execution BIOSs lock all the localities
-except zero, so they're not really viable.  An alternative way is to
-have the kernel populate a NV index on boot with a randomly generated
-authority it knows and then tie the key to a PolicySecret of that index
-... which means only the kernel can unseal it.  My property
-requirements are similar to yours: userspace can't be allowed to remove
-or redefine the authority of the index (since it would be empty I don't
-care if they can read it or not, but I don't mind if they can't).
+I get that PCR 5 measures boot configuration and isn't supposed to
+change from boot to boot, but what about across things like firmware
+upgrades ... do you have any idea how brittle it actually is?
 
-The reason I never really proposed such a scheme is the rollback
-problem (old version of OS or non-Linux OS can create the NV index from
-user space bypassing the kernel only block) which you try to solve with
-PCR5.  Do you have any data for how widespread measuring
-exitbootservices is?  I know edk2 does it, but I just looked on my
-XPS13 and I only have two PCR5 events: a separator and the GPT table,
-so it's definitely in violation, but if Dells don't do this then it's
-indicative that many other manufacturers might not as well.
-
-If we do have a problem with lack of manufacturer compliance, one other
-way I've got on my todo list is fake trusted launch: now that
-Trenchboot is heading upstream, we have the real trusted launch, but
-that's usually too fiddly for most people, so I was thinking if we
-could get enough of the TXT launch to happen to open the localities
-(without bothering too much about anything else) that might be easier
-and give us the ability to run the Kernel in locality 2.
-
-> Reserve NV index 0x014c4853 for use by the kernel, and filter
-> commands submitted through /dev/tpm* and /dev/tpmrm* so that
-> userspace cannot undefine or modify it. Blocking definition is more
-> awkward so let's allow that for now, not being able to modify
-> ithttps://www.bbc.co.uk/sounds/play/p0pfxh72
-> means there's nothing interesting they can do there. The filter
-> simply validates which handle the relevant set of commands is
-> referring to and returns -EPERM if it's the kernel one.
-
-As you say there are several other use cases, including mine above and
-NV PCRs, that can only be extended by the kernel, so I think this
-should be a range from the get go.
+If it is brittle, one way out of this might be only to care about the
+last log entries, so make sure the log hashes to PCR5 then find your
+EFI_ACTION and the exit boot services mark in the right order rather
+than caring about exact value match.
 
 Regards,
 
