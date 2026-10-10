@@ -1,42 +1,42 @@
 Received: from lamorak.hansenpartnership.com (lamorak.hansenpartnership.com [198.37.111.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB231364029;
-	Sat, 10 Oct 2026 09:34:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 866F943C7D0;
+	Sat, 10 Oct 2026 09:43:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.37.111.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791624857; cv=none; b=r4Nf0sdJFM6u6jRjzc9JR+WKW++D2G+DvvTW2BfOtIsnTjft2bq0nd7P5Iwj8j68NMpX4ZG5iiLgMTVB0Hyl6vwCMW/n1O5LZ3yDlfo45F/yt6Fqb/499KEvIYNy1ULjlOOk112vIgOxrZSRFrniKzheD8St76EUhnwXl+x4iIQ=
+	t=1791625388; cv=none; b=iukZm7JNhX/Ov6T5T39P0rMDb/3HNC6T6chxMcThYVFy1JOOHErfacxDOu5XrI4f7wNBxAkF4fltxw+AfCPp/L7rA9o6jICkfQSnRncoDPAXQWBduEWnFFINSky1qvqdqB8XCFHpn4UR9Bm9+j/qRCakCeEPkoTSpGJOMvIwrvk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791624857; c=relaxed/simple;
-	bh=UEcdoc2+ODoZqDFaeaKA/50ko2AM9A38LXx4npVCzPs=;
+	s=arc-20240116; t=1791625388; c=relaxed/simple;
+	bh=CGbR6aFO9BZ1LyLIdozymyWbekzjhRYLhihFAIdV0J4=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=IvxPl09BTjm+Jklk6jaKmGim9xJSUnbBTGOQgZ/Mi74DEVCuETpXwzymA+4SQ58R4iiIi9DnQlVSRvNAN1EsLNAPsnqQyzZuQUMSAodO0WP2CL4Aj0nbgYSyZ5wc7loNDh66Fcn49JRSz/lVXGcUvkY/uANQmxymb148CXIc3k4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com; spf=pass smtp.mailfrom=HansenPartnership.com; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=ZFGuHu/n; arc=none smtp.client-ip=198.37.111.173
+	 Content-Type:MIME-Version; b=i1P2aPY2PswUKdh+uDmCtmEtVHUTrZfgujiDXtenW/TO7Pt9EGiW56QiV9Lu8ZL2ne6Jzw5to1ZkxgEqFYqNn7qZFgEQ6SxmenrBvk4ZQ3gqgIfmrIdnf9fH7yI9YSDQ81U9C1/K37VO1wUoKI9taflWL1eg4H/o3s9D6Gk9aXs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com; spf=pass smtp.mailfrom=HansenPartnership.com; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=frqj8S18; arc=none smtp.client-ip=198.37.111.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=HansenPartnership.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="ZFGuHu/n"
+	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="frqj8S18"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-	d=hansenpartnership.com; s=20151216; t=1791624854;
-	bh=UEcdoc2+ODoZqDFaeaKA/50ko2AM9A38LXx4npVCzPs=;
+	d=hansenpartnership.com; s=20151216; t=1791625381;
+	bh=CGbR6aFO9BZ1LyLIdozymyWbekzjhRYLhihFAIdV0J4=;
 	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-	b=ZFGuHu/n334Rzsi4Lw7MgRk8JZqV5bDcxJarcVfI3NoXl6/6zVz+obi8BuXFeCcJS
-	 Ss5JUQuTpc6F2IXOIay2WIEAJJtWbtz2e9AuT/1TgayEPGOVPNrXZwP3f2zbYfjp9F
-	 UyEvJL5J0euyyddcemQYxnNTPCrGUKpfj3Cuh1Yk=
+	b=frqj8S18krnXXr4lWfDV2LghQwOiJ1MrJRqOs7V1GKRiwQtqLWQHye33Q1USG7aj8
+	 AQXaTVTvl3VGMIL4FZDZmLVP9AlmXC/EV3dIrH6ZfAvk5Ax1T8xk5YBkjS+Dcf7viO
+	 W23gXowQMh0lvPEubmQJvfFnDkKOFyPELsQ7QhSI=
 Received: from [10.23.23.39] (unknown [80.188.228.74])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519MLKEM768 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	 key-exchange X25519MLKEM768)
 	(No client certificate requested)
-	by lamorak.hansenpartnership.com (Postfix) with ESMTPSA id 40A131C0347;
-	Sat, 10 Oct 2026 05:34:13 -0400 (EDT)
-Message-ID: <0e47c22afbce2f94673bcc77d640cd9da410c2f2.camel@HansenPartnership.com>
+	by lamorak.hansenpartnership.com (Postfix) with ESMTPSA id 42F821C001A;
+	Sat, 10 Oct 2026 05:43:00 -0400 (EDT)
+Message-ID: <aeedde06c51910afe5231d9f359bb8767c01b5bd.camel@HansenPartnership.com>
 Subject: Re: [PATCH 13/17] tpm: Add verification of kernel signing key
  provenance
 From: James Bottomley <James.Bottomley@HansenPartnership.com>
 To: Matthew Garrett <matthewg@nvidia.com>, mjg59@srcf.ucam.org
 Cc: keyrings@vger.kernel.org, linux-integrity@vger.kernel.org, 
 	rafael@kernel.org, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org
-Date: Sat, 10 Oct 2026 11:34:10 +0200
+Date: Sat, 10 Oct 2026 11:42:58 +0200
 In-Reply-To: <20261008132532.1155166-14-matthewg@nvidia.com>
 References: <20261008132532.1155166-1-matthewg@nvidia.com>
 	 <20261008132532.1155166-14-matthewg@nvidia.com>
@@ -80,8 +80,7 @@ MIME-Version: 1.0
 On Thu, 2026-10-08 at 06:20 -0700, Matthew Garrett wrote:
 > Add tpm2_kernel_key_verify(), which checks the provenance produced by
 > tpm2_kernel_key_create() and returns the public key it shows the
-> kernel
-> created. It checks that:
+> kernel created. It checks that:
 >=20
 > * The session audit attestation is signed by this TPM's kernel AK
 >=20
@@ -92,15 +91,25 @@ On Thu, 2026-10-08 at 06:20 -0700, Matthew Garrett wrote:
 > the commands were PCR_Read, NV_Read, and CreateLoaded in that order
 >=20
 > * PCR 5 was read, and held the value it holds now
+>=20
+> * The read of the NV index returned the magic value
+>=20
+> * The key created has exactly the attributes of a kernel signing key.
+>=20
+> Since userspace cannot store the magic value in the kernel NV index,
+> this shows that the key was created while the kernel was in control
+> of the TPM.
 
-I get that PCR 5 measures boot configuration and isn't supposed to
-change from boot to boot, but what about across things like firmware
-upgrades ... do you have any idea how brittle it actually is?
-
-If it is brittle, one way out of this might be only to care about the
-last log entries, so make sure the log hashes to PCR5 then find your
-EFI_ACTION and the exit boot services mark in the right order rather
-than caring about exact value match.
+This does strike me as very elaborate, especially the ephemeral key
+bit; would you countenance a simplification?  Since all you want is
+proof that the hibernate image hash matches the one the creating kernel
+made, you could simply create your kernel only NV index as a PCR and
+measure the hash directly to that.  Since user space is barred from
+writing, all you need is an audit of the measurement going into the NV
+register (indeed, it could be an ordinary NV index you simply write the
+hash value to), coupled with a read of PCR 5.  Then your audit log
+directly verifies the hibernate image hash and you don't have to bother
+with the ephemeral keys.
 
 Regards,
 
