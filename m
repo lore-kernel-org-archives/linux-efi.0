@@ -1,35 +1,35 @@
 Received: from lamorak.hansenpartnership.com (lamorak.hansenpartnership.com [198.37.111.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDE6617BB21;
-	Sun, 11 Oct 2026 06:04:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83F6D3644C6;
+	Sun, 11 Oct 2026 08:21:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.37.111.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791698675; cv=none; b=mr29qir0m87GN35yKxGfjdMM8wrtQthMHBrpr9ceygXOk1I8/S7fHf3fe0cXI52rfGu9YRL4ydTKTKasCmvSahfO0ta5wo8atLJaVpbq4LiSWehPfs6LYIfBMejTYxGe1av1PhBQ8UePFetVFVvCBD09wPdGBdX7gHOLtyojs9I=
+	t=1791706892; cv=none; b=cYw1pvvmzTZFWkNPVcwW0zhsSqaEbknAkQANHROW0emk9dXwNyOdqN7v+DI/+39SzPbJJPJaWiY80DXcUpZZb5z86MP0EBcje+FI4bEyPSQtW0N/FIOJNO18z2InYK3+LeXWYihYiKQFFD0EiTmxIhsmJLOkswQ+rEbObEOI3J8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791698675; c=relaxed/simple;
-	bh=qQmjMVGfaoMxzHce3jAIh0i8dWumuMSkvNeLa89ofOg=;
+	s=arc-20240116; t=1791706892; c=relaxed/simple;
+	bh=8LdKDzBJ+e+7VR18SRBTbtAqhcjd9xD7lDD0ZUYR4Nw=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=IXuMSo4E5DtVa+jEm41CGqybyb9fASeQihWK4VfR1zwpSZ5InGb7Wns6M/QcsJ5MIDUx+helMnURQgMymBb09Bkc9xxXZ8xbNRWHECsqDcCLhLWpUpGMwgsnxtBLfiQR5+MNwmtOvuP0khg0+9YZXlhfMqRBMJA8/kdN9oFhR8M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com; spf=pass smtp.mailfrom=HansenPartnership.com; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=OlyHu7sq; arc=none smtp.client-ip=198.37.111.173
+	 Content-Type:MIME-Version; b=Lege4ZPa3BGdg9xPEmG2Yc+02wb5tVo3rwJj39DjDoVhcrmxYh4612KX4mLS7aibHtdebJWbzCGkmdvsmqomyt4t5JZ/BXBgyw9dTrTQwHRNPNwN2ydWKadfdYfYNxF7/nlu5tn1m8i+hG46an+XYWX6kNFy6gDF4ybNTu+7wNw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com; spf=pass smtp.mailfrom=HansenPartnership.com; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=mIxHxx2B; arc=none smtp.client-ip=198.37.111.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=HansenPartnership.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=HansenPartnership.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="OlyHu7sq"
+	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="mIxHxx2B"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-	d=hansenpartnership.com; s=20151216; t=1791698671;
-	bh=qQmjMVGfaoMxzHce3jAIh0i8dWumuMSkvNeLa89ofOg=;
+	d=hansenpartnership.com; s=20151216; t=1791706889;
+	bh=8LdKDzBJ+e+7VR18SRBTbtAqhcjd9xD7lDD0ZUYR4Nw=;
 	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-	b=OlyHu7sql5n1DPvf0QO7QrverNqxwTSplVcPTSLUjdQNjcIKpFO/T8AwNREvVS5at
-	 JYbKrz7+kY1AkngO8sGlCngMT2OVL9ZX6tWEFBSSUVZERO2J7SRDHt4sFIvZYru8Kl
-	 FU7U0lBg+nweVA+UfeQLxDli8Z7iEMdzG0MhEJGQ=
+	b=mIxHxx2BAmwFDRwhjO9zHgghXLZwcoNPZ16RdRFJvEU+MIDsLGuJmxXk+UvaR1tfz
+	 s0T5IkDEowtEqq+GEvNsbs7uGSEec+/aIa2vikXnXEMClOW0OwAxsKHBukrkF/auY1
+	 fqVhKRAPNFjk2MLSj70x/daiDYdQLAac+3G7mk/w=
 Received: from [10.23.23.39] (unknown [80.188.228.74])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519MLKEM768 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by lamorak.hansenpartnership.com (Postfix) with ESMTPSA id 8A9D51C0374;
-	Sun, 11 Oct 2026 02:04:30 -0400 (EDT)
-Message-ID: <059384e86fd256618498b9a7214b6421d38fdf1f.camel@HansenPartnership.com>
+	by lamorak.hansenpartnership.com (Postfix) with ESMTPSA id BB6A21C0492;
+	Sun, 11 Oct 2026 04:21:27 -0400 (EDT)
+Message-ID: <916e6cede1a704dd7bc9889829dd8b1598a431e7.camel@HansenPartnership.com>
 Subject: Re: [PATCH 01/17] tpm: Define a kernel-owned TPM NV index that
  can't be modified by userland
 From: James Bottomley <James.Bottomley@HansenPartnership.com>
@@ -37,12 +37,12 @@ To: Matthew Garrett <mjg59@srcf.ucam.org>
 Cc: Matthew Garrett <matthewg@nvidia.com>, keyrings@vger.kernel.org, 
 	linux-integrity@vger.kernel.org, rafael@kernel.org,
  linux-pm@vger.kernel.org, 	linux-efi@vger.kernel.org
-Date: Sun, 11 Oct 2026 08:04:27 +0200
+Date: Sun, 11 Oct 2026 10:21:23 +0200
 In-Reply-To: <asqthz69ohnMVCye@srcf.ucam.org>
 References: <20261008132532.1155166-1-matthewg@nvidia.com>
-	 <20261008132532.1155166-2-matthewg@nvidia.com>
-	 <435907614242e82ecde1767a967a3110fca6fb37.camel@HansenPartnership.com>
-	 <asqthz69ohnMVCye@srcf.ucam.org>
+		 <20261008132532.1155166-2-matthewg@nvidia.com>
+		 <435907614242e82ecde1767a967a3110fca6fb37.camel@HansenPartnership.com>
+		 <asqthz69ohnMVCye@srcf.ucam.org>
 Autocrypt: addr=James.Bottomley@HansenPartnership.com;
  keydata=mQENBE58FlABCADPM714lRLxGmba4JFjkocqpj1/6/Cx+IXezcS22azZetzCXDpm2MfNE
  lecY3qkFjfnoffQiw5rrOO0/oRSATOh8+2fmJ6el7naRbDuh+i8lVESfdlkoqX57H5R8h/UTIp6gn
@@ -81,81 +81,45 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
 On Sat, 2026-10-10 at 14:26 -0700, Matthew Garrett wrote:
-> On Sat, Oct 10, 2026 at 11:22:34AM +0200, James Bottomley wrote:
+[...]
+> > If we do have a problem with lack of manufacturer compliance, one
+> > other way I've got on my todo list is fake trusted launch: now that
+> > Trenchboot is heading upstream, we have the real trusted launch,
+> > but that's usually too fiddly for most people, so I was thinking if
+> > we could get enough of the TXT launch to happen to open the
+> > localities (without bothering too much about anything else) that
+> > might be easier and give us the ability to run the Kernel in
+> > locality 2.
 >=20
-> > The reason I never really proposed such a scheme is the rollback
-> > problem (old version of OS or non-Linux OS can create the NV index
-> > from user space bypassing the kernel only block) which you try to
-> > solve with PCR5.=C2=A0 Do you have any data for how widespread measurin=
-g
-> > exitbootservices is?=C2=A0 I know edk2 does it, but I just looked on my
-> > XPS13 and I only have two PCR5 events: a separator and the GPT
-> > table, so it's definitely in violation, but if Dells don't do this
-> > then it's indicative that many other manufacturers might not as
-> > well.
->=20
-> Does your log replay correctly for PCR 5? It's *extremely* common for
-> the extension to happen without logging, since logging needs to be
-> done  into the late events table and almost nobody got that right
-> until a few years ago (hence=20
-> https://github.com/google/go-attestation/blob/master/attest/eventlog_work=
-arounds.go#L70
-> )
+> Remember that many consumer devices don't implement TXT, it's only
+> the enterprise SKUs that tend to. But that would be funny - it's the
+> same sort of shape as an awful hack that's used on some of the
+> Qualcomm laptops to get access to EL2.
 
-It seems to.  This is what tpm2-eventlog returns (edited only to show
-PCR 5):
+I haven't really got much farther than a bit of dissassembly of the AC
+block on the theory that if I could work out how the localities get
+opened, I wouldn't even need to do a fake trusted launch.  However, I
+have been doing most of the investigation on random Dell laptops, which
+do claim support for TXT (at least they have a BIOS switch for it) ...
+although I was looking for it now and it seems to have disappeared on
+my XPS, which might be deliberate:
 
----
-version: 1
-events:
-- EventNum: 20
-  PCRIndex: 5
-  EventType: EV_SEPARATOR
-  DigestCount: 2
-  Digests:
-  - AlgorithmId: sha1
-    Digest: "9069ca78e7450a285173431b3e52c5c25299e473"
-  - AlgorithmId: sha256
-    Digest: "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b811=
-19"
-  EventSize: 4
-  Event: "00000000"
-- EventNum: 22
-  PCRIndex: 5
-  EventType: EV_EFI_GPT_EVENT
-  DigestCount: 2
-  Digests:
-  - AlgorithmId: sha1
-    Digest: "bcd4ef027ee6b70a1ce07b37378da7ad02bfc545"
-  - AlgorithmId: sha256
-    Digest: "ed5eaf5ac436743417c862277ac71e1f202e6ff734fcf9a4ecdabc0d045d20=
-a3"
-  EventSize: 484
-  Event: "4546492050415254000001005c000000de83a7fd000000000100000000000000a=
-f129e3b0000000022000000000000008e129e3b00000000fc1e83487e221840b908f829a235=
-f48b02000000000000008000000080000000983fc1db030000000000000028732ac11ff8d21=
-1ba4b00a0c93ec93bb131ae393c3797438f4a8bf58beeaef50008000000000000ff07100000=
-000000000000000000000000000000000000000000000000000000000000000000000000000=
-000000000000000000000000000000000000000000000000000000000000000000000000000=
-0000000000000000af3dc60f838472478e793d69d8477de4cde1b4fc71d4a245a89533bb0b5=
-24e9b0008100000000000ff0f5e3b0000000000000000000000000000000000000000000000=
-000000000000000000000000000000000000000000000000000000000000000000000000000=
-000000000000000000000000000000000000000000000006dfd5706aba4c44384e50933c84b=
-4f4fb29b70a77c1da04da9d7f36291c77dc000105e3b000000008e129e3b000000000000000=
-000000000000000000000000000000000000000000000000000000000000000000000000000=
-000000000000000000000000000000000000000000000000000000000000000000000000000=
-000"
-pcrs:
-  sha256:
-    5  : 0x9c41c9e22fb5275e84b88f7eda8a764961f67ede9dfad9626e84208c9f7de63c
+https://www.dell.com/community/en/conversations/xps/9730-secure-launch/6872=
+f0a3915c657bf9d40ae2
 
-and
+>  Localities are very clearly the Right Way to deal with this and ugh
+> if we'd been having this conversation 20 years ago instead.
 
-jejb@lingrow:~> cat /sys/class/tpm/tpm0/pcr-sha256/5
-9C41C9E22FB5275E84B88F7EDA8A764961F67EDE9DFAD9626E84208C9F7DE63C
+Yes, I know. I actually have an unpublished patch series that makes the
+kernel enforce locality 2 for its operations and 0 for userspace (to
+demonstrate locality policy for keys) but because of the BIOS block it
+only works on kvm guests, which makes upstreaming it a bit pointless.
 
-
-So that's a match.
+Perhaps the way forward on this one is to pressure Intel and AMD to
+tell us how to open the localities absent a trusted launch.  I mean, we
+only need localities 0-2 which would give them an easy way to
+distinguish our use case from trusted launch ... but I bet the bios
+switch is all or nothing ...
 
 Regards,
 
