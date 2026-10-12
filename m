@@ -1,149 +1,131 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89B9026656D;
-	Mon, 12 Oct 2026 08:13:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCA0136E477
+	for <linux-efi@vger.kernel.org>; Mon, 12 Oct 2026 08:37:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791792796; cv=none; b=HSP1UfJenvFomPMrx372Ekz8UyCxIdeuULjMDQ0nBB+R2A/pXPf9Ebqyu1IACnKdmojNUiZZKrwFrN11h+VBSnZfj43v0OImQHzBRmAlzgMNR7wT71ptEpiQHVYwZGZirzNxcAJNZjeJrpy/qu90UvvAt6LFDSWTe5zIgBYnyF0=
+	t=1791794226; cv=none; b=g+WbezgBbv+e2ckkyjijuvXTUSm7FmXNcIS+o/4qfTz5kwuUquvqtKrGcARtSp+zRQa4xwkZXBcjrej9cTWjU54vP4MqEHa6KPTpWKzLd/sbBTqVNbP3Xxwi/zzz2d/4GVO+ox+eNT9mwVGJDt95qnntula4eWEMjnlvYJWTe68=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791792796; c=relaxed/simple;
-	bh=M5qhdkNX6HuYcI4QIpPMoJekstICwco7ZRjc5Z+NNhU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TYJetVE9C04BVaLHwQcvQLDpOu0w1pmdVYZETfz28ZB/YvVsyfUSZBnxGfegrC91MTTSGn7zDyjk8s60Jxs8eujzmRvYpAXadXGjdrmQRmHeZaHMqBDKnmAF92wsdFeYcDLP7M8uT6qY3uJZhjCBaZgqlGFbjYoKnpb/sRHzQlI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=cl5Uqivr; arc=none smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1791794226; c=relaxed/simple;
+	bh=sZTgt9R/jsBGgS+PNLj2DAay5FHJUaZM8HmhOX7wPG4=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=OqK2iw8J1Oi7eJbKvj77jV+b6z1b+5u8PRSi/0wOBKDBiniP8tZBTLQLNoIhLIMiKqAXHDztNKL5kNrNumDh6xIoXf+AqHM2FPSpreXM2qHz5fiKwhSgP+IW/Z+QuXPEkGQQHhMDQZFFevdpxM+qpSTHGscPGgba93LptXb2dpk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XjfnxLQL; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="cl5Uqivr"
-Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69C5EmS23321957;
-	Mon, 12 Oct 2026 08:12:57 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=ZxHVu7
-	GobJPZCWFXgNE6sdDlKYaMqd7ltRWpUKF/Se4=; b=cl5UqivrYvF4GUvBe0cMrs
-	92o7XxCOEY1GZa9Q1LnU4RlQvXiHkkxdNoRHuk3PYKEIryxD5XIl7n77BHNrQjE/
-	CT1t48l4st5fklimCyxWnc1f5c2FQ7UVb7Mq4L0YS3vT67x8Dnuqpr7YIWppBIX1
-	VXIuvHKBeDr6KIyzK0+9ayVMPZO/egPYSiXjC4RgPFjE1GW5Y3llPztWuhTvXobf
-	JK53kdyXxQi+9FUFvFJQ/6a0Igwrd4yEg+EI+owYQ1Bw6HvZU1fh2LRkejFvmg7t
-	i3bcIQBosp7sc6mWrIsWfAjk1zLyk8Ve1fgarEgii2Pu3qpY24wwycY3ldBpkDpw
-	==
-Received: from ppma13.dal12v.mail.ibm.com (dd.9e.1632.ip4.static.sl-reverse.com [50.22.158.221])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4h7dwhqk9y-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Mon, 12 Oct 2026 08:12:57 +0000 (GMT)
-Received: from pps.filterd (ppma13.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma13.dal12v.mail.ibm.com (8.18.1.11/8.18.1.11) with ESMTP id 69C54w833726492;
-	Mon, 12 Oct 2026 08:12:56 GMT
-Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
-	by ppma13.dal12v.mail.ibm.com (PPS) with ESMTPS id 4h81wfv4j4-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 12 Oct 2026 08:12:56 +0000 (GMT)
-Received: from smtpav04.fra02v.mail.ibm.com (smtpav04.fra02v.mail.ibm.com [10.20.54.103])
-	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 69C8CsEQ12779888
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 12 Oct 2026 08:12:54 GMT
-Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 8147220043;
-	Mon, 12 Oct 2026 08:12:54 +0000 (GMT)
-Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 3621020040;
-	Mon, 12 Oct 2026 08:12:54 +0000 (GMT)
-Received: from osiris (unknown [9.224.76.185])
-	by smtpav04.fra02v.mail.ibm.com (Postfix) with ESMTPS;
-	Mon, 12 Oct 2026 08:12:54 +0000 (GMT)
-Date: Mon, 12 Oct 2026 10:12:54 +0200
-From: Steffen Eiden <seiden@linux.ibm.com>
-To: Kristina =?utf-8?Q?Mart=C5=A1enko?= <kristina.martsenko@arm.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-acpi@vger.kernel.org,
-        kvmarm@lists.linux.dev, linux-efi@vger.kernel.org,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
-        Ryan Roberts <ryan.roberts@arm.com>,
-        David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>,
-        Linu Cherian <linu.cherian@arm.com>,
-        Anshuman Khandual <anshuman.khandual@arm.com>,
-        Lorenzo Pieralisi <lpieralisi@kernel.org>,
-        Hanjun Guo <guohanjun@huawei.com>,
-        Sudeep Holla <sudeep.holla@kernel.org>, Marc Zyngier <maz@kernel.org>,
-        Oliver Upton <oupton@kernel.org>, Fuad Tabba <fuad.tabba@linux.dev>,
-        Joey Gouly <joey.gouly@arm.com>,
-        Suzuki K Poulose <suzuki.poulose@arm.com>,
-        Zenghui Yu <yuzenghui@huawei.com>, Ard Biesheuvel <ardb@kernel.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Subject: Re: [RFC 03/12] KVM: arm64: Hide TLBID from guest sysregs
-Message-ID: <20261012081254.483793-A-seiden@linux.ibm.com>
-References: <20261001110655.461473-1-kristina.martsenko@arm.com>
- <20261001110655.461473-4-kristina.martsenko@arm.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XjfnxLQL"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 016F71F0089D;
+	Mon, 12 Oct 2026 08:37:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1791794225;
+	bh=KaTDNeGIs4Eya8Iq0e/D24HTq8sf7hkN0/Y704r7Hpo=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=XjfnxLQL1JzyLJJ+aJCNe8mgOI3NMLP/wrtu8mpwo04hq7G5J7iRzlA8yBa9BUorz
+	 D/7zYyGyGZnc7DVknS5lRiNHvl6vm3TgjwinQ2E6LVZRc9AqcBVy/DBF7Wt800Sj9O
+	 0DcHfEqr6q9nJwZXo1tAAFnROyBeQBZxzMli60Fa22KpK6xCNsMLELkgf2cmZAwMXb
+	 PBRk2hAyxVxBtO3BXfLf0F96S3uQTKH+OY+LirVFnTukKPnLuc0GQfy6VVxmzmmyPu
+	 vmVDRyTYQ4qgpY2gqjN1EjlcJ8RggjhaiJO424FolrCRSMQfSdU9tTUUvIysakXq6g
+	 qDmRfKoRZtHIg==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 4BAD7198003A;
+	Mon, 12 Oct 2026 04:37:03 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Mon, 12 Oct 2026 04:37:03 -0400
+X-ME-Sender: <xms:LZzMavUNOPNfW0dNfzBv5Y8LM25zezHtaX7ccbQty30vkMf9j-vMEg>
+    <xme:LZzMaibj0hpCvI3686VaDjdfdVwU_NXGBCrwlUjthQVzjkMlPRm2na_fu9GH_gXIu
+    hcLtY8FqXAqUoB7ff5gpTUqGuPUxMi0joUXk26l0AV4cRQaWQu9tgY>
+X-ME-Proxy-Cause: dmFkZTEThxgyF43rNUF63WV4bfNwDlYm6E/t3DdUkJCiSwT9/QwWB1XnBUrlCTGx97rh1I
+    npz2tTJ4a0lrG8k4Oz0TTr50lcfntge9RrFesknLGLVm3Z5sD1122TDLKaJ8XrcAuCG9Ce
+    MWBqR9l+GV5c7yrLZU/XzlqBLHbapJ/xDrzzH277B4CK9igCgegAb9COr44/dmo5BVOBXr
+    6x5a17wXNSBgkNc8kJZqiZvsCet6DptiUbWF9fKonF3aiqe3Zq4x6vJ5nRPno+DIeJ2s1z
+    Vql+lpbk9tIcrTdMTGRCUtMiy45MOhetpXQbCLz8Qm1tJpgBjf8rt4eFeDfpQRWv4EOndC
+    /g/ij8LClT5b5XLIiDbKG0ZeDFsqe8Z+cC5svW/8oxrWeym5x0ZF/uZCqI62GLdSMHcHDy
+    lfNlDmYSW64uWCu0CMqEOY7G0b5yjA+8upIoAj3+EY7qL2gU4OTRC8lFuBUUfq/OhDM5t/
+    HlVKz0zogM401WHfUzd7Yn2GZ+vIaNlrU+4GqCoQ43JxdhdW/6ixX3FaTLXpUrCBTLvtAB
+    0bVObwDEhG6triZyke+hGmVMbW7GtjbFP4y9Xm+ZPEjvuO+GFaGerdl6t1k9qpAeXR+bEY
+    AbATUY479uH6ATOaR/S3r7KRrHGY6zLZwKxrYADWgrmno9b2C1rhvdXe9TYQ
+X-ME-Proxy: <xmx:L5zMav2__LUY0IJwjhxenhX0N_Nx6e2IWy0TOjBXO0MF26zxP8vv0Q>
+    <xmx:L5zMapArh4PeVYHY4ECNKcWexlTJcOS7RlXu0Ps6G7W94lPdXXEyRw>
+    <xmx:L5zMau5ieYjom-Q6hguJUKmH7hRltD1kQgffx3hXbj4ZGzlkdJr_Hw>
+    <xmx:L5zMaqL3xsDQeIDTQoCuCWc5QJghbbpCs8Ou4hFgR0UpbPW9PEMimw>
+    <xmx:L5zMavvXzofQL89lQSs0B8HleVYplt6-kViKH2AwnJmu9xlWkX-1eVdG>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 6AD4BF80086; Mon, 12 Oct 2026 04:37:01 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20261001110655.461473-4-kristina.martsenko@arm.com>
-X-TM-AS-GCONF: 00
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDEyMDAzMCBTYWx0ZWRfXwppdWWnupKZm
- R5YMszWuISLyqitb5l6P4CFHM1PSLZbI2vFgULl0Ezon7SDFxNi6TtsKy/2QF+EgiKDaanozKpV
- riftcLPbkcFymJV/YWaHqI6e6+8vxbM60twnDLkkevRDaR+xi9rhVwUxizMtS4XvYNNpDoKdTeB
- ZVF3lydm8vAwBBLOyL09b6gDa9sgidnka7ZchMinvuyuKKduJQd/InGs1zbj1fRjHKlfYA77b5J
- ezd2Eo5WUQO3n7uSSw10zHmhmG4PMqHW1vJo+UiqWDjAzRVjn9t+Dx/d9uOVdaOFTQkpeRZLUr9
- iFhaOLwmGpPNu711xbvelXxryzFOBe43mMrRJHJ8EAXirMGUWWpZ6Hmjw3qJ1sGBdxaC33yZDlV
- gtbT/LyTGpA7sZdEG8cD0Zsd2WmBUk70d2RbRMylEmUGcgQagN2pYpxi8wtfIQQmUtEjO1V/SSD
- Llpdp2aEjhwLkgpu9Wg==
-X-Proofpoint-GUID: 8WRxpz4LaIopRuMISbZzH7WHNCyEDW2E
-X-Proofpoint-ORIG-GUID: 8WRxpz4LaIopRuMISbZzH7WHNCyEDW2E
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMDEyMDAzMCBTYWx0ZWRfXxbNOPlqJaejr
- VwcYq80OnPhGOgQVe5J3o4GitrvU6jbbx4zmHB3S1PzoX3pEh6kHjUEe2Dr6yCsnfEC3JA/w8LD
- wIRGEC2vLHyRR58cGJZJ5aTVymA06Zc=
-X-Authority-Analysis: v=2.4 cv=btHZl0ai c=1 sm=1 tr=0 ts=6acc9689 cx=c_pps
- a=AfN7/Ok6k8XGzOShvHwTGQ==:117 a=AfN7/Ok6k8XGzOShvHwTGQ==:17
- a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10 a=VkNPw1HP01LnGYTKEx00:22
- a=RnoormkPH1_aCDwRdu11:22 a=Y2IxJ9c9Rs8Kov3niI8_:22 a=9Dg5do3rMOcXWvYwyOwA:9
- a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-10-12_02,2026-10-09_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=0 malwarescore=0 phishscore=0 impostorscore=0 adultscore=0
- lowpriorityscore=0 priorityscore=1501 clxscore=1011 spamscore=0
- suspectscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2610080000
- definitions=main-2610120030
+Date: Mon, 12 Oct 2026 10:36:41 +0200
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Ard Biesheuvel" <ardb+git@google.com>,
+ linux-arm-kernel@lists.infradead.org
+Cc: linux-efi@vger.kernel.org, "Will Deacon" <will@kernel.org>,
+ "Catalin Marinas" <catalin.marinas@arm.com>,
+ "Mark Rutland" <mark.rutland@arm.com>
+Message-Id: <cad3ed39-407e-49db-91f5-cd36f052ced0@app.fastmail.com>
+In-Reply-To: <20261009143438.330265-2-ardb+git@google.com>
+References: <20261009143438.330265-2-ardb+git@google.com>
+Subject: Re: [PATCH] arm64/mm: Route faults taken by EFI runtime firmware to no_context
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Thu, Oct 01, 2026 at 12:06:46PM +0100, Kristina Martšenko wrote:
-> Don't expose FEAT_TLBID to guests. It wouldn't be useful in the general
-> case since a guest doesn't know which domains exist and its vCPUs can be
-> moved between any physical CPUs.
-> 
-> Try to hide TLBID sysregs and sysreg fields from the guest:
-> 
->   * Report the feature as not supported in the ID register
->     ID_AA64MMFR4_EL1.TLBID.
-> 
->   * Configure the TLBIDIDR_EL1 sysreg to UNDEF via the FGU mechanism.
->     Sanitize a nested hypervisor's HFGRTR2.nTLBIDIDR.
-> 
->   * Sanitize a nested hypervisor's HCRX.{VTLBIDEn,VTLBIDOSEn,FNB}.
-> 
->   * VTLBID{OS}<n>_EL2 registers are VNCR-backed and not exposed to
->     guests (apart from being able to read/write into the VNCR page) so
->     no need to handle them in sys_reg_descs or elsewhere.
-> 
->   * The guest is free to set SCTLR2_EL{1,2}.TLBOSNIS, which shouldn't
->     matter to KVM.
+
+
+On Fri, 9 Oct 2026, at 16:34, Ard Biesheuvel wrote:
+> From: Ard Biesheuvel <ardb@kernel.org>
 >
+> When EFI runtime services are invoked from a preemptible kthread, the
+> kthread runs with efi_mm installed via kthread_use_mm() and preemption
+> enabled, so neither faulthandler_disabled() nor !mm applies in
+> do_page_fault(). A permission fault taken by the firmware on one of its
+> own (TTBR0) mappings then hits the 'access to user memory outside
+> uaccess routines' check and oopses, without efi_runtime_fixup_exception()
+> ever being consulted.
+>
+> efi_mm has no VMAs, so there is nothing for the mm to resolve. Send such
+> faults to no_context directly, so that __do_kernel_fault() can recover
+> from them as it does when the call is made with preemption disabled.
+>
+> Fixes: a5baf582f4c0 ("arm64/efi: Call EFI runtime services without 
+> disabling preemption")
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> ---
+>  arch/arm64/mm/fault.c | 12 ++++++++++++
+>  1 file changed, 12 insertions(+)
+>
+> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+> index 0b52557652be..db308fe01c4f 100644
+> --- a/arch/arm64/mm/fault.c
+> +++ b/arch/arm64/mm/fault.c
+> @@ -40,6 +40,7 @@
+>  #include <asm/kprobes.h>
+>  #include <asm/mte.h>
+>  #include <asm/processor.h>
+> +#include <asm/stacktrace.h>
+>  #include <asm/sysreg.h>
+>  #include <asm/system_misc.h>
+>  #include <asm/tlbflush.h>
+> @@ -621,6 +622,17 @@ static int __kprobes do_page_fault(unsigned long 
+> far, unsigned long esr,
+>  	if (faulthandler_disabled() || !mm)
+>  		goto no_context;
+> 
+> +	/*
+> +	 * Faults taken by EFI runtime services firmware are never resolved by
+> +	 * the mm (efi_mm has no VMAs), and must reach __do_kernel_fault() so
+> +	 * that efi_runtime_fixup_exception() can recover from them. When EFI
+> +	 * runtime services are invoked from a preemptible kthread, neither of
+> +	 * the conditions above applies, so check for this explicitly.
+> +	 */
+> +	if (IS_ENABLED(CONFIG_EFI) && !user_mode(regs) &&
+> +	    is_ttbr0_addr(regs->pc) && current_in_efi())
+> +		goto no_context;
+> +
 
-What confuse me where a bit that you wrote 'try to hide'.
-For me this indicates that the hiding process may not be successful.
-For me the code looks like it will always succeddin hiding the feature
-from the guest, no? Did I miss anything?
-
-Same for the next patch.
-
-	Steffen
+Looking at this again, I wonder if we should just add a comparison with
+&efi_mm to the preceding if() condition.
 
