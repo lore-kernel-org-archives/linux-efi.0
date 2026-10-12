@@ -1,214 +1,227 @@
-Received: from PAUP264CU001.outbound.protection.outlook.com (mail-francecentralazon11021133.outbound.protection.outlook.com [40.107.160.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 781672931EE;
-	Mon, 12 Oct 2026 13:37:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.160.133
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791812236; cv=fail; b=OHaxOZIUZ2Yyo+Nm5qvAT6zDt8/3Cm04CWzQtQoZf2OjgZAvZNSdws2YWivTnruplxRg3GRhbVIYeOZ8hkVvLtBzg0jC2aUcpTT/ZO+Vfz1JlnHjcft98X6uHPacu79H/SMFV9uCAfJUWh+kArmdG8o0N0I32Dd4VwXDrSjPOR8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791812236; c=relaxed/simple;
-	bh=Qyd5E59+XjkGLHd5ZVavfY6A1BDuZzxojIH8BwHT38w=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Yl0cMQ57kLKxV0pJ/gVXapZg/g298qwGDEDl8/RZBQBg110Dshr7biPnI8awPWy/WwVOii1ksY3DD9pSwEopJzjoEoUevMsQgTuViHO3uDQHrIvdmZR/v3HqDcnirHVw2tswCDPwE5rV8O4Gim4gcNI7Pj0/QBoQUVYXswqSuXY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=wenske.fr; spf=pass smtp.mailfrom=wenske.fr; dkim=pass (2048-bit key) header.d=wenske.fr header.i=@wenske.fr header.b=i5SA1nD0; arc=fail smtp.client-ip=40.107.160.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=wenske.fr
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wenske.fr
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DEE2049891F;
+	Mon, 12 Oct 2026 16:38:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1791823132; cv=none; b=qpAn88m9LhovaTFdmjitBQEXA2BDPEVi1yl7vGYSTPwqrR0QTjCfO+DBne6rxUtuLFkNnIIVSu/bQagzEvgwuIw/Nd1VaJh2X9i0ZDm9I6HlIzmxRq5NF6xjSl0H6LuU7joPbMcLQAPhsldFQhCUowDHqItMlfF8HyLMWnO8r34=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1791823132; c=relaxed/simple;
+	bh=+2zdQ6S4ZsYD0E7MfH1iCkQfbZPh5zhOEsI2jTjK14o=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ns07bHiMVl/2/Oo50StRnCmB0tSs0+Ei5EQEMTV5ufOCyXLK2S/qdhVsaoJ9x3HUgI/MHqKoWiNw1pnqatHJhG8+JiJ5BHh/fvAuRSLluJCsgrFI/BBpbFHWoNeR7bN0zW3KK4WPWFyINX/FNRWEtOAV5w2f/+vKxH2io9dxdCM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=D19Ab7zG; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=Zi758xX8; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=Uwbarloh; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=zX03xJjP; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wenske.fr header.i=@wenske.fr header.b="i5SA1nD0"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=YHOsS+8Q2hu42JkxQuHqHdGiqqnf8JkCNvGbnmAJxdm2Rjf3fNkQqciKpxVuRg86xa99yvoS2QrfN1cmfaLsJlznj/SnOtn5uQk7G2o4A/86DujQ08cF+Ul0LnAFFdGOYTGmzsZ6RkSsYNjeUbjel1jlIELrzSR8igBiV+G69X5uAzV/b68jBClIWk+LQEe4CXcva5rlVYiR0HioKatEwfo3xkBdoVMbigmN0GpD7NZkuAqj/ygxpeImNd7cizBL82Bmfkbu0kyATx+mBM+pEMogcIY54N7x2x/soy2gtuoh+dCoIRp06XyH/NrX2kjJGxIXb/szUPzRbI+nosd0kQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Cb1KzrYb/NxclxupdogkcL42hOzn0oXY2ub1PZfz+xw=;
- b=IX+KCyYAcxZhhLNzxQ7JTf8pf1kUMGVRjJW095IvlyVSA22pO5cVebnKgNxHH5uamK/8WouyXNtwYSD14/+PkD7SKKnlfWm7v/owPNYbElet+tHaScl8QI3/J8mwHchJn6bFnA8Rrruc14u5N2lbvDOTBZqjDy6XwV8KRRLgs/XSFFDvnjh+AEdndBVGts2kFrraR1lHZsK41ETh3Iv4XUCauYvXJXgWJpZa/5bmSQxhzAEGZNBLTGTQ7Usb1Dlv0HPpNaPaC297vEEkzWOFwljrKaOFqwcD4P6Wo2ddTbzMrgw2ZI0T4G+TcjfA5ZNEtGzBtHhjjFPHQQF8pgjFwQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 82.65.107.217) smtp.rcpttodomain=gentoo.org smtp.mailfrom=wenske.fr;
- dmarc=pass (p=none sp=none pct=100) action=none header.from=wenske.fr;
- dkim=none (message not signed); arc=none (0)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wenske.fr;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Cb1KzrYb/NxclxupdogkcL42hOzn0oXY2ub1PZfz+xw=;
- b=i5SA1nD0zNX0ACjK6u5JEgOo9YNqc8fCXzq0s1/23PUimowg0fT+epSCQ6uITMxUDGK9ouh1jaVC8R2SyRD6JmFaffWE2VVGkkBjD8EJ2zvCvdDaFjtxr/d2cD8VLkUfbYDOTCvk8wkVEkBUGU6l4FpHSizZiahrsYqlbsPErOPfBeXitKXkhkb4rvNMcEbfySfCL12P8h8viDGobR9ca29TrZLD6KRx9dQTfo4Vkzzl/OGnKLSyL5Ncu1Ty8HUYb14dK2b+iEVJZ1aIboUUELFIPtGI0RtDF/cWoH7S8u11E9WwIF/X8H/6ISTnYNL87qyIPho6Xe6Q4kAu5TXwAA==
-Received: from PAZP264CA0141.FRAP264.PROD.OUTLOOK.COM (2603:10a6:102:1f8::16)
- by MR1P264MB2356.FRAP264.PROD.OUTLOOK.COM (2603:10a6:501:35::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.496.23; Mon, 12 Oct
- 2026 13:37:09 +0000
-Received: from PA2PEPF00019231.FRAP264.PROD.OUTLOOK.COM
- (2603:10a6:102:1f8:cafe::4d) by PAZP264CA0141.outlook.office365.com
- (2603:10a6:102:1f8::16) with Microsoft SMTP Server (version=TLS1_3,
- cipher=TLS_AES_256_GCM_SHA384) id 15.21.496.5 via Frontend Transport; Mon, 12
- Oct 2026 13:37:09 +0000
-X-MS-Exchange-Authentication-Results: mx.microsoft.com 1; spf=pass (sender IP
- is 82.65.107.217) smtp.mailfrom=wenske.fr; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=wenske.fr;
-Received-SPF: Pass (protection.outlook.com: domain of wenske.fr designates
- 82.65.107.217 as permitted sender) receiver=protection.outlook.com;
- client-ip=82.65.107.217; helo=lgs.sw-servers.net; pr=C
-Received: from lgs.sw-servers.net (82.65.107.217) by
- PA2PEPF00019231.mail.protection.outlook.com (10.167.242.37) with Microsoft
- SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.21.522.6
- via Frontend Transport; Mon, 12 Oct 2026 13:37:09 +0000
-Received: from zephy.int.sw-servers.net (zephy.int.sw-servers.net [10.1.2.3])
-	by lgs.sw-servers.net (Postfix) with ESMTPS id 0CDE3830;
-	Mon, 12 Oct 2026 15:37:09 +0200 (CEST)
-Received: by zephy.int.sw-servers.net (Postfix, from userid 1000)
-	id 4C5306531E; Mon, 12 Oct 2026 15:37:12 +0200 (CEST)
-From: Sebastien WENSKE <sebastien@wenske.fr>
-To: Ard Biesheuvel <ardb@kernel.org>,
-	linux-efi@vger.kernel.org
-Cc: swenske@veepee.com,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	James Le Cuirot <chewi@gentoo.org>,
-	linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org
-Subject: [PATCH] efi/libstub: Allocate the INITRD table in ACPI reclaim memory
-Date: Mon, 12 Oct 2026 15:37:09 +0200
-Message-ID: <20261012133712.618913-1-sebastien@wenske.fr>
-X-Mailer: git-send-email 2.47.3
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="D19Ab7zG";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="Zi758xX8";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="Uwbarloh";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="zX03xJjP"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id ED90D1F38E;
+	Mon, 12 Oct 2026 16:38:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1791823129; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=csrmG+kg/7i2sj29GJ6UcgK7Fx1EjcFlYaUAqC5zM2M=;
+	b=D19Ab7zGWgRqxioTti68cMnegodC9NqI0OopT4947r94LjuQC+4DGht2l7mlLuXrBtlYIZ
+	/xSpUt9uifLoRh0cu0NUqff8Gp8pHp7mwgkcOVdBt/YQFz481xH4/92RqDir0mL+l18Pxz
+	9e0kY5zo/7jMeI0EMFYoT3EtqJk9AbE=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1791823129;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=csrmG+kg/7i2sj29GJ6UcgK7Fx1EjcFlYaUAqC5zM2M=;
+	b=Zi758xX81PlX2RSwZxqO3OZBz3oCy9UBz1ZwquSPybFAAm3bUnjz3K4iWM34CM8c9JsaTO
+	lJcvK4Pj9LT9qDBg==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1791823128; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=csrmG+kg/7i2sj29GJ6UcgK7Fx1EjcFlYaUAqC5zM2M=;
+	b=UwbarlohlE0rKOf1x1aOkm3laMKzkLWLDBAqhPJRvV8TFLqe1gDUcxy96AitoZ+yX3yq/J
+	7mn3JaxBa0C/wvjcASGtwuHz038plwYUWILfzRTOOo1BHvBaZq4ohSb94PDkyFHj7nYvd4
+	z3rHRGpL16kuCbeNBTeaevmUgaP4MsI=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1791823128;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=csrmG+kg/7i2sj29GJ6UcgK7Fx1EjcFlYaUAqC5zM2M=;
+	b=zX03xJjPAFTgWUzEwQJV/VKuyXvputpOMDcHpO8U5UmdbyT4odqDFaHUkDYR8+Qw+6erAp
+	fgoikpd6NSKXYXBA==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id C558913314;
+	Mon, 12 Oct 2026 16:38:48 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id debgJxgNzWr0XgAAD6G6ig
+	(envelope-from <jack@suse.cz>); Mon, 12 Oct 2026 16:38:48 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id 58B75A1405; Mon, 12 Oct 2026 18:38:48 +0200 (CEST)
+Date: Mon, 12 Oct 2026 18:38:48 +0200
+From: Jan Kara <jack@suse.cz>
+To: Christian Brauner <brauner@kernel.org>
+Cc: Jan Kara <jack@suse.com>, Al Viro <viro@zeniv.linux.org.uk>, 
+	ecryptfs@vger.kernel.org, linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net, 
+	linux-nilfs@vger.kernel.org, exfat@lists.linux.dev, linux-fsdevel@vger.kernel.org, 
+	ntfs@lists.linux.dev, ocfs2-devel@lists.linux.dev, linux-btrfs@vger.kernel.org, 
+	gfs2@lists.linux.dev, linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org, 
+	linux-xfs@vger.kernel.org, stable@vger.kernel.org
+Subject: Re: [PATCH RFC 25/28] ext4: allow remounting read-only in the
+ emergency state
+Message-ID: <ixl4z4jusef2ou62hzqecfc4s7c45xx5slrwdhuzb6wctuia6b@i7hccjzpa433>
+References: <20261012-work-fs-sb_rdonly-v1-0-60743a3dc326@kernel.org>
+ <20261012-work-fs-sb_rdonly-v1-25-60743a3dc326@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PA2PEPF00019231:EE_|MR1P264MB2356:EE_
-Content-Type: text/plain
-X-MS-Office365-Filtering-Correlation-Id: 7027699e-4e05-4390-f91b-08df2865ea03
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|82310400026|23010399003|36860700016|376014|1800799024|6133799003|10067099003|18002099003|5023799004|261009223027099003|56012099006;
-X-Microsoft-Antispam-Message-Info:
-	4nQeTQdBwidr5d1y2JzP9RbwmAZzgk5K6FtFT+FrsnBWDvb0OiIlEmmnSDYH9xdB+DZF6V+zC2u2B+u/87f/WWRK/mJGLjrhCVzbpa5LmvOI2EuKr3qcGs0qzABjPzKP0xu0rKylxdn2OvzBtKORO6wnzThAXnhtaxHAX+OWx9ji/gSNrLpJMDf9oFphnBoBpDg7CE5RL41mhcuX1sT0UWqRV8OzLDTvFdZjkB5GQ3KMQFDGeA/NC3ghIPgaix9FU5NjRxgd685DVVd0s+mroPuYkujk4LgQJce6cGNyS28Xn7V5U+Tx7v6bPEMLDHWfbkjdfhmjJOyS7b+38EW0NRwz+AjXoEVDBFXtZMnbwlTt0dj+inknmHg+dJGzBkAMZXSQnItnOYGbQPD4KJhvQaAigeg3Gnus+RM7zH1bIXSWZD58cmR6vJhWHA2nY5UKoi84MqIozplA2EQJMdia45221i4ChliYl/7KdPL2SZ0Q0DhYEoEG7itqfmi6dRLWpsar6gF5oot/dPPRbkL3EqKKoG2npeM85EZUeUcVDPEM07VCXQaptpoSVHVDQTBMbO2AJDz7DI4UqswROFJh96Z0D07CY1jhmfZkpWH3r02cAZOG7dBiGeM4TBzNVRXsFnc/ZLUs5x2GJQIbprOQSPxzjK8EzivKlzdhmDrXWaCpF0RlqUKKMgk8HYwP7ogN
-X-Forefront-Antispam-Report:
-	CIP:82.65.107.217;CTRY:FR;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:lgs.sw-servers.net;PTR:82-65-107-217.subs.proxad.net;CAT:NONE;SFS:(13230040)(82310400026)(23010399003)(36860700016)(376014)(1800799024)(6133799003)(10067099003)(18002099003)(5023799004)(261009223027099003)(56012099006);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	Q4A+77ZEOZtgrZnBRdlqYmwy39s8qkuNGytVLi9Hcugo3rNbA2YFNcyNGdZ6jQQWbpDBpeAVcjJ40u1CWE6qy9j5uBOObHmMm5CbkQok/S+baK/09qvIcNpXmbLfuk5Nr4hj+WAeyRXYi4AD0gf4QKNPYwIZly1g3s2qCTcw9L9JE/KtVmJ2TNjCSIIhHcrdem5nd3G/0W+u00L2G5dG51iFrwr+kmwGaTwnbDqukWgJHQan7fJbTyS3LMBe9xOk2Bh2sqXXSAEkt5u/5WcldfvZ433lvFhrhywCmVmcXz2FWFGCJOfotPf9n2eVUW0SPMzqqkQRcwiuVP5Og/oc5BRaO93bk0OQy17cAt1I15jZQDqzIDYdaN6LO/WQhHv7AJ+z5kigcarkhsWXzaf/71lH9Ib3czHAAepC5KUIDGqkJZC7hPntZnxSzcsHMOT1
-X-OriginatorOrg: wenske.fr
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 Oct 2026 13:37:09.2309
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7027699e-4e05-4390-f91b-08df2865ea03
-X-MS-Exchange-CrossTenant-Id: ff4ca3b8-6c54-4519-8b0b-9389fb15cdbb
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=ff4ca3b8-6c54-4519-8b0b-9389fb15cdbb;Ip=[82.65.107.217];Helo=[lgs.sw-servers.net]
-X-MS-Exchange-CrossTenant-AuthSource: PA2PEPF00019231.FRAP264.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MR1P264MB2356
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261012-work-fs-sb_rdonly-v1-25-60743a3dc326@kernel.org>
+X-Spam-Flag: NO
+X-Spam-Score: -3.80
+X-Spam-Level: 
+X-Spamd-Result: default: False [-3.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_RHS_NOT_FQDN(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-0.999];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_COUNT_THREE(0.00)[3];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	RCPT_COUNT_TWELVE(0.00)[17];
+	FROM_HAS_DN(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_SOME(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_TLS_LAST(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MISSING_XM_UA(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.cz:email,imap1.dmz-prg2.suse.org:helo,suse.com:email]
 
-Commit 6e62d1c6f2c7 ("efi: Wipe INITRD config table from memory after
-consumption") makes the kernel clear the base and size of the
-LINUX_EFI_INITRD_MEDIA_GUID configuration table once it has read them,
-so that a kexec'd kernel no longer picks up a stale initrd.
+On Mon 12-10-26 12:21:10, Christian Brauner wrote:
+> __ext4_remount() refuses any change of the read-only state with -EROFS
+> while ext4_emergency_state() is set, i.e. after FS_IOC_SHUTDOWN, after
+> an error with errors=remount-ro or after an error that forces the
+> filesystem read-only like ext4_abort(). None of them sets SB_RDONLY
+> anymore. So a plain remount to read-only fails and the filesystem stays
+> read-write.
+> 
+> And emergency remount (sysrq u) asks every read-write superblock on a
+> block device to go read-only with SB_FORCE. ext4 refuses that too and
+> reconfigure_super() warns before it sets SB_RDONLY anyway:
+> 
+>   EXT4-fs (vda): Remounting filesystem read-only
+>   sysrq: Emergency Remount R/O
+>   forced remount of a ext4 fs returned -30
+>   WARNING: fs/super.c:1133 at reconfigure_super+0x498/0xb20, CPU#3: kworker/3:1/50
+>    do_emergency_remount_callback+0xc4/0x100
+>    __iterate_supers+0x33d/0x410
+>    do_emergency_remount+0x20/0x40
+> 
+> With panic_on_warn that's a panic from sysrq u.
+> 
+> Nothing may be written in the emergency state but becoming read-only
+> doesn't need to write anything. So allow going read-only and skip
+> everything in that branch that would touch the disk. That's
+> sync_filesystem(), which fails with the emergency errno anyway,
+> dquot_suspend(), the s_state update and ext4_mark_recovery_complete().
+> Note that after a shutdown with FS_SHUTDOWN_FLAGS_DEFAULT the journal is
+> still live and the latter would really write. Also skip the superblock
+> commit a remount does for a filesystem without a journal, like
+> ext4_put_super() does in that state. Going read-write is still refused
+> with -EROFS and option-only remounts work as before. Quotas stay on
+> until umount.
+> 
+> That's the rule the filesystems converted earlier in this series follow
+> as well. In the emergency state going read-write fails and going
+> read-only works, writing at most what was dirtied before the error.
+> 
+> Reproducer (the sb_rdonly selftest after this patch covers the mount(2)
+> path):
+> 
+>   truncate -s 64M img; mkfs.ext4 -q img
+>   mount -o loop,errors=remount-ro img /mnt
+>   xfs_io -x -c shutdown /mnt     # or any ext4 error, e.g.
+>                                  # echo x > /sys/fs/ext4/loop0/trigger_fs_error
+>   mount -o remount,ro /mnt       # EROFS, stays read-write
+>   echo u > /proc/sysrq-trigger   # WARNING: forced remount of a ext4 fs returned -30
+> 
+> Fixes: 95257987a638 ("ext4: drop EXT4_MF_FS_ABORTED flag")
+> Fixes: d3476f3dad4a ("ext4: don't set SB_RDONLY after filesystem errors")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
 
-However, the stub allocates that table from EFI_LOADER_DATA, which the
-kernel that consumes it treats as ordinary RAM, while the configuration
-table entry pointing at it survives kexec. A kexec'd kernel therefore
-finds the same address in the configuration table, and clears 16 bytes
-there again, in memory that may by then hold anything - including the
-kexec'd kernel's own image, which kexec_file_load() is free to place
-there.
+Looks good. Feel free to add:
 
-Seen on x86_64 v7.2.10 under QEMU with Debian's OVMF 2025.02 Secure
-Boot capable build (OVMF_CODE_4M.secboot.fd, no keys enrolled), the
-initrd handed to the stub through the LINUX_EFI_INITRD_MEDIA_GUID
-device path (systemd-stub UKI). A kexec reboot (kexec_file_load(),
-bzImage64, with an initrd) loads the new kernel at 0x1ca00000; the
-stale table is at 0x1d4bcf98, in the middle of tcp_parse_options() in
-that image. The kexec'd kernel boots, then oopses on the first incoming
-SYN, 16 bytes of its text zeroed:
+Reviewed-by: Jan Kara <jack@suse.cz>
 
-  BUG: kernel NULL pointer dereference, address: 0000000000000002
-  RIP: 0010:tcp_parse_options+0xe7/0x2f0
-  Code: a5 4c 29 e1 89 c8 0f b6 4d 12 83 e0 3f 83 e1 c0 09 c1 88 4d 12 eb de 41 83 fe 04 75 d8 41 f6 44 24 0d 02 74 d0 45 85 d2 75 cb <0f> 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 66 39 d0 89 d1
-  Call Trace:
-   <IRQ>
-   tcp_conn_request+0x270/0x9d0
-   tcp_rcv_state_process+0x147/0x1560
-   tcp_v4_do_rcv+0xc1/0x260
-   tcp_v4_rcv+0x110e/0x1190
+								Honza
 
-A debug print added before the wipe shows what the kexec'd kernel reads
-at the table's address - its own text:
-
-  efi: INITRD table at 0x1d4bcf98:
-       base 0xc274c085660241b7 size 0x8c0c1661455b70f
-
-Whether a given kernel crashes depends on what happens to land at that
-address: v7.2.9 clears 16 bytes elsewhere in its image without any
-visible failure, and bisecting v7.2.9..v7.2.10 ends on an unrelated
-commit that only shifts the image's layout.
-
-Allocate the table from EFI_ACPI_RECLAIM_MEMORY instead, as the stub
-already does for the RNG seed table so that it survives a kexec reboot.
-The table then stays where it is across kexec, and the wipe always
-lands on the table itself.
-
-Fixes: 6e62d1c6f2c7 ("efi: Wipe INITRD config table from memory after consumption")
-Cc: stable@vger.kernel.org
-Assisted-by: LLM
-Signed-off-by: Sebastien WENSKE <sebastien@wenske.fr>
----
-Tested on x86_64 under QEMU (q35, KVM) with Debian's OVMF 2025.02
-(OVMF_CODE_4M.secboot.fd and OVMF_CODE_4M.fd), booting a systemd-stub
-UKI, then rebooting with kexec_file_load() and an initrd:
-
-- v7.2.10: the oops above in 6 out of 6 kexec reboots under the
-  secboot build (none under the plain one). With this patch: 2 out of
-  2 come up, and two chained kexec'd kernels read the cleared table
-  back (base 0x0 size 0x0), now in ACPI data memory.
-- v7.3-rc7 without this patch: no visible failure, but the same debug
-  print shows the kexec'd kernel reading its own image at the table's
-  address - and so clearing 16 bytes of it:
-
-    efi: INITRD table at 0x1d4bcf98:
-         base 0xf413863894c40c4 size 0x415c74063c1246b6 - inside this
-         kernel's image
-
-  With this patch: kexec reboots (chained too) come up under both OVMF
-  builds. It builds without warnings, W=1 included for libstub.
-
-Not tested: other architectures, real hardware.
-
-Reserving the table with efi_mem_reserve() in efi_config_parse_tables()
-instead doesn't help on x86: efi_arch_mem_reserve() only handles
-EFI_BOOT_SERVICES_DATA ("Failed to lookup EFI memory descriptor"), so
-kexec still places the next kernel over the table. Note that a kernel
-kexec'd from one without this patch still finds the table in loader
-data memory.
-
- drivers/firmware/efi/libstub/efi-stub-helper.c | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index f27f2e1f0..9293b8b31 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -641,8 +641,14 @@ efi_status_t efi_load_initrd(efi_loaded_image_t *image,
- 				     EFISTUB_EVT_INITRD) == EFI_SUCCESS)
- 		efi_info("Measured initrd data into PCR 9\n");
- 
--	status = efi_bs_call(allocate_pool, EFI_LOADER_DATA, sizeof(initrd),
--			     (void **)&tbl);
-+	/*
-+	 * Use EFI_ACPI_RECLAIM_MEMORY so the table survives a kexec reboot:
-+	 * configuration tables do, and the kernel wipes this one once it has
-+	 * consumed it - a kexec'd kernel wipes it again, at the same address,
-+	 * which in EFI_LOADER_DATA memory may hold anything by then.
-+	 */
-+	status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
-+			     sizeof(initrd), (void **)&tbl);
- 	if (status != EFI_SUCCESS)
- 		goto free_initrd;
- 
-
-base-commit: 24a19b953e2a3d0ea5a8c4951a0ab8f32720c907
+> ---
+>  fs/ext4/super.c | 20 ++++++++++++++------
+>  1 file changed, 14 insertions(+), 6 deletions(-)
+> 
+> diff --git a/fs/ext4/super.c b/fs/ext4/super.c
+> index d636b89090a2..643c304460ec 100644
+> --- a/fs/ext4/super.c
+> +++ b/fs/ext4/super.c
+> @@ -6711,11 +6711,18 @@ static int __ext4_remount(struct fs_context *fc, struct super_block *sb)
+>  
+>  	if ((bool)(fc->sb_flags & SB_RDONLY) != sb_rdonly(sb)) {
+>  		if (ext4_emergency_state(sb)) {
+> -			err = -EROFS;
+> -			goto restore_opts;
+> -		}
+> -
+> -		if (fc->sb_flags & SB_RDONLY) {
+> +			/*
+> +			 * Nothing may be written in the emergency state. Going
+> +			 * read-write stays refused, but going read-only must
+> +			 * not fail or emergency remount (sysrq u) WARNs. So
+> +			 * just become read-only without touching the disk.
+> +			 */
+> +			if (!(fc->sb_flags & SB_RDONLY)) {
+> +				err = -EROFS;
+> +				goto restore_opts;
+> +			}
+> +			sb->s_flags |= SB_RDONLY;
+> +		} else if (fc->sb_flags & SB_RDONLY) {
+>  			err = sync_filesystem(sb);
+>  			if (err < 0)
+>  				goto restore_opts;
+> @@ -6826,7 +6833,8 @@ static int __ext4_remount(struct fs_context *fc, struct super_block *sb)
+>  			goto restore_opts;
+>  	}
+>  
+> -	if (sbi->s_journal == NULL && !(old_sb_flags & SB_RDONLY)) {
+> +	if (sbi->s_journal == NULL && !(old_sb_flags & SB_RDONLY) &&
+> +	    !ext4_emergency_state(sb)) {
+>  		err = ext4_commit_super(sb);
+>  		if (err)
+>  			goto restore_opts;
+> 
+> -- 
+> 2.53.0
+> 
 -- 
-2.47.3
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
