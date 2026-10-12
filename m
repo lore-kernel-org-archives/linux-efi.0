@@ -1,131 +1,114 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCA0136E477
-	for <linux-efi@vger.kernel.org>; Mon, 12 Oct 2026 08:37:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2EC033F4DCA;
+	Mon, 12 Oct 2026 10:21:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791794226; cv=none; b=g+WbezgBbv+e2ckkyjijuvXTUSm7FmXNcIS+o/4qfTz5kwuUquvqtKrGcARtSp+zRQa4xwkZXBcjrej9cTWjU54vP4MqEHa6KPTpWKzLd/sbBTqVNbP3Xxwi/zzz2d/4GVO+ox+eNT9mwVGJDt95qnntula4eWEMjnlvYJWTe68=
+	t=1791800490; cv=none; b=f7KkYBjx8q0DcXkqWMk4PFaTL0MjKlxN9xlLaG6QyJ6KXIkZlb2Hm//ELJYFLX+qNrtx6FrrhvWcMDGqdYcLGfggzPnsCTZkjYUqp3o/L7nU64oRTE2AyLddJd3SivGUkE8N5a/GIcxxDO9p4WhEt8qsIp7UrJ8qzwQqpQQoT5k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791794226; c=relaxed/simple;
-	bh=sZTgt9R/jsBGgS+PNLj2DAay5FHJUaZM8HmhOX7wPG4=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=OqK2iw8J1Oi7eJbKvj77jV+b6z1b+5u8PRSi/0wOBKDBiniP8tZBTLQLNoIhLIMiKqAXHDztNKL5kNrNumDh6xIoXf+AqHM2FPSpreXM2qHz5fiKwhSgP+IW/Z+QuXPEkGQQHhMDQZFFevdpxM+qpSTHGscPGgba93LptXb2dpk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XjfnxLQL; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1791800490; c=relaxed/simple;
+	bh=FHwfq/OCDsnntrfJYkKn8tLOjs4Tv7YHZV8JitYQDQ0=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=llHmXC+YlFhxReQ+rBpOwfXrUggAXxiutyzHwER/gdhdOZULL9JInaAX+tBU0WNtkK+y/kuXR4AKWIl8bwRcC8mqj8RmXRJen71R5nn89q49m2v1txB5bxEBlCdTCE7mEC0G7dOGAeoRpIHHbRcWfn/e0xGpvYmQyx/l2oIl9Bo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=daD9kmOa; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XjfnxLQL"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 016F71F0089D;
-	Mon, 12 Oct 2026 08:37:04 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="daD9kmOa"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 07DB31F0089C;
+	Mon, 12 Oct 2026 10:21:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1791794225;
-	bh=KaTDNeGIs4Eya8Iq0e/D24HTq8sf7hkN0/Y704r7Hpo=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=XjfnxLQL1JzyLJJ+aJCNe8mgOI3NMLP/wrtu8mpwo04hq7G5J7iRzlA8yBa9BUorz
-	 D/7zYyGyGZnc7DVknS5lRiNHvl6vm3TgjwinQ2E6LVZRc9AqcBVy/DBF7Wt800Sj9O
-	 0DcHfEqr6q9nJwZXo1tAAFnROyBeQBZxzMli60Fa22KpK6xCNsMLELkgf2cmZAwMXb
-	 PBRk2hAyxVxBtO3BXfLf0F96S3uQTKH+OY+LirVFnTukKPnLuc0GQfy6VVxmzmmyPu
-	 vmVDRyTYQ4qgpY2gqjN1EjlcJ8RggjhaiJO424FolrCRSMQfSdU9tTUUvIysakXq6g
-	 qDmRfKoRZtHIg==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 4BAD7198003A;
-	Mon, 12 Oct 2026 04:37:03 -0400 (EDT)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Mon, 12 Oct 2026 04:37:03 -0400
-X-ME-Sender: <xms:LZzMavUNOPNfW0dNfzBv5Y8LM25zezHtaX7ccbQty30vkMf9j-vMEg>
-    <xme:LZzMaibj0hpCvI3686VaDjdfdVwU_NXGBCrwlUjthQVzjkMlPRm2na_fu9GH_gXIu
-    hcLtY8FqXAqUoB7ff5gpTUqGuPUxMi0joUXk26l0AV4cRQaWQu9tgY>
-X-ME-Proxy-Cause: dmFkZTEThxgyF43rNUF63WV4bfNwDlYm6E/t3DdUkJCiSwT9/QwWB1XnBUrlCTGx97rh1I
-    npz2tTJ4a0lrG8k4Oz0TTr50lcfntge9RrFesknLGLVm3Z5sD1122TDLKaJ8XrcAuCG9Ce
-    MWBqR9l+GV5c7yrLZU/XzlqBLHbapJ/xDrzzH277B4CK9igCgegAb9COr44/dmo5BVOBXr
-    6x5a17wXNSBgkNc8kJZqiZvsCet6DptiUbWF9fKonF3aiqe3Zq4x6vJ5nRPno+DIeJ2s1z
-    Vql+lpbk9tIcrTdMTGRCUtMiy45MOhetpXQbCLz8Qm1tJpgBjf8rt4eFeDfpQRWv4EOndC
-    /g/ij8LClT5b5XLIiDbKG0ZeDFsqe8Z+cC5svW/8oxrWeym5x0ZF/uZCqI62GLdSMHcHDy
-    lfNlDmYSW64uWCu0CMqEOY7G0b5yjA+8upIoAj3+EY7qL2gU4OTRC8lFuBUUfq/OhDM5t/
-    HlVKz0zogM401WHfUzd7Yn2GZ+vIaNlrU+4GqCoQ43JxdhdW/6ixX3FaTLXpUrCBTLvtAB
-    0bVObwDEhG6triZyke+hGmVMbW7GtjbFP4y9Xm+ZPEjvuO+GFaGerdl6t1k9qpAeXR+bEY
-    AbATUY479uH6ATOaR/S3r7KRrHGY6zLZwKxrYADWgrmno9b2C1rhvdXe9TYQ
-X-ME-Proxy: <xmx:L5zMav2__LUY0IJwjhxenhX0N_Nx6e2IWy0TOjBXO0MF26zxP8vv0Q>
-    <xmx:L5zMapArh4PeVYHY4ECNKcWexlTJcOS7RlXu0Ps6G7W94lPdXXEyRw>
-    <xmx:L5zMau5ieYjom-Q6hguJUKmH7hRltD1kQgffx3hXbj4ZGzlkdJr_Hw>
-    <xmx:L5zMaqL3xsDQeIDTQoCuCWc5QJghbbpCs8Ou4hFgR0UpbPW9PEMimw>
-    <xmx:L5zMavvXzofQL89lQSs0B8HleVYplt6-kViKH2AwnJmu9xlWkX-1eVdG>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 6AD4BF80086; Mon, 12 Oct 2026 04:37:01 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=k20260515; t=1791800478;
+	bh=jSaTeXy5zEI39kgqqTi6yfSkP3Kgm5wm6RfoGXruvqg=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc;
+	b=daD9kmOaoDrecEZ+GKWXxyW9H20UJr48DcxIiw0e65dcl8QTST3JZXcj61YvqNTyb
+	 c5d34ADQW1FTC40OtFvDZ/r1oWnvdCTDB2nBPiUWZpsdvr64rU3yyTUZCbQmtT/WHN
+	 M4L3IE8ZFu/uZjDyHAoHWVVDuNF/pppyPWohHYEa4Yvx8fprF5PUJYsVDI169f9kxo
+	 jBe+V1vSuEX9xF71FfYPmOVHGKSg4cEB3pIABRCDPA7K95hBDggmzUqYSJbpYomakn
+	 PXM0tJDgLdWEhvw5L8NTowb8aNFn6hJrwa/MlDBOPgqwCRarNEsyBQ1YwBmx0RfVjr
+	 WbnHd24KBBfVA==
+From: Christian Brauner <brauner@kernel.org>
+Date: Mon, 12 Oct 2026 12:20:46 +0200
+Subject: [PATCH RFC 01/28] ecryptfs: don't leak the inode when a lookup
+ can't open the lower file
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Mon, 12 Oct 2026 10:36:41 +0200
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Ard Biesheuvel" <ardb+git@google.com>,
- linux-arm-kernel@lists.infradead.org
-Cc: linux-efi@vger.kernel.org, "Will Deacon" <will@kernel.org>,
- "Catalin Marinas" <catalin.marinas@arm.com>,
- "Mark Rutland" <mark.rutland@arm.com>
-Message-Id: <cad3ed39-407e-49db-91f5-cd36f052ced0@app.fastmail.com>
-In-Reply-To: <20261009143438.330265-2-ardb+git@google.com>
-References: <20261009143438.330265-2-ardb+git@google.com>
-Subject: Re: [PATCH] arm64/mm: Route faults taken by EFI runtime firmware to no_context
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+Message-Id: <20261012-work-fs-sb_rdonly-v1-1-60743a3dc326@kernel.org>
+References: <20261012-work-fs-sb_rdonly-v1-0-60743a3dc326@kernel.org>
+In-Reply-To: <20261012-work-fs-sb_rdonly-v1-0-60743a3dc326@kernel.org>
+To: Jan Kara <jack@suse.com>
+Cc: Al Viro <viro@zeniv.linux.org.uk>, ecryptfs@vger.kernel.org, 
+ linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net, 
+ linux-nilfs@vger.kernel.org, exfat@lists.linux.dev, 
+ linux-fsdevel@vger.kernel.org, ntfs@lists.linux.dev, 
+ ocfs2-devel@lists.linux.dev, linux-btrfs@vger.kernel.org, 
+ gfs2@lists.linux.dev, linux-efi@vger.kernel.org, 
+ linux-mtd@lists.infradead.org, linux-xfs@vger.kernel.org, 
+ "Christian Brauner (Amutable)" <brauner@kernel.org>, stable@vger.kernel.org
+X-Mailer: b4 0.17-dev-3d1b8
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1919; i=brauner@kernel.org;
+ h=from:subject:message-id; bh=FHwfq/OCDsnntrfJYkKn8tLOjs4Tv7YHZV8JitYQDQ0=;
+ b=owGbwMvMwCU28Zj0gdSKO4sYT6slMWSd2TJJmlVX9PaCsIn+FsHZwuxHGEpPFCj+mriqsDrpf
+ qGIfFJFRykLgxgXg6yYIotDu0m43HKeis1GmRowc1iZQIYwcHEKwETcDjD8sz1q8vHQt6fh7p09
+ uT08PmKLO9tkzFMehF2fYnDC/qOTC8P/xLgFX20+PbiQ+CC39cSDhwe1Dlq6qHKtT7/euMmvwfE
+ UHwA=
+X-Developer-Key: i=brauner@kernel.org; a=openpgp;
+ fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
 
+ecryptfs_lookup_interpose() opens the lower file of a regular file to
+read the size from the header. If that fails it calls make_bad_inode()
+and returns the error. A new inode is still I_NEW at that point and
+nothing ever unlocks or puts it, so it leaks together with the reference
+it holds on the lower inode. And an inode that was already in the cache
+gets marked bad for all its other users instead of just losing the
+reference this lookup took.
 
+umount then complains:
 
-On Fri, 9 Oct 2026, at 16:34, Ard Biesheuvel wrote:
-> From: Ard Biesheuvel <ardb@kernel.org>
->
-> When EFI runtime services are invoked from a preemptible kthread, the
-> kthread runs with efi_mm installed via kthread_use_mm() and preemption
-> enabled, so neither faulthandler_disabled() nor !mm applies in
-> do_page_fault(). A permission fault taken by the firmware on one of its
-> own (TTBR0) mappings then hits the 'access to user memory outside
-> uaccess routines' check and oopses, without efi_runtime_fixup_exception()
-> ever being consulted.
->
-> efi_mm has no VMAs, so there is nothing for the mm to resolve. Send such
-> faults to no_context directly, so that __do_kernel_fault() can recover
-> from them as it does when the call is made with preemption disabled.
->
-> Fixes: a5baf582f4c0 ("arm64/efi: Call EFI runtime services without 
-> disabling preemption")
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-> ---
->  arch/arm64/mm/fault.c | 12 ++++++++++++
->  1 file changed, 12 insertions(+)
->
-> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-> index 0b52557652be..db308fe01c4f 100644
-> --- a/arch/arm64/mm/fault.c
-> +++ b/arch/arm64/mm/fault.c
-> @@ -40,6 +40,7 @@
->  #include <asm/kprobes.h>
->  #include <asm/mte.h>
->  #include <asm/processor.h>
-> +#include <asm/stacktrace.h>
->  #include <asm/sysreg.h>
->  #include <asm/system_misc.h>
->  #include <asm/tlbflush.h>
-> @@ -621,6 +622,17 @@ static int __kprobes do_page_fault(unsigned long 
-> far, unsigned long esr,
->  	if (faulthandler_disabled() || !mm)
->  		goto no_context;
-> 
-> +	/*
-> +	 * Faults taken by EFI runtime services firmware are never resolved by
-> +	 * the mm (efi_mm has no VMAs), and must reach __do_kernel_fault() so
-> +	 * that efi_runtime_fixup_exception() can recover from them. When EFI
-> +	 * runtime services are invoked from a preemptible kthread, neither of
-> +	 * the conditions above applies, so check for this explicitly.
-> +	 */
-> +	if (IS_ENABLED(CONFIG_EFI) && !user_mode(regs) &&
-> +	    is_ttbr0_addr(regs->pc) && current_in_efi())
-> +		goto no_context;
-> +
+  VFS: Busy inodes after unmount of ecryptfs (ecryptfs)
 
-Looking at this again, I wonder if we should just add a comparison with
-&efi_mm to the preceding if() condition.
+That's a WARN, or a BUG with CONFIG_BUG_ON_DATA_CORRUPTION. The lower
+filesystem reports the same when it is unmounted. Use iget_failed() for
+a new inode and iput() for one from the cache.
+
+Reproducer, opening the lower file read-write fails on a read-only bind
+mount:
+
+  sig=$(printf x | ecryptfs-add-passphrase - | sed -n 's/.*\[\(.*\)\].*/\1/p')
+  mount --bind -o ro /lower /lower
+  mount -i -t ecryptfs -o ecryptfs_sig=$sig,ecryptfs_cipher=aes,ecryptfs_key_bytes=16,ecryptfs_passthrough /lower /upper
+  cat /upper/f      # EROFS
+  umount /upper     # VFS: Busy inodes after unmount of ecryptfs
+
+Fixes: 3b06b3ebf441 ("eCryptfs: Fix new inode race condition")
+Cc: stable@vger.kernel.org
+Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+---
+ fs/ecryptfs/inode.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/fs/ecryptfs/inode.c b/fs/ecryptfs/inode.c
+index 525297c7ebd8..0d8452558a98 100644
+--- a/fs/ecryptfs/inode.c
++++ b/fs/ecryptfs/inode.c
+@@ -362,7 +362,10 @@ static struct dentry *ecryptfs_lookup_interpose(struct dentry *dentry,
+ 	if (S_ISREG(inode->i_mode)) {
+ 		rc = ecryptfs_i_size_read(dentry, inode);
+ 		if (rc) {
+-			make_bad_inode(inode);
++			if (inode_state_read_once(inode) & I_NEW)
++				iget_failed(inode);
++			else
++				iput(inode);
+ 			return ERR_PTR(rc);
+ 		}
+ 	}
+
+-- 
+2.53.0
 
