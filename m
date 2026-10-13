@@ -1,65 +1,65 @@
 Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 825153F58C4
-	for <linux-efi@vger.kernel.org>; Tue, 13 Oct 2026 09:33:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FFA140245F
+	for <linux-efi@vger.kernel.org>; Tue, 13 Oct 2026 09:33:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791883984; cv=none; b=jzr81Mnvi/VhDNEwNZFUhnlg87nBMo3j5r1a/6clPiy3KCx+TUS9RoSgp69yVSelBJD74UU2DL+2zE8nTivBg5jRuNMpMDFWxgjcOJ9icjCFaZy6Jjfo4a0V6gGBwe9Xtnmu42ufcYTzqySeNbQ499MAvxCyvVmQ0cpFhieRr9Q=
+	t=1791883987; cv=none; b=p/6izkSv2Wp/PpAFYuY/urqTu36jJMIX+W/Ap/oVTneZx/2yVM8MGQJrT0Cdq2NtwPFtXKlyjSLkAsAswcK8gevKj3SZprceM+SXuet1o3MTDW8B8hjD0cpRTTQa1HAuWRc+weauBJTUsn3TNzDUAIpztV45dNGojfScXfz+KTk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791883984; c=relaxed/simple;
-	bh=ZcbqbnyKp/n0WpB7iv3NE32Z90PzMJn0VzjmrHwzo7E=;
+	s=arc-20240116; t=1791883987; c=relaxed/simple;
+	bh=XXCAheqEwWEeNXTk2daG4fV+KXtS4FyM/T+IAPa7GmE=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=BSqyWc37VNChsdTOesxKJoPTi8bGvJQBk9PQuVZ4Mvirj5QHdTpLpfInb0ozMBORQe4Yu/aGvcof3X2/2I9oWmH6Tg+SBsGk9GpOpoBa5jy8Q8Tt3o+Pqj6Dkrp7jVTT5plQ7NTRXg+zggof1A4fglipM7gQG43Dmx/BYeEzyl8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=YO4IuQrp; arc=none smtp.client-ip=209.85.221.52
+	 MIME-Version:Content-Type; b=tF9gYYbXSxIPg3b/halcEBeNQF/UDAttGJFXfshN4VF645mYvwdM2gyWzbq/6HWS5Z9RI2aqhuY1MEms88ihQsMkVijmZ5Tmmn6si4XOoWTX2YhqAOIb/HuqRllNf5m+2N7boEBmN61jrTMogQb/ModnwxE18kWpDU9r6fodyNg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CcZd1h3l; arc=none smtp.client-ip=209.85.221.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YO4IuQrp"
-Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-48af27fe287so2348767f8f.0
-        for <linux-efi@vger.kernel.org>; Tue, 13 Oct 2026 02:33:02 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CcZd1h3l"
+Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-48b9d8055dfso2083388f8f.3
+        for <linux-efi@vger.kernel.org>; Tue, 13 Oct 2026 02:33:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791883981; x=1792488781; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1791883983; x=1792488783; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=j79G9x93qm3T0R3P1TfLErsNrxHPzMPCo5TuV1Ni39U=;
-        b=YO4IuQrpAgMQ1QTHYH+FbmHY5hdO3sxVdQQVqHeFHVFwm9xWq9m8WyfZ4PqVGPUXfG
-         vmrcKP2z5UV+OR1qnnld2DWRRX1/UEoG4aR0xoP7+3MIAvbWrqCxMR6WhGj6Nr2t5fry
-         Z62b6rLKlgAG1muWc5OLvQcimskiQaOo0KFxQdDbFkx96r9q12IWDyL5DGO//A7aF4+g
-         uREQ2SEwB8Sm45g7xOvsF+3nGva3w+Pgdw4sxJMD1NL67NhKAG0o41XCJO4wXWIRDoYp
-         CbLDC9d7a0DStT5PbujUfMtIl6kbkuUn43/efTThkbV8MJ4+tbm4+jxE6NlRKLuY8r8H
-         VwDA==
+        bh=SnEkf+SshAJve0553z+hLZ8mY5sSHw5Ad0IiJvmX3q0=;
+        b=CcZd1h3lVFQd+meUKFFn4V679jpUAQeDvPsMEZVdOdJLPK4kIj8g9iLAseVaVK4qgp
+         zbqRxxApNTUfZIYLxESROJf8GQ5/OiucAy6cvtHIkD6xcVfnWDVPVaNEC63dh+iJxkMC
+         gz3vYWqBT6AI3yEVCeuFkA2avZ5AqfuyHSDrt8kOmrcFFAQ2UtGy72RbAHy1EA4mFvFC
+         OTKSNuooX6pzw8hExVIO1ZSR6gMHGIjSRoO2+SmFS1HXPqmdXuJlZp/53VFSaxs+tqnE
+         6JSgVG1LDFUurAWnYL9KH1P7yEFeZyzc0LMTiJEyigEaJ04uCNOFrwrs13SFUzuPkDJg
+         51rQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791883981; x=1792488781;
+        d=1e100.net; s=20260707; t=1791883983; x=1792488783;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=j79G9x93qm3T0R3P1TfLErsNrxHPzMPCo5TuV1Ni39U=;
-        b=LPDFgSh4zpN9PxH7lTUC3A0kZsqcj0RJpH7HW1wvSnGvMDUjNa5ULlcmgJKChGxN3m
-         b2lmWpQOCB9j9/oBwEGhmR45OEixirPPEX99glSUG5/pgt1gFia+FmudCoe6HF1rBlP4
-         YpNeRe3ShfuGoCMkvJZHL2pBNyV7W1cDvhNaDUnPdTL8g6DmwRpkz2mLcgEKGUH2waDa
-         UNqDuUUKc/JtHJrsPJzR9QUwP6/TyQ83FA1NDIVA58UJYW4Nc4RH6xV/cIwz3/uibJGp
-         PJ8JH0f1c1OFchPKn+CvKtwr+78EjADdv3358S+kuE/ZnlvKMHM5w9lTcL/fTqlXZ0U1
-         X5dg==
-X-Forwarded-Encrypted: i=1; AKwUvByqh37+64GPKSxf/IR2Tz42R4dIe9T2EOnGO8JNnanmVkOUOVzY9t0jRFr03+L/8BUDSs2lt5ElVKc=@vger.kernel.org
-X-Gm-Message-State: AFq9FYLF3RuTVIQ71mjTmxFIKI1b1UnVwsKKwwqtkI52WmUkaR0pPj9/
-	hCYPHBoaq1p54d73KvbP3ZjPjo+GBo/2ATelSi5C7CLHQnj5v7AtUT/LzbnJVCKv
-X-Gm-Gg: AYBFou1sQk8+eaiqs/eex7ve49IKm198E3M0qdMmqcuKtvNIoYFKCw4yosfbkcH1esA
-	FaB6ehNThOvG64Vz9NoxsZwj1Oler3BuZemJQqfmc1pYjFfZYLWZn3Kxj2KgER4M3nAmL+zKA3C
-	3IUR6tFm6YQtlR/BCQXkhDJselzo4tEEaa3sW8Jhmklo1PDYHfI/1cSlZimX+fDvdRSWfrLgMXf
-	x6pfCFJDr99GnkHEiTir04Q/EfK1Cy3W18lgHo/EVBU8fCRqCe/6rlZn8ev0KcS5Wn/yPMr/aaM
-	laQZVU0Z1IYm1gNiy2xtArlnbhKY5BBumHYhaf24mUAllOJMUm674j2y3PVNn6vF79sYhTG7cYt
-	mzLxnCUKfq+UvAO64jVGEcp9zFerHVFq163lJvuR7+SWuAvJVqcpsIpd2rr8VqzDwNXas3vskba
-	KO5SecQ6+qt8d8TGI/bnRdCQe6UA1hsgp0OaBPNmL3eJVte+RHYW/F1sLlVZjFEy7Sev4NjxKLh
-	unAjl8Sp2t0x+SNjxDKEhls
-X-Received: by 2002:adf:e712:0:b0:488:7927:9ca2 with SMTP id ffacd0b85a97d-48dbace0e05mr17961496f8f.49.1791883980607;
-        Tue, 13 Oct 2026 02:33:00 -0700 (PDT)
+        bh=SnEkf+SshAJve0553z+hLZ8mY5sSHw5Ad0IiJvmX3q0=;
+        b=VyjzQKvQTTwyz1oT3va4YOE9yLe0hamvahhSVWlF/N7A5CDaKICJkWW+eGNsUvPPkT
+         NsC9Jm2CFQFmgVDyKyDP5K9etjZt44RHXYQWhtz8azVZlfa/kYU5n/QFMfYa57VgeM3x
+         BouzcWuuohiFgdwz6CtrnaZvIlWS0kWWEW2t3DgkkyeU4fgFF9RdSuWOrqHvlqMnnBwM
+         eun1vl2HUZ6sKWm2SPNBl78VCzfu/TK/eTCP6bTVV9W3AjvMhizzX0y+7Q8VwgP8jU+P
+         YMqj/e/8Rrkfn3Tede3q0vGMwkXIaaPscKNZOsUYj0M+KC6T3MQPMN5H8qRC8Duw+z8M
+         RNnQ==
+X-Forwarded-Encrypted: i=1; AKwUvBx4rUts2nxJv83wiVQ6YR2xZRGnUYRGN3a8yg4xyEd8415l3+JF70Vwh+/avJUiHox5VHwGqq20OIc=@vger.kernel.org
+X-Gm-Message-State: AFq9FYIoobWKVs8FAgXrh4GGL44x1+Zgg/VsWNdA7nPFFwnRDl5SYjib
+	fq54JYwRcgt67DTZ9w7xWFHJn90OeV3Mkqhvzs5TE1txcmjpoWUVlyCA
+X-Gm-Gg: AYBFou2j00NznEvLnZbGxCFRczW0TwIjyfBg04jIkZyz1s59bQV58TpedO04gmb5MvF
+	sodI2Auw72fHMIEJWBWtyngUyYja79yQPLgYii6oXRKL/SjxD3ddPzpOR87zkg2npWTlWZQ1T4u
+	AqXxLRjxbGjj/n4ZsqYv4L8Tm4IAjxOEKy+tUI9OBei30xE1+MFbNRpiessd+JjWgJTmZloI9ps
+	wxecO5lRUHAM0RO2lnikC1S/EmYm8aFp9UnP5aINSROfaNzM0FEhmF4NIzsx1WuNHm/MavoEy+c
+	/LQi5gaRwHObSGvGWOYhA6jgkh2j/bd4SS6XRzqZwWe3ZXaNrKhjwzFnSIgi8KeRqyieJwCUqFR
+	35yRSZ4XubaTTFSFxxuhnjhTgLKWDUB7gsRpowtlIjqVsaC/6I55SuIeTO9U/NRWbyfweio4iWn
+	GXBq6X4Ij9jNn71dZq7wb3ApNTijdn48sK0Gt0zUFu5EHfIGcHhVtX8DqM8vQSXP2qWfi5oK06U
+	E0ZfkXPlGSt7TPDMFeNMa8n
+X-Received: by 2002:a5d:5f84:0:b0:48b:86:5563 with SMTP id ffacd0b85a97d-48dbaae6f0bmr22382083f8f.27.1791883982560;
+        Tue, 13 Oct 2026 02:33:02 -0700 (PDT)
 Received: from ingenieria31.oficinasStQ.local ([79.112.15.218])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48de0bc4ec6sm3986774f8f.48.2026.10.13.02.32.58
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48de0bc4ec6sm3986774f8f.48.2026.10.13.02.33.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 13 Oct 2026 02:33:00 -0700 (PDT)
+        Tue, 13 Oct 2026 02:33:02 -0700 (PDT)
 From: =?UTF-8?q?M=C3=A0xim=20Pedraza=20Padilla?= <maximpedraza@gmail.com>
 To: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
 	Maxime Ripard <mripard@kernel.org>,
@@ -86,9 +86,9 @@ Cc: Francesco Valla <francesco@valla.it>,
 	linux-doc@vger.kernel.org,
 	linux-embedded@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v5 05/13] drm: docs: remove bootsplash from TODO
-Date: Tue, 13 Oct 2026 11:32:35 +0200
-Message-Id: <20261013093243.505776-6-maximpedraza@gmail.com>
+Subject: [PATCH v5 06/13] dt-bindings: display: add a boot logo node under /chosen
+Date: Tue, 13 Oct 2026 11:32:36 +0200
+Message-Id: <20261013093243.505776-7-maximpedraza@gmail.com>
 X-Mailer: git-send-email 2.39.5
 In-Reply-To: <20261013093243.505776-1-maximpedraza@gmail.com>
 References: <20261013093243.505776-1-maximpedraza@gmail.com>
@@ -101,45 +101,209 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-From: Francesco Valla <francesco@valla.it>
+Products built on the same board often differ only in branding. On UEFI
+systems the firmware hands the operating system its boot logo through
+the ACPI BGRT; a device tree system has no such table, so today the logo
+is built into the kernel, and each product needs its own kernel image.
+With U-Boot's Falcon mode the device tree is the only thing that reaches
+the kernel, so it is also the only place the logo can come from.
 
-Now that a splash client exists, remove the bootsplash task from the
-TODO list for the DRM subsystem.
+Add a "boot-logo" node under /chosen. The node lives there because a
+logo is configuration handed over by firmware rather than a description
+of the hardware, as simple-framebuffer nodes already are.
 
-Signed-off-by: Francesco Valla <francesco@valla.it>
+The image is a BMP with 24 bits per pixel and no compression, the
+format of the BGRT image, so that one file serves the firmware splash,
+a BMP loaded as firmware and this node alike. It is carried either in
+an "image" property, which dtc fills in from the file with /incbin/, or
+in a reserved memory region the bootloader loaded it into, named by
+"memory-region". Exactly one of the two must be present.
+
+"logo-position" takes -1 on an axis to mean centre on that axis, which
+is the only way to say it when the device tree does not know the image
+size, and "logo-offset" is added afterwards. "rotation" counts degrees
+counter clockwise, as for panels, and turns the image rather than the
+screen, so position and offset stay in screen pixels. The optional
+"background-color" goes with the image, since a logo designed for one
+background looks wrong on another.
+
+Assisted-by: Claude:claude-opus-5-5
 Signed-off-by: Màxim Pedraza Padilla <maximpedraza@gmail.com>
 ---
- Documentation/gpu/todo.rst | 17 -----------------
- 1 file changed, 17 deletions(-)
+ .../bindings/display/boot-logo.yaml           | 151 ++++++++++++++++++
+ MAINTAINERS                                   |   1 +
+ 2 files changed, 152 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/display/boot-logo.yaml
 
-diff --git a/Documentation/gpu/todo.rst b/Documentation/gpu/todo.rst
-index a437ae5c71f4..e77de5e2a24f 100644
---- a/Documentation/gpu/todo.rst
-+++ b/Documentation/gpu/todo.rst
-@@ -773,23 +773,6 @@ See drivers/gpu/drm/amd/display/TODO for tasks.
+diff --git a/Documentation/devicetree/bindings/display/boot-logo.yaml b/Documentation/devicetree/bindings/display/boot-logo.yaml
+new file mode 100644
+index 000000000000..bf4121f24f1b
+--- /dev/null
++++ b/Documentation/devicetree/bindings/display/boot-logo.yaml
+@@ -0,0 +1,151 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/display/boot-logo.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Boot logo supplied by the device tree
++
++maintainers:
++  - Francesco Valla <francesco@valla.it>
++  - Màxim Pedraza Padilla <maximpedraza@gmail.com>
++
++description: |
++  An image for the operating system to show on the display while it boots,
++  handed over by the firmware together with where and how to show it.
++
++  Products built on the same board often differ only in branding. Carrying
++  the logo in the device tree lets a single kernel image serve all of them,
++  each booting with its own device tree, and it works where the device tree
++  is the only thing that reaches the kernel, as with U-Boot's Falcon mode.
++  It plays the part the ACPI BGRT plays on UEFI systems.
++
++  Since a logo is configuration rather than a description of the hardware,
++  the node lives under /chosen, next to the other things firmware hands to
++  the operating system.
++
++  The image is a BMP file with a 40 byte BITMAPINFOHEADER, 24 bits per pixel
++  and no compression, the format of the BGRT image. It is carried either in
++  the node itself or in a reserved memory region the bootloader loaded it
++  into, never both.
++
++properties:
++  $nodename:
++    const: logo
++
++  compatible:
++    const: boot-logo
++
++  image:
++    $ref: /schemas/types.yaml#/definitions/uint8-array
++    description:
++      The BMP file itself, byte for byte, which dtc can fill in from the file
++      with /incbin/. The device tree stays in memory for as long as the
++      system runs, so this is meant for small images; larger ones belong in
++      a reserved memory region.
++
++  memory-region:
++    maxItems: 1
++    description: |
++      Reserved memory region the bootloader loaded the BMP file into, starting
++      at the beginning of the region. The BMP header says how much of the
++      region is image.
++
++      This keeps the image out of the device tree, so that it can be changed
++      without rebuilding the device tree, for instance by loading it from a
++      partition of its own that userspace can update.
++
++      Memory keeps its contents across a reset, and may even across a short
++      power cycle, and the operating system cannot tell a stale image from a
++      fresh one. A bootloader that loads no image into the region therefore
++      disables the node (status = "disabled") or removes it.
++
++  logo-position:
++    $ref: /schemas/types.yaml#/definitions/int32-array
++    description:
++      X and Y coordinates, in screen pixels, of the top left corner of the
++      image once it has been rotated. A value of -1 on an axis centres the
++      image on that axis instead, which is the only way to say it when the
++      device tree does not know the image size, as with a memory region.
++      Defaults to centring on both axes.
++    items:
++      - description: X coordinate, or -1 to centre horizontally
++        minimum: -1
++        maximum: 65535
++      - description: Y coordinate, or -1 to centre vertically
++        minimum: -1
++        maximum: 65535
++
++  logo-offset:
++    $ref: /schemas/types.yaml#/definitions/int32-array
++    description:
++      X and Y displacement, in screen pixels, applied after the image has been
++      placed. Mostly useful together with a centred axis, to land the image
++      somewhere other than the middle of a panel whose visible area is not
++      the middle of the mode.
++    items:
++      - description: X displacement
++        minimum: -65535
++        maximum: 65535
++      - description: Y displacement
++        minimum: -65535
++        maximum: 65535
++
++  rotation:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description:
++      Rotation applied to the image before it is shown, in degrees counter
++      clockwise, as for the rotation property of panels. It turns the image
++      and not the screen, so a quarter turn swaps how much room the image
++      takes up, but logo-position and logo-offset stay in screen pixels
++      either way.
++    enum: [0, 90, 180, 270]
++    default: 0
++
++  background-color:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description:
++      Colour of the rest of the screen, as 0xRRGGBB. When absent, the
++      operating system uses its own default.
++    maximum: 0xffffff
++
++required:
++  - compatible
++
++# The image lives either in the node or in a reserved memory region,
++# never both and never neither.
++oneOf:
++  - required:
++      - image
++  - required:
++      - memory-region
++
++additionalProperties: false
++
++examples:
++  - |
++    // A 2x1 image, red and blue, centred and 120 pixels below the middle
++    / {
++        compatible = "foo";
++        model = "foo";
++        #address-cells = <1>;
++        #size-cells = <1>;
++
++        chosen {
++            logo {
++                compatible = "boot-logo";
++                /* Normally: image = /incbin/("logo.bmp"); */
++                image = /bits/ 8 <0x42 0x4d 0x3e 0x00 0x00 0x00 0x00 0x00
++                                  0x00 0x00 0x36 0x00 0x00 0x00 0x28 0x00
++                                  0x00 0x00 0x02 0x00 0x00 0x00 0x01 0x00
++                                  0x00 0x00 0x01 0x00 0x18 0x00 0x00 0x00
++                                  0x00 0x00 0x08 0x00 0x00 0x00 0x13 0x0b
++                                  0x00 0x00 0x13 0x0b 0x00 0x00 0x00 0x00
++                                  0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
++                                  0xff 0xff 0x00 0x00 0x00 0x00>;
++                logo-position = <(-1) (-1)>;
++                logo-offset = <0 120>;
++                background-color = <0x1e1e28>;
++            };
++        };
++    };
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 321ecb9f5b5b..0d1decaedde0 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -9174,6 +9174,7 @@ M:	Màxim Pedraza Padilla <maximpedraza@gmail.com>
+ L:	dri-devel@lists.freedesktop.org
+ S:	Maintained
+ T:	git https://gitlab.freedesktop.org/drm/misc/kernel.git
++F:	Documentation/devicetree/bindings/display/boot-logo.yaml
+ F:	drivers/gpu/drm/clients/drm_splash.c
  
- Contact: Harry Wentland, Alex Deucher
- 
--Bootsplash
--==========
--
--There is support in place now for writing internal DRM clients making it
--possible to pick up the bootsplash work that was rejected because it was written
--for fbdev.
--
--- [v6,8/8] drm/client: Hack: Add bootsplash example
--  https://patchwork.freedesktop.org/patch/306579/
--
--- [RFC PATCH v2 00/13] Kernel based bootsplash
--  https://lore.kernel.org/r/20171213194755.3409-1-mstaudt@suse.de
--
--Contact: Sam Ravnborg
--
--Level: Advanced
--
- Brightness handling on devices with multiple internal panels
- ============================================================
- 
+ DRM TTM SUBSYSTEM
 -- 
 2.39.5
 
