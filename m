@@ -1,56 +1,56 @@
-Received: from mail-ed1-f71.google.com (mail-ed1-f71.google.com [209.85.208.71])
+Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com [209.85.221.72])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 504A048B383
-	for <linux-efi@vger.kernel.org>; Thu, 15 Oct 2026 06:51:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.71
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F97448C3F3
+	for <linux-efi@vger.kernel.org>; Thu, 15 Oct 2026 06:51:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792047093; cv=none; b=uf7UOqMrks9n1FOKq/6eWfE9BtAp8dGjLdr4CBYgbBmrxUGKt2XdWLg8HOs8X/EY7Uo6b2GQMayU5l06o+lbwysu1/h5iE5kejZw+bOwksXSoVD12CcjyB9mFdgHE4xiCsMarkWlfMVC0iQ+jLWRKBdbiH6CKC66E/dybjNadP0=
+	t=1792047095; cv=none; b=LcZtoZ9KQV16t1Wa1wskHF4bXwIzURKGH5Vz7rsNt6xMwZE8fshenU7aSL/SrXw74a4FgbqsPW+tCbdYQu+N0eCaVajQ3uIL5Vwkrcohq+8/kVWEZfw5ZstSkjUKrDKzkxXFh9oOudOW2vcObEy/AAVoV8V4+22/N6sku+z8faE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792047093; c=relaxed/simple;
-	bh=SItlcE6smWJ9HWMtIeToa9WeUeX4DHDe7cGssIy3xRE=;
+	s=arc-20240116; t=1792047095; c=relaxed/simple;
+	bh=CoURnaEAceEXQwAt5rIxAf1BmNuj1SEfdMMTwQY5S6c=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=bRnmP0EJvT0wHX1EJkS87Dkc9GNuDhFY4xsFShd9+lWquCy8JNrA9ETsA4obpL1/5igkJcf6cd5lHf5RSPNchSasOPpSTZKxxu3l8go9Bxf/JfLWIen7lJrpalVL97OF84kLVxsgsczkWtsziScCS6B8rZB82l6ZRaVe+lV2x8w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=IcN+yYrW; arc=none smtp.client-ip=209.85.208.71
+	 To:Cc:Content-Type; b=gxpLI1qDrknHxCbVoIGUm8jffuhtoNyNqPZITmwXlf/v7xiGi3Yta1qZNyTiqq20kCmT9kVIffoyZST2Zmz9UXs3jlr5OJSM59G0SOPEHfDiJVNHcILTdQ+ntyKzSmRSHfgayG9AIE4ourgwFSIVW2/BHDtikn66BfF2q/jiQ2o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=PtNJTyqn; arc=none smtp.client-ip=209.85.221.72
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="IcN+yYrW"
-Received: by mail-ed1-f71.google.com with SMTP id 4fb4d7f45d1cf-6a5d57a8d51so5526535a12.1
-        for <linux-efi@vger.kernel.org>; Wed, 14 Oct 2026 23:51:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="PtNJTyqn"
+Received: by mail-wr1-f72.google.com with SMTP id ffacd0b85a97d-487038bc9b8so3927187f8f.2
+        for <linux-efi@vger.kernel.org>; Wed, 14 Oct 2026 23:51:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1792047087; x=1792651887; darn=vger.kernel.org;
+        d=google.com; s=20251104; t=1792047085; x=1792651885; darn=vger.kernel.org;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=01+6NNJE+oY24QEwS4N1zsdGWUwgIgBwewKqWCgHYVI=;
-        b=IcN+yYrWElOb1rxDI0CnFhAbzvNjM7FlR1MWLsfTNfhUl2bDFej/ZMImF7/92rkz3h
-         Pui1XYpb9ql5UPn41GpCpSLl7NKYCioYwhAR9WlnDIhW0FFlgX3W75Pt6Btu8TAVndcL
-         gz01UDf+qpTlk7CH9DPBXmsUWJd2JkrfnvFSqZKAFWvmGd/CtIbEKOCcfcpedPtrrKr9
-         ByOYnOUmV7Z3zjnrv5uYp4lIVDvpchxQjLiavTCvAhHTBgkyfdnB+MxF5LvzGu/+FbCO
-         +HOLvJQO2pPfgOwaP/UpIn/vRD5UsCsLg+5oCBwsq+AmZy2IYpVeqcPM57RiGmYufyU7
-         oDLA==
+        bh=KegbrHiSQyHiHPpZTs9VdePuzmuQYA+LUuhtvzhprvE=;
+        b=PtNJTyqnyVDjVfbF65uT76j4W5gw8Zt09co2ND9ir/l/R4mMSfXFFixENNfGCvxNTC
+         V271bcFRmJ8c3SavRGhEIywyLGt/zcI+vgVAtSBRuRakDbRe7+yTrcoLRIQScZniW2gG
+         e2yD0KoZmxfsS3hG4RZuaWasA19DCuqnGc8zYNn41lsm6HRcpp5hZ8HRwShAwvTvKmPK
+         7lZosU3sxNDGlgUKqvAhsIogRf7l7E76VjcyUO/UMu85fAGZfGTKRpDJCpyx97AxvSyK
+         yUTASjQFKiYYSsKX9Vpx/OfxKwmdvYhZeaUDHmiz4TbonuFwBqeku4wkW5SVvpZHD10w
+         Kn/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792047087; x=1792651887;
+        d=1e100.net; s=20260707; t=1792047085; x=1792651885;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=01+6NNJE+oY24QEwS4N1zsdGWUwgIgBwewKqWCgHYVI=;
-        b=POn5OCd1KrNZA0Zb9cN1mfZ/DOcYVR74h+tdPEQ7OgNKWIsot/rdliYFpUHPMSizB1
-         egpHjAJT3jJpG1gJNcGfaLIVfIe3BVnu5qOWbb7UsVuS7nREHaEkI7QNqjWLS+Dquzy0
-         hbHo0Oou6TrAFSErk5kzbyb8vMokzRnFog+a+TBLSUqCDBmSRcsfNGddC2ntj/kPEnZY
-         XcyQbtfqMF+2mun6GYOlPbU+i254DdpxxJnvtLZ8ZvKPzL2XXTXaWm596JxlFIYLjDV6
-         I1vSL9Ud4cjqVd3WzV7CNr3HjmI8kPfEBHC9F1xzPX+z/vLdjA/GTnvi0tqfpK9Q9grP
-         +3BA==
-X-Gm-Message-State: AFq9FYKBkXVOfVQ0OL2sr2+dv4cikMvrbM/tWJ2H0zxpLNDsXE7ZMXAI
-	t/xBD4lMXZ1WSuK0WFXynL+tsHv6+DRGE96LSFbeTl/5mqpvtgDnGH1bF9FeISYfJ8R1/BLa0Z1
-	ULSQW5LlfMXQO9Q5zx5zKekxkMDsWJGuMXeFMvfxesI9s/tDjqOStzMeLWNE69pO0INkVPyLErP
-	s5OE219uR42hhqtqP4zZA4K2pX1btmyA==
-X-Received: from edsl13.prod.google.com ([2002:aa7:d94d:0:b0:6b1:f575:1635])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6402:1d53:b0:6b1:b5b8:b691
- with SMTP id 4fb4d7f45d1cf-6b1b5b8b8demr10254428a12.21.1792047086929; Wed, 14
- Oct 2026 23:51:26 -0700 (PDT)
-Date: Thu, 15 Oct 2026 08:51:20 +0200
+        bh=KegbrHiSQyHiHPpZTs9VdePuzmuQYA+LUuhtvzhprvE=;
+        b=SetDE+DGq6vjjZlE5SX+Pw1EpAbAwqCcaoAcv/njKAU9PQN2qvbYUGcCHuMmDFaJEK
+         o1vStZBrcKg7dQTSGg2nGE7nR6v9rLuwhUqeT8eMOJDmrwXzOHPSrbj/ES5xgmz+EquD
+         6Skc0ekX6w/1umhofWRrUv4mbl3XAORiCpxP3Mfd9lxhrF5BmbpSzbpB0cpPqY9EoFVw
+         ii6nxP0hXAcw3Q1ymGK5+Syy65aIJnPJv08FJPtBgJMKyoEMgHdRVlU6n4b0uQgHhZT8
+         +y0oP5JG6qrSXZQ7nCGZaZf0PwLcgshCTNghtFzw+r5W76oywP0f+BwJyqJlO7FcITY2
+         COww==
+X-Gm-Message-State: AFq9FYLFr8f+CeD+yqzlosXTpW70RE8sbykgGE4DACELUUiY5N0+MU3H
+	N+506fP+fxE91FKfZJgs65vTdlE1YrWDM5pJHFDU8jtoAXbHfzo39fTW1D2DJqFd84IkEwFFiD0
+	+YaFJL3HUzBESW4BgB4Ib3h6EwbtzOxrloFHD0VaJaSr4LisI30K13pKbOrJCKRiOTktae2ZcLW
+	LG9YAGz2Ix6qwCDXxE7mV0pe0HPzMo3Q==
+X-Received: from wrsg14.prod.google.com ([2002:a5d:46ce:0:b0:48d:e956:4631])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:1ac5:b0:487:91e:d8ed
+ with SMTP id ffacd0b85a97d-48dba784ca9mr35598921f8f.2.1792047084249; Wed, 14
+ Oct 2026 23:51:24 -0700 (PDT)
+Date: Thu, 15 Oct 2026 08:51:18 +0200
 In-Reply-To: <20261015065116.3365029-5-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -60,8 +60,9 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20261015065116.3365029-5-ardb+git@google.com>
 X-Mailer: git-send-email 2.56.0.385.gd3acb90ef8-goog
-Message-ID: <20261015065116.3365029-8-ardb+git@google.com>
-Subject: [PATCH 3/3] efi: Initialize all configuration table addresses to EFI_INVALID_TABLE_ADDR
+Message-ID: <20261015065116.3365029-6-ardb+git@google.com>
+Subject: [PATCH 1/3] efi/libstub: Don't replace an existing
+ LINUX_EFI_MEMRESERVE table
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
 Cc: Ard Biesheuvel <ardb@kernel.org>
@@ -69,44 +70,46 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-The addresses of the MOK variable table, the confidential computing
-secret area and the unaccepted memory table in struct efi are only
-initialized to EFI_INVALID_TABLE_ADDR if support for the respective
-table is enabled, and are left at 0 otherwise. This is harmless for
-the existing users, which are compiled out in that case, but code that
-consumes the table addresses in struct efi generically, such as a kexec
-loader that passes the configuration tables on to the incoming kernel,
-would mistake 0 for a valid table address.
+The LINUX_EFI_MEMRESERVE table is the root of a linked list of memory
+reservations that need to persist across kexec, such as the GICv3 LPI
+pending and property tables, which cannot be moved once the
+redistributors have been enabled. Each kernel adds its own reservations
+to the list that it finds via the EFI configuration table, and honours
+the ones made by its predecessors.
 
-So initialize all of them unconditionally: efi_config_parse_tables()
-only assigns them if support for the table is enabled, and so they
-remain EFI_INVALID_TABLE_ADDR otherwise.
+The EFI stub installs a new, empty table unconditionally, replacing any
+existing one. This is fine on a cold boot, but not if the stub is being
+executed by a loader that passes on the configuration tables of an
+earlier kernel, e.g., a kexec loader that runs the incoming kernel's EFI
+stub, as the reservations made by earlier kernels would be lost.
+
+So leave an existing table in place, and only install a new one if none
+exists yet.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/efi.c | 6 ------
- 1 file changed, 6 deletions(-)
+ drivers/firmware/efi/libstub/efi-stub.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 14b9c7ebb5df..9bc22de0d67e 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -47,15 +47,9 @@ struct efi __read_mostly efi = {
- 	.tpm_final_log		= EFI_INVALID_TABLE_ADDR,
- 	.ovmf_debug_log         = EFI_INVALID_TABLE_ADDR,
- 	.mem_reserve		= EFI_INVALID_TABLE_ADDR,
--#ifdef CONFIG_LOAD_UEFI_KEYS
- 	.mokvar_table		= EFI_INVALID_TABLE_ADDR,
--#endif
--#ifdef CONFIG_EFI_COCO_SECRET
- 	.coco_secret		= EFI_INVALID_TABLE_ADDR,
--#endif
--#ifdef CONFIG_UNACCEPTED_MEMORY
- 	.unaccepted		= EFI_INVALID_TABLE_ADDR,
--#endif
- };
- EXPORT_SYMBOL(efi);
+diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
+index 975148f986bf..6db10590f89b 100644
+--- a/drivers/firmware/efi/libstub/efi-stub.c
++++ b/drivers/firmware/efi/libstub/efi-stub.c
+@@ -83,6 +83,14 @@ static void install_memreserve_table(void)
+ 	struct linux_efi_memreserve *rsv;
+ 	efi_status_t status;
  
++	/*
++	 * If an earlier boot stage installed a memreserve table already, e.g.,
++	 * a kexec loader passing on the persistent reservations made by the
++	 * previous kernel, use it as is: installing a new one would replace it.
++	 */
++	if (get_efi_config_table(memreserve_table_guid))
++		return;
++
+ 	status = efi_bs_call(allocate_pool, EFI_LOADER_DATA, sizeof(*rsv),
+ 			     (void **)&rsv);
+ 	if (status != EFI_SUCCESS) {
 -- 
 2.56.0.385.gd3acb90ef8-goog
 
