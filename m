@@ -1,272 +1,426 @@
-Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com [209.85.128.72])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B0A437AA78
-	for <linux-efi@vger.kernel.org>; Thu, 15 Oct 2026 15:46:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.72
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792079203; cv=none; b=B4Ue7zp7G2g4MlJ/gjKLGd7+hqSW/e302S64Z4zLK4+Aj1GdWEn1ts7I+cN04wvxfUVb3LDGrKpaPsaU3MAjPPThp9i1xK5izSuYVxcL2wtDj8nxRXu+7DdUiyS1G2lIx1yETz3KBkshYNrXudTfSG1pQuBq3Xv7Hv59brsBk58=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792079203; c=relaxed/simple;
-	bh=RaSKnpohn/a0FBZWs6DUgO05EqKlyNBnDQSqxF4eZ5M=;
-	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=TtdIgvuyMiQAxQQhU8W7jY7AnQ0i5zCso8Gx0Vwcyn029RuVUPxIhXIIy0l7vPxtaBk/i7wZToUPp8JEWE2/2U8ILtxyLyzkV0GZ2DxmDQ6wcS9hLZ7bnrC69BsEeRHYnNsFOEeo8Do6mKCWhYSpzwU7tSLfn57UeIT1C5Q5+ts=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=Xoc5yMgi; arc=none smtp.client-ip=209.85.128.72
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CDE553033CB
+	for <linux-efi@vger.kernel.org>; Fri, 16 Oct 2026 00:01:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=170.10.133.124
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1792108882; cv=pass; b=WQMNbBuE77Px3vm8rqvhrqIB2s1asbKNm/iYPNaFTOaiFyol5Ry5/JDtp6mFSfVEKjhWxx+motcWgQmGd23cp4NShglLBQe5emfdM/8h+TWR107I/iDg1Iad4HM5CVi7X9Pxw17n5al+vdpL8fhsE30XhlJMh4jnAzSh3ZQf3lk=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1792108882; c=relaxed/simple;
+	bh=cDzYndgVLHSlgLhviEcKgLhvTsb8mhyEeRWsU/W6ToA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=cGwXQ1sgXnmJOKRtRcbwYiBf58Qn8a2qUjjsLTjMiWJ7D632CfAYkj4DUHp4Rmpe1/g2Nx/WTbQMgronmpR+kiQcv96HD9zcOWGSetC5d0h6pA7rUPIUgi8eX7D6S9NbqMFTJBPiI4dGQjHd3Grx0wNkglYS5bUjnnkFjN/bUiM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XaavN6xs; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=tbMoaNSQ; arc=pass smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Xoc5yMgi"
-Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-4a01ba12198so619905e9.1
-        for <linux-efi@vger.kernel.org>; Thu, 15 Oct 2026 08:46:32 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XaavN6xs";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="tbMoaNSQ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1792108880;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=+iJ5ftvCuZ0dzn9DuBnu06m+Dldzk+vmqioG+hhsp4M=;
+	b=XaavN6xsYkpOWZ78a07GON0uMnm1aFIR+SjMM5aIdOOnmHOHRSwNRUmQjcsgYeiqN0ZZ9w
+	4UhYEjcHgRObBUejX8sfWc9gzep9GL0MIx9EnR0TsBza9djcDefe59IJOKpVNJgyclxoNH
+	Fp6awmOccjVUgmtpdeGzA6BfmNx94Co=
+Received: from mail-yx1-f72.google.com (mail-yx1-f72.google.com
+ [74.125.224.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-378-Unkhj0nmNHe0dBrpqeHVYw-1; Fri, 16 Oct 2026 00:01:18 +0000
+X-MC-Unique: Unkhj0nmNHe0dBrpqeHVYw-1
+X-Mimecast-MFC-AGG-ID: Unkhj0nmNHe0dBrpqeHVYw_1792108878
+Received: by mail-yx1-f72.google.com with SMTP id 956f58d0204a3-6755fef4f96so2542174d50.0
+        for <linux-efi@vger.kernel.org>; Thu, 15 Oct 2026 17:01:18 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1792108878; cv=none;
+        d=google.com; s=arc-20260327;
+        b=Xn08Wl0++xmKwFsGdktZ+X7MF0pLC/NrRQXuZKmAGmNMIYvCPxyy3VQnrwXps/2e56
+         2AtJYD5/HKGQJsG9QoXo1dg7ymyO0Cxgdgsny+qJ3BC5Jxd1Qi5oy8COZMAhwoDKFOTk
+         5VxRNOrCoeUuxGB7EpZjoFwr/Dqq8/iGVBCwgMhTRdZOokmwZmXOnuECpskhCH2WvKJt
+         lgSQqCT1Hh/C6H4n/ZTJNJEct/XQHvB7Syiuml1e9Y8SDvTyeKwLAqltZwcrsuBPKtwV
+         1ODHgGsb7A2O0/mU+BItfJc/sUio4sl2QQZMVorU74lGauQh5mOTmTHwCkQo/WmjcMuX
+         SkMA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=+iJ5ftvCuZ0dzn9DuBnu06m+Dldzk+vmqioG+hhsp4M=;
+        fh=iHf4FIcCDTTPD4KiIoLBiKQPnITO7gGxDDnfkRWxo/M=;
+        b=Ds4W4c6HdwfPLQdvRQVhNfGi19LNo9r8ZqjRXHxB7Jliv9eDNsOSxNnTOg+wg14CSf
+         ympi2S5GHkwEZAxzC9vyxW61/dHn4Dlnp0dR94/jHfvSDUpyr0KD0/MqFnNdHxEhzfVX
+         U0AVZ2lCBqn5Zd/ure3SxFdWygjxTBUuqSKc+o9gbdNyvlqNvTPjREdqZi8D7CS2293A
+         wZpj3Hub0tq9Yr7j0aQ658UBthv8JcqdpWQSjz/p11yJvXsB5cSsHhB1IA7sfxFvkpjs
+         jyqW4l9O6fIgVPzbZ5rp2ihIwfSyX7eiBDs9OIaTZxFZGpa/zbecniuPPlJ8ZlrikKJl
+         ESmA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1792079190; x=1792683990; darn=vger.kernel.org;
-        h=content-type:cc:to:from:subject:message-id:mime-version:date:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=lG0Z4SvBAfj9Av6Tnq+22F6zrNXtluUjzfA7kSDSk+A=;
-        b=Xoc5yMgif0J5dpXXzKOAiTQmklEqiSpXY/acdm4Q4yu2MJwb4lOBrnR2IptE8tcQEE
-         nru7kOX07d1RwPidMziZCzrqb1HEprtGbJhFzpIcet0roPJffzUfkIzpo7fmEYf25xoc
-         JbBMhM+pmpqBrVNvp3eVXgAzAB8v04rKnz2Rbb1O/h1T7TlAMbVUphedxO1uX7ELX3je
-         /8DjaoMT3TanhyXMIGVJHFY4NYay/bysE5cWZYWBCOy8BogvjnAi61VtQ7fqokk0wFDP
-         hJQ/MitW8vV2Md2EK5LtIL3RJy1FiYahfysItUQk216yW1vwoT0tAhylZcBsWOGfxUdV
-         zu6A==
+        d=redhat.com; s=google; t=1792108878; x=1792713678; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=+iJ5ftvCuZ0dzn9DuBnu06m+Dldzk+vmqioG+hhsp4M=;
+        b=tbMoaNSQNv0VP/HDAeBFp1fGLaHMepKNTBhEEFHdh7mNPYc4qSWC5QDJ49coznD0fi
+         PWnZ7aZu3Ci8Omo62L3LvPjQHBnkd1fxPJaVH/aqOTbn8/lO1UePWq6LmTVCMfh0FhDK
+         HNpvlmSIrRu0LUo8KQN7EjQv9zr9uXLueX7nF9xX/YnzeV3nzOHiSISHj/SccXdf3+lu
+         J88d+wl3pQeZ+XC73zrWSwVbfYyxK6kHMBc/13UnRG08OFgNxVEbn/tlt+lZddH6xhVz
+         KZiJ7IWOe7WbSj6auBDb9gIPczBad3UW9eLR3P/BwuXhpyYT4b9QI+jqUcsRNHMEKuao
+         pgEw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792079190; x=1792683990;
-        h=content-type:cc:to:from:subject:message-id:mime-version:date
+        d=1e100.net; s=20260707; t=1792108878; x=1792713678;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=lG0Z4SvBAfj9Av6Tnq+22F6zrNXtluUjzfA7kSDSk+A=;
-        b=t3psrSeDCZdqrkRz4QVEhQBj+wzXIlRwHgZXNtDggfVdWDBJ7CJydJfOWE2o9pWDW8
-         nEwFBlOE4TzUQ2TkOrAV3lafIUL6oyg64YwRxeLx+lCwvEocDu8uFzW17pXHt3/2cej8
-         2/CphfwGvXBm83+F6CvZoV0+lvU6OrfGOE03JBM+a+yayYpRD4p1WKHFiTSaJeDUkO1d
-         +Et44gdrch2v/Xb57SUVn+ZBNblZGWFEQvFCS20gDKIPJ3L8lvWplxAihgUaSv/I9fTH
-         dG07r0BWh3qhsnGM2Q1HSzbGk0eiXddc2aLqybRXQlFbt2TZYK+xm/l2OWk7+erH9rt2
-         0uRQ==
-X-Gm-Message-State: AFq9FYJRviKBbfpSawELyGmzNBvzRhpMBN4qA+tlTTSrmsTnW/MavH4S
-	CsIbXzNctlPxWnjJJzHAW00SBGr1uCo+aIdOIgts1XuKTHwtCM4Ye2vvUZ9UXOw/LQe2qMW1LBH
-	UVeT09eoDQaFbhwX2tPJxQD9ZJjOEVIBo4ZtlmCy7TJBcfxRRYKy8zriJQ2kyd7YqFHghWvn89d
-	Q5/MgMlLp/ixXEwizN7a4MuvQW4xD/qA==
-X-Received: from wmbjt9.prod.google.com ([2002:a05:600c:5689:b0:4a1:9c49:8b1d])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:1f86:b0:4a1:c27d:e1a8
- with SMTP id 5b1f17b1804b1-4a1c6672f2emr8813795e9.10.1792079189972; Thu, 15
- Oct 2026 08:46:29 -0700 (PDT)
-Date: Thu, 15 Oct 2026 17:46:27 +0200
+        bh=+iJ5ftvCuZ0dzn9DuBnu06m+Dldzk+vmqioG+hhsp4M=;
+        b=aP5rFQLcM2Mspzad+kjobljw3KAKk7yvPHK4DMghcoI263u0mgX1P3TbbYfZ9J3Wx6
+         ATX4gYv4IO57w8cBkjf2V25CCgJpnjJnH++YC/b7cRZDBewT+pS4yHqwDWFJfBcz6pnd
+         iuZmMiOxR1fXFiJdamyUTGWbdCWU9qnxL96matRZPfp2nvOLskP27Zs5ZrLIUbRs8a/w
+         OtmtIjP/l6Za156saT3D1iAZ9SoPKpoHtwes5i8VGgwFdP8vtltaBDyJHjd7lXUZVbDV
+         EmwnmTRwjnnySTBk97nrn8Qs38qIxPyBAiyKa8eERyI/iuQJtzbI9LJeWj9pHQd5Ynyb
+         gcDA==
+X-Forwarded-Encrypted: i=1; AKwUvBxpuP+I3iZtdOhAj1nJkFoYS146rnFTCHy/1J22z7VCdqrjwCWZGBTKKSl68bNgxUqqnr7cz+mauWo=@vger.kernel.org
+X-Gm-Message-State: AFq9FYI2ogosOSRlTRQ27HtD7K/VqZtl83Q9GFeohfOeKzuSzuWQ3/a2
+	uc+IeBpgnmjT9z3BNglwlbiOBaysCzrpcb1WfF48OgOrb2PTXZjrYI0ZkkRoUE12hr+3RvbEOPc
+	5VIXqwBQ+4413J9TcDktIx3p6RcQhqFh3g+UrQlq5afXCL2RyCIeN6vXvaGzw6LTD4dSWewBQsv
+	zUS4eGinZo/nTBol1Gt+D170ryhrkiO5X3FB7r
+X-Gm-Gg: AYBFou2odPxWSVzMriz6ps7Gj4nF/rAfS8uvJ4IZwwP4xVYB2PGj5HjuXgxhbZpv8gC
+	TI080WC9aEbdyhi+e6QG5pZYOCRRT6vawV3uvMAXYoQ6p4TLl3vD7moHfG74ZxoSxIY4EBDGRUF
+	HhZZ9MCrGZDRYOQVhj/2BBuw7EdtKqaNaDJlBec7KlcGbYQnxrAuf9llKbDokxcw9U9Jeo6LxwN
+	njMJwGV2qBEs/O4chTBQWIoMGiIAFzdWLAoGdf7H6DsCw==
+X-Received: by 2002:a05:690e:b8c:b0:679:980d:996a with SMTP id 956f58d0204a3-679980da3fcmr1447546d50.33.1792108872639;
+        Thu, 15 Oct 2026 17:01:12 -0700 (PDT)
+X-Received: by 2002:a05:690e:b8c:b0:679:980d:996a with SMTP id
+ 956f58d0204a3-679980da3fcmr1447535d50.33.1792108871774; Thu, 15 Oct 2026
+ 17:01:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-X-Mailer: git-send-email 2.56.0.385.gd3acb90ef8-goog
-Message-ID: <20261015154626.552282-2-ardb+git@google.com>
-Subject: [PATCH v2] lkdtm: Add more EFI runtime tests
-From: Ard Biesheuvel <ardb+git@google.com>
-To: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, 
-	Kees Cook <kees@kernel.org>
+MIME-Version: 1.0
+References: <20261012-work-fs-sb_rdonly-v1-0-60743a3dc326@kernel.org> <20261012-work-fs-sb_rdonly-v1-21-60743a3dc326@kernel.org>
+In-Reply-To: <20261012-work-fs-sb_rdonly-v1-21-60743a3dc326@kernel.org>
+From: Andreas Gruenbacher <agruenba@redhat.com>
+Date: Fri, 16 Oct 2026 02:01:00 +0200
+X-Gm-Features: AclHuK-sAjCgZe2jZlpOS_f9wdrUdBca6HiO3TEkm1pT3ImiObIJ5_3wwDvQKVU
+Message-ID: <CAHc6FU6z4kX5R3Og8m0dYOHsjFcw+4Btvfe87AGPxy_EWs0E7A@mail.gmail.com>
+Subject: Re: [PATCH RFC 21/28] gfs2: don't set SB_RDONLY on withdraw
+To: Christian Brauner <brauner@kernel.org>
+Cc: Jan Kara <jack@suse.com>, Al Viro <viro@zeniv.linux.org.uk>, ecryptfs@vger.kernel.org, 
+	linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net, 
+	linux-nilfs@vger.kernel.org, exfat@lists.linux.dev, 
+	linux-fsdevel@vger.kernel.org, ntfs@lists.linux.dev, 
+	ocfs2-devel@lists.linux.dev, linux-btrfs@vger.kernel.org, 
+	gfs2@lists.linux.dev, linux-efi@vger.kernel.org, 
+	linux-mtd@lists.infradead.org, linux-xfs@vger.kernel.org, 
+	stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Ard Biesheuvel <ardb@kernel.org>
+Christian,
 
-Two bugs were found in the arm64 EFI runtime support that weren't caught
-by LKDTM. The existing EFI_RUNTIME_CRASH test instructs the firmware to
-write to kernel memory that is mapped read-only, which usually fails as
-expected. However, this does not exercise the runtime mapping logic in
-the kernel, nor the fault recovery logic when the faulting address is
-inside the EFI runtime memory regions itself.
+thanks for looking into this. I agree with a lot of the points you are
+making. This message is still difficult to reply to because it
+conflates multiple problems.
 
-So add two more test cases:
-- a write to R/O memory test that uses the firmware's own executable
-  memory as an output buffer
-- a branch to memory that is occupied by the firmware's runtime services
-  function table, which is usually mapped non-execute.
+On Mon, Oct 12, 2026 at 1:06=E2=80=AFPM Christian Brauner <brauner@kernel.o=
+rg> wrote:
+> do_withdraw() sets SB_RDONLY from the withdraw work item without holding
+> sb->s_umount. gfs2_withdraw() sets SDF_WITHDRAWN right away and queues
+> gfs2_withdraw_func() which runs do_withdraw(). That also happens on a
+> frozen filesystem. SDF_JOURNAL_LIVE is still set then because the
+> freeze log flush doesn't clear it.
 
-This depends on the EFI memory attributes table having been exposed by
-the firmware and having been taken into account by the runtime mapping
-code, so this is used as a prerequisite by the new tests, otherwise it
-produces an XFAIL.
+Agreed, do_withdraw() shouldn't set SB_RDONLY.
 
-Reviewed-by: Kees Cook <kees@kernel.org>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
-v2: - split XFAIL into four different conditions
-    - check that we are using the native EFI runtime services
-    - use the address of SetVirtualAddressMap() as the R/O buffer so
-      a spurious successful store does not clobber code that we might
-      try to run later outside of the lkdtm context
-    - use IS_ENABLED(CONFIG_LKDTM) so the modularized build works too
+> freeze_super() and thaw_super() both look at sb_rdonly() to figure out
+> whether the s_writers rwsems need to be taken or released. gfs2 doesn't
+> even get that far. FITHAW goes through gfs2_thaw_super() to
+> gfs2_do_thaw() whose gfs2_freeze_lock_shared() fails with -EIO for a
+> withdrawn filesystem. So FITHAW never gets to thaw_super() and the
+> filesystem stays frozen.
 
-I'll queue this up in efi/next unless anyone spots a problem.
+So when gfs2_thaw_super() is called on a withdrawn filesystem, it
+should still call thaw_super(). Fair enough.
 
- drivers/firmware/efi/runtime-wrappers.c | 55 ++++++++++++++++++++
- drivers/misc/lkdtm/bugs.c               | 33 ++++++++++++
- include/linux/efi.h                     | 10 ++++
- 3 files changed, 98 insertions(+)
+> The only ways out are emergency thaw, which
+> calls thaw_super_locked() directly, and writing 0 to the gfs2 "freeze"
+> sysfs file, which calls thaw_super() directly. Both see SB_RDONLY and
+> skip sb_freeze_unlock(). The rwsems stay write-locked, writes through
+> file descriptors opened before the withdraw hang and umount warns:
+>
+>   gfs2: fsid=3Ds2test:s2fs.0: can't lock the freeze glock: -5
+>   gfs2: fsid=3Ds2test:s2fs.0: GFS2: couldn't thaw filesystem: -5
+>   sysrq: Emergency Thaw of all frozen filesystems
+>   WARNING: kernel/rcu/sync.c:177 at rcu_sync_dtor+0x143/0x190
+>
+>   [<0>] percpu_rwsem_wait+0x203/0x500
+>   [<0>] vfs_write+0xb57/0xfa0
 
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 33f256dd3d2c..f663342bcc72 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -337,6 +337,29 @@ static void __nocfi efi_call_rts(struct work_struct *work)
- 		 * function identifier into efi_rts_work->efi_rts_id
- 		 */
- 		pr_err("Requested executing invalid EFI Runtime Service.\n");
-+		break;
-+
-+#if IS_ENABLED(CONFIG_LKDTM)
-+	case EFI_LKDTM_RUNTIME_RO_TEST:
-+		/*
-+		 * Call GetTime() with the output argument pointing to
-+		 * executable memory, which should be mapped read-only in the
-+		 * EFI page tables.
-+		 */
-+		status = efi_call_virt(get_time,
-+				       (void *)efi.runtime->set_virtual_address_map,
-+				       NULL);
-+		break;
-+	case EFI_LKDTM_RUNTIME_NX_TEST:
-+		/*
-+		 * Call efi.runtime, which points to a data object in a EFI
-+		 * runtime region, as if it were a function pointer.
-+		 */
-+		struct { efi_status_t (__efiapi *fn)(int); } s = { (void *)efi.runtime };
-+
-+		status = arch_efi_call_virt((&s), fn, 0);
-+		break;
-+#endif
- 	}
- 
- 	efi_call_virt_check_flags(flags, efi_rts_work.caller);
-@@ -624,6 +647,34 @@ static efi_status_t virt_efi_query_capsule_caps(efi_capsule_header_t **capsules,
- 	return status;
- }
- 
-+#if IS_ENABLED(CONFIG_LKDTM)
-+static efi_status_t efi_lkdtm_rt_test(enum efi_rts_ids id)
-+{
-+	efi_status_t status;
-+
-+	if (!efi_enabled(EFI_RUNTIME_SERVICES) || !efi_enabled(EFI_MEM_ATTR))
-+		return EFI_NOT_READY;
-+
-+	switch (id) {
-+	case EFI_LKDTM_RUNTIME_NX_TEST:
-+		break;
-+	case EFI_LKDTM_RUNTIME_RO_TEST:
-+		if (efi.get_time &&
-+		    efi_rt_services_supported(EFI_RT_SUPPORTED_GET_TIME))
-+			break;
-+		fallthrough;
-+	default:
-+		return EFI_UNSUPPORTED;
-+	}
-+
-+	if (down_interruptible(&efi_runtime_lock))
-+		return EFI_NOT_READY;
-+	status = __efi_queue_work(id, NULL);
-+	up(&efi_runtime_lock);
-+	return status;
-+}
-+#endif
-+
- void __init efi_native_runtime_setup(void)
- {
- 	efi.get_time			    = virt_efi_get_time;
-@@ -640,6 +691,10 @@ void __init efi_native_runtime_setup(void)
- 	efi.query_variable_info_nonblocking = virt_efi_query_variable_info_nb;
- 	efi.update_capsule		    = virt_efi_update_capsule;
- 	efi.query_capsule_caps		    = virt_efi_query_capsule_caps;
-+
-+#if IS_ENABLED(CONFIG_LKDTM)
-+	efi.lkdtm_rt_test		    = efi_lkdtm_rt_test;
-+#endif
- }
- 
- #ifdef CONFIG_ACPI_PRMT
-diff --git a/drivers/misc/lkdtm/bugs.c b/drivers/misc/lkdtm/bugs.c
-index 3eca2ef64aff..8ed368ea3e8b 100644
---- a/drivers/misc/lkdtm/bugs.c
-+++ b/drivers/misc/lkdtm/bugs.c
-@@ -841,6 +841,37 @@ static void __maybe_unused lkdtm_EFI_RUNTIME_CRASH(void)
- 		       status);
- }
- 
-+static void efi_rt_test(enum efi_rts_ids id, const char *desc)
-+{
-+	if (!efi_enabled(EFI_RUNTIME_SERVICES)) {
-+		pr_err("XFAIL: EFI runtime services have been disabled\n");
-+		return;
-+	} else if (!efi_enabled(EFI_MEM_ATTR)) {
-+		pr_err("XFAIL: EFI memory attributes table not provided by firmware\n");
-+		return;
-+	} else if (!efi.lkdtm_rt_test) {
-+		pr_err("XFAIL: Only supported with native EFI runtime services\n");
-+		return;
-+	}
-+
-+	efi_status_t status = efi.lkdtm_rt_test(id);
-+	if (status == EFI_UNSUPPORTED)
-+		pr_err("XFAIL: EFI runtime service not implemented by firmware\n");
-+	else if (status != EFI_ABORTED || efi_enabled(EFI_RUNTIME_SERVICES))
-+		pr_err("FAIL: EFI %s memory not caught (%#lx)\n",
-+		       desc, status);
-+}
-+
-+static void __maybe_unused lkdtm_EFI_RUNTIME_WRITE_TO_RO(void)
-+{
-+	efi_rt_test(EFI_LKDTM_RUNTIME_RO_TEST, "write to RO");
-+}
-+
-+static void __maybe_unused lkdtm_EFI_RUNTIME_BRANCH_TO_NX(void)
-+{
-+	efi_rt_test(EFI_LKDTM_RUNTIME_NX_TEST, "branch to NX");
-+}
-+
- static struct crashtype crashtypes[] = {
- 	CRASHTYPE(PANIC),
- 	CRASHTYPE(PANIC_STOP_IRQOFF),
-@@ -876,6 +907,8 @@ static struct crashtype crashtypes[] = {
- 	CRASHTYPE(CORRUPT_PAC),
- #ifdef CONFIG_EFI
- 	CRASHTYPE(EFI_RUNTIME_CRASH),
-+	CRASHTYPE(EFI_RUNTIME_WRITE_TO_RO),
-+	CRASHTYPE(EFI_RUNTIME_BRANCH_TO_NX),
- #endif
- };
- 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index cd8728702e93..cc1df1577d5f 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -631,6 +631,8 @@ typedef struct {
- 
- extern unsigned long __ro_after_init efi_rng_seed;		/* RNG Seed table */
- 
-+enum efi_rts_ids;
-+
- /*
-  * All runtime access to EFI goes through this structure:
-  */
-@@ -667,6 +669,10 @@ extern struct efi {
- 	efi_get_next_high_mono_count_t	*get_next_high_mono_count;
- 	efi_reset_system_t		*reset_system;
- 
-+#if IS_ENABLED(CONFIG_LKDTM)
-+	efi_status_t			(*lkdtm_rt_test)(enum efi_rts_ids id);
-+#endif
-+
- 	struct efi_memory_map		memmap;
- 	unsigned long			flags;
- } efi;
-@@ -1254,6 +1260,10 @@ enum efi_rts_ids {
- 	EFI_UPDATE_CAPSULE,
- 	EFI_QUERY_CAPSULE_CAPS,
- 	EFI_ACPI_PRM_HANDLER,
-+#if IS_ENABLED(CONFIG_LKDTM)
-+	EFI_LKDTM_RUNTIME_RO_TEST,
-+	EFI_LKDTM_RUNTIME_NX_TEST,
-+#endif
- };
- 
- union efi_rts_args;
--- 
-2.56.0.385.gd3acb90ef8-goog
+According to commit d564053f0746 ("GFS2: Clean up freeze code"), the
+idea of the freeze sysfs file was to make it behave like the FIFREEZE
+/ FITHAW ioctls. This isn't what the code is doing at all.
+
+> Withdrawing first and freezing afterwards isn't any better.
+> freeze_super() freezes the read-only superblock without the rwsems,
+> gfs2_lock_fs_check_clean() fails with -EIO and gfs2_do_thaw() can't get
+> the freeze glock. FIFREEZE fails with -EIO and the superblock stays
+> frozen and pinned for good.
+>
+> SDF_WITHDRAWN already stops all modifications. Glocks fail with -EIO,
+> gfs2_trans_begin() with -EROFS and log flushes and metadata reads are
+> refused. So stop setting SB_RDONLY in do_withdraw() like ext4 did in
+> commit d3476f3dad4a ("ext4: don't set SB_RDONLY after filesystem
+> errors").
+
+Yes, do_withdraw() shouldn't set SB_RDONLY.
+
+> A few things have to come with that:
+>
+> (1) gfs2_evict_inode() and gfs2_quota_sync() check gfs2_withdrawn() next
+>     to sb_rdonly(). Eviction writes the inode glock's metadata in place
+>     and umount evicts everything.
+>
+> (2) gfs2_write_inode() returns -EIO once withdrawn. sync(2), syncfs(2),
+>     freeze and umount skipped writeback for the read-only superblock.
+>     Now they reach ->write_inode() which writes the glock address space
+>     in place without a withdrawn check, and gfs2_ail_drain() leaves
+>     committed buffers dirty. Data writeback needs no check because the
+>     block mapping goes through gfs2_meta_read() which fails once
+>     withdrawn.
+
+Okay, (1) and (2) are related to the SB_RDONLY change.
+
+> (3) gfs2_do_thaw() thaws even if the freeze glock can't be taken again
+>     because the filesystem withdrew. A withdrawn filesystem can't write
+>     anything and its lockspace is gone anyway.
+>
+> (4) gfs2_freeze_super() refuses a withdrawn filesystem with -EIO before
+>     calling freeze_super(). It can't take the freeze glock anymore and
+>     freeze_super() would now take the rwsems of the read-write
+>     superblock before gfs2_lock_fs_check_clean() fails.
+
+And (3) and (4) are related to thawing a withdrawn filesystem.
+
+> Note that the SB_RDONLY change and (3) have to go in together and the
+> rest has to be in place by then. With only the SB_RDONLY change a freeze
+> after a withdraw takes the rwsems of the now read-write superblock and
+> stays frozen for good with writers blocked. With only (3) FITHAW reaches
+> thaw_super() on the read-only superblock and leaks the rwsems. And
+> without (4) a freeze after a withdraw goes through the error path of
+> gfs2_freeze_super() which re-locks sd_freeze_gh while
+> gfs2_lock_fs_check_clean() still holds it. The umount that is now
+> possible then hangs in gfs2_wait_glocks().
+
+Not sure what should prevent us from fixing withdrawn filesystem
+thawing and the SB_RDONLY issue in separate commits. Both need fixing
+in the end, but that's okay.
+
+> While withdrawn a remount to read-write fails with -EROFS instead of the
+> -EIO from gfs2_make_fs_rw().
+
+So before this patch, 'mount -o remount,rw' of a withdrawn filesystem
+fails with -EIO, and this patch changes it to -EROFS. What's wrong
+with -EIO? Once do_withdraw() doesn't set SB_RDONLY anymore, the
+filesystem will remain read-write mounted; getting an -EROFS error in
+that state seems odd.
+
+> A remount to read-only goes through
+> gfs2_make_fs_ro() which writes nothing once do_withdraw() has run, and
+> since the previous patch gfs2_make_fs_ro() waits for that. So emergency
+> remount (sysrq u), which now forces every withdrawn gfs2 read-only,
+> works without a WARN.
+
+Alright.
+
+> We show "withdrawn" in the mount options next to the existing
+> "demote_interface_used". A withdrawn filesystem stays "rw" so statfs()
+> doesn't report ST_RDONLY anymore, and the "Mounted RO" line in the sysfs
+> status file and the RDONLY=3D uevent field read 0 too. A second mount of
+> the device and a gfs2meta mount have to be read-write now. And like with
+> "emergency_ro" on ext4, remount helpers that pass the shown options back
+> fail. busybox mount for example now gets "Unknown parameter
+> 'withdrawn'".
+>
+> Path based operations fail with -EIO as before. The mount root is the
+> exception because it isn't looked up. So operations on it now fail with
+> -EIO from the glocks instead of -EROFS from mnt_want_write(), and the
+> same goes for fd based chmod, chown, utimes, setxattr and fileattr
+> changes. syncfs(2) on a withdrawn filesystem returns gfs2_sync_fs()'s
+> sd_log_error, e.g. -EIO, instead of 0. FITHAW of a filesystem that
+> withdrew while frozen works now and FIFREEZE of a withdrawn filesystem
+> fails with -EIO without freezing it.
+>
+> Reproducer (the sb_rdonly selftest at the end of this series covers it
+> as well):
+>
+>   mkfs.gfs2 -O -p lock_nolock -j 1 -t test:fs img; mount -o loop img /mnt
+>   exec 3>>/mnt/a 4</mnt          # paths stop working after the withdraw
+>   fsfreeze -f /mnt
+>   echo 1 > /sys/fs/gfs2/test:fs/withdraw; sleep 8
+>   <FITHAW on fd 4>               # before: EIO, stays frozen; after: thaw=
+ed
+>   echo j > /proc/sysrq-trigger   # before: the only way out, leaks the rw=
+sems
+>   echo x >&3                     # before: hangs in percpu_rwsem_wait(); =
+after: EIO
+>   umount /mnt                    # before: WARNING at rcu_sync_dtor()
+>
+> Fixes: 601ef0d52e96 ("gfs2: Force withdraw to replay journals and wait fo=
+r it to finish")
+> Fixes: b77b4a4815a9 ("gfs2: Rework freeze / thaw logic")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+> ---
+>  fs/gfs2/ops_fstype.c |  6 +++++-
+>  fs/gfs2/quota.c      |  2 +-
+>  fs/gfs2/super.c      | 19 +++++++++++++++++--
+>  fs/gfs2/util.c       |  6 ++++--
+>  4 files changed, 27 insertions(+), 6 deletions(-)
+>
+> diff --git a/fs/gfs2/ops_fstype.c b/fs/gfs2/ops_fstype.c
+> index 718e0da7dfce..d7f7e8b75971 100644
+> --- a/fs/gfs2/ops_fstype.c
+> +++ b/fs/gfs2/ops_fstype.c
+> @@ -1594,7 +1594,11 @@ static int gfs2_reconfigure(struct fs_context *fc)
+>                 if (fc->sb_flags & SB_RDONLY) {
+>                         gfs2_make_fs_ro(sdp);
+>                 } else {
+> -                       error =3D gfs2_make_fs_rw(sdp);
+> +                       /* A withdrawn filesystem can't go back to read-w=
+rite. */
+> +                       if (gfs2_withdrawn(sdp))
+> +                               error =3D -EROFS;
+> +                       else
+> +                               error =3D gfs2_make_fs_rw(sdp);
+>
+>                         if (error)
+>                                 errorfc(fc, "unable to remount read-write=
+");
+>                 }
+> diff --git a/fs/gfs2/quota.c b/fs/gfs2/quota.c
+> index 001c8b39ca55..7fac70bae129 100644
+> --- a/fs/gfs2/quota.c
+> +++ b/fs/gfs2/quota.c
+> @@ -1329,7 +1329,7 @@ int gfs2_quota_sync(struct super_block *sb, int typ=
+e)
+>         u64 sync_gen;
+>         int error =3D 0;
+>
+> -       if (sb_rdonly(sdp->sd_vfs))
+> +       if (sb_rdonly(sdp->sd_vfs) || gfs2_withdrawn(sdp))
+>                 return 0;
+>
+>         qda =3D kzalloc_objs(struct gfs2_quota_data *, max_qd);
+> diff --git a/fs/gfs2/super.c b/fs/gfs2/super.c
+> index 1d7b39354d65..ec7bce124376 100644
+> --- a/fs/gfs2/super.c
+> +++ b/fs/gfs2/super.c
+> @@ -456,6 +456,9 @@ static int gfs2_write_inode(struct inode *inode, stru=
+ct writeback_control *wbc)
+>         int ret =3D 0;
+>         bool flush_all =3D (wbc->sync_mode =3D=3D WB_SYNC_ALL || gfs2_is_=
+jdata(ip));
+>
+> +       if (gfs2_withdrawn(sdp))
+> +               return -EIO;
+> +
+>         if (flush_all)
+>                 gfs2_log_flush(GFS2_SB(inode), ip->i_gl,
+>                                GFS2_LOG_HEAD_FLUSH_NORMAL |
+> @@ -686,7 +689,12 @@ static int gfs2_do_thaw(struct gfs2_sbd *sdp, enum f=
+reeze_holder who, const void
+>         int error;
+>
+>         error =3D gfs2_freeze_lock_shared(sdp);
+> -       if (error)
+> +       /*
+> +        * A withdrawn filesystem can't get the freeze glock back, but it=
+ won't
+> +        * write anything either. Thaw it anyway instead of leaving it fr=
+ozen
+> +        * for good.
+> +        */
+> +       if (error && !gfs2_withdrawn(sdp))
+>                 goto fail;
+>         error =3D thaw_super(sb, who, freeze_owner);
+>         if (!error)
+> @@ -751,6 +759,11 @@ static int gfs2_freeze_super(struct super_block *sb,=
+ enum freeze_holder who,
+>                 mutex_unlock(&sdp->sd_freeze_mutex);
+>                 return -EBUSY;
+>         }
+> +       /* A withdrawn filesystem can't take the freeze glock anymore. */
+> +       if (gfs2_withdrawn(sdp)) {
+> +               mutex_unlock(&sdp->sd_freeze_mutex);
+> +               return -EIO;
+> +       }
+
+This is racy; the filesystem can still be withdrawn after this
+gfs2_withdrawn() check. It should make more sense to bail out of the
+for loop in gfs2_freeze_super() on withdrawn filesystems.
+
+>         for (;;) {
+>                 error =3D freeze_super(sb, who, freeze_owner);
+> @@ -1165,6 +1178,8 @@ static int gfs2_show_options(struct seq_file *s, st=
+ruct dentry *root)
+>                 seq_puts(s, ",nobarrier");
+>         if (test_bit(SDF_DEMOTE, &sdp->sd_flags))
+>                 seq_puts(s, ",demote_interface_used");
+> +       if (gfs2_withdrawn(sdp))
+> +               seq_puts(s, ",withdrawn");
+
+I'm not a fan of those fake mount options. It doesn't matter all that
+much for "withdrawn" because remounting will fail anyway, but it's
+still messy.
+
+Filesystems with "demote_interface_used" can be remounted, so that
+fake option is worse.
+
+"demote_rq" and "demote_interface_used" should never have been added
+in the first place, but here we are.
+
+>         if (args->ar_rgrplvb)
+>                 seq_puts(s, ",rgrplvb");
+>         if (args->ar_loccookie)
+> @@ -1466,7 +1481,7 @@ static void gfs2_evict_inode(struct inode *inode)
+>         int ret;
+>
+>         gfs2_holder_mark_uninitialized(&gh);
+> -       if (sb_rdonly(sb) || !ip->i_no_addr || !ip->i_gl)
+> +       if (sb_rdonly(sb) || gfs2_withdrawn(sdp) || !ip->i_no_addr || !ip=
+->i_gl)
+>                 goto out;
+>
+>         /*
+> diff --git a/fs/gfs2/util.c b/fs/gfs2/util.c
+> index 1535ce2b7aa8..990552f42a0b 100644
+> --- a/fs/gfs2/util.c
+> +++ b/fs/gfs2/util.c
+> @@ -133,9 +133,11 @@ static void do_withdraw(struct gfs2_sbd *sdp)
+>                            gfs2_log_is_empty(sdp),
+>                            HZ * 5);
+>
+> -       sdp->sd_vfs->s_flags |=3D SB_RDONLY;
+> -
+>         /*
+> +        * We don't set SB_RDONLY. That requires sb->s_umount, and changi=
+ng it
+> +        * under freeze_super() and thaw_super() leaves the freeze protec=
+tion
+> +        * unbalanced. SDF_WITHDRAWN already stops all modifications.
+> +        *
+>          * Dequeue any pending non-system glock holders that can no
+>          * longer be granted because the file system is withdrawn.
+>          */
+>
+> --
+> 2.53.0
+>
+
+Thanks,
+Andreas
 
