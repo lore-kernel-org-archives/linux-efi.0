@@ -1,177 +1,246 @@
-Received: from BYAPR05CU005.outbound.protection.outlook.com (mail-westusazon11010051.outbound.protection.outlook.com [52.101.85.51])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84FBE4F85B7;
-	Fri, 16 Oct 2026 16:54:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.85.51
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792169656; cv=fail; b=armz2SVfzT7+thWUtAXxPgPEOX2jXYx8O9MI2/ihMZj16u1RBlNbpRF7eBEADQ7jDcvM6xkWlOYTwt8H9FfJdVN8DvZouzUepqEsq8h+Gtda/eeiflTvIsrGAT7MUSw2m0suKSkoptLo893ku4tPIYtlmpfWLlOSPRauXuvEKao=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792169656; c=relaxed/simple;
-	bh=MUwdEgIyK9UwUuge7riCvmrgZFjRt2Kr/z41tCBB+y4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=GmD+n8GGpeovaOKwZ89H5sx4g5rWg3A4kZPsWj5hJ43uQrvSZExF218TYNfEKILYGMiNNETgCJrO1GKYmXhG+N6235WHOMbct7AwcKBu5dVMDcmVsIMXUK9m5Gexmyq6FrsA3c0/FLxb3xshdgHiMQ0QqmDmx4opfjtbD17Ngbs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=hpIC53TB; arc=fail smtp.client-ip=52.101.85.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4021953FD51;
+	Fri, 16 Oct 2026 17:06:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1792170397; cv=none; b=G/VRubjwY/HpHTAjO2mxmgnBtbwskRD7rSbcP0kwdGhGCpI8w2g28WsGet6NiEBsWZAgkA54oHZJcUc6SMg2JuN2VykUgg5UH58NErtM9THJ4HdSauvFAmabKybOrXonRdPUMmMR8O21JdHhOzAMNbTuY+cEXIoLtdanEzwsTek=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1792170397; c=relaxed/simple;
+	bh=cq+dFtbOvjF5bRDFpILdaqjX9inVYxdxNGz98Swem/E=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=OVkdlXWycLamckJPKOsIdTM7qR5G3fDwaF9fwWMb4d4RoBImbbS55voBAnkgZ9uVwnlY+CrLP0o1LQqAgPDDTRm+5ibX5R8jfzaoIGpqyW097JZmCijFFsonxc2zPEczdP5sqdedWDHwG6GqbZWzeSmzFmPOzlB3B0RonwFCpLE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dAEwm+Ll; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="hpIC53TB"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Wt0WQzP+cDQABQM4Kn4ut3QLMDntSP0WAzUsZUtQ6nScJ7SjVejlP94jglp3XOniYxoQik1ORKyA4l6WbmYWOHsAGH7HmhZLP5baO33qgbknlwdhW6oPIy0KWYUqziWls6vGMKoyKoYbRCDuSV+kWk2oUOzHYPW247E5mG+wkudlug0XUqdIJ0JalxfjDEBwJZWnTCIIejffaFWjr965uaUMksr6Z3naYzFLYjWj1omR4iHify2++qTR4B4lss0m8rOZSppR8m/NaU+GAIHZLuOgjx4ZfxN1BKVXIOXLWSlI9aADN1Ws1EDUTGc2AIRZo2oPbwD21kpmZVlchqM3cg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Q+idNlqcAGbMoo3CQDK4SQZ7yrzN7w+FLH/16+j578k=;
- b=BSNkhceOzZPadk9V4ftGrAeYkvMtRI7sIVnESnIJdc/ZL778w/4P3voz2erjMMepFlb6fpdJIQGveAsmSZ2LGs3DWbz+7vqd9gjrU3nf0dAw21xZe8r9mnUJ4TcioXe+uxSszUduAp99te6XveMSg9tamvMDEHejppbzT7aU9V/dsJFDiVBT7fy2JS4sRXyEElcnZZExFHClvkzgMU630c0Q1WrSEtBDJ6l0w+Zre8GE7cIKT5k1xxLkjy3takeSjgJgRIZuSUshYb/G8tt9mSgRiYZRdJD9WBwp+i5bNVZwjovUyEqojTbUw+TTXQM+QaWjIdAG+v7ksBKoELslGg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
- dkim=pass header.d=nvidia.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Q+idNlqcAGbMoo3CQDK4SQZ7yrzN7w+FLH/16+j578k=;
- b=hpIC53TBADFZkxW/Whg28yqcNEvN4CFz8nImTgGVst0tZRLTcpnzqH4bxwC93qZbKK8CKx6THDD/SIIiLI93Eq+NebGsHiNYQCRtMavpjtysp8IFA0PppLVSTLH8nNvT1dFYe3QL9eBhNJvdJclJepchy5n7NHAlnbmwwTPaTDLDJMJwTyMC7cvHMy7FuoMdTqndnhHSD8AzF9C6r7pT8Bmlj/om/ZPMgOfhs+mE+un42A2A7TycR6N6acwYupfK+elNfqc9wCxq4980dmrMyFIPewlxTFKMyrwtY4aGl1MRl+rIczAexLW2bFFu6Awa1Kgn0aftfoq1ZfJt3fM8AQ==
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nvidia.com;
-Received: from CHBPR12MB731189.namprd12.prod.outlook.com
- (2603:10b6:610:33d::12) by CH2PR12MB4165.namprd12.prod.outlook.com
- (2603:10b6:610:a4::13) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.522.14; Fri, 16 Oct
- 2026 16:54:04 +0000
-Received: from CHBPR12MB731189.namprd12.prod.outlook.com
- ([fe80::b0e5:123d:fe06:e10d]) by CHBPR12MB731189.namprd12.prod.outlook.com
- ([fe80::b0e5:123d:fe06:e10d%6]) with mapi id 15.21.0522.013; Fri, 16 Oct 2026
- 16:54:04 +0000
-Date: Fri, 16 Oct 2026 13:54:03 -0300
-From: Jason Gunthorpe <jgg@nvidia.com>
-To: Alexandre Ghiti <alex@ghiti.fr>, Albert Ou <aou@eecs.berkeley.edu>,
-	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Jonathan Corbet <corbet@lwn.net>, David Sterba <dsterba@suse.com>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-doc@vger.kernel.org, linux-efi@vger.kernel.org,
-	linux-riscv@lists.infradead.org,
-	Mark Rutland <mark.rutland@arm.com>,
-	Palmer Dabbelt <palmer@dabbelt.com>, Paul Walmsley <pjw@kernel.org>,
-	Randy Dunlap <rdunlap@infradead.org>,
-	Simon Glass <sjg@chromium.org>,
-	Shuah Khan <skhan@linuxfoundation.org>,
-	Nick Terrell <terrelln@fb.com>, Will Deacon <will@kernel.org>
-Cc: Alexandre Ghiti <alexghiti@rivosinc.com>,
-	Conor Dooley <conor.dooley@microchip.com>,
-	Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>,
-	linux-integrity@vger.kernel.org,
-	Palmer Dabbelt <palmer@rivosinc.com>, patches@lists.linux.dev,
-	Piotr =?utf-8?B?S3LDs2w=?= <piotr.krol@3mdeb.com>,
-	Ross Philipson <ross.philipson@gmail.com>,
-	Sami Tolvanen <samitolvanen@google.com>,
-	Song Shuai <songshuaishuai@tinylab.org>
-Subject: Re: [PATCH v2 15/15] efi/arm64: Implement ARM64 DRTM in the stub
-Message-ID: <20261016165403.GA503225@nvidia.com>
-References: <0-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
- <15-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <15-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
-X-ClientProxiedBy: BLAP220CA0021.NAMP220.PROD.OUTLOOK.COM
- (2603:10b6:208:32c::26) To CHBPR12MB731189.namprd12.prod.outlook.com
- (2603:10b6:610:33d::12)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dAEwm+Ll"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 601221F000C5;
+	Fri, 16 Oct 2026 17:06:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1792170396;
+	bh=BSEXDWNORjZsXLCu9GysuRDNJRkpmKxIZz1Z4Vu8yyc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=dAEwm+Ll7zWYzg0O2/opPmRwyuEcN5vqyx3FOLNDe47i4s7xuUix1uZgX/dlo2aoM
+	 gtUuBpX6Fvsl5QjvcsgAZ5oPtoDo+OMgyE8aK8spLzAERzLCaFNIJs6/Qvzl0qnuim
+	 CshJT9OrW+ZwAkEtWFTxheF0/JtB2cxxYCtpVciK8lXHSLiNWUSX1zG+Hn6EYDT6Hz
+	 MgQ0bQbHhTXuIQ+rz+pxCsR4iOPyrfRvk0p9omqb6aOluXTdX6TMvIUYLozs+lZt/Z
+	 CMVPW48qhmbZqUwBF2LfXpAqSNHOd5zr0FRgTctbs4uLs/WeE4Pk21uIXN24Gk11u6
+	 dZVi7zkFQbQoA==
+Date: Fri, 16 Oct 2026 18:06:21 +0100
+From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
+To: Petr Pavlu <petr.pavlu@suse.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
+	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
+	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
+	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
+	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
+	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
+	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
+	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
+	Gary Guo <gary@garyguo.net>, =?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, 
+	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
+	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
+	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
+	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
+	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
+	Randy Dunlap <rdunlap@infradead.org>, Kees Cook <kees@kernel.org>, 
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	llvm@lists.linux.dev, linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
+	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v4 14/22] modpost: emit module descriptors as assembly
+Message-ID: <atJVYDgv8ejLoIrA@gremlin>
+References: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
+ <20260923-build-speedup-v4-14-73128809a4a4@kernel.org>
+ <b17e9924-ca92-4cdf-b5e6-54164039e09a@suse.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CHBPR12MB731189:EE_|CH2PR12MB4165:EE_
-X-MS-Office365-Filtering-Correlation-Id: bf5ec9ae-d639-4d45-6986-08df2ba615ff
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|7416014|1800799024|23010399003|366016|921020|56012099006|11063799006|4143699003|10067099003|22082099003|18002099003|3023799007;
-X-Microsoft-Antispam-Message-Info:
-	vyI8zSyIm4k8XZhp7n4MVPqQQBU/Ch2U2xf/qt8bc6dlvGIyTIdDlezVdJUZdZyPX72znxM/K/CCuKvhEsUbQpDliv4WXkBTm4/8CTmseZlChZnoo0nmZXcvbSqIfkLZzmGR2UleJn7mUzd4rOJ936YkQXbuyFiUjgoz0x9Dsyo2N+ab2nzfDnsVIcbMVaBoanqkYkYoOAROO1nJMk4ndvERxehA7ELPhsw9oB5KlL1MYGXvCZXRlYne7D7wTPoxrp4hjfXxP8a3Oq/rIlMq9i9P139ZhfWf+CW2aioZayVqXdkXSqpSC5luDDBaFlSmv8nsVKWTrJdBO1CJo+BI/t2/VDqzZwyevMaLkPjpvGRsMXyWn7kuuRpYr7lu2LcWK8fE+m6kpZslk2oHrgdNhKB6HRSzNIQWyYAzoOKV8aVpQh1eP0UiQpAvq5ZeKdU4Cw4KwD0/jSUGKx8G5njDGTlLx4gChMFBoqbbvkXwRbkbWPmS2xgEw1O0iZ1Xd3+6oYpprSfyK9cmFeoONywapvKWBZqos2KeRNK0XAAoKRJ6wuhQZO/F4yUhLPfBCMOqR6dTBmO0vLWWWJlwpfdBzP+BQDy0CyGXQqRwfpyVZ42gjyI4S+iqjC+ypkt06wmqUCsne2wzCzTzWsFufJVil07IyY3GqNqmQnpSFYj+/XW6MEFjdXXlmBsRFSwX9vdUMAubhJu7vhsuzY4be6cl7g==
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CHBPR12MB731189.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(1800799024)(23010399003)(366016)(921020)(56012099006)(11063799006)(4143699003)(10067099003)(22082099003)(18002099003)(3023799007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?Sl8cWOobVfWulWC5LserYRmzRpgwGZrgoFWMDrFAMVxLzC36I4A03l6sfuri?=
- =?us-ascii?Q?r+i56ozJlLsilcb0I4llCpfUDE4B6vuLbISa4e1vfSaFm1mCeXTSkXpI1o4l?=
- =?us-ascii?Q?GV7D5NtL+sEXXV2zsVSIsRgXVfzG49FwDSwC5kbXpoKQTVp5rXQHTCRgQSy6?=
- =?us-ascii?Q?lOun31crKdy1I5S/TpxGcArXFabtfTh9e2beC2n7x/8XHdWgMxjbtPHD5dte?=
- =?us-ascii?Q?Zo+2UwLlwHRq0b0T+4w9I/fFqj9ctwFERkXn2fk/yZ7EV4r430BXH49RFdIi?=
- =?us-ascii?Q?AHRPyBmKwx+8Rgn8jqXXiMdCN9o5psPYionf40J3h06ViKfpb65gwUrXOGKz?=
- =?us-ascii?Q?7zUHF65/5D1956GzAQVXfpYZ+kiYIdDpoGhP9gdg7I/qLlyVxKKk1ETdJH+5?=
- =?us-ascii?Q?9nHJDgeGUpoOaBIng8F8jnOnA6gmeN3XNMMI3/+316L5ifP0W5OueI27AmHu?=
- =?us-ascii?Q?PjqavIt7eGXSzgFt3FvXR8vM/Iwgp0WitWXwO2glC+cvzWcc5GXhKrLgV9gH?=
- =?us-ascii?Q?yxKJYnAWOIhfqWFsbYmA1qM4CDVGHNQuEILsl/W0UeveRMsqPEoAJfQTnTpi?=
- =?us-ascii?Q?9+dLYrWK4vZOhhC5jI6zNda1SAA8Lq6BhOUPe97Hw5antUkcz7s3qArlAXBW?=
- =?us-ascii?Q?gCAXnyBICrs2I+IceefwZM7krnB6ua20ZjpXi/p6pIgmXmdhEDrPz/T8TbDC?=
- =?us-ascii?Q?WhhkaTaoVHxv1gPth3rIbezpPvMO8fVt2UkgJYtYnLE0Ra81PJhrUJRWjRiY?=
- =?us-ascii?Q?fS7izEXjl283SIRsNpsEnn7yEmDXjvXhwey3g8qhZ3mHZ1ahTcL+tSxwcLx8?=
- =?us-ascii?Q?hREPKvsaUyqZrAlpMMYAUu+AkoNhJ38k1aWsS4t5t5U9sdJ9LlJEPKBT279O?=
- =?us-ascii?Q?75j1u0FqOv4r+z1q/pYwqwFHla8YaLm4wS6OEDzIdKSfSLdBpZp+fK43+M2U?=
- =?us-ascii?Q?9AN2CxnXQ9kDmX8QCKqO4cucD0bEYDdwrgOJArhXsaK4+l5EQbFooEPQSo8w?=
- =?us-ascii?Q?4tjAMXHTYYIkI6cEf2rhCxLD0r2cxpXBHptuKNPbuKTHLMRpGKxQB2MlBK3P?=
- =?us-ascii?Q?nX4AWNe6n8S1wpuXPAfM7rSm7IE8xt4a65s2mJVYIhF2JlVALB5hyrQQ/eFq?=
- =?us-ascii?Q?maT3wTIOseDrkOT7c5o0ubcUjW5bkbm/IKhvt8VS+HbgKswEUiyGV66RoXAb?=
- =?us-ascii?Q?E4Fh9ETYHgrpVJeaO8levKj5xwmwNvDDLrRvsHUrDwGQg3HF09a43eNZT82k?=
- =?us-ascii?Q?A4K35xvYiCYkuFXBjFo49tu7D4h6ZcCuuH4Sb8OpLexB0B+sqHAWdd9+dll6?=
- =?us-ascii?Q?gRjm4phpIPyaaKUkU5ol7nSfN7S4Z8eGRfeh3QB6P/dZxq8PvDqzMOUYjBj0?=
- =?us-ascii?Q?t4No/BYD1nvrMgbE7PteedWMsmos9wyHc28Cx9ef/gUS3wd3ZDujWUyzGTtH?=
- =?us-ascii?Q?DUacqnZwBNXn/aZQaS8SUVzPiTbafPRU/xlGLHUpT8lwxp27yZjMJduMEJi7?=
- =?us-ascii?Q?2K3vd2kUSWOJzyknbpkbCGDt4F+c4x9TPZAAwr+djWEkgO7GtSXiXN5L4mGw?=
- =?us-ascii?Q?qhEXAp0xO/B/phraAiRzjp6pv4UWKA+B0wCBCyQgfK583tgcb1ka90/1JXdh?=
- =?us-ascii?Q?gBO1+2c+CpScH0mmkoxc+gHMOcJc9CqVeDKCFO1x4AHC07YNCvTEpMgHSVRv?=
- =?us-ascii?Q?L49Oqt6mrV1hWFaRalVRgUqAh10j7VXlKrCPRmkuUSlV+GwK?=
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: bf5ec9ae-d639-4d45-6986-08df2ba615ff
-X-MS-Exchange-CrossTenant-AuthSource: CHBPR12MB731189.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 16 Oct 2026 16:54:04.4535
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: LtOCklqy5zPgujMF+vKP1en6w9/UtYIJWSsiOToDhNNXJ6blRA5yKPjHpqRyAB7i
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH2PR12MB4165
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <b17e9924-ca92-4cdf-b5e6-54164039e09a@suse.com>
 
-On Fri, Oct 02, 2026 at 08:31:52PM -0300, Jason Gunthorpe wrote:
-> +efi_status_t efi_drtm_prepare_launch(unsigned long image_base,
-> +				     unsigned long fdt_addr)
-> +{
-> +	const struct arm64_image_header *header = (const void *)image_base;
-> +	const struct efi_image_info *info = efi_get_image_info(image_base);
-> +	struct arm64_drtm_handoff *handoff =
-> +		efi_get_image_symbol(image_base, arm64_drtm_handoff);
-> +	struct arm_drtm_parameters *params;
-> +	unsigned long measured_offset;
-> +	unsigned long measured_size;
-> +	unsigned long image_size;
-> +	unsigned long dlme_start;
-> +	unsigned long dlme_end;
-> +	unsigned long dce_end;
-> +	unsigned long entry;
-> +
-> +	if (efi_drtm_policy == EFI_DRTM_OFF)
-> +		return EFI_SUCCESS;
-> +
-> +	image_size = le64_to_cpu(header->image_size);
+On Fri, Oct 16, 2026 at 02:14:16PM +0200, Petr Pavlu wrote:
+> This version looks mostly ok to me, from a modules perspective. Below
+> are a few nits plus one more useful comment about handling
+> MODULE_ARCH_INIT.
 
-We've been able to do some testing with UKIs now and this line doesn't
-work with systemd's PE loader, it discards the PE headers. The stub
-already has a comment about this:
+Ack thanks :)
 
-	/*
-	 * When built as part of the kernel, the EFI stub cannot branch to the
-	 * kernel proper via the image header, as the PE/COFF header is
-	 * strictly not part of the in-memory presentation of the image, only
-	 * of the file representation. So instead, we need to jump to the
-	 * actual entrypoint in the .text region of the image.
-	 */
+>
+> > diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
+> > index 0fd43c8a89ea..9d96459e492c 100644
+> > --- a/scripts/mod/modpost.c
+> > +++ b/scripts/mod/modpost.c
+...
+> > +/* The equivalent of KSYMTAB_FUNC()/KSYMTAB_DATA(). */
+> > +static void add_asm_ksymtab(struct buffer *buf, const struct symbol *sym)
+> > +{
+> > +	const char *name = sym->name;
+> > +
+> > +	add_asm_kstrtab(buf, sym);
+> > +
+> > +	buf_printf(buf, "\t.section \"___ksymtab+%s\", \"a\"\n", name);
+> > +	buf_printf(buf, "\t.balign %d\n", KSYM_ALIGN);
+> > +	buf_printf(buf, "__ksymtab_%s:\n", name);
+> > +	add_asm_ksym_ref(buf, sym->is_func ? MOD_FUNC_PREFIX : "", name);
+> > +	add_asm_ksym_ref(buf, "__kstrtab_", name);
+> > +	add_asm_ksym_ref(buf, "__kstrtabns_", name);
+> > +	buf_printf(buf, "\t.previous\n");
+> > +
+> > +	add_asm_kflagstab(buf, sym);
+> > +}
+>
+> add_asm_kstrtab() and add_asm_kflagstab() are only called from
+> add_asm_ksymtab() and their logic is fairly short. I suggest merging
+> these functions.
 
-I will fix this by passing the image_size through the efi_image_info
-instead.
+Ack, done for v5.
 
-Jason
+>
+> > +
+> > +/* The equivalent of SYMBOL_CRC(). */
+> > +static void add_asm_crc(struct buffer *buf, const struct symbol *sym)
+> > +{
+> > +	buf_printf(buf, "\t.section \"___kcrctab+%s\",\"a\"\n", sym->name);
+> > +	buf_printf(buf, "\t.balign 4\n");
+> > +	buf_printf(buf, "__crc_%s:\n", sym->name);
+> > +	buf_printf(buf, "\t.long 0x%08x\n", sym->crc);
+> > +	buf_printf(buf, "\t.previous\n");
+> > +}
+> > +
+> > +static bool export_is_kept(const struct symbol *sym)
+> > +{
+> > +	return !trim_unused_exports || sym->used;
+> > +}
+>
+> export_is_kept() is only called once from add_asm_exported_symbols().
+> The condition can be inlined directly there.
+
+Ack done.
+
+> > +/*
+> > + * The equivalent of:
+> > + *
+> > + *	__visible struct module __this_module __section(".gnu.linkonce.this_module")
+> > + *		= { .name = KBUILD_MODNAME, .init = init_module, .exit = cleanup_module,
+> > + *		    .arch = MODULE_ARCH_INIT };
+> > + *
+> > + * Everything not listed is zero, MODULE_ARCH_INIT included, except on m68k.
+> > + */
+> > +static void add_asm_this_module(struct buffer *buf, const struct module *mod,
+> > +				const char *modname)
+> > +{
+> > +	struct this_module_field fields[THIS_MODULE_MAX_FIELDS];
+> > +	const unsigned int nr_fields = get_this_module_fields(mod, modname, fields);
+>
+> The const qualifier can be removed from the nr_fields definition to
+> match the usual kernel style.
+
+Ack done.
+
+> > +/*
+> > + * The equivalent of:
+> > + *	static const u32 ____version_ext_crcs[] __section("__version_ext_crcs") = { crc, ... };
+> > + *	static const char ____version_ext_names[] __section("__version_ext_names") = "name\0" ...;
+> > + *
+> > + * for unresolved symbols.
+> > + */
+> > +static void add_asm_extended_versions(struct buffer *buf, struct module *mod)
+> > +{
+> > +	struct symbol *sym;
+> > +
+> > +	if (!extended_modversions)
+> > +		return;
+> > +
+> > +	buf_printf(buf, "\n\t.section __version_ext_crcs,\"a\",%%progbits\n");
+> > +	buf_printf(buf, "\t.balign 4\n");
+> > +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
+> > +		if (skip_unversioned(mod, sym))
+> > +			continue;
+> > +
+> > +		buf_printf(buf, "\t.long 0x%08x\n", sym->crc);
+> > +	}
+> > +
+> > +	/*
+> > +	 * A symbol without a CRC was warned about above, and is skipped here
+> > +	 * too so that the names line up with the CRCs.
+> > +	 */
+> > +	buf_printf(buf, "\t.section __version_ext_names,\"a\",%%progbits\n");
+> > +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
+> > +		if (!sym->module || !sym->crc_valid)
+> > +			continue;
+>
+> This condition must match the logic in skip_unversioned(). It would be
+> clearer to keep it only in one place by calling skip_unversioned() here
+> and adding a "silent" parameter to the function.
+
+Ack done.
+
+>
+> > diff --git a/scripts/mod/module-offsets.c b/scripts/mod/module-offsets.c
+> > new file mode 100644
+> > index 000000000000..a336dd47aa33
+> > --- /dev/null
+> > +++ b/scripts/mod/module-offsets.c
+
+> > +// SPDX-License-Identifier: GPL-2.0
+> > +/*
+> > + * Layout of the structures modpost emits into *.mod.S, extracted from the
+> > + * target headers as devicetable-offsets.c does for the device tables.
+> > + */
+>
+> The second part of the comment, after the comma, is superfluous. It is
+> expected that the various parts of modpost use consistent mechanisms
+> where appropriate.
+
+Ack done.
+
+> > +int main(void)
+> > +{
+> > +	DEFINE(MOD_SIZEOF_LONG, sizeof(long));
+> > +	DEFINE(MOD_PREL32_RELOCATIONS, IS_ENABLED(CONFIG_HAVE_ARCH_PREL32_RELOCATIONS));
+> > +	DEFINE(MOD_FUNC_PLABEL, IS_ENABLED(CONFIG_PARISC) && IS_ENABLED(CONFIG_64BIT));
+> > +
+> > +	DEFINE(MOD_SIZEOF_struct_module, sizeof(struct module));
+> > +	DEFINE(MOD_ALIGNOF_struct_module, __alignof__(struct module));
+> > +	OFFSET(MOD_OFF_module_name, module, name);
+> > +	OFFSET(MOD_OFF_module_init, module, init);
+> > +#ifdef CONFIG_MODULE_UNLOAD
+> > +	OFFSET(MOD_OFF_module_exit, module, exit);
+> > +#endif
+> > +#if defined(CONFIG_M68K) && defined(CONFIG_MMU)
+> > +	/* MODULE_ARCH_INIT: the only architecture where it is not all zeroes. */
+> > +	OFFSET(MOD_OFF_module_arch_fixup_start, module, arch.fixup_start);
+> > +	OFFSET(MOD_OFF_module_arch_fixup_end, module, arch.fixup_end);
+> > +#endif
+>
+> I feel it is a bit of a layering violation for modpost to know how
+> individual architectures need to initialize module::arch.
+
+Yeah that is kinda gross :)
+
+>
+> For now, this is probably ok. I would just remove MODULE_ARCH_INIT from
+> include/linux/module.h and arch/m68k/include/asm/module.h, along with
+> the comment referring to it in scripts/mod/modpost.c.
+
+ack done.
+
+>
+> In the future, this could be avoided by having the m68k module support
+> look up the .m68k_fixup section at runtime, as other architectures
+> typically do for similar sections.
+
+Yes, arch stuff should live with the arch-specific stuff.
+
+--
+Cheers, Lorenzo
