@@ -1,254 +1,246 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5345822D7A1
-	for <linux-efi@vger.kernel.org>; Fri, 16 Oct 2026 00:32:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=170.10.129.124
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792110738; cv=pass; b=oL+Rud/KCv6FNJfTDT6hwIJbnBoLD6xXpTUFzrVEWX2IiZeA7nrz0rx28czOn8EiuYz6alzksKJT4Mm/L/Nwifhm4sKYywiCYco+rmu9IWMO4XDPa0Eshi/m+i7GG1oIEI9WqRqNfwcJCePw4/UNnC9L7Dfsl2mGxLGafM8WhlQ=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792110738; c=relaxed/simple;
-	bh=HxZt08dVRw4ejTWE+FGXV5r0nmHjM+0lQhVW4+dpeTE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=pUvj4PBuBjwDMQpIoywm9+JZLd9VH4uJmTS9xguFuSq+5/aMj1pt52uXvm3K8WL09Qcy8vbEu2Cny57dobYONGC26SJ5RyKWVg14HAbgGmAUqyIxjaIOjbMDGVW+wtnjSQo9WKNvJ1cwl185ebdp2jmZm4IMpua7gMwPWTmATEM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OMi03vrw; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=a6aGHoVG; arc=pass smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3EC3345D923
+	for <linux-efi@vger.kernel.org>; Fri, 16 Oct 2026 09:06:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.12
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1792141606; cv=none; b=GwkJb8FD5pMo9j68tNWMfgNXAU/9sRKoTcpgAVh6xjfmyon22+lK05JaD9rSoow49BWEMu14Z4WajGvsfy+lpWm0btmQfDTlsI8SN6vEiAMjyqOoySH5AD3RN0a0FEQdsjIcUQ8Z4xp5s2zegTh0777ZIUe3AJKHOXkgk3Gx/5c=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1792141606; c=relaxed/simple;
+	bh=5qWulNtGZLP4j4RpQP43yCcnIa88KyF9Yq365Xnc00o=;
+	h=Date:From:To:Cc:Subject:Message-ID; b=plEnOhS6ds/zNDs9Zw8x5kEUsDDzBtXpdnuJixVREZccGj7MNB6mJmHuc/jjlfyxv5WYtcePFZ8TfjTUys0lc7RtBkbO3Wxa5E6+18f2UqfDevUl6qH3nSSWRLLMDe8TcI81Swfa2Q1ZuSPrvhZDF+C4zFST1e0m/ZxoxXu22N8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ednxXM40; arc=none smtp.client-ip=198.175.65.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OMi03vrw";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="a6aGHoVG"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1792110735;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=2PpmzonvJ+GFyXX1ccvr8BDAPumMVPYHB7D08eoJkdk=;
-	b=OMi03vrwiksem2U41TCFBpUAaYtOZu+lGZOzQNCPnbZbJzhol7uqK7YGClwnyJrFYP7ZvB
-	XuiMXVbpxX9CP5a1piIHy0xC5qZ6xdSYcBrXoms3/U4sR8cR+kr8KrpKQcTPzttb0PiRWY
-	wj4ZU8y3W/z/IQVJFmLs9cARieZ3mzo=
-Received: from mail-yx1-f69.google.com (mail-yx1-f69.google.com
- [74.125.224.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-357-lsl4JJqpP7mHHbmNmaDNLw-1; Fri, 16 Oct 2026 00:32:13 +0000
-X-MC-Unique: lsl4JJqpP7mHHbmNmaDNLw-1
-X-Mimecast-MFC-AGG-ID: lsl4JJqpP7mHHbmNmaDNLw_1792110733
-Received: by mail-yx1-f69.google.com with SMTP id 956f58d0204a3-677d10671b7so7501812d50.1
-        for <linux-efi@vger.kernel.org>; Thu, 15 Oct 2026 17:32:13 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1792110733; cv=none;
-        d=google.com; s=arc-20260327;
-        b=DwzzxBMOKFqHUrEVpxzLFUl66BVbUdZmWIXuuGXlTIBPIRB9LtfyNNTIaf6fnmShf9
-         YIb08ifv4Dcr762C4IvKzoZfSMaVIRxDGRSB09WSiHpG0hjyyD/r3SF+Vcf/Q+yhsprN
-         8KQCWHu/T0/2VNqvUx2tuVN3tj40joKdYxKpN2meAnmEyMlngwgbXzleGjnp3xn0WW6T
-         MWDElVSoDt51v3TefjzyXIWtCbdFMZBG27zy82QJBeuZKP+/HLuSBf4+bPnz+q+kQu7q
-         ilUp5vlEVyeQqPB1kxM6xUWF0oI6roO3oSUGvMW68bD0LMmaSnbBb0PhYZacuzXUiyyC
-         DSKQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=2PpmzonvJ+GFyXX1ccvr8BDAPumMVPYHB7D08eoJkdk=;
-        fh=x8Iestyr/e2cc3hHl+OU+sUAujI1loiQ7ymmOfThy0k=;
-        b=Zw3Sa7D6sipfKHtcevvKiYUgkCW+rRyal0rEjgZoqL7wwjgIq2M1dgHYlW4LM4l9r3
-         CNRRTHqXwX+88BRmdYr13Vh0DOdAwmiiSWqU15Q3D0dIzZoTJ5WGzW48nlN++EeI//Tw
-         n33BsCoRJAHhJVq/1t/D8rEfbqRvO/9nYtDHJNEJaXZckwkLDNW+amUhOFgstEdWwkyi
-         w15x1rqwwliq4PzhJ00/qKVt8oUSRshoktd2LpDZYKU/IaDXz1ziZyFx2BkL0qlXKVWD
-         RFjlCxWA9WwB6CgwXCCtjIkaj5HixdBX0ueV3pSNJegH3yHy8k9iBpaA0NgkbODfSjw/
-         PfTQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1792110733; x=1792715533; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=2PpmzonvJ+GFyXX1ccvr8BDAPumMVPYHB7D08eoJkdk=;
-        b=a6aGHoVGIYOsFz/XfTl3ih7pJmkn7G8MvkQUgyC4pbFnoTXyQ6IKAieAD7L6p8cEPh
-         T4VNJw5qBoecq3yoztukTVDgAN9R39xL49fo+67cgW69kYZYhWo+3cOPctZXqJ+bCSIY
-         OYsaCsgHoXKRMQoVyKK8XqyKa49ZZEHamA6EuLTMlcfek1jiFFeHjOAfARX9Pg7T3HXL
-         x3twPA2xlFo6q2czC6mUxMNHqigersgPvgokjs96lJd9xnh1AKtqqcKSb7G1szhrPyeR
-         x/81KEOTrA7F73dkAWtRYvAPmB80S/QXlQHT6GbmWbsj8txovb21kc93//owNdVWf23Q
-         DHaQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792110733; x=1792715533;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=2PpmzonvJ+GFyXX1ccvr8BDAPumMVPYHB7D08eoJkdk=;
-        b=hmuDBU4fUupqE44lXgO5V1x7R0TZrsCskzb/crxbUOjzJFA9WOKn9BMXGBUJmAZ2xX
-         U83iz7ol/3QiH4yK4Y44MXUknCfiH/bvYQWGUltwYD7kDNyOSIrXEKADnSOTh7jFqo4f
-         hbG6jRdHC/2ZJtbntLovPsspUcSv9yaxhkFjBkctwOKKZRzZIuTSwtv0CNL/rpDmTHX0
-         0Z2JuroJpmlypMENmO150mUhtpaw/M+qXNQR8Hv2G3ejcJnZf/iTcPNymv5l2eyynf09
-         8fVrPpWVuSQPx+K/BTqX9QS29DVFuchS4xI3FKJIbNzXZSgfrJ5nBO0WYI54xz32cVl2
-         Tx9Q==
-X-Forwarded-Encrypted: i=1; AKwUvBzZyT9lmt41Y0K5fbCe4KugBXTWCBGNpzPXniLyH3fcklTSHyUmK8dAQL5pr+dGuEN40GjPOWiREQ0=@vger.kernel.org
-X-Gm-Message-State: AFq9FYJECO69EhjctzOeoF14Yujfy9cPOuLXwZV5XSIGsl55YDpkQW3F
-	GVlbv++ckT1XvMUzaqIcgN/nyXfy/SMd56hniLtDwM2v4wJ/hOVKBAlR2yzAMkOHoYx1227CrT+
-	Maof2To5ayPF8sMGVBbU7ETai+j06acT1Xf5iNLMNOPXBagRcedSTjPzUoLl9pNeALv243FnJbE
-	a2bzog4AkM0uAwRgw4pJ+EKxqG3WDxmOR2c4+d
-X-Gm-Gg: AYBFou0D8GS8OovSSkvAyaRV4R5OwA/UyflJQuQHnbh2sW3WDQ4Kb2wSQr+8Jz5JTMh
-	j+T7FZx6sUwsxVl3mOQ3+4nfk2LUEnAUU3mISp0CHJsXl5iFmuQWzbiAkSvGt8s74yb5lE7fXip
-	zZmRqx8p/gQWbfxGqVre9jnTacrZgAHzTIdke0oZnX6UKK7hvPNQUQyCrBQISsMYMSrsEIWzJGt
-	G/7INu9kBbZU3pnvvce7/8bsZ7dMYzpDkl7d5Pwzeqy9A==
-X-Received: by 2002:a05:690e:12cf:b0:677:c92e:eee4 with SMTP id 956f58d0204a3-67936ac0905mr8161300d50.86.1792110733219;
-        Thu, 15 Oct 2026 17:32:13 -0700 (PDT)
-X-Received: by 2002:a05:690e:12cf:b0:677:c92e:eee4 with SMTP id
- 956f58d0204a3-67936ac0905mr8161290d50.86.1792110732554; Thu, 15 Oct 2026
- 17:32:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ednxXM40"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1792141604; x=1823677604;
+  h=date:from:to:cc:subject:message-id;
+  bh=5qWulNtGZLP4j4RpQP43yCcnIa88KyF9Yq365Xnc00o=;
+  b=ednxXM40GJzXFj4b3ND+K1TkthQnB6oekdwfuRsrBUtEk0sXFj+uKQeB
+   5TSFR+OlXcrhRX1QPHf1xXcPaRgrxrU2sPvhBEz30+mRU265qxTdIKTKk
+   zR0nvvJripj0EBYRsav9pzAgM6/o+Ck8u38XXd3MUCX73D41+Ydg9yuqG
+   iJbhU8KFwCh2mI5U0aN0nf4iVdRlZr3+GPkiEHI4GXCwgqK4a9T6eET16
+   iB3hRbiNQWRt1JuQLL7REadHc5XY17hQLnI4LrKPaIynfH8Y97YzaldRZ
+   1ZBo+ZwP+DFidkeDImz7LXzvcpIGtFI6yfihVkXLG3gnVrwkQ5mAiUeSH
+   g==;
+X-CSE-ConnectionGUID: hSqpCJr3QLWB7Ub0REc1Dg==
+X-CSE-MsgGUID: YDJp6G3wRhmd84bE1ojJgA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11936"; a="802756"
+X-IronPort-AV: E=Sophos;i="6.27,161,1787036400"; 
+   d="scan'208";a="802756"
+Received: from orviesa006.jf.intel.com ([10.64.159.146])
+  by orvoesa104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Oct 2026 02:06:44 -0700
+X-CSE-ConnectionGUID: 64F+3uSqQKi4XyqZnYpuzw==
+X-CSE-MsgGUID: 761fskOcQTCg+31tBbNF1g==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.27,161,1787036400"; 
+   d="scan'208";a="1969820"
+Received: from igk-lkp-server01.igk.intel.com (HELO d0de6c2a75a7) ([10.211.93.152])
+  by orviesa006.jf.intel.com with ESMTP; 16 Oct 2026 02:06:42 -0700
+Received: from kbuild by d0de6c2a75a7 with local (Exim 4.98.2)
+	(envelope-from <lkp@intel.com>)
+	id 1xHdtg-00000000C9X-1Ef5;
+	Fri, 16 Oct 2026 09:06:40 +0000
+Date: Fri, 16 Oct 2026 11:05:55 +0200
+From: kernel test robot <lkp@intel.com>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: oe-kbuild-all@lists.linux.dev, linux-efi@vger.kernel.org,
+ Kees Cook <kees@kernel.org>
+Subject: [efi:next 27/27]
+ drivers/firmware/efi/runtime-wrappers.c:350:51: error: passing argument 1 of
+ 'efi.runtime-><U4280>.get_time' from incompatible pointer type
+Message-ID: <202610161027.zTUj3RVZ-lkp@intel.com>
+User-Agent: s-nail v14.9.25
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-References: <20261012-work-fs-sb_rdonly-v1-0-60743a3dc326@kernel.org> <20261012-work-fs-sb_rdonly-v1-20-60743a3dc326@kernel.org>
-In-Reply-To: <20261012-work-fs-sb_rdonly-v1-20-60743a3dc326@kernel.org>
-From: Andreas Gruenbacher <agruenba@redhat.com>
-Date: Fri, 16 Oct 2026 02:32:01 +0200
-X-Gm-Features: AclHuK8NmKT3H02cx2l9pkluaZaWRnSiR4jZEUSx8b1tH5UXdD0FGyrgWytahmA
-Message-ID: <CAHc6FU5bdAjABRm=bnH68b2f66TZTDZ8sPdatLB2fS7-55U=yw@mail.gmail.com>
-Subject: Re: [PATCH RFC 20/28] gfs2: wait for a pending withdraw before
- remounting read-only
-To: Christian Brauner <brauner@kernel.org>
-Cc: Jan Kara <jack@suse.com>, Al Viro <viro@zeniv.linux.org.uk>, ecryptfs@vger.kernel.org, 
-	linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net, 
-	linux-nilfs@vger.kernel.org, exfat@lists.linux.dev, 
-	linux-fsdevel@vger.kernel.org, ntfs@lists.linux.dev, 
-	ocfs2-devel@lists.linux.dev, linux-btrfs@vger.kernel.org, 
-	gfs2@lists.linux.dev, linux-efi@vger.kernel.org, 
-	linux-mtd@lists.infradead.org, linux-xfs@vger.kernel.org, 
-	stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-Christian,
+tree:   https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
+head:   0d950fa5f7bfd3c9e7760a83b4970dc31603b043
+commit: 0d950fa5f7bfd3c9e7760a83b4970dc31603b043 [27/27] lkdtm: Add more EFI runtime tests
+config: loongarch-randconfig-2000-20261016 (https://download.01.org/0day-ci/archive/20261016/202610161027.zTUj3RVZ-lkp@intel.com/config)
+compiler: loongarch64-linux-gcc (GCC) 16.1.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20261016/202610161027.zTUj3RVZ-lkp@intel.com/reproduce)
 
-On Mon, Oct 12, 2026 at 1:27=E2=80=AFPM Christian Brauner <brauner@kernel.o=
-rg> wrote:
-> Since commit 9c4a3de6cd5b ("gfs2: Asynchronous withdraw") most of a
-> withdraw happens in do_withdraw() from a work item and SDF_JOURNAL_LIVE
-> stays set until it ran. A remount to read-only in that window goes
-> through gfs2_make_fs_ro(). Its log flushes bail out early on the
-> withdrawn filesystem before FLUSH_SHUTDOWN can clear SDF_JOURNAL_LIVE
-> and then gfs2_quota_cleanup() hits its BUG_ON():
->
->   kernel BUG at fs/gfs2/quota.c:1532!
->   RIP: 0010:gfs2_quota_cleanup+0x562/0x6b0
->    gfs2_make_fs_ro+0xf3/0x2e0
->    gfs2_reconfigure+0x42e/0xfd0
->    reconfigure_super+0x437/0xb20
->
-> Just flushing the withdraw work before the remount isn't enough.
-> gfs2_withdraw() sets SDF_WITHDRAWN, calls dump_stack() and only then
-> queues the work. So a remount can see a withdrawn filesystem while
-> there's nothing to flush yet. And a withdraw can also start in the
-> middle of gfs2_make_fs_ro().
->
-> So let do_withdraw() wake up waiters when it clears SDF_JOURNAL_LIVE and
-> let gfs2_make_fs_ro() wait for the bit after its log flushes, right
-> before gfs2_quota_cleanup(). On a healthy filesystem the shutdown flush
-> already cleared it. umount doesn't need to wait. gfs2_put_super() sets
-> SDF_NORECOVERY first and gfs2_quota_cleanup() only BUGs without it. Once
-> the bit is clear the journal isn't live anymore and gfs2_make_fs_ro()
-> doesn't write anything.
->
-> gfs2_make_fs_rw() can leave the bit set on a withdrawn filesystem as
-> well. It checks for a withdraw and then sets SDF_JOURNAL_LIVE. If
-> do_withdraw() runs in between it finds the journal not live yet and
-> returns. Nothing clears the bit then and the next remount to read-only
-> waits for it forever. So check for the withdraw and set the bit under
-> sd_log_flush_lock, which do_withdraw() holds while it tests the bit.
-> Then either the remount sees the withdraw or do_withdraw() sees the live
-> journal.
->
-> Reproducer, lock_nolock: a SCHED_FIFO task writes 1 to the withdraw
-> sysfs knob from cpu 1 and keeps cpu 1 busy (RT throttling and cpu 1's
-> fair server disabled) so do_withdraw() can't run, then from cpu 2:
->
->   mount -o remount,ro /mnt
->
-> On lock_dlm the window lasts as long as the withdraw helper runs. The
-> window before the work is queued can be widened with a kprobe on
-> dump_stack_lvl() that delays the task writing to the withdraw knob by a
-> few seconds. A remount to read-only or sysrq u in that window hits the
-> same BUG_ON().
->
-> Fixes: 9c4a3de6cd5b ("gfs2: Asynchronous withdraw")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
-> ---
->  fs/gfs2/super.c | 22 ++++++++++++++++++----
->  fs/gfs2/util.c  |  2 +-
->  2 files changed, 19 insertions(+), 5 deletions(-)
->
-> diff --git a/fs/gfs2/super.c b/fs/gfs2/super.c
-> index 06302c29340f..1d7b39354d65 100644
-> --- a/fs/gfs2/super.c
-> +++ b/fs/gfs2/super.c
-> @@ -147,12 +147,23 @@ int gfs2_make_fs_rw(struct gfs2_sbd *sdp)
->         }
->
->         error =3D gfs2_quota_init(sdp);
-> -       if (!error && gfs2_withdrawn(sdp)) {
-> -               gfs2_quota_cleanup(sdp);
-> +       if (error)
-> +               return error;
-> +
-> +       /*
-> +        * do_withdraw() only takes a live journal down. Check for a with=
-draw
-> +        * under the lock it holds for that so that either we see the wit=
-hdraw
-> +        * or it sees the journal live. Otherwise gfs2_make_fs_ro() waits=
- for
-> +        * the bit forever.
-> +        */
-> +       down_write(&sdp->sd_log_flush_lock);
-> +       if (gfs2_withdrawn(sdp))
->                 error =3D -EIO;
-> -       }
-> -       if (!error)
-> +       else
->                 set_bit(SDF_JOURNAL_LIVE, &sdp->sd_flags);
-> +       up_write(&sdp->sd_log_flush_lock);
-> +       if (error)
-> +               gfs2_quota_cleanup(sdp);
->         return error;
->  }
->
-> @@ -565,6 +576,9 @@ void gfs2_make_fs_ro(struct gfs2_sbd *sdp)
->                                    HZ * 5);
->                 gfs2_assert_warn(sdp, gfs2_log_is_empty(sdp));
->         }
-> +       /* A withdraw that do_withdraw() didn't finish yet leaves it live=
-. */
-> +       if (!test_bit(SDF_NORECOVERY, &sdp->sd_flags))
-> +               wait_on_bit(&sdp->sd_flags, SDF_JOURNAL_LIVE, TASK_UNINTE=
-RRUPTIBLE);
->         gfs2_quota_cleanup(sdp);
->  }
->
-> diff --git a/fs/gfs2/util.c b/fs/gfs2/util.c
-> index 83b8bb6446e5..1535ce2b7aa8 100644
-> --- a/fs/gfs2/util.c
-> +++ b/fs/gfs2/util.c
-> @@ -122,7 +122,7 @@ static void do_withdraw(struct gfs2_sbd *sdp)
->                 up_write(&sdp->sd_log_flush_lock);
->                 return;
->         }
-> -       clear_bit(SDF_JOURNAL_LIVE, &sdp->sd_flags);
-> +       clear_and_wake_up_bit(SDF_JOURNAL_LIVE, &sdp->sd_flags);
->         gfs2_ail_drain(sdp); /* frees all transactions */
->         up_write(&sdp->sd_log_flush_lock);
->
->
-> --
-> 2.53.0
->
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202610161027.zTUj3RVZ-lkp@intel.com/
 
-this looks good all around, thank you very much. Can I add it to my gfs2 qu=
-eue?
+All errors (new ones prefixed by >>):
 
-Thanks,
-Andreas
+   In file included from drivers/firmware/efi/runtime-wrappers.c:28:
+   drivers/firmware/efi/runtime-wrappers.c: In function 'efi_call_rts':
+>> drivers/firmware/efi/runtime-wrappers.c:350:51: error: passing argument 1 of 'efi.runtime-><U4280>.get_time' from incompatible pointer type [-Wincompatible-pointer-types]
+     350 |                                        efi.runtime->set_virtual_address_map,
+         |                                        ~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+         |                                                   |
+         |                                                   efi_status_t (*)(long unsigned int,  long unsigned int,  u32,  efi_memory_desc_t *) {aka long unsigned int (*)(long unsigned int,  long unsigned int,  unsigned int,  efi_memory_desc_t *)}
+   include/linux/efi.h:1178:57: note: in definition of macro 'arch_efi_call_virt'
+    1178 | #define arch_efi_call_virt(p, f, args...)       ((p)->f(args))
+         |                                                         ^~~~
+   drivers/firmware/efi/runtime-wrappers.c:349:26: note: in expansion of macro 'efi_call_virt'
+     349 |                 status = efi_call_virt(get_time,
+         |                          ^~~~~~~~~~~~~
+   drivers/firmware/efi/runtime-wrappers.c:350:51: note: expected 'efi_time_t *' but argument is of type 'efi_status_t (*)(long unsigned int,  long unsigned int,  u32,  efi_memory_desc_t *)' {aka 'long unsigned int (*)(long unsigned int,  long unsigned int,  unsigned int,  efi_memory_desc_t *)'}
+   include/linux/efi.h:1178:57: note: in definition of macro 'arch_efi_call_virt'
+    1178 | #define arch_efi_call_virt(p, f, args...)       ((p)->f(args))
+         |                                                         ^~~~
+   drivers/firmware/efi/runtime-wrappers.c:349:26: note: in expansion of macro 'efi_call_virt'
+     349 |                 status = efi_call_virt(get_time,
+         |                          ^~~~~~~~~~~~~
 
+
+vim +350 drivers/firmware/efi/runtime-wrappers.c
+
+   240	
+   241	/*
+   242	 * Calls the appropriate efi_runtime_service() with the appropriate
+   243	 * arguments.
+   244	 */
+   245	static void __nocfi efi_call_rts(struct work_struct *work)
+   246	{
+   247		const union efi_rts_args *args = efi_rts_work.args;
+   248		efi_status_t status = EFI_NOT_FOUND;
+   249		unsigned long flags;
+   250	
+   251		if (!efi_enabled(EFI_RUNTIME_SERVICES))
+   252			efi_rts_park_worker();
+   253	
+   254		efi_runtime_lock_owner = current;
+   255	
+   256		arch_efi_call_virt_setup();
+   257		flags = efi_call_virt_save_flags();
+   258	
+   259		switch (efi_rts_work.efi_rts_id) {
+   260		case EFI_GET_TIME:
+   261			status = efi_call_virt(get_time,
+   262					       args->GET_TIME.time,
+   263					       args->GET_TIME.capabilities);
+   264			break;
+   265		case EFI_SET_TIME:
+   266			status = efi_call_virt(set_time,
+   267					       args->SET_TIME.time);
+   268			break;
+   269		case EFI_GET_WAKEUP_TIME:
+   270			status = efi_call_virt(get_wakeup_time,
+   271					       args->GET_WAKEUP_TIME.enabled,
+   272					       args->GET_WAKEUP_TIME.pending,
+   273					       args->GET_WAKEUP_TIME.time);
+   274			break;
+   275		case EFI_SET_WAKEUP_TIME:
+   276			status = efi_call_virt(set_wakeup_time,
+   277					       args->SET_WAKEUP_TIME.enable,
+   278					       args->SET_WAKEUP_TIME.time);
+   279			break;
+   280		case EFI_GET_VARIABLE:
+   281			status = efi_call_virt(get_variable,
+   282					       args->GET_VARIABLE.name,
+   283					       args->GET_VARIABLE.vendor,
+   284					       args->GET_VARIABLE.attr,
+   285					       args->GET_VARIABLE.data_size,
+   286					       args->GET_VARIABLE.data);
+   287			break;
+   288		case EFI_GET_NEXT_VARIABLE:
+   289			status = efi_call_virt(get_next_variable,
+   290					       args->GET_NEXT_VARIABLE.name_size,
+   291					       args->GET_NEXT_VARIABLE.name,
+   292					       args->GET_NEXT_VARIABLE.vendor);
+   293			break;
+   294		case EFI_SET_VARIABLE:
+   295			status = efi_call_virt(set_variable,
+   296					       args->SET_VARIABLE.name,
+   297					       args->SET_VARIABLE.vendor,
+   298					       args->SET_VARIABLE.attr,
+   299					       args->SET_VARIABLE.data_size,
+   300					       args->SET_VARIABLE.data);
+   301			break;
+   302		case EFI_QUERY_VARIABLE_INFO:
+   303			status = efi_call_virt(query_variable_info,
+   304					       args->QUERY_VARIABLE_INFO.attr,
+   305					       args->QUERY_VARIABLE_INFO.storage_space,
+   306					       args->QUERY_VARIABLE_INFO.remaining_space,
+   307					       args->QUERY_VARIABLE_INFO.max_variable_size);
+   308			break;
+   309		case EFI_GET_NEXT_HIGH_MONO_COUNT:
+   310			status = efi_call_virt(get_next_high_mono_count,
+   311					       args->GET_NEXT_HIGH_MONO_COUNT.high_count);
+   312			break;
+   313		case EFI_UPDATE_CAPSULE:
+   314			status = efi_call_virt(update_capsule,
+   315					       args->UPDATE_CAPSULE.capsules,
+   316					       args->UPDATE_CAPSULE.count,
+   317					       args->UPDATE_CAPSULE.sg_list);
+   318			break;
+   319		case EFI_QUERY_CAPSULE_CAPS:
+   320			status = efi_call_virt(query_capsule_caps,
+   321					       args->QUERY_CAPSULE_CAPS.capsules,
+   322					       args->QUERY_CAPSULE_CAPS.count,
+   323					       args->QUERY_CAPSULE_CAPS.max_size,
+   324					       args->QUERY_CAPSULE_CAPS.reset_type);
+   325			break;
+   326		case EFI_ACPI_PRM_HANDLER:
+   327	#ifdef CONFIG_ACPI_PRMT
+   328			status = arch_efi_call_virt(args, ACPI_PRM_HANDLER.acpi_prm_handler,
+   329						    args->ACPI_PRM_HANDLER.param_buffer_addr,
+   330						    args->ACPI_PRM_HANDLER.context);
+   331			break;
+   332	#endif
+   333		default:
+   334			/*
+   335			 * Ideally, we should never reach here because a caller of this
+   336			 * function should have put the right efi_runtime_service()
+   337			 * function identifier into efi_rts_work->efi_rts_id
+   338			 */
+   339			pr_err("Requested executing invalid EFI Runtime Service.\n");
+   340			break;
+   341	
+   342	#if IS_ENABLED(CONFIG_LKDTM)
+   343		case EFI_LKDTM_RUNTIME_RO_TEST:
+   344			/*
+   345			 * Call GetTime() with the output argument pointing to
+   346			 * executable memory, which should be mapped read-only in the
+   347			 * EFI page tables.
+   348			 */
+   349			status = efi_call_virt(get_time,
+ > 350					       efi.runtime->set_virtual_address_map,
+   351					       NULL);
+   352			break;
+   353		case EFI_LKDTM_RUNTIME_NX_TEST:
+   354			/*
+   355			 * Call efi.runtime, which points to a data object in a EFI
+   356			 * runtime region, as if it were a function pointer.
+   357			 */
+   358			struct { efi_status_t (__efiapi *fn)(int); } s = { (void *)efi.runtime };
+   359	
+   360			status = arch_efi_call_virt((&s), fn, 0);
+   361			break;
+   362	#endif
+   363		}
+   364	
+   365		efi_call_virt_check_flags(flags, efi_rts_work.caller);
+   366		arch_efi_call_virt_teardown();
+   367	
+   368		/*
+   369		 * EFI runtime services may also have been disabled because the
+   370		 * firmware faulted, but the caller is still waiting for us in that
+   371		 * case. Only park the worker if the caller has given up on it.
+   372		 */
+   373		if (READ_ONCE(efi_rts_abandoned))
+   374			efi_rts_park_worker();
+   375	
+   376		efi_rts_work.status = status;
+   377		complete(&efi_rts_work.efi_rts_comp);
+   378		efi_runtime_lock_owner = NULL;
+   379	}
+   380	
+
+--
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
