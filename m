@@ -1,556 +1,465 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DD6D4508E9
-	for <linux-efi@vger.kernel.org>; Fri, 16 Oct 2026 12:14:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9E843368A9;
+	Fri, 16 Oct 2026 12:16:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792152862; cv=none; b=p5HL7rWa8U5OnHt2d/gOICjb16KFVwivBXsv8BlJHqQdr3YMAMfm6u0aEPTTSIlrR0HRCdudANn7gOgBUSTcZbUoUwIZ3y8Jm8aCKCJ/zpHWFMUIk6y4SIHlBWX0UEmF3uFE5uEFfWuqmwkVvqD67aMJgHEy845Zcxjo9SyY0wA=
+	t=1792152979; cv=none; b=CIxmZockNBMcI7shcCPdF6rt7jSIhMV2lnGoLdqVAIQjCBKUbxWk8bAWN4Whdd76fzHzUXVQSjvlLpECVxI/tdZD0dDlN2VF4PWcBGuhKXD+yLYHNtQnbY9jscgeuMRK4QcfYda5OYXLtjTooEUMa4QCM/W3qSn7B20S4amAkAk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792152862; c=relaxed/simple;
-	bh=N91STIRoJBKZikDLI3znzjcc/Fnu8R6YXCPQBVKhEB0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=rgEYYaaaI027d5NRRJug4oRWGSqIbC1uJ+EKXPcSCnCgpgG0ov09+w2EmmLUMuGbZ6O+MPg2F2zGbEk0ShTyktUNelsieUr5hIrWzM1+Us7R4xkI4IZCdxbkrthj7yImVKEZfChumlIBqOefHqKrOLmSBeHI0O86qHO+1uNJ/JQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=DGoMVrGU; arc=none smtp.client-ip=209.85.221.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1792152979; c=relaxed/simple;
+	bh=1k93cf5MKhVkjcQvTNw5WBZH+bZNWNPY9aOVyzZGhGg=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=CPHHlAKHqk6ixpNTH3s1EtGo09mbh5TkflRsgmE6WUQrEilJPfNAmbP5GEepo2hF0I2c95HUAv6tqZpRQdUePD1Cl1Io2xTFXIueysvSH80Vugtrzt3aBywCG29D2J7rjOBtBsiiLOYoOvHcMuvKFfcgzwORMjkWefoD7KwxBaY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=hv7m4yJY; arc=none smtp.client-ip=82.195.75.108
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="DGoMVrGU"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-48de72fc832so1139246f8f.1
-        for <linux-efi@vger.kernel.org>; Fri, 16 Oct 2026 05:14:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1792152859; x=1792757659; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=O+NQOhqzv2YbuUrbjrP3YSMvBckVI+bztNOXhDG1B+k=;
-        b=DGoMVrGUSZiEQbmzuZv2c0lefpUmktzWmFxukcY/eo/C1GHsI+Eh0qFdtv14W3zkuU
-         ENoLCGpwz3pQpA3iEQwgG+QnUXGzW6SvXXnXZbDE7VVzyXq/Sy8o41EmHLVhoVuOOiqh
-         pLUwQ8ZjGt+UNNcu2L7A+t5aI30KTXval9arjwDmVwwnlcQupszacyfbHNgiuOAovgjm
-         FTC1ReFmTbA9Ow4LqQZ24y+YIGGFLXS6bGk5XTtW2wPFllVRkuTCKY1A2KbWbwQHBK3y
-         QU1XCuqd52vxFvZrNV6y5/btuYUZdfg+U7CdB0Ne2hzJVtOHaN2ld7UEvyJ42XRFWuJX
-         boAg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792152859; x=1792757659;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=O+NQOhqzv2YbuUrbjrP3YSMvBckVI+bztNOXhDG1B+k=;
-        b=bZT+UrNLrCIrn88vOwGDbXs0sOAbF8aKr0YH3HOwpbvm0j6u41kam7VQDN2bFFi4lD
-         vvvvVaSO2dZIQApgyvr/eRpEv5A5wcKf7Ym3Z1CU/5iVWCTsRXgMaUEc1+OFcZxDJ6SO
-         HRIQsuuoNMCYobAfUlibAnW2PS2sZ6tfNnwBuom5Yx6OpQwAqYdq1gPukv7TvKSBxOWA
-         Zwx1UVZbIcqMh1KJ7CLk4xsoZYsrUfrSPsQZmmAExCaWcKCvkI5xbvrx+L+/tDSi/yrO
-         X0ZCBR6bvM9S5UxLp0bYVBpZ3ws38PxObtJv1K4oDkY0DmX+vcWBm8ZctafpG+SskGXt
-         oLUg==
-X-Forwarded-Encrypted: i=1; AKwUvBy0rwPGUtLIJS4oZLczSqOM/X/ClHqkfaz4UHASlnk3lDeDQYJTFsyMM2oZxd+OSGDS1ySEAj0q5no=@vger.kernel.org
-X-Gm-Message-State: AFq9FYKdfIYFHAiUknZ3ZTofOBL8ntWggYsE/hY/YiD6/f4jYbiJJhzD
-	ZKh7ono8Ac4Cymcz2MIrB64ifr+tZ13aR24UoCExe3g96tO38S6uQu/2dxEgGIvqK9E=
-X-Gm-Gg: AYBFou2HOe4d7jodUxu/0Rdb8GYSH+2mvNezjvkQ7ku5jneCQvV4WwGAUryXS28a7sA
-	piDhtSNgLxt5Iild4qLFbuVtDZ9QloeR25zD18MPeAucoLCq6gbe1LKnTJTtqSVQ4cvSB3PS7K/
-	64QOH8ItAbLOi7wKchWfO7utzkYshi5cVVw1cNc6ZNuh+imYp+tfL8R7Kwhgg/bV6XkIoPe1Rqr
-	uZH70IlOu9sBE/RYQewdAK5y6w7uVoe4ZgbvwgKG+UjvohM9o3i63r/HE/y8IWyHD1NRr9YnDbe
-	AVnOu06KbRiLvHf8a9zd1VDlCy+JjQr6c4iuOcHuFKTKO/gV7Nxw5vENhBpc2HmN/SisLcosPhm
-	LhOSSyzpojFxMndTC804h/5DrPbAVVm/5kZ/4luzVGz5h0Bkk7Eg0YLSkZKCq8E2ZilS059w/DH
-	A/Ygv+R9W64kWHEyzPD80+OAQDj/WI3KVcWSw32lYpsXhJ8j3GOz8spvKXld+uXTTxqaOKKM0KV
-	EiCJWY3BTx2c+Fv1OQCdPXcvI894FDMYt4=
-X-Received: by 2002:a05:6000:2686:b0:48d:f3a4:610b with SMTP id ffacd0b85a97d-48df3a462bcmr12096973f8f.25.1792152858574;
-        Fri, 16 Oct 2026 05:14:18 -0700 (PDT)
-Received: from ?IPV6:2a07:de40:8100:0:89a9:fd0e:583d:4a53? ([2001:af0:8000:1409:193:86:92:181])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48dfd50d080sm4940009f8f.53.2026.10.16.05.14.16
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 16 Oct 2026 05:14:17 -0700 (PDT)
-Message-ID: <b17e9924-ca92-4cdf-b5e6-54164039e09a@suse.com>
-Date: Fri, 16 Oct 2026 14:14:16 +0200
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="hv7m4yJY"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
+	s=smtpauto.stravinsky; h=X-Debian-User:Cc:To:Content-Transfer-Encoding:
+	Content-Type:MIME-Version:Message-Id:Date:Subject:From:Reply-To:Content-ID:
+	Content-Description:In-Reply-To:References;
+	bh=SMyeb0TPlDp+5iGy2w5sWmOpqn+etT9xkF8lgFC0TDs=; b=hv7m4yJYlURQ1VtfxsKUORkx6h
+	pJXdsK+wxLc2Rktrbe0UkzwU3W6wdbudYsscRi5+TwnC7kie1BOtMdciPC0Bn16QAIoYEHmB50Shz
+	PkSB3XR4IYmfqGqCOben2xQK/soQSslY/0+vOlhreElevT3sfvzmAs7Riv77o7xlhWI3TJUWPvTGk
+	WH92WdsfIrKXongtQevT8r2/l4xi+pXCWHxnG7loG6qJShOdMu7h5Vnuf+bbk5gty/Yd+Y6gGvUon
+	ja7TI5IwyCj6kMb0xpzvHdU7GRaBqTzW0YTBTwNNoNgRmYfDTZXPOTkRUzWHpH3liqarbX/ELuMyA
+	JtYmBbUA==;
+Received: from authenticated-user
+	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
+	(Exim 4.96)
+	(envelope-from <leitao@debian.org>)
+	id 1xHgqq-005xSX-2c;
+	Fri, 16 Oct 2026 12:15:57 +0000
+From: Breno Leitao <leitao@debian.org>
+Subject: [PATCH v6 0/7] mm/memory-failure: keep hardware-poisoned pages out
+ of the next kexec
+Date: Fri, 16 Oct 2026 05:15:40 -0700
+Message-Id: <20261016-hwpoison-kho-v6-0-f304255147da@debian.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 14/22] modpost: emit module descriptors as assembly
-To: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
- Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>,
- Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling
- <morbo@google.com>, Justin Stitt <justinstitt@google.com>,
- Masahiro Yamada <masahiroy@kernel.org>, Alexey Gladkov <legion@kernel.org>,
- Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
- Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
- x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>,
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
- Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
- Arnd Bergmann <arnd@arndb.de>, Catalin Marinas <catalin.marinas@arm.com>,
- Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
- Ard Biesheuvel <ardb@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Josh Poimboeuf <jpoimboe@kernel.org>, Peter Zijlstra <peterz@infradead.org>,
- Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>,
- Gary Guo <gary@garyguo.net>, =?UTF-8?Q?Bj=C3=B6rn_Roy_Baron?=
- <bjorn3_gh@protonmail.com>, Benno Lossin <lossin@kernel.org>,
- Andreas Hindborg <a.hindborg@kernel.org>, Alice Ryhl <aliceryhl@google.com>,
- Trevor Gross <tmgross@umich.edu>, Danilo Krummrich <dakr@kernel.org>,
- Daniel Almeida <daniel.almeida@collabora.com>,
- Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot
- <acourbot@nvidia.com>, =?UTF-8?Q?Onur_=C3=96zkan?= <work@onurozkan.dev>,
- Jonathan Corbet <corbet@lwn.net>, Randy Dunlap <rdunlap@infradead.org>,
- Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>,
- linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
- llvm@lists.linux.dev, linux-riscv@lists.infradead.org,
- linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
- linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
- linux-hardening@vger.kernel.org
-References: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
- <20260923-build-speedup-v4-14-73128809a4a4@kernel.org>
-Content-Language: en-US
-From: Petr Pavlu <petr.pavlu@suse.com>
-In-Reply-To: <20260923-build-speedup-v4-14-73128809a4a4@kernel.org>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAG0V0moC/2XMy2rDMBBA0V8Rs/YUvUayvOp/hC70ciwKVrCDm
+ xL878XpIom9vXDuHeY8lTxDx+4w5aXMpY7QMdMwiIMfzxlLgo6B5NJwIyUOP5da5jri91Cxjy4
+ F6ZNvg4eGwWXKfbk9dqevhsFQ5mudfh/3RWz1f2SFfR8tAjm6SDl5IuFc+5lyKH78qNMZttMin
+ 7qVYqclciSrlXUi6zabg1av2uy0Qo6mty7qYDiFeND6qR13O62RoyKnhCKjtaODphctaKdp0yF
+ aTzYk4upNr+v6Bygm+LyhAQAA
+X-Change-ID: 20260622-hwpoison-kho-fc9db2ada8ba
+To: Ard Biesheuvel <ardb@kernel.org>, 
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
+ Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, 
+ Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, 
+ x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+ Andrew Morton <akpm@linux-foundation.org>, 
+ David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>, 
+ "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>, 
+ Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>, 
+ Michal Hocko <mhocko@suse.com>, Miaohe Lin <linmiaohe@huawei.com>, 
+ Naoya Horiguchi <nao.horiguchi@gmail.com>, 
+ Oscar Salvador <osalvador@suse.de>, 
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+ "Rafael J. Wysocki" <rafael@kernel.org>, Danilo Krummrich <dakr@kernel.org>, 
+ Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+ Mark Rutland <mark.rutland@arm.com>, kas@kernel.org, 
+ kexec@lists.infradead.org, Brendan Jackman <brendan.jackman@linux.dev>, 
+ Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>, 
+ shakeel.butt@linux.dev
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ linux-mm@kvack.org, linux-cxl@vger.kernel.org, driver-core@lists.linux.dev, 
+ linux-arm-kernel@lists.infradead.org, rmikey@meta.com, riel@surriel.com, 
+ Breno Leitao <leitao@debian.org>, harry@kernel.org, kernel-team@meta.com
+X-Mailer: b4 0.16-dev-f8e9d
+X-Developer-Signature: v=1; a=openpgp-sha256; l=18436; i=leitao@debian.org;
+ h=from:subject:message-id; bh=1k93cf5MKhVkjcQvTNw5WBZH+bZNWNPY9aOVyzZGhGg=;
+ b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBq0hV0jhzREAd0G3imvy+BI0XnQ3zytR24P/ADe
+ ELNXcy20D6JAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCatIVdAAKCRA1o5Of/Hh3
+ bSybEACJ0PVwseZx4etiu8nccgq1mAMfz+y25yA1zStrlp07djejaQTCmKYOH3kpA+nwfPSUrGP
+ vbPv4uR0T3+eX04uBaJwZIvzqIpn48YZ7vi94vqIhft9QTW9mu08a2FFw6J3jQMnEnKvKGRhX4O
+ bmrLwZNtRNsgQjW4J0qSOflBPX2U1KzhLUsZB1cLB7zjzkVCcw1sEInf90ruWGztUSBiWQTF/jS
+ nM2glb03vIIcH2mtDIQJtHjgqZTPftOG6HTnGlN+YsR6MPGkaUmVM6/Bbwue7feZDhHlHvYp42I
+ +0nq6Mi64x74cxinEYAdVLh5hz5VX5QvYhXOuXu/MrriWbRO3eOWfIp7OT6a9GtU785wySFCl6K
+ 6No8lxXAg3Fk90o+HCy48JjcJyLnGYlTyTyGeJw2kc2rL2UOLt87fG44V7c9naYCv2x5pKiKcLf
+ am2XiGMNcu8tjyPfXXhqhmXsGRCOmASlX+eSmvNctVipnhkK3ziAmkXxgZdSaoWL3G0DQn8CWWY
+ g2EOh/miM8bpYu3gGeYUUUHfS59xpMP7q4Q9bNHGx2U9GSVF/o8c7JXACk9Y4nyRPMBMJqQyymL
+ qd9ENa6Jq4Men/sXG9naf1jshVAYQDKtSXdZsNJcWlEzs+UBsVW++PXD3yAN1gvLFWg2bHnwAAp
+ y3AR3nHxSNW6w9A==
+X-Developer-Key: i=leitao@debian.org; a=openpgp;
+ fpr=AC8539A6E8F46702CA4A439B35A3939FFC78776D
+X-Debian-User: leitao
 
-On 9/23/26 7:18 PM, Lorenzo Stoakes (ARM) wrote:
-> modpost generates a descriptor for every module in the form of a
-> <module>.mod.c file with .modinfo strings, the __this_module descriptor,
-> exported symbol tables and (with CONFIG_MODVERSIONS set), the CRC of
-> imported symbols.
-> 
-> These files are compiled like any other kernel C file with all of the
-> -include preamble, as well as including linux/module.h, header dependencies
-> generated by fixdep of a few hundred headers, an objtool run and if LTO is
-> being performed, a link is performed to generate native code.
-> 
-> On an x86-64 allmodconfig build 11,189 *.mod.c files are built, each
-> taking ~0.24s of CPU time to compile, and module finalisation as a whole
-> 6,300 CPU seconds, or 64 seconds of wall time when run over 128 threads.
-> 
-> It also generates ~1.3 GiB of *.mod.o.cmd files that every subsequent build
-> has to read back.
-> 
-> Avoid all this by emitting the descriptors as assembly instead.
-> 
-> The layout required (size and alignment of struct module, struct
-> modversion_info, the module's name offsets, init, and exit fields and
-> whether the architecture uses PREL32 ksymtab references) can all be derived
-> from scripts/mod/module-offsets.h.
-> 
-> The fields of __this_module are emitted in offset order rather than
-> declaration order, as CONFIG_RANDSTRUCT shuffles struct module so the name,
-> init and exit fields can land anywhere.
-> 
-> An assembly file avoids all of the issues previously mentioned so this
-> conversion results in a very significant performance win on kernel build.
-> 
-> As a consequence of this change, since module-offsets.c includes
-> linux/module.h, scripts/mod is now built after the generated headers in
-> prepare0, rather than before.
-> 
-> Also update .gitignore and make clean to handle .mod.S files, but keep
-> .mod.c files there to ensure that users do not end up with untracked
-> changes/dirty trees after the change takes effect.
-> 
-> The sections were confirmed to be byte-for-byte identical to the C version
-> produced - each of .modinfo, .gnu.linkonce.this_module, __ksymtab*,
-> __ksymtab_strings, __kcrctab*, __kflagstab*, __versions,
-> __version_ext_crcs, __version_ext_names and their relocations - for all
-> 8,135 modules of a clang allmodconfig build with CONFIG_COMPILE_TEST off
-> and CONFIG_MODVERSIONS, CONFIG_EXTENDED_MODVERSIONS and
-> CONFIG_MODULE_SRCVERSION_ALL on, and for a sample built with gcc.
-> 
-> What differs is what the compiler added around them: the __UNIQUE_ID_*
-> locals, the KASAN constructor for the .mod.c globals, and on x86 a
-> .note.gnu.property that the linker already drops from any module containing
-> an assembly file and the loader never reads.
-> 
-> None of these have any impact on the build, however.
-> 
-> The assembly carries no debug information, so in order to keep describing
-> __this_module in each module's debug information, define it weakly in
-> module-common.c too, in a section which the module link discards.
-> 
-> x86_64 kernels built with gcc and clang, with CONFIG_MODVERSIONS,
-> CONFIG_EXTENDED_MODVERSIONS and CONFIG_MODULE_SRCVERSION_ALL, were booted,
-> every module and an external one loaded and unloaded, and the srcversions
-> checked against modinfo, i386 and arm64 defconfigs (gcc and clang) and a
-> ThinLTO build were also built as part of testing.
-> 
-> An x86_64 CONFIG_RANDSTRUCT_FULL build with clang, which places the name
-> field after init and exit, was checked the same way and produces the same
-> .gnu.linkonce.this_module sections and relocations as the C version.
-> 
-> On the x86_64 allmodconfig with clang 22, "make modules" with every
-> *.mod.o and *.ko deleted goes from 64.5s (6,306 CPU-s) to 28.5s (518
-> CPU-s).
-> 
-> A consequence of this change is that the make jobs are now so small that
-> make cannot dispatch them quick enough, however the next commit in the
-> series addresses this issue.
-> 
-> This impacts clean and no-op builds with a large number of modules most
-> noticeably.
-> 
-> Whole build, 128-thread Threadripper 9980X, best of N runs:
-> 
->                                          before   after     delta
->                                          -------------------------------
->   x86 allmodconfig, no-op make, gcc        12.7s     2.3s    -10.4s (-82%)
->   x86 allmodconfig, no-op make, clang      13.9s     2.8s    -11.2s (-80%)
->   x86 allmodconfig, clean, gcc            342.6s   306.6s    -36.0s (-11%)
->   x86 allmodconfig, clean, clang          340.1s   290.2s    -49.8s (-15%)
-> 
-> Assisted-by: LLM
-> Signed-off-by: Lorenzo Stoakes (ARM) <ljs@kernel.org>
+Problem:
+========
 
-This version looks mostly ok to me, from a modules perspective. Below
-are a few nits plus one more useful comment about handling
-MODULE_ARCH_INIT.
+When a page is hard-offlined due to an uncorrectable memory error (multi
+bit ECC), memory_failure() sets PG_hwpoison, unmaps it, removes it from
+the buddy allocator. This information is not carried to the next kernel
+that is kexec'd. The kexec'd kernel then trips over that bad memory
+bank _again_.
 
-> diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-> index 0fd43c8a89ea..9d96459e492c 100644
-> --- a/scripts/mod/modpost.c
-> +++ b/scripts/mod/modpost.c
-> [...]
-> +/* The name and namespace strings a ksymtab entry refers to. */
-> +static void add_asm_kstrtab(struct buffer *buf, const struct symbol *sym)
-> +{
-> +	buf_printf(buf, "\t.section \"__ksymtab_strings\",\"aMS\",%%progbits,1\n");
-> +	buf_printf(buf, "__kstrtab_%s:\n", sym->name);
-> +	buf_asciz(buf, sym->name);
-> +	buf_printf(buf, "__kstrtabns_%s:\n", sym->name);
-> +	buf_asciz(buf, sym->namespace);
-> +	buf_printf(buf, "\t.previous\n");
-> +}
-> +
-> +/* The equivalent of SYMBOL_FLAGS(). */
-> +static void add_asm_kflagstab(struct buffer *buf, const struct symbol *sym)
-> +{
-> +	buf_printf(buf, "\t.section \"___kflagstab+%s\", \"a\"\n", sym->name);
-> +	buf_printf(buf, "__flags_%s:\n", sym->name);
-> +	buf_printf(buf, "\t.byte 0x%02x\n", get_symbol_flags(sym));
-> +	buf_printf(buf, "\t.previous\n");
-> +}
-> +
-> +/* The equivalent of KSYMTAB_FUNC()/KSYMTAB_DATA(). */
-> +static void add_asm_ksymtab(struct buffer *buf, const struct symbol *sym)
-> +{
-> +	const char *name = sym->name;
-> +
-> +	add_asm_kstrtab(buf, sym);
-> +
-> +	buf_printf(buf, "\t.section \"___ksymtab+%s\", \"a\"\n", name);
-> +	buf_printf(buf, "\t.balign %d\n", KSYM_ALIGN);
-> +	buf_printf(buf, "__ksymtab_%s:\n", name);
-> +	add_asm_ksym_ref(buf, sym->is_func ? MOD_FUNC_PREFIX : "", name);
-> +	add_asm_ksym_ref(buf, "__kstrtab_", name);
-> +	add_asm_ksym_ref(buf, "__kstrtabns_", name);
-> +	buf_printf(buf, "\t.previous\n");
-> +
-> +	add_asm_kflagstab(buf, sym);
-> +}
+Why now:
+========
 
-add_asm_kstrtab() and add_asm_kflagstab() are only called from
-add_asm_ksymtab() and their logic is fairly short. I suggest merging
-these functions.
+Several industry trends make this increasingly important:
 
-> +
-> +/* The equivalent of SYMBOL_CRC(). */
-> +static void add_asm_crc(struct buffer *buf, const struct symbol *sym)
-> +{
-> +	buf_printf(buf, "\t.section \"___kcrctab+%s\",\"a\"\n", sym->name);
-> +	buf_printf(buf, "\t.balign 4\n");
-> +	buf_printf(buf, "__crc_%s:\n", sym->name);
-> +	buf_printf(buf, "\t.long 0x%08x\n", sym->crc);
-> +	buf_printf(buf, "\t.previous\n");
-> +}
-> +
-> +static bool export_is_kept(const struct symbol *sym)
-> +{
-> +	return !trim_unused_exports || sym->used;
-> +}
+    1) DRAM is getting more expensive
+    2) soldered / on-package memory (LPDDR, HBM) is becoming more common, so a
+       failing part can no longer simply be swapped;
+    3) memory is kept in service far longer (at Meta, DRAM lifetime is being
+       drastically extended).
+    4) It is more and more common to kexec instead of full reboot
+    5) Increase of memory per system with CXL
 
-export_is_kept() is only called once from add_asm_exported_symbols().
-The condition can be inlined directly there.
+What was done already:
+======================
 
-> +
-> +/* The exported symbols and, with modversions, their CRCs. */
-> +static void add_asm_exported_symbols(struct buffer *buf, struct module *mod)
-> +{
-> +	struct symbol *sym;
-> +
-> +	list_for_each_entry(sym, &mod->exported_symbols, list) {
-> +		if (!export_is_kept(sym))
-> +			continue;
-> +
-> +		add_asm_ksymtab(buf, sym);
-> +
-> +		if (!modversions)
-> +			continue;
-> +
-> +		if (!sym->crc_valid)
-> +			mod_warn(mod, "EXPORT symbol '%s' version generation failed, symbol will not be versioned.\n"
-> +				 "Is '%s' prototyped in <asm/asm-prototypes.h>?\n",
-> +				 sym->name, sym->name);
-> +		add_asm_crc(buf, sym);
-> +	}
-> +}
-> +
-> +/* Zero fill up to the offset. */
-> +static void asm_skip_to(struct buffer *buf, unsigned int *pos,
-> +			unsigned int offset)
-> +{
-> +	if (offset < *pos)
-> +		fatal("__this_module field at offset %u overlaps the previous one\n",
-> +		      offset);
-> +	if (offset > *pos)
-> +		buf_printf(buf, "\t.skip %u\n", offset - *pos);
-> +
-> +	*pos = offset;
-> +}
-> +
-> +/* A non-zero field of __this_module: its offset and the name or symbol in it. */
-> +struct this_module_field {
-> +	unsigned int offset;
-> +	bool is_name;
-> +	const char *value;
-> +};
-> +
-> +#define THIS_MODULE_MAX_FIELDS	5
-> +
-> +static int compare_field_offsets(const void *ptr_a, const void *ptr_b)
-> +{
-> +	const struct this_module_field *field_a = ptr_a, *field_b = ptr_b;
-> +
-> +	if (field_a->offset != field_b->offset)
-> +		return field_a->offset < field_b->offset ? -1 : 1;
-> +
-> +	return 0;
-> +}
-> +
-> +/*
-> + * The fields of __this_module which are not zero, in offset order. The order
-> + * is only known from module-offsets.h, CONFIG_RANDSTRUCT shuffles struct module.
-> + */
-> +static unsigned int get_this_module_fields(const struct module *mod,
-> +					   const char *modname,
-> +					   struct this_module_field *fields)
-> +{
-> +	unsigned int nr_fields = 0;
-> +
-> +	fields[nr_fields++] = (struct this_module_field)
-> +		{ MOD_OFF_module_name, true, modname };
-> +	if (mod->has_init)
-> +		fields[nr_fields++] = (struct this_module_field)
-> +			{ MOD_OFF_module_init, false, MOD_FUNC_PREFIX "init_module" };
-> +#ifdef MOD_OFF_module_exit
-> +	if (mod->has_cleanup)
-> +		fields[nr_fields++] = (struct this_module_field)
-> +			{ MOD_OFF_module_exit, false, MOD_FUNC_PREFIX "cleanup_module" };
-> +#endif
-> +#ifdef MOD_OFF_module_arch_fixup_start
-> +	fields[nr_fields++] = (struct this_module_field)
-> +		{ MOD_OFF_module_arch_fixup_start, false, "__start_fixup" };
-> +	fields[nr_fields++] = (struct this_module_field)
-> +		{ MOD_OFF_module_arch_fixup_end, false, "__stop_fixup" };
-> +#endif
-> +	qsort(fields, nr_fields, sizeof(*fields), compare_field_offsets);
-> +
-> +	return nr_fields;
-> +}
-> +
-> +/* Emit one field of __this_module, returning its size. */
-> +static unsigned int add_asm_this_module_field(struct buffer *buf,
-> +					      const struct this_module_field *field)
-> +{
-> +	if (field->is_name) {
-> +		buf_printf(buf, "\t.ascii \"%s\"\n", field->value);
-> +		return strlen(field->value);
-> +	}
-> +
-> +	buf_printf(buf, "\t" MOD_PTR_DIRECTIVE " %s\n", field->value);
-> +	return MOD_SIZEOF_LONG;
-> +}
-> +
-> +/*
-> + * The equivalent of:
-> + *
-> + *	__visible struct module __this_module __section(".gnu.linkonce.this_module")
-> + *		= { .name = KBUILD_MODNAME, .init = init_module, .exit = cleanup_module,
-> + *		    .arch = MODULE_ARCH_INIT };
-> + *
-> + * Everything not listed is zero, MODULE_ARCH_INIT included, except on m68k.
-> + */
-> +static void add_asm_this_module(struct buffer *buf, const struct module *mod,
-> +				const char *modname)
-> +{
-> +	struct this_module_field fields[THIS_MODULE_MAX_FIELDS];
-> +	const unsigned int nr_fields = get_this_module_fields(mod, modname, fields);
+To deal with the problem above, I have already fixed a few things in
+this area:
 
-The const qualifier can be removed from the nr_fields definition to
-match the usual kernel style.
+1) Panic on unrecoverable errors, instead of "printk and carry over":
+https://lore.kernel.org/all/20260630-ecc_panic-v10-0-c6ed5b62eea2@debian.org/
 
-> +	unsigned int pos = 0, i;
-> +
-> +	buf_printf(buf, "\n\t.section .gnu.linkonce.this_module,\"aw\",%%progbits\n");
-> +	buf_printf(buf, "\t.balign %d\n", MOD_ALIGNOF_struct_module);
-> +	buf_printf(buf, "\t.globl __this_module\n");
-> +	buf_printf(buf, "\t.type __this_module, %%object\n");
-> +	buf_printf(buf, "\t.size __this_module, %d\n", MOD_SIZEOF_struct_module);
-> +	buf_printf(buf, "__this_module:\n");
-> +
-> +	for (i = 0; i < nr_fields; i++) {
-> +		asm_skip_to(buf, &pos, fields[i].offset);
-> +		pos += add_asm_this_module_field(buf, &fields[i]);
-> +	}
-> +
-> +	asm_skip_to(buf, &pos, MOD_SIZEOF_struct_module);
-> +}
-> +
-> +/*
-> + * An unresolved symbol without a module is not versioned; one without a CRC
-> + * cannot be, so warn about it.
-> + */
-> +static bool skip_unversioned(struct module *mod, const struct symbol *sym)
-> +{
-> +	if (!sym->module)
-> +		return true;
-> +	if (sym->crc_valid)
-> +		return false;
-> +
-> +	mod_warn(mod, "symbol '%s' has no CRC!\n", sym->name);
-> +	return true;
-> +}
-> +
-> +/* One struct modversion_info: the CRC, then the name padded to the end. */
-> +static void add_asm_version(struct buffer *buf, const struct symbol *sym)
-> +{
-> +	buf_printf(buf, "\t" MOD_PTR_DIRECTIVE " 0x%08x\n", sym->crc);
-> +	buf_printf(buf, "\t.ascii \"%s\"\n", sym->name);
-> +	buf_printf(buf, "\t.skip %zu\n", MOD_SIZEOF_struct_modversion_info -
-> +		   MOD_OFF_modversion_info_name - strlen(sym->name));
-> +}
-> +
-> +/*
-> + * The equivalent of:
-> + *
-> + *	static const struct modversion_info ____versions[]
-> + *	__used __section("__versions") = { { crc, "name" }, ... };
-> + *
-> + * for unresolved symbols.
-> + */
-> +static void add_asm_versions(struct buffer *buf, struct module *mod)
-> +{
-> +	struct symbol *sym;
-> +
-> +	if (!basic_modversions)
-> +		return;
-> +
-> +	buf_printf(buf, "\n\t.section __versions,\"a\",%%progbits\n");
-> +	buf_printf(buf, "\t.balign %d\n", MOD_ALIGNOF_struct_modversion_info);
-> +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
-> +		if (skip_unversioned(mod, sym))
-> +			continue;
-> +
-> +		if (strlen(sym->name) >= MOD_NAME_LEN) {
-> +			/* Only the extended table can hold it. */
-> +			if (extended_modversions)
-> +				continue;
-> +
-> +			mod_error(mod, "too long symbol '%s'\n", sym->name);
-> +			break;
-> +		}
-> +
-> +		add_asm_version(buf, sym);
-> +	}
-> +}
-> +
-> +/*
-> + * The equivalent of:
-> + *	static const u32 ____version_ext_crcs[] __section("__version_ext_crcs") = { crc, ... };
-> + *	static const char ____version_ext_names[] __section("__version_ext_names") = "name\0" ...;
-> + *
-> + * for unresolved symbols.
-> + */
-> +static void add_asm_extended_versions(struct buffer *buf, struct module *mod)
-> +{
-> +	struct symbol *sym;
-> +
-> +	if (!extended_modversions)
-> +		return;
-> +
-> +	buf_printf(buf, "\n\t.section __version_ext_crcs,\"a\",%%progbits\n");
-> +	buf_printf(buf, "\t.balign 4\n");
-> +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
-> +		if (skip_unversioned(mod, sym))
-> +			continue;
-> +
-> +		buf_printf(buf, "\t.long 0x%08x\n", sym->crc);
-> +	}
-> +
-> +	/*
-> +	 * A symbol without a CRC was warned about above, and is skipped here
-> +	 * too so that the names line up with the CRCs.
-> +	 */
-> +	buf_printf(buf, "\t.section __version_ext_names,\"a\",%%progbits\n");
-> +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
-> +		if (!sym->module || !sym->crc_valid)
-> +			continue;
+2) Respect poisoned memory at kexec time
+https://lore.kernel.org/all/20260812-kexec_posioned-v6-0-e477887086f0@debian.org/
 
-This condition must match the logic in skip_unversioned(). It would be
-clearer to keep it only in one place by calling skip_unversioned() here
-and adding a "silent" parameter to the function.
+Now, the natural follow up is to carry the poisoned memory information
+to the next kexec kernel, avoiding tripping over a known "bad page".
 
-> diff --git a/scripts/mod/module-offsets.c b/scripts/mod/module-offsets.c
-> new file mode 100644
-> index 000000000000..a336dd47aa33
-> --- /dev/null
-> +++ b/scripts/mod/module-offsets.c
-> @@ -0,0 +1,35 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Layout of the structures modpost emits into *.mod.S, extracted from the
-> + * target headers as devicetable-offsets.c does for the device tables.
-> + */
+Proposed Solution:
+==================
 
-The second part of the comment, after the comma, is superfluous. It is
-expected that the various parts of modpost use consistent mechanisms
-where appropriate.
+Carry the poisoned frames to the next kernel in a new EFI configuration
+table, LINUX_EFI_POISONED_MEMORY.
 
-> +#define COMPILE_OFFSETS
-> +#include <linux/kbuild.h>
-> +#include <linux/module.h>
-> +
-> +int main(void)
-> +{
-> +	DEFINE(MOD_SIZEOF_LONG, sizeof(long));
-> +	DEFINE(MOD_PREL32_RELOCATIONS, IS_ENABLED(CONFIG_HAVE_ARCH_PREL32_RELOCATIONS));
-> +	DEFINE(MOD_FUNC_PLABEL, IS_ENABLED(CONFIG_PARISC) && IS_ENABLED(CONFIG_64BIT));
-> +
-> +	DEFINE(MOD_SIZEOF_struct_module, sizeof(struct module));
-> +	DEFINE(MOD_ALIGNOF_struct_module, __alignof__(struct module));
-> +	OFFSET(MOD_OFF_module_name, module, name);
-> +	OFFSET(MOD_OFF_module_init, module, init);
-> +#ifdef CONFIG_MODULE_UNLOAD
-> +	OFFSET(MOD_OFF_module_exit, module, exit);
-> +#endif
-> +#if defined(CONFIG_M68K) && defined(CONFIG_MMU)
-> +	/* MODULE_ARCH_INIT: the only architecture where it is not all zeroes. */
-> +	OFFSET(MOD_OFF_module_arch_fixup_start, module, arch.fixup_start);
-> +	OFFSET(MOD_OFF_module_arch_fixup_end, module, arch.fixup_end);
-> +#endif
+The table is a bitmap with one bit per 2MB of physical memory, modeled
+on LINUX_EFI_UNACCEPTED_MEMORY. The stub sizes it from the EFI memory
+map and installs it empty while boot services are up -- a running kernel
+cannot install a configuration table, it can only flip bits -- and a
+table that an earlier stub run in the same firmware session installed
+is reused as-is. That is one fixed-size allocation, 64KB per TiB of the
+span the memory map describes, with no list to grow at runtime and no
+chain to trust at parse time.
 
-I feel it is a bit of a layering violation for modpost to know how
-individual architectures need to initialize module::arch.
+The mechanism is architecture independent, so x86 and arm64 use the same
+code.
 
-For now, this is probably ok. I would just remove MODULE_ARCH_INIT from
-include/linux/module.h and arch/m68k/include/asm/module.h, along with
-the comment referring to it in scripts/mod/modpost.c.
+Each hard offline sets the bit for its unit. Soft-offlined pages are not
+recorded: they are still functional, and were offlined predictively.
+Errors injected by software (MADV_HWPOISON, hwpoison-inject) are not
+recorded either: they are not hardware faults.
 
-In the future, this could be avoided by having the m68k module support
-look up the .m68k_fixup section at runtime, as other architectures
-typically do for similar sections.
+The next kernel takes the table into use from efi_config_parse_tables().
+It vets the inherited header and reserves the table's own pages in
+memblock.
 
--- 
-Thanks,
-Petr
+Then, once the architecture has reserved the kernel image and the
+initrd, it reads the bitmap once and reserves every recorded unit in
+memblock with a new MEMBLOCK_RSRV_HWPOISON flag. On x86 and arm64 this
+runs before the page tables and the memmap are allocated, so memblock
+cannot hand a recorded unit to an early allocation, and it never frees
+one to the buddy allocator.
+
+memmap_init_reserved_pages() then flags the frames of those units
+PG_hwpoison, initializing their struct pages through init_deferred_page()
+where that initialization is deferred. They end up in the state a frame
+poisoned by this kernel would be in, so everything that already
+understands PG_hwpoison covers them -- including the kexec segment
+placement check from the series linked above, which keeps the segments a
+kexec places off these frames. From there on the memmap is the only
+source of poisoned frames: nothing reads the bitmap again.
+
+The memory block poison counter is seeded from the memmap when a block is
+created at boot, behind num_poisoned_pages.
+
+Granularity is the trade-off: one bad 4KB frame costs a whole 2MB unit in
+every later kernel of the chain. In exchange, a row or column fault --
+roughly a quarter of the DRAM faults reported in [1], and potentially
+thousands of 4KB pages scattered over gigabytes -- collapses into a bit
+or two.
+
+A bit is never cleared, which is a known limitation: it stands for a
+whole unit, so an unpoison of one frame cannot tell whether the unit as a
+whole is good again.
+
+Known limitations:
+==================
+
+In order to keep this patchset digestible, I am making some trade-offs,
+thus, this feature has the following limitations:
+
+  - Memory hot-added after boot is not covered: the bitmap spans the RAM
+    the EFI memory map describes, and a frame above it is not recorded.
+    Same gap the unaccepted-memory table has.
+
+  - The bitmap spans the descriptors that are write-back cacheable or
+    unaccepted memory. On x86 the stub also reports loader, boot services
+    and conventional memory without EFI_MEMORY_WB as RAM, so such a
+    descriptor at either end of RAM falls outside the bitmap and its
+    frames are not recorded.
+
+  - A recorded unit that overlaps a reservation made before the units are
+    reserved, the kernel image or a kexec segment for one, is flagged only
+    where that reservation leaves it free, and the overlap is logged. A
+    kexec segment was placed around the bad frames, so the frames it
+    leaves free include them. A unit that is covered entirely is skipped
+    with a warning.
+
+  - The reserved array cannot be resized when the table is parsed, so
+    memblock_reserve_hwpoison() keeps 32 slots free for the reservations
+    that follow and skips the units that do not fit, with a warning.
+    Adjacent units share a slot.
+
+  - Memory preserved across a KHO handover is not covered.
+    kho_preserved_memory_reserve() reserves it after the units are
+    reserved and marks it MEMBLOCK_RSRV_NOINIT, so
+    memmap_init_reserved_pages() skips it and a recorded frame there is
+    not flagged. The frame goes back to the allocator once the owner
+    releases it.
+
+  - On x86 the next kernel picks its own physical address again.
+    choose_random_location() draws from the memory map and does not know
+    about the table, so KASLR can land the kernel image on a recorded
+    frame. arm64 does not re-pick; the outgoing kernel fixes the address.
+
+  - An inherited frame keeps its direct map entry. On x86 the MCE handler
+    calls set_mce_nospec() next to memory_failure(), and nothing replays
+    that half here, so the frame is out of the allocator but still mapped
+    writeback. set_memory_*() needs the allocator to split a large page,
+    so this wants a later pass.
+
+  - On a host with SME active the frames are not recorded: the stub writes
+    the table in the clear, so reading it back there needs a decrypted
+    mapping. Parsing an inherited table is not affected. Mapping the table
+    decrypted is follow up work.
+
+  - The CMA patchset is being worked by Shaikh Kamaluddin
+    https://lore.kernel.org/all/20261010162017.62506-1-shaikhkamal2012@gmail.com/#t
+
+All of the limitations above can be fixed in follow up work. I am trying
+to keep this patchset the foundation, with that work done on top.
+
+The series is seven patches:
+
+  1. Add the table: Defines the EFI table: GUID, Kconfig symbol, and
+     a bitmap with one bit per 2MiB.
+  2. Install it from the stub: The EFI stub allocates the table at boot,
+     sized from the memory map, installed empty.
+  3. Flag an inherited frame: Adds a helper flagging an inherited frame
+     PG_hwpoison, counting it in the global counter and the managed pages,
+     and disabling unpoison.
+  4. Memblock flag: Adds a memblock flag keeping poisoned ranges from
+     allocators and buddy, and marking frames PG_hwpoison.
+  5. Memory block counter: Seeds each memory block's poison counter from
+     the memmap at boot, only when poison exists.
+  6. Reserve the inherited units: Reads the inherited table once at boot
+     and reserves every recorded 2MiB unit in memblock.
+  7. Record poisoned frames: Records each hard-offlined frame's unit in
+     the table, so the next kexec'd kernel reserves it.
+
+This was initially discussed at
+https://lore.kernel.org/all/ajut_LDQGYCShApx@gmail.com/
+
+A special thanks to Kiryl and David, for feedbacks and suggestions.
+
+[1] https://arxiv.org/abs/2408.15302
+
+To: Ard Biesheuvel <ardb@kernel.org>
+To: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+To: Miaohe Lin <linmiaohe@huawei.com>
+To: Naoya Horiguchi <nao.horiguchi@gmail.com>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Cc: linux-mm@kvack.org
+Cc: rmikey@meta.com
+To: kas@kernel.org
+Cc: riel@surriel.com
+To: kexec@lists.infradead.org
+
+Signed-off-by: Breno Leitao <leitao@debian.org>
+---
+Changes in v6:
+- Rework the consumer along the lines David Hildenbrand described: read the
+  bitmap once, at parse time, and reserve each recorded unit in memblock
+  with a new MEMBLOCK_RSRV_HWPOISON flag. memmap_init_reserved_pages()
+  flags the frames PG_hwpoison, so the memmap is the only source of
+  poisoned frames from then on. memblock never allocates from a unit or
+  frees it to buddy, which also keeps early allocations off it (David)
+  * This was discussed in the MM alignement meeting/thread as well.
+- Drop the __free_pages_core() hook, the accept-and-free refactor under it
+  and the range query. Nothing queries the bitmap after parse time (David)
+- Seed the memory block poison counter from the memmap, behind
+  num_poisoned_pages, instead of walking the bitmap (David)
+- Record a hard error on a frame that was soft-offlined earlier: the hook
+  moves ahead of the MF_MSG_ALREADY_POISONED statistics guard (Sashiko)
+- Do not count inherited frames in the per-node memory failure statistics:
+  this kernel handled no failure
+- Reject a table whose units would run past the address space
+- Do not record on a host with SME active: the table is written in the
+  clear and needs a decrypted mapping
+- Do not record errors injected by software (MF_SW_SIMULATED): they are
+  not hardware faults, and a recorded bit is never cleared
+- Map the table with memremap() for recording instead of using the direct
+  map, which mem= and a crash kernel's usable range trim on arm64
+- Reserve the table's pages without adding them to memblock.memory: they
+  are no longer read through the direct map, and with mem= the extra
+  region made a CONFIG_DEBUG_VM kernel warn
+- Treat an inherited frame as a hardware failure, so unpoison_memory()
+  cannot free it, and count it as managed so that memory offlining adds up
+- Link to v5: https://patch.msgid.link/20260915-hwpoison-kho-v5-0-3bc7a57bd503@debian.org
+
+Changes in v5:
+- Free the part of the block that is not recorded instead of dropping the
+  block whole: the leftover frames were neither buddy nor poisoned nor
+  offline, so they leaked and left the block impossible to offline
+  (Sashiko)
+- Count inherited frames into the memory block when it is created.
+  memblk_nr_poison_inc() cannot run that early, and unpoisoning a frame
+  whose block counter was never incremented wrapped it to ULONG_MAX,
+  which then refuses memory_block_online() for good (Sashiko)
+- Keep the caller's end in range_contains_poisoned_memory() when the
+  start is clamped up to phys_base, rather than shifting the whole window
+  past what was asked about (Sashiko)
+- Reject an inherited table whose footprint wraps the address space,
+  which fed a negative range to memblock_add() (Sashiko)
+- Say in patch 2 why the native bitops are safe: EFI_STUB && 64BIT is
+  little-endian everywhere (Sashiko)
+- Split the accept-and-free tail of __free_pages_core() into its own
+  preparation patch at the head of the series, so the replay patch can
+  reuse it without carrying a rework of that function
+- Split the replay itself into the page flag helper, the memory block
+  counter and the __free_pages_core() hook, one per subsystem it touches
+- Split adopting an inherited table from recording into it: the parse-time
+  plumbing and the memory_failure() hook are unrelated pieces of work
+- Put the memory block counter ahead of the __free_pages_core() hook, so
+  no revision in the middle of the series flags a frame the counter does
+  not know about
+- Size the bitmap from the descriptors that become RAM rather than from
+  every descriptor in the map, which v4 argued for. Both architectures
+  gate on EFI_MEMORY_WB, so spanning that plus EFI_UNACCEPTED_MEMORY
+  stays wider than either accepts on its own while leaving out the MMIO
+  apertures. On a 5G guest the table went from 65536 to 320 bytes
+- Link to v4: https://patch.msgid.link/20260909-hwpoison-kho-v4-0-359313564495@debian.org
+
+Changes in v4:
+- Poison the inherited frames from __free_pages_core(), as each block
+  reaches the buddy allocator, instead of walking the bitmap once from
+  mm_core_init(): with CONFIG_DEFERRED_STRUCT_PAGE_INIT most struct pages
+  are not initialised there and the poison was silently lost (Kiryl)
+- Hand the table's pages to memblock at parse time, the way
+  8dbe33956d96 does for the unaccepted memory table; it is ACPI reclaim
+  memory and touching it through the direct map faulted
+- Add phys_base to the table, so a machine whose RAM starts high does not
+  pay for the hole below it (Kiryl)
+- Size the bitmap from every descriptor in the memory map rather than a
+  descriptor-type list, which was x86-only reasoning (Kiryl)
+- Drop the max_pfn clamp on the inherited bitmap size (Kiryl)
+- Drop the stale memblock.h include (Kiryl)
+- Link to v3: https://patch.msgid.link/20260826-hwpoison-kho-v3-0-6f79c4b605bc@debian.org
+
+Changes in v3:
+- Poison the inherited frames from mm_core_init() instead of reserving
+  them in memblock, so everything that keys off PG_hwpoison sees them,
+  the kexec segment placement check included (Kiryl)
+- Reserve nothing in memblock: the page flag is enough, and reserving
+  per unit that early runs into the fixed region array (Kiryl)
+- Drop the 1MB cap on the table and the unit coarsening that went with
+  it (Kiryl)
+- Size the table from the memory types arm64 turns into RAM as well, not
+  just the set setup_e820() maps to E820_TYPE_RAM (Kiryl)
+- Make CONFIG_EFI_POISONED_MEMORY unprompted, so it is on wherever its
+  dependencies allow and nobody has to decide (Kiryl, Pratyush)
+- Fold the top-of-RAM helper into its only caller and make it static,
+  rather than adding a generic libstub API
+- Fold the table build and its installation into one patch
+- Spell out the known limitations in this cover letter
+- Link to v2: https://patch.msgid.link/20260821-hwpoison-kho-v2-0-5743791e48e6@debian.org
+
+Changes in v2:
+- Replace the growable linked list of 4KB entries with a fixed-size
+  bitmap, one bit per 2MB, modeled on the unaccepted-memory table (Kiryl)
+- Record hard offlines only, by hooking action_result() instead of
+  num_poisoned_pages_inc(), which also fires for soft offline (Kiryl)
+- Allocate the table as EFI_ACPI_RECLAIM_MEMORY, so it is not System RAM
+  in the next kernel, and reuse an inherited table instead of installing
+  a second one
+- Validate the geometry of an inherited table before using it
+- Cap the table at 1MB, coarsening the unit instead of growing it
+- Restrict to 64-bit, as the unaccepted-memory table effectively is
+- Never clear a bit: an unpoison no longer un-records the unit
+- Split the table definition and the stub installer into separate patches
+- Link to v1: https://patch.msgid.link/20260717-hwpoison-kho-v1-0-9c5eda551998@debian.org
+
+To: Ard Biesheuvel <ardb@kernel.org>
+To: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+To: Miaohe Lin <linmiaohe@huawei.com>
+To: Naoya Horiguchi <nao.horiguchi@gmail.com>
+To: Andrew Morton <akpm@linux-foundation.org>
+To: David Hildenbrand <david@kernel.org>
+To: Lorenzo Stoakes <ljs@kernel.org>
+To: "Liam R. Howlett" <liam@infradead.org>
+To: Vlastimil Babka <vbabka@kernel.org>
+To: Mike Rapoport <rppt@kernel.org>
+To: Suren Baghdasaryan <surenb@google.com>
+To: Michal Hocko <mhocko@suse.com>
+To: Thomas Gleixner <tglx@kernel.org>
+To: Ingo Molnar <mingo@redhat.com>
+To: Borislav Petkov <bp@alien8.de>
+To: Dave Hansen <dave.hansen@linux.intel.com>
+To: x86@kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+To: Brendan Jackman <brendan.jackman@linux.dev>
+To: Johannes Weiner <hannes@cmpxchg.org>
+To: Zi Yan <ziy@nvidia.com>
+To: Oscar Salvador <osalvador@suse.de>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: "Rafael J. Wysocki" <rafael@kernel.org>
+To: Danilo Krummrich <dakr@kernel.org>
+Cc: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Cc: linux-mm@kvack.org
+Cc: harry@kernel.org
+Cc: linux-cxl@vger.kernel.org
+Cc: driver-core@lists.linux.dev
+To: shakeel.butt@linux.dev
+
+---
+Breno Leitao (7):
+      mm/memory-failure: efi: add the LINUX_EFI_POISONED_MEMORY configuration table
+      mm/memory-failure: libstub: install the poisoned-memory EFI table
+      mm/memory-failure: add hwpoison_boot_page() to flag an inherited frame
+      mm/memblock: add a reserved-region flag for poisoned frames
+      drivers/base/memory: count the poison a block already holds when creating it
+      mm/memory-failure: efi: reserve the inherited poisoned-memory units
+      mm/memory-failure: efi: record hardware-poisoned frames into the poisoned-memory table
+
+ arch/arm64/mm/init.c                           |   3 +
+ arch/x86/kernel/setup.c                        |   3 +
+ arch/x86/platform/efi/efi.c                    |   3 +
+ drivers/base/memory.c                          |  30 +++
+ drivers/firmware/efi/Kconfig                   |   8 +
+ drivers/firmware/efi/Makefile                  |   1 +
+ drivers/firmware/efi/efi.c                     |   8 +
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 103 +++++++++++
+ drivers/firmware/efi/libstub/efi-stub.c        |   1 +
+ drivers/firmware/efi/libstub/efistub.h         |   6 +
+ drivers/firmware/efi/libstub/x86-stub.c        |   2 +
+ drivers/firmware/efi/poison.c                  | 243 +++++++++++++++++++++++++
+ include/linux/efi.h                            |  24 +++
+ include/linux/memblock.h                       |  10 +
+ mm/internal.h                                  |   5 +
+ mm/memblock.c                                  |  80 +++++++-
+ mm/memory-failure.c                            |  61 ++++---
+ 17 files changed, 567 insertions(+), 24 deletions(-)
+---
+base-commit: a9d7ced84989ec05be09b4b8428759ef60450a0f
+change-id: 20260622-hwpoison-kho-fc9db2ada8ba
+
+Best regards,
+--  
+Breno Leitao <leitao@debian.org>
+
