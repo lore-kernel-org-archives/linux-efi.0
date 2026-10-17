@@ -1,246 +1,219 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4021953FD51;
-	Fri, 16 Oct 2026 17:06:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AB5537F01B
+	for <linux-efi@vger.kernel.org>; Sat, 17 Oct 2026 05:12:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792170397; cv=none; b=G/VRubjwY/HpHTAjO2mxmgnBtbwskRD7rSbcP0kwdGhGCpI8w2g28WsGet6NiEBsWZAgkA54oHZJcUc6SMg2JuN2VykUgg5UH58NErtM9THJ4HdSauvFAmabKybOrXonRdPUMmMR8O21JdHhOzAMNbTuY+cEXIoLtdanEzwsTek=
+	t=1792213978; cv=none; b=XKwcQuNipHKXbALEH23xDHBI+Vu+IaXdSPaZ+487Plb7Qwtrvyjk0WLjd3KS3cE8XlvzmH1qMHfy6Yl6md3514xeGbTYXyDiliRriJXvA300WasaLZoKtrlD1833SozThDpNAdvxkuaw3iBsAqr75cspPEtxolPmbIMosFL+Eo4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792170397; c=relaxed/simple;
-	bh=cq+dFtbOvjF5bRDFpILdaqjX9inVYxdxNGz98Swem/E=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OVkdlXWycLamckJPKOsIdTM7qR5G3fDwaF9fwWMb4d4RoBImbbS55voBAnkgZ9uVwnlY+CrLP0o1LQqAgPDDTRm+5ibX5R8jfzaoIGpqyW097JZmCijFFsonxc2zPEczdP5sqdedWDHwG6GqbZWzeSmzFmPOzlB3B0RonwFCpLE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dAEwm+Ll; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1792213978; c=relaxed/simple;
+	bh=Ejqdxw4Gf6xBGDVoaUoXJK/pY34MsZMAUznHjv8NV9I=;
+	h=Date:From:To:Cc:Subject:Message-ID; b=Az23WNjFodeOunz66LlvOQs/3UwhBGN172EV19GZg8x+m/Gl0NZu8R6S3Qg9Ar1+n+0UDnwbHyH4QMHTHUsk/EAJhLhPUG6ZmXwj7nDtn/HhHFerFOGHtsDPu+2RPZo/FTwepvs6pZHST6rAtaZnc44sw2cxDmrCJ7Y83ZHRIRw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=L3WCsszP; arc=none smtp.client-ip=198.175.65.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dAEwm+Ll"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 601221F000C5;
-	Fri, 16 Oct 2026 17:06:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792170396;
-	bh=BSEXDWNORjZsXLCu9GysuRDNJRkpmKxIZz1Z4Vu8yyc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=dAEwm+Ll7zWYzg0O2/opPmRwyuEcN5vqyx3FOLNDe47i4s7xuUix1uZgX/dlo2aoM
-	 gtUuBpX6Fvsl5QjvcsgAZ5oPtoDo+OMgyE8aK8spLzAERzLCaFNIJs6/Qvzl0qnuim
-	 CshJT9OrW+ZwAkEtWFTxheF0/JtB2cxxYCtpVciK8lXHSLiNWUSX1zG+Hn6EYDT6Hz
-	 MgQ0bQbHhTXuIQ+rz+pxCsR4iOPyrfRvk0p9omqb6aOluXTdX6TMvIUYLozs+lZt/Z
-	 CMVPW48qhmbZqUwBF2LfXpAqSNHOd5zr0FRgTctbs4uLs/WeE4Pk21uIXN24Gk11u6
-	 dZVi7zkFQbQoA==
-Date: Fri, 16 Oct 2026 18:06:21 +0100
-From: "Lorenzo Stoakes (ARM)" <ljs@kernel.org>
-To: Petr Pavlu <petr.pavlu@suse.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
-	Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
-	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
-	Justin Stitt <justinstitt@google.com>, Masahiro Yamada <masahiroy@kernel.org>, 
-	Alexey Gladkov <legion@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, Arnd Bergmann <arnd@arndb.de>, 
-	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
-	Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
-	Peter Zijlstra <peterz@infradead.org>, Miguel Ojeda <ojeda@kernel.org>, Boqun Feng <boqun@kernel.org>, 
-	Gary Guo <gary@garyguo.net>, =?utf-8?B?QmrDtnJu?= Roy Baron <bjorn3_gh@protonmail.com>, 
-	Benno Lossin <lossin@kernel.org>, Andreas Hindborg <a.hindborg@kernel.org>, 
-	Alice Ryhl <aliceryhl@google.com>, Trevor Gross <tmgross@umich.edu>, 
-	Danilo Krummrich <dakr@kernel.org>, Daniel Almeida <daniel.almeida@collabora.com>, 
-	Tamir Duberstein <tamird@kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, 
-	Onur =?utf-8?B?w5Z6a2Fu?= <work@onurozkan.dev>, Jonathan Corbet <corbet@lwn.net>, 
-	Randy Dunlap <rdunlap@infradead.org>, Kees Cook <kees@kernel.org>, 
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	llvm@lists.linux.dev, linux-riscv@lists.infradead.org, linux-arch@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org, 
-	linux-doc@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, linux-hardening@vger.kernel.org
-Subject: Re: [PATCH v4 14/22] modpost: emit module descriptors as assembly
-Message-ID: <atJVYDgv8ejLoIrA@gremlin>
-References: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
- <20260923-build-speedup-v4-14-73128809a4a4@kernel.org>
- <b17e9924-ca92-4cdf-b5e6-54164039e09a@suse.com>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="L3WCsszP"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1792213977; x=1823749977;
+  h=date:from:to:cc:subject:message-id;
+  bh=Ejqdxw4Gf6xBGDVoaUoXJK/pY34MsZMAUznHjv8NV9I=;
+  b=L3WCsszPRkDCudEQfjwaMU/a0NVBVKB5Kf5A8IMSA4S2gU2f2L+9c45X
+   VzszGXuSnDR/blEaX9MhDLAE+NfqOfZvYb3rwuOdGzEw0Ao7RNJNUPn7x
+   LfaDPSCI5oUBKGFHH45GbH/I7Sm5hTBuRleKfO89/L9LK3jVoYwRa/FLQ
+   9KsDmsS3iExLfdW0w5FcEjvKcT5xXAeR//tlPAkq4PXQ4YrBihySFHBlt
+   piAe8WtuWTZFYPWjpG/7jEVs1pgMbxVD/NNrdIdk2rwmRh4IMnUhdbnFQ
+   zacX66b8p1y6SCscsSCXf9daX7eFVjj1p+g0fN00+Ew/288MHmV7vGPUQ
+   A==;
+X-CSE-ConnectionGUID: qcsrcGVlSMO3dJM858q19w==
+X-CSE-MsgGUID: Qesi1uozQ0y5jj1h664gUA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11937"; a="877016"
+X-IronPort-AV: E=Sophos;i="6.27,163,1787036400"; 
+   d="scan'208";a="877016"
+Received: from fmviesa009.fm.intel.com ([10.60.135.149])
+  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Oct 2026 22:12:56 -0700
+X-CSE-ConnectionGUID: IP30AtLZQOCZ4ZBvPOzi4A==
+X-CSE-MsgGUID: dKo9C2z+TsSP2OocHhUS5w==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.27,163,1787036400"; 
+   d="scan'208";a="2467505"
+Received: from lkp-server01.sh.intel.com (HELO 0caa9d2d175c) ([10.239.97.150])
+  by fmviesa009.fm.intel.com with ESMTP; 16 Oct 2026 22:12:54 -0700
+Received: from kbuild by 0caa9d2d175c with local (Exim 4.98.2)
+	(envelope-from <lkp@intel.com>)
+	id 1xHwix-00000000J66-0ELo;
+	Sat, 17 Oct 2026 05:12:51 +0000
+Date: Sat, 17 Oct 2026 13:12:14 +0800
+From: kernel test robot <lkp@intel.com>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: linux-efi@vger.kernel.org
+Subject: [efi:next] BUILD SUCCESS
+ 002a3f5757e07edd7fbef243d823b565624bc5fb
+Message-ID: <202610171312.NzVZjq0I-lkp@intel.com>
+User-Agent: s-nail v14.9.25
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <b17e9924-ca92-4cdf-b5e6-54164039e09a@suse.com>
 
-On Fri, Oct 16, 2026 at 02:14:16PM +0200, Petr Pavlu wrote:
-> This version looks mostly ok to me, from a modules perspective. Below
-> are a few nits plus one more useful comment about handling
-> MODULE_ARCH_INIT.
+tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
+branch HEAD: 002a3f5757e07edd7fbef243d823b565624bc5fb  lkdtm: Add more EFI runtime tests
 
-Ack thanks :)
+elapsed time: 943m
 
->
-> > diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-> > index 0fd43c8a89ea..9d96459e492c 100644
-> > --- a/scripts/mod/modpost.c
-> > +++ b/scripts/mod/modpost.c
-...
-> > +/* The equivalent of KSYMTAB_FUNC()/KSYMTAB_DATA(). */
-> > +static void add_asm_ksymtab(struct buffer *buf, const struct symbol *sym)
-> > +{
-> > +	const char *name = sym->name;
-> > +
-> > +	add_asm_kstrtab(buf, sym);
-> > +
-> > +	buf_printf(buf, "\t.section \"___ksymtab+%s\", \"a\"\n", name);
-> > +	buf_printf(buf, "\t.balign %d\n", KSYM_ALIGN);
-> > +	buf_printf(buf, "__ksymtab_%s:\n", name);
-> > +	add_asm_ksym_ref(buf, sym->is_func ? MOD_FUNC_PREFIX : "", name);
-> > +	add_asm_ksym_ref(buf, "__kstrtab_", name);
-> > +	add_asm_ksym_ref(buf, "__kstrtabns_", name);
-> > +	buf_printf(buf, "\t.previous\n");
-> > +
-> > +	add_asm_kflagstab(buf, sym);
-> > +}
->
-> add_asm_kstrtab() and add_asm_kflagstab() are only called from
-> add_asm_ksymtab() and their logic is fairly short. I suggest merging
-> these functions.
+configs tested: 142
+configs skipped: 8
 
-Ack, done for v5.
+The following configs have been built successfully.
+More configs may be tested in the coming days.
 
->
-> > +
-> > +/* The equivalent of SYMBOL_CRC(). */
-> > +static void add_asm_crc(struct buffer *buf, const struct symbol *sym)
-> > +{
-> > +	buf_printf(buf, "\t.section \"___kcrctab+%s\",\"a\"\n", sym->name);
-> > +	buf_printf(buf, "\t.balign 4\n");
-> > +	buf_printf(buf, "__crc_%s:\n", sym->name);
-> > +	buf_printf(buf, "\t.long 0x%08x\n", sym->crc);
-> > +	buf_printf(buf, "\t.previous\n");
-> > +}
-> > +
-> > +static bool export_is_kept(const struct symbol *sym)
-> > +{
-> > +	return !trim_unused_exports || sym->used;
-> > +}
->
-> export_is_kept() is only called once from add_asm_exported_symbols().
-> The condition can be inlined directly there.
-
-Ack done.
-
-> > +/*
-> > + * The equivalent of:
-> > + *
-> > + *	__visible struct module __this_module __section(".gnu.linkonce.this_module")
-> > + *		= { .name = KBUILD_MODNAME, .init = init_module, .exit = cleanup_module,
-> > + *		    .arch = MODULE_ARCH_INIT };
-> > + *
-> > + * Everything not listed is zero, MODULE_ARCH_INIT included, except on m68k.
-> > + */
-> > +static void add_asm_this_module(struct buffer *buf, const struct module *mod,
-> > +				const char *modname)
-> > +{
-> > +	struct this_module_field fields[THIS_MODULE_MAX_FIELDS];
-> > +	const unsigned int nr_fields = get_this_module_fields(mod, modname, fields);
->
-> The const qualifier can be removed from the nr_fields definition to
-> match the usual kernel style.
-
-Ack done.
-
-> > +/*
-> > + * The equivalent of:
-> > + *	static const u32 ____version_ext_crcs[] __section("__version_ext_crcs") = { crc, ... };
-> > + *	static const char ____version_ext_names[] __section("__version_ext_names") = "name\0" ...;
-> > + *
-> > + * for unresolved symbols.
-> > + */
-> > +static void add_asm_extended_versions(struct buffer *buf, struct module *mod)
-> > +{
-> > +	struct symbol *sym;
-> > +
-> > +	if (!extended_modversions)
-> > +		return;
-> > +
-> > +	buf_printf(buf, "\n\t.section __version_ext_crcs,\"a\",%%progbits\n");
-> > +	buf_printf(buf, "\t.balign 4\n");
-> > +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
-> > +		if (skip_unversioned(mod, sym))
-> > +			continue;
-> > +
-> > +		buf_printf(buf, "\t.long 0x%08x\n", sym->crc);
-> > +	}
-> > +
-> > +	/*
-> > +	 * A symbol without a CRC was warned about above, and is skipped here
-> > +	 * too so that the names line up with the CRCs.
-> > +	 */
-> > +	buf_printf(buf, "\t.section __version_ext_names,\"a\",%%progbits\n");
-> > +	list_for_each_entry(sym, &mod->unresolved_symbols, list) {
-> > +		if (!sym->module || !sym->crc_valid)
-> > +			continue;
->
-> This condition must match the logic in skip_unversioned(). It would be
-> clearer to keep it only in one place by calling skip_unversioned() here
-> and adding a "silent" parameter to the function.
-
-Ack done.
-
->
-> > diff --git a/scripts/mod/module-offsets.c b/scripts/mod/module-offsets.c
-> > new file mode 100644
-> > index 000000000000..a336dd47aa33
-> > --- /dev/null
-> > +++ b/scripts/mod/module-offsets.c
-
-> > +// SPDX-License-Identifier: GPL-2.0
-> > +/*
-> > + * Layout of the structures modpost emits into *.mod.S, extracted from the
-> > + * target headers as devicetable-offsets.c does for the device tables.
-> > + */
->
-> The second part of the comment, after the comma, is superfluous. It is
-> expected that the various parts of modpost use consistent mechanisms
-> where appropriate.
-
-Ack done.
-
-> > +int main(void)
-> > +{
-> > +	DEFINE(MOD_SIZEOF_LONG, sizeof(long));
-> > +	DEFINE(MOD_PREL32_RELOCATIONS, IS_ENABLED(CONFIG_HAVE_ARCH_PREL32_RELOCATIONS));
-> > +	DEFINE(MOD_FUNC_PLABEL, IS_ENABLED(CONFIG_PARISC) && IS_ENABLED(CONFIG_64BIT));
-> > +
-> > +	DEFINE(MOD_SIZEOF_struct_module, sizeof(struct module));
-> > +	DEFINE(MOD_ALIGNOF_struct_module, __alignof__(struct module));
-> > +	OFFSET(MOD_OFF_module_name, module, name);
-> > +	OFFSET(MOD_OFF_module_init, module, init);
-> > +#ifdef CONFIG_MODULE_UNLOAD
-> > +	OFFSET(MOD_OFF_module_exit, module, exit);
-> > +#endif
-> > +#if defined(CONFIG_M68K) && defined(CONFIG_MMU)
-> > +	/* MODULE_ARCH_INIT: the only architecture where it is not all zeroes. */
-> > +	OFFSET(MOD_OFF_module_arch_fixup_start, module, arch.fixup_start);
-> > +	OFFSET(MOD_OFF_module_arch_fixup_end, module, arch.fixup_end);
-> > +#endif
->
-> I feel it is a bit of a layering violation for modpost to know how
-> individual architectures need to initialize module::arch.
-
-Yeah that is kinda gross :)
-
->
-> For now, this is probably ok. I would just remove MODULE_ARCH_INIT from
-> include/linux/module.h and arch/m68k/include/asm/module.h, along with
-> the comment referring to it in scripts/mod/modpost.c.
-
-ack done.
-
->
-> In the future, this could be avoided by having the m68k module support
-> look up the .m68k_fixup section at runtime, as other architectures
-> typically do for similar sections.
-
-Yes, arch stuff should live with the arch-specific stuff.
+tested configs:
+alpha                              allnoconfig    gcc-16.1.0
+alpha                             allyesconfig    gcc-16.1.0
+alpha                                defconfig    gcc-16.1.0
+arc                               allmodconfig    clang-24
+arc                                allnoconfig    gcc-16.1.0
+arc                               allyesconfig    clang-24
+arc                                  defconfig    gcc-16.1.0
+arc                   randconfig-1000-20261017    gcc-10.5.0
+arc                   randconfig-1001-20261017    gcc-10.5.0
+arm                                allnoconfig    gcc-16.1.0
+arm                               allyesconfig    clang-24
+arm                                  defconfig    gcc-16.1.0
+arm                   randconfig-1000-20261017    gcc-10.5.0
+arm                   randconfig-1001-20261017    gcc-10.5.0
+arm                   randconfig-1002-20261017    gcc-10.5.0
+arm                   randconfig-1003-20261017    gcc-10.5.0
+arm64                             allmodconfig    clang-24
+arm64                              allnoconfig    gcc-16.1.0
+arm64                                defconfig    gcc-16.1.0
+arm64                 randconfig-1000-20261017    clang-24
+arm64                 randconfig-1001-20261017    clang-24
+arm64                 randconfig-1002-20261017    clang-24
+arm64                 randconfig-1003-20261017    clang-24
+csky                              allmodconfig    gcc-16.1.0
+csky                               allnoconfig    gcc-16.1.0
+csky                                 defconfig    gcc-16.1.0
+csky                  randconfig-1000-20261017    clang-24
+csky                  randconfig-1001-20261017    clang-24
+hexagon                           allmodconfig    gcc-16.1.0
+hexagon                            allnoconfig    gcc-16.1.0
+hexagon                              defconfig    gcc-16.1.0
+hexagon               randconfig-1000-20261017    clang-21
+hexagon               randconfig-1001-20261017    clang-21
+i386                               allnoconfig    gcc-16.1.0
+i386        buildonly-randconfig-1000-20261017    gcc-14
+i386        buildonly-randconfig-1001-20261017    gcc-14
+i386        buildonly-randconfig-1002-20261017    gcc-14
+i386        buildonly-randconfig-1003-20261017    gcc-14
+i386        buildonly-randconfig-1004-20261017    gcc-14
+i386        buildonly-randconfig-1005-20261017    gcc-14
+i386                                 defconfig    gcc-16.1.0
+i386                  randconfig-1007-20261017    clang-22
+i386                  randconfig-1008-20261017    clang-22
+i386                  randconfig-1009-20261017    clang-22
+i386                  randconfig-1010-20261017    clang-22
+i386                  randconfig-1011-20261017    clang-22
+i386                  randconfig-1012-20261017    clang-22
+i386                  randconfig-1013-20261017    clang-22
+loongarch                         allmodconfig    clang-24
+loongarch                          allnoconfig    gcc-16.1.0
+loongarch                            defconfig    clang-24
+loongarch             randconfig-1000-20261017    clang-21
+loongarch             randconfig-1001-20261017    clang-21
+m68k                              allmodconfig    gcc-16.1.0
+m68k                               allnoconfig    gcc-16.1.0
+m68k                              allyesconfig    clang-24
+m68k                                 defconfig    clang-24
+microblaze                         allnoconfig    gcc-16.1.0
+microblaze                        allyesconfig    gcc-16.1.0
+microblaze                           defconfig    clang-24
+mips                              allmodconfig    gcc-16.1.0
+mips                               allnoconfig    gcc-16.1.0
+mips                              allyesconfig    gcc-16.1.0
+nios2                             allmodconfig    clang-20
+nios2                              allnoconfig    clang-24
+nios2                                defconfig    clang-24
+nios2                 randconfig-1000-20261017    clang-21
+nios2                 randconfig-1001-20261017    clang-21
+openrisc                          allmodconfig    clang-20
+openrisc                           allnoconfig    clang-24
+openrisc                             defconfig    gcc-16.1.0
+parisc                            allmodconfig    gcc-16.1.0
+parisc                             allnoconfig    clang-24
+parisc                            allyesconfig    clang-17
+parisc                               defconfig    gcc-16.1.0
+parisc                randconfig-1000-20261017    gcc-15.2.0
+parisc                randconfig-1001-20261017    gcc-15.2.0
+parisc64                             defconfig    clang-24
+powerpc                            allnoconfig    clang-24
+powerpc               randconfig-1000-20261017    gcc-15.2.0
+powerpc               randconfig-1001-20261017    gcc-15.2.0
+powerpc64             randconfig-1000-20261017    gcc-15.2.0
+powerpc64             randconfig-1001-20261017    gcc-15.2.0
+riscv                             allmodconfig    clang-24
+riscv                              allnoconfig    clang-24
+riscv                             allyesconfig    clang-24
+riscv                                defconfig    gcc-16.1.0
+riscv                 randconfig-1000-20261017    clang-19
+riscv                 randconfig-1001-20261017    clang-19
+s390                              allmodconfig    clang-17
+s390                               allnoconfig    clang-24
+s390                              allyesconfig    gcc-16.1.0
+s390                                 defconfig    gcc-16.1.0
+s390                  randconfig-1000-20261017    clang-19
+s390                  randconfig-1001-20261017    clang-19
+sh                                allmodconfig    gcc-16.1.0
+sh                                 allnoconfig    clang-24
+sh                                allyesconfig    clang-17
+sh                                   defconfig    gcc-14
+sh                    randconfig-1000-20261017    clang-19
+sh                    randconfig-1001-20261017    clang-19
+sparc                              allnoconfig    clang-24
+sparc                                defconfig    gcc-16.1.0
+sparc                 randconfig-1000-20261017    gcc-15.2.0
+sparc                 randconfig-1001-20261017    gcc-15.2.0
+sparc64                           allmodconfig    clang-20
+sparc64                              defconfig    gcc-14
+sparc64               randconfig-1000-20261017    gcc-15.2.0
+sparc64               randconfig-1001-20261017    gcc-15.2.0
+um                                allmodconfig    clang-17
+um                                 allnoconfig    clang-24
+um                                allyesconfig    gcc-16.1.0
+um                                   defconfig    gcc-14
+um                              i386_defconfig    gcc-14
+um                    randconfig-1000-20261017    gcc-15.2.0
+um                    randconfig-1001-20261017    gcc-15.2.0
+um                            x86_64_defconfig    gcc-14
+x86_64                             allnoconfig    clang-24
+x86_64      buildonly-randconfig-1000-20261017    gcc-14
+x86_64      buildonly-randconfig-1001-20261017    gcc-14
+x86_64      buildonly-randconfig-1002-20261017    gcc-14
+x86_64      buildonly-randconfig-1003-20261017    gcc-14
+x86_64      buildonly-randconfig-1004-20261017    gcc-14
+x86_64      buildonly-randconfig-1005-20261017    gcc-14
+x86_64                               defconfig    gcc-14
+x86_64                                   kexec    clang-22
+x86_64                randconfig-1000-20261017    gcc-14
+x86_64                randconfig-1001-20261017    gcc-14
+x86_64                randconfig-1002-20261017    gcc-14
+x86_64                randconfig-1003-20261017    gcc-14
+x86_64                randconfig-1004-20261017    gcc-14
+x86_64                randconfig-1005-20261017    gcc-14
+x86_64                                rhel-9.4    clang-22
+x86_64                            rhel-9.4-bpf    gcc-14
+x86_64                           rhel-9.4-func    clang-22
+x86_64                     rhel-9.4-kselftests    clang-22
+x86_64                          rhel-9.4-kunit    gcc-14
+x86_64                            rhel-9.4-ltp    gcc-14
+xtensa                             allnoconfig    clang-24
+xtensa                            allyesconfig    clang-20
+xtensa                randconfig-1000-20261017    gcc-15.2.0
+xtensa                randconfig-1001-20261017    gcc-15.2.0
 
 --
-Cheers, Lorenzo
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
