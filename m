@@ -1,219 +1,178 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AB5537F01B
-	for <linux-efi@vger.kernel.org>; Sat, 17 Oct 2026 05:12:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E3A833A453B;
+	Sun, 18 Oct 2026 15:48:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792213978; cv=none; b=XKwcQuNipHKXbALEH23xDHBI+Vu+IaXdSPaZ+487Plb7Qwtrvyjk0WLjd3KS3cE8XlvzmH1qMHfy6Yl6md3514xeGbTYXyDiliRriJXvA300WasaLZoKtrlD1833SozThDpNAdvxkuaw3iBsAqr75cspPEtxolPmbIMosFL+Eo4=
+	t=1792338522; cv=none; b=mQPBS+o84ndHvbu/QcdVOn1C4GVAz3KkMHOy+po/FHyJ1hA0VwMxGc05BP51inAKwA5NIHPzUfWko9D/iGKa3lou/NNSk+cymGWKFk0m/8bvXZvegGuC4+cljbBj3f9VF5uU83y7IV7IhFFaHC3rjBxnxchZ8u6V6AgcoytMMRs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792213978; c=relaxed/simple;
-	bh=Ejqdxw4Gf6xBGDVoaUoXJK/pY34MsZMAUznHjv8NV9I=;
-	h=Date:From:To:Cc:Subject:Message-ID; b=Az23WNjFodeOunz66LlvOQs/3UwhBGN172EV19GZg8x+m/Gl0NZu8R6S3Qg9Ar1+n+0UDnwbHyH4QMHTHUsk/EAJhLhPUG6ZmXwj7nDtn/HhHFerFOGHtsDPu+2RPZo/FTwepvs6pZHST6rAtaZnc44sw2cxDmrCJ7Y83ZHRIRw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=L3WCsszP; arc=none smtp.client-ip=198.175.65.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1792338522; c=relaxed/simple;
+	bh=FaRcLEUs6l15qig9t/5mUVXsio7boF41UEEgpQSRb4g=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=T55XSCI5Bv56z3Hz7iH+q3uCuqzavW/LdzfnBbLbQ+2F21ozj5E0tkJXj1ZPmVDvzuYoL1scaALTOtQ80iK+KwKQZK/ru7MWmriw/gq+yiB8Y9M/K3gqORZouwhMktbG+8pd2rix8Jejv23kJ6tLwNybtIYZvoT83l5E3tSmtZY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WVyI2KX3; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="L3WCsszP"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1792213977; x=1823749977;
-  h=date:from:to:cc:subject:message-id;
-  bh=Ejqdxw4Gf6xBGDVoaUoXJK/pY34MsZMAUznHjv8NV9I=;
-  b=L3WCsszPRkDCudEQfjwaMU/a0NVBVKB5Kf5A8IMSA4S2gU2f2L+9c45X
-   VzszGXuSnDR/blEaX9MhDLAE+NfqOfZvYb3rwuOdGzEw0Ao7RNJNUPn7x
-   LfaDPSCI5oUBKGFHH45GbH/I7Sm5hTBuRleKfO89/L9LK3jVoYwRa/FLQ
-   9KsDmsS3iExLfdW0w5FcEjvKcT5xXAeR//tlPAkq4PXQ4YrBihySFHBlt
-   piAe8WtuWTZFYPWjpG/7jEVs1pgMbxVD/NNrdIdk2rwmRh4IMnUhdbnFQ
-   zacX66b8p1y6SCscsSCXf9daX7eFVjj1p+g0fN00+Ew/288MHmV7vGPUQ
-   A==;
-X-CSE-ConnectionGUID: qcsrcGVlSMO3dJM858q19w==
-X-CSE-MsgGUID: Qesi1uozQ0y5jj1h664gUA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11937"; a="877016"
-X-IronPort-AV: E=Sophos;i="6.27,163,1787036400"; 
-   d="scan'208";a="877016"
-Received: from fmviesa009.fm.intel.com ([10.60.135.149])
-  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Oct 2026 22:12:56 -0700
-X-CSE-ConnectionGUID: IP30AtLZQOCZ4ZBvPOzi4A==
-X-CSE-MsgGUID: dKo9C2z+TsSP2OocHhUS5w==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.27,163,1787036400"; 
-   d="scan'208";a="2467505"
-Received: from lkp-server01.sh.intel.com (HELO 0caa9d2d175c) ([10.239.97.150])
-  by fmviesa009.fm.intel.com with ESMTP; 16 Oct 2026 22:12:54 -0700
-Received: from kbuild by 0caa9d2d175c with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1xHwix-00000000J66-0ELo;
-	Sat, 17 Oct 2026 05:12:51 +0000
-Date: Sat, 17 Oct 2026 13:12:14 +0800
-From: kernel test robot <lkp@intel.com>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: linux-efi@vger.kernel.org
-Subject: [efi:next] BUILD SUCCESS
- 002a3f5757e07edd7fbef243d823b565624bc5fb
-Message-ID: <202610171312.NzVZjq0I-lkp@intel.com>
-User-Agent: s-nail v14.9.25
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WVyI2KX3"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F62E1F000C8;
+	Sun, 18 Oct 2026 15:48:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1792338520;
+	bh=qHr+ZYKSpAzCi10EtcwRrDzJJq6BBKkyzbps+RPUef0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=WVyI2KX3sfSFb7oZBIkg5vyFZX7+LpvwVP7fn4Cty10Z+Y1LmZOfywyVqCXWWjkZk
+	 w0HsKNxrIpDN+fTkwgMX01zxZ9pMY6N/P1LtrU17V8ZUMVAxbiAmgrPDGg7W+Rjs6i
+	 cOUCAgudB6PnoTQaLURK0fj6/ZYFFSlnOyU9KKE/6KmvZiNJKMOPTK8W4Rny4GZZn5
+	 dnzO8E7iP9hzjx0W6bJF+lnhorAfjoibm0p1V0l9L9VW6uVghDWolJvqlzthVu28XZ
+	 /BYjpM8dC6pSBrEBdq8Xis70LV4n4Q0dBgk6Rq7VtYXCr+VagK8d6QqHe7hk60/2QA
+	 1AcOlXaFgMXKQ==
+Date: Sun, 18 Oct 2026 17:48:34 +0200
+From: Christian Brauner <brauner@kernel.org>
+To: Andreas Gruenbacher <agruenba@redhat.com>
+Cc: Jan Kara <jack@suse.com>, Al Viro <viro@zeniv.linux.org.uk>, 
+	ecryptfs@vger.kernel.org, linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net, 
+	linux-nilfs@vger.kernel.org, exfat@lists.linux.dev, linux-fsdevel@vger.kernel.org, 
+	ntfs@lists.linux.dev, ocfs2-devel@lists.linux.dev, linux-btrfs@vger.kernel.org, 
+	gfs2@lists.linux.dev, linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org, 
+	linux-xfs@vger.kernel.org, stable@vger.kernel.org
+Subject: Re: [PATCH RFC 20/28] gfs2: wait for a pending withdraw before
+ remounting read-only
+Message-ID: <20261018-ungemacht-sodbrennen-hausordnung-42d33a4f7098@brauner>
+References: <20261012-work-fs-sb_rdonly-v1-0-60743a3dc326@kernel.org>
+ <20261012-work-fs-sb_rdonly-v1-20-60743a3dc326@kernel.org>
+ <CAHc6FU5bdAjABRm=bnH68b2f66TZTDZ8sPdatLB2fS7-55U=yw@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAHc6FU5bdAjABRm=bnH68b2f66TZTDZ8sPdatLB2fS7-55U=yw@mail.gmail.com>
 
-tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
-branch HEAD: 002a3f5757e07edd7fbef243d823b565624bc5fb  lkdtm: Add more EFI runtime tests
+On Fri, Oct 16, 2026 at 02:32:01AM +0200, Andreas Gruenbacher wrote:
+> Christian,
+> 
+> On Mon, Oct 12, 2026 at 1:27 PM Christian Brauner <brauner@kernel.org> wrote:
+> > Since commit 9c4a3de6cd5b ("gfs2: Asynchronous withdraw") most of a
+> > withdraw happens in do_withdraw() from a work item and SDF_JOURNAL_LIVE
+> > stays set until it ran. A remount to read-only in that window goes
+> > through gfs2_make_fs_ro(). Its log flushes bail out early on the
+> > withdrawn filesystem before FLUSH_SHUTDOWN can clear SDF_JOURNAL_LIVE
+> > and then gfs2_quota_cleanup() hits its BUG_ON():
+> >
+> >   kernel BUG at fs/gfs2/quota.c:1532!
+> >   RIP: 0010:gfs2_quota_cleanup+0x562/0x6b0
+> >    gfs2_make_fs_ro+0xf3/0x2e0
+> >    gfs2_reconfigure+0x42e/0xfd0
+> >    reconfigure_super+0x437/0xb20
+> >
+> > Just flushing the withdraw work before the remount isn't enough.
+> > gfs2_withdraw() sets SDF_WITHDRAWN, calls dump_stack() and only then
+> > queues the work. So a remount can see a withdrawn filesystem while
+> > there's nothing to flush yet. And a withdraw can also start in the
+> > middle of gfs2_make_fs_ro().
+> >
+> > So let do_withdraw() wake up waiters when it clears SDF_JOURNAL_LIVE and
+> > let gfs2_make_fs_ro() wait for the bit after its log flushes, right
+> > before gfs2_quota_cleanup(). On a healthy filesystem the shutdown flush
+> > already cleared it. umount doesn't need to wait. gfs2_put_super() sets
+> > SDF_NORECOVERY first and gfs2_quota_cleanup() only BUGs without it. Once
+> > the bit is clear the journal isn't live anymore and gfs2_make_fs_ro()
+> > doesn't write anything.
+> >
+> > gfs2_make_fs_rw() can leave the bit set on a withdrawn filesystem as
+> > well. It checks for a withdraw and then sets SDF_JOURNAL_LIVE. If
+> > do_withdraw() runs in between it finds the journal not live yet and
+> > returns. Nothing clears the bit then and the next remount to read-only
+> > waits for it forever. So check for the withdraw and set the bit under
+> > sd_log_flush_lock, which do_withdraw() holds while it tests the bit.
+> > Then either the remount sees the withdraw or do_withdraw() sees the live
+> > journal.
+> >
+> > Reproducer, lock_nolock: a SCHED_FIFO task writes 1 to the withdraw
+> > sysfs knob from cpu 1 and keeps cpu 1 busy (RT throttling and cpu 1's
+> > fair server disabled) so do_withdraw() can't run, then from cpu 2:
+> >
+> >   mount -o remount,ro /mnt
+> >
+> > On lock_dlm the window lasts as long as the withdraw helper runs. The
+> > window before the work is queued can be widened with a kprobe on
+> > dump_stack_lvl() that delays the task writing to the withdraw knob by a
+> > few seconds. A remount to read-only or sysrq u in that window hits the
+> > same BUG_ON().
+> >
+> > Fixes: 9c4a3de6cd5b ("gfs2: Asynchronous withdraw")
+> > Cc: stable@vger.kernel.org
+> > Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+> > ---
+> >  fs/gfs2/super.c | 22 ++++++++++++++++++----
+> >  fs/gfs2/util.c  |  2 +-
+> >  2 files changed, 19 insertions(+), 5 deletions(-)
+> >
+> > diff --git a/fs/gfs2/super.c b/fs/gfs2/super.c
+> > index 06302c29340f..1d7b39354d65 100644
+> > --- a/fs/gfs2/super.c
+> > +++ b/fs/gfs2/super.c
+> > @@ -147,12 +147,23 @@ int gfs2_make_fs_rw(struct gfs2_sbd *sdp)
+> >         }
+> >
+> >         error = gfs2_quota_init(sdp);
+> > -       if (!error && gfs2_withdrawn(sdp)) {
+> > -               gfs2_quota_cleanup(sdp);
+> > +       if (error)
+> > +               return error;
+> > +
+> > +       /*
+> > +        * do_withdraw() only takes a live journal down. Check for a withdraw
+> > +        * under the lock it holds for that so that either we see the withdraw
+> > +        * or it sees the journal live. Otherwise gfs2_make_fs_ro() waits for
+> > +        * the bit forever.
+> > +        */
+> > +       down_write(&sdp->sd_log_flush_lock);
+> > +       if (gfs2_withdrawn(sdp))
+> >                 error = -EIO;
+> > -       }
+> > -       if (!error)
+> > +       else
+> >                 set_bit(SDF_JOURNAL_LIVE, &sdp->sd_flags);
+> > +       up_write(&sdp->sd_log_flush_lock);
+> > +       if (error)
+> > +               gfs2_quota_cleanup(sdp);
+> >         return error;
+> >  }
+> >
+> > @@ -565,6 +576,9 @@ void gfs2_make_fs_ro(struct gfs2_sbd *sdp)
+> >                                    HZ * 5);
+> >                 gfs2_assert_warn(sdp, gfs2_log_is_empty(sdp));
+> >         }
+> > +       /* A withdraw that do_withdraw() didn't finish yet leaves it live. */
+> > +       if (!test_bit(SDF_NORECOVERY, &sdp->sd_flags))
+> > +               wait_on_bit(&sdp->sd_flags, SDF_JOURNAL_LIVE, TASK_UNINTERRUPTIBLE);
+> >         gfs2_quota_cleanup(sdp);
+> >  }
+> >
+> > diff --git a/fs/gfs2/util.c b/fs/gfs2/util.c
+> > index 83b8bb6446e5..1535ce2b7aa8 100644
+> > --- a/fs/gfs2/util.c
+> > +++ b/fs/gfs2/util.c
+> > @@ -122,7 +122,7 @@ static void do_withdraw(struct gfs2_sbd *sdp)
+> >                 up_write(&sdp->sd_log_flush_lock);
+> >                 return;
+> >         }
+> > -       clear_bit(SDF_JOURNAL_LIVE, &sdp->sd_flags);
+> > +       clear_and_wake_up_bit(SDF_JOURNAL_LIVE, &sdp->sd_flags);
+> >         gfs2_ail_drain(sdp); /* frees all transactions */
+> >         up_write(&sdp->sd_log_flush_lock);
+> >
+> >
+> > --
+> > 2.53.0
+> >
+> 
+> this looks good all around, thank you very much. Can I add it to my gfs2 queue?
 
-elapsed time: 943m
-
-configs tested: 142
-configs skipped: 8
-
-The following configs have been built successfully.
-More configs may be tested in the coming days.
-
-tested configs:
-alpha                              allnoconfig    gcc-16.1.0
-alpha                             allyesconfig    gcc-16.1.0
-alpha                                defconfig    gcc-16.1.0
-arc                               allmodconfig    clang-24
-arc                                allnoconfig    gcc-16.1.0
-arc                               allyesconfig    clang-24
-arc                                  defconfig    gcc-16.1.0
-arc                   randconfig-1000-20261017    gcc-10.5.0
-arc                   randconfig-1001-20261017    gcc-10.5.0
-arm                                allnoconfig    gcc-16.1.0
-arm                               allyesconfig    clang-24
-arm                                  defconfig    gcc-16.1.0
-arm                   randconfig-1000-20261017    gcc-10.5.0
-arm                   randconfig-1001-20261017    gcc-10.5.0
-arm                   randconfig-1002-20261017    gcc-10.5.0
-arm                   randconfig-1003-20261017    gcc-10.5.0
-arm64                             allmodconfig    clang-24
-arm64                              allnoconfig    gcc-16.1.0
-arm64                                defconfig    gcc-16.1.0
-arm64                 randconfig-1000-20261017    clang-24
-arm64                 randconfig-1001-20261017    clang-24
-arm64                 randconfig-1002-20261017    clang-24
-arm64                 randconfig-1003-20261017    clang-24
-csky                              allmodconfig    gcc-16.1.0
-csky                               allnoconfig    gcc-16.1.0
-csky                                 defconfig    gcc-16.1.0
-csky                  randconfig-1000-20261017    clang-24
-csky                  randconfig-1001-20261017    clang-24
-hexagon                           allmodconfig    gcc-16.1.0
-hexagon                            allnoconfig    gcc-16.1.0
-hexagon                              defconfig    gcc-16.1.0
-hexagon               randconfig-1000-20261017    clang-21
-hexagon               randconfig-1001-20261017    clang-21
-i386                               allnoconfig    gcc-16.1.0
-i386        buildonly-randconfig-1000-20261017    gcc-14
-i386        buildonly-randconfig-1001-20261017    gcc-14
-i386        buildonly-randconfig-1002-20261017    gcc-14
-i386        buildonly-randconfig-1003-20261017    gcc-14
-i386        buildonly-randconfig-1004-20261017    gcc-14
-i386        buildonly-randconfig-1005-20261017    gcc-14
-i386                                 defconfig    gcc-16.1.0
-i386                  randconfig-1007-20261017    clang-22
-i386                  randconfig-1008-20261017    clang-22
-i386                  randconfig-1009-20261017    clang-22
-i386                  randconfig-1010-20261017    clang-22
-i386                  randconfig-1011-20261017    clang-22
-i386                  randconfig-1012-20261017    clang-22
-i386                  randconfig-1013-20261017    clang-22
-loongarch                         allmodconfig    clang-24
-loongarch                          allnoconfig    gcc-16.1.0
-loongarch                            defconfig    clang-24
-loongarch             randconfig-1000-20261017    clang-21
-loongarch             randconfig-1001-20261017    clang-21
-m68k                              allmodconfig    gcc-16.1.0
-m68k                               allnoconfig    gcc-16.1.0
-m68k                              allyesconfig    clang-24
-m68k                                 defconfig    clang-24
-microblaze                         allnoconfig    gcc-16.1.0
-microblaze                        allyesconfig    gcc-16.1.0
-microblaze                           defconfig    clang-24
-mips                              allmodconfig    gcc-16.1.0
-mips                               allnoconfig    gcc-16.1.0
-mips                              allyesconfig    gcc-16.1.0
-nios2                             allmodconfig    clang-20
-nios2                              allnoconfig    clang-24
-nios2                                defconfig    clang-24
-nios2                 randconfig-1000-20261017    clang-21
-nios2                 randconfig-1001-20261017    clang-21
-openrisc                          allmodconfig    clang-20
-openrisc                           allnoconfig    clang-24
-openrisc                             defconfig    gcc-16.1.0
-parisc                            allmodconfig    gcc-16.1.0
-parisc                             allnoconfig    clang-24
-parisc                            allyesconfig    clang-17
-parisc                               defconfig    gcc-16.1.0
-parisc                randconfig-1000-20261017    gcc-15.2.0
-parisc                randconfig-1001-20261017    gcc-15.2.0
-parisc64                             defconfig    clang-24
-powerpc                            allnoconfig    clang-24
-powerpc               randconfig-1000-20261017    gcc-15.2.0
-powerpc               randconfig-1001-20261017    gcc-15.2.0
-powerpc64             randconfig-1000-20261017    gcc-15.2.0
-powerpc64             randconfig-1001-20261017    gcc-15.2.0
-riscv                             allmodconfig    clang-24
-riscv                              allnoconfig    clang-24
-riscv                             allyesconfig    clang-24
-riscv                                defconfig    gcc-16.1.0
-riscv                 randconfig-1000-20261017    clang-19
-riscv                 randconfig-1001-20261017    clang-19
-s390                              allmodconfig    clang-17
-s390                               allnoconfig    clang-24
-s390                              allyesconfig    gcc-16.1.0
-s390                                 defconfig    gcc-16.1.0
-s390                  randconfig-1000-20261017    clang-19
-s390                  randconfig-1001-20261017    clang-19
-sh                                allmodconfig    gcc-16.1.0
-sh                                 allnoconfig    clang-24
-sh                                allyesconfig    clang-17
-sh                                   defconfig    gcc-14
-sh                    randconfig-1000-20261017    clang-19
-sh                    randconfig-1001-20261017    clang-19
-sparc                              allnoconfig    clang-24
-sparc                                defconfig    gcc-16.1.0
-sparc                 randconfig-1000-20261017    gcc-15.2.0
-sparc                 randconfig-1001-20261017    gcc-15.2.0
-sparc64                           allmodconfig    clang-20
-sparc64                              defconfig    gcc-14
-sparc64               randconfig-1000-20261017    gcc-15.2.0
-sparc64               randconfig-1001-20261017    gcc-15.2.0
-um                                allmodconfig    clang-17
-um                                 allnoconfig    clang-24
-um                                allyesconfig    gcc-16.1.0
-um                                   defconfig    gcc-14
-um                              i386_defconfig    gcc-14
-um                    randconfig-1000-20261017    gcc-15.2.0
-um                    randconfig-1001-20261017    gcc-15.2.0
-um                            x86_64_defconfig    gcc-14
-x86_64                             allnoconfig    clang-24
-x86_64      buildonly-randconfig-1000-20261017    gcc-14
-x86_64      buildonly-randconfig-1001-20261017    gcc-14
-x86_64      buildonly-randconfig-1002-20261017    gcc-14
-x86_64      buildonly-randconfig-1003-20261017    gcc-14
-x86_64      buildonly-randconfig-1004-20261017    gcc-14
-x86_64      buildonly-randconfig-1005-20261017    gcc-14
-x86_64                               defconfig    gcc-14
-x86_64                                   kexec    clang-22
-x86_64                randconfig-1000-20261017    gcc-14
-x86_64                randconfig-1001-20261017    gcc-14
-x86_64                randconfig-1002-20261017    gcc-14
-x86_64                randconfig-1003-20261017    gcc-14
-x86_64                randconfig-1004-20261017    gcc-14
-x86_64                randconfig-1005-20261017    gcc-14
-x86_64                                rhel-9.4    clang-22
-x86_64                            rhel-9.4-bpf    gcc-14
-x86_64                           rhel-9.4-func    clang-22
-x86_64                     rhel-9.4-kselftests    clang-22
-x86_64                          rhel-9.4-kunit    gcc-14
-x86_64                            rhel-9.4-ltp    gcc-14
-xtensa                             allnoconfig    clang-24
-xtensa                            allyesconfig    clang-20
-xtensa                randconfig-1000-20261017    gcc-15.2.0
-xtensa                randconfig-1001-20261017    gcc-15.2.0
-
---
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+I was planning to just provide a stable branch for everyone to pull post
+-rc1. Then you can just pull that in?
