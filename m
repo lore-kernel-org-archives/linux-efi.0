@@ -1,104 +1,126 @@
-Received: from canpmsgout04.his.huawei.com (canpmsgout04.his.huawei.com [113.46.200.219])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5390447DD44;
-	Mon, 19 Oct 2026 08:52:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=113.46.200.219
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0172346F4A4;
+	Mon, 19 Oct 2026 09:27:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792399935; cv=none; b=nvFrYrxe64NiGQS67N/EAUAnLuq3WAkWwSZzTz+xZd+BD3hTjoJt2JtEiuD2iiTgo0rl9k7SmMhk+n7I2cTMW5PfMvL1MYam3PL223lhFjKKrHe4LyBgj8ixgGSOge7bfSailw/at2A2NJaQSyvEUWotdZAZAjHM5e4hVG2EZR4=
+	t=1792402065; cv=none; b=peGOF/JK0ektOqrH5kTm4nXV4hhZfLxL3Muwm1vU4MKhZVM6q4DZwbZtsumXGZzgXSZdGsuHp/eXCVMG2zmpchc6LEOiokzoIHI5b7uEdH+HjnurdYC2cleTRTQHyLkqaGh3GheT8E7QWSFPjKErVLIO5z80YmS7eDoRGPfW5CM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792399935; c=relaxed/simple;
-	bh=MUCbYR8v18SbB6OH/HVYNU3LttmfdwnVvjpPi4IMhV0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=P3ZTGbRmsWE/URLWHAiL+Vh9CLk3hxAadxeiJQuB/zzyZpSbefOurNGCEFVXAmTe40I0bmjzvKliurPX7YEsJmXMR8gO2kPPSJNi4pgSBIVd/0DrDkg7GEJT3wEP0z2cVQT9fXz2jXnR3pTWO8tQjxwz6t2w9kIuAIsLFz+NF48=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b=GT1bZLoW; arc=none smtp.client-ip=113.46.200.219
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
+	s=arc-20240116; t=1792402065; c=relaxed/simple;
+	bh=U3knIE2Md9Zc3CX5N/xS+XFo6RIrwAE/fq4iSyMC2ck=;
+	h=Date:Message-ID:From:To:Cc:Subject:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=JvyX0ls0DU4qmD7Qeq/FnQvjOcuBzfOahIY9s/R4O24/nEXWivj7Jz1iPvQLjiP7sNHuDZcqXFrPYn1j4k65NMBZu7icSSrAWDpvgSDc4TYcsRU/LBjLEYMP1FYN1FtBgeCgOS/tsuleBu8+WCAy0uJ6W4pU3/Iopx8Wv7X2Ykw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XOPXKQ6+; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b="GT1bZLoW"
-dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
-	c=relaxed/relaxed; q=dns/txt;
-	h=From;
-	bh=9RA/hcHJY3Xat3tCcIdPXsEW1mdR/MAvb3pTyuaKtH8=;
-	b=GT1bZLoWEeUhVI9pHxVGG5Ih5t07PJ7PhNfPRlbaE6gxZFAUryRnYskkR/n2v4K6+kzhR3gNZ
-	GFY97Pdf5N+UsxDTpm2dJa7f5PXuLu/jkhwrISX8RblokF3/07EYt7DotxFJMl8Kpy6VH79B1q0
-	qJGqGHYJkgZmEVNFdymwEF4=
-Received: from mail.maildlp.com (unknown [172.19.162.223])
-	by canpmsgout04.his.huawei.com (SkyGuard) with ESMTPS id 4j7TnJ4Sr4z1prlN;
-	Mon, 19 Oct 2026 16:52:04 +0800 (CST)
-Received: from kwepemk300013.china.huawei.com (unknown [7.202.194.231])
-	by mail.maildlp.com (Postfix) with ESMTPS id 47EFD40575;
-	Mon, 19 Oct 2026 16:52:07 +0800 (CST)
-Received: from [10.67.121.183] (10.67.121.183) by
- kwepemk300013.china.huawei.com (7.202.194.231) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.45; Mon, 19 Oct 2026 16:52:05 +0800
-Message-ID: <9eb6e0fe-5d8a-499c-b19b-ce73fe982451@huawei.com>
-Date: Mon, 19 Oct 2026 16:52:04 +0800
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XOPXKQ6+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 977821F000C4;
+	Mon, 19 Oct 2026 09:27:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1792402064;
+	bh=2OjBa7iaXXaZQxUImtISWJdVBXlfSGVvuUO6E60OqkI=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References;
+	b=XOPXKQ6+hgTicpmygm4YVwbYVNQE6k/Fiz83sSfeaoX8WBuh1j7Xfg0D2c8jvn1AR
+	 qHTt+6p8qZBnji04u7xtNmJWcLCvWaVVLzmi15fprhdlHJc8taL384XZUdP/yaLcwF
+	 cV3oYIJXUfoBKrdPUBx1KFnhC3NsDc9mHWs2oYlbDqcoam/qAR0zSUE5WiXOipaX07
+	 IoPT5H8nYD8KhLtXHJe6DfafGyxQm8k5EOXZk5bDRV1AD+6FvKjsZ0ANbG8HUDEz5K
+	 OSiPVBuICeS2UBpm2921pBWeEPp0EJgt+UoRY5Z3I4k4P7ivHQIBYQACRk8O3L4pRE
+	 m5LsGKqI2zSPg==
+Received: from sofa.misterjones.org ([185.219.108.64] helo=goblin-girl.misterjones.org)
+	by disco-boy.misterjones.org with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.98.2)
+	(envelope-from <maz@kernel.org>)
+	id 1xIjeg-00000004Z9Z-20hE;
+	Mon, 19 Oct 2026 09:27:42 +0000
+Date: Mon, 19 Oct 2026 10:27:40 +0100
+Message-ID: <86zewayr8z.wl-maz@kernel.org>
+From: Marc Zyngier <maz@kernel.org>
+To: Jinqian Yang <yangjinqian1@huawei.com>
+Cc: Kristina =?UTF-8?B?TWFydMWhZW5rbw==?=
+ <kristina.martsenko@arm.com>,<linux-arm-kernel@lists.infradead.org>,
+ <linux-acpi@vger.kernel.org>,<kvmarm@lists.linux.dev>,
+ <linux-efi@vger.kernel.org>,	Catalin Marinas <catalin.marinas@arm.com>,
+	Will Deacon <will@kernel.org>,	Mark Rutland <mark.rutland@arm.com>,	Ryan
+ Roberts <ryan.roberts@arm.com>,	David Hildenbrand <david@kernel.org>,
+	Lorenzo Stoakes <ljs@kernel.org>,	Linu Cherian <linu.cherian@arm.com>,
+	Anshuman Khandual <anshuman.khandual@arm.com>,	Lorenzo Pieralisi
+ <lpieralisi@kernel.org>,	Hanjun Guo <guohanjun@huawei.com>,	Sudeep Holla
+ <sudeep.holla@kernel.org>,	Oliver Upton <oupton@kernel.org>,	Fuad Tabba
+ <fuad.tabba@linux.dev>,	Joey Gouly <joey.gouly@arm.com>,	Steffen Eiden
+ <seiden@linux.ibm.com>,	Suzuki K Poulose <suzuki.poulose@arm.com>,	Zenghui
+ Yu <yuzenghui@huawei.com>,	Ard Biesheuvel <ardb@kernel.org>,	Ilias
+ Apalodimas <ilias.apalodimas@linaro.org>
+Subject: Re: [RFC 00/12] arm64: Add support for TLBI domains
+In-Reply-To: <9eb6e0fe-5d8a-499c-b19b-ce73fe982451@huawei.com>
+References: <20261001110655.461473-1-kristina.martsenko@arm.com>
+	<9eb6e0fe-5d8a-499c-b19b-ce73fe982451@huawei.com>
+User-Agent: Wanderlust/2.15.9 (Almost Unreal) SEMI-EPG/1.14.7 (Harue)
+ FLIM-LB/1.14.9 (=?UTF-8?B?R29qxY0=?=) APEL-LB/10.8 EasyPG/1.0.0 Emacs/30.1
+ (aarch64-unknown-linux-gnu) MULE/6.0 (HANACHIRUSATO)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC 00/12] arm64: Add support for TLBI domains
-To: =?UTF-8?Q?Kristina_Mart=C5=A1enko?= <kristina.martsenko@arm.com>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-acpi@vger.kernel.org>,
-	<kvmarm@lists.linux.dev>, <linux-efi@vger.kernel.org>
-CC: Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
-	Mark Rutland <mark.rutland@arm.com>, Ryan Roberts <ryan.roberts@arm.com>,
-	David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>, Linu
- Cherian <linu.cherian@arm.com>, Anshuman Khandual
-	<anshuman.khandual@arm.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>,
-	Hanjun Guo <guohanjun@huawei.com>, Sudeep Holla <sudeep.holla@kernel.org>,
-	Marc Zyngier <maz@kernel.org>, Oliver Upton <oupton@kernel.org>, Fuad Tabba
-	<fuad.tabba@linux.dev>, Joey Gouly <joey.gouly@arm.com>, Steffen Eiden
-	<seiden@linux.ibm.com>, Suzuki K Poulose <suzuki.poulose@arm.com>, Zenghui Yu
-	<yuzenghui@huawei.com>, Ard Biesheuvel <ardb@kernel.org>, Ilias Apalodimas
-	<ilias.apalodimas@linaro.org>
-References: <20261001110655.461473-1-kristina.martsenko@arm.com>
-From: Jinqian Yang <yangjinqian1@huawei.com>
-In-Reply-To: <20261001110655.461473-1-kristina.martsenko@arm.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: kwepems500001.china.huawei.com (7.221.188.70) To
- kwepemk300013.china.huawei.com (7.202.194.231)
+MIME-Version: 1.0 (generated by SEMI-EPG 1.14.7 - "Harue")
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+X-SA-Exim-Connect-IP: 185.219.108.64
+X-SA-Exim-Rcpt-To: yangjinqian1@huawei.com, kristina.martsenko@arm.com, linux-arm-kernel@lists.infradead.org, linux-acpi@vger.kernel.org, kvmarm@lists.linux.dev, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will@kernel.org, mark.rutland@arm.com, ryan.roberts@arm.com, david@kernel.org, ljs@kernel.org, linu.cherian@arm.com, anshuman.khandual@arm.com, lpieralisi@kernel.org, guohanjun@huawei.com, sudeep.holla@kernel.org, oupton@kernel.org, fuad.tabba@linux.dev, joey.gouly@arm.com, seiden@linux.ibm.com, suzuki.poulose@arm.com, yuzenghui@huawei.com, ardb@kernel.org, ilias.apalodimas@linaro.org
+X-SA-Exim-Mail-From: maz@kernel.org
+X-SA-Exim-Scanned: No (on disco-boy.misterjones.org); SAEximRunCond expanded to false
 
-Hi,
-
-On 2026/10/1 19:06, Kristina Martšenko wrote:
+On Mon, 19 Oct 2026 09:52:04 +0100,
+Jinqian Yang <yangjinqian1@huawei.com> wrote:
+>=20
 > Hi,
-> 
-> This series allows the kernel to use TLBI domains. TLBI domains (FEAT_TLBID) is
-> an Arm architecture feature that enables a TLB invalidation to target a subset
-> of CPUs instead of the whole system. It can improve performance on systems with
-> many CPUs. TLBID is not yet part of the Arm Architecture Reference Manual but
-> some of it is described in the latest XML [1].
-> 
-> The goal of this series is to send TLBI commands only to the CPUs where a
-> process has run (i.e. where its page tables have been installed). The last
-> patch explains a bit about how it works. This is an RFC since I'm not familiar
-> with the kernel's TLB/mm code and I'd like feedback on whether the general
-> approach is correct.
-> 
+>=20
+> On 2026/10/1 19:06, Kristina Mart=C5=A1enko wrote:
+> > Hi,
+> >=20
+> > This series allows the kernel to use TLBI domains. TLBI domains (FEAT_T=
+LBID) is
+> > an Arm architecture feature that enables a TLB invalidation to target a=
+ subset
+> > of CPUs instead of the whole system. It can improve performance on syst=
+ems with
+> > many CPUs. TLBID is not yet part of the Arm Architecture Reference Manu=
+al but
+> > some of it is described in the latest XML [1].
+> >=20
+> > The goal of this series is to send TLBI commands only to the CPUs where=
+ a
+> > process has run (i.e. where its page tables have been installed). The l=
+ast
+> > patch explains a bit about how it works. This is an RFC since I'm not f=
+amiliar
+> > with the kernel's TLB/mm code and I'd like feedback on whether the gene=
+ral
+> > approach is correct.
+> >=20
+>=20
+> Thanks for posting this series.
+>=20
+> I'm working on the KVM side of TLBID, and have a series that
+> virtualizes TLBI domains for guests. It includes:
+>=20
+>  - per-vCPU vDomain configuration via a new capability and
+>    two ioctls
+>  - VTLBID_EL2 programming at vCPU load/put, mapping vDomains
+>    to physical domains
+>  - a guest visible TLBIDIDR_EL1 with virtual domain counts,
+>    and conditional exposure of ID_AA64MMFR4_EL1.TLBID
+>=20
+> You mentioned you planned to look at KVM support in your next
+> version. Would it be OK for us to post this as an RFC on top
+> of your series? :)
 
-Thanks for posting this series.
-
-I'm working on the KVM side of TLBID, and have a series that
-virtualizes TLBI domains for guests. It includes:
-
-  - per-vCPU vDomain configuration via a new capability and
-    two ioctls
-  - VTLBID_EL2 programming at vCPU load/put, mapping vDomains
-    to physical domains
-  - a guest visible TLBIDIDR_EL1 with virtual domain counts,
-    and conditional exposure of ID_AA64MMFR4_EL1.TLBID
-
-You mentioned you planned to look at KVM support in your next
-version. Would it be OK for us to post this as an RFC on top
-of your series? :)
+It is always OK to post patches, but don't expect much reviewing to
+take place until things have settled on the host side of things.
 
 Thanks,
-Jinqian
 
+	M.
+
+--=20
+Without deviation from the norm, progress is not possible.
