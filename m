@@ -1,46 +1,80 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f47.google.com (mail-pj1-f47.google.com [209.85.216.47])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E3A833A453B;
-	Sun, 18 Oct 2026 15:48:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 064C847FB03
+	for <linux-efi@vger.kernel.org>; Mon, 19 Oct 2026 06:14:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792338522; cv=none; b=mQPBS+o84ndHvbu/QcdVOn1C4GVAz3KkMHOy+po/FHyJ1hA0VwMxGc05BP51inAKwA5NIHPzUfWko9D/iGKa3lou/NNSk+cymGWKFk0m/8bvXZvegGuC4+cljbBj3f9VF5uU83y7IV7IhFFaHC3rjBxnxchZ8u6V6AgcoytMMRs=
+	t=1792390494; cv=none; b=WR09g0lOE4BDDOZwagFPcXs+ih/n/5AoL9XsU5P3kZO2juYnHxuU6GCdXLho5Tryb/tLFmBQ5i1Ctl2qkOLoEbRR9u+sKMPhtdfSLLNIz4X8Di/l/1eAJHfTxTZ4vVVjRO7VZcLOIWppDTvQWMS9+A6+3G47iqB/Sa9wk7e6KFE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792338522; c=relaxed/simple;
-	bh=FaRcLEUs6l15qig9t/5mUVXsio7boF41UEEgpQSRb4g=;
+	s=arc-20240116; t=1792390494; c=relaxed/simple;
+	bh=hLviHrUQcnY9d6Hs59o7A7DhG6hJV3vxIcScsJNeYyM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=T55XSCI5Bv56z3Hz7iH+q3uCuqzavW/LdzfnBbLbQ+2F21ozj5E0tkJXj1ZPmVDvzuYoL1scaALTOtQ80iK+KwKQZK/ru7MWmriw/gq+yiB8Y9M/K3gqORZouwhMktbG+8pd2rix8Jejv23kJ6tLwNybtIYZvoT83l5E3tSmtZY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WVyI2KX3; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=CDYP8HL8qyuh1lnz7lSpnoLFVjI+grYm+P155hpQSna2Xz8Y95PclxJbaCKCaMLFV+qTiI8OURf0A3clr6Z/6wyEO1MhHT2TEE/zjJr+3e9k2MZRhQM33Sy4CPJ6lHhSe5b1ASF7kNZy3crIVDUtlq42wRel5ZHqq3TLC9bUOqs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=b15sAq9N; arc=none smtp.client-ip=209.85.216.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WVyI2KX3"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F62E1F000C8;
-	Sun, 18 Oct 2026 15:48:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792338520;
-	bh=qHr+ZYKSpAzCi10EtcwRrDzJJq6BBKkyzbps+RPUef0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=WVyI2KX3sfSFb7oZBIkg5vyFZX7+LpvwVP7fn4Cty10Z+Y1LmZOfywyVqCXWWjkZk
-	 w0HsKNxrIpDN+fTkwgMX01zxZ9pMY6N/P1LtrU17V8ZUMVAxbiAmgrPDGg7W+Rjs6i
-	 cOUCAgudB6PnoTQaLURK0fj6/ZYFFSlnOyU9KKE/6KmvZiNJKMOPTK8W4Rny4GZZn5
-	 dnzO8E7iP9hzjx0W6bJF+lnhorAfjoibm0p1V0l9L9VW6uVghDWolJvqlzthVu28XZ
-	 /BYjpM8dC6pSBrEBdq8Xis70LV4n4Q0dBgk6Rq7VtYXCr+VagK8d6QqHe7hk60/2QA
-	 1AcOlXaFgMXKQ==
-Date: Sun, 18 Oct 2026 17:48:34 +0200
-From: Christian Brauner <brauner@kernel.org>
-To: Andreas Gruenbacher <agruenba@redhat.com>
-Cc: Jan Kara <jack@suse.com>, Al Viro <viro@zeniv.linux.org.uk>, 
-	ecryptfs@vger.kernel.org, linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net, 
-	linux-nilfs@vger.kernel.org, exfat@lists.linux.dev, linux-fsdevel@vger.kernel.org, 
-	ntfs@lists.linux.dev, ocfs2-devel@lists.linux.dev, linux-btrfs@vger.kernel.org, 
-	gfs2@lists.linux.dev, linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org, 
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="b15sAq9N"
+Received: by mail-pj1-f47.google.com with SMTP id 98e67ed59e1d1-3ab9268d90eso974393a91.3
+        for <linux-efi@vger.kernel.org>; Sun, 18 Oct 2026 23:14:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1792390492; x=1792995292; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:content-type:mime-version
+         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=CH7/2Pn88Czop2CrZPadAXkcJAGF4wsEW/e1YNB1cxQ=;
+        b=b15sAq9NWihv6GFpfqSH5HJ3jmNXepVPacRSjllpONskWo3VoEK4Itgk5hQGhDqVUm
+         OWiPBYy0UhE40WYO7DWnLZlZpp1Jwz4eqeXN2NSXpBe447i3vO6tMCc7g3awQB10u3Jj
+         jTYX/R96bQphJx/b/em2D3HoMpomNXcg8xaw48nYpVKInNkwqKttKW2Y5t+OgBhBj5Fy
+         EbpmE93ZISJExcTC6ZjYcexazX0RFzhEETQCXjJaWpZSM11D4gqsKPPoT80kk/2BPyfp
+         49Q5kSYl++unHpMs6blx4qxYak19NowZTS7eZvDPax0vG4/9RmoFI/cMVEqXRgNQ7P5Q
+         Zvog==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1792390492; x=1792995292;
+        h=in-reply-to:content-disposition:content-type:mime-version
+         :references:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=CH7/2Pn88Czop2CrZPadAXkcJAGF4wsEW/e1YNB1cxQ=;
+        b=TAnp4Z/7Pq6o1eM0C+ZNuUAdCZ7+DMXMS73rY8zf3DGBeIVKZj/QJB+TSEgj+hvpE7
+         pAhD+JVVIG7Q10sRtcZIP0+f5IWzQvDcAfkymvfhUiCKKqi906DC46IXVuc0AeBwKonz
+         tEsKpZWtP1D7D+xp0jxz5R4oU/8FquIonoNKgdZPEQWcqh0/tIfPU6o2g95oPvCf14sd
+         /SABEe45hbZXP84+ULE0GC+0JasL6K9TwInC+DAA+qc6rRUkFZFAyawPRIBW/142FlEP
+         RK3hjvW+NccCf0pWos3dYFXBsaVStlS4GwN+Byt88lJ3qjKag6MCu5HK5OkOmf2G9Hk3
+         qQWQ==
+X-Forwarded-Encrypted: i=1; AKwUvBwG/3RZiyMyNjCgrEhpjHMw2yv+rCAyNKi9/cFRn8FnQcY4SBttAggfV1V45AEnpDKczH05NYLltUM=@vger.kernel.org
+X-Gm-Message-State: AFq9FYK80cpSen0G8x2jTlKt11YVsnpStFzA/h0HWSFLvzLNzfxPA1L/
+	gweGF7XsNgcGLrlSezjVkf6vSL5cjwI9S6xetiYDa2eDG1l1weTLD2I2
+X-Gm-Gg: AYBFou0S0Ql3fHqZilIMyXRhDykPKgWdaSudW9zvpAMoMRQyzh80BDMHb7S3T1GSQB7
+	tVTjAC/VAFKDIxAdfjKDrsNfixDTaAl033UWmjZFDN2YAPTF8ks4mDtwIlLN/rgsWBo72uBE7h7
+	MR7I6EpzGnzQS1vZEKe+Fe9Kmw4pO837o/krCBmmRxT6dbGoCfIBXB/AR1BgsELbQDl5gINXv5h
+	lMYessp+FPR5lJfQCbJGemh8xhg5heVvtucImx73stn5/IFYDB+rtMGx1O8N1UdyUsfBdq2dvqs
+	uKCsXh3dA74cluFtLbqsTpVbQxYkHQideAPYc+fTH4svyjTpi3Kny91UKE63HQ1Ecag6WONZwI/
+	BZFUrmpmX1//emUfA5x6L/3DX+m/tXC8gPH6KO5uie6tSVSYbVxOXrlPDQB85yQP9ZmaHE7agvy
+	irrGTvYgqxDIX71aTxEBjdmh/itlb1PJ+8FHOvj7XM5i7Ne4epY8fPJ9KSmMjj
+X-Received: by 2002:a17:90b:3851:b0:3ab:c80:9362 with SMTP id 98e67ed59e1d1-3aceeea8f3amr5078332a91.35.1792390492104;
+        Sun, 18 Oct 2026 23:14:52 -0700 (PDT)
+Received: from localhost ([27.122.242.71])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3ac94794dd9sm19035101a91.12.2026.10.18.23.14.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 18 Oct 2026 23:14:51 -0700 (PDT)
+Date: Mon, 19 Oct 2026 15:14:46 +0900
+From: Hyunchul Lee <hyc.lee@gmail.com>
+To: Christian Brauner <brauner@kernel.org>
+Cc: Jan Kara <jack@suse.com>, Al Viro <viro@zeniv.linux.org.uk>,
+	ecryptfs@vger.kernel.org, linux-ext4@vger.kernel.org,
+	jfs-discussion@lists.sourceforge.net, linux-nilfs@vger.kernel.org,
+	exfat@lists.linux.dev, linux-fsdevel@vger.kernel.org,
+	ntfs@lists.linux.dev, ocfs2-devel@lists.linux.dev,
+	linux-btrfs@vger.kernel.org, gfs2@lists.linux.dev,
+	linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org,
 	linux-xfs@vger.kernel.org, stable@vger.kernel.org
-Subject: Re: [PATCH RFC 20/28] gfs2: wait for a pending withdraw before
- remounting read-only
-Message-ID: <20261018-ungemacht-sodbrennen-hausordnung-42d33a4f7098@brauner>
+Subject: Re: [PATCH RFC 14/28] ntfs: don't set SB_RDONLY after filesystem
+ errors
+Message-ID: <atW1VhJXAIvtYPfd@hyunchul-PC02>
 References: <20261012-work-fs-sb_rdonly-v1-0-60743a3dc326@kernel.org>
- <20261012-work-fs-sb_rdonly-v1-20-60743a3dc326@kernel.org>
- <CAHc6FU5bdAjABRm=bnH68b2f66TZTDZ8sPdatLB2fS7-55U=yw@mail.gmail.com>
+ <20261012-work-fs-sb_rdonly-v1-14-60743a3dc326@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -49,130 +83,36 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAHc6FU5bdAjABRm=bnH68b2f66TZTDZ8sPdatLB2fS7-55U=yw@mail.gmail.com>
+In-Reply-To: <20261012-work-fs-sb_rdonly-v1-14-60743a3dc326@kernel.org>
 
-On Fri, Oct 16, 2026 at 02:32:01AM +0200, Andreas Gruenbacher wrote:
-> Christian,
-> 
-> On Mon, Oct 12, 2026 at 1:27 PM Christian Brauner <brauner@kernel.org> wrote:
-> > Since commit 9c4a3de6cd5b ("gfs2: Asynchronous withdraw") most of a
-> > withdraw happens in do_withdraw() from a work item and SDF_JOURNAL_LIVE
-> > stays set until it ran. A remount to read-only in that window goes
-> > through gfs2_make_fs_ro(). Its log flushes bail out early on the
-> > withdrawn filesystem before FLUSH_SHUTDOWN can clear SDF_JOURNAL_LIVE
-> > and then gfs2_quota_cleanup() hits its BUG_ON():
-> >
-> >   kernel BUG at fs/gfs2/quota.c:1532!
-> >   RIP: 0010:gfs2_quota_cleanup+0x562/0x6b0
-> >    gfs2_make_fs_ro+0xf3/0x2e0
-> >    gfs2_reconfigure+0x42e/0xfd0
-> >    reconfigure_super+0x437/0xb20
-> >
-> > Just flushing the withdraw work before the remount isn't enough.
-> > gfs2_withdraw() sets SDF_WITHDRAWN, calls dump_stack() and only then
-> > queues the work. So a remount can see a withdrawn filesystem while
-> > there's nothing to flush yet. And a withdraw can also start in the
-> > middle of gfs2_make_fs_ro().
-> >
-> > So let do_withdraw() wake up waiters when it clears SDF_JOURNAL_LIVE and
-> > let gfs2_make_fs_ro() wait for the bit after its log flushes, right
-> > before gfs2_quota_cleanup(). On a healthy filesystem the shutdown flush
-> > already cleared it. umount doesn't need to wait. gfs2_put_super() sets
-> > SDF_NORECOVERY first and gfs2_quota_cleanup() only BUGs without it. Once
-> > the bit is clear the journal isn't live anymore and gfs2_make_fs_ro()
-> > doesn't write anything.
-> >
-> > gfs2_make_fs_rw() can leave the bit set on a withdrawn filesystem as
-> > well. It checks for a withdraw and then sets SDF_JOURNAL_LIVE. If
-> > do_withdraw() runs in between it finds the journal not live yet and
-> > returns. Nothing clears the bit then and the next remount to read-only
-> > waits for it forever. So check for the withdraw and set the bit under
-> > sd_log_flush_lock, which do_withdraw() holds while it tests the bit.
-> > Then either the remount sees the withdraw or do_withdraw() sees the live
-> > journal.
-> >
-> > Reproducer, lock_nolock: a SCHED_FIFO task writes 1 to the withdraw
-> > sysfs knob from cpu 1 and keeps cpu 1 busy (RT throttling and cpu 1's
-> > fair server disabled) so do_withdraw() can't run, then from cpu 2:
-> >
-> >   mount -o remount,ro /mnt
-> >
-> > On lock_dlm the window lasts as long as the withdraw helper runs. The
-> > window before the work is queued can be widened with a kprobe on
-> > dump_stack_lvl() that delays the task writing to the withdraw knob by a
-> > few seconds. A remount to read-only or sysrq u in that window hits the
-> > same BUG_ON().
-> >
-> > Fixes: 9c4a3de6cd5b ("gfs2: Asynchronous withdraw")
-> > Cc: stable@vger.kernel.org
-> > Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
-> > ---
-> >  fs/gfs2/super.c | 22 ++++++++++++++++++----
-> >  fs/gfs2/util.c  |  2 +-
-> >  2 files changed, 19 insertions(+), 5 deletions(-)
-> >
-> > diff --git a/fs/gfs2/super.c b/fs/gfs2/super.c
-> > index 06302c29340f..1d7b39354d65 100644
-> > --- a/fs/gfs2/super.c
-> > +++ b/fs/gfs2/super.c
-> > @@ -147,12 +147,23 @@ int gfs2_make_fs_rw(struct gfs2_sbd *sdp)
-> >         }
-> >
-> >         error = gfs2_quota_init(sdp);
-> > -       if (!error && gfs2_withdrawn(sdp)) {
-> > -               gfs2_quota_cleanup(sdp);
-> > +       if (error)
-> > +               return error;
-> > +
-> > +       /*
-> > +        * do_withdraw() only takes a live journal down. Check for a withdraw
-> > +        * under the lock it holds for that so that either we see the withdraw
-> > +        * or it sees the journal live. Otherwise gfs2_make_fs_ro() waits for
-> > +        * the bit forever.
-> > +        */
-> > +       down_write(&sdp->sd_log_flush_lock);
-> > +       if (gfs2_withdrawn(sdp))
-> >                 error = -EIO;
-> > -       }
-> > -       if (!error)
-> > +       else
-> >                 set_bit(SDF_JOURNAL_LIVE, &sdp->sd_flags);
-> > +       up_write(&sdp->sd_log_flush_lock);
-> > +       if (error)
-> > +               gfs2_quota_cleanup(sdp);
-> >         return error;
-> >  }
-> >
-> > @@ -565,6 +576,9 @@ void gfs2_make_fs_ro(struct gfs2_sbd *sdp)
-> >                                    HZ * 5);
-> >                 gfs2_assert_warn(sdp, gfs2_log_is_empty(sdp));
-> >         }
-> > +       /* A withdraw that do_withdraw() didn't finish yet leaves it live. */
-> > +       if (!test_bit(SDF_NORECOVERY, &sdp->sd_flags))
-> > +               wait_on_bit(&sdp->sd_flags, SDF_JOURNAL_LIVE, TASK_UNINTERRUPTIBLE);
-> >         gfs2_quota_cleanup(sdp);
-> >  }
-> >
-> > diff --git a/fs/gfs2/util.c b/fs/gfs2/util.c
-> > index 83b8bb6446e5..1535ce2b7aa8 100644
-> > --- a/fs/gfs2/util.c
-> > +++ b/fs/gfs2/util.c
-> > @@ -122,7 +122,7 @@ static void do_withdraw(struct gfs2_sbd *sdp)
-> >                 up_write(&sdp->sd_log_flush_lock);
-> >                 return;
-> >         }
-> > -       clear_bit(SDF_JOURNAL_LIVE, &sdp->sd_flags);
-> > +       clear_and_wake_up_bit(SDF_JOURNAL_LIVE, &sdp->sd_flags);
-> >         gfs2_ail_drain(sdp); /* frees all transactions */
-> >         up_write(&sdp->sd_log_flush_lock);
-> >
-> >
-> > --
-> > 2.53.0
-> >
-> 
-> this looks good all around, thank you very much. Can I add it to my gfs2 queue?
+Hi Christian,
 
-I was planning to just provide a stable branch for everyone to pull post
--rc1. Then you can just pull that in?
+> diff --git a/fs/ntfs/super.c b/fs/ntfs/super.c
+> index 4066bacabe37..12ad2ce938ba 100644
+> --- a/fs/ntfs/super.c
+> +++ b/fs/ntfs/super.c
+> @@ -269,6 +269,8 @@ static int ntfs_reconfigure(struct fs_context *fc)
+>  
+>  	ntfs_debug("Entering with remount");
+>  
+> +	/* Mark the volume dirty first if an error made it read-only. */
+> +	flush_work(&vol->error_work);
+>  	sync_filesystem(sb);
+>  
+
+    if (sb_rdonly(sb) && !(fc->sb_flags & SB_RDONLY)) {
+        ....
+	return -EROFS;
+
+Before this patch, SB_RDONLY is set, so remount,rw returned -EROFS. With
+this patch, sb_rdonly(sb) is false, so remount,rw skips the check and
+return success even though writes are rejected with -EROFS.
+
+I think that the condition should be test NVolErrors(), for example
+
+    if ((sb_rdonly(sb) || NVolErrors(vol)) &&
+        !(fc->sb_flags & SB_RDONLY)) {
+
+-- 
+Thanks,
+Hyunchul
