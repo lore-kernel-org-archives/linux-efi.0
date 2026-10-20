@@ -1,248 +1,235 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.21])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.130
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1792487524;
+	b=D3Ctb/LnPg/dYuln/7kCQltLSPvUjVxCTfepeFj3ltzuDgCo5v9i54kOH/UiNAmQ0xzU
+	 duttAdRLJZ98xFy2x2qDGrNS+nb2bWPOeGVJjY6KAutVDezqmygs8ecrceozx0HcbLFiR
+	 udpY2PHjwbKWilKpN+GEgt2KbFwKrVN9/uA1c8h7iIqWCgj21xsEh7N7TCEg6xeov4VHS
+	 A+zmI8pFw016Vzg56O+2KvVlr7uYq5PMT07o0Esln6mwRXQG1aAq8uSQxXKQgvwCXPMLr
+	 JnBGxDmgdfF9wzZ3hRfEQcsQZidNErky3dmJjeYyDXi8wnaanbDyM5CWlJ9XXzcE9sA==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792487524;
+	h=DMARC-Filter:Received:DKIM-Signature:DKIM-Signature:DKIM-Signature:
+	 DKIM-Signature:Received:Received:Message-ID:Date:MIME-Version:
+	 User-Agent:Subject:To:Cc:References:Content-Language:From:Autocrypt:
+	 In-Reply-To:Content-Type:Content-Transfer-Encoding:X-Spam-Flag:
+	 X-Spam-Score:X-Spam-Level:X-Spamd-Result;
+	bh=s94UpzuG42fen3Pnbo+DBcnYWMmwpyHhKPC+MKJzM1w=;
+	b=Jv1sZeD/wFXyeH7qFijMjLWmbI0Vm1HuXayZ7Twgib4kgIRXR5btZzQmJ3PwED3kRwVt
+	 kkOTVY4oeaQb29xUW1JLtHUWMeu5aOJbB0BWoo24CC5b2uZ5t0qpokjXOtkFrQDtAFOcD
+	 edPul5mdy8Hfn5Y9bRL6aLenreDpFaXlek0fHTXxut7nJMTXTXOSAzqR7ba6QF7JQza69
+	 BP9aOlC//QHYYXut3m895N3LwsT8rIQTJTKiHcFZ3ccrmG3oz8uA2k/827wD2l73XgYsW
+	 nFavLWe1BHlO5nAzqoowWy0kgohZVL6toGc2LRxbXR6KBGW3q3oDhCFCu6UFjOIjHOA==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=suse.de;
+	spf=pass smtp.mailfrom=suse.de;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=l8ed6vBT;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=XXlhkZG6;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=0tCZ6tcf;
+	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=IU8IC7di;
+	arc=none smtp.remote-ip=195.135.223.130
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24EAE3F54D2
-	for <linux-efi@vger.kernel.org>; Mon, 19 Oct 2026 11:56:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.21
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792411008; cv=none; b=Uw8CuCTGzZx4LcnTRg6jW8+nQXXUKJuXkbVaZ3FBF6/rWsngjjN/1+i41WdEvXnhTVBCb+5Wzlk1bn9fucuPHbQDkDgzDx5Z5P93te5+37Hn3nflvB5CXjK4Vp+jOqdXDnZisx8eYemlmubNnVQGhNgVSIwNWiLKbsfJYzaUhu4=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792411008; c=relaxed/simple;
-	bh=uEsfcW0hml7dcqf0sPfwtlJoZLcf8FwcEU5UVwypS9A=;
-	h=Date:From:To:Cc:Subject:Message-ID; b=To4YQIrbtC/RcJR4/oaW/U+CtoI82MQ+JAJwfU4o3JL1J4AbbSpW2GLJQ7tEMD6mdC4OODPfdKqiC9URj43Wy7f1OjfoRrsgUX6vh/SIMvsLVtLp2B/dbMfT51kaX4aahfIqlCjWmeV5spg9onwzpWG8cr5x/PcKaw6wJuOpS9E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=EDdqzKpC; arc=none smtp.client-ip=198.175.65.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 924FD606A319;
+	Tue, 20 Oct 2026 09:12:03 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 924FD606A319
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="EDdqzKpC"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1792411007; x=1823947007;
-  h=date:from:to:cc:subject:message-id;
-  bh=uEsfcW0hml7dcqf0sPfwtlJoZLcf8FwcEU5UVwypS9A=;
-  b=EDdqzKpC+hCbJUN7ZUoG+umVpW1axTsO12t1s2yzgsJ/SxSpgJzOZytY
-   S/5+uFYeWElauSwPN33C8c7sFVHm0I0gpqBQUaSzx90KhyLimIX+W1/cE
-   OjDt8O0QkFVeF4VbPRqIud+3sO5ZvnIJawZrMWqtuk9ZCKAqqDU116I5P
-   NubVn1GgMgNJPCMtQr0wN0yQZaxDryWXw9nktYDxi55OdwMojBjxrNqV2
-   FWu8CQdXRizztWW+SiexhwEyJliiu+tcA1G6GHs3eaHGZKIhDhZDhgTiX
-   FWTIGhILg3nI0FbjZ79QOJorGGS7H6WdMZ1CL+OJ439dggwiIvQVFTEgM
-   g==;
-X-CSE-ConnectionGUID: 0phc3Kw3S56LfnQu9Ig2HQ==
-X-CSE-MsgGUID: MqiGZkXvR2yh6XOOc2UZHA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11939"; a="1193106"
-X-IronPort-AV: E=Sophos;i="6.27,167,1787036400"; 
-   d="scan'208";a="1193106"
-Received: from fmviesa004.fm.intel.com ([10.60.135.144])
-  by orvoesa113.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Oct 2026 04:56:46 -0700
-X-CSE-ConnectionGUID: RijEmAjjR669Uztbc22tjA==
-X-CSE-MsgGUID: xIXPsSK0RDiDOX/jOl4qGg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.27,167,1787036400"; 
-   d="scan'208";a="2523486"
-Received: from lkp-server01.sh.intel.com (HELO 0caa9d2d175c) ([10.239.97.150])
-  by fmviesa004.fm.intel.com with ESMTP; 19 Oct 2026 04:56:45 -0700
-Received: from kbuild by 0caa9d2d175c with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1xIlys-00000000LdK-44P1;
-	Mon, 19 Oct 2026 11:56:42 +0000
-Date: Mon, 19 Oct 2026 19:56:21 +0800
-From: kernel test robot <lkp@intel.com>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: linux-efi@vger.kernel.org
-Subject: [efi:next] BUILD SUCCESS
- 2c493ac8c347167eec9e4e985d2b58d5fa6fd420
-Message-ID: <202610191918.bB4kZYjy-lkp@intel.com>
-User-Agent: s-nail v14.9.25
-Precedence: bulk
+	dkim=pass (1024-bit key, unprotected) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=l8ed6vBT;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=XXlhkZG6;
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=0tCZ6tcf;
+	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=IU8IC7di
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id C1C1121C13;
+	Tue, 20 Oct 2026 09:11:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1792487515; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=s94UpzuG42fen3Pnbo+DBcnYWMmwpyHhKPC+MKJzM1w=;
+	b=l8ed6vBTWJkSwIBJm0xlksr2hQxAqLCMyiHL7/HKj6TvJjR3DDvwoSoKdg9l2LPcNUkOxQ
+	GdGGq5OmHjqSRzkODYey/YK3p6Nz7JtGYynFVCxbhX4hn2Ky4wY4/iFWNI8QFQpcPHIPXR
+	KLMEf4MdH/hXikw8xB5y+4UrN1+Bmbw=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1792487515;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=s94UpzuG42fen3Pnbo+DBcnYWMmwpyHhKPC+MKJzM1w=;
+	b=XXlhkZG6Y1WV9u4OgYEZcdLzSR50V417kF1BhJY4j8WHmNbh0p6lE1KKLwQKPzS8+OIHhI
+	eFOS6PYAh1n/LvBQ==
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1792487513; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=s94UpzuG42fen3Pnbo+DBcnYWMmwpyHhKPC+MKJzM1w=;
+	b=0tCZ6tcfgGkhUWecp++8LdqxqNPCe5iIgen9Q3bFVrVFfy0lNwoW9b+KxgYSIqkv+zEkl5
+	1tn3Fk26UFw9vQaYxjsvY65JKWhqLPSe9tyrJgT6lhFoEpoH03KGDPmGcT0oSEnZ6+d1z2
+	qxZ8475k7vuCOxc1QGW0nDCu0Ndyx68=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1792487513;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=s94UpzuG42fen3Pnbo+DBcnYWMmwpyHhKPC+MKJzM1w=;
+	b=IU8IC7diMrzV17QCp9DQwxcWRibIprYBF0OIxCJaIpCR2a1C/ZQUx0x4anbMVj6l3YUYkV
+	1NRyRKEdUaZJj4BA==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 10E83136CC;
+	Tue, 20 Oct 2026 09:11:52 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id jEGeKVgw12qfagAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Tue, 20 Oct 2026 09:11:52 +0000
+Message-ID: <cc19e4a9-9ec1-4b90-b935-24d9ff33bf7a@suse.de>
+Date: Tue, 20 Oct 2026 11:11:52 +0200
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
+List-Post: <mailto:linux-efi@vger.kernel.org>
+List-Help: <mailto:linux-efi+help@vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
+List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
+Precedence: list
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 01/13] drm/clients: Kconfig: indent DRM_CLIENT_DEFAULT
+ with tabs
+To: =?UTF-8?Q?M=C3=A0xim_Pedraza_Padilla?= <maximpedraza@gmail.com>,
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+ Maxime Ripard <mripard@kernel.org>, David Airlie <airlied@gmail.com>,
+ Simona Vetter <simona@ffwll.ch>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Ard Biesheuvel <ardb@kernel.org>,
+ Jonathan Corbet <corbet@lwn.net>
+Cc: Francesco Valla <francesco@valla.it>,
+ Jani Nikula <jani.nikula@linux.intel.com>,
+ Mario Limonciello <mario.limonciello@amd.com>,
+ Javier Martinez Canillas <javierm@redhat.com>,
+ Jocelyn Falempe <jfalempe@redhat.com>, Sam Ravnborg <sam@ravnborg.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Shuah Khan <skhan@linuxfoundation.org>, Randy Dunlap
+ <rdunlap@infradead.org>, dri-devel@lists.freedesktop.org,
+ devicetree@vger.kernel.org, linux-efi@vger.kernel.org,
+ linux-doc@vger.kernel.org, linux-embedded@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <20261013093243.505776-1-maximpedraza@gmail.com>
+ <20261013093243.505776-2-maximpedraza@gmail.com>
+Content-Language: en-US
+From: Thomas Zimmermann <tzimmermann@suse.de>
+Autocrypt: addr=tzimmermann@suse.de; keydata=
+ xsBNBFs50uABCADEHPidWt974CaxBVbrIBwqcq/WURinJ3+2WlIrKWspiP83vfZKaXhFYsdg
+ XH47fDVbPPj+d6tQrw5lPQCyqjwrCPYnq3WlIBnGPJ4/jreTL6V+qfKRDlGLWFjZcsrPJGE0
+ BeB5BbqP5erN1qylK9i3gPoQjXGhpBpQYwRrEyQyjuvk+Ev0K1Jc5tVDeJAuau3TGNgah4Yc
+ hdHm3bkPjz9EErV85RwvImQ1dptvx6s7xzwXTgGAsaYZsL8WCwDaTuqFa1d1jjlaxg6+tZsB
+ 9GluwvIhSezPgnEmimZDkGnZRRSFiGP8yjqTjjWuf0bSj5rUnTGiyLyRZRNGcXmu6hjlABEB
+ AAHNJ1Rob21hcyBaaW1tZXJtYW5uIDx0emltbWVybWFubkBzdXNlLmRlPsLAjgQTAQgAOAIb
+ AwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftODH
+ AAoJEGgNwR1TC3ojx1wH/0hKGWugiqDgLNXLRD/4TfHBEKmxIrmfu9Z5t7vwUKfwhFL6hqvo
+ lXPJJKQpQ2z8+X2vZm/slsLn7J1yjrOsoJhKABDi+3QWWSGkaGwRJAdPVVyJMfJRNNNIKwVb
+ U6B1BkX2XDKDGffF4TxlOpSQzdtNI/9gleOoUA8+jy8knnDYzjBNOZqLG2FuTdicBXblz0Mf
+ vg41gd9kCwYXDnD91rJU8tzylXv03E75NCaTxTM+FBXPmsAVYQ4GYhhgFt8S2UWMoaaABLDe
+ 7l5FdnLdDEcbmd8uLU2CaG4W2cLrUaI4jz2XbkcPQkqTQ3EB67hYkjiEE6Zy3ggOitiQGcqp
+ j//OwE0EWznS4AEIAMYmP4M/V+T5RY5at/g7rUdNsLhWv1APYrh9RQefODYHrNRHUE9eosYb
+ T6XMryR9hT8XlGOYRwKWwiQBoWSDiTMo/Xi29jUnn4BXfI2px2DTXwc22LKtLAgTRjP+qbU6
+ 3Y0xnQN29UGDbYgyyK51DW3H0If2a3JNsheAAK+Xc9baj0LGIc8T9uiEWHBnCH+RdhgATnWW
+ GKdDegUR5BkDfDg5O/FISymJBHx2Dyoklv5g4BzkgqTqwmaYzsl8UxZKvbaxq0zbehDda8lv
+ hFXodNFMAgTLJlLuDYOGLK2AwbrS3Sp0AEbkpdJBb44qVlGm5bApZouHeJ/+n+7r12+lqdsA
+ EQEAAcLAdgQYAQgAIAIbDBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftOH6AAoJEGgNwR1T
+ C3ojVSkIALpAPkIJPQoURPb1VWjh34l0HlglmYHvZszJWTXYwavHR8+k6Baa6H7ufXNQtThR
+ yIxJrQLW6rV5lm7TjhffEhxVCn37+cg0zZ3j7zIsSS0rx/aMwi6VhFJA5hfn3T0TtrijKP4A
+ SAQO9xD1Zk9/61JWk8OysuIh7MXkl0fxbRKWE93XeQBhIJHQfnc+YBLprdnxR446Sh8Wn/2D
+ Ya8cavuWf2zrB6cZurs048xe0UbSW5AOSo4V9M0jzYI4nZqTmPxYyXbm30Kvmz0rYVRaitYJ
+ 4kyYYMhuULvrJDMjZRvaNe52tkKAvMevcGdt38H4KSVXAylqyQOW5zvPc4/sq9c=
+In-Reply-To: <20261013093243.505776-2-maximpedraza@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Spam-Flag: NO
+X-Spam-Score: -2.79
+X-Spam-Level: 
+X-Spamd-Result: default: False [-2.79 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	SUSPICIOUS_RECIPS(1.50)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	XM_UA_NO_VERSION(0.01)[];
+	TAGGED_RCPT(0.00)[dt];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RCPT_COUNT_TWELVE(0.00)[25];
+	FREEMAIL_TO(0.00)[gmail.com,linux.intel.com,kernel.org,ffwll.ch,lwn.net];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	TO_DN_SOME(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MID_RHS_MATCH_FROM(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:url,imap1.dmz-prg2.suse.org:helo,suse.de:email]
 
-tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
-branch HEAD: 2c493ac8c347167eec9e4e985d2b58d5fa6fd420  lkdtm: Add more EFI runtime tests
 
-elapsed time: 1605m
 
-configs tested: 171
-configs skipped: 6
+Am 13.10.26 um 11:32 schrieb Màxim Pedraza Padilla:
+> The body of DRM_CLIENT_DEFAULT is indented with spaces, unlike every
+> other entry in the file. Use tabs, so that the next client added to the
+> list does not have to pick one or the other.
+>
+> No functional change.
+>
+> Assisted-by: Claude:claude-opus-5-5
+> Signed-off-by: Màxim Pedraza Padilla <maximpedraza@gmail.com>
 
-The following configs have been built successfully.
-More configs may be tested in the coming days.
+Reviewed-by: Thomas Zimmermann <tzimmermann@suse.de>
 
-tested configs:
-alpha                              allnoconfig    gcc-16.2.0
-alpha                             allyesconfig    gcc-16.2.0
-alpha                                defconfig    gcc-16.2.0
-arc                               allmodconfig    clang-24
-arc                                allnoconfig    gcc-16.2.0
-arc                               allyesconfig    gcc-16.2.0
-arc                                  defconfig    gcc-16.2.0
-arc                   randconfig-1000-20261019    clang-21
-arc                   randconfig-1001-20261019    clang-21
-arm                                allnoconfig    gcc-16.2.0
-arm                               allyesconfig    clang-24
-arm                                  defconfig    gcc-16.2.0
-arm                   randconfig-1000-20261019    clang-21
-arm                   randconfig-1001-20261019    clang-21
-arm                   randconfig-1002-20261019    clang-21
-arm                   randconfig-1003-20261019    clang-21
-arm                        spear13xx_defconfig    clang-24
-arm64                              allnoconfig    gcc-16.2.0
-arm64                                defconfig    gcc-16.2.0
-arm64                 randconfig-1000-20261019    clang-24
-arm64                 randconfig-1001-20261019    clang-24
-arm64                 randconfig-1002-20261019    clang-24
-arm64                 randconfig-1003-20261019    clang-24
-csky                              allmodconfig    gcc-16.2.0
-csky                               allnoconfig    gcc-16.2.0
-csky                                 defconfig    gcc-16.2.0
-csky                  randconfig-1000-20261019    clang-24
-csky                  randconfig-1001-20261019    clang-24
-hexagon                           allmodconfig    gcc-16.2.0
-hexagon                            allnoconfig    gcc-16.2.0
-hexagon                              defconfig    gcc-16.2.0
-hexagon               randconfig-1000-20261019    clang-24
-hexagon               randconfig-1001-20261019    clang-24
-i386                              allmodconfig    clang-22
-i386                               allnoconfig    gcc-16.2.0
-i386                              allyesconfig    clang-22
-i386        buildonly-randconfig-1000-20261019    clang-22
-i386        buildonly-randconfig-1001-20261019    clang-22
-i386        buildonly-randconfig-1002-20261019    clang-22
-i386        buildonly-randconfig-1003-20261019    clang-22
-i386        buildonly-randconfig-1004-20261019    clang-22
-i386        buildonly-randconfig-1005-20261019    clang-22
-i386                                 defconfig    gcc-16.2.0
-i386                  randconfig-1000-20261019    clang-22
-i386                  randconfig-1001-20261019    clang-22
-i386                  randconfig-1002-20261019    clang-22
-i386                  randconfig-1003-20261019    clang-22
-i386                  randconfig-1004-20261019    clang-22
-i386                  randconfig-1005-20261019    clang-22
-i386                  randconfig-1006-20261019    clang-22
-i386                  randconfig-1007-20261019    gcc-14
-i386                  randconfig-1008-20261019    gcc-14
-i386                  randconfig-1009-20261019    gcc-14
-i386                  randconfig-1010-20261019    gcc-14
-i386                  randconfig-1011-20261019    gcc-14
-i386                  randconfig-1012-20261019    gcc-14
-i386                  randconfig-1013-20261019    gcc-14
-loongarch                          allnoconfig    gcc-16.2.0
-loongarch                            defconfig    clang-24
-loongarch                 loongson32_defconfig    clang-24
-loongarch             randconfig-1000-20261019    clang-24
-loongarch             randconfig-1001-20261019    clang-24
-m68k                              allmodconfig    gcc-16.2.0
-m68k                               allnoconfig    gcc-16.2.0
-m68k                              allyesconfig    clang-24
-m68k                                 defconfig    clang-24
-microblaze                         allnoconfig    gcc-16.2.0
-microblaze                        allyesconfig    gcc-16.2.0
-microblaze                           defconfig    clang-24
-mips                              allmodconfig    gcc-16.2.0
-mips                               allnoconfig    gcc-16.2.0
-mips                              allyesconfig    gcc-16.2.0
-nios2                             allmodconfig    clang-20
-nios2                              allnoconfig    clang-24
-nios2                                defconfig    clang-24
-nios2                 randconfig-1000-20261019    clang-24
-nios2                 randconfig-1001-20261019    clang-24
-openrisc                          allmodconfig    clang-20
-openrisc                           allnoconfig    clang-24
-openrisc                             defconfig    gcc-16.2.0
-parisc                            allmodconfig    gcc-16.2.0
-parisc                             allnoconfig    clang-24
-parisc                            allyesconfig    clang-17
-parisc                               defconfig    gcc-16.2.0
-parisc                randconfig-1000-20261019    gcc-8.5.0
-parisc                randconfig-1001-20261019    gcc-8.5.0
-parisc64                             defconfig    clang-24
-powerpc                           allmodconfig    gcc-16.2.0
-powerpc                            allnoconfig    clang-24
-powerpc                       cm5200_defconfig    clang-24
-powerpc               randconfig-1000-20261019    gcc-8.5.0
-powerpc               randconfig-1001-20261019    gcc-8.5.0
-powerpc                      tqm8548_defconfig    clang-24
-powerpc64             randconfig-1000-20261019    gcc-8.5.0
-powerpc64             randconfig-1001-20261019    gcc-8.5.0
-riscv                              allnoconfig    clang-24
-riscv                             allyesconfig    clang-24
-riscv                                defconfig    gcc-16.2.0
-riscv                 randconfig-1000-20261019    gcc-11.5.0
-riscv                 randconfig-1001-20261019    gcc-11.5.0
-s390                              allmodconfig    clang-17
-s390                               allnoconfig    clang-24
-s390                              allyesconfig    gcc-16.2.0
-s390                                 defconfig    gcc-16.2.0
-s390                  randconfig-1000-20261019    gcc-11.5.0
-s390                  randconfig-1001-20261019    gcc-11.5.0
-sh                                allmodconfig    gcc-16.2.0
-sh                                 allnoconfig    clang-24
-sh                                allyesconfig    clang-17
-sh                                   defconfig    gcc-14
-sh                           landisk_defconfig    clang-24
-sh                           r7785rp_defconfig    clang-24
-sh                    randconfig-1000-20261019    gcc-11.5.0
-sh                    randconfig-1001-20261019    gcc-11.5.0
-sh                         sh7757lcr_defconfig    clang-24
-sparc                              allnoconfig    clang-24
-sparc                                defconfig    gcc-16.2.0
-sparc                 randconfig-1000-20261019    clang-20
-sparc                 randconfig-1001-20261019    clang-20
-sparc64                           allmodconfig    clang-20
-sparc64                              defconfig    gcc-14
-sparc64               randconfig-1000-20261019    clang-20
-sparc64               randconfig-1001-20261019    clang-20
-um                                allmodconfig    clang-17
-um                                 allnoconfig    clang-24
-um                                allyesconfig    gcc-16.2.0
-um                                   defconfig    gcc-14
-um                              i386_defconfig    gcc-14
-um                    randconfig-1000-20261019    clang-20
-um                    randconfig-1001-20261019    clang-20
-um                            x86_64_defconfig    gcc-14
-x86_64                            allmodconfig    clang-22
-x86_64                             allnoconfig    clang-24
-x86_64                            allyesconfig    clang-22
-x86_64      buildonly-randconfig-1000-20261019    clang-22
-x86_64      buildonly-randconfig-1001-20261019    clang-22
-x86_64      buildonly-randconfig-1002-20261019    clang-22
-x86_64      buildonly-randconfig-1003-20261019    clang-22
-x86_64      buildonly-randconfig-1004-20261019    clang-22
-x86_64      buildonly-randconfig-1005-20261019    clang-22
-x86_64                               defconfig    gcc-14
-x86_64                                   kexec    clang-22
-x86_64                randconfig-1000-20261019    clang-22
-x86_64                randconfig-1001-20261019    clang-22
-x86_64                randconfig-1002-20261019    clang-22
-x86_64                randconfig-1003-20261019    clang-22
-x86_64                randconfig-1004-20261019    clang-22
-x86_64                randconfig-1005-20261019    clang-22
-x86_64                randconfig-1006-20261019    clang-22
-x86_64                randconfig-1007-20261019    clang-22
-x86_64                randconfig-1008-20261019    clang-22
-x86_64                randconfig-1009-20261019    clang-22
-x86_64                randconfig-1010-20261019    clang-22
-x86_64                randconfig-1011-20261019    clang-22
-x86_64                randconfig-1012-20261019    gcc-14
-x86_64                randconfig-1013-20261019    gcc-14
-x86_64                randconfig-1014-20261019    gcc-14
-x86_64                randconfig-1015-20261019    gcc-14
-x86_64                randconfig-1016-20261019    gcc-14
-x86_64                randconfig-1017-20261019    gcc-14
-x86_64                                rhel-9.4    clang-22
-x86_64                            rhel-9.4-bpf    gcc-14
-x86_64                           rhel-9.4-func    clang-22
-x86_64                     rhel-9.4-kselftests    clang-22
-x86_64                          rhel-9.4-kunit    gcc-14
-x86_64                            rhel-9.4-ltp    gcc-14
-x86_64                           rhel-9.4-rust    clang-22
-xtensa                             allnoconfig    clang-24
-xtensa                            allyesconfig    clang-20
-xtensa                randconfig-1000-20261019    clang-20
-xtensa                randconfig-1001-20261019    clang-20
+> ---
+>   drivers/gpu/drm/clients/Kconfig | 10 +++++-----
+>   1 file changed, 5 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/gpu/drm/clients/Kconfig b/drivers/gpu/drm/clients/Kconfig
+> index 6096c623d9d5..8d8bc37ec9f2 100644
+> --- a/drivers/gpu/drm/clients/Kconfig
+> +++ b/drivers/gpu/drm/clients/Kconfig
+> @@ -114,10 +114,10 @@ config DRM_CLIENT_DEFAULT_LOG
+>   endchoice
+>   
+>   config DRM_CLIENT_DEFAULT
+> -       string
+> -       depends on DRM_CLIENT
+> -       default "fbdev" if DRM_CLIENT_DEFAULT_FBDEV
+> -       default "log" if DRM_CLIENT_DEFAULT_LOG
+> -       default ""
+> +	string
+> +	depends on DRM_CLIENT
+> +	default "fbdev" if DRM_CLIENT_DEFAULT_FBDEV
+> +	default "log" if DRM_CLIENT_DEFAULT_LOG
+> +	default ""
+>   
+>   endmenu
 
+-- 
 --
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Thomas Zimmermann
+Graphics Driver Developer
+SUSE Software Solutions Germany GmbH
+Frankenstr. 146, 90461 Nürnberg, Germany, www.suse.com
+GF: Stefan Gaiser, Jochen Jaser, Abhinav Puri, (HRB 36809, AG Nürnberg)
+
+
