@@ -1,59 +1,78 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=217.140.110.172
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792514843;
-	b=VssJw9nC5Yoxf6py3jj3ggQ0+3G5jWHzPcvJC+fafZHuP4SZuQf3ZbWKJIbmAIHG0T6k
-	 7ZW+M4RwDdgdHLwY+LZeO5bWFKTQgrB2nAAcmeYau6rlqjut15IvgzmSBB5+f9mX+Cpjy
-	 4AIPJy9rs4af7yCerX/Vb9/zOffWpuFdem+TN3TZrbMjJJnmfE17mQ4zWK0pmXrHxkZ8D
-	 M/xN/R+jK8gGAf4hdCFIUNelnDoUqWJHouijlTlme9MLECFGvzA4AdLh2+Iehfb0D3MTm
-	 MUEifIJj+F0nZWhNbmDjc42jLkfwRaFTa9TszN35C9Z8V0efWua/eeYlFyJeoIXRgTw==
+	t=1792536595;
+	b=zAlwCGCvl7/Dnxfzidx7M0cziOMiIHek981Y3ziasCB9Nbf//mASh4rsoGU848etM/j9
+	 x3qqDCQtUKwXwN8rk8AnFk+YyepPRkbmDq0A0I3LnsqP9ya132k+0G3riGrPExHP1/pg7
+	 T/HbvgiHzc4KZkFAdo2Fwnx4mDBbwdyvtLDrmY8pM1Rle0pJGSzQ2wmk83Tg69TJM+hmF
+	 gEEeWAZb+9KUJa+nqogXO9YuMC8mrdMFQFXxZVwM+iXgDQ//1O3s7mGJSthoKkNodn3VD
+	 tVlzrdJECsZ79oV6YoiLg7kUi9VFc+y7mt48IeIvZVKHtj/YfbxdKpKUcgT/OBaTtGg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792514843;
-	h=Received:Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:Content-Transfer-Encoding:
-	 In-Reply-To;
-	bh=JRqtFuDuxtmiDxqkWDLmT7asRbopDuvT5Fq2Dr/Rymw=;
-	b=KXL+7pQoB2iR8EMVYXTTb+Dw4XGQWkfrgTjhJ+aLnqfhmQQsi4yIKEnWIcb8h78XKQHB
-	 VKcL2m4UllN8Em66wLutPwabyu1siTz10eTz+PndIAH+NOAnZ3Jn4Wx6U0XfIECAnWL8K
-	 zywMdWZ2bec7r3UWuq2Iv11asWwPAnMKT4RVJQV60OkGvkOiFv6SAPoO++qd5GxRk6aRm
-	 +U6nTw1yOlcbZFdnIVwlTMhZV62xLeZ3FAytrHpHy1RgVe7F9TwhgTjZrPNAhDMY+JuS5
-	 60zc6m7/52BBo7GPxtvAYj3M5VFCmCu39RHsDhtCuiV0DGuxAmlyk4yakEmHnvTcYXA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792536595;
+	h=DMARC-Filter:Received:Received:DKIM-Signature:Date:From:To:Cc:
+	 Subject:Message-ID:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=8L3dbJg7n3McKQQtwak49EcNPS+ZUeJOE3KFcCfv8HU=;
+	b=mnEw/TcJyF3l+yjzmScjwzh7ugTCwszDIbBa0FZFT4RWUtfkVpFTHJZ5Iwb8d1rtJvrh
+	 YSMVuZhPOlRJxDJjdfXyzte8FXMECI75xg23NPSA308JU7b3gCTV52Gn3ndPTYJzgX/V4
+	 UxfDBk9t8TecnxWzBpiAPuebSJ8M+1Tv3L2QlkFQCVZJqaZE/juInq769mb3QTjtlOJWF
+	 VCeJqtGlJZgHjtjRFWo6kEt032nKPxsba7uDQnnIP8a/Yb9m0ddhdrcOIVhqbp3fpHM9H
+	 DTs6UW6R/+BQ/YF4S0bs8mwdfBHCi7HAmRIXAm9b/9c3JjIxe5MtMc7LNUph8pk0GOQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57C6C60A261A;
-	Tue, 20 Oct 2026 16:47:23 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6EE311F000CA;
-	Tue, 20 Oct 2026 16:47:22 +0000 (UTC)
-Date: Tue, 20 Oct 2026 11:46:51 -0500
-From: Rob Herring <robh@kernel.org>
-To: =?iso-8859-1?Q?M=E0xim?= Pedraza Padilla <maximpedraza@gmail.com>
-Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Ard Biesheuvel <ardb@kernel.org>, Jonathan Corbet <corbet@lwn.net>,
-	Francesco Valla <francesco@valla.it>,
-	Jani Nikula <jani.nikula@linux.intel.com>,
-	Mario Limonciello <mario.limonciello@amd.com>,
-	Javier Martinez Canillas <javierm@redhat.com>,
-	Jocelyn Falempe <jfalempe@redhat.com>,
-	Sam Ravnborg <sam@ravnborg.org>,
+	dmarc=pass header.from=arm.com;
+	spf=pass smtp.mailfrom=arm.com;
+	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=Iy65iNq2;
+	arc=none smtp.remote-ip=217.140.110.172
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 41C5A606A32E;
+	Tue, 20 Oct 2026 22:49:54 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 41C5A606A32E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key, unprotected) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=Iy65iNq2
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 22FC515A1;
+	Tue, 20 Oct 2026 15:49:50 -0700 (PDT)
+Received: from e129823.arm.com (e129823.arm.com [10.2.213.3])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 92E9E3F673;
+	Tue, 20 Oct 2026 15:49:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
+	t=1792536593; bh=utolcjwaaJaPzYwJQo9ya2LOeTJaqLosq4TA9Cq4IIo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Iy65iNq278aR/8Qr5ADRvjS5ek17DIwYRx5fL1DcFwSqjuxUK3E/82pYbuRw8AJRv
+	 LW+A9rVlT44ugB3MLub2pWp75rqYgsVz57A99bXDD0t1WBYfyxBKd1q7eFc3vOG4BJ
+	 8mE7Bsb9YISf28302wWCSS0gQPVnGGFFsFBqp1L0=
+Date: Tue, 20 Oct 2026 23:49:45 +0100
+From: Yeoreum Yun <yeoreum.yun@arm.com>
+To: Jason Gunthorpe <jgg@nvidia.com>
+Cc: Alexandre Ghiti <alex@ghiti.fr>, Albert Ou <aou@eecs.berkeley.edu>,
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Jonathan Corbet <corbet@lwn.net>, David Sterba <dsterba@suse.com>,
 	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Shuah Khan <skhan@linuxfoundation.org>,
+	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-doc@vger.kernel.org, linux-efi@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	Mark Rutland <mark.rutland@arm.com>,
+	Palmer Dabbelt <palmer@dabbelt.com>, Paul Walmsley <pjw@kernel.org>,
 	Randy Dunlap <rdunlap@infradead.org>,
-	dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
-	linux-efi@vger.kernel.org, linux-doc@vger.kernel.org,
-	linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v5 06/13] dt-bindings: display: add a boot logo node
- under /chosen
-Message-ID: <20261020164651.GA4017884-robh@kernel.org>
-References: <20261013093243.505776-1-maximpedraza@gmail.com>
- <20261013093243.505776-7-maximpedraza@gmail.com>
+	Simon Glass <sjg@chromium.org>,
+	Shuah Khan <skhan@linuxfoundation.org>,
+	Nick Terrell <terrelln@fb.com>, Will Deacon <will@kernel.org>,
+	Alexandre Ghiti <alexghiti@rivosinc.com>,
+	Conor Dooley <conor.dooley@microchip.com>,
+	Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>,
+	linux-integrity@vger.kernel.org,
+	Palmer Dabbelt <palmer@rivosinc.com>, patches@lists.linux.dev,
+	Piotr =?iso-8859-1?Q?Kr=F3l?= <piotr.krol@3mdeb.com>,
+	Ross Philipson <ross.philipson@gmail.com>,
+	Sami Tolvanen <samitolvanen@google.com>,
+	Song Shuai <songshuaishuai@tinylab.org>
+Subject: Re: [PATCH v2 12/15] arm64: drtm: Update the linker script for
+ EFI_STUB_DRTM
+Message-ID: <atfwCcRfC6rWFywH@e129823.arm.com>
+References: <0-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
+ <12-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -63,223 +82,193 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20261013093243.505776-7-maximpedraza@gmail.com>
+In-Reply-To: <12-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
 
-On Tue, Oct 13, 2026 at 11:32:36AM +0200, Màxim Pedraza Padilla wrote:
-> Products built on the same board often differ only in branding. On UEFI
-> systems the firmware hands the operating system its boot logo through
-> the ACPI BGRT; a device tree system has no such table, so today the logo
-> is built into the kernel, and each product needs its own kernel image.
-> With U-Boot's Falcon mode the device tree is the only thing that reaches
-> the kernel, so it is also the only place the logo can come from.
+Hi,
+
+> Implement the link layout that CONFIG_EFI_STUB_DRTM requires. This maps
+> vmlinux into the Dynamic Launch Measured Environment (DLME) defined by the
+> spec.
 > 
-> Add a "boot-logo" node under /chosen. The node lives there because a
-> logo is configuration handed over by firmware rather than a description
-> of the hardware, as simple-framebuffer nodes already are.
+> Broadly, Image fits into the spec defined DLME region memory layout in
+> this order:
+>  - Program headers and padding up to _stext. EFI can write to these while
+>    loading the stub so they do not have a stable measurement.
+>  - All the boot-time immutable data, including .text, .data, .init
+>    and so on (measured)
+>  - Data written by the EFI stub
+>  - .bss, padding and other 0'd data up to _end
+>  - The "DLME Data" written by the launch process. This is a datastructure
+>    the post launch kernel will parse to get trusted information about th
+>    launch.
 > 
-> The image is a BMP with 24 bits per pixel and no compression, the
-> format of the BGRT image, so that one file serves the firmware splash,
-> a BMP loaded as firmware and this node alike. It is carried either in
-> an "image" property, which dtc fills in from the file with /incbin/, or
-> in a reserved memory region the bootloader loaded it into, named by
-> "memory-region". Exactly one of the two must be present.
+> New linker symbols are added to mark these areas and their offsets are
+> placed into the efi_image_info so both stubs can get them.
 > 
-> "logo-position" takes -1 on an axis to mean centre on that axis, which
-> is the only way to say it when the device tree does not know the image
-> size, and "logo-offset" is added afterwards. "rotation" counts degrees
-> counter clockwise, as for panels, and turns the image rather than the
-> screen, so position and offset stay in screen pixels. The optional
-> "background-color" goes with the image, since a logo designed for one
-> background looks wrong on another.
+> The spec's design of the DLME was intended to fit a typical OS image like
+> this, with two areas that are unmeasured and an inner measured region.
 > 
-> Assisted-by: Claude:claude-opus-5-5
-> Signed-off-by: Màxim Pedraza Padilla <maximpedraza@gmail.com>
+> Linux zeroes the unmeasured area of .bss/etc after the DRTM launch so it
+> also reaches a known value. The DLME data is written by the launch and is
+> trusted. The EFI stub data is either ignored or will have to be sanitized.
+> 
+> Add a section for the unmeasured data before the PECOFF padding. This is
+> an allocated section so it is zero'd in the image and is only 64 bytes in
+> my builds. There is a high chance it gets absorbed into the padding
+> region.
+> 
+> The post-launch kernel will have to reserve the "DLME Data" before
+> starting the allocator since it falls outside the linker map. This will
+> happen in the first series to consume this data.
+> 
+> Signed-off-by: Jason Gunthorpe <jgg@nvidia.com>
 > ---
->  .../bindings/display/boot-logo.yaml           | 151 ++++++++++++++++++
->  MAINTAINERS                                   |   1 +
->  2 files changed, 152 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/display/boot-logo.yaml
+>  arch/arm64/include/asm/image.h  |  8 +++++
+>  arch/arm64/kernel/vmlinux.lds.S | 64 ++++++++++++++++++++++++++++++++-
+>  2 files changed, 71 insertions(+), 1 deletion(-)
 > 
-> diff --git a/Documentation/devicetree/bindings/display/boot-logo.yaml b/Documentation/devicetree/bindings/display/boot-logo.yaml
-> new file mode 100644
-> index 000000000000..bf4121f24f1b
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/display/boot-logo.yaml
-> @@ -0,0 +1,151 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/display/boot-logo.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Boot logo supplied by the device tree
-> +
-> +maintainers:
-> +  - Francesco Valla <francesco@valla.it>
-> +  - Màxim Pedraza Padilla <maximpedraza@gmail.com>
-> +
-> +description: |
-> +  An image for the operating system to show on the display while it boots,
-> +  handed over by the firmware together with where and how to show it.
-> +
-> +  Products built on the same board often differ only in branding. Carrying
-> +  the logo in the device tree lets a single kernel image serve all of them,
-> +  each booting with its own device tree, and it works where the device tree
-> +  is the only thing that reaches the kernel, as with U-Boot's Falcon mode.
-> +  It plays the part the ACPI BGRT plays on UEFI systems.
-> +
-> +  Since a logo is configuration rather than a description of the hardware,
-> +  the node lives under /chosen, next to the other things firmware hands to
-> +  the operating system.
-> +
-> +  The image is a BMP file with a 40 byte BITMAPINFOHEADER, 24 bits per pixel
-> +  and no compression, the format of the BGRT image. It is carried either in
-> +  the node itself or in a reserved memory region the bootloader loaded it
-> +  into, never both.
-> +
-> +properties:
-> +  $nodename:
-> +    const: logo
-> +
-> +  compatible:
-> +    const: boot-logo
-> +
-> +  image:
-
-A bit too generic for me. How about logo-image for consistency.
-
-> +    $ref: /schemas/types.yaml#/definitions/uint8-array
-> +    description:
-> +      The BMP file itself, byte for byte, which dtc can fill in from the file
-> +      with /incbin/. The device tree stays in memory for as long as the
-> +      system runs, so this is meant for small images; larger ones belong in
-> +      a reserved memory region.
-> +
-> +  memory-region:
-> +    maxItems: 1
-> +    description: |
-> +      Reserved memory region the bootloader loaded the BMP file into, starting
-> +      at the beginning of the region. The BMP header says how much of the
-> +      region is image.
-> +
-> +      This keeps the image out of the device tree, so that it can be changed
-> +      without rebuilding the device tree, for instance by loading it from a
-> +      partition of its own that userspace can update.
-> +
-> +      Memory keeps its contents across a reset, and may even across a short
-> +      power cycle, and the operating system cannot tell a stale image from a
-> +      fresh one. A bootloader that loads no image into the region therefore
-> +      disables the node (status = "disabled") or removes it.
-> +
-> +  logo-position:
-> +    $ref: /schemas/types.yaml#/definitions/int32-array
-> +    description:
-> +      X and Y coordinates, in screen pixels, of the top left corner of the
-> +      image once it has been rotated. A value of -1 on an axis centres the
-> +      image on that axis instead, which is the only way to say it when the
-> +      device tree does not know the image size, as with a memory region.
-> +      Defaults to centring on both axes.
-> +    items:
-> +      - description: X coordinate, or -1 to centre horizontally
-> +        minimum: -1
-> +        maximum: 65535
-> +      - description: Y coordinate, or -1 to centre vertically
-> +        minimum: -1
-> +        maximum: 65535
-> +
-> +  logo-offset:
-> +    $ref: /schemas/types.yaml#/definitions/int32-array
-> +    description:
-> +      X and Y displacement, in screen pixels, applied after the image has been
-> +      placed. Mostly useful together with a centred axis, to land the image
-> +      somewhere other than the middle of a panel whose visible area is not
-> +      the middle of the mode.
-> +    items:
-> +      - description: X displacement
-> +        minimum: -65535
-> +        maximum: 65535
-> +      - description: Y displacement
-> +        minimum: -65535
-> +        maximum: 65535
-> +
-> +  rotation:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      Rotation applied to the image before it is shown, in degrees counter
-> +      clockwise, as for the rotation property of panels. It turns the image
-> +      and not the screen, so a quarter turn swaps how much room the image
-> +      takes up, but logo-position and logo-offset stay in screen pixels
-> +      either way.
-> +    enum: [0, 90, 180, 270]
-> +    default: 0
-
-This property is already defined in panel-common.yaml, so you need a ref 
-to it. You probably don't want everything from there, so just 'rotation: 
-true' here. Though keeping the description here is probably worthwhile.
-
-> +
-> +  background-color:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      Colour of the rest of the screen, as 0xRRGGBB. When absent, the
-> +      operating system uses its own default.
-> +    maximum: 0xffffff
-> +
-> +required:
-> +  - compatible
-> +
-> +# The image lives either in the node or in a reserved memory region,
-> +# never both and never neither.
-> +oneOf:
-> +  - required:
-> +      - image
-> +  - required:
-> +      - memory-region
-> +
-> +additionalProperties: false
-> +
-> +examples:
-> +  - |
-> +    // A 2x1 image, red and blue, centred and 120 pixels below the middle
-> +    / {
-> +        compatible = "foo";
-> +        model = "foo";
-> +        #address-cells = <1>;
-> +        #size-cells = <1>;
-> +
-> +        chosen {
-> +            logo {
-> +                compatible = "boot-logo";
-> +                /* Normally: image = /incbin/("logo.bmp"); */
-> +                image = /bits/ 8 <0x42 0x4d 0x3e 0x00 0x00 0x00 0x00 0x00
-> +                                  0x00 0x00 0x36 0x00 0x00 0x00 0x28 0x00
-> +                                  0x00 0x00 0x02 0x00 0x00 0x00 0x01 0x00
-> +                                  0x00 0x00 0x01 0x00 0x18 0x00 0x00 0x00
-> +                                  0x00 0x00 0x08 0x00 0x00 0x00 0x13 0x0b
-> +                                  0x00 0x00 0x13 0x0b 0x00 0x00 0x00 0x00
-> +                                  0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
-> +                                  0xff 0xff 0x00 0x00 0x00 0x00>;
-> +                logo-position = <(-1) (-1)>;
-> +                logo-offset = <0 120>;
-> +                background-color = <0x1e1e28>;
-> +            };
-> +        };
-> +    };
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 321ecb9f5b5b..0d1decaedde0 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -9174,6 +9174,7 @@ M:	Màxim Pedraza Padilla <maximpedraza@gmail.com>
->  L:	dri-devel@lists.freedesktop.org
->  S:	Maintained
->  T:	git https://gitlab.freedesktop.org/drm/misc/kernel.git
-> +F:	Documentation/devicetree/bindings/display/boot-logo.yaml
->  F:	drivers/gpu/drm/clients/drm_splash.c
+> diff --git a/arch/arm64/include/asm/image.h b/arch/arm64/include/asm/image.h
+> index b18ce23a2cba7f..36afe95ffa7544 100644
+> --- a/arch/arm64/include/asm/image.h
+> +++ b/arch/arm64/include/asm/image.h
+> @@ -5,7 +5,11 @@
 >  
->  DRM TTM SUBSYSTEM
+>  #define ARM64_IMAGE_MAGIC	"ARM\x64"
+>  
+> +#ifdef CONFIG_ARM64_DRTM
+> +#define EFI_IMAGE_INFO_SIZE	40
+
+Small nit. I know according to #13, This should be 40 with drtm_entry
+and arm64_drtm_handoff. but in this patch, should EFI_IMAGE_INFO_SIZE
+be 24 and be change to 40 at #13?
+
+> +#else
+>  #define EFI_IMAGE_INFO_SIZE	8
+> +#endif
+>  
+>  #define ARM64_IMAGE_FLAG_BE_SHIFT		0
+>  #define ARM64_IMAGE_FLAG_PAGE_SIZE_SHIFT	(ARM64_IMAGE_FLAG_BE_SHIFT + 1)
+> @@ -62,6 +66,10 @@ struct arm64_image_header {
+>   */
+>  struct efi_image_info {
+>  	u64 code_size;
+> +#ifdef CONFIG_ARM64_DRTM
+> +	u64 drtm_measured_start;
+> +	u64 dlme_measured_size;
+> +#endif
+>  };
+>  static_assert(sizeof(struct efi_image_info) == EFI_IMAGE_INFO_SIZE);
+>  
+> diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
+> index 8305b47995954b..5c14decf0dd4d3 100644
+> --- a/arch/arm64/kernel/vmlinux.lds.S
+> +++ b/arch/arm64/kernel/vmlinux.lds.S
+> @@ -190,10 +190,24 @@ SECTIONS
+>  
+>  	.head.text : {
+>  		_text = .;
+> +#ifdef CONFIG_ARM64_DRTM
+> +		/* DEN0113 R314010: The DLME region must start at a 4KB aligned address. */
+> +		ASSERT((_text & (SZ_4K - 1)) == 0,
+> +		       "DLME region is not 4 KiB aligned");
+> +#endif
+>  		HEAD_TEXT
+>  	}
+>  	.text : ALIGN(SEGMENT_ALIGN) {	/* Real text segment		*/
+>  		_stext = .;		/* Text and read-only data	*/
+> +#ifdef CONFIG_ARM64_DRTM
+> +		__drtm_measured_start = _stext;
+> +		/*
+> +		 * DEN0113 R314020: The DLME image must start at a 4KB aligned
+> +		 * address. This happens always because SEGMENT_ALIGN is big.
+> +		 */
+> +		ASSERT((__drtm_measured_start & (SZ_4K - 1)) == 0,
+> +		       "DLME measured start is not 4 KiB aligned");
+> +#endif
+>  			IRQENTRY_TEXT
+>  			SOFTIRQENTRY_TEXT
+>  			ENTRY_TEXT
+> @@ -285,6 +299,11 @@ SECTIONS
+>  		EFI_IMAGE_INFO(
+>  			/* code_size */
+>  			EFI_IMAGE_INFO_OFFSET(__inittext_end);
+> +#ifdef CONFIG_ARM64_DRTM
+> +			EFI_IMAGE_INFO_OFFSET(__drtm_measured_start);
+> +			/* dlme_measured_size */
+> +			EFI_IMAGE_INFO_ENTRY(__drtm_measured_end - __drtm_measured_start);
+> +#endif
+>  		)
+>  	}
+>  	.exit.data : {
+> @@ -348,6 +367,44 @@ SECTIONS
+>  		__mmuoff_data_end = .;
+>  	}
+>  
+> +	/*
+> +	 * DRTM layout for DEN0113 as it relates to the link layout, refer
+> +	 * to Figure 8 in 1.4b. In that language:
+> +	 *  "Free Space 1" is the PE header and padding between _text and
+> +	 *        __drtm_measured_start (_stext)
+> +	 *  "DLME Image" is from __drtm_measured_start to __drtm_measured_end
+> +	 *  "Free Space 2" is kernel efi data/bss/etc till __drtm_dlme_start
+> +	 *  "DLME Data" is a memory sized "Minimum Size of DLME data"
+> +	 *        and is retained after boot for use by the kernel
+> +	 *
+> +	 * Thus, the DRTM_PARAMETERS follow from that:
+> +	 *   DLME Region Address = _text's PA ie the start of Image
+> +	 *   DLME Region Size = DLME Data Offset + "Minimum Size of DLME data"
+> +	 *   DLME Image Start Offset = __drtm_measured_start - _text
+> +	 *   DLME Image Size = __drtm_measured_end - __drtm_measured_start
+> +	 *   DLME Data Offset = __drtm_dlme_start - _text
+> +	 *   Normal World DCE region address = PA of __drtm_dlme_start +
+> +	 *                                  "Minimum Size of DLME data"
+> +	 *
+> +	 * The EFI stub will place any optional "Normal World DCE" region
+> +	 * immediately after the "DLME data". It is only used internally by the
+> +	 * FW during the launch and has no effect on the link layout.
+> +	 */
+> +#ifdef CONFIG_ARM64_DRTM
+> +	__drtm_measured_end = .;
+> +
+> +	/*
+> +	 * Writable EFI stub state. When DRTM is being used the stub's mutable
+> +	 * data cannot reside in the normal .init.data because that section
+> +	 * will be measured.
+> +	 */
+> +	.unmeasured.data : {
+> +		*(.unmeasured.data)
+> +		*(.init.efidata .init.efidata.*)
+> +		*(.init.efibss .init.efibss.*)
+> +	}
+> +#endif
+> +
+>  	PECOFF_EDATA_PADDING
+>  	__pecoff_data_rawsize = ABSOLUTE(. - __initdata_begin);
+>  	_edata = .;
+> @@ -370,10 +427,15 @@ SECTIONS
+>  
+>  	. += SZ_4K;		/* stack for the early C runtime */
+>  	early_init_stack = .;
+> -
+>  	. = ALIGN(SEGMENT_ALIGN);
+>  	__pecoff_data_size = ABSOLUTE(. - __initdata_begin);
+>  	_end = .;
+> +#ifdef CONFIG_ARM64_DRTM
+> +	/* DEN0113 R314030: The DLME data must start at a 4KB aligned address. */
+> +	__drtm_dlme_start = .;
+> +	ASSERT((__drtm_dlme_start & (SZ_4K - 1)) == 0,
+> +	       "DLME data is not 4 KiB aligned")
+> +#endif
+>  	__pi__end = .;
+>  
+>  	STABS_DEBUG
 > -- 
-> 2.39.5
+> 2.43.0
 > 
+> 
+
+-- 
+Sincerely,
+Yeoreum Yun
