@@ -1,102 +1,102 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.131
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792494274;
-	b=FV2RdtvUzyuxpMNpHLr1XTpC29gjLIy4YrYk+T10LU/hElTjBxC6RcAttr4D8AYtvXFU
-	 xfswfSqWW8eeRPq6sPK2dyNM9ydCnSPPp023kxMPoF+NKQkOp72B2alsKptl+ZCUp957l
-	 SCNxdN6s77bdkU0bPu7pq51M4MUjw3Gq39nFYtfWu8akNoTlSNJkQAy+9sJmHQI+PAB2Z
-	 WOEfmkZCTDc3qohxBNXLaybBCiq+6dJQ7YhDx3FrXKrxUsSezhJIZ+w2MZbq58/YzAXSa
-	 JqhhlAHbJGKVQMo2Ala0rgEl7E/GKQUau12xPfmylw6J7UN1ulLrUBhrlWYcwb9ga2w==
+	t=1792494975;
+	b=X3D0ffCFEZbw2XqR+BRg7yiQYscHbnC4xpidwPocB758pRVbyZlqo5YfkZEe7stnQRZs
+	 TmtgNcORj11cJ7neKg5Mkn7WVEiTmsPy+rfT/GGrvbC4a+LYN8WBxfvZUbI59vBWsBUJW
+	 bRB7wOAnv7tUqUL160BJ1MNinHYrYftjjaEtpMNC6vd8hlhw0FUlUzVhuGXUBuWBhtTDr
+	 d2YcMDi5LeAp7JQX4Nb4qe1WxMYMn9D4NWs7FUBXYJAULD8X4U9K4/oPjYlO0ov2Heq63
+	 NCi0GeliQQ+1AaGoCMaUizAwEgOGKsTE04ULUltJrU745Yht5v86y3YFm3joKcZFwQg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792494274;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792494975;
 	h=DMARC-Filter:Received:DKIM-Signature:DKIM-Signature:DKIM-Signature:
 	 DKIM-Signature:Received:Received:Message-ID:Date:MIME-Version:
 	 User-Agent:Subject:To:Cc:References:Content-Language:From:Autocrypt:
 	 In-Reply-To:Content-Type:Content-Transfer-Encoding:X-Spamd-Result:
 	 X-Spam-Score:X-Spam-Level:X-Spam-Flag;
-	bh=wpVq8HTF6kp3l3+P+HlqkQvEgOT+i0h0AfpydZ4MNoA=;
-	b=3jjUvqHR5D08cPyDz9WOC0W8DT9h8mDMgBLWVcMEdYsWKaX751Y9lKPR14ykmkuHKg+V
-	 2Ay7kKWVHQcZjwVs1Yjz8Su9VNADpWIBaBoidJkmPG4ET7ZEzr0PQrY+0m87TrLSHAacF
-	 saZ01OyGQgOgarUAzsBz9W3TNF0VDc2eXIOhy6IEHf1o4KA5BDI79E5YPspRJ9tdRR4kA
-	 7Q+guPbcvLXZWDqIFh7jIa0QEZsawi9LJmbW3p99f0zW13JLSzTrVmSqbfxmpC2BwMIQL
-	 Rmdo7DKJ/un144H0j9UbwjPCSm9k4Dk3rnz/IZRN6rqSfTz6RvEuTM1GKAPtbzoCd+w==
+	bh=bxw/EhE4FNjfEBFr+SgmSBcERnLEt+GnFpVvWXnolUs=;
+	b=PNlqxNGEoy9OC2oySsPs90ESpSCbm3jsbfWpUlGH5GDJ1o+zbOVKTdhqBA555vCq28mK
+	 SEqoBTVPyh36SxXl97IuMZiGn1Rr9QsUNsY7XEFqZyR4s6GqeOOwH2+HL9eQeTq3kGqq1
+	 XwRfPPb1obpjLTGboU+xdoXOtllKzYQ7cU3NgOp7iOSVRyalFF4azlfeaZZciOjBxai4j
+	 uE91pFq83LF8cYzf5ZjBvByAou3nFc628boAlhAbHkrbVu9lUgLbETftjGJG0wgvD+2kE
+	 JS3bcbC/sfY52z1NER00XBIOoOcmNUEOcb6HcvfWeBXQszinkjACnLUG8QKguQvYWcA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=suse.de;
 	spf=pass smtp.mailfrom=suse.de;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=LZCVchYP;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=UbP7T0A5;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=LZCVchYP;
-	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=UbP7T0A5;
-	arc=none smtp.remote-ip=195.135.223.130
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b="FJc/wkba";
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=E8ivwJid;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b="FJc/wkba";
+	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=E8ivwJid;
+	arc=none smtp.remote-ip=195.135.223.131
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7980E606A319;
-	Tue, 20 Oct 2026 11:04:33 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7980E606A319
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EC33606A319;
+	Tue, 20 Oct 2026 11:16:14 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0EC33606A319
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=LZCVchYP;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=UbP7T0A5;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=LZCVchYP;
-	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=UbP7T0A5
+	dkim=pass (1024-bit key, unprotected) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=FJc/wkba;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=E8ivwJid;
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=FJc/wkba;
+	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=E8ivwJid
 Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 49FEC21C99;
-	Tue, 20 Oct 2026 11:04:24 +0000 (UTC)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 9ED601F79A;
+	Tue, 20 Oct 2026 11:16:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1792494264; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	t=1792494965; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=wpVq8HTF6kp3l3+P+HlqkQvEgOT+i0h0AfpydZ4MNoA=;
-	b=LZCVchYPxngjyrTdwP7dDyGwjGeRlfwz6xzaWNSZtF8y3Qgf12SIhyh9Y6Nd0wcT7He1aK
-	YWofyhmxglbBVNhGLztczgk2ut0LSAYokiSZEVTLZunTZ4Jh8IVD6VEwHTFDIw5kayF9gZ
-	vwrWwtjorhJFX/VTys9hwrEgQyblgzQ=
+	bh=bxw/EhE4FNjfEBFr+SgmSBcERnLEt+GnFpVvWXnolUs=;
+	b=FJc/wkbaMpKB25TLPlT6kazIvDNZJdxK39tVGCmtzSwaeVGOv/QxjTke/0I2XreI9ZvNr5
+	PVKe6ZWxSFxUI99fjekfAdmv5Um1ywqm6Qc7BbwjEgCC71WDmapi2lPvCEZULng295HipB
+	2voZo+sGnbC8nEhDVZF+KdJK+4vqRSY=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1792494264;
+	s=susede2_ed25519; t=1792494965;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=wpVq8HTF6kp3l3+P+HlqkQvEgOT+i0h0AfpydZ4MNoA=;
-	b=UbP7T0A54+niJcsOuJ4B/+AeErov5GjTeJBZVnwBx1FlP4R5goEFKis3ur6UZEwIpgqvEs
-	JSlX8AaT2FdapVAA==
-Authentication-Results: smtp-out1.suse.de;
+	bh=bxw/EhE4FNjfEBFr+SgmSBcERnLEt+GnFpVvWXnolUs=;
+	b=E8ivwJids2MHCFrTYPFJZCqqJoT+NgFq1hdnL1TE4Zbe4MDxeZFGi8p7u7vlR2bqlRQEJn
+	G49uMm9PAxTycjBA==
+Authentication-Results: smtp-out2.suse.de;
 	none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1792494264; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	t=1792494965; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=wpVq8HTF6kp3l3+P+HlqkQvEgOT+i0h0AfpydZ4MNoA=;
-	b=LZCVchYPxngjyrTdwP7dDyGwjGeRlfwz6xzaWNSZtF8y3Qgf12SIhyh9Y6Nd0wcT7He1aK
-	YWofyhmxglbBVNhGLztczgk2ut0LSAYokiSZEVTLZunTZ4Jh8IVD6VEwHTFDIw5kayF9gZ
-	vwrWwtjorhJFX/VTys9hwrEgQyblgzQ=
+	bh=bxw/EhE4FNjfEBFr+SgmSBcERnLEt+GnFpVvWXnolUs=;
+	b=FJc/wkbaMpKB25TLPlT6kazIvDNZJdxK39tVGCmtzSwaeVGOv/QxjTke/0I2XreI9ZvNr5
+	PVKe6ZWxSFxUI99fjekfAdmv5Um1ywqm6Qc7BbwjEgCC71WDmapi2lPvCEZULng295HipB
+	2voZo+sGnbC8nEhDVZF+KdJK+4vqRSY=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1792494264;
+	s=susede2_ed25519; t=1792494965;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=wpVq8HTF6kp3l3+P+HlqkQvEgOT+i0h0AfpydZ4MNoA=;
-	b=UbP7T0A54+niJcsOuJ4B/+AeErov5GjTeJBZVnwBx1FlP4R5goEFKis3ur6UZEwIpgqvEs
-	JSlX8AaT2FdapVAA==
+	bh=bxw/EhE4FNjfEBFr+SgmSBcERnLEt+GnFpVvWXnolUs=;
+	b=E8ivwJids2MHCFrTYPFJZCqqJoT+NgFq1hdnL1TE4Zbe4MDxeZFGi8p7u7vlR2bqlRQEJn
+	G49uMm9PAxTycjBA==
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 90833136CC;
-	Tue, 20 Oct 2026 11:04:23 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E5954136C6;
+	Tue, 20 Oct 2026 11:16:04 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id dCK0ErdK12o2ZQAAD6G6ig
-	(envelope-from <tzimmermann@suse.de>); Tue, 20 Oct 2026 11:04:23 +0000
-Message-ID: <9834b569-935c-484b-befb-b913acead9c1@suse.de>
-Date: Tue, 20 Oct 2026 13:04:22 +0200
+	id dv8oJHRN12qhcQAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Tue, 20 Oct 2026 11:16:04 +0000
+Message-ID: <350adc03-dd7f-4120-ac9c-b6d04ff44faf@suse.de>
+Date: Tue, 20 Oct 2026 13:16:04 +0200
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -107,8 +107,8 @@ List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 07/13] drm/client: splash: add a device tree image
- source
+Subject: Re: [PATCH v5 09/13] drm/client: splash: turn the device tree image
+ as it asks
 To: =?UTF-8?Q?M=C3=A0xim_Pedraza_Padilla?= <maximpedraza@gmail.com>,
  Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
  Maxime Ripard <mripard@kernel.org>, David Airlie <airlied@gmail.com>,
@@ -128,7 +128,7 @@ Cc: Francesco Valla <francesco@valla.it>,
  linux-doc@vger.kernel.org, linux-embedded@vger.kernel.org,
  linux-kernel@vger.kernel.org
 References: <20261013093243.505776-1-maximpedraza@gmail.com>
- <20261013093243.505776-8-maximpedraza@gmail.com>
+ <20261013093243.505776-10-maximpedraza@gmail.com>
 Content-Language: en-US
 From: Thomas Zimmermann <tzimmermann@suse.de>
 Autocrypt: addr=tzimmermann@suse.de; keydata=
@@ -155,7 +155,7 @@ Autocrypt: addr=tzimmermann@suse.de; keydata=
  SAQO9xD1Zk9/61JWk8OysuIh7MXkl0fxbRKWE93XeQBhIJHQfnc+YBLprdnxR446Sh8Wn/2D
  Ya8cavuWf2zrB6cZurs048xe0UbSW5AOSo4V9M0jzYI4nZqTmPxYyXbm30Kvmz0rYVRaitYJ
  4kyYYMhuULvrJDMjZRvaNe52tkKAvMevcGdt38H4KSVXAylqyQOW5zvPc4/sq9c=
-In-Reply-To: <20261013093243.505776-8-maximpedraza@gmail.com>
+In-Reply-To: <20261013093243.505776-10-maximpedraza@gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 X-Spamd-Result: default: False [-2.79 / 50.00];
@@ -180,7 +180,7 @@ X-Spamd-Result: default: False [-2.79 / 50.00];
 	RCVD_TLS_ALL(0.00)[];
 	RCVD_COUNT_TWO(0.00)[2];
 	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:url]
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:url,imap1.dmz-prg2.suse.org:helo]
 X-Spam-Score: -2.79
 X-Spam-Level: 
 X-Spam-Flag: NO
@@ -188,294 +188,330 @@ X-Spam-Flag: NO
 Hi
 
 Am 13.10.26 um 11:32 schrieb Màxim Pedraza Padilla:
-> Embedded products often share one kernel image and one board support
-> package across several models that differ in branding. The splash
-> client can show the firmware's BGRT image or a BMP loaded as firmware,
-> but a device tree system has no BGRT, and a BMP loaded as firmware is
-> either built into the kernel, which means one kernel per logo, or read
-> from a filesystem that is not there yet when the display comes up. With
-> U-Boot's Falcon mode the SPL starts the kernel directly, and the device
-> tree is the only thing that reaches it.
+> The same board is often fitted with the same panel mounted in more than
+> one orientation. Let the device tree node ask for the image to be turned,
+> with a "rotation" property counting degrees counter clockwise, as panels
+> already do and as DRM_MODE_ROTATE_* count, which is what it is kept as.
 >
-> Add a source that takes the image from a "boot-logo" node under /chosen.
-> The BMP either sits in the node itself, in an "image" property that dtc
-> fills in with /incbin/, or in a reserved memory region the bootloader
-> loaded it into, named by "memory-region". Exactly one of the two must be
-> present; a node with both or neither is ignored with a warning.
->
-> The image in the node is used where it is: the device tree stays in
-> memory, so there is nothing to copy or release. The region is mapped
-> like the BGRT image, and the BMP header is checked against its size.
->
-> A node is only there if someone put it there for that board, so the
-> device tree goes first, then the BGRT, then the BMP loaded as firmware.
-> The boolean that chose between the latter two becomes an enum naming
-> the one source in use.
->
-> Assisted-by: Claude:claude-opus-5-5
-> Signed-off-by: Màxim Pedraza Padilla <maximpedraza@gmail.com>
-> ---
->   drivers/gpu/drm/clients/Kconfig      |  15 +++
->   drivers/gpu/drm/clients/drm_splash.c | 166 ++++++++++++++++++++++++---
->   2 files changed, 165 insertions(+), 16 deletions(-)
->
-> diff --git a/drivers/gpu/drm/clients/Kconfig b/drivers/gpu/drm/clients/Kconfig
-> index cbe271c3a23f..aef3781cc110 100644
-> --- a/drivers/gpu/drm/clients/Kconfig
-> +++ b/drivers/gpu/drm/clients/Kconfig
-> @@ -108,6 +108,21 @@ config DRM_CLIENT_SPLASH_BACKGROUND_COLOR
->   	  The color can be overridden through the drm_client_lib.splash_color
->   	  kernel command line parameter.
->   
-> +config DRM_CLIENT_SPLASH_SRC_DT
-> +	bool "Device tree as splash source"
-> +	depends on DRM_CLIENT_SPLASH
-> +	depends on OF
-> +	select DRM_CLIENT_SPLASH_BMP_SUPPORT
-> +	help
-> +	  Use a BMP image described by a "boot-logo" node under /chosen in
-> +	  the device tree, either carried in the node itself or placed by the
-> +	  bootloader in a reserved memory region. This lets one kernel image
-> +	  show a different logo on each board or product, chosen by the
-> +	  device tree it boots with.
-> +
-> +	  When present, the device tree image is preferred over the other
-> +	  sources.
-> +
->   config DRM_CLIENT_SPLASH_SRC_BGRT
->   	bool "EFI BGRT as splash source"
->   	depends on DRM_CLIENT_SPLASH
-> diff --git a/drivers/gpu/drm/clients/drm_splash.c b/drivers/gpu/drm/clients/drm_splash.c
-> index a7d627954158..50842922a7f8 100644
-> --- a/drivers/gpu/drm/clients/drm_splash.c
-> +++ b/drivers/gpu/drm/clients/drm_splash.c
-> @@ -9,9 +9,12 @@
->   #include <linux/efi-bgrt.h>
->   #include <linux/firmware.h>
->   #include <linux/init.h>
-> +#include <linux/io.h>
->   #include <linux/iosys-map.h>
->   #include <linux/kthread.h>
->   #include <linux/module.h>
-> +#include <linux/of.h>
-> +#include <linux/of_reserved_mem.h>
->   #include <linux/overflow.h>
->   #include <linux/types.h>
->   #include <linux/unaligned.h>
-> @@ -71,6 +74,14 @@ struct bmp_dib_header {
->   	__le32 colors_important;
->   } __packed;
->   
-> +/* Where the image comes from, in order of preference */
-> +enum drm_splash_source {
-> +	DRM_SPLASH_SRC_NONE,
-> +	DRM_SPLASH_SRC_DT,
-> +	DRM_SPLASH_SRC_BGRT,
-> +	DRM_SPLASH_SRC_BMP,
-> +};
+> The rotation turns the image and not the screen: "logo-position" and
+> "logo-offset" stay in screen pixels, and a quarter turn only swaps how
+> much room the image takes up. Placing it in a frame that turned with it
+> would make the same pair of coordinates mean different places on the
+> same panel, decided by a property that describes the image.
 
-The logic behind this enum deserves a separate patch, I think.
+> The three blitters, one per destination pixel size, become one that
+
+Reading the code below, may I suggest to do this in two steps: first 
+read the image data into a temporary buffer, invert height and rotate as 
+needed.  Second, copy the temporary image into the graphics buffer and 
+adjust the color format.
+
+Eventually we want to have a useful and flexible drawing/blitting API 
+for the DRM clients. Keeping drawing steps separate will help a lot in 
+the long run.
 
 Best regards
 Thomas
 
-> +
->   struct drm_splash_scanout {
->   	int id;
->   	/* Modesets scanning this buffer out, by position in the list */
-> @@ -110,7 +121,7 @@ struct drm_splash {
->   	bool render_done;
->   	void *map_data;
+> reads the source pixel through the rotation and writes it according to
+> the pixel size. Each source pixel is read as three bytes rather than as
+> an unaligned u32: a BMP row is only padded as a whole, so with 3 * width
+> already a multiple of four the last pixel of the image was read one byte
+> past its end. An upright image going to an RGB888 buffer is still copied
+> a row at a time.
+>
+> Assisted-by: Claude:claude-opus-5-5
+> Signed-off-by: Màxim Pedraza Padilla <maximpedraza@gmail.com>
+> ---
+>   drivers/gpu/drm/clients/drm_splash.c | 206 ++++++++++++++-------------
+>   1 file changed, 110 insertions(+), 96 deletions(-)
+>
+> diff --git a/drivers/gpu/drm/clients/drm_splash.c b/drivers/gpu/drm/clients/drm_splash.c
+> index 8561d00a5b96..fdf398987007 100644
+> --- a/drivers/gpu/drm/clients/drm_splash.c
+> +++ b/drivers/gpu/drm/clients/drm_splash.c
+> @@ -25,6 +25,7 @@
+>   #include <drm/drm_drv.h>
+>   #include <drm/drm_fourcc.h>
+>   #include <drm/drm_framebuffer.h>
+> +#include <drm/drm_mode.h>
+>   #include <drm/drm_plane.h>
+>   #include <drm/drm_print.h>
 >   
-> -	bool use_bgrt;
-> +	enum drm_splash_source src;
+> @@ -130,6 +131,8 @@ struct drm_splash {
+>   	 */
+>   	s32 pos_x, pos_y;
+>   	s32 off_x, off_y;
+> +	/* One of DRM_MODE_ROTATE_*: turns the image, not the screen */
+> +	unsigned int rotation;
 >   };
 >   
 >   static struct drm_splash *client_to_drm_splash(struct drm_client_dev *client)
-> @@ -212,6 +223,114 @@ static int drm_splash_fw_request_bmp(struct drm_splash *splash)
+> @@ -283,6 +286,28 @@ static void drm_splash_dt_placement(struct drm_splash *splash,
+>   		splash->off_x = (s32)val[0];
+>   		splash->off_y = (s32)val[1];
+>   	}
+> +
+> +	/* Degrees counter clockwise, as for panels, and as DRM counts them */
+> +	if (!of_property_read_u32(np, "rotation", &val[0])) {
+> +		switch (val[0]) {
+> +		case 0:
+> +			splash->rotation = DRM_MODE_ROTATE_0;
+> +			break;
+> +		case 90:
+> +			splash->rotation = DRM_MODE_ROTATE_90;
+> +			break;
+> +		case 180:
+> +			splash->rotation = DRM_MODE_ROTATE_180;
+> +			break;
+> +		case 270:
+> +			splash->rotation = DRM_MODE_ROTATE_270;
+> +			break;
+> +		default:
+> +			drm_warn(splash->client.dev,
+> +				 "splash: %pOF: unsupported rotation %u",
+> +				 np, val[0]);
+> +		}
+> +	}
 >   }
->   #endif // CONFIG_DRM_CLIENT_SPLASH_SRC_BMP
 >   
-> +#if IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_SRC_DT)
-> +#define DRM_SPLASH_DT_COMPATIBLE "boot-logo"
-> +
+>   static int drm_splash_dt_load(struct drm_splash *splash, const u8 **data,
+> @@ -479,73 +504,68 @@ static unsigned int drm_splash_place_axis(s32 pos, s32 off, unsigned int span,
+>   	return clamp_t(s64, coord + off, 0, last);
+>   }
+>   
+> -static void drm_splash_blit_pix16(struct iosys_map *map, unsigned int dpitch,
+> -				  unsigned int x_pad, unsigned int y_pad,
+> -				  const u8 *sbuf8, unsigned int spitch,
+> -				  unsigned int width, unsigned int height,
+> -				  bool invert_y, u32 format)
+> -{
+> -	unsigned int x, y, src_offset, dst_offset;
+> -	u32 scolor, dcolor, wr_off;
+> -
+> -	for (y = 0; y < height; y++) {
+> -		src_offset = (invert_y ? (height - y - 1) : y) * spitch;
+> -		dst_offset = (y_pad + y) * dpitch;
+> -
+> -		for (x = 0; x < width; x++) {
+> -			scolor = *(const u32 *)(&sbuf8[src_offset + 3 * x]);
+> -			dcolor = drm_draw_color_from_xrgb8888(scolor, format);
+> -			wr_off = dst_offset + (x_pad + x) * sizeof(u16);
+> -
+> -			iosys_map_wr(map, wr_off, u16, dcolor);
+> -		}
+> -	}
+> -}
+> -
+> -static void drm_splash_blit_pix24(struct iosys_map *map, unsigned int dpitch,
+> -				  unsigned int x_pad, unsigned int y_pad,
+> -				  const u8 *sbuf8, unsigned int spitch,
+> -				  unsigned int width, unsigned int height,
+> -				  bool invert_y, u32 format)
+> -{
+> -	unsigned int x, y, src_offset, dst_offset;
+> -	u32 scolor, dcolor, wr_off;
+> -
+> -	for (y = 0; y < height; y++) {
+> -		src_offset = (invert_y ? (height - y - 1) : y) * spitch;
+> -		dst_offset = (y_pad + y) * dpitch;
+> -
+> -		for (x = 0; x < width; x++) {
+> -			scolor = *(const u32 *)(&sbuf8[src_offset + 3 * x]);
+> -			dcolor = drm_draw_color_from_xrgb8888(scolor, format);
+> -			wr_off = dst_offset + (x_pad + x) * 3;
+> -
+> -			iosys_map_wr(map, wr_off, u8, (dcolor & 0x000000FF) >> 0);
+> -			iosys_map_wr(map, wr_off + 1, u8, (dcolor & 0x0000FF00) >> 8);
+> -			iosys_map_wr(map, wr_off + 2, u8, (dcolor & 0x00FF0000) >> 16);
+> -		}
+> -	}
+> -}
+> -
+> -static void drm_splash_blit_pix32(struct iosys_map *map, unsigned int dpitch,
+> -				  unsigned int x_pad, unsigned int y_pad,
+> -				  const u8 *sbuf8, unsigned int spitch,
+> -				  unsigned int width, unsigned int height,
+> -				  bool invert_y, u32 format)
 > +/*
-> + * The boot logo node, if the device tree has a usable one. Only a child of
-> + * /chosen is considered, not anything compatible anywhere in the tree: the
-> + * image is configuration handed over by the firmware, not a device.
+> + * Copy the BMP pixels into the buffer, converted to its format and turned by
+> + * @rotation, one of DRM_MODE_ROTATE_*, which count counter clockwise. The
+> + * rotation turns the image, not the screen: a quarter turn swaps how much
+> + * room the image takes up, and @x_pad and @y_pad place that room on screen.
+> + *
+> + * Each source pixel is three bytes read on their own, since a BMP row is
+> + * only padded to four bytes as a whole and the image need not be aligned.
 > + */
-> +static struct device_node *drm_splash_dt_node(struct drm_splash *splash)
-> +{
-> +	struct drm_client_dev *client = &splash->client;
-> +	struct device_node *np;
-> +	bool image, region;
-> +
-> +	np = of_get_compatible_child(of_chosen, DRM_SPLASH_DT_COMPATIBLE);
-> +	if (!np)
-> +		return NULL;
-> +
-> +	if (!of_device_is_available(np))
-> +		goto out_put;
-> +
-> +	image = of_property_present(np, "image");
-> +	region = of_property_present(np, "memory-region");
-> +	if (image == region) {
-> +		drm_warn(client->dev,
-> +			 "splash: %pOF needs exactly one of image or memory-region",
-> +			 np);
-> +		goto out_put;
-> +	}
-> +
-> +	return np;
-> +
-> +out_put:
-> +	of_node_put(np);
-> +	return NULL;
-> +}
-> +
-> +static bool drm_splash_dt_available(struct drm_splash *splash)
-> +{
-> +	struct device_node *np = drm_splash_dt_node(splash);
-> +
-> +	of_node_put(np);
-> +
-> +	return np;
-> +}
-> +
-> +static int drm_splash_dt_load(struct drm_splash *splash, const u8 **data,
-> +			      size_t *size)
-> +{
-> +	struct drm_client_dev *client = &splash->client;
-> +	struct device_node *np;
-> +	struct resource res;
-> +	const void *prop;
-> +	int len, ret = 0;
-> +
-> +	np = drm_splash_dt_node(splash);
-> +	if (!np)
-> +		return -ENOENT;
-> +
-> +	/*
-> +	 * An image in the node is used in place: the device tree stays in
-> +	 * memory for as long as the system runs, so there is nothing to copy
-> +	 * and nothing to release.
-> +	 */
-> +	prop = of_get_property(np, "image", &len);
-> +	if (prop) {
-> +		*data = prop;
-> +		*size = len;
-> +		goto out_put;
-> +	}
-> +
-> +	/* Otherwise the bootloader loaded it into a reserved region */
-> +	ret = of_reserved_mem_region_to_resource(np, 0, &res);
-> +	if (ret) {
-> +		drm_warn(client->dev, "splash: %pOF: no usable memory-region: %d",
-> +			 np, ret);
-> +		goto out_put;
-> +	}
-> +
-> +	splash->map_data = memremap(res.start, resource_size(&res),
-> +				    MEMREMAP_WB);
-> +	if (!splash->map_data) {
-> +		drm_warn(client->dev, "splash: failed to map %pR", &res);
-> +		ret = -ENOMEM;
-> +		goto out_put;
-> +	}
-> +
-> +	/* The BMP header, checked against this size, says how much is image */
-> +	*data = splash->map_data;
-> +	*size = resource_size(&res);
-> +
-> +out_put:
-> +	of_node_put(np);
-> +	return ret;
-> +}
-> +#else
-> +static bool drm_splash_dt_available(struct drm_splash *splash)
-> +{
-> +	return false;
-> +}
-> +
-> +static int drm_splash_dt_load(struct drm_splash *splash,
-> +			      const u8 **data, size_t *size)
-> +{
-> +	return -EOPNOTSUPP;
-> +}
-> +#endif // CONFIG_DRM_CLIENT_SPLASH_SRC_DT
-> +
->   static bool drm_splash_bgrt_available(struct drm_splash *splash)
+> +static void drm_splash_blit(struct iosys_map *map, unsigned int dpitch,
+> +			    u32 format, unsigned int cpp,
+> +			    unsigned int x_pad, unsigned int y_pad,
+> +			    const u8 *sbuf8, unsigned int spitch,
+> +			    unsigned int width, unsigned int height,
+> +			    bool invert_y, unsigned int rotation)
 >   {
->   	struct drm_client_dev *client = &splash->client;
-> @@ -489,7 +608,7 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
+> -	unsigned int x, y, src_offset, dst_offset;
+> -	u32 scolor, dcolor, wr_off;
+> -
+> -	for (y = 0; y < height; y++) {
+> -		src_offset = (invert_y ? (height - y - 1) : y) * spitch;
+> -		dst_offset = (y_pad + y) * dpitch;
+> +	bool quarter = rotation & (DRM_MODE_ROTATE_90 | DRM_MODE_ROTATE_270);
+> +	unsigned int dw = quarter ? height : width;
+> +	unsigned int dh = quarter ? width : height;
+> +	unsigned int x, y, sx, sy, row, off;
+> +	u32 scolor, dcolor;
+> +
+> +	for (y = 0; y < dh; y++) {
+> +		for (x = 0; x < dw; x++) {
+> +			switch (rotation) {
+> +			case DRM_MODE_ROTATE_90:
+> +				sx = width - 1 - y;
+> +				sy = x;
+> +				break;
+> +			case DRM_MODE_ROTATE_180:
+> +				sx = width - 1 - x;
+> +				sy = height - 1 - y;
+> +				break;
+> +			case DRM_MODE_ROTATE_270:
+> +				sx = y;
+> +				sy = height - 1 - x;
+> +				break;
+> +			default:
+> +				sx = x;
+> +				sy = y;
+> +				break;
+> +			}
+>   
+> -		for (x = 0; x < width; x++) {
+> -			scolor = *(const u32 *)(&sbuf8[src_offset + 3 * x]);
+> +			/* A positive BMP height stores the rows bottom up */
+> +			row = invert_y ? height - 1 - sy : sy;
+> +			scolor = get_unaligned_le24(&sbuf8[row * spitch + 3 * sx]);
+>   			dcolor = drm_draw_color_from_xrgb8888(scolor, format);
+> -			wr_off = dst_offset + (x_pad + x) * sizeof(u32);
+> +			off = (y_pad + y) * dpitch + (x_pad + x) * cpp;
+>   
+> -			iosys_map_wr(map, wr_off, u32, dcolor);
+> +			switch (cpp) {
+> +			case 2:
+> +				iosys_map_wr(map, off, u16, dcolor);
+> +				break;
+> +			case 3:
+> +				iosys_map_wr(map, off, u8, dcolor & 0xff);
+> +				iosys_map_wr(map, off + 1, u8, (dcolor >> 8) & 0xff);
+> +				iosys_map_wr(map, off + 2, u8, (dcolor >> 16) & 0xff);
+> +				break;
+> +			case 4:
+> +				iosys_map_wr(map, off, u32, dcolor);
+> +				break;
+> +			}
+>   		}
+>   	}
+>   }
+> @@ -584,7 +604,7 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
+>   	bool bmp_invert_y;
+>   	u32 bitmap_offset;
+>   	size_t row_len, pixels_len, end;
+> -	unsigned int x_pad, y_pad;
+> +	unsigned int x_pad, y_pad, img_w, img_h;
+>   	const u8 *image_data;
+>   	struct iosys_map map;
+>   	struct drm_rect r;
+> @@ -644,7 +664,16 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
+>   	}
+>   	bmp_pitch = row_len & ~(size_t)3;
+>   
+> -	if (bmp_width > scanout->width || bmp_height > scanout->height) {
+> +	/* The room the image takes up on screen, once turned */
+> +	if (splash->rotation & (DRM_MODE_ROTATE_90 | DRM_MODE_ROTATE_270)) {
+> +		img_w = bmp_height;
+> +		img_h = bmp_width;
+> +	} else {
+> +		img_w = bmp_width;
+> +		img_h = bmp_height;
+> +	}
+> +
+> +	if (img_w > scanout->width || img_h > scanout->height) {
+>   		drm_err(client->dev, "splash: BMP image is too big for the screen");
 >   		return -EINVAL;
 >   	}
->   
-> -	if (splash->use_bgrt) {
-> +	if (splash->src == DRM_SPLASH_SRC_BGRT) {
->   		x_pad = efi_bgrt_image_offset_x();
->   		y_pad = efi_bgrt_image_offset_y();
->   
-> @@ -582,19 +701,34 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
->   static int drm_splash_image_load(struct drm_splash *splash, const u8 **img_data,
->   				 size_t *img_data_len)
->   {
-> -	int ret = 0;
-> -
-> -	if (splash->use_bgrt) {
-> -		ret = drm_splash_bgrt_load(splash, img_data, img_data_len);
-> -		if (ret)
-> -			splash->use_bgrt = false;
-> +	switch (splash->src) {
-> +	case DRM_SPLASH_SRC_DT:
-> +		return drm_splash_dt_load(splash, img_data, img_data_len);
-> +	case DRM_SPLASH_SRC_BGRT:
-> +		return drm_splash_bgrt_load(splash, img_data, img_data_len);
-> +	case DRM_SPLASH_SRC_BMP:
-> +		return drm_splash_fw_load(splash, img_data, img_data_len);
-> +	default:
-> +		return -ENOENT;
+> @@ -678,9 +707,9 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
+>   #endif
+>   	} else {
+>   		x_pad = drm_splash_place_axis(splash->pos_x, splash->off_x,
+> -					      scanout->width, bmp_width);
+> +					      scanout->width, img_w);
+>   		y_pad = drm_splash_place_axis(splash->pos_y, splash->off_y,
+> -					      scanout->height, bmp_height);
+> +					      scanout->height, img_h);
 >   	}
-> +}
 >   
-> -	/* BGRT failed to load */
-> -	if (!splash->use_bgrt)
-> -		ret = drm_splash_fw_load(splash, img_data, img_data_len);
-> -
-> -	return ret;
-> +/*
-> + * Pick the one source the image will come from. A device tree node is only
-> + * there if someone put it there for this board, so it goes first; the BGRT
-> + * is whatever the firmware shows, and the BMP loaded as firmware is the
-> + * fallback. With none of them, only the background colour is drawn.
-> + */
-> +static enum drm_splash_source drm_splash_pick_source(struct drm_splash *splash)
-> +{
-> +	if (drm_splash_dt_available(splash))
-> +		return DRM_SPLASH_SRC_DT;
-> +	if (drm_splash_bgrt_available(splash))
-> +		return DRM_SPLASH_SRC_BGRT;
-> +	if (IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_SRC_BMP))
-> +		return DRM_SPLASH_SRC_BMP;
-> +
-> +	return DRM_SPLASH_SRC_NONE;
->   }
+>   	image_data = data + bitmap_offset;
+> @@ -691,40 +720,24 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
+>   		return ret;
+>   	}
 >   
->   static void drm_splash_image_cleanup(struct drm_splash *splash)
-> @@ -909,10 +1043,10 @@ static int drm_splash_client_hotplug(struct drm_client_dev *client)
->   	get_task_struct(thread);
->   	splash->thread = thread;
+> -	r = DRM_RECT_INIT(x_pad, y_pad, bmp_width, bmp_height);
+> +	r = DRM_RECT_INIT(x_pad, y_pad, img_w, img_h);
 >   
-> -	splash->use_bgrt = drm_splash_bgrt_available(splash);
-> +	splash->src = drm_splash_pick_source(splash);
+> -	/* In case the target format is RGB888, source data can be copied to
+> -	 * the video buffer line by line, avoiding some overhead.
+> +	/*
+> +	 * An unturned image going to an RGB888 buffer has the same byte order
+> +	 * as the BMP, so it is copied a row at a time.
+>   	 */
+> -	if (scanout->format == DRM_FORMAT_RGB888) {
+> +	if (scanout->format == DRM_FORMAT_RGB888 &&
+> +	    splash->rotation == DRM_MODE_ROTATE_0) {
+>   		drm_splash_blit_rgb888(&map, fb->pitches[0], x_pad, y_pad,
+>   				       image_data, bmp_pitch, bmp_width,
+>   				       bmp_height, bmp_invert_y);
+> +	} else if (px_width >= 2 && px_width <= 4) {
+> +		drm_splash_blit(&map, fb->pitches[0], scanout->format, px_width,
+> +				x_pad, y_pad, image_data, bmp_pitch, bmp_width,
+> +				bmp_height, bmp_invert_y, splash->rotation);
+>   	} else {
+> -		switch (px_width) {
+> -		case 2:
+> -			drm_splash_blit_pix16(&map, fb->pitches[0], x_pad,
+> -					      y_pad, image_data, bmp_pitch,
+> -					      bmp_width, bmp_height,
+> -					      bmp_invert_y, scanout->format);
+> -			break;
+> -		case 3:
+> -			drm_splash_blit_pix24(&map, fb->pitches[0], x_pad,
+> -					      y_pad, image_data, bmp_pitch,
+> -					      bmp_width, bmp_height,
+> -					      bmp_invert_y, scanout->format);
+> -			break;
+> -		case 4:
+> -			drm_splash_blit_pix32(&map, fb->pitches[0], x_pad,
+> -					      y_pad, image_data, bmp_pitch,
+> -					      bmp_width, bmp_height,
+> -					      bmp_invert_y, scanout->format);
+> -			break;
+> -		default:
+> -			drm_warn_once(client->dev,
+> -				      "splash: can't blit with pixel width %d",
+> -				      px_width);
+> -		}
+> +		drm_warn_once(client->dev, "splash: can't blit with pixel width %d",
+> +			      px_width);
+>   	}
 >   
-> -	/* If no other image has been loaded, try to load a BMP as firmware */
-> -	if (IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_SRC_BMP) && !splash->use_bgrt) {
-> +	/* The BMP loaded as firmware is the only source that arrives later */
-> +	if (splash->src == DRM_SPLASH_SRC_BMP) {
->   		WRITE_ONCE(splash->fw_pending, true);
->   		ret = drm_splash_fw_request_bmp(splash);
->   		splash->fw_requested = !ret;
+>   	drm_client_buffer_vunmap_local(buffer);
+> @@ -1193,9 +1206,10 @@ void drm_splash_register(struct drm_device *dev,
+>   	spin_lock_init(&splash->fw_lock);
+>   	init_completion(&splash->fw_done);
+>   
+> -	/* Centred unless the image source asks otherwise */
+> +	/* Centred and upright unless the image source asks otherwise */
+>   	splash->pos_x = -1;
+>   	splash->pos_y = -1;
+> +	splash->rotation = DRM_MODE_ROTATE_0;
+>   
+>   	if (format && format->num_planes == 1)
+>   		splash->preferred_format = format->format;
 
 -- 
 --
