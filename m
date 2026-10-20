@@ -1,102 +1,104 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.131
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792487524;
-	b=D3Ctb/LnPg/dYuln/7kCQltLSPvUjVxCTfepeFj3ltzuDgCo5v9i54kOH/UiNAmQ0xzU
-	 duttAdRLJZ98xFy2x2qDGrNS+nb2bWPOeGVJjY6KAutVDezqmygs8ecrceozx0HcbLFiR
-	 udpY2PHjwbKWilKpN+GEgt2KbFwKrVN9/uA1c8h7iIqWCgj21xsEh7N7TCEg6xeov4VHS
-	 A+zmI8pFw016Vzg56O+2KvVlr7uYq5PMT07o0Esln6mwRXQG1aAq8uSQxXKQgvwCXPMLr
-	 JnBGxDmgdfF9wzZ3hRfEQcsQZidNErky3dmJjeYyDXi8wnaanbDyM5CWlJ9XXzcE9sA==
+	t=1792487647;
+	b=5i7p2WYhtAdHvgxOnKmRF6Ri5lpwHmpp+PeY/LNd5y+9ZvCFirMbw+Is3c7pP0dJ5+1w
+	 YIglbb/4fxh3kFXM3C/IzFsAUjA0Amukur5uU20aWGmOvB7LkZ3pTRaD4jLwgXPuORHBq
+	 jMsR6vgvXL8kMvRAicplfZAq0eGDOmN1lFTLVXVBcd29IyTCoyAwkUDbQvZ0TJxdSyruG
+	 kNdZ30WflEWveq7sWYiJhqfsHhTDbayLDEvJHveo1owZWbdfBsfzGnmqen/xsHFgwYDjR
+	 dyU4jB8GGzdlsy0y5CdvYX8RKtcHNdO/+poyvDRcdmk5H1jOf2mISMQU8uy0q7v1nVg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792487524;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792487647;
 	h=DMARC-Filter:Received:DKIM-Signature:DKIM-Signature:DKIM-Signature:
 	 DKIM-Signature:Received:Received:Message-ID:Date:MIME-Version:
 	 User-Agent:Subject:To:Cc:References:Content-Language:From:Autocrypt:
-	 In-Reply-To:Content-Type:Content-Transfer-Encoding:X-Spam-Flag:
-	 X-Spam-Score:X-Spam-Level:X-Spamd-Result;
-	bh=s94UpzuG42fen3Pnbo+DBcnYWMmwpyHhKPC+MKJzM1w=;
-	b=Jv1sZeD/wFXyeH7qFijMjLWmbI0Vm1HuXayZ7Twgib4kgIRXR5btZzQmJ3PwED3kRwVt
-	 kkOTVY4oeaQb29xUW1JLtHUWMeu5aOJbB0BWoo24CC5b2uZ5t0qpokjXOtkFrQDtAFOcD
-	 edPul5mdy8Hfn5Y9bRL6aLenreDpFaXlek0fHTXxut7nJMTXTXOSAzqR7ba6QF7JQza69
-	 BP9aOlC//QHYYXut3m895N3LwsT8rIQTJTKiHcFZ3ccrmG3oz8uA2k/827wD2l73XgYsW
-	 nFavLWe1BHlO5nAzqoowWy0kgohZVL6toGc2LRxbXR6KBGW3q3oDhCFCu6UFjOIjHOA==
+	 In-Reply-To:Content-Type:Content-Transfer-Encoding:X-Rspamd-Server:
+	 X-Rspamd-Queue-Id:X-Rspamd-Action:X-Spam-Level:X-Spamd-Result:
+	 X-Spam-Flag:X-Spam-Score;
+	bh=RQmY0M9tjegDMEezsQ5hlFkCwb+QHN9rMXnNEMTbaII=;
+	b=VwcZvtLY2/zNG5r4KDPRNK2VeI0nzl0Hbibx5a2yomb5J7Apf+kvup3Wty8i0toJlGxk
+	 cYdoboZKNaJG9VRqDCNM5H15hgDEUjdRZgK60pt38MOLtLEPwYHXcQwUt4k3UQeF35281
+	 rtdjFe49d2Cd5F1K1Tr5M4/KJ0jFOf94X49pckGO2ficpqpmypgVqsmOiBhPToqxbFwhq
+	 KDXyHGKU1qM1yqzWb+wdmN2TO4xoNtEMvPmZZO5nhO2w9VQju1h2TiZrfVdKqcmIpQZRp
+	 IWyaT0E4iEeQl4qY2R0m7/W4WOtYF9II7gP9ZbibFVjfMzfsNcQQaq1N/pqi3fKzWmQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=suse.de;
 	spf=pass smtp.mailfrom=suse.de;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=l8ed6vBT;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=XXlhkZG6;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=0tCZ6tcf;
-	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=IU8IC7di;
-	arc=none smtp.remote-ip=195.135.223.130
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=FabIPXEb;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=qz5T1yBj;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=FabIPXEb;
+	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=qz5T1yBj;
+	arc=none smtp.remote-ip=195.135.223.131
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 924FD606A319;
-	Tue, 20 Oct 2026 09:12:03 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 924FD606A319
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B67F606A31D;
+	Tue, 20 Oct 2026 09:14:06 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8B67F606A31D
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=l8ed6vBT;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=XXlhkZG6;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=0tCZ6tcf;
-	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=IU8IC7di
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	dkim=pass (1024-bit key, unprotected) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=FabIPXEb;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=qz5T1yBj;
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=FabIPXEb;
+	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=qz5T1yBj
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id C1C1121C13;
-	Tue, 20 Oct 2026 09:11:53 +0000 (UTC)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id B8EE91F44E;
+	Tue, 20 Oct 2026 09:13:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1792487515; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	t=1792487637; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=s94UpzuG42fen3Pnbo+DBcnYWMmwpyHhKPC+MKJzM1w=;
-	b=l8ed6vBTWJkSwIBJm0xlksr2hQxAqLCMyiHL7/HKj6TvJjR3DDvwoSoKdg9l2LPcNUkOxQ
-	GdGGq5OmHjqSRzkODYey/YK3p6Nz7JtGYynFVCxbhX4hn2Ky4wY4/iFWNI8QFQpcPHIPXR
-	KLMEf4MdH/hXikw8xB5y+4UrN1+Bmbw=
+	bh=RQmY0M9tjegDMEezsQ5hlFkCwb+QHN9rMXnNEMTbaII=;
+	b=FabIPXEbdQj8PnsJLgzWdOf0WlEkKJ31RrCT4zjm8/5VkwE1fDv9WOtYbaxqB1TqxZ3vry
+	RjRYv+jx0Zo6P6GqGNjq/Kj1H/GNol08e6Wl/FbloYUJayPGz3HC9Z+EOQ3EHBZc33F2CI
+	IDqAktxOkzYlACENhzTuztADxpMNaOA=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1792487515;
+	s=susede2_ed25519; t=1792487637;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=s94UpzuG42fen3Pnbo+DBcnYWMmwpyHhKPC+MKJzM1w=;
-	b=XXlhkZG6Y1WV9u4OgYEZcdLzSR50V417kF1BhJY4j8WHmNbh0p6lE1KKLwQKPzS8+OIHhI
-	eFOS6PYAh1n/LvBQ==
-Authentication-Results: smtp-out1.suse.de;
-	none
+	bh=RQmY0M9tjegDMEezsQ5hlFkCwb+QHN9rMXnNEMTbaII=;
+	b=qz5T1yBjGy5qGXamBQRVTNpt+TV9+BJ51Dqbcj8/GhO2kTgQNcw6X8xHiwAn0iLcc7lbld
+	W5qJSMBDztjCC6DA==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=FabIPXEb;
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=qz5T1yBj
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1792487513; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	t=1792487637; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=s94UpzuG42fen3Pnbo+DBcnYWMmwpyHhKPC+MKJzM1w=;
-	b=0tCZ6tcfgGkhUWecp++8LdqxqNPCe5iIgen9Q3bFVrVFfy0lNwoW9b+KxgYSIqkv+zEkl5
-	1tn3Fk26UFw9vQaYxjsvY65JKWhqLPSe9tyrJgT6lhFoEpoH03KGDPmGcT0oSEnZ6+d1z2
-	qxZ8475k7vuCOxc1QGW0nDCu0Ndyx68=
+	bh=RQmY0M9tjegDMEezsQ5hlFkCwb+QHN9rMXnNEMTbaII=;
+	b=FabIPXEbdQj8PnsJLgzWdOf0WlEkKJ31RrCT4zjm8/5VkwE1fDv9WOtYbaxqB1TqxZ3vry
+	RjRYv+jx0Zo6P6GqGNjq/Kj1H/GNol08e6Wl/FbloYUJayPGz3HC9Z+EOQ3EHBZc33F2CI
+	IDqAktxOkzYlACENhzTuztADxpMNaOA=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1792487513;
+	s=susede2_ed25519; t=1792487637;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=s94UpzuG42fen3Pnbo+DBcnYWMmwpyHhKPC+MKJzM1w=;
-	b=IU8IC7diMrzV17QCp9DQwxcWRibIprYBF0OIxCJaIpCR2a1C/ZQUx0x4anbMVj6l3YUYkV
-	1NRyRKEdUaZJj4BA==
+	bh=RQmY0M9tjegDMEezsQ5hlFkCwb+QHN9rMXnNEMTbaII=;
+	b=qz5T1yBjGy5qGXamBQRVTNpt+TV9+BJ51Dqbcj8/GhO2kTgQNcw6X8xHiwAn0iLcc7lbld
+	W5qJSMBDztjCC6DA==
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 10E83136CC;
-	Tue, 20 Oct 2026 09:11:52 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 12F0D136C6;
+	Tue, 20 Oct 2026 09:13:56 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id jEGeKVgw12qfagAAD6G6ig
-	(envelope-from <tzimmermann@suse.de>); Tue, 20 Oct 2026 09:11:52 +0000
-Message-ID: <cc19e4a9-9ec1-4b90-b935-24d9ff33bf7a@suse.de>
-Date: Tue, 20 Oct 2026 11:11:52 +0200
+	id +OANMNQw12rebAAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Tue, 20 Oct 2026 09:13:56 +0000
+Message-ID: <1d3aecdb-2537-4f08-a4d2-22c81ebaca03@suse.de>
+Date: Tue, 20 Oct 2026 11:13:56 +0200
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -107,8 +109,7 @@ List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 01/13] drm/clients: Kconfig: indent DRM_CLIENT_DEFAULT
- with tabs
+Subject: Re: [PATCH v5 02/13] efi: bgrt: add accessors for the boot graphics
 To: =?UTF-8?Q?M=C3=A0xim_Pedraza_Padilla?= <maximpedraza@gmail.com>,
  Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
  Maxime Ripard <mripard@kernel.org>, David Airlie <airlied@gmail.com>,
@@ -128,7 +129,7 @@ Cc: Francesco Valla <francesco@valla.it>,
  linux-doc@vger.kernel.org, linux-embedded@vger.kernel.org,
  linux-kernel@vger.kernel.org
 References: <20261013093243.505776-1-maximpedraza@gmail.com>
- <20261013093243.505776-2-maximpedraza@gmail.com>
+ <20261013093243.505776-3-maximpedraza@gmail.com>
 Content-Language: en-US
 From: Thomas Zimmermann <tzimmermann@suse.de>
 Autocrypt: addr=tzimmermann@suse.de; keydata=
@@ -155,74 +156,221 @@ Autocrypt: addr=tzimmermann@suse.de; keydata=
  SAQO9xD1Zk9/61JWk8OysuIh7MXkl0fxbRKWE93XeQBhIJHQfnc+YBLprdnxR446Sh8Wn/2D
  Ya8cavuWf2zrB6cZurs048xe0UbSW5AOSo4V9M0jzYI4nZqTmPxYyXbm30Kvmz0rYVRaitYJ
  4kyYYMhuULvrJDMjZRvaNe52tkKAvMevcGdt38H4KSVXAylqyQOW5zvPc4/sq9c=
-In-Reply-To: <20261013093243.505776-2-maximpedraza@gmail.com>
+In-Reply-To: <20261013093243.505776-3-maximpedraza@gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: -2.79
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: B8EE91F44E
+X-Rspamd-Action: no action
 X-Spam-Level: 
-X-Spamd-Result: default: False [-2.79 / 50.00];
+X-Spamd-Result: default: False [-3.00 / 50.00];
 	BAYES_HAM(-3.00)[100.00%];
 	SUSPICIOUS_RECIPS(1.50)[];
 	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
 	NEURAL_HAM_SHORT(-0.20)[-1.000];
 	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
 	XM_UA_NO_VERSION(0.01)[];
-	TAGGED_RCPT(0.00)[dt];
-	FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	ARC_NA(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	RCPT_COUNT_TWELVE(0.00)[25];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
 	FREEMAIL_TO(0.00)[gmail.com,linux.intel.com,kernel.org,ffwll.ch,lwn.net];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	RCPT_COUNT_TWELVE(0.00)[25];
 	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	TO_DN_SOME(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	RCVD_TLS_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.de:+];
+	RCVD_COUNT_TWO(0.00)[2];
 	FROM_EQ_ENVFROM(0.00)[];
 	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
 	MID_RHS_MATCH_FROM(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:url,imap1.dmz-prg2.suse.org:helo,suse.de:email]
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	TAGGED_RCPT(0.00)[dt];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email,suse.de:dkim,suse.com:url,intel.com:email,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns]
+X-Spam-Flag: NO
+X-Spam-Score: -3.00
 
 
 
 Am 13.10.26 um 11:32 schrieb Màxim Pedraza Padilla:
-> The body of DRM_CLIENT_DEFAULT is indented with spaces, unlike every
-> other entry in the file. Use tabs, so that the next client added to the
-> list does not have to pick one or the other.
+> The DRM splash client shows the boot graphics the firmware left behind,
+> and needs the image address and size, its offsets and the status bits.
+> Reading them from bgrt_tab and bgrt_image_size works with drm_client_lib
+> built in, but it can be a module, and neither is exported:
 >
-> No functional change.
+>    ERROR: modpost: drivers/gpu/drm/clients/drm_client_lib.ko: symbol 'bgrt_tab' undefined!
+>    ERROR: modpost: drivers/gpu/drm/clients/drm_client_lib.ko: symbol 'bgrt_image_size' undefined!
 >
+> Rather than export the data, add an accessor for each of them, exported
+> GPL only, with stubs in efi-bgrt.h for CONFIG_ACPI_BGRT=n so that users
+> need no #ifdef of their own. The variables stay global for
+> drivers/acpi/bgrt.c, and are only written by efi_bgrt_init(): mark them
+> __ro_after_init.
+>
+> Reported-by: Mario Limonciello <mario.limonciello@amd.com>
+> Closes: https://lore.kernel.org/dri-devel/5d7067de-97b7-4232-9cf6-e4b978696482@amd.com/
+> Suggested-by: Jani Nikula <jani.nikula@linux.intel.com>
 > Assisted-by: Claude:claude-opus-5-5
 > Signed-off-by: Màxim Pedraza Padilla <maximpedraza@gmail.com>
 
 Reviewed-by: Thomas Zimmermann <tzimmermann@suse.de>
 
 > ---
->   drivers/gpu/drm/clients/Kconfig | 10 +++++-----
->   1 file changed, 5 insertions(+), 5 deletions(-)
+>   drivers/firmware/efi/efi-bgrt.c | 74 ++++++++++++++++++++++++++++++++-
+>   include/linux/efi-bgrt.h        | 39 ++++++++++++++++-
+>   2 files changed, 110 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/gpu/drm/clients/Kconfig b/drivers/gpu/drm/clients/Kconfig
-> index 6096c623d9d5..8d8bc37ec9f2 100644
-> --- a/drivers/gpu/drm/clients/Kconfig
-> +++ b/drivers/gpu/drm/clients/Kconfig
-> @@ -114,10 +114,10 @@ config DRM_CLIENT_DEFAULT_LOG
->   endchoice
+> diff --git a/drivers/firmware/efi/efi-bgrt.c b/drivers/firmware/efi/efi-bgrt.c
+> index 1da451582812..01425c4d2e70 100644
+> --- a/drivers/firmware/efi/efi-bgrt.c
+> +++ b/drivers/firmware/efi/efi-bgrt.c
+> @@ -16,8 +16,8 @@
+>   #include <linux/efi.h>
+>   #include <linux/efi-bgrt.h>
 >   
->   config DRM_CLIENT_DEFAULT
-> -       string
-> -       depends on DRM_CLIENT
-> -       default "fbdev" if DRM_CLIENT_DEFAULT_FBDEV
-> -       default "log" if DRM_CLIENT_DEFAULT_LOG
-> -       default ""
-> +	string
-> +	depends on DRM_CLIENT
-> +	default "fbdev" if DRM_CLIENT_DEFAULT_FBDEV
-> +	default "log" if DRM_CLIENT_DEFAULT_LOG
-> +	default ""
+> -struct acpi_table_bgrt bgrt_tab;
+> -size_t bgrt_image_size;
+> +struct acpi_table_bgrt bgrt_tab __ro_after_init;
+> +size_t bgrt_image_size __ro_after_init;
 >   
->   endmenu
+>   struct bmp_header {
+>   	u16 id;
+> @@ -89,3 +89,73 @@ void __init efi_bgrt_init(struct acpi_table_header *table)
+>   out:
+>   	memset(bgrt, 0, sizeof(bgrt_tab));
+>   }
+> +
+> +/**
+> + * efi_bgrt_has_image() - Whether the firmware left a boot graphic
+> + *
+> + * Return: true if the BGRT points at a BMP image, which efi_bgrt_init()
+> + * checked and reserved.
+> + */
+> +bool efi_bgrt_has_image(void)
+> +{
+> +	return bgrt_tab.image_address != 0;
+> +}
+> +EXPORT_SYMBOL_GPL(efi_bgrt_has_image);
+> +
+> +/**
+> + * efi_bgrt_image_address() - Physical address of the boot graphic
+> + *
+> + * Return: the address of the BMP image, or 0 if there is none.
+> + */
+> +phys_addr_t efi_bgrt_image_address(void)
+> +{
+> +	return bgrt_tab.image_address;
+> +}
+> +EXPORT_SYMBOL_GPL(efi_bgrt_image_address);
+> +
+> +/**
+> + * efi_bgrt_image_size() - Size of the boot graphic
+> + *
+> + * Return: the size of the BMP image, as its header gives it, or 0 if there
+> + * is none.
+> + */
+> +size_t efi_bgrt_image_size(void)
+> +{
+> +	return bgrt_image_size;
+> +}
+> +EXPORT_SYMBOL_GPL(efi_bgrt_image_size);
+> +
+> +/**
+> + * efi_bgrt_status() - Status field of the BGRT
+> + *
+> + * Return: the status byte. Bit 0 tells whether the image is still on
+> + * screen and, since ACPI 6.2, bits 1-2 how far it has to be turned to show
+> + * upright (ACPI_BGRT_ORIENTATION_OFFSET).
+> + */
+> +u8 efi_bgrt_status(void)
+> +{
+> +	return bgrt_tab.status;
+> +}
+> +EXPORT_SYMBOL_GPL(efi_bgrt_status);
+> +
+> +/**
+> + * efi_bgrt_image_offset_x() - Horizontal position of the boot graphic
+> + *
+> + * Return: the X offset, in pixels, at which the firmware drew the image.
+> + */
+> +u32 efi_bgrt_image_offset_x(void)
+> +{
+> +	return bgrt_tab.image_offset_x;
+> +}
+> +EXPORT_SYMBOL_GPL(efi_bgrt_image_offset_x);
+> +
+> +/**
+> + * efi_bgrt_image_offset_y() - Vertical position of the boot graphic
+> + *
+> + * Return: the Y offset, in pixels, at which the firmware drew the image.
+> + */
+> +u32 efi_bgrt_image_offset_y(void)
+> +{
+> +	return bgrt_tab.image_offset_y;
+> +}
+> +EXPORT_SYMBOL_GPL(efi_bgrt_image_offset_y);
+> diff --git a/include/linux/efi-bgrt.h b/include/linux/efi-bgrt.h
+> index e6cd51005633..1c287e5fd388 100644
+> --- a/include/linux/efi-bgrt.h
+> +++ b/include/linux/efi-bgrt.h
+> @@ -9,7 +9,14 @@
+>   void efi_bgrt_init(struct acpi_table_header *table);
+>   int __init acpi_parse_bgrt(struct acpi_table_header *table);
+>   
+> -/* The BGRT data itself; only valid if bgrt_image != NULL. */
+> +bool efi_bgrt_has_image(void);
+> +phys_addr_t efi_bgrt_image_address(void);
+> +size_t efi_bgrt_image_size(void);
+> +u8 efi_bgrt_status(void);
+> +u32 efi_bgrt_image_offset_x(void);
+> +u32 efi_bgrt_image_offset_y(void);
+> +
+> +/* The BGRT data itself; only valid if efi_bgrt_has_image(). */
+>   extern size_t bgrt_image_size;
+>   extern struct acpi_table_bgrt bgrt_tab;
+>   
+> @@ -21,6 +28,36 @@ static inline int __init acpi_parse_bgrt(struct acpi_table_header *table)
+>   	return 0;
+>   }
+>   
+> +static inline bool efi_bgrt_has_image(void)
+> +{
+> +	return false;
+> +}
+> +
+> +static inline phys_addr_t efi_bgrt_image_address(void)
+> +{
+> +	return 0;
+> +}
+> +
+> +static inline size_t efi_bgrt_image_size(void)
+> +{
+> +	return 0;
+> +}
+> +
+> +static inline u8 efi_bgrt_status(void)
+> +{
+> +	return 0;
+> +}
+> +
+> +static inline u32 efi_bgrt_image_offset_x(void)
+> +{
+> +	return 0;
+> +}
+> +
+> +static inline u32 efi_bgrt_image_offset_y(void)
+> +{
+> +	return 0;
+> +}
+> +
+>   #endif /* !CONFIG_ACPI_BGRT */
+>   
+>   #endif /* _LINUX_EFI_BGRT_H */
 
 -- 
 --
