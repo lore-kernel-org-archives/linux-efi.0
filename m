@@ -1,108 +1,108 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=205.220.168.131
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792599395;
-	b=VDuLxabhH5DvXcdKWJsl862f9bD2zAbVUo1PXHu1h/VzTmsw/A3+Kc4/DP8mXzwigjTe
-	 cpx6RM4yy1PMHMkxfuglmsRuLxo3PWC/UEwYHCuayLG+kO/7AZOu5lsyoJHZcUKi/1h0P
-	 F2U0jRkYyA8GrYBThCJ/HtJQDWGltssFI+rcq8tSzwHEO02wcqJUxbRwGlMLvEO+1KemL
-	 piM06zBkBqoCS+fG0hEoi49IEoFwcjOakCrdkTLUy5/LnWV2bKawwoiTj8YDM88gSpevV
-	 fRdqtSXoj1kyOVw2LfBqT2TCXWf+DnWawbGv/vL+ti+oEQfWE5vlVWxc4Xf14fi9bEQ==
+	t=1792600407;
+	b=O9fZK0vyskSZUwgqjGMz9X5xSb32KVMg7ePTbkMvAegNuIJG9tILRqiAMhZ7Dbl5TgdH
+	 16Y5OcwPiW1WXnH65EavkBgF7f2TLIO/io46BygSkeLyd+4RFGsew66IsIyKAU35Pva23
+	 vJSX4PWKJpaKK7vzFMz8lSxtiAK+HOb41H9bcXzUHMKBG0s7j0+JPmHmY7jzkoNkurCsP
+	 rUQtfEAs/EPg6UUlMNv6ejHZpEiySmpMVCzK+UFeGvpGOSlE/3WDk9szILDgtP9mgg1G+
+	 FGoWQufdWcGFAmsXQFrAc2CXZUe8IhGCM2i5Q/8j1gXVVShldq/btmuY9EzzOHnd1bw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792599395;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792600407;
 	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
 	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:Received:Date:From:
 	 To:Cc:Subject:Message-ID:In-Reply-To:References:Organization:X-Mailer:
 	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-Proofpoint-GUID:
-	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-Spam-Info:
-	 X-Proofpoint-ORIG-GUID:X-Authority-Analysis:
-	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
-	bh=9hWqXEuq9iUvICKJmtCYJXRTGUsjg4czRSsoSn+YADM=;
-	b=LALXR0MMnCuouokG5JsL171mB7rNq62BXUz79f+NYrA/nXEyC4kmo820RrD74dk8F9KT
-	 iDAaWsM+3l6iID0AAH5xdi8V/aBBKpRDI0l3ifnVLGXCRaSw5e6U07ymy3GYdihMG0pCz
-	 ZCDaysuBJ2RgHuC8VDAlbWsd4aJRRSiI0JwfRiS3ioYzQ2FTHYRvKUTpbZ7YwjEfRycjx
-	 bUXGPpDspB+QZjBrbnol6SF9nm0cMVfL8GXwc16MJJ2ugIe+S8B6V3lk8o5PZMAOKZYZC
-	 O+h6M8csMtVEODjyGD3g+JaP0OejTDcNM12BHBUhd/uhiIG64ppWhjxkZKsjjwejmkg==
+	 X-Proofpoint-ORIG-GUID:X-Proofpoint-Spam-Info:X-Authority-Analysis:
+	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-Virus-Version:
+	 X-Proofpoint-Spam-Details;
+	bh=5S0gFGL7jUhkinHTL4yVeHOzYpusQ3d8V09xofjMzsw=;
+	b=qi7CFq8mCSjaur+THAOqtpz+JF850w5K6S07PEFD9kmtW4R4H1Ro+cnlSgs9jzcPWRaQ
+	 cPhXxkbPi3SH/E7YOUEJ/77+SicbAywZ+dvk1Iju9UldeseohGvZu94DnAyfjTY9WeWAV
+	 NG6BWBx4WlDSpfMBehDTyKJOAva1Ri8lUAVmcamTtBWDT9NXa+IiZ1Z2eJAwkYkkgKC4n
+	 U04ojyE1Kz/a5d+4drbydyZ0xViw09wqaFbRRMP0zDbINtOer3YJIhOveX731tC6XQoYN
+	 Ia3s2WNUtg+xq1Dr+AtKlzYZh3/nWEKYG4xnAUGd0bWEJj9cmp4axoyHukjTZU05xfA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=oss.qualcomm.com;
 	spf=pass smtp.mailfrom=oss.qualcomm.com;
-	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=i9+3PrHW;
-	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=HnlJbmWx;
+	dkim=pass header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=GUi+svDU;
+	dkim=pass header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=NUmJEvst;
 	arc=none smtp.remote-ip=205.220.168.131
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91500606B6D0
-	for <linux-efi@vger.kernel.org>; Wed, 21 Oct 2026 16:16:34 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 91500606B6D0
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33AB8606A321
+	for <linux-efi@vger.kernel.org>; Wed, 21 Oct 2026 16:33:25 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 33AB8606A321
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=i9+3PrHW;
-	dkim=pass (2048-bit key, unprotected) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=HnlJbmWx
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69LFTxxD3726119
-	for <linux-efi@vger.kernel.org>; Wed, 21 Oct 2026 16:16:34 GMT
+	dkim=pass (2048-bit key, unprotected) header.d=qualcomm.com header.i=@qualcomm.com header.a=rsa-sha256 header.s=qcppdkim1 header.b=GUi+svDU;
+	dkim=pass (2048-bit key, unprotected) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.a=rsa-sha256 header.s=google header.b=NUmJEvst
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69LG4D2f2149348
+	for <linux-efi@vger.kernel.org>; Wed, 21 Oct 2026 16:33:24 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	9hWqXEuq9iUvICKJmtCYJXRTGUsjg4czRSsoSn+YADM=; b=i9+3PrHWHdY9KcEx
-	Rkizp5TA6LO3x6JHCBfisbZ0xVIII/InNbBxuEouoj5Gl5TOhuvbQWrw8eL06u4X
-	qiHRcvAhNmVYdbjfFVOwPWC3tQY0bR5kWrXLzQ6N++TpSf/0W4Z9TASh0cWZS0a4
-	Xr9AZ/sJJsXeg1+6ffdBlzPEUJbhqfq/9wHvJh7xsRqxJSeMNgDYFH12igwOZIPc
-	9Ae4kXTrb8SAFEmNoQRNByJbkPWjKBdcjRrRz6EVRgeBw92KcZMZBQC+kZVat+X1
-	ZWlx2gub9lucHtn0mdnHsO852q/e0aPYuMDdx068yiGnUphUu4BvJDEy1BXUn9xg
-	8ukbIQ==
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com [209.85.215.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hesy7a0qa-1
+	5S0gFGL7jUhkinHTL4yVeHOzYpusQ3d8V09xofjMzsw=; b=GUi+svDU/yyymhsl
+	VrHOtB1d73sBGwG7COM52idcWEEDctYMa+eF6Pt4VtlzcUUOeQtAh2n1Vsh/2WQu
+	0u2tDuR/jArqfSZjo5WeZDkmKKnq5Cyx8LpPJLaBgJ14HSsFT34pk/oMJnE/QjZP
+	wyw5Luv8WVqQT2T3xAGbmx03QPVfE3A+2OotuyjaMF4DqeoByKTYNGCQZF08de+c
+	iWVSRHM+0Mr8/oSDoL8AAiVZP7kj7Tx91KaLcsM4HRQSlR0x5UCwgmmD9m+hLCQj
+	/j5oJYm/JjLQzfXhoQU6IC244z8l/Pqlkc+kupWm84Z9ZYCfxIBs8ju/HIUwivyK
+	DroMWg==
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com [209.85.216.70])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4hf0ke059s-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-efi@vger.kernel.org>; Wed, 21 Oct 2026 16:16:33 +0000 (GMT)
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-cd65070d3feso8901a12.0
-        for <linux-efi@vger.kernel.org>; Wed, 21 Oct 2026 09:16:33 -0700 (PDT)
+	for <linux-efi@vger.kernel.org>; Wed, 21 Oct 2026 16:33:24 +0000 (GMT)
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-3ab27eb38d6so948059a91.2
+        for <linux-efi@vger.kernel.org>; Wed, 21 Oct 2026 09:33:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1792599393; x=1793204193; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1792600404; x=1793205204; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:mime-version:organization
          :references:in-reply-to:message-id:subject:cc:to:from:date:from:to
          :cc:subject:date:message-id:reply-to:content-type;
-        bh=9hWqXEuq9iUvICKJmtCYJXRTGUsjg4czRSsoSn+YADM=;
-        b=HnlJbmWxheT2gXIIjcxthAC/H1+57UtsxmUxyx+vccU9Ep3I9hxpJXeWGHordJbqWu
-         mxrJNr1Qjrz+GPYJhwC543D/FR/xWwBeMhtMNPU2oYRyGY65Ves5ed1yTzwT58zruClh
-         e1biPaX9kRMaKlncicouX1Q3sUh1I8ETUPNMehINjSDX2ofI8gI7Ytc4R0PGEv/DhgxM
-         WDjyeDA6Ox5vIp4TKjrb6Fam6OaEAfF9uPr2wumCyuHYre0Wl1XGa1Y/chTGb1kExVZI
-         yDk664y1iTShBv59Jaz4slCuc/SnbLQDoqcqN9cdsXscy4GHBydOwxDDZTqqQYUu62GO
-         eHJg==
+        bh=5S0gFGL7jUhkinHTL4yVeHOzYpusQ3d8V09xofjMzsw=;
+        b=NUmJEvstuVXE/tFZM2esXmuv3658YshInDdySPbrRF3yWviKEdk0fOMWFJAkCexFb1
+         /zokv5p0CPry3SeWu3Prxvcmv2qZgDT4IK3A2By04GvL6SdhHDW2H2UBzMWbUMVVF9z0
+         k53jxv6Qwt/j+0PrPmrxMtlEmqNG9UCMJBM8X9+esboLh6Xs8PRYprzgsS2w67CGcGjS
+         oX+f13kUk+taAl/Klgo+b5SDplOcLjj5kOEK6tONmQ+oLIcUrikm30dMmA+Wt1xcPw8I
+         AG6LILRXd4RgRW4JLbJN0sddoSipHTJ/bfNJubKWZfcfcfnyUxQCWLuCLb6wYoCJi8R+
+         9rqQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792599393; x=1793204193;
+        d=1e100.net; s=20260707; t=1792600404; x=1793205204;
         h=content-transfer-encoding:content-type:mime-version:organization
          :references:in-reply-to:message-id:subject:cc:to:from:date:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=9hWqXEuq9iUvICKJmtCYJXRTGUsjg4czRSsoSn+YADM=;
-        b=btbR/LnYyNUSM3o0aM2hjbFX51c/5X1jHO67yCKZ9pas8ta6unHIwvUAwo3WKHD/k7
-         xfOr3FGa62HullHBAX/jmafrmT9NMAuu87+ZfEQhFdE8WgtH6xj6Q29kfjEn1C8qGTNC
-         QZANT7H4jyY1PRtGxnE9yz1aqKnvfdSaO24HAOkJyTBoLuGA8eHBsLA57QGP7zXE8S+M
-         Y3/rqExll4UJywNt6EUZeHhYhWmOIDduuNoiY5N7MByGgsHF6vnxxtLlEq0xbVg2LO6O
-         5zwbLxVxKqKmKEuZsIP2YIq5UVn7G6EHFCi9SyuKiuknbgW2IoBMCqjizqxmGqtYJ3Ma
-         zw/g==
-X-Forwarded-Encrypted: i=1; AKwUvByfqpXhTQdtDDw8HGeRm7YL2QDSCR3gqImpAbKeD3QeGCU7FLJBjeHzeTofxTYpcG9A/UcBi9OxQ5w=@vger.kernel.org
-X-Gm-Message-State: AFq9FYJi8Hqs1bLBf26k/ejU/tcFYPyzncHdHPuQixXL9luFwnksCuZQ
-	BaztzxxklaY3w1vF5t4jXow5sN3wr2sZJhUx6CnA+7VHJOUQYGtM9NB+2lz0kE8Ik/kGwPTY27S
-	5XHjA+tQFIOUek6o4VFDyvaZQ6XLLicJgngicPwcSx/iPrCsZ9cbnAcN3zGrsDNs=
-X-Gm-Gg: AYBFou018oPeAtRoFVHhI4TUXrud+0jNAw6fD30aDV74nQrD7rLLxLGinHMR2ZTxtbU
-	TNz9KOlWdOnumKGf27lrkYbSOCtH0sc/6ksiPwx5Hz8j3qC30Bb6zBqMw24gr4SvH9jThb6KS2c
-	HH3uJGNmIbVTspzG6iaFyoG0gObm2qvvodZnzp1wbWAJYGluJ+78HGZOjHPjKAn3BkGciOPmLEQ
-	JA0mXZI71UICRH5WxWVK6l7uDa/qAd1LQmPffKNmf7vGS3/+fHYJP7QAHEV3uGqAI/sWkaT6Nbf
-	NWlXuebbUFtdaclNZ4BO0oXjKj9ZNZUD8qm9XV62N2DTsNRWBuaCVOv3XL0K/2yrSxClnk1tfh0
-	sirTGqcgP22uK3nBXvT1Q+fKH40jma4JGy9+3nv3glQ==
-X-Received: by 2002:a05:6a20:2f98:b0:3e2:6653:149c with SMTP id adf61e73a8af0-3e26fc04d39mr3512938637.10.1792599392789;
-        Wed, 21 Oct 2026 09:16:32 -0700 (PDT)
-X-Received: by 2002:a05:6a20:2f98:b0:3e2:6653:149c with SMTP id adf61e73a8af0-3e26fc04d39mr3512915637.10.1792599392315;
-        Wed, 21 Oct 2026 09:16:32 -0700 (PDT)
+        bh=5S0gFGL7jUhkinHTL4yVeHOzYpusQ3d8V09xofjMzsw=;
+        b=0syjJ5Fzwgo76wx6slfUJfaE18x03Gxf/vQhb3WfoOfs1NAVjwAHg6HoxZ2xw9tzTR
+         ABOL7+56kAcN4uUGiDEMdrHBjmwYGy3HCqGi6etocjuZemhB9xoPyVWkqUT24XtUZZb0
+         9ay+bxpLLMfoN3JQ5C1RluVvks3Gs42ZEi3+7VLsf8PvVRcXwc4JdolMpmWuHu3qgln7
+         dgA+Pr9iEs+csY4+xmcbTksf/bag2pQ8pgsvhrXlC/4gTHYHToJk7NZ55wFT3kZhulyZ
+         ESuPSM9AWBNVojArzRvkPEc5wHJcU8913D4go9pqTBJoJg8oK1Y6DPpagBqu3H9v98kF
+         GlyA==
+X-Forwarded-Encrypted: i=1; AKwUvBwPIryGG4PNeB9jxvAGnzIzq3+Bq7aozFVvuBl2V5s46eLsVa8tjS9T7ZYqgBVLCEbOc4J2mYEgn00=@vger.kernel.org
+X-Gm-Message-State: AFq9FYJT2ZU+ad6WE1NI952YB6gdwIZXd4Df+SawTtJCO1vZF0Mww4QM
+	JheSFztrBV3A89IyRYdLcQxU76hO3X71JfuZwTmbbzP3oONnFhrl4qocbuGh4HIX79fpNSmzbNj
+	FFe2iLigkRh3OfIn4XzT5rJwEsnqDvN8xLfRxIvyoc4/9DgKgzhaoB9bj65bkrVE=
+X-Gm-Gg: AYBFou0rpOd8ufWNb7IMv/MgMeRfINtyznnD7JOgS3x4PRWqrik8PdIP3lX7jwrmJ8m
+	9GG1wgm+jeeoc5SUi2XuPzUK5on2or0vxKzl/CD565WI8xkLEiqQ84hM+IJDdUhE37ebTQ0gw/B
+	o72DzzI4G4BfmDncR6/Hp9lI3zXlCZI98mKgFCWPZAcTxkgD55tqwiFMbjaAkaAKIZcue4rPTEM
+	qKfuc1rAPoDvIA0zyEv6mBleVfPg8ebLsvYlIU3MV2UOvdq1ZngcSVEzVy8gogyP5ZzIInKOPVa
+	4DpF+xmuMy2ogVSoWmbbIkTZsdV/FATv3R6y8F+T9nyA1xpbTf6zMPJIoshwt2IsmBL78giwF/a
+	K4+1DbSsO9Em/u6iteoBwUnGz+DC+Kn/TSyho0UxG8A==
+X-Received: by 2002:a17:90b:5688:b0:3ac:b185:fa16 with SMTP id 98e67ed59e1d1-3ad86ef57d3mr2257171a91.43.1792600403611;
+        Wed, 21 Oct 2026 09:33:23 -0700 (PDT)
+X-Received: by 2002:a17:90b:5688:b0:3ac:b185:fa16 with SMTP id 98e67ed59e1d1-3ad86ef57d3mr2257139a91.43.1792600403107;
+        Wed, 21 Oct 2026 09:33:23 -0700 (PDT)
 Received: from localhost (i-global254.qualcomm.com. [199.106.103.254])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-cd6b84b6b17sm205866a12.13.2026.10.21.09.16.28
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ea4005a7c1sm11891595ad.71.2026.10.21.09.33.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 Oct 2026 09:16:31 -0700 (PDT)
-Date: Wed, 21 Oct 2026 09:16:25 -0700
+        Wed, 21 Oct 2026 09:33:22 -0700 (PDT)
+Date: Wed, 21 Oct 2026 09:33:16 -0700
 From: Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>
 To: Jason Gunthorpe <jgg@nvidia.com>
 Cc: Alexandre Ghiti <alex@ghiti.fr>, Albert Ou <aou@eecs.berkeley.edu>,
@@ -136,12 +136,12 @@ Cc: Alexandre Ghiti <alex@ghiti.fr>, Albert Ou <aou@eecs.berkeley.edu>,
         Sami Tolvanen <samitolvanen@google.com>,
         Song
  Shuai <songshuaishuai@tinylab.org>
-Subject: Re: [PATCH v2 04/15] efi/libstub: Add a general way to get symbols
- from the vmlinux into zboot
-Message-ID: <20261021091625.0000515e@oss.qualcomm.com>
-In-Reply-To: <4-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
+Subject: Re: [PATCH v2 06/15] efi/zboot: Lift efi_cache_sync_image() from
+ efi_zboot_decompress()
+Message-ID: <20261021093316.0000594b@oss.qualcomm.com>
+In-Reply-To: <6-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
 References: <0-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
-	<4-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
+	<6-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
 Organization: Qualcomm
 X-Mailer: Claws Mail 4.4.0 (GTK 3.24.51; x86_64-w64-mingw32)
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -155,140 +155,72 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-X-Proofpoint-GUID: peoD_ginXtbpeCVcH0HTY-PPoqxahD37
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDIxMDA2NCBTYWx0ZWRfXzY5k+KWIxBmu
- wn72bcWap1pA1gxYAAAlEMiS3LEO8r1BjuIs8EziA7IOxPn0fz0IDN9T/LSi0xP+suZ4dajh/jx
- EaJprM9Q+/jKqo27l13ML6TIg+x+gYOi4O+rCAGzFUjMOl4b1HODpfWykcOk/e9RKOMV5M8syO0
- hCWFjG3nhg7XBZDS2GJyA9p264vcXMOZ51fjOpwFXtyP79dtcZyfyXWxZ7RxagNloYaenLtuXz6
- 3RxYM8c0MPkgPi0Kf/D7dMA/iuW9Y78iJTzcPwkmwSGWxaykQLiuSD/P1X1s7LG8nBpnBB6K+ib
- yvBAdFj642njOy0Vx23QjW01PRauA1RsWg1T8QAsEcZk0qDeEgPjCr/jesA7sLR/J4Aj0duPe60
- A3HlRY0PBXhTkKPuzMTcBPrADOXlkGk+5qF3yU3J3mMw00zhGFHwJFJBo3GBBUxMIw6szyIKDy+
- vp3q8ukNH6DR2SAYgWQ==
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMDIxMDA2NCBTYWx0ZWRfX44VtlnrbblJH
- oWaE/pzh4BcTDgxy2O+LCKKN9lCxgg3d5PmqRAp/xwrIADFKHpPozqNp6hNMcyiF5NzKkGdH3ZT
- eVLGx3MfFPV0LUo5bNcgBcxbgNg/JCw=
-X-Proofpoint-ORIG-GUID: peoD_ginXtbpeCVcH0HTY-PPoqxahD37
-X-Authority-Analysis: v=2.4 cv=IPaXmQvG c=1 sm=1 tr=0 ts=6ad8e561 cx=c_pps
- a=Qgeoaf8Lrialg5Z894R3/Q==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=ah4THgOBrJhmsRMU:21 a=kj9zAlcOel0A:10 a=660iZSQnnn4A:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=DJpcGTmdVt4CTyJn9g5Z:22
- a=Ikd4Dj_1AAAA:8 a=_GvItbcUg7J-DuPKX2oA:9 a=CjuIK1q_8ugA:10
- a=x9snwWr2DeNwDh03kgHS:22
+X-Proofpoint-GUID: yAIBlJS0BlHllVEiQwP7AQOsxmOVPEZY
+X-Proofpoint-ORIG-GUID: yAIBlJS0BlHllVEiQwP7AQOsxmOVPEZY
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMDIxMDA2NSBTYWx0ZWRfX7tPbrVO4Gy+N
+ 172P9IkEG7u5eeN7Jg49DDyWM7Qmo4bU2BTvymm/gRNnRmuTHAKuat29JI290NVeGfZGonGPH3j
+ A1TA3CJlP7ZttMvW2IBgk2QjI3y6FBQ=
+X-Authority-Analysis: v=2.4 cv=KOzPn1Fo c=1 sm=1 tr=0 ts=6ad8e954 cx=c_pps
+ a=0uOsjrqzRL749jD1oC5vDA==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=kj9zAlcOel0A:10 a=660iZSQnnn4A:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=Um2Pa8k9VHT-vaBCBUpS:22
+ a=Ikd4Dj_1AAAA:8 a=EUspDBNiAAAA:8 a=w7afb6Jpyl5axNu8_tQA:9 a=CjuIK1q_8ugA:10
+ a=mQ_c8vxmzFEMiUWkPHU9:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDIxMDA2NSBTYWx0ZWRfX7nx27XSfq+5z
+ ERWbD+soZAW/McCf0CM+kz4kLbyArOhsNH0kFd6WWgwT+wk3PDAuhShvhCu+98KWbfLeozBekh/
+ UyPhLlYojDIGJQleeBlUG3NTZ7GCDpmzWeePfqwSLJoCb8/aDijTWxZKxSwCuyH/MW9xMF7zHU8
+ IA1Z7QKH1l9UAvMratc2rMIN6MrtqVbWL3PozNng48luC3+SGQbCCClBCTzmkrZj4HgpUEgmBZR
+ 1wd7FYGCNEGkNu7L0iCqrzRaZ5PKSUz1UDYBFHYFTdzqzsykdsj2ny5Nb5GBvggpgZYvG3XsXFG
+ AQ8df+5lD4eUga0uZ7Ohggj2OcnCWx9F+dMj8l4bWc+lMdgBuxfULc+OCUUUDbE8yDWrygLJK9n
+ GMWFbhHqpkp2SUTYUOEZYsYld5vqfZm8EaYciOZyMwByoStvkL5LywreI+YOxu08b7L7ZnVQZ0d
+ RYT0r5x+bselzZJhx4Q==
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
  definitions=2026-10-21_04,2026-10-21_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1015 malwarescore=0 phishscore=0 lowpriorityscore=0 suspectscore=0
- impostorscore=0 spamscore=0 priorityscore=1501 adultscore=0 bulkscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2610190000 definitions=main-2610210064
+ clxscore=1015 spamscore=0 impostorscore=0 suspectscore=0 bulkscore=0
+ lowpriorityscore=0 adultscore=0 priorityscore=1501 malwarescore=0
+ phishscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2610190000
+ definitions=main-2610210065
 
-On Fri,  2 Oct 2026 20:31:41 -0300
+On Fri,  2 Oct 2026 20:31:43 -0300
 Jason Gunthorpe <jgg@nvidia.com> wrote:
 
-> Currently the zboot stub has no access to symbols in the vmlinux. In
-> contrast x86 has a voffsets.h header that allows the stub to know whatever
-> symbols it wants for the decompressed image. ARM DRTM needs another 4
-> symbol locations to work, and it also wants to compile the DRTM libstub
-> code once and have it work in both zboot and embedded.
-> 
-> The current solution in arm is "code_size" from commit 45dd403da851
-> ("efi/zboot: arm64: Inject kernel code size symbol into the zboot
-> payload"). This is neat, but it makes the zboot and embedded cases
-> work differently.
-
-Not a real review as linker fun is not my forte.  So just some
-trivial formatting comments.
-
-
-> 
-> The x86 voffsets.h approach is also nice, but it can only work in zboot
-> since it relies on 'nm vmlinux' to extract the locations. That's a
-> circular dependency for the embedded stub.
-> 
-> One idea that meets the requirements is to embed a struct of offsets
-> inside the vmlinux and then have both stubs know its offset from the start
-> of the image.
-> 
-> First, each arch defines what information it wants the stub to have in a
-> struct:
-> 
->        struct efi_image_info {
-> 	       __le64 code_size;
->        };
-> 
-> Second, it populates the struct with the linker:
-> 
->        EFI_IMAGE_INFO(
-> 	       /* code_size */
-> 	       EFI_IMAGE_INFO_OFFSET(__inittext_end)
->        )
-> 
-> This approach with the linker is guaranteed to emit a value and not a
-> relocation. I looked at writing the struct initializer in C, but that can
-> result in relocations inside the struct. That seemed sketchy so I stuck
-> with a linker script approach.
-> 
-> Finally, any stub code, either in zboot or embedded can access the struct
-> through:
-> 
->   const struct efi_image_info *efi_get_image_info(unsigned long image_base);
-> 
-> The makefiles arrange that both links have a "u64 __efi_image_info_offset"
-> symbol that contains the value. For vmlinux this links to a symbol created
-> by the EFI_IMAGE_INFO() macro, for zboot it uses the same technique as
-> code_size through the zboot.lds.
-> 
-> Since this needs arch changes, protect it under
-> CONFIG_EFI_STUB_IMAGE_INFO. The arch should define the struct and use the
-
-Odd line wrap as moving the CONFIG up a line is still shorter than some of
-the lines above.
-
-> linker macro before enabling that config.
-> 
-> Since everything is linked together, and the actual location of the struct
-> is not fixed, this is all private within the kernel build and can't become
-> ABI to any bootloader.
-> 
-> As some follow-up work, it seems interesting to standardize on this
-> mechanism and remove the PROVIDE() and voffset.h alternatives. This would
-> also avoid needing to pass sysfb_primary_display through EFI from zboot,
-> for example.
+> The two decompressors duplicate this call and the next patch needs to
+> change the argument. Hoist it up to remove the duplication.
 > 
 > Signed-off-by: Jason Gunthorpe <jgg@nvidia.com>
 
+Some mutterings below, but I couldn't come up with a better code
+style, so
 
-> diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
-> index b2988aa12f6645..4dd52ddb148401 100644
-> --- a/include/asm-generic/vmlinux.lds.h
-> +++ b/include/asm-generic/vmlinux.lds.h
-> @@ -83,6 +83,44 @@
->  #define RO_EXCEPTION_TABLE
->  #endif
+Reviewed-by: Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>
+
+> diff --git a/drivers/firmware/efi/libstub/zboot.c b/drivers/firmware/efi/libstub/zboot.c
+> index 4b76f74c56dae0..e3abaa05fc4183 100644
+> --- a/drivers/firmware/efi/libstub/zboot.c
+> +++ b/drivers/firmware/efi/libstub/zboot.c
+> @@ -92,9 +92,11 @@ efi_zboot_entry(efi_handle_t handle, efi_system_table_t *systab)
+>  	}
 >  
-> +/*
-> + * Architecture specific information made available to the EFI stub, see
-> + * CONFIG_EFI_STUB_IMAGE_INFO. The architecture describes the data with a
-> + * struct efi_image_info in its asm/image.h and emits the matching bytes here
-> + * through contents, using linker expressions the compiler cannot compute.
-> + *
-> + * Place in the same section as INIT_DATA.
-> + *
-> + * The architecture must also define EFI_IMAGE_INFO_SIZE to sizeof(struct
-> + * efi_image_info), and that definition has to be visible to the linker script
+>  	// Decompress the payload into the newly allocated buffer
+> -	status = efi_zboot_decompress((void *)image_base, alloc_size) ?:
+> -	         efi_stub_common(handle, image, image_base, cmdline_ptr);
+> -
+> +	status = efi_zboot_decompress((void *)image_base, alloc_size);
+> +	if (status == EFI_SUCCESS) {
+> +		efi_cache_sync_image(image_base, alloc_size);
+> +		status = efi_stub_common(handle, image, image_base, cmdline_ptr);
 
-I'd wrap this to have the whole sizeof() on one line line.
+A little ugly though less so than original code with that implicit assumption
+of EFI_SUCCCESS == 0 that is avoided in most the rest of this code.
+__free magic would be complex given the need to provide the size and hence
+we are down to a helper.  Ok. Maybe just not worth the effort given how small
+the code is.
 
-> + * before this macro is used. Keeping the two in sync is checked by a
-> + * static_assert() next to the struct and by the ASSERT() below.
-> + *
-> + * The struct's offset from _text is emitted as a u64 at
-> + * __efi_image_info_offset. The architecture aliases this location to
-> + * __efistub_efi_image_info_offset for the embedded stub. The absolute
-> + * _efi_image_info_offset_value contains the offset itself; Makefile.zboot
-> + * extracts it with nm and zboot.lds emits it for the compressed image.
-> + */
-
->  
+> +	}
+>  	efi_free(alloc_size, image_base);
+>  	return status;
+>  }
 
