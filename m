@@ -1,78 +1,80 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=95.215.58.166
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=217.140.110.172
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792563071;
-	b=WwYa0ynbrucMaMDXqw3aUvfzoaiNZLaiH+V7uHFy8oupChalrjdbr/OfRLeg/7JKQzGs
-	 l1iUufGTZDV107bhoKZCd2/xPSIftWUNEY7pMe1eWkSSO+mRkTL4wShX/3Q5yq76S8OdG
-	 lnc6Iloj5ZpjccNk0prRPVEqBZYP+6n99nWrRnAOsJ+zEfPrQ43d+db4Iul5BuTyeu+5s
-	 WS7rjFgWIjbBlG3dwZh/WG608IWQ6lHdVdyuLDC8mU5h5iGYb4j3LeYwkstfJm0zPOfoz
-	 AAm9BBZ0cZkTI2krrfALOUKNIGVA22xfvpTuquN3QkPjKFmGQrew37hgyS6BbgvQFig==
+	t=1792563288;
+	b=LE9tIWyCLnWeWd4IOB0VNNfCcfnB8BOpc9Bovq3KHJnwFJa3w5sfG73+5w9leTLgGQgM
+	 mH+vnsHKwCe4TW/lSfWSEekSGzvE7rjcT2e90Fmoxr8evN8ckO9tCboukhMslu95SruyQ
+	 55HAy9lfByhUf9ftrb24+HIPfiTNv7/RnhiHCmlFAbhNzvvbKdEea/702T03YEDqErPal
+	 pggYllND0oIzPolQ1IwOKnBOuJ4DHx1sjRe8xabrMhbdz+z6nzTJFDG4S9vft00dNmwGd
+	 RZ/t02ZYPgq4pxkd4y9iHRZ0Mt0EdPCWdqNRncFTk1foEMgjTHJtA10z5Goz9t8W7iA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792563071;
-	h=DMARC-Filter:X-Envelope-To:DKIM-Signature:X-Envelope-To:Received:
-	 X-Mizu-Trace-ID:X-Migadu-Flow:From:To:Cc:Subject:Date:Message-ID:
-	 X-Mailer:In-Reply-To:References:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=RoigheuXlEgEVVeOm0wqZxiwY5/DXHnZexKpxuh+vtk=;
-	b=ZpU849pQ9v+Wi8Htb0EbFvNrJkv0NxHsjHzJDlfaTZvjItf7z1TZDRbj/FnU15/xNqVF
-	 UfZmbA8/XoA7reGIvKd1bAQ+Cq5orY34GPQ4ltDL8yoT6qEquyqAfEDhk/m+pZDQ2RWDq
-	 X5KQtLj86yzOha9WxnQyQk1ib4zMpTUv4lFmByp8LdZT/j0Wws2we9M262U3auAxKDz8Q
-	 eLILedGEA3kXCXCLxmSJjDH+z9jLksleIqOR2fCAE2DWdkKd8vfXXm5Vu8VhJfs7JR28B
-	 4hRQhm/Y28mM5HXqtjPPgNeJkpMBhHzf+4gwYf6sQW/o1QKALcFGzmfB+yARHAXNS3g==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792563288;
+	h=DMARC-Filter:Received:Received:DKIM-Signature:Date:From:To:Cc:
+	 Subject:Message-ID:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=3x3TamlaaK9V9PCuBZqg1dttpYbp4NHVNda75j19VEs=;
+	b=2EfzwPCVgBJbenG5UjSPTXtM7BeNXjTOiDr5tTyLo+VzRTzhs/hUNOX/wpPAb3QhR0IR
+	 dbamqTfTjrL4umUpZBj38lnFrQt06yNhF9nnKgSaoCK0YSTqYZPoC2hBVCaQ9zaOzQW8h
+	 DaxQknZ7BLQ03uS6Hs1PWExOUKZqABmACHhlmvK1A5HZqlJjC9JGmPvRiJPz/xC1eI8Ig
+	 Ysyihlf7SY8kx4coOC/TMBlyxB8rjs5ip0Qdlz/07A8IVEP44TPOM/uV7cs1sQpjJVuNH
+	 8wCZk3z+HbiUA24isuo4hw2w0fyK1MLiSr/VC7zt9nicZEmIgOb/6b5Xxrz3yAfR3AQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=linux.dev;
-	spf=pass smtp.mailfrom=linux.dev;
-	dkim=pass header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b="KyAaAhH/";
-	arc=none smtp.remote-ip=95.215.58.166
-Received: from mta1.migadu.com (out-166.mta1.migadu.com [95.215.58.166])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01573606A319
-	for <linux-efi@vger.kernel.org>; Wed, 21 Oct 2026 06:11:10 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 01573606A319
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	dmarc=pass header.from=arm.com;
+	spf=pass smtp.mailfrom=arm.com;
+	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=Dz1W2m1m;
+	arc=none smtp.remote-ip=217.140.110.172
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 39F35606A32D;
+	Wed, 21 Oct 2026 06:14:42 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 39F35606A32D
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=KyAaAhH/
-X-Envelope-To: linux-efi@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=RoigheuXlEgEVVeOm0wqZxiwY5/DXHnZexKpxuh+vtk=;
- c=simple/simple; d=linux.dev;
- h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1792563069; v=1; x=1793167869;
- b=KyAaAhH/eYfv2EtlnJFOXQeqVG+6ADHWw8k6iQd17UIBgcsZIaW1WIf+o+/Q81kvO7aqjckN
- k9gsBbyAi4mn1MRj7Lgh/OA4smyfnFbNsOgKeACNDfbNnJViy7hw/dO6dgnysEK4hYW6c25EUpP
- Ur5IANeC4CF42e1c02Tz/W/U=
-X-Envelope-To: linux-efi@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id 73700c2a578380af;
-	Wed, 21 Oct 2026 06:11:08 +0000
-X-Mizu-Trace-ID: 73700c2a578380af
-X-Migadu-Flow: FLOW_OUT
-From: George Guo <dongtai.guo@linux.dev>
-To: pratyush@kernel.org
-Cc: rppt@kernel.org,
-	pasha.tatashin@soleen.com,
-	chenhuacai@kernel.org,
-	ardb@kernel.org,
-	shuah@kernel.org,
-	ilias.apalodimas@linaro.org,
-	akpm@linux-foundation.org,
-	baoquan.he@linux.dev,
-	ruirui.yang@linux.dev,
-	guodongtai@kylinos.cn,
-	kernel@xen0n.name,
-	graf@amazon.com,
-	loongarch@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	kexec@lists.infradead.org,
-	linux-mm@kvack.org,
-	linux-kselftest@vger.kernel.org,
-	linux-efi@vger.kernel.org
-Subject: Re: [PATCH v5 2/5] liveupdate: synchronize EFI KHO channel at execution
-Date: Wed, 21 Oct 2026 14:11:05 +0800
-Message-ID: <20261021061105.3697-1-dongtai.guo@linux.dev>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <2vxz1pal5u64.fsf@kernel.org>
-References: <2vxz1pal5u64.fsf@kernel.org>
+	dkim=pass (1024-bit key, unprotected) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=Dz1W2m1m
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id DF9A815A1;
+	Tue, 20 Oct 2026 23:14:37 -0700 (PDT)
+Received: from e129823.arm.com (e129823.arm.com [10.2.213.3])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 7D69D3F673;
+	Tue, 20 Oct 2026 23:14:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
+	t=1792563281; bh=bY7eaKmWXeEGJZPv0klJ3mm9fvB9sa6YQ58K0dGT+DQ=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Dz1W2m1mtqieAvvcHZ0PElJP5ck781BRAil8keCt0J0xDmnmsvOtE2z2M/5OD8bJT
+	 x0mY2JIMQy/68/SPz8OHAETC2GSRyy6i0mXuMcfrF0pwBi7AW/wwQj2YV7ClSyJ7P8
+	 z7NHuQtFqmTF4JQhakFU6b9pfZaA/t3mKW3YduKY=
+Date: Wed, 21 Oct 2026 07:14:33 +0100
+From: Yeoreum Yun <yeoreum.yun@arm.com>
+To: Jason Gunthorpe <jgg@nvidia.com>
+Cc: Yeoreum Yun <yeoreum.yun@arm.com>, Alexandre Ghiti <alex@ghiti.fr>,
+	Albert Ou <aou@eecs.berkeley.edu>, Ard Biesheuvel <ardb@kernel.org>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Jonathan Corbet <corbet@lwn.net>, David Sterba <dsterba@suse.com>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-doc@vger.kernel.org, linux-efi@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	Mark Rutland <mark.rutland@arm.com>,
+	Palmer Dabbelt <palmer@dabbelt.com>, Paul Walmsley <pjw@kernel.org>,
+	Randy Dunlap <rdunlap@infradead.org>,
+	Simon Glass <sjg@chromium.org>,
+	Shuah Khan <skhan@linuxfoundation.org>,
+	Nick Terrell <terrelln@fb.com>, Will Deacon <will@kernel.org>,
+	Alexandre Ghiti <alexghiti@rivosinc.com>,
+	Conor Dooley <conor.dooley@microchip.com>,
+	Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>,
+	linux-integrity@vger.kernel.org,
+	Palmer Dabbelt <palmer@rivosinc.com>, patches@lists.linux.dev,
+	Piotr =?iso-8859-1?Q?Kr=F3l?= <piotr.krol@3mdeb.com>,
+	Ross Philipson <ross.philipson@gmail.com>,
+	Sami Tolvanen <samitolvanen@google.com>,
+	Song Shuai <songshuaishuai@tinylab.org>
+Subject: Re: [PATCH v2 15/15] efi/arm64: Implement ARM64 DRTM in the stub
+Message-ID: <athYSbJXA96DZK-X@e129823.arm.com>
+References: <0-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
+ <15-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
+ <atf4ONRM3xbs877y@e129823.arm.com>
+ <20261020233435.GJ3008132@nvidia.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -82,60 +84,50 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261020233435.GJ3008132@nvidia.com>
 
-Hi Pratyush,
+On Tue, Oct 20, 2026 at 08:34:35PM -0300, Jason Gunthorpe wrote:
+> On Wed, Oct 21, 2026 at 12:24:40AM +0100, Yeoreum Yun wrote:
+> > One small question...
+> > 
+> > [..snipped..]
+> > 
+> > > +void efi_drtm_launch(void)
+> > > +{
+> > > +	if (efi_drtm_policy == EFI_DRTM_OFF)
+> > > +		return;
+> > > +
+> > > +	/*
+> > > +	 * No cache maintenance is required before the launch. v1.4B R42130 in
+> > > +	 * Table 22 "DCE preamble requirements" requires the DRTM_PARAMETERS to
+> > > +	 * be accessible as Normal Write-Back Cacheable, Inner Shareable memory,
+> > > +	 * so the DCE reads them coherently with the writes made above.  R45220
+> > > +	 * in Table 30 "DCE requirements for the DLME" then has the DCE clean
+> > > +	 * and invalidate the whole DLME region to the Point of Coherency before
+> > > +	 * it measures the DLME image, which covers both the Image itself and
+> > > +	 * the handoff struct placed in the DLME region. Thus once we jump into
+> > > +	 * the kernel with MMU and caches off the CPU will see everything the
+> > > +	 * stub wrote.
+> > > +	 */
+> > > +	arm_drtm_dynamic_launch(drtm_cfg.params_addr);
+> > 
+> > After launching, How to get eventlogs for measurement of DLEM if
+> > tpm_read_log_efi() is used? Doesn't it need to concatenate those
+> > event logs from DRTM eventlog in returned DLEM data?
+> 
+> My plan is a future series will return them as a discrete log bundle
+> through attestation subsystem. All of the logs will be available
+> consistently that way, CCGL, the EFI and ACPI ones..
+> 
+> And it will be logically linked to the ROT the DRTM uses in some
+> future ROT agile DRTM flow. So we can tell the difference between a
+> TPM bare metal launch into PCRs and something like a realm launch into
+> REMs.
 
-You are right about the text, and I am sorry. I used an LLM to help
-write this series. I meant to check every commit message and comment
-word by word myself before sending, but I made a mistake and sent v5
-to the list before doing that check. That is my fault, and it cost you
-time trying to read it.
+Make sense. Thanks!
 
-For v6 I am rewriting the messages and checking every line myself before
-sending.
-
-On Tue, Sep 22 2026, Pratyush Yadav wrote:
-> > The EFI KHO configuration table is a global channel. Updating it while
-> > a candidate kexec image is still being loaded can leave the channel
-> > pointing at the failed candidate even though the previous image remains
-> > installed. Synchronize it instead from the image selected for execution.
->
-> Huh? Sorry, I don't understand this is supposed to mean at all. What
-> failed candidate?
-
-Rewritten in v6.
-
-> Why are you setting this at kexec time? Why not set it at load time like
-> every other architecture?
-
-Other architectures store the KHO addresses in the loaded image itself,
-so each image has its own copy.
-
-The EFI table is shared, but the normal and the crash image can both be
-loaded, and they need different contents: the normal kernel needs the
-KHO addresses, the crash kernel must find the table zeroed. Whatever is
-written at load time is wrong for one of them. For example, after
-"kexec -l" with KHO and then "kexec -p", a panic boots the crash kernel
-with KHO addresses that were meant for the normal kernel.
-
-kernel_kexec() and __crash_kexec() know which image is about to run, so
-v6 writes the table there: filled from that image, or zeroed if it has
-no KHO state.
-
-> Also what's this "sync channel"? Use simpler words that _actually
-> describe_ what they do.
-
-Renamed to kho_update_efi_table() in v6.
-
-> > Use the actual scratch payload size rather than its page-aligned segment
-> > size, and propagate update failures before live-update serialization.
-> > Keep clearing the channel for cold and crash images best-effort.
->
-> Huh? This is word soup and I don't understand what any of this is
-> supposed to mean.
-
-Rewritten in v6.
-
-Thanks,
-George
+-- 
+Sincerely,
+Yeoreum Yun
