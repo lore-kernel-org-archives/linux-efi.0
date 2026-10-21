@@ -1,83 +1,83 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.42
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.48
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792536623;
-	b=gvbYtFV0ZUHM5ycKBnkopIQk/lWNNcYuvkqQsstlv3lXfG3kbkY5nZpiA1y449GX4Id7
-	 tYsl8D7mI5opj4ILU1S3c5icv9fnUUZx/kBo6om55HeHJJSljDxhBtp/+JPsa18sbfHXg
-	 Glf4vCkKOjw6Q5jTZaqtzD15zrCkCRUyCUDtmKYkfHwSNot99kejdGqgPQs6UVl0Bg7ta
-	 /ZzEXf6oTSpkTxJKQ8Zu83VebfNmcfCP9WzLCgVGZV/Z3fFcZ/H0Ny28qf31vKcjFsUfW
-	 1YtNlJELPYClwKfeq5AZdHh7pE7iIMCACJLIhaLEReHrbrcKfwx9sP4hrfsfLhtFQug==
+	t=1792536620;
+	b=Erq02Qcjkk5uODfL7dg2yYWn1DS0SHTRefDHEhMSYUHcxqI43v5/9zS6VcCGyc5ujoCr
+	 6mSMiRMAbxZmVbhkwPVvv5cWh9gAIyDjUaWvrCTjis/Ql5spNO8Ey0rs9TygSGCjuwFeu
+	 Pwg+PLHC0igN0EVjeSuXrteYfS3AUs42TntTEO27p3PVEAGrC7ETxxhjgRY/0kCe7LmMA
+	 bzhr/awyOU9+lbq1laoZa0C8TDhPoP7hUdmwaECuZMdBHnRFEwxIVTsuPJ+iiXMLSozEd
+	 yheB2A4/gSzHQhjnFWHAcYKfySsR8ZareQWc97FmMp3oJjfzetJp3HQfLw8eruXxvAw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792536623;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792536620;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
 	 From:To:Cc:Subject:Date:Message-Id:X-Mailer:In-Reply-To:References:
 	 MIME-Version:Content-Type:Content-Transfer-Encoding;
-	bh=s0sFZviiuD58KoKuefE1C//igVvTgzZQdIYejlrorjA=;
-	b=szWzdV0aB+uUNfy9eBsc1kFKxW6pQtCs2npPbRvwwaPNF3+1CEvtGLIO8lXAK1WnvECA
-	 DfL95+Sk9JatU+t++4TteYLPlW6NT/gOGLyKlz4VNwS+u4dG7GZO6UDRQQHyT50m+KbIt
-	 v3Qp4HA8ZrRJHVUqujf5ifw159TxC/Avbzx6rc6/wlqSjS7U3D1x7DqZWouZ5FhkceGs5
-	 oKVaR1ROhqUtgoaaXFXlZ48g3mp0pioyEkBwFkcI726QvocEQWs2aNZlmSFJ3Po3bDbEz
-	 +B28BQdDwHCbbku7+gKUyk4wCy8VSmSIiNoo+yTlH0krAKf2b3PbEmUoDD8mhaidNGw==
+	bh=4zL0S6kvmtkQoYmoWRmufP9rJujsnjUqprK46hj2fn0=;
+	b=pc/CApx1aFuedgUVeIido3wJu8vcGwfd6RrIB08DsiIB1XkARK48fGuW89T4FaLIRLX/
+	 nMEG9b1gEBPVTEAH8Rl0++Idt+OrZHkq2WEP3NTZpRIHPSes1sFIbgr+ziPRUoEB1AmNU
+	 oDtk1E727jz1DnhvILH42HLyfFqLeCZOuaKqxlyyg0lgtui11JTDlxaydlTpFoqUvmOlO
+	 oFJ+WPHk39NRO3CzLHjZ2vXxGqsSPlWtVT8MB2ebfRL92IZxQtyCnoApWYfUCLGeomjV0
+	 G5kOoIfFMKwxJMfm6/1Uib4/zWvu6G6wVAHQ3jZZoRe/w9nxGLmClFoy1WBUV1yPkAQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=fuL01yBC;
-	arc=none smtp.remote-ip=209.85.128.42
-Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=Y9FIbqDR;
+	arc=none smtp.remote-ip=209.85.128.48
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C40F60A3828
-	for <linux-efi@vger.kernel.org>; Tue, 20 Oct 2026 22:50:23 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6C40F60A3828
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FF4160A3803
+	for <linux-efi@vger.kernel.org>; Tue, 20 Oct 2026 22:50:19 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9FF4160A3803
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=fuL01yBC
-Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-4a1dede3c2cso1064685e9.2
-        for <linux-efi@vger.kernel.org>; Tue, 20 Oct 2026 15:50:23 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=Y9FIbqDR
+Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-4a1ec92f655so1347005e9.0
+        for <linux-efi@vger.kernel.org>; Tue, 20 Oct 2026 15:50:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1792536622; x=1793141422; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1792536618; x=1793141418; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=s0sFZviiuD58KoKuefE1C//igVvTgzZQdIYejlrorjA=;
-        b=fuL01yBCCOgff8Fcjtg40uzwGWns4yu2K79aOgLmuvLPTIqIq6xfOwGY+eNrV9NxYB
-         NuLHXc6OKmZrjivF7l9UL8tnxGToPClQgFvUmKZMSX9ccJDpurVRWobpNkBCtnmcNdUB
-         aQBh1L8VU/HjBgiGcJVCFs8z60tJMgw0CIfCS3TebzUjoMpedcSRCxPnL46oPTfekM/r
-         EAtK3JGq6+2HquC1sETYjEiKdU2nyybu/oRxBP5t5d+kfuC6EVRuAOXmVBxFkmGmxVXv
-         ZKdQvz79m7F99pOrPsWabv9/wRorRrzeQu6l+DP8GgJvbkNo/joMAomOB14jA7mMTEOo
-         rlPQ==
+        bh=4zL0S6kvmtkQoYmoWRmufP9rJujsnjUqprK46hj2fn0=;
+        b=Y9FIbqDRFsiHCh6wCMx/lGXYMzbEMpcYPExHRKo8kxmfRwSdsbHKcVN6b2o3fsfWmS
+         EMfNStvVEXtwQlwGFhTspCN6Iy8LsIslmTQJZArs9croRUFFsg9a0R2Wmowm78fCGk+p
+         qoMRAjWrlWyjvmo/cv+QOkjio/QCUym29eIrZxNWbZgTO868C5tZQiYnBcrDy/y+qYxV
+         AxXCy+jIbfVSYNWbB6SaV+1+cus75rqPWlO2twcCFTqCAqrzmVEb5SQPuQ0TN5KrYxQd
+         MNdNYIr9ltemS55NjRHUaTPPPJnI8hAvgtgmCV7T01bNB3UVCcpT2l7+0a9cI5hk20GK
+         EuaQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792536622; x=1793141422;
+        d=1e100.net; s=20260707; t=1792536618; x=1793141418;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=s0sFZviiuD58KoKuefE1C//igVvTgzZQdIYejlrorjA=;
-        b=Q6NTg1go+nsxwwZw1I3yIT/RYFl4o3BvY7Gxz7fGTPYtEw+eRsNYN2WkzA4vvoCk5g
-         UVpANUSISJz2Y+JtCTXAO3PCxbfuLUug00z6VfZILewo2dWH2zMgtOGmnepYq/7W63Zk
-         FMsswazbqtnvOd1Z/JDjDhyd40f+95JoLbBRor9WiVioQHH8WxxXGL+LG9MRQk35mEII
-         2FQJKSoOCeGxiNvTSThyKtibjlijEFpubHuZsbpOQevOhmNP3/8JySVWCR6hJr36NWeE
-         8rF2aT6jGLP9d2kAUNvp90KwUWGDOfBZ67X04amxFDrvneJmQGl2gemg2vED0IxyMC6e
-         rCvw==
-X-Forwarded-Encrypted: i=1; AKwUvBxNMwrnHFfB7zBR2OBupiGYeZo83W4VxRvlJXcu5j5TGEZKro0c0Rhw7iFwZ3EJlb9KLsCn5lATQjc=@vger.kernel.org
-X-Gm-Message-State: AFq9FYK2DJ7kLR9xyVrypX2AD+ecVu0DNHaiWUTwvSsUm6ydGghH5Hpi
-	tzr0vWQjLf/nBapvo9acH74zqiISkdVPm1Q9DBYMGroflwL6MIw2I7Oy
-X-Gm-Gg: AYBFou3ayTtelYj3Ax4LniHusQg5FjqliLs7GWMFUmC8CrYA1px/qbRiBiBeUUTwbmz
-	G9DJZMa3c+vw88u49Zj6lgH0htUqXn8noLVw+G9BsnyY5YGPjWfQjVEYBXKcjc9WnECZjQ2b7Wn
-	lFT8YFd4G9DQgKG9Ox9NpF/XuJK33MHDfSC3eUZOsI5U8+q8wk/juHD7IaEO2ISzKuuWGUXQmsi
-	hW8NOIoFU5lXErgnw+VXdCM7pQyKYhpUyj9dQF2AeG7u8QhEanYqwEgmQiDYDjpzRg4xTxPUqHq
-	72/asPxc4jgRuGBkYTj54RCttPjj4GHIbbFP7tyRjGd1KCR+H5+Su6oWh0zlqd6S2xti4IHdt4v
-	87VHxeYPoOTc7U88V8EpPy7Lum97VSJjnx/f4rpC7mHK/BlI2THwuF1lcObBSf/N3c9fCa7TFHT
-	r21WNmGP4jfPT4p2f2XQ2VfPkM5VoFubb9sgn1pllMJ6CnRapVEIaMmRI/dFqcW46sshuLkw5xj
-	OxbDD1y/PFCe6/2u8KxT3k5
-X-Received: by 2002:a05:600d:8646:20b0:49f:bd3c:bc24 with SMTP id 5b1f17b1804b1-4a1fdd5b101mr1644285e9.31.1792536621644;
-        Tue, 20 Oct 2026 15:50:21 -0700 (PDT)
+        bh=4zL0S6kvmtkQoYmoWRmufP9rJujsnjUqprK46hj2fn0=;
+        b=g99mNBowzw/f2Nq+QZGQ6TEk7C8HryEmAfBvVryMPNS6ZmQeCuLukBpPtRLySR1Szy
+         6G0VuWmiWYYJSbC153WaLA+ePltooIJwaXMuV1BHKRHW6m9slYNm/j/RMdLWtIwp/4A+
+         JJ7qlIa33shb4evVhyybchvN7mywZA/PMCbFP3IaRAdU2RCnB5NHadKSHy7o+AIEYRzK
+         rhUW8d7zMdmE8kKbOTPlYI3GR/XLfU1tvKIqw9s+o9s13QHuHFjyH+8R+HSejvicQLX8
+         X+Wm4BNwmcZd06FxdWWwHD2hJ0j7oUjt3yNKyJqzl+Ej97Zc/r11TlW+WW9/hiGsY8h9
+         MKhQ==
+X-Forwarded-Encrypted: i=1; AKwUvBywyfeRXGZ1zf3Q4sL7ziUBOXnYa1eg5XTVYyiakqwO3zvfMpqHSaJ28GEcoP6Dv7hUHU6jtYNGl+I=@vger.kernel.org
+X-Gm-Message-State: AFq9FYISK1cdF2upujQdN4R7RS7shZKwIg5XU6THZzODUJGXb+xWXM9g
+	pi8yp4R8qgp+ahTnPfdKD4G9eV3uSB6Dqc+vfKJD/jU42VmFboLK9y4f
+X-Gm-Gg: AYBFou3FCjEkmdQWUzst266iTXX3dLafIwI9Ewj/ZDjUEQibzXgb/B/c9Oef9wP5RNI
+	MAW5mWr5SHvBcQo/IOPddLlFiEb28pMXSOT6xFkLJSJJVo7+DwenLqeMZ/Gr0AswjvSsDQQ9fUt
+	rUHpaaMQlJ4nBJPtgGya9TvrYWKm1j8lQZWjONLomx3zJ3mgGEU0tgmClcjoUjdwr1oAA4VdmbD
+	Czmi/n9xwKrsEuxTiaDl6PRGQpuQZ0akik4D7kQFrjSvQuJGftthce/+GzJrKVV03JdxMUHiF7o
+	D/owlaozIUVqhnPdUfOv+UG9uYN2sUPboOz7MnG3EcKq983Jtx++iMnqO7DV/stJvzJMDGbArQs
+	IjIcldar6u0Ba3NdQ5UaAqxxxqZ5hNekvEJp13uv7F4pUarTKVoxDcrrXBYclNzBd1vfoqp+6MG
+	vPS5BPfaS3YU7eOAsMc8EtUF7i1MapGcXkcIDLPac1amwRncWHqYc5TnuV6R0Sw6mkVcv7iALdc
+	64C1L88Cj5u6Ewjhx+GsYLK
+X-Received: by 2002:a05:600c:b8d:b0:49e:65f2:db64 with SMTP id 5b1f17b1804b1-4a1fdb165d8mr2576335e9.5.1792536618009;
+        Tue, 20 Oct 2026 15:50:18 -0700 (PDT)
 Received: from ingenieria31.oficinasStQ.local ([79.117.46.175])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4a1fc0b42bdsm17511805e9.0.2026.10.20.15.50.19
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4a1fc0b42bdsm17511805e9.0.2026.10.20.15.50.15
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Oct 2026 15:50:21 -0700 (PDT)
+        Tue, 20 Oct 2026 15:50:17 -0700 (PDT)
 From: =?UTF-8?q?M=C3=A0xim=20Pedraza=20Padilla?= <maximpedraza@gmail.com>
 To: Thomas Zimmermann <tzimmermann@suse.de>
 Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
@@ -104,12 +104,12 @@ Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
 	linux-doc@vger.kernel.org,
 	linux-embedded@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v5 12/13] drm/client: splash: prefer what the command line asks for
-Date: Wed, 21 Oct 2026 02:50:06 +0200
-Message-Id: <20261021005006.2341200-7-maximpedraza@gmail.com>
+Subject: Re: [PATCH v5 09/13] drm/client: splash: turn the device tree image as it asks
+Date: Wed, 21 Oct 2026 02:50:04 +0200
+Message-Id: <20261021005006.2341200-5-maximpedraza@gmail.com>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <45b55f94-0cd2-425b-b985-ba3958502b06@suse.de>
-References: <20261013093243.505776-1-maximpedraza@gmail.com> <20261013093243.505776-13-maximpedraza@gmail.com> <45b55f94-0cd2-425b-b985-ba3958502b06@suse.de>
+In-Reply-To: <350adc03-dd7f-4120-ac9c-b6d04ff44faf@suse.de>
+References: <20261013093243.505776-1-maximpedraza@gmail.com> <20261013093243.505776-10-maximpedraza@gmail.com> <350adc03-dd7f-4120-ac9c-b6d04ff44faf@suse.de>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -124,11 +124,23 @@ Content-Transfer-Encoding: 8bit
 
 Hi Thomas,
 
-Am 20.10.26 um 13:26 schrieb Thomas Zimmermann:
-> Please see my earlier comments on module parameters.
+Am 20.10.26 um 13:16 schrieb Thomas Zimmermann:
+> Reading the code below, may I suggest to do this in two steps: first
+> read the image data into a temporary buffer, invert height and rotate as
+> needed.  Second, copy the temporary image into the graphics buffer and
+> adjust the color format.
+>
+> Eventually we want to have a useful and flexible drawing/blitting API
+> for the DRM clients. Keeping drawing steps separate will help a lot in
+> the long run.
 
-Same here: my reasons for keeping these are in my reply on patch 3. If
-the command line is not wanted, this patch goes away in v6.
+Makes sense. v6 will do it that way: the first step turns and flips
+the BMP into an XRGB8888 buffer, and the second converts that into the
+framebuffer's format. The buffer is as large as the image in
+XRGB8888, up to 8 MB for a full screen 1080p splash, and it goes once
+the image is drawn. If there is a helper you would like the second
+step to go through, or a shape you have in mind for the API, I am happy
+to follow it.
 
 Best regards,
 Màxim
