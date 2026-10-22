@@ -1,101 +1,56 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.219.49
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792683597;
-	b=ikwcCwsH4W+Lb0vJMdehUeWAMyxsuEdVFqqiVP2LO17Q2ffkeb8V7AdkhTcPyo8s5Bmq
-	 CjPGzOfgDYztNkzvaPYCBB1KGITNKx+hColeTdpmLygTtFxUKjLHgcB/ufxDv6/qxHCkn
-	 uHoqu6dAOULqkzJPNycYMyHmepG7kwKcpk4g8ESaTrEIFtQYUVFnoAGiz8EjJvxH+k+cs
-	 5B0z/tV7t5NHYhyWK9H0hB2cKi1gxvMSgW97YwUeJhaJDKxm09z7myJNvxzxYr++xVbnU
-	 QgqNt2z9HsgTYkpHuwnZ/m9i7qOgzOsIEqOCjNKju5zDmPtLgVPSufJfBe1ScLUoDjw==
+	t=1792684530;
+	b=UkN8AlZcGa6LvKhSUVXvP7uTfw8ClIPTx56fAfsju59+bECbw3sntcVD9wKEHdY549AA
+	 FtYvtmseCpV9TBwHiYq/soduMwfwHmsJCBfSWyU1xjkqOXiXKpAUl12EcripwE3QktZ3b
+	 GGfNgLnQ6t8As4p1IH7gSIvzyKO5R5KuguBuDoiRKIm1QdjOv0CBICRRoKJi62qdCBf2v
+	 fEddy28eJ7EsTL1ebz/qSa87ceYhbpY9nqPYwOZnw1XVtrHHrizAZADUEsRk5scYff9q1
+	 1ZydVmYx6EYFg1Vq3qCR/QwKAnTAY3ISG2b80NbIj8jxvcfMMGqMDKs2A5gzZAa4Bcg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792683597;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=9PRBt6CU99Tgp/PmrNNizxfLM+x8gsCayxEXcNPrw6c=;
-	b=iSNwq2znmibj5+kwL87RjPuENijOS+T6WwG4SQXiRyCWdjGfFK2mYBR0F936gxfxBgWa
-	 ToKStqw3mTCb3SXGj853hRHog5E9UtAz6McHXFkDBcJELJh+nSosrsXa9F3s1Q4hNvOrU
-	 sNK+LkDcSGnDvccuE02QcEEaLVRoUaQWW2RXzySadhmv3vWZc06P4FDyUGbugfm7v8Jy+
-	 KEcbU4sVCt5rWpgzMh3VYNLhaleg6dbVlyDVRQtaWWR8LM4BnA5biS5BOmbfFV7TmclcT
-	 7TWVKCwE7R2A/W9ZXvKNRmzAmvF215JFBtYLpJCOeyEGCVYXtQE7+Uyz4VHbSyCl48A==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792684530;
+	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
+	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
+	bh=ZAb0YOayIPGTB5WHH3L2EnJ+sh+Go4NLg8MF443ztgo=;
+	b=jzIbOcjGXaQ/nkX7FCC1/kD32QYPc6WYVqH3Lf8GylTWOCuO2qDlxOf2UvAdKdI3z4U8
+	 KoMI12eynCl8ZMxDUAzDmkY4kHtRXvapYswYzfB68p74vVjjS+W5aBjGudhqRrLihXklC
+	 Tk63Oa6tNvH+hAs4SdZ+ah43A82YhbSzUyIhOhvxchI6/nGEWW73oPiaRejglr+p8x7tm
+	 UTjzKPnp/FVco3ijuYyX/7nx9hvnNc9YYnbzgD/WQ9mi/+67u3bZnO6ajovblU1feId3I
+	 WH/HE5TDzuQa3RS99muPeSrqlKb1NQrgJODGvRrzT0Qtvdz905cakMzb4/1wAdbhB4A==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=gwNC7e+7;
-	arc=none smtp.remote-ip=209.85.219.49
-Received: from mail-qv1-f49.google.com (mail-qv1-f49.google.com [209.85.219.49])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=eR8MHj5g;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 448F2606A319
-	for <linux-efi@vger.kernel.org>; Thu, 22 Oct 2026 15:39:57 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 448F2606A319
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 14B32606A319
+	for <linux-efi@vger.kernel.org>; Thu, 22 Oct 2026 15:55:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=gwNC7e+7
-Received: by mail-qv1-f49.google.com with SMTP id 6a1803df08f44-91b83459526so34096d6.2
-        for <linux-efi@vger.kernel.org>; Thu, 22 Oct 2026 08:39:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1792683596; x=1793288396; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=9PRBt6CU99Tgp/PmrNNizxfLM+x8gsCayxEXcNPrw6c=;
-        b=gwNC7e+7NzQRg4fHDHwXLCiShQBYZmOKhlIS7e0HLIepHhNxJdOA4thrdVz6MrzsJb
-         ubP0mnqUVpjbxahUPKbPu5mWivtODl82Os3sJhxS5TdQJzUExA4JD1LjR0c9R9TcQjNA
-         ZY0FiG9yx55iuQMIQgkGgwj06/FvXMeAoycMe8+Sq+sZePzu2EAxuo9IsgtfHd903hvf
-         i9r1GOyrmtOTHIi32tUHbCKUjUk5xWwdEfSovVvx5RpokY7W/CBTpC3vK/InhpI44+Ov
-         9pSC2g3pbZGGyz4147yvSEdzHc9LyL4r7p4oJZ7wPMreHRlLrp8jLL82oneJYMKIjDUD
-         aKMw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792683596; x=1793288396;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=9PRBt6CU99Tgp/PmrNNizxfLM+x8gsCayxEXcNPrw6c=;
-        b=GTBoIg5fE69RvKv36JrIs4ul5GFGnNUGS4Uf9TAZzOqSQRFiekxWVxsh+BcCeGa0BX
-         NiT4aBSv59oDnlrKzDiUHYEQG9/qkFEmyfhByK/0KssMQUDwPlXb2TOWF7zjL2tq4GjV
-         k9DYcsoAKkJbTGkZfkeSZMES/wUkTMyMMbNuZC0oEpfb0clsuobOwy98v9wAN6F05XaJ
-         s91VIq5HdPIqI2fEnRhF1qhVpY8lQo7lrG+5NpVtdULZ068SwipRiVQD0N070mILNY2f
-         0sFe9m78kjAZIayl87fyJL8TGKfJHFi+onb64St9vhZdfbGrWHg7sHgSixv8xnXDbf/J
-         WI9Q==
-X-Forwarded-Encrypted: i=1; AKwUvBw3QdQ5d6+Pk0o3ZuVgTPMQCWxwTtVrC9H5kUnIhF12ynV+cwYBebrXsOuHISvuHmMDXFdbjASvvks=@vger.kernel.org
-X-Gm-Message-State: AFq9FYIxVKG8atgUTseMKwoxIx+90c4eIxmriMiqXqoqkE2p2RHFT+rl
-	QoaipBAsFiaXD6e4xYGupBfzRxle9IXO3lrP+0zF+R0tWHYMXp2tdfG8
-X-Gm-Gg: AYBFou2rJ5vcdyc23NOv21X7LpPPSkjc/Thl5ysVLIYk23FLenzNgw4tVArbrH1QK4Z
-	21Rsn5d/uF+tkWxF4UfqzexdYFhJwggPHGG5vNCl287zWjEVyeuPm9PZljsya5NCyAhA7uNTn91
-	26xax7GE4ruu9pFogCPs4Nd/SEQn8lRSYK3MUr9rpVi7OnP6VVi0sq2lG1oO40BMEvvkcQwIZkO
-	CTZyZ+V61VPUeLqLfpWKf0Xk1KMtw9G3RAdHrbu8iddVGmNKVanuVOiOxySbUtI8CkxQ5TxQdiz
-	hk9LFcqxeWsniRd25jubWytIwj8CEHbPmeRwpsLg3e5nfGxKd+J+y8FbKyBtyR/Bm1gxCoNwvnZ
-	oOHnKvNaZ3+Kfc/EPdX8jctn+Em2EpKUQnZhVOVld/+40h5NSwTTnYsAl3g7lmk+tRucodM12xO
-	tCfXzE9hG7VkLO4jhnXQNJSrWYikFt7xzDXNYYazbrx/J0FqcHlT/mUDrOyUIgYQmXFOk4WunLk
-	xcJBMq265pVCGfJzORqtnqAf392NqN2O7IvCa9iqrv79oxvYIXGrhbngHgNvJ4nhps38Ehr0xV7
-	gepnYvXaVR7hMDvwTAu0nJAynTUYmL6SpPRMdF68SRJvXBBEztbHi2uJxMA=
-X-Received: by 2002:a05:620a:170e:b0:93e:a8c5:132f with SMTP id af79cd13be357-93f57f70346mr956171785a.29.1792683596172;
-        Thu, 22 Oct 2026 08:39:56 -0700 (PDT)
-Received: from CW-KDG4DXVLYF-L.hsd1.mi.comcast.net ([2601:400:8100:2e40:55f:d026:b9b8:679d])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-93f56c6f15asm538665685a.6.2026.10.22.08.39.55
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Thu, 22 Oct 2026 08:39:55 -0700 (PDT)
-From: Jaehee Park <jaehee3park@gmail.com>
-To: ardb@kernel.org
-Cc: sebastien@wenske.fr,
-	ilias.apalodimas@linaro.org,
-	tglx@kernel.org,
-	mingo@redhat.com,
-	bp@alien8.de,
-	dave.hansen@linux.intel.com,
-	x86@kernel.org,
-	hpa@zytor.com,
-	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] x86/efi: Drop stale INITRD table entry on kexec boot
-Date: Thu, 22 Oct 2026 11:39:54 -0400
-Message-ID: <20261022153954.51577-1-jaehee3park@gmail.com>
-X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20261012133712.618913-1-sebastien@wenske.fr>
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=eR8MHj5g
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 00D491F01825;
+	Thu, 22 Oct 2026 15:55:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1792684529;
+	bh=ZAb0YOayIPGTB5WHH3L2EnJ+sh+Go4NLg8MF443ztgo=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=eR8MHj5gp1LmYwJu8G7UqVdEMjGKOGY8vtOshgz+sDXynh6WgMSKo4MCHq5toCJDB
+	 Z2nGLkrGlrpTM3gUW7jQq4t8EyNY32PDPoF1ICEKiXUbQnXIOIWEcRrORKWcDiFL+u
+	 m4hkxlW67tT+PO19hRR/15Dmcnm+L7/EK/aNpSez9nAyLPtxFq4DOIL0biFYefeyoa
+	 E12L+2vo6tQQxnA0Tc6lbr+acr8FQkC0OuVMXQctSMZcd73yRO0QdhALZu+gUIhRVa
+	 LzPtO44Wit2BtprUPz1WuaysqHnh3CuTcaqRZngwucrkv69UU3ioIIHffHRQNhRsfn
+	 X73mR4wZc8CVQ==
+Message-ID: <sashiko-outbox-181738@kernel.org>
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH] x86/efi: Drop stale INITRD table entry on kexec boot
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Jaehee Park" <jaehee3park@gmail.com>, ardb@kernel.org
+Cc: sebastien@wenske.fr, ilias.apalodimas@linaro.org, tglx@kernel.org, mingo@redhat.com, bp@alien8.de, dave.hansen@linux.intel.com, x86@kernel.org, hpa@zytor.com, linux-efi@vger.kernel.org
+In-Reply-To: <20261022153954.51577-1-jaehee3park@gmail.com>
 References: <20261012133712.618913-1-sebastien@wenske.fr>
+ <20261022153954.51577-1-jaehee3park@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Thu, 22 Oct 2026 15:55:28 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -104,85 +59,132 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-From: Jaehee Park <jpark@coreweave.com>
+Thank you for your contribution! Sashiko AI review found 2 potential issue(=
+s) to consider:
+- [High] x86/efi: efi_reuse_config() skips INITRD invalidation when data->s=
+mbios is 0
+- [High] x86/efi: incomplete stale INITRD table invalidation in efi_reuse_c=
+onfig()
+--
 
-The EFI stub allocates the INITRD configuration table in EFI_LOADER_DATA
-memory. That memory can be reused after boot, but the configuration table
-entry pointing to it survives kexec.
+commit 475363733715c59cee77eadc0fb6905b395409e1
+Author: Jaehee Park <jpark@coreweave.com>
 
-When a kexec'd kernel consumes the stale entry, efi_config_parse_tables()
-clears the base and size fields at the old table address. If the new
-initramfs occupies that memory, this overwrites 16 bytes of compressed
-data and prevents the capture kernel from unpacking its initramfs.
+x86/efi: Drop stale INITRD table entry on kexec boot
 
-Invalidate the INITRD entry when reusing the EFI configuration tables on
-x86. Kexec supplies the new initrd through boot_params, so the capture
-kernel does not need the old table.
+This commit invalidates the LINUX_EFI_INITRD_MEDIA_GUID entry in
+efi_reuse_config() on x86 so that a kexec kernel does not consume and zero
+a stale EFI_LOADER_DATA table address that may now overlap the new
+initramfs.
 
-Fixes: 6e62d1c6f2c7 ("efi: Wipe INITRD config table from memory after consumption")
-Cc: stable@vger.kernel.org
-Signed-off-by: Jaehee Park <jpark@coreweave.com>
----
-Hi Ard, Sebastien,
+> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirk=
+s.c
+> index 02c56a02eb9bc..d7f4b985b2794 100644
+> --- a/arch/x86/platform/efi/quirks.c
+> +++ b/arch/x86/platform/efi/quirks.c
+> @@ -615,6 +615,13 @@ int __init efi_reuse_config(u64 tables, int nr_table=
+s)
+>  		if (!efi_guidcmp(guid, EFI_MEMORY_ATTRIBUTES_TABLE_GUID))
+>  			((efi_config_table_64_t *)p)->table =3D EFI_INVALID_TABLE_ADDR;
+> =20
+> +		/*
+> +		 * The EFI stub allocated this table in loader data, which may
+> +		 * have been reused. Kexec passes its initrd in boot_params.
+> +		 */
+> +		if (!efi_guidcmp(guid, LINUX_EFI_INITRD_MEDIA_GUID))
+> +			((efi_config_table_64_t *)p)->table =3D EFI_INVALID_TABLE_ADDR;
+> +
 
-I independently diagnosed and locally fixed this issue on October 6
-while debugging kdump on an x86_64 L40S system. I was preparing to submit
-my fix after internal review and found your October 12 proposal.
+[Severity: High]
+Will efi_reuse_config() in arch/x86/platform/efi/quirks.c still skip
+invalidating LINUX_EFI_INITRD_MEDIA_GUID when data->smbios is zero?
 
-In my case, the stale INITRD table address overlapped the capture
-initramfs. The capture kernel reported:
+Before mapping the configuration table array and entering the loop,
+arch/x86/platform/efi/quirks.c:efi_reuse_config() checks:
 
-  Initramfs unpacking failed: ZSTD-compressed data is corrupt
-  Failed to execute /init (error -2)
-  Kernel panic - not syncing: No working init found.
+	if (!efi_setup)
+		return 0;
 
-My local fix invalidates the inherited INITRD entry in efi_reuse_config()
-instead of changing the stub allocation. With that fix, the capture
-initramfs checksum remained unchanged through successful unpacking and
-kdump saved a crash dump.
+	if (!efi_enabled(EFI_64BIT))
+		return 0;
 
-The tested version also removed the data->smbios early return. I have
-left that change out of this submission to keep the initial patch small.
-This reduced version has not been boot-tested separately. It retains
-the existing SMBIOS guard, so it does not cover SMBIOS3-only systems.
-Would you prefer handling that guard as part of this fix?
+	data =3D early_memremap(efi_setup, sizeof(*data));
+	if (!data) {
+		ret =3D -ENOMEM;
+		goto out;
+	}
 
-Would invalidating the inherited entry also be useful when kexec boots
-from a kernel whose stub allocated the table in EFI_LOADER_DATA? The
-allocation change appears to address the lifetime at its source, while
-this change prevents the incoming x86 kernel from consuming a stale
-entry created by an older kernel.
+	if (!data->smbios)
+		goto out_memremap;
 
-I have not tested the ACPI reclaim patch, so I am not offering a
-Tested-by for that patch.
+On UEFI systems that only provide a 64-bit SMBIOS 3.0 entry point
+(SMBIOS3_TABLE_GUID) and no legacy 32-bit SMBIOS 2.x entry point
+(SMBIOS_TABLE_GUID), efi.smbios remains EFI_INVALID_TABLE_ADDR. In
+drivers/firmware/efi/efi.c:systab_show(), /sys/firmware/efi/systab only
+emits SMBIOS3=3D and omits SMBIOS=3D:
 
-Thanks,
-Jaehee
+	if (efi.smbios3 !=3D EFI_INVALID_TABLE_ADDR)
+		str +=3D sprintf(str, "SMBIOS3=3D0x%lx\n", efi.smbios3);
+	if (efi.smbios !=3D EFI_INVALID_TABLE_ADDR)
+		str +=3D sprintf(str, "SMBIOS=3D0x%lx\n", efi.smbios);
 
- arch/x86/platform/efi/quirks.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+When userspace kexec-tools populates struct efi_setup_data from
+/sys/firmware/efi/systab on such a system, data->smbios is left as 0.
+When the kexec or kdump kernel boots, efi_reuse_config() takes the
+goto out_memremap path before reaching the configuration table loop.
 
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -615,6 +615,13 @@
- 		if (!efi_guidcmp(guid, EFI_MEMORY_ATTRIBUTES_TABLE_GUID))
- 			((efi_config_table_64_t *)p)->table = EFI_INVALID_TABLE_ADDR;
- 
-+		/*
-+		 * The EFI stub allocated this table in loader data, which may
-+		 * have been reused. Kexec passes its initrd in boot_params.
-+		 */
-+		if (!efi_guidcmp(guid, LINUX_EFI_INITRD_MEDIA_GUID))
-+			((efi_config_table_64_t *)p)->table = EFI_INVALID_TABLE_ADDR;
-+
- 		p += sz;
- 	}
- 	early_memunmap(tablep, nr_tables * sz);
+On x86, the kexec initrd passed via boot_params is read through
+boot_params.hdr.ramdisk_size in arch/x86/kernel/setup.c:get_ramdisk_size()
+without setting phys_initrd_size:
 
-base-commit: 7be4bc52fd9e0e55dc9a2e0232b89427d2c4b614
--- 
-2.54.0
+	u64 ramdisk_size =3D boot_params.hdr.ramdisk_size;
+
+	ramdisk_size |=3D (u64)boot_params.ext_ramdisk_size << 32;
+
+	if (ramdisk_size =3D=3D 0)
+		ramdisk_size =3D phys_initrd_size;
+
+As a result, phys_initrd_size is still 0 when
+drivers/firmware/efi/efi.c:efi_config_parse_tables() runs:
+
+	if (IS_ENABLED(CONFIG_BLK_DEV_INITRD) &&
+	    initrd !=3D EFI_INVALID_TABLE_ADDR && phys_initrd_size =3D=3D 0) {
+		struct linux_efi_initrd *tbl;
+
+		tbl =3D early_memremap(initrd, sizeof(*tbl));
+		if (tbl) {
+			phys_initrd_start =3D tbl->base;
+			phys_initrd_size =3D tbl->size;
+			tbl->base =3D tbl->size =3D 0;
+			early_memunmap(tbl, sizeof(*tbl));
+		}
+	}
+
+Because drivers/firmware/efi/libstub/efi-stub-helper.c:efi_load_initrd()
+allocated tbl in EFI_LOADER_DATA memory during the initial boot:
+
+	status =3D efi_bs_call(allocate_pool, EFI_LOADER_DATA, sizeof(initrd),
+			     (void **)&tbl);
+
+that physical address is reclaimed as normal RAM after ExitBootServices()
+and can be overwritten with 16 bytes of zeros when efi_reuse_config()
+returns early on !data->smbios (or when !efi_setup or
+!efi_enabled(EFI_64BIT)), corrupting whatever kexec or kdump segment now
+resides there.
+
+Should data->smbios only guard the SMBIOS_TABLE_GUID assignment inside the
+loop rather than returning early from efi_reuse_config()?
+
+Also, since non-x86 EFI architectures do not call efi_reuse_config(), could
+a kexec boot without an initrd (where phys_initrd_size =3D=3D 0) on those
+architectures still dereference and zero the stale EFI_LOADER_DATA address
+in efi_config_parse_tables()?
+
+>  		p +=3D sz;
+>  	}
+>  	early_memunmap(tablep, nr_tables * sz);
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261022153954.5157=
+7-1-jaehee3park@gmail.com?part=3D1
