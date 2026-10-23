@@ -1,142 +1,104 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.131
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792738258;
-	b=a4WmorRrxp9NYYmmk2BpWz/cHEMqCMyR3d4TRfRWeZAf3zttv5cvXhHO0UjhD/Z4BfDY
-	 aD80WHGwpu8NoBePN4n5vad/kyU40e4n1sXkO7bS7lwtOHiYw5fhNoe8Gz5KCmQay0vfT
-	 cW9oKwuqjjr9pgMHrCBvboHxAHD392JYZ0JTiUNAZUPTaZOTUIZSMFRcE2/nQj4mwXvx9
-	 KEVmcJYcyAlg7AeSNxeUgbnRvi5ulpGqFP10w6gg4LQtFvCwsh8exlnMQUO6HPOvIDEdI
-	 tpmWgB44GREHY/iOFYPYBBO+rAPsbkNDGI1YOuzu9aP3koYK2B8lvmyien7bVINQ7Dw==
+	t=1792754807;
+	b=zRmdq/f1aACNPKvQCoc946jiWCPKzq3zJOltdwgD9lQ7QdIv3gbc0J1mWwMpJNPNwfzf
+	 qHljUdvrL//5yJGk0FwyevaadzUeBa16PZ+JlUCq9VT7c/fYnj/bpZEaBclFby4ZqOOGR
+	 2CDd/9PiC9CIz2Mo1Xqf7hLS9EWPLYbBcPFK6qz2AvdBaGj7Aqn9Rm5o32t/8ZA0ALik3
+	 toTZZh/ko2mKqpYPUMWBBilEdTLahlyoTSxodK2DDb2RnWc+bonkmEIqNUBfmRwYEHFvE
+	 74XjE2hq9Vm+N867fFDpy6bfohmpnXu/VxRFl/U40ESo/p5btPfRwNgBwe26Hn+aQYA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792738258;
-	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
-	 X-Mimecast-MFC-AGG-ID:Received:Received:From:To:Cc:Subject:Date:
-	 Message-ID:In-Reply-To:References:MIME-Version:
-	 Content-Transfer-Encoding:X-Scanned-By;
-	bh=F6+noPVYF4kQP6smbqYTSV7WwZHDrBWE8Us7MYDz21A=;
-	b=farNplfdwow9CT5eWQlypajQvFoU2Be9LRWqmGu8UNEtvwI1WD5VXElhWBynTM0WdZhg
-	 McVMcs4EGaXCu2Apfd8MLbaznjv/KrZ4qeXK0OeUX6CRbe4x9t3EoebmekERrrJOw6WP5
-	 SRQBfhSc4dnDrzwIIr8aZR6juraXAUe11b/wYT/q9uaB8AsWmbME8V4zvMf/hmvKXxX2S
-	 5C565j/A36Q9znoXSCkAxvMev76crlR7nDrLuBuA5M17yE2XhsLM+4JQfkBt90OzAxXE1
-	 0GO+ZVBQ7NrWwR3UpcOwBWPO9dCkynsvMTKg09s6UcObb7XdfTVOdpbmrMLVl3eWong==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792754807;
+	h=DMARC-Filter:Received:DKIM-Signature:DKIM-Signature:DKIM-Signature:
+	 DKIM-Signature:Received:Received:Message-ID:Date:MIME-Version:
+	 User-Agent:Subject:To:Cc:References:Content-Language:From:Autocrypt:
+	 In-Reply-To:Content-Type:Content-Transfer-Encoding:X-Spamd-Result:
+	 X-Rspamd-Server:X-Rspamd-Action:X-Spam-Flag:X-Spam-Score:X-Spam-Level:
+	 X-Rspamd-Queue-Id;
+	bh=rH5uI+MFFbqA2/IjxVKao6Wy3U0y7FtYS68LxQh8NN0=;
+	b=yfAOioq68RLaedmJUeGTfR7BLdZ0J8xLtdZLOvhUElU1KHEgkkyA+rixe3n3EBd5aEMa
+	 Ha122cRZ1U39+1dk3j4YPm4ZlObVrFmwqOIulxnZfMWNZVOnINzj+19Ka0MjBwDMYIo9Y
+	 6G5C0Wy6WFLBMWlr4jri455Da46RZ6He35m9AlFiGVfPR5F+TlDA9OLsjS+qwuvYHkceV
+	 JObUa8NLOm2aL6yt6OISM2+HW3DowRVAG9zz2JgUPbkUMLoAjN3op8YVGOdoPcFWXyjnM
+	 qZVYSpoOam3vCf1yoO17ldEUp9GCNuOj2BhBJR7XO/G+rHyL6TtMOfRXFSooREgACfQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=redhat.com;
-	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=WiJAYFar;
-	arc=none smtp.remote-ip=170.10.129.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	dmarc=pass header.from=suse.de;
+	spf=pass smtp.mailfrom=suse.de;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=g09d70JU;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=vEPP7UqY;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=g09d70JU;
+	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=vEPP7UqY;
+	arc=none smtp.remote-ip=195.135.223.131
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DAA0606A32C
-	for <linux-efi@vger.kernel.org>; Fri, 23 Oct 2026 06:50:57 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8DAA0606A32C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EFD7E606A31A;
+	Fri, 23 Oct 2026 11:26:46 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org EFD7E606A31A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=WiJAYFar
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1792738256;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=F6+noPVYF4kQP6smbqYTSV7WwZHDrBWE8Us7MYDz21A=;
-	b=WiJAYFar5GLqm9jBfte1wVBOF0+8IuRTzYWgbucplaQuwiTc28SwjYD3DC6M3D70cFGrT8
-	z2mAjxn3+cDE9BLfZl/o6C2WBIvSaVC9DCPKgkYcVdTVPHeQsYjOtJJCTRXK4emGxXVw1V
-	CyBMzM3RQo4z+iuB+UBXSCtuRcHYgtA=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-587-1BrFnSVrOACgn3OQUjDx2Q-1; Fri,
- 23 Oct 2026 02:50:51 -0400
-X-MC-Unique: 1BrFnSVrOACgn3OQUjDx2Q-1
-X-Mimecast-MFC-AGG-ID: 1BrFnSVrOACgn3OQUjDx2Q_1792738248
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+	dkim=pass (1024-bit key, unprotected) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=g09d70JU;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=vEPP7UqY;
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=g09d70JU;
+	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=vEPP7UqY
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id BCC341955F71;
-	Fri, 23 Oct 2026 06:50:47 +0000 (UTC)
-Received: from thuth-p1g4.redhat.com (unknown [10.44.48.42])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 7EFCD1956095;
-	Fri, 23 Oct 2026 06:50:27 +0000 (UTC)
-From: Thomas Huth <thuth@redhat.com>
-To: Arnd Bergmann <arnd@arndb.de>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nicolas Schier <nsc@kernel.org>,
-	Richard Henderson <richard.henderson@linaro.org>,
-	Matt Turner <mattst88@gmail.com>,
-	Magnus Lindholm <linmag7@gmail.com>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Will Deacon <will@kernel.org>,
-	Huacai Chen <chenhuacai@kernel.org>,
-	Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-	Madhavan Srinivasan <maddy@linux.ibm.com>,
-	Heiko Carstens <hca@linux.ibm.com>,
-	Vasily Gorbik <gor@linux.ibm.com>,
-	Alexander Gordeev <agordeev@linux.ibm.com>,
-	Thomas Gleixner <tglx@kernel.org>,
-	Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>,
-	x86@kernel.org,
-	Chris Zankel <chris@zankel.net>,
-	Max Filippov <jcmvbkbc@gmail.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Andrew Lunn <andrew+netdev@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@kernel.org>,
-	Jakub Kicinski <kuba@kernel.org>,
-	Paolo Abeni <pabeni@redhat.com>,
-	Luis Augenstein <luis.augenstein@tngtech.com>,
-	Maximilian Huber <maximilian.huber@tngtech.com>,
-	Anup Patel <anup@brainfault.org>,
-	Paolo Bonzini <pbonzini@redhat.com>,
-	Shuah Khan <shuah@kernel.org>,
-	Paul Walmsley <pjw@kernel.org>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>,
-	Andy Lutomirski <luto@kernel.org>,
-	Vincenzo Frascino <vincenzo.frascino@arm.com>
-Cc: soc@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	linux-kbuild@vger.kernel.org,
-	=?UTF-8?q?Thomas=20Wei=C3=9Fschuh?= <linux@weissschuh.net>,
-	Mark Rutland <mark.rutland@arm.com>,
-	WANG Xuerui <kernel@xen0n.name>,
-	Michael Ellerman <mpe@ellerman.id.au>,
-	Nicholas Piggin <npiggin@gmail.com>,
-	"Christophe Leroy (CS GROUP)" <chleroy@kernel.org>,
-	"Ritesh Harjani (IBM)" <ritesh.list@gmail.com>,
-	Shrikanth Hegde <sshegde@linux.ibm.com>,
-	Christian Borntraeger <borntraeger@linux.ibm.com>,
-	Sven Schnelle <svens@linux.ibm.com>,
-	"H. Peter Anvin" <hpa@zytor.com>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Atish Patra <atish.patra@linux.dev>,
-	Sean Christopherson <seanjc@google.com>,
-	Alexandre Ghiti <alex@ghiti.fr>,
-	Nick Desaulniers <ndesaulniers@google.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	linux-alpha@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	loongarch@lists.linux.dev,
-	linux-mips@vger.kernel.org,
-	linuxppc-dev@lists.ozlabs.org,
-	linux-s390@vger.kernel.org,
-	linux-efi@vger.kernel.org,
-	netdev@vger.kernel.org,
-	kvm@vger.kernel.org,
-	kvm-riscv@lists.infradead.org,
-	linux-riscv@lists.infradead.org,
-	linux-kselftest@vger.kernel.org,
-	llvm@lists.linux.dev
-Subject: [PATCH v5 13/13] treewide: Stop defining __ASSEMBLY__ for assembler files
-Date: Fri, 23 Oct 2026 08:48:50 +0200
-Message-ID: <20261023064908.66707-14-thuth@redhat.com>
-In-Reply-To: <20261023064908.66707-1-thuth@redhat.com>
-References: <20261023064908.66707-1-thuth@redhat.com>
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 9EB9A1F785;
+	Fri, 23 Oct 2026 11:26:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1792754797; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=rH5uI+MFFbqA2/IjxVKao6Wy3U0y7FtYS68LxQh8NN0=;
+	b=g09d70JUhHy1R/ylgiL3xD+c9XkLyM5XAWeqxDoj1gStW+S5GjCU8Q5KFfjYlrfxNKPEgk
+	uFs1oDSwW1WGkxDxQ8GboLF6dbApD8iC6gcM5PEME2N3dV2o2Jnww/orlLuYxb961M/okl
+	FLeIz44ht8n6Vxw103z7dyG66eZSNt0=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1792754797;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=rH5uI+MFFbqA2/IjxVKao6Wy3U0y7FtYS68LxQh8NN0=;
+	b=vEPP7UqYltxaqK7Xukyvllo+6SuslGec4MxGptvGWpg6yC0jhGmCBCf0yEKiFBpEpYCHiS
+	O7X0CFUDlZ3kPKAQ==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=g09d70JU;
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=vEPP7UqY
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1792754797; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=rH5uI+MFFbqA2/IjxVKao6Wy3U0y7FtYS68LxQh8NN0=;
+	b=g09d70JUhHy1R/ylgiL3xD+c9XkLyM5XAWeqxDoj1gStW+S5GjCU8Q5KFfjYlrfxNKPEgk
+	uFs1oDSwW1WGkxDxQ8GboLF6dbApD8iC6gcM5PEME2N3dV2o2Jnww/orlLuYxb961M/okl
+	FLeIz44ht8n6Vxw103z7dyG66eZSNt0=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1792754797;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=rH5uI+MFFbqA2/IjxVKao6Wy3U0y7FtYS68LxQh8NN0=;
+	b=vEPP7UqYltxaqK7Xukyvllo+6SuslGec4MxGptvGWpg6yC0jhGmCBCf0yEKiFBpEpYCHiS
+	O7X0CFUDlZ3kPKAQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id D68AF133F6;
+	Fri, 23 Oct 2026 11:26:36 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id 2mW1KmxE22r7RQAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Fri, 23 Oct 2026 11:26:36 +0000
+Message-ID: <645c1c2b-9aa8-44b4-8a67-dcd7bfbe8fbd@suse.de>
+Date: Fri, 23 Oct 2026 13:26:36 +0200
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -146,309 +108,337 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 03/13] drm: client: add splash client
+To: =?UTF-8?Q?M=C3=A0xim_Pedraza_Padilla?= <maximpedraza@gmail.com>
+Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+ Maxime Ripard <mripard@kernel.org>, David Airlie <airlied@gmail.com>,
+ Simona Vetter <simona@ffwll.ch>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Ard Biesheuvel <ardb@kernel.org>,
+ Jonathan Corbet <corbet@lwn.net>, Francesco Valla <francesco@valla.it>,
+ Jani Nikula <jani.nikula@linux.intel.com>,
+ Mario Limonciello <mario.limonciello@amd.com>,
+ Javier Martinez Canillas <javierm@redhat.com>,
+ Jocelyn Falempe <jfalempe@redhat.com>, Sam Ravnborg <sam@ravnborg.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Shuah Khan <skhan@linuxfoundation.org>, Randy Dunlap
+ <rdunlap@infradead.org>, dri-devel@lists.freedesktop.org,
+ devicetree@vger.kernel.org, linux-efi@vger.kernel.org,
+ linux-doc@vger.kernel.org, linux-embedded@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <20261013093243.505776-1-maximpedraza@gmail.com>
+ <20261013093243.505776-4-maximpedraza@gmail.com>
+ <fafa7327-e624-49f2-98b2-83fd602a0ad7@suse.de>
+ <20261021005006.2341200-2-maximpedraza@gmail.com>
+Content-Language: en-US
+From: Thomas Zimmermann <tzimmermann@suse.de>
+Autocrypt: addr=tzimmermann@suse.de; keydata=
+ xsBNBFs50uABCADEHPidWt974CaxBVbrIBwqcq/WURinJ3+2WlIrKWspiP83vfZKaXhFYsdg
+ XH47fDVbPPj+d6tQrw5lPQCyqjwrCPYnq3WlIBnGPJ4/jreTL6V+qfKRDlGLWFjZcsrPJGE0
+ BeB5BbqP5erN1qylK9i3gPoQjXGhpBpQYwRrEyQyjuvk+Ev0K1Jc5tVDeJAuau3TGNgah4Yc
+ hdHm3bkPjz9EErV85RwvImQ1dptvx6s7xzwXTgGAsaYZsL8WCwDaTuqFa1d1jjlaxg6+tZsB
+ 9GluwvIhSezPgnEmimZDkGnZRRSFiGP8yjqTjjWuf0bSj5rUnTGiyLyRZRNGcXmu6hjlABEB
+ AAHNJ1Rob21hcyBaaW1tZXJtYW5uIDx0emltbWVybWFubkBzdXNlLmRlPsLAjgQTAQgAOAIb
+ AwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftODH
+ AAoJEGgNwR1TC3ojx1wH/0hKGWugiqDgLNXLRD/4TfHBEKmxIrmfu9Z5t7vwUKfwhFL6hqvo
+ lXPJJKQpQ2z8+X2vZm/slsLn7J1yjrOsoJhKABDi+3QWWSGkaGwRJAdPVVyJMfJRNNNIKwVb
+ U6B1BkX2XDKDGffF4TxlOpSQzdtNI/9gleOoUA8+jy8knnDYzjBNOZqLG2FuTdicBXblz0Mf
+ vg41gd9kCwYXDnD91rJU8tzylXv03E75NCaTxTM+FBXPmsAVYQ4GYhhgFt8S2UWMoaaABLDe
+ 7l5FdnLdDEcbmd8uLU2CaG4W2cLrUaI4jz2XbkcPQkqTQ3EB67hYkjiEE6Zy3ggOitiQGcqp
+ j//OwE0EWznS4AEIAMYmP4M/V+T5RY5at/g7rUdNsLhWv1APYrh9RQefODYHrNRHUE9eosYb
+ T6XMryR9hT8XlGOYRwKWwiQBoWSDiTMo/Xi29jUnn4BXfI2px2DTXwc22LKtLAgTRjP+qbU6
+ 3Y0xnQN29UGDbYgyyK51DW3H0If2a3JNsheAAK+Xc9baj0LGIc8T9uiEWHBnCH+RdhgATnWW
+ GKdDegUR5BkDfDg5O/FISymJBHx2Dyoklv5g4BzkgqTqwmaYzsl8UxZKvbaxq0zbehDda8lv
+ hFXodNFMAgTLJlLuDYOGLK2AwbrS3Sp0AEbkpdJBb44qVlGm5bApZouHeJ/+n+7r12+lqdsA
+ EQEAAcLAdgQYAQgAIAIbDBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftOH6AAoJEGgNwR1T
+ C3ojVSkIALpAPkIJPQoURPb1VWjh34l0HlglmYHvZszJWTXYwavHR8+k6Baa6H7ufXNQtThR
+ yIxJrQLW6rV5lm7TjhffEhxVCn37+cg0zZ3j7zIsSS0rx/aMwi6VhFJA5hfn3T0TtrijKP4A
+ SAQO9xD1Zk9/61JWk8OysuIh7MXkl0fxbRKWE93XeQBhIJHQfnc+YBLprdnxR446Sh8Wn/2D
+ Ya8cavuWf2zrB6cZurs048xe0UbSW5AOSo4V9M0jzYI4nZqTmPxYyXbm30Kvmz0rYVRaitYJ
+ 4kyYYMhuULvrJDMjZRvaNe52tkKAvMevcGdt38H4KSVXAylqyQOW5zvPc4/sq9c=
+In-Reply-To: <20261021005006.2341200-2-maximpedraza@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+X-Spamd-Result: default: False [-12.00 / 50.00];
+	SUSE_INTERNAL_BYPASS(-9.00)[];
+	BAYES_HAM(-3.00)[100.00%];
+	SUSPICIOUS_RECIPS(1.50)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	XM_UA_NO_VERSION(0.01)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	RCPT_COUNT_TWELVE(0.00)[25];
+	FREEMAIL_TO(0.00)[gmail.com];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	RCVD_TLS_ALL(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received,2a07:de40:b281:104:10:150:64:97:from];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	FREEMAIL_CC(0.00)[linux.intel.com,kernel.org,gmail.com,ffwll.ch,lwn.net,valla.it,amd.com,redhat.com,ravnborg.org,linaro.org,linuxfoundation.org,infradead.org,lists.freedesktop.org,vger.kernel.org];
+	MID_RHS_MATCH_FROM(0.00)[];
+	TAGGED_RCPT(0.00)[dt];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	DKIM_TRACE(0.00)[suse.de:+];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:url,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.de:dkim]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Action: no action
+X-Spam-Flag: NO
+X-Spam-Score: -12.00
+X-Spam-Level: 
+X-Rspamd-Queue-Id: 9EB9A1F785
 
-All spots have been changed to __ASSEMBLER__ (i.e. the macro that
-gets defined by the compiler), so we don't have to manually define
-__ASSEMBLY__ anymore.
+Hi
 
-Signed-off-by: Thomas Huth <thuth@redhat.com>
----
- Makefile                                             | 2 +-
- arch/alpha/boot/compressed/Makefile                  | 2 +-
- arch/arm64/kernel/vdso32/Makefile                    | 1 -
- arch/loongarch/vdso/Makefile                         | 2 +-
- arch/mips/boot/compressed/Makefile                   | 2 +-
- arch/mips/vdso/Makefile                              | 2 +-
- arch/powerpc/boot/Makefile                           | 2 +-
- arch/powerpc/platforms/cell/spufs/Makefile           | 2 +-
- arch/s390/Makefile                                   | 2 +-
- arch/x86/boot/Makefile                               | 2 +-
- arch/x86/boot/compressed/Makefile                    | 2 +-
- arch/x86/realmode/rm/Makefile                        | 2 +-
- arch/xtensa/kernel/Makefile                          | 2 +-
- drivers/firmware/efi/libstub/Makefile                | 2 +-
- drivers/net/wan/Makefile                             | 2 +-
- scripts/Makefile.build                               | 2 +-
- scripts/gfp-translate                                | 2 +-
- scripts/headers_install.sh                           | 1 -
- scripts/sbom/tests/cmd_graph/test_savedcmd_parser.py | 2 +-
- tools/testing/selftests/kvm/lib/riscv/handlers.S     | 4 ----
- tools/testing/selftests/vDSO/vgetrandom-chacha.S     | 2 --
- 21 files changed, 17 insertions(+), 25 deletions(-)
+Am 21.10.26 um 02:50 schrieb Màxim Pedraza Padilla:
+> Hi Thomas,
+>
+> Thanks a lot for the thorough review. I was preparing v6 when it came
+> in; I will hold it back and work all of this in first. Answers below.
+>
+> Am 20.10.26 um 12:28 schrieb Thomas Zimmermann:
+>> This lengthy comment should be a list of per-revision changes, like this:
+>>
+>> v5:
+>> - exit when firmware BMP is missing
+>> - foo
+>> - bla
+>>
+>> and so on. We keep these in the commit message right before the tags.
+> Will do.
+>
+>>> +	select DRM_CLIENT_LIB if DRM_CLIENT_SPLASH
+>>>    	select DRM_CLIENT_LIB if DRM_CLIENT_LOG
+>> Alphabetic order please
+> OK.
+>
+>>> +	  The color can be overridden through the drm_client_lib.splash_color
+>>> +	  kernel command line parameter.
+>> No extra module parameters please.
+> [...]
+>
+>> As I said, no module parameter for colors.  The color is something that
+>> the SoC firmware vendor would know at build-time. There is no reason for
+>> the user to modify this at runtime.
+> Sorry, I should have answered this the first time rather than keep
+> the parameter without a word. Let me explain why I would like to keep
+> the command line, for the colour and also for the parameters patch 12
+> adds, and you tell me whether it holds.
+>
+> The build-time defaults cover what a product normally shows. The
+> parameters are for what is only known at boot: the bootloader finds an
+> update pending, a failed boot count or a recovery request, or reads the
+> product variant from an EEPROM, and wants the splash to say so, with
+> another logo or a red or amber background. Any bootloader can do that
+> by adding to the command line: a setenv in a U-Boot script, a recovery
+> entry in GRUB or systemd-boot. Changing the device tree instead needs
+> fdt support in the bootloader and knowledge of the node, and is not
+> possible at all when the device tree is signed along with the kernel
+> in a FIT image. On x86 with the BGRT there is no device tree, and the
+> command line is the only way.
 
-diff --git a/Makefile b/Makefile
-index 0319cd716d73b..98bffdd9cf2d6 100644
---- a/Makefile
-+++ b/Makefile
-@@ -606,7 +606,7 @@ LINUXINCLUDE    := \
- 		-I$(objtree)/include \
- 		$(USERINCLUDE)
- 
--KBUILD_AFLAGS   := -D__ASSEMBLY__ -fno-PIE
-+KBUILD_AFLAGS   := -fno-PIE
- 
- KBUILD_CFLAGS :=
- KBUILD_CFLAGS += -fshort-wchar
-diff --git a/arch/alpha/boot/compressed/Makefile b/arch/alpha/boot/compressed/Makefile
-index eb930f01b4be4..16119a13e53a3 100644
---- a/arch/alpha/boot/compressed/Makefile
-+++ b/arch/alpha/boot/compressed/Makefile
-@@ -22,7 +22,7 @@ KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
- KBUILD_CFLAGS += -pipe -mcpu=ev4 -mno-fp-regs -ffixed-8
- KBUILD_CFLAGS += -DDISABLE_BRANCH_PROFILING -D__DISABLE_EXPORTS
- KBUILD_CFLAGS += $(CC_FLAGS_DIALECT)
--KBUILD_AFLAGS := -D__ASSEMBLY__ $(KBUILD_CFLAGS)
-+KBUILD_AFLAGS := $(KBUILD_CFLAGS)
- 
- # The stub has no sanitizer or coverage runtime. arch/alpha/lib/lib.a is
- # built with the kernel's instrumentation and -mcpu=, so build private
-diff --git a/arch/arm64/kernel/vdso32/Makefile b/arch/arm64/kernel/vdso32/Makefile
-index 00efdc5d23543..0ba0b4bb3e013 100644
---- a/arch/arm64/kernel/vdso32/Makefile
-+++ b/arch/arm64/kernel/vdso32/Makefile
-@@ -77,7 +77,6 @@ VDSO_CFLAGS += -marm
- endif
- 
- VDSO_AFLAGS := $(VDSO_CAFLAGS)
--VDSO_AFLAGS += -D__ASSEMBLY__
- 
- # From arm vDSO Makefile
- VDSO_LDFLAGS += -Bsymbolic --no-undefined -soname=linux-vdso.so.1
-diff --git a/arch/loongarch/vdso/Makefile b/arch/loongarch/vdso/Makefile
-index 0b84892d084b6..c2b73fd3781c0 100644
---- a/arch/loongarch/vdso/Makefile
-+++ b/arch/loongarch/vdso/Makefile
-@@ -32,7 +32,7 @@ cflags-vdso := $(ccflags-vdso) \
- 	$(call cc-option, -fasynchronous-unwind-tables) \
- 	$(call cc-option, -fno-stack-protector)
- aflags-vdso := $(ccflags-vdso) \
--	-D__ASSEMBLY__ -Wa,-gdwarf-2
-+	-Wa,-gdwarf-2
- 
- ifneq ($(c-gettimeofday-y),)
-   CFLAGS_vgettimeofday.o += -include $(c-gettimeofday-y)
-diff --git a/arch/mips/boot/compressed/Makefile b/arch/mips/boot/compressed/Makefile
-index 2684540758a8d..3e3803b2db48f 100644
---- a/arch/mips/boot/compressed/Makefile
-+++ b/arch/mips/boot/compressed/Makefile
-@@ -30,7 +30,7 @@ endif
- KBUILD_CFLAGS := $(KBUILD_CFLAGS) -D__KERNEL__ -D__DISABLE_EXPORTS \
- 	-DBOOT_HEAP_SIZE=$(BOOT_HEAP_SIZE) -D"VMLINUX_LOAD_ADDRESS_ULL=$(VMLINUX_LOAD_ADDRESS)ull"
- 
--KBUILD_AFLAGS := $(KBUILD_AFLAGS) -D__ASSEMBLY__ \
-+KBUILD_AFLAGS := $(KBUILD_AFLAGS) \
- 	-DBOOT_HEAP_SIZE=$(BOOT_HEAP_SIZE) \
- 	-DKERNEL_ENTRY=$(VMLINUX_ENTRY_ADDRESS)
- 
-diff --git a/arch/mips/vdso/Makefile b/arch/mips/vdso/Makefile
-index 00d3ba2c482ac..4d04987e995de 100644
---- a/arch/mips/vdso/Makefile
-+++ b/arch/mips/vdso/Makefile
-@@ -33,7 +33,7 @@ cflags-vdso := $(ccflags-vdso) \
- 	-fno-stack-protector -fno-jump-tables -DDISABLE_BRANCH_PROFILING \
- 	$(call cc-option, -fno-asynchronous-unwind-tables)
- aflags-vdso := $(ccflags-vdso) \
--	-D__ASSEMBLY__ -Wa,-gdwarf-2
-+	-Wa,-gdwarf-2
- 
- ifneq ($(c-gettimeofday-y),)
- obj-vdso-y += vgettimeofday.o
-diff --git a/arch/powerpc/boot/Makefile b/arch/powerpc/boot/Makefile
-index 7ee0fa2d3371e..5dca91ec9f4aa 100644
---- a/arch/powerpc/boot/Makefile
-+++ b/arch/powerpc/boot/Makefile
-@@ -80,7 +80,7 @@ BOOTCFLAGS	:= $(BOOTTARGETFLAGS) \
- 		   $(call cc-option,-mno-spe) $(call cc-option,-mspe=no) \
- 		   -fomit-frame-pointer -fno-builtin -fPIC
- 
--BOOTAFLAGS	:= $(BOOTTARGETFLAGS) -D__ASSEMBLY__
-+BOOTAFLAGS	:= $(BOOTTARGETFLAGS)
- 
- BOOTARFLAGS	:= -crD
- 
-diff --git a/arch/powerpc/platforms/cell/spufs/Makefile b/arch/powerpc/platforms/cell/spufs/Makefile
-index 60319d4ff25a6..959617c4ee89c 100644
---- a/arch/powerpc/platforms/cell/spufs/Makefile
-+++ b/arch/powerpc/platforms/cell/spufs/Makefile
-@@ -15,7 +15,7 @@ SPU_AS		:= $(SPU_CROSS)gcc
- SPU_LD		:= $(SPU_CROSS)ld
- SPU_OBJCOPY	:= $(SPU_CROSS)objcopy
- SPU_CFLAGS	:= -O2 -Wall -I$(srctree)/include -D__KERNEL__
--SPU_AFLAGS	:= -c -D__ASSEMBLY__ -I$(srctree)/include -D__KERNEL__
-+SPU_AFLAGS	:= -c -I$(srctree)/include -D__KERNEL__
- SPU_LDFLAGS	:= -N -Ttext=0x0
- 
- $(obj)/switch.o: $(obj)/spu_save_dump.h $(obj)/spu_restore_dump.h
-diff --git a/arch/s390/Makefile b/arch/s390/Makefile
-index 8b712cd85fcd3..83ecc702f7146 100644
---- a/arch/s390/Makefile
-+++ b/arch/s390/Makefile
-@@ -17,7 +17,7 @@ KBUILD_CFLAGS	+= -fPIC
- LDFLAGS_vmlinux	:= $(call ld-option,-no-pie)
- extra_tools	:= relocs
- aflags_dwarf	:= -Wa,-gdwarf-2
--KBUILD_AFLAGS_DECOMPRESSOR := $(CLANG_FLAGS) -m64 -D__ASSEMBLY__
-+KBUILD_AFLAGS_DECOMPRESSOR := $(CLANG_FLAGS) -m64
- ifndef CONFIG_AS_IS_LLVM
- KBUILD_AFLAGS_DECOMPRESSOR += $(if $(CONFIG_DEBUG_INFO),$(aflags_dwarf))
- endif
-diff --git a/arch/x86/boot/Makefile b/arch/x86/boot/Makefile
-index 4a9bce32586d3..69d75072888d1 100644
---- a/arch/x86/boot/Makefile
-+++ b/arch/x86/boot/Makefile
-@@ -52,7 +52,7 @@ targets += cpustr.h
- # ---------------------------------------------------------------------------
- 
- KBUILD_CFLAGS	:= $(REALMODE_CFLAGS) -D_SETUP
--KBUILD_AFLAGS	:= $(KBUILD_CFLAGS) -D__ASSEMBLY__
-+KBUILD_AFLAGS	:= $(KBUILD_CFLAGS)
- KBUILD_CFLAGS	+= -fno-asynchronous-unwind-tables
- KBUILD_CFLAGS	+= $(CONFIG_CC_IMPLICIT_FALLTHROUGH)
- 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 680ad803cba7d..e73ef522496e1 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -49,7 +49,7 @@ KBUILD_CFLAGS += -include $(srctree)/include/linux/hidden.h
- # that the compiler finds it even with out-of-tree builds (make O=/some/path).
- CFLAGS_sev-handle-vc.o += -I$(objtree)/arch/x86/lib/
- 
--KBUILD_AFLAGS  := $(KBUILD_CFLAGS) -D__ASSEMBLY__
-+KBUILD_AFLAGS  := $(KBUILD_CFLAGS)
- 
- KBUILD_LDFLAGS := -m elf_$(UTS_MACHINE)
- KBUILD_LDFLAGS += $(call ld-option,--no-ld-generated-unwind-info)
-diff --git a/arch/x86/realmode/rm/Makefile b/arch/x86/realmode/rm/Makefile
-index a0fb39abc5c86..20bbe1af05acd 100644
---- a/arch/x86/realmode/rm/Makefile
-+++ b/arch/x86/realmode/rm/Makefile
-@@ -65,5 +65,5 @@ $(obj)/realmode.relocs: $(obj)/realmode.elf FORCE
- 
- KBUILD_CFLAGS	:= $(REALMODE_CFLAGS) -D_SETUP -D_WAKEUP \
- 		   -I$(srctree)/arch/x86/boot
--KBUILD_AFLAGS	:= $(KBUILD_CFLAGS) -D__ASSEMBLY__
-+KBUILD_AFLAGS	:= $(KBUILD_CFLAGS)
- KBUILD_CFLAGS	+= -fno-asynchronous-unwind-tables
-diff --git a/arch/xtensa/kernel/Makefile b/arch/xtensa/kernel/Makefile
-index d3ef0407401f6..ece4ae6dea97d 100644
---- a/arch/xtensa/kernel/Makefile
-+++ b/arch/xtensa/kernel/Makefile
-@@ -39,7 +39,7 @@ sed-y = -e ':a; s/\*(\([^)]*\)\.text\.unlikely/*(\1.literal.unlikely .{text}.unl
- 	-e 's/\.{text}/.text/g'
- 
- quiet_cmd__cpp_lds_S = LDS     $@
--cmd__cpp_lds_S = $(CPP) $(cpp_flags) -P -C -Uxtensa -D__ASSEMBLY__ \
-+cmd__cpp_lds_S = $(CPP) $(cpp_flags) -P -C -Uxtensa \
- 		 -DLINKER_SCRIPT $< | sed $(sed-y) >$@
- 
- $(obj)/vmlinux.lds: $(src)/vmlinux.lds.S FORCE
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 415f63105b481..d4edc3c0c4556 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -61,7 +61,7 @@ KBUILD_CFLAGS := $(filter-out $(CC_FLAGS_LTO), $(KBUILD_CFLAGS))
- # `-fdata-sections` flag from KBUILD_CFLAGS_KERNEL
- KBUILD_CFLAGS_KERNEL := $(filter-out -fdata-sections, $(KBUILD_CFLAGS_KERNEL))
- 
--KBUILD_AFLAGS			:= $(KBUILD_CFLAGS) -D__ASSEMBLY__
-+KBUILD_AFLAGS			:= $(KBUILD_CFLAGS)
- 
- lib-y				:= efi-stub-helper.o gop.o secureboot.o tpm.o \
- 				   file.o mem.o random.o randomalloc.o pci.o \
-diff --git a/drivers/net/wan/Makefile b/drivers/net/wan/Makefile
-index 00e9b7ee1e012..4233143534465 100644
---- a/drivers/net/wan/Makefile
-+++ b/drivers/net/wan/Makefile
-@@ -57,7 +57,7 @@ $(obj)/wanxlfw.bin: $(obj)/wanxlfw.o FORCE
- 	$(call if_changed,m68kld_bin_o)
- 
- quiet_cmd_m68kas_o_S = M68KAS  $@
--      cmd_m68kas_o_S = $(M68KCC) -D__ASSEMBLY__ -Wp,-MD,$(depfile) -I$(srctree)/include/uapi -c -o $@ $<
-+      cmd_m68kas_o_S = $(M68KCC) -Wp,-MD,$(depfile) -I$(srctree)/include/uapi -c -o $@ $<
- 
- $(obj)/wanxlfw.o: $(src)/wanxlfw.S FORCE
- 	$(call if_changed_dep,m68kas_o_S)
-diff --git a/scripts/Makefile.build b/scripts/Makefile.build
-index 6127feb970c65..0b7c1e273f0cb 100644
---- a/scripts/Makefile.build
-+++ b/scripts/Makefile.build
-@@ -465,7 +465,7 @@ targets += $(lib-y) $(always-y)
- # ---------------------------------------------------------------------------
- quiet_cmd_cpp_lds_S = LDS     $@
-       cmd_cpp_lds_S = $(CPP) $(cpp_flags) -P -U$(ARCH) \
--	                     -D__ASSEMBLY__ -DLINKER_SCRIPT -o $@ $<
-+	                     -DLINKER_SCRIPT -o $@ $<
- 
- $(obj)/%.lds: $(src)/%.lds.S FORCE
- 	$(call if_changed_dep,cpp_lds_S)
-diff --git a/scripts/gfp-translate b/scripts/gfp-translate
-index 8385ae0d5af93..f6353795fdca3 100755
---- a/scripts/gfp-translate
-+++ b/scripts/gfp-translate
-@@ -73,7 +73,7 @@ echo Parsing: $GFPMASK
- #include <stdio.h>
- 
- // Try to fool compiler.h into not including extra stuff
--#define __ASSEMBLY__	1
-+#define __ASSEMBLER__	1
- 
- #include <generated/autoconf.h>
- #include <linux/gfp_types.h>
-diff --git a/scripts/headers_install.sh b/scripts/headers_install.sh
-index 2f1d1767ca267..9c15e748761c4 100755
---- a/scripts/headers_install.sh
-+++ b/scripts/headers_install.sh
-@@ -36,7 +36,6 @@ sed -E -e '
- 	s/(^|[^a-zA-Z0-9])__packed([^a-zA-Z0-9_]|$)/\1__attribute__((packed))\2/g
- 	s/(^|[[:space:](])(inline|asm|volatile)([[:space:](]|$)/\1__\2__\3/g
- 	s@#(ifndef|define|endif[[:space:]]*/[*])[[:space:]]*_UAPI@#\1 @
--	s/__ASSEMBLY__/__ASSEMBLER__/g
- ' $INFILE > $TMPFILE || exit 1
- 
- scripts/unifdef -U__KERNEL__ -D__EXPORTED_HEADERS__ $TMPFILE > $OUTFILE
-diff --git a/scripts/sbom/tests/cmd_graph/test_savedcmd_parser.py b/scripts/sbom/tests/cmd_graph/test_savedcmd_parser.py
-index 93787a1cd1566..8d9ae35764040 100644
---- a/scripts/sbom/tests/cmd_graph/test_savedcmd_parser.py
-+++ b/scripts/sbom/tests/cmd_graph/test_savedcmd_parser.py
-@@ -152,7 +152,7 @@ class TestSavedCmdParser(unittest.TestCase):
-         self._assert_parsing(cmd, expected)
- 
-     def test_clang(self):
--        cmd = """clang -Wp,-MMD,arch/x86/entry/.entry_64_compat.o.d -nostdinc -I../arch/x86/include -I./arch/x86/include/generated -I../include -I./include -I../arch/x86/include/uapi -I./arch/x86/include/generated/uapi -I../include/uapi -I./include/generated/uapi -include ../include/linux/compiler-version.h -include ../include/linux/kconfig.h -D__KERNEL__ --target=x86_64-linux-gnu -fintegrated-as -Werror=unknown-warning-option -Werror=ignored-optimization-argument -Werror=option-ignored -Werror=unused-command-line-argument -fmacro-prefix-map=../= -Werror -D__ASSEMBLY__ -fno-PIE -m64 -I../arch/x86/entry -Iarch/x86/entry    -DKBUILD_MODFILE='"arch/x86/entry/entry_64_compat"' -DKBUILD_MODNAME='"entry_64_compat"' -D__KBUILD_MODNAME=kmod_entry_64_compat -c -o arch/x86/entry/entry_64_compat.o ../arch/x86/entry/entry_64_compat.S"""
-+        cmd = """clang -Wp,-MMD,arch/x86/entry/.entry_64_compat.o.d -nostdinc -I../arch/x86/include -I./arch/x86/include/generated -I../include -I./include -I../arch/x86/include/uapi -I./arch/x86/include/generated/uapi -I../include/uapi -I./include/generated/uapi -include ../include/linux/compiler-version.h -include ../include/linux/kconfig.h -D__KERNEL__ --target=x86_64-linux-gnu -fintegrated-as -Werror=unknown-warning-option -Werror=ignored-optimization-argument -Werror=option-ignored -Werror=unused-command-line-argument -fmacro-prefix-map=../= -Werror -fno-PIE -m64 -I../arch/x86/entry -Iarch/x86/entry    -DKBUILD_MODFILE='"arch/x86/entry/entry_64_compat"' -DKBUILD_MODNAME='"entry_64_compat"' -D__KBUILD_MODNAME=kmod_entry_64_compat -c -o arch/x86/entry/entry_64_compat.o ../arch/x86/entry/entry_64_compat.S"""
-         expected = "../arch/x86/entry/entry_64_compat.S"
-         self._assert_parsing(cmd, expected)
- 
-diff --git a/tools/testing/selftests/kvm/lib/riscv/handlers.S b/tools/testing/selftests/kvm/lib/riscv/handlers.S
-index b787b982e922a..c8cc2d695f483 100644
---- a/tools/testing/selftests/kvm/lib/riscv/handlers.S
-+++ b/tools/testing/selftests/kvm/lib/riscv/handlers.S
-@@ -3,10 +3,6 @@
-  * Copyright (c) 2023 Intel Corporation
-  */
- 
--#ifndef __ASSEMBLY__
--#define __ASSEMBLY__
--#endif
--
- #include <asm/csr.h>
- 
- .macro save_context
-diff --git a/tools/testing/selftests/vDSO/vgetrandom-chacha.S b/tools/testing/selftests/vDSO/vgetrandom-chacha.S
-index 16f985b089d45..42839c5cf5ec4 100644
---- a/tools/testing/selftests/vDSO/vgetrandom-chacha.S
-+++ b/tools/testing/selftests/vDSO/vgetrandom-chacha.S
-@@ -3,8 +3,6 @@
-  * Copyright (C) 2024 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
-  */
- 
--#define __ASSEMBLY__
--
- #if defined(__aarch64__)
- #include "../../../../arch/arm64/kernel/vdso/vgetrandom-chacha.S"
- #elif defined(__loongarch__)
+I'd just like to say that these are not good uses of the splash screen.  
+They also move the goal from having a boot-up logo to 
+reporting/debugging boot-up problems.
+
+>
+> There is precedent for this kind of setting: video=...,rotate=,
+> fbcon=rotate: and fbcon=logo-pos: are all about how the boot screen
+> looks, and console= wins over stdout-path the way these win over the
+> device tree.
+
+video= has its uses, but the others seem misguided. Rotation should be 
+auto-configured in some way; logo-pos shouldn't even be a thing IMHO.
+
+
+>
+> So my proposal for v6: the defaults are set at build time, as you ask
+> (the colour already is, and the BMP's file name becomes a Kconfig
+> string), and the parameters stay, only to override them for one boot.
+> If that is still a no, I will drop them all, patch 12 included.
+
+Please drop the parameters for now. If we want to give status messages 
+from boot loader to kernel, we should first evaluate how to do that 
+correctly. This involves people from the various supported 
+architectures. Once we have support for such a channel, we can try to 
+use it on any DRM client and build a shared solution.
+
+I'm not against reporting boot-loader messages, but it seems to require 
+a lot more thought that what can be done here in this series.
+
+
+>
+>> How could we find out about the bmp's file name? I assume it is just a
+>> file in the initfs, which we have to know about?
+> It is requested with request_firmware_nowait(), so it is looked up like
+> any other firmware: built into the kernel with EXTRA_FIRMWARE, in the
+> initramfs, or under /lib/firmware once the root file system is there.
+> The name is fixed by whoever builds the image, so
+>
+>> In any case, this should again not be module parameter. Please make it
+>> build-time configurable via Kconfig.
+> a Kconfig string fits it well for the default name; v6 will have it.
+> splash_bmp= would then only pick another file for one boot, such as
+> one of several images built in with EXTRA_FIRMWARE, as above.
+>
+>>> +} __packed;
+>> These types are already in efifb.c can we move them into a header file.
+>> include/video/bmp.h should work.
+> Yes, I'll add a patch that moves them there and makes efifb use the
+> header. The header keeps the __le types, as BMP is little endian
+> whatever the CPU, so efifb will read the fields through
+> get_unaligned_le*() like the splash does; no change on the little
+> endian systems EFI runs on. That patch touches fbdev, so it will go to
+> Helge and Peter as well.
+
+Makes sense.
+
+>
+>>> +	*data = fw->data;
+>>> +	*size = fw->size;
+>> Why does this work?
+>>
+>> We no longer hold a lock on fw. If a concurrent thread calls
+>> release_firmware() on splash->fw, data and size might become invalid.
+> The only release_firmware() on splash->fw is in
+> drm_splash_image_cleanup(), which runs in the render thread itself
+> once it has drawn, and at unregister after the thread has been
+> stopped. The firmware callback stores the firmware under fw_lock, or
+> releases it itself if the thread is already done, and never touches it
+> again. So nobody can release it while the thread reads from it; the
+> lock is only there for the hand-over from the callback. I'll put that
+> in a comment, since it is not obvious from the code.
+
+Thanks.
+
+>
+>>> +	drm_info(client->dev, "splash: request %s as firmware", splash_bmp);
+>> drm_dbg() here. drm_info() is log spam.
+> OK, here and in the other places you pointed out.
+>
+>>> +	int i;
+>> format_count is an unsigned int. i should lik
+> OK.
+
+
+Oh, I just noticed that my comment got truncated. I meant to that "i 
+should likely by unsigned int as well".
+
+
+>
+>> Values like px_width are deprecated because they don't work in the
+>> general case.  Rather pass the format as drm_format_into and do the
+>> px_width lookup within the drm_splash_fill().
+> OK.
+
+At some point I'd like to have a nice, shared drawing interface that all 
+the clients can use easily.
+
+
+>
+>>> +			scolor = *(const u32 *)(&sbuf8[src_offset + 3 * x]);
+>> Please build scolor from the individual entries in the color table. This
+>> type casting is fragile. It also only works on little endian with
+>> unaligned loads AFAIU.
+> Agreed. It also read one byte past the end of the image on the last
+> pixel. v6 already reads each pixel with get_unaligned_le24(), which
+> builds it from the three bytes, in this patch rather than in a later
+> one as in v5.
+>
+>>> +	bmp_width = (s32)get_unaligned_le32(&dib_header->width);
+>>> +	bmp_height = (s32)get_unaligned_le32(&dib_header->height);
+>> Why not make these variables unsigned?
+> [...]
+>
+>>> +	bmp_invert_y = (bmp_height > 0);
+>>> +	bmp_height = abs(bmp_height);
+>> That's the answer to my question above, i guess?   But what about bmp_width?
+> Yes. Both are signed in the BMP header, as in efifb's struct
+> bmp_dib_header. A negative width has no meaning, and keeping it signed
+> lets the format check reject it as such (bmp_width <= 0) rather than
+> see a huge width that only the size checks further down would stop.
+> I can read the width as unsigned and check it against S32_MAX instead
+> if you prefer.
+
+It's ok.
+
+>
+>>> +		 * On x86 some firmwares use a low non native resolution for
+>> 'Some firmware on x86 uses a non-native resolution for'
+>>
+>>> +		 * the display when they have shown some text messages. While
+>> 'the display if it has shown some text messages.'
+> OK, thanks.
+>
+>> The entire if-else block below should be a function drm_splash_blit().
+>> Please also see my comment on using px_width.
+> OK. Together with your comment on patch 9, the blit will become a
+> function from this patch on.
+>
+>> The client receives a hotplug whenever the attached display changes.
+>> Returning here would likely break anything after the initial one.
+>>
+>> Best is to kill the rendering thread, rebuild the list of modesets and
+>> reinit.
+> Right, today an output plugged in later stays dark, and a restore puts
+> back the modesets of the first hotplug. v6 will rebuild on every
+> hotplug, keeping the image around so that an output plugged in later
+> gets it too.
+
+It's probably ok to address things in small steps. DRM's common client 
+interfaces could be easier to use and getting it all right is fairly 
+complicated, I think.
+
+Best regards
+Thomas
+
+
+>
+>> Why does it use a rendering threat?  Wouldn't it be much easier to
+>> schedule a worker?  You can also try to put it on the power-efficient
+>> work queue.
+> The thread mostly waits: for the BMP firmware and for the next
+> redraw. A work item queued from the hotplug and from the firmware
+> callback covers both, and makes the start and stop paths simpler,
+> which is where v3 had its use-after-frees. I'll move it to
+> system_power_efficient_wq.
+>
+>> I don't think this is right. (?) If there's no fb, the restore should
+>> disable the display. Just run the commit below.
+> Fair enough. The early return was there because committing modesets
+> that still had a mode but no framebuffer failed with -EINVAL and a
+> WARN. v6 already clears the mode of an output that gets no buffer;
+> I'll do the same when the buffers are freed, drop the early return,
+> and let the commit turn the outputs off.
+>
+>>> +	mutex_destroy(&splash->hotplug_lock);
+>> This line belongs into drm_splash_client_unregister(). The free callback
+>> is only for free-ing the client instance.
+> OK.
+>
+>>> +	drm_dbg(dev, "Unregistered with drm splash");
+>> 'free', not 'unregister'
+> OK.
+>
+> Best regards,
+> Màxim
+
 -- 
-2.56.0
+--
+Thomas Zimmermann
+Graphics Driver Developer
+SUSE Software Solutions Germany GmbH
+Frankenstr. 146, 90461 Nürnberg, Germany, www.suse.com
+GF: Stefan Gaiser, Jochen Jaser, Abhinav Puri, (HRB 36809, AG Nürnberg)
+
 
