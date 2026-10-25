@@ -1,48 +1,48 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792933450;
-	b=Omm9RO9dicZ8ZcgzcmjHKUElN3XJSDPwdoBCbP7LKgzYXDIf96JPLvVn4cWaUL1soJcv
-	 ta6S/lw39ETFRJjePNdBSgSHKuulNBirCgy0X8LVB+OF90Ws2oqaNLupURZmSGY1TAgZ8
-	 /3XuvTSaTTvHXuTL235FPLokOTNHMRzd6gMy2AroeLYuokeLNPeKex01JUVTNw8OE1v8O
-	 5iXPUfIko2f0ukARsZNOLEvGQN9VG2xbyvzoa0I8SBRK0bGO1a4nYgW4M1tD8qtgAvSqY
-	 IIxBRL6B1bz5Vx0/ZpIrNan+0mq3aMlM7yeBIPrHuDPKn2DrKk1pDkGqK8d5A8vAY3A==
+	t=1792933446;
+	b=FIjrUGdC69wBvjQ7SOZ3ZmSrLMhzFcOFpgLrt7S3rU9ewbJvAeoUan72g9PPBgiIttkf
+	 jWvBJ0F0mb+eQMtL1XT5ju+RrxP8Z5f3ACFbrtlqe9bcCbpAcLqvKpSg6IZRNxoNsdMDA
+	 l3h7sC76yFjDo+hxjDNOTsVjMKToESNwjFU2MFe6hIJ0WG86C5CGgCh8aTmUkHxUMBDzY
+	 x2b2wjyI1rREw1XBRvHwIir4L9+KNh0hNQFeoyfXVdqEJ8bKL2JWF/JvlMx7P3pCP9G/3
+	 eqzbD2GU8+cQscbQjdqVmHMMnRPEf876gdCuXKxL7ScwMQ6UNh9wIlrz3c1qtRK1Qsg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792933450;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792933446;
 	h=Received:DKIM-Signature:From:Date:Subject:MIME-Version:Content-Type:
 	 Content-Transfer-Encoding:Message-Id:References:In-Reply-To:To:Cc:
 	 X-Mailer:X-Developer-Signature:X-Developer-Key;
-	bh=q3oKuRfytJnnU3NQYKbKaM1o1JrAm6kqNNM7F90ig2U=;
-	b=WWfVU1KoeBlS3d/bzNjZdT8+xtWhjE+uRINMSj0GH4iOpZ6idN8mVruOYGZPweLCqydC
-	 yL7f50QQozGa8O+PLdktv/DrFEEnbAjmkczB+/B9oafgEWdsBxXClYyOX1V/RuRfe1uYa
-	 so7jDU3r0GTjeaH1TtvQpDPmMdBl3gkZdJ4KfwuPY3MRkyPgukAydu+VG/FAV+zRToTse
-	 zLxmFQqEKYEiaBUxGPU7MM5wnEWmY0TMj7VDKKa3pXv6dDK2O6RHlrne0+zL0F9xRssG2
-	 DovtObbugpXn/ngBPzCYESe+OS4KlstMyKjVZhyBNYMSnwrN6ZK4mK7KNo8HkWPXYKA==
+	bh=//uaP1WFxO5u5Vpx8JSOFowIBO0whCKSAp0wSvlyerY=;
+	b=l/uHYvi6/ROn4GqpCgxoYiyxeMgRUbEDdc2t5W7D6LTz5jk3yftygdg9rdd3tF6JaguA
+	 lD0gc9dN9S8RmXSNQW/YTlpdO2OSo8Hvxwk5tiLj/a7AgDBohHf+fxyXNSsAmg/0HKNa5
+	 M0Uapck0IQgbPVyveOJHaxClI5hrNkpBufxYv0mJr2ou2p/kpknnoojQqS9wy86uvRR3U
+	 kHPGiiFKE8S0TQbLcXaYin+JkWlktv0J1GwV8uXlc7h4zqkbPCSAbedZTLo8NrM+EMk3H
+	 Xk64tMRPilMC8oJKrbAsfxs6iewyM9QLvs10gUCG67y8VyzjMguEO8l6Vbku4Agc3Ew==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=UAAOW4zV;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=OgCMn7lv;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 500C5606A31F;
-	Sun, 25 Oct 2026 13:04:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=UAAOW4zV
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66A341F031E0;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 532A2606A321;
 	Sun, 25 Oct 2026 13:04:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=OgCMn7lv
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3B5FF1F01828;
+	Sun, 25 Oct 2026 13:04:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792933449;
-	bh=q3oKuRfytJnnU3NQYKbKaM1o1JrAm6kqNNM7F90ig2U=;
+	s=k20260515; t=1792933445;
+	bh=//uaP1WFxO5u5Vpx8JSOFowIBO0whCKSAp0wSvlyerY=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=UAAOW4zVjLa2+WAUiaaLQZN+GSppsTp6c6lDuMCdi45pFKjpUxVsBwP71NANWz0Hv
-	 RKp6FTv5+TrIn7a7XJOoZGp1WyBf+VftZVs9Hner+GcJhF+DhcepHeLIO9IgQ6BXaU
-	 KCX2Nsz6cHaExzo9imtGotkp4NjJHiQ5HiV9ZLZ7yC6Ft0uDME8a3zNbFZ0kM8UxhW
-	 VhrUYeoVJ/tjGpABr2MIVmSjObvPflpv/7a718bYmthI82TFdgpuEIEhxgFbtgPxqM
-	 oyrlym83oPN9Y4R9+npeFQ+2wncl8LL+m2QoNzEXPQT9tmBxpCA0voPA1dOOnfxWBO
-	 xM/o4ywZiux9g==
+	b=OgCMn7lvjJjXCk/mV6dmgiGrUWUULHjjJlbO7/8Ay7ZYANqjW2muVIYLXU1BVGtN9
+	 ZV63zBEVp19NuypnZBaTDyqIyNkRoTKzj5goepU+y7SNtLwzj+upyOXC9iS66w7y3G
+	 ZtQP+fGRfQMAcLjp9PIPBsYhAXWke5NzRONFPMe1Okyft+kJjy7vM7iK2A2kWRX3Gq
+	 FqQp3oCuFRSBA7wkR+jHrzYKniqfyaGNhaQF7kf7LADB05wgUVlGhBWNuQ1mDBfOXf
+	 5zVy5AikuJGy0pHoI/hIHBmcjN4PGXQej2c3uBuiMu3yuTrhczpBa8vwFuqJQMmfXB
+	 kTzroLU6XP8zQ==
 From: Vincent Mailhol <mailhol@kernel.org>
-Date: Sun, 25 Oct 2026 14:03:12 +0100
-Subject: [PATCH v2 2/7] init: add DPS root partition type UUID definitions
+Date: Sun, 25 Oct 2026 14:03:11 +0100
+Subject: [PATCH v2 1/7] block: store GPT partition type UUID
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -54,7 +54,7 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20261025-discoverable-root_partitions-v2-2-fb77d0821fab@kernel.org>
+Message-Id: <20261025-discoverable-root_partitions-v2-1-fb77d0821fab@kernel.org>
 References: <20261025-discoverable-root_partitions-v2-0-fb77d0821fab@kernel.org>
 In-Reply-To: <20261025-discoverable-root_partitions-v2-0-fb77d0821fab@kernel.org>
 To: Jens Axboe <axboe@kernel.dk>, Davidlohr Bueso <dave@stgolabs.net>, 
@@ -67,59 +67,53 @@ Cc: linux-kernel@vger.kernel.org, linux-block@vger.kernel.org,
  Helge Deller <deller@gmx.de>, Matthew Wilcox <willy@infradead.org>, 
  Vincent Mailhol <mailhol@kernel.org>
 X-Mailer: b4 0.16.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1850; i=mailhol@kernel.org;
- h=from:subject:message-id; bh=EZW4lcd+UB51X4rf76eXLHBWp7j8RnkoPttpORnLc0I=;
- b=owGbwMvMwCV2McXO4Xp97WbG02pJDFl3/9nobGLa/jWUhWUym1uVkumN94sNHfuWXP07/dPal
- zvVIj27OiayMIhxMViKKbIsK+fkVugo9A479NcSZg4rE8gQaZEGBiBgYeDLTcwrNdIx0jPVNtQz
- BDJ0jBi4OAVgqh99YWS4ejbelbNVMKU2Z84N86/r7DJO7/8abz7x4O8P92P6XRatY2ToYtW7KbL
- mFcuH2M7Cque7dpxy/+DzWK9ycdJV4d3WsW08AA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1428; i=mailhol@kernel.org;
+ h=from:subject:message-id; bh=56q8LlYKMAEsowAI1SuYakZ1PjWTf/maPadyXzq/xW4=;
+ b=owGbwMvMwCV2McXO4Xp97WbG02pJDFl3/9lk8MqzHuqwnMKscKSdxeS7kDeLOPvOLQuzGfSuR
+ Vu7u/t2TGRhEONisBRTZFlWzsmt0FHoHXboryXMHFYmkCHSIg0MQMDCwJebmFdqpGOkZ6ptqGcI
+ ZOgYMXBxCsBUW7sz/M/ZEVOwKF54nSb7/hj9/VcPPH4bH5h++2x8w5qTv/SNbO8yMhwN8nlbX1q
+ der9S3rBqw03he5ZXcl+dd7lg3NKyQ6LgHjsA
 X-Developer-Key: i=mailhol@kernel.org; a=openpgp;
  fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
 
-DPS [1] assigns a native root partition type UUID to each supported
-architecture. Add a hidden DPS_ROOT_PARTITION_TYPE_UUID string symbol
-and populate it from the architecture selected in Kconfig. Only
-architectures with EFI support in the kernel are added.
+DPS [1] identifies OS partitions by GPT partition type UUID.
 
-Gate the symbol on EFI and EFI_PARTITION because discovery needs block
-devices, EFI runtime services and GPT partition parsing.
-
-Derive the hidden DPS_ROOT_AUTO_DISCOVERY boolean from whether
-DPS_ROOT_PARTITION_TYPE_UUID is nonempty.
+Keep that UUID in struct partition_meta_info and populate it while
+scanning GPT partition tables so early root discovery can use it.
 
 [1] The Discoverable Partitions Specification (DPS)
 Link: https://uapi-group.org/specifications/specs/discoverable_partitions_specification/
 
 Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
 ---
- init/Kconfig | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+ block/partitions/efi.c | 1 +
+ include/linux/blkdev.h | 1 +
+ 2 files changed, 2 insertions(+)
 
-diff --git a/init/Kconfig b/init/Kconfig
-index b31aa298c4fe..133854355697 100644
---- a/init/Kconfig
-+++ b/init/Kconfig
-@@ -2166,6 +2166,20 @@ config ARCH_HAS_PREPARE_SYNC_CORE_CMD
- config ARCH_HAS_SYNC_CORE_BEFORE_USERMODE
- 	bool
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 9865d59093fa..4a3835ed9561 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -742,6 +742,7 @@ int efi_partition(struct parsed_partitions *state)
  
-+config DPS_ROOT_PARTITION_TYPE_UUID
-+	depends on EFI && EFI_PARTITION
-+	string
-+	default "69dad710-2ce4-4e3c-b16c-21a1d49abed3" if ARM
-+	default "b921b045-1df0-41c3-af44-4c6f280d3fae" if ARM64
-+	default "77055800-792c-4f94-b39a-98c91b762bb6" if LOONGARCH
-+	default "72ec70a6-cf74-40e6-bd49-4bda08e8f224" if RISCV && 64BIT
-+	default "60d5a7fe-8e7d-435c-b714-3dd8162144e1" if RISCV
-+	default "4f68bce3-e8cd-4db1-96e7-fbcaf984b709" if X86_64
-+	default "44479540-f297-41b2-9af7-d131d5f0458a" if X86
-+
-+config DPS_ROOT_AUTO_DISCOVERY
-+	def_bool DPS_ROOT_PARTITION_TYPE_UUID != ""
-+
- # It may be useful for an architecture to override the definitions of the
- # SYSCALL_DEFINE() and __SYSCALL_DEFINEx() macros in <linux/syscalls.h>
- # and the COMPAT_ variants in <linux/compat.h>, in particular to use a
+ 		info = &state->parts[i + 1].info;
+ 		efi_guid_to_str(&ptes[i].unique_partition_guid, info->uuid);
++		efi_guid_to_str(&ptes[i].partition_type_guid, info->type_uuid);
+ 
+ 		/* Naively convert UTF16-LE to 7 bits. */
+ 		label_max = min(ARRAY_SIZE(info->volname) - 1,
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index d003a9d2d1f6..b99a59cd1120 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -67,6 +67,7 @@ extern const struct class block_class;
+ 
+ struct partition_meta_info {
+ 	char uuid[PARTITION_META_INFO_UUIDLTH];
++	char type_uuid[PARTITION_META_INFO_UUIDLTH];
+ 	u8 volname[PARTITION_META_INFO_VOLNAMELTH];
+ };
+ 
 
 -- 
 2.55.0
