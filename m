@@ -1,84 +1,84 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.50
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.44
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793109251;
-	b=hsHX0S4X/2T40+L9JzbYnIrfoh+88F6W4ne+5lqqJrnDAxgcnlEq8FZB4Ca5w79d688Y
-	 ZgiB1dqYdHZRo3cuXT8GEQX3UCu4PMBa5hCh7GiTXO3Ba61BAOncaOYYq3HBMYVitZ4/e
-	 LHii6NKLg9YIXni0Yx3kd8Qv3tNerPyxD5zxwsFCismmPyzxYoOJiVdKVHgqMy2q2mEjf
-	 2Kv6jfjzMQbmfhb0RFGh7a3U4N8//6YXDDke8zt6np+G3vNwX9pTBAoQDqC/DpyFj9NJ4
-	 /J3hnAi4vvj0wleo8uh9yRDaVvnxtfWOo4QrTL68U3OVKre5DGfmy5EbsPrfXWvhr2g==
+	t=1793109246;
+	b=Rqto3xkN6aiCWrjgU/1blgDXhlTwW36x4wYK5PsBHDFdtgiGXfJ2vryGM4ANqDEd88zT
+	 tN9NU4h2LIhYUnsdwDITBjgWtkufi7hOVZJfkY2BmXdcY774OZhRhPrp1SAhN3P5uc5lb
+	 9ChmCyryhNNRXuUiY/QIc4uvwTQmV10m1c4DLcvunN9pvdA0wcVtqv/sSIPmhSJba5PPK
+	 81e1uCpn/qdP/UY5ggeuUPFAHR3tQm5wB4huNq5ENVu+XpYje/GZWIMKMhMqrppeM7zaR
+	 ZDvb8Y9wgu6ccuRuXEpxxlplWSdUHlcSEdn+Fb2Q1diBrdNquseb3hHqbWzTR4XRbKg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793109251;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793109246;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
 	 From:To:Cc:Subject:Date:Message-Id:X-Mailer:In-Reply-To:References:
 	 MIME-Version:Content-Type:Content-Transfer-Encoding;
-	bh=fU1UKpzBNuXU6ySePDsKYMB2Kq9NDiCM/53N3kd7ajQ=;
-	b=U6Ja5Ew0Kmdz5/L0/bBpdbMxmoeESNqQ3aTNoOYxZ24pf4QiRHtpXa5kpWNoDCkjMHbF
-	 juGtpgdfyFnInuS8dDuGcTQrNIE+D8h9rtYoQII2HyfND/uzs4n1t+bwtSHryHdriSLCd
-	 f0LACiwsW4ofeQY1AsOodM04hH2yKiRDuBcD2XXFQazv+couniAubVtHzC8uAVlKCJAI5
-	 G6gE4XeOswRuAOQb+2YBbWQy+5gnxXjMiY8tHX5jBXD0ubJNRBaLWnwHYIX211m6FcL5m
-	 UrVG2ky/OEc3eTlfSTyJ07nF7gldM9XOFGOuxwFZIcmxzGN1cYNlRwUqokz1fQKA1Mw==
+	bh=x3TRWoAym08EDkUmxJbEElxgHRIsBB4gzy6Y/BELf6M=;
+	b=rYWrFiKZKfqalCclnEl7Dph6E7xDh8DyxKlK48Nhr5bGynDlJvNZ3dGAIUM+dsGItjjh
+	 eQ382UxwSD4CrdTr69r1QdJ0QdDAaJMKAIkUCpWHfquzfCZAkRlkrrPtxjMvUFMYATdPD
+	 DaBXh5DQpFGLYb1ermCi6orSuda38M0K9csnpIH0gOwqGZf/M6eEdbj0lw/OXyuj9Ek1J
+	 Z1pMQXmvfcgNlGDrpRKr7jpQBNye0+UaMYeCb5hQ3VRaz0IQlLQSV+kVmMhIpPRyNi/cx
+	 B8AcLp3yV0u1EaMBdIp/9/8BcCm/yDop1D2GTEnOxhErbonYiJNCw5KWldhLdEntScg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=IqGU5Z+y;
-	arc=none smtp.remote-ip=209.85.221.50
-Received: from mail-wr1-f50.google.com (mail-wr1-f50.google.com [209.85.221.50])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=CXibKdWQ;
+	arc=none smtp.remote-ip=209.85.221.44
+Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D717760A5BCF
-	for <linux-efi@vger.kernel.org>; Tue, 27 Oct 2026 13:54:10 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D717760A5BCF
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 774C960A3831
+	for <linux-efi@vger.kernel.org>; Tue, 27 Oct 2026 13:54:06 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 774C960A3831
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=IqGU5Z+y
-Received: by mail-wr1-f50.google.com with SMTP id ffacd0b85a97d-48b042c0728so1173514f8f.1
-        for <linux-efi@vger.kernel.org>; Tue, 27 Oct 2026 06:54:10 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=CXibKdWQ
+Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-48c45111bebso1908959f8f.0
+        for <linux-efi@vger.kernel.org>; Tue, 27 Oct 2026 06:54:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1793109249; x=1793714049; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1793109245; x=1793714045; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=fU1UKpzBNuXU6ySePDsKYMB2Kq9NDiCM/53N3kd7ajQ=;
-        b=IqGU5Z+yI//Uf1f1InC3HbWaNBA9juMow4J6j21/IjLsy/OIkWb8l1dy+22F09jNzV
-         pDR9l4AM1iB5b8gdMgCmA0McivtMFc6/ynrCQY5iULmmlvGkphtZuPZCoI6JVhhKEqpr
-         Dg6sHWh0itWUOkLmnyLLremMAkJYHAFS3DgTLLk9/Ow9xQF2aPYwQB3ZcNOm9QJ5T/Rv
-         rlGXXpvjjleJRsRRPJkYgVlQPOsMaNo8Jxb1RIA2rbddhAZpnELZLvMn5wkRBRDtEBMb
-         +uugvAZLXOPIMdh37rUjulu/J+SLa8Lu5eURbtTL03+78xOqgArIfXFyBmKmKslt5eBh
-         ANCg==
+        bh=x3TRWoAym08EDkUmxJbEElxgHRIsBB4gzy6Y/BELf6M=;
+        b=CXibKdWQ9F7anjrgC0VMM7aDjT7IZMsjrShnAhjebv9ylc+23J4tWOL8QvB+1moPRX
+         +ccoc8d11rCpEb7OtfOrgtPIf/fT8tmb8PVCSRTYx4nbwMkcpY2vtHqVUEpb/OC3PRSX
+         n0Ia7Prd8lLKUDe1UZtgqbfo5N4cIvFxQz6SXiyEYg+iyq3EZ/1FhxyWHv5iBM4l7xCx
+         7F2ocwI8m+BeAbnle6aJRUD9PWHXDbHOYkGek9AI74WYQgNsj7qt8kMlhNAd0+KVokOO
+         6MNd4RtF0WI/55ngrMNg6XmUK6c78cp3ggmzgkKmzUywXESizZ7nCpjNOly4WKzfIN4I
+         Qk/Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793109249; x=1793714049;
+        d=1e100.net; s=20260707; t=1793109245; x=1793714045;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=fU1UKpzBNuXU6ySePDsKYMB2Kq9NDiCM/53N3kd7ajQ=;
-        b=2PcHj7mONcnoEg30ypK5ldz2mPEhcehnkT+SeMCHk56/10V6k7hDX8V7JPzeFT3nTR
-         cVRuTB5IHdvKJnpdd1FeCa3P/TGQm5npe30QvC1pkOgL2DDblIfvk+ShgWBcPEDyxhV+
-         YKqCOsHIVrD4n2nTpVtKta1fblqVGY+WUSo0SRwVHbGv/bu5KIsZvrPYVxg3AnsOND/o
-         WWBROXWYWrkLGZBTA8SFQdOg/sKUzDRXkMzRztUZBqKeZmoA97XFxdwMO/+UlvcTwwkl
-         axncxmyImajSzWFXdzEJx8ryrYonpMu7GRhPBaypFkvxcqKMPbP1iOC04EBcO48/yVyf
-         T3vA==
-X-Forwarded-Encrypted: i=1; AKwUvBwPYn8PlyW3rKCnJY3KeJASGD/dV7sAE8/dcLY8Fd9XasO1RQRLXgmYpsRS3T9mY0FFv1hCELLLZVY=@vger.kernel.org
-X-Gm-Message-State: AFq9FYKJUNwxC6kWXmhryz5gTclQSpR23GGBfqFQuQyaU48GHIf2nyHl
-	RGyTw9N/u1jw2m9CnqHDNDPhakQYJdgPkceI3UMSpozs84usiQDWQzBT
-X-Gm-Gg: AYBFou3IjddhjcRAvBNo92Qj5hVl8oAV34+z8kEOzAgYWt4IGw+CTty2bytLQt2yP3b
-	k3cok8NM1FCjYsyKUU4w8+eMraI7v3rnPHRFLKbA7TXey91c9AYGrFivMGjXRfXXSvCGINCzmnS
-	gEQJLZud7rjnrte0uF58KKTcr/rgujoKLo89G5yM1Tt/P4frHuDRF8olx8UhujTDmU4hd7srm2l
-	kAaAfeELpAilTCK6Pb5Ald95Tk8rdhksZxBP6QXq4uquUSYddUd7os61fyrNw3cJhB2direoxVr
-	JujkUrQAROtkiVvEK+ZPHa3yIKv8HYGoBru+7t5tGCFSsD+jMb7Qq7ZCUnzXkhvFwmJ5RCSO4NV
-	l1XwhuTryJAXXzyFMsZw5ErdmK9yhA+tVCdqTPrewBluw93nGXOFxozwMC7jfVmKB9kD3nbRzLf
-	UGH+iajR5MIoQrvq4trOT8wDlDWg433O+Bh9Hb+S9zTGk9G1znj34q/tTQESFNpX+PzRXuUJQ0C
-	zcCRYt8rMBORgo2/VzBEvBhiHpLe9PcZZHegyiLRRaSHhUdaYUN9JlozOLukMnm4EByFNoWfRJU
-	sIIgMPw=
-X-Received: by 2002:adf:e186:0:b0:48d:eec5:d243 with SMTP id ffacd0b85a97d-48e3eb8b71emr19191940f8f.9.1793109249072;
-        Tue, 27 Oct 2026 06:54:09 -0700 (PDT)
+        bh=x3TRWoAym08EDkUmxJbEElxgHRIsBB4gzy6Y/BELf6M=;
+        b=P1uChqPeLChEOmnrrzm4JP1/XOhzeM3SdvN+gxm7vKhc/GYcPgtCOAkpLj3W+Kd+xn
+         IQzZdemn5s5qvJ8o/2Nm4x1Rvs/uJMGJg+VR/6dZvpwVDQkybMNASsasLzvUTLU+d8hA
+         tu3h8od7CJW3iK16SHR2qu4NgrosF1SpVapYAdvNMFrH6naEIfzqnCfoXk9/li127n84
+         dgMjvUoTvvzOrtPjIgGejbgagVj7Mof+RefRnn8amtojAFP7Wcle6WGX1l+EXfKoUH7S
+         fVjevTXK6e92nzrIfRg3nIlfPVJLVscBRE84nzmhjt12pHI/KJW9rSI8ojn7Bje/w+vs
+         oYTg==
+X-Forwarded-Encrypted: i=1; AKwUvBzT3hVOoIpZYx31PVTZhXdlXUCcZeuzblPurmD4HXSIP+clsivFaJe3T/xkWgG5BSMYRZmDLldW0os=@vger.kernel.org
+X-Gm-Message-State: AFq9FYLzaI00sCsyUVzBMp2KdMZJb8SHhtEhJE1h94gQgADSZCqo725V
+	yXu+d/AwiVC8eJfALxZddiKAKHqAkinz72L5jdzQiRCHV2gBjIEcsAJD
+X-Gm-Gg: AYBFou08Fg8Z8Kyy9C+FjXqXMX2QIbWwNmpm1E/MAICG887OTb8wtGt5CgFVAEQdscB
+	0Ay39WiTO9RlhTdzgNcpVVlAgxvkUIKT9LFDG+2C4V8vRYlmopk8IdchARBD2fIK+3foc6ig2e/
+	qv/e2eLmM2whtUwL9ahg5/wseu7Inx/vQBdrgpvMjUwyq9hEAb4nbPMdKNyTD+lBDmfGu+TBsRN
+	1xX21sQyCwrxvMZ2zhPv4BSusLNmBZb1r3X6nfL2K0ZmAMilkHphdBhScmBczYUVn+hgOCTvdo0
+	S1VApdsKb/Ob1fVPJw9AlOuoJb6/Tffe2Q+8RNTzXsopojT4yUpmSmLZS4IVrDkSduFA4pm2Bmb
+	kcEaPY5VQBZfzA141Pm1R+s588OCJNYNZNGRD/lhmhBkqjrV99ef5bWctyb+NS288TJk+4gWX3z
+	ik0Vug9ADNk4OHNBEXrbKeLLoiEkuieBM2a6SwDjGkepTqNAuH+JbD5Xa8peFRsvFrpyyQDe+vC
+	SzkKQQ/0Qu7Fm7pJknlJwEjzMsoYKF4nWatLZQ3KEQyDCa7TVyCs1eAJxPN7QdfBLBLeZSTPk0o
+	NAxsrt3knMfMAh9nwztDZdJKkHQ7
+X-Received: by 2002:a5d:5d10:0:b0:48e:1c72:abc with SMTP id ffacd0b85a97d-48e3eb9890amr18924302f8f.35.1793109244645;
+        Tue, 27 Oct 2026 06:54:04 -0700 (PDT)
 Received: from ingenieria31.oficinasStQ.local ([79.117.46.175])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48e3ebcb846sm23128058f8f.25.2026.10.27.06.54.06
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48e3ebcb846sm23128058f8f.25.2026.10.27.06.54.02
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Oct 2026 06:54:08 -0700 (PDT)
+        Tue, 27 Oct 2026 06:54:04 -0700 (PDT)
 From: =?UTF-8?q?M=C3=A0xim=20Pedraza=20Padilla?= <maximpedraza@gmail.com>
 To: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
 	Maxime Ripard <mripard@kernel.org>,
@@ -108,9 +108,9 @@ Cc: Francesco Valla <francesco@valla.it>,
 	linux-doc@vger.kernel.org,
 	linux-embedded@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v6 10/15] drm/client: splash: place the device tree image where it asks
-Date: Tue, 27 Oct 2026 14:53:37 +0100
-Message-Id: <20261027135342.2003632-11-maximpedraza@gmail.com>
+Subject: [PATCH v6 08/15] drm/client: splash: pick the image source in one place
+Date: Tue, 27 Oct 2026 14:53:35 +0100
+Message-Id: <20261027135342.2003632-9-maximpedraza@gmail.com>
 X-Mailer: git-send-email 2.39.5
 In-Reply-To: <20261027135342.2003632-1-maximpedraza@gmail.com>
 References: <20261027135342.2003632-1-maximpedraza@gmail.com>
@@ -126,167 +126,108 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-A logo supplied by the device tree describes a particular product, and
-where it lands on the panel matters: some panels only show part of the
-mode, so the middle of the mode is not the middle of what the user
-sees.
+The client chooses between two sources with a boolean: the BGRT if the
+firmware left one, otherwise the BMP loaded as firmware. A third one is
+coming, and with it an order of preference that a boolean cannot hold.
 
-Read the optional "logo-position" and "logo-offset" properties of the
-node. The position is the top left corner, with -1 on an axis meaning
-centre on that axis, and the offset is added afterwards, which is the
-only way to say "below the centre" when the device tree does not know
-the image size, as with an image in a reserved region.
+Name the source in use with an enum, picked once by
+drm_splash_pick_source(), and have drm_splash_image_load() switch on
+it. No functional change.
 
-Both come straight from the device tree. A property that is not two
-cells, or that is out of the binding's range, is reported and keeps its
-default;
-otherwise the sum is done in 64 bits and clamped, and a silly pair of
-values lands the image against an edge rather than off the screen: the
-blitters do not clip. Every other source keeps being centred, except
-the BGRT, which keeps its own offsets.
-
+Suggested-by: Thomas Zimmermann <tzimmermann@suse.de>
 Assisted-by: Claude:claude-opus-5-5
 Signed-off-by: Màxim Pedraza Padilla <maximpedraza@gmail.com>
 ---
- drivers/gpu/drm/clients/drm_splash.c | 82 ++++++++++++++++++++++++++--
- 1 file changed, 78 insertions(+), 4 deletions(-)
+ drivers/gpu/drm/clients/drm_splash.c | 45 +++++++++++++++++++++++-----
+ 1 file changed, 38 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/gpu/drm/clients/drm_splash.c b/drivers/gpu/drm/clients/drm_splash.c
-index 618c060f33d5..81070547390f 100644
+index 337c7160c4a1..911149b92a52 100644
 --- a/drivers/gpu/drm/clients/drm_splash.c
 +++ b/drivers/gpu/drm/clients/drm_splash.c
-@@ -106,6 +106,14 @@ struct drm_splash {
- 	size_t dt_len;
+@@ -39,6 +39,16 @@
+  * a static image.
+  */
  
- 	enum drm_splash_source src;
++/*
++ * Where the image comes from. drm_splash_pick_source() sets the order of
++ * preference; NONE is zero, so that a new splash starts without a source.
++ */
++enum drm_splash_source {
++	DRM_SPLASH_SRC_NONE,
++	DRM_SPLASH_SRC_BGRT,
++	DRM_SPLASH_SRC_BMP,
++};
 +
-+	/*
-+	 * Where the image goes, in screen pixels: a coordinate of -1 centres
-+	 * it on that axis, and the offset is added afterwards. Only the device
-+	 * tree asks for anything but the centre.
-+	 */
-+	s32 pos_x, pos_y;
-+	s32 off_x, off_y;
+ struct drm_splash_scanout {
+ 	int id;
+ 	/* Modesets scanning this buffer out, by position in the list */
+@@ -87,7 +97,7 @@ struct drm_splash {
+ 	const struct firmware *fw;
+ 	void *map_data;
+ 
+-	bool use_bgrt;
++	enum drm_splash_source src;
  };
  
  static struct drm_splash *client_to_drm_splash(struct drm_client_dev *client)
-@@ -238,6 +246,39 @@ static struct device_node *drm_splash_dt_node(struct drm_splash *splash)
- 	return NULL;
- }
- 
-+/* An X and Y pair; anything but two cells from @min to @max is reported */
-+static void drm_splash_dt_pair(struct drm_splash *splash,
-+			       struct device_node *np, const char *name,
-+			       s32 min, s32 max, s32 *x, s32 *y)
-+{
-+	u32 val[2];
-+
-+	if (!of_property_present(np, name))
-+		return;
-+
-+	if (of_property_count_u32_elems(np, name) != 2 ||
-+	    of_property_read_u32_array(np, name, val, 2) ||
-+	    (s32)val[0] < min || (s32)val[0] > max ||
-+	    (s32)val[1] < min || (s32)val[1] > max) {
-+		drm_warn(splash->client.dev, "splash: %pOF: invalid %s\n",
-+			 np, name);
-+		return;
-+	}
-+
-+	*x = val[0];
-+	*y = val[1];
-+}
-+
-+/* The optional placement properties of the node, read once */
-+static void drm_splash_dt_placement(struct drm_splash *splash,
-+				    struct device_node *np)
-+{
-+	drm_splash_dt_pair(splash, np, "logo-position", -1, 65535,
-+			   &splash->pos_x, &splash->pos_y);
-+	drm_splash_dt_pair(splash, np, "logo-offset", -65535, 65535,
-+			   &splash->off_x, &splash->off_y);
-+}
-+
- /*
-  * Find the image when the source is picked, and keep it for the outputs
-  * plugged in later. A node whose image cannot be had leaves the other
-@@ -307,6 +348,11 @@ static bool drm_splash_dt_open(struct drm_splash *splash)
- 	return false;
- }
- 
-+static void drm_splash_dt_placement(struct drm_splash *splash,
-+				    struct device_node *np)
-+{
-+}
-+
- static int drm_splash_dt_load(struct drm_splash *splash,
- 			      const u8 **data, size_t *size)
- {
-@@ -428,6 +474,26 @@ static int drm_splash_fill_solid_color(struct drm_client_buffer *buffer,
- }
- 
- #if IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_BMP_SUPPORT)
-+/*
-+ * Place the image along one axis of the screen. @pos is the coordinate asked
-+ * for, or -1 to centre on that axis, and @off is added afterwards. Both may
-+ * come from the device tree, so the sum is done wide enough not to wrap, and
-+ * the result keeps the whole image on the screen: the blitters do not clip.
-+ */
-+static unsigned int drm_splash_place_axis(s32 pos, s32 off, unsigned int span,
-+					  unsigned int size)
-+{
-+	s64 last = (s64)span - size;
-+	s64 coord;
-+
-+	if (last <= 0)
-+		return 0;
-+
-+	coord = pos == -1 ? last / 2 : pos;
-+
-+	return clamp_t(s64, coord + off, 0, last);
-+}
-+
- /* The rows of a 24 bpp BMP, bottom up or top down, upright in XRGB8888 */
- static void drm_splash_bmp_decode(u32 *dst, const u8 *src, unsigned int spitch,
- 				  unsigned int width, unsigned int height,
-@@ -595,9 +661,10 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
- 		}
- #endif
- 	} else {
--		/* Center X and Y */
--		x_pad = (scanout->width - bmp_width) / 2;
--		y_pad = (scanout->height - bmp_height) / 2;
-+		x_pad = drm_splash_place_axis(splash->pos_x, splash->off_x,
-+					      scanout->width, bmp_width);
-+		y_pad = drm_splash_place_axis(splash->pos_y, splash->off_y,
-+					      scanout->height, bmp_height);
+@@ -429,7 +439,7 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
+ 		return -EINVAL;
  	}
  
- 	image_data = data + bitmap_offset;
-@@ -659,8 +726,11 @@ static int drm_splash_image_load(struct drm_splash *splash, const u8 **img_data,
-  */
- static enum drm_splash_source drm_splash_pick_source(struct drm_splash *splash)
+-	if (splash->use_bgrt) {
++	if (splash->src == DRM_SPLASH_SRC_BGRT) {
+ 		x_pad = efi_bgrt_image_offset_x();
+ 		y_pad = efi_bgrt_image_offset_y();
+ 
+@@ -498,10 +508,31 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
+ static int drm_splash_image_load(struct drm_splash *splash, const u8 **img_data,
+ 				 size_t *img_data_len)
  {
--	if (drm_splash_dt_open(splash))
-+	if (drm_splash_dt_open(splash)) {
-+		drm_splash_dt_placement(splash, splash->dt_np);
- 		return DRM_SPLASH_SRC_DT;
+-	if (splash->use_bgrt)
++	switch (splash->src) {
++	case DRM_SPLASH_SRC_BGRT:
+ 		return drm_splash_bgrt_load(splash, img_data, img_data_len);
++	case DRM_SPLASH_SRC_BMP:
++		return drm_splash_fw_load(splash, img_data, img_data_len);
++	case DRM_SPLASH_SRC_NONE:
++		break;
 +	}
 +
- 	if (drm_splash_bgrt_available(splash))
- 		return DRM_SPLASH_SRC_BGRT;
- 	if (IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_SRC_BMP))
-@@ -1114,6 +1184,10 @@ void drm_splash_register(struct drm_device *dev,
- 	mutex_init(&splash->lock);
- 	init_completion(&splash->fw_done);
- 
-+	/* Centred unless the image source asks otherwise */
-+	splash->pos_x = -1;
-+	splash->pos_y = -1;
++	return -ENOENT;
++}
 +
- 	if (format && format->num_planes == 1) {
- 		splash->preferred_format = format->format;
- 	} else {
++/*
++ * Pick the one source the image will come from: the BGRT is whatever the
++ * firmware shows, and the BMP loaded as firmware is the fallback. With
++ * neither, only the background colour is drawn.
++ */
++static enum drm_splash_source drm_splash_pick_source(struct drm_splash *splash)
++{
++	if (drm_splash_bgrt_available(splash))
++		return DRM_SPLASH_SRC_BGRT;
++	if (IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_SRC_BMP))
++		return DRM_SPLASH_SRC_BMP;
+ 
+-	return drm_splash_fw_load(splash, img_data, img_data_len);
++	return DRM_SPLASH_SRC_NONE;
+ }
+ 
+ /* At unregister, once nothing else can use the image */
+@@ -818,10 +849,10 @@ static int drm_splash_client_hotplug(struct drm_client_dev *client)
+ 
+ 	if (!splash->source_picked) {
+ 		splash->source_picked = true;
+-		splash->use_bgrt = drm_splash_bgrt_available(splash);
++		splash->src = drm_splash_pick_source(splash);
+ 
+-		/* If no other image has been loaded, try to load a BMP as firmware */
+-		if (IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_SRC_BMP) && !splash->use_bgrt) {
++		/* The BMP loaded as firmware is the only source that arrives later */
++		if (splash->src == DRM_SPLASH_SRC_BMP) {
+ 			ret = drm_splash_fw_request_bmp(splash);
+ 			splash->fw_requested = !ret;
+ 			if (ret)
 -- 
 2.39.5
 
