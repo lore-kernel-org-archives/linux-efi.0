@@ -1,66 +1,66 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=217.140.110.172
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793110766;
-	b=tqtGb5z7uDWqebXE3MhF/mxZc4oFTlNIuSXeq5eB7VsfqqJhbMC/7K8v2wG9REluCwlw
-	 LMhU1cdsHuglDTTa7Ee97i7xuH6fWA9yeonXCItyDM31XtK8LBpSVUD88opoEAOwp1+3u
-	 1V7ipINW7YjnGDpSwqNHwi3XhG3O6F9/Mth/eJDC+ruub2xw941luY8+ta/rmISTidoCV
-	 KKGAUNI8JwLsTbvBbP/lLLzmDs+xUkMj4CLci97mtWOUNm2jgvpEiyqpmc/ympetoQtFq
-	 wdpAW6B1vdYz7yXq1tz2XzOqLJjYMCgeTgJb8r/t3dWk+e/zn5hzHOUim+PL7zEbz9Q==
+	t=1793110986;
+	b=uT6IAJal2SDj70J7AxEDStP3l5b1+O3Pp81epYl7vHPMtb3LtuZX1OCjLtPAaoMcOULK
+	 Jb9q19E0MQOqfRi9XDjaJTUE0KmM6vpkTQNzjQqO+NfiIt8P66njhm/hXcXxgVnBL/IK0
+	 pRTtL3RSn9yFAwRrLjs//ioZvILN4KD+7r7p2r9L62RbPAmbQ38+jWqqHHYtlti+J+wyn
+	 FNjVDcgSdojNXA+5HDZcMBzSVyYx65yWNkSNJMC5kD40znD92JUlUYQ+jQVaMtEKHT+t8
+	 pecMCJWvNMEwXkCLZDERd0OKZ3C0zLZe0pgqlJ216GW9KW40Y0WQwNFLU5j0sou2Qkg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793110766;
-	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
-	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
-	bh=7/NdGXk0k60OCRY68KdH4xp2hlhwawdysfR3zWz9V1A=;
-	b=jqlMbz0nzzs2kH4dW3ZrbuNWpQ8/R91ZiKJaFkLVP+pEqtcsxkk4BdCr4i+6ELY/jFxF
-	 j815x0wx0rOLIRV8ENLimIviDoHKO5hf2N5IzJU+d0XiFRlK5XGti868McMEHK2zo0ObH
-	 pq0pfxOOaVnsjcyIQvdZ2q8elKrsQ4UT2kpiZILsFRMpFbPB5BsjwY+dAhxrbze29lFqe
-	 G2UUg31cSzQv7wprjuLRupgrn99zoLMzhWHBupI7dHfTkqdv9VAEo7sP8HaNBNhCwxFsR
-	 P/PmYDYKGyI6ldaMRxqHGcUA5jn92IZutWDc0GQ1hcYAwWFyNh5Pq6f8396E60kygHg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793110986;
+	h=DMARC-Filter:Received:Received:DKIM-Signature:Date:From:To:Cc:
+	 Subject:Message-ID:References:MIME-Version:Content-Type:
+	 Content-Disposition:Content-Transfer-Encoding:In-Reply-To;
+	bh=YCM1R6dVVWvuIH+UBR6TH5CMJ3bKt8HZdVGd2g1zmYs=;
+	b=z9AeNlRFon0u9D0Q1fpxdUaEYGJ10tAMWD64dG6KaE1qszoVwT9P/K+4vYCbw1T/8JXa
+	 mXQK3E+ttRGS5QRV5q/UeByfEEeTkijuEsSqi6E6gpFHmrnml1tdOu3E+U1Zc+5GIFa6q
+	 Q6isp1N+qjsijWUBi96XPgqbyYaK+8vCL1SqL5AWudtelyVHpJkhgNaZQL4ATd0aZurk2
+	 uO7BdsztJE18x/YO72/QIy0biVI9UobXvVkgTqOinup2IMdvsFJhNqX1kx6S4sYhsiNZk
+	 McOtwxguxd0j5Up/XM0ALANp3r7QEMV2GTbgTp1LSUdkIeLDWDZi7hIqSQX9mkdhSOg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=iZpHKs6M;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE4F9606A31A;
-	Tue, 27 Oct 2026 14:19:25 +0000 (UTC)
+	dmarc=pass header.from=arm.com;
+	spf=pass smtp.mailfrom=arm.com;
+	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=Y1y72I7Z;
+	arc=none smtp.remote-ip=217.140.110.172
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 281AE606A31A;
+	Tue, 27 Oct 2026 14:23:04 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 281AE606A31A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=iZpHKs6M
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F47A1F01825;
-	Tue, 27 Oct 2026 14:19:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793110765;
-	bh=7/NdGXk0k60OCRY68KdH4xp2hlhwawdysfR3zWz9V1A=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=iZpHKs6MD1Ry7jDWlY/8RakHDmD5WLaBdBPWMObp9lB0j5R8QS2WYSPl870YSLmNZ
-	 FhdS+33xKqt52caITpF/YgoPvz6Gs8XY5lbdlFsTB2eotSDf+9EnyyM+zI7p1quTF5
-	 lueXsD3tFhy0kFxFVNEUgKXWY7QmXolEPWQYtRIhr42yAjrzg75xbj6hZd6KfO4hFO
-	 ax4TJDzgFxYrajArfqJIWfTjjs/3Vv4FTxg123lSEkNuvcGhvWZPixFInv9a1mXwYS
-	 N7EHV6lo6Pqvk2eF0iXoVq6r6LtpVXhYZ9lRqNuGDlQpgJfdpv3B1GMjWL7ytW3B+n
-	 NXfkr7+jXqjUg==
-Message-ID: <sashiko-outbox-186719@kernel.org>
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v6 04/15] drm: client: add splash client
-Reply-To: sashiko-reviews@lists.linux.dev
-To: =?utf-8?b?TcOgeGltIFBlZHJhemEgUGFkaWxsYQ==?= <maximpedraza@gmail.com>, "Maarten
- Lankhorst" <maarten.lankhorst@linux.intel.com>, "Maxime Ripard" <mripard@kernel.org>, "Thomas
- Zimmermann" <tzimmermann@suse.de>, "David Airlie" <airlied@gmail.com>, "Simona
- Vetter" <simona@ffwll.ch>, "Rob Herring" <robh@kernel.org>, "Krzysztof
- Kozlowski" <krzk+dt@kernel.org>, "Conor Dooley" <conor+dt@kernel.org>, "Ard
- Biesheuvel" <ardb@kernel.org>, "Jonathan Corbet" <corbet@lwn.net>, "Helge
- Deller" <deller@gmx.de>, "Peter Jones" <pjones@redhat.com>
-Cc: "Francesco Valla" <francesco@valla.it>, "Jani Nikula" <jani.nikula@linux.intel.com>, "Mario
- Limonciello" <mario.limonciello@amd.com>, "Javier Martinez Canillas" <javierm@redhat.com>, "Jocelyn
- Falempe" <jfalempe@redhat.com>, "Sam Ravnborg" <sam@ravnborg.org>, "Ilias
- Apalodimas" <ilias.apalodimas@linaro.org>, "Shuah Khan" <skhan@linuxfoundation.org>, "Randy
- Dunlap" <rdunlap@infradead.org>, dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org
-In-Reply-To: <20261027135342.2003632-5-maximpedraza@gmail.com>
-References: <20261027135342.2003632-1-maximpedraza@gmail.com>
- <20261027135342.2003632-5-maximpedraza@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Tue, 27 Oct 2026 14:19:23 +0000
+	dkim=pass (1024-bit key, unprotected) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=Y1y72I7Z
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id D4A8F15A1;
+	Tue, 27 Oct 2026 07:23:00 -0700 (PDT)
+Received: from e142392.arm.com (e142392.arm.com [10.2.213.23])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 7565A3F7B4;
+	Tue, 27 Oct 2026 07:23:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
+	t=1793110984; bh=5oj/0Olu6P0vOlAuhliwwyRovCufR2SAkrdb83vbrEU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Y1y72I7ZZgHOwDZ52neOkUJTOFHLGM6SpPrLJVlApi2ONKuPpXy5gvo/YDy6bjRdY
+	 UjZ8l/7y5kF6noVILXl0H6e+7Nb7KYz93CLjCCr7D1N2FQkJe6kC1ZNYqjb4NZfw1c
+	 kqwUht3UItiP8Y9UtMdtZaMB+dEp84ku6EU01etY=
+Date: Tue, 27 Oct 2026 14:22:50 +0000
+From: Kristina =?utf-8?Q?Mart=C5=A1enko?= <kristina.martsenko@arm.com>
+To: Jinqian Yang <yangjinqian1@huawei.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-acpi@vger.kernel.org, 
+	kvmarm@lists.linux.dev, linux-efi@vger.kernel.org, 
+	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+	Mark Rutland <mark.rutland@arm.com>, Ryan Roberts <ryan.roberts@arm.com>, 
+	David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>, 
+	Linu Cherian <linu.cherian@arm.com>, Anshuman Khandual <anshuman.khandual@arm.com>, 
+	Lorenzo Pieralisi <lpieralisi@kernel.org>, Hanjun Guo <guohanjun@huawei.com>, 
+	Sudeep Holla <sudeep.holla@kernel.org>, Marc Zyngier <maz@kernel.org>, Oliver Upton <oupton@kernel.org>, 
+	Fuad Tabba <fuad.tabba@linux.dev>, Joey Gouly <joey.gouly@arm.com>, 
+	Steffen Eiden <seiden@linux.ibm.com>, Suzuki K Poulose <suzuki.poulose@arm.com>, 
+	Zenghui Yu <yuzenghui@huawei.com>, Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Subject: Re: [RFC 00/12] arm64: Add support for TLBI domains
+Message-ID: <cs3tsczrky7egqzde6gnsf7l22t53jit3cygtwe56yfeka5ue7@zesz6zptww3v>
+References: <20261001110655.461473-1-kristina.martsenko@arm.com>
+ <9eb6e0fe-5d8a-499c-b19b-ce73fe982451@huawei.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -69,138 +69,60 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <9eb6e0fe-5d8a-499c-b19b-ce73fe982451@huawei.com>
 
-Thank you for your contribution! Sashiko AI review found 1 potential issue(=
-s) to consider:
-- [Medium] drm/client: splash: deferred restore during suspend skipped when=
- n_scanout is 0
---
+On Mon, Oct 19, 2026 at 04:52:04PM +0800, Jinqian Yang wrote:
+> Hi,
+> 
+> On 2026/10/1 19:06, Kristina Martšenko wrote:
+> > Hi,
+> > 
+> > This series allows the kernel to use TLBI domains. TLBI domains (FEAT_TLBID) is
+> > an Arm architecture feature that enables a TLB invalidation to target a subset
+> > of CPUs instead of the whole system. It can improve performance on systems with
+> > many CPUs. TLBID is not yet part of the Arm Architecture Reference Manual but
+> > some of it is described in the latest XML [1].
+> > 
+> > The goal of this series is to send TLBI commands only to the CPUs where a
+> > process has run (i.e. where its page tables have been installed). The last
+> > patch explains a bit about how it works. This is an RFC since I'm not familiar
+> > with the kernel's TLB/mm code and I'd like feedback on whether the general
+> > approach is correct.
+> > 
+> 
+> Thanks for posting this series.
+> 
+> I'm working on the KVM side of TLBID, and have a series that
+> virtualizes TLBI domains for guests. It includes:
+> 
+>  - per-vCPU vDomain configuration via a new capability and
+>    two ioctls
+>  - VTLBID_EL2 programming at vCPU load/put, mapping vDomains
+>    to physical domains
+>  - a guest visible TLBIDIDR_EL1 with virtual domain counts,
+>    and conditional exposure of ID_AA64MMFR4_EL1.TLBID
+> 
+> You mentioned you planned to look at KVM support in your next
+> version. Would it be OK for us to post this as an RFC on top
+> of your series? :)
 
-commit e78c6d64f4fdb91cb45b16a96f7a38008255ec63
-Author: Francesco Valla <francesco@valla.it>
+Thanks for sharing.
 
-drm: client: add splash client
+I’m starting to look at KVM support but I’m not working on exposing
+domains to guests. I’m looking at if we can track which CPUs a guest has
+run on and transparently redirect all of a guest’s TLBIs to a single
+domain that contains those CPUs. This could be a fallback in case the
+guest is not configured to have virtual domains itself (which your
+series enables).
 
-This commit adds a DRM splash client capable of displaying an EFI BGRT logo,
-a firmware-loaded 24bpp uncompressed BMP image, or a solid background color.
-The client draws from a work item, handles hotplug events while keeping the
-previous scanouts on screen until new ones are committed, and defers drawing
-and restore commits while the device is suspended.
+I think there is some overlap between what we’re doing (e.g. configuring
+VTLBID), but also lots of separate parts. So no objection from my side,
+please feel free to post your series.
 
-> diff --git a/drivers/gpu/drm/clients/drm_splash.c b/drivers/gpu/drm/clien=
-ts/drm_splash.c
-> new file mode 100644
-> index 0000000000000..337c7160c4a1b
-> --- /dev/null
-> +++ b/drivers/gpu/drm/clients/drm_splash.c
-> @@ -0,0 +1,976 @@
+Thanks,
+Kristina
 
-[ ... ]
-
-> +static void drm_splash_work(struct work_struct *work)
-> +{
-> +	struct drm_splash *splash =3D container_of(work, struct drm_splash, wor=
-k);
-> +	struct drm_client_dev *client =3D &splash->client;
-> +	const u8 *img_data =3D NULL;
-> +	size_t img_data_len =3D 0;
-> +	bool img_loaded;
-> +	unsigned int i;
-> +	int ret;
-> +
-> +	guard(mutex)(&splash->lock);
-> +
-> +	/*
-> +	 * Not while the device sleeps, not even drawing, which flushes the
->	 * buffers to the hardware: resume queues the work again
-> +	 */
-> +	if (splash->suspended) {
-> +		splash->work_skipped =3D true;
-> +		return;
-> +	}
-> +
-> +	if (!splash->n_scanout)
-> +		return;
-
-[ ... ]
-
-> +	ret =3D drm_client_modeset_commit(client);
-> +	if (ret) {
-> +		/* What a hotplug replaced is still on screen: it stays */
-> +		drm_dbg(client->dev, "splash: commit: %d\n", ret);
-> +		return;
-> +	}
-> +
-> +	/* Whatever a hotplug replaced is no longer on screen */
-> +	drm_splash_delete_scanouts(&splash->old_scanout, &splash->n_old_scanout=
-);
-> +}
-
-[ ... ]
-
-> +/* An output without a buffer has no mode either: the commit switches it=
- off */
-> +static int drm_splash_client_restore(struct drm_client_dev *client, bool=
- force)
-> +{
-> +	struct drm_splash *splash =3D client_to_drm_splash(client);
-> +	int ret;
-> +
-> +	guard(mutex)(&splash->lock);
-> +
-> +	/* Not while the device sleeps: resume runs the work, which commits */
-> +	if (splash->suspended) {
-> +		splash->work_skipped =3D true;
-> +		return 0;
-> +	}
-> +
-> +	if (force)
-> +		ret =3D drm_client_modeset_commit_locked(client);
-> +	else
-> +		ret =3D drm_client_modeset_commit(client);
-> +
-> +	/* Whatever a hotplug replaced is no longer on screen */
-> +	if (!ret)
-> +		drm_splash_delete_scanouts(&splash->old_scanout,
-> +					   &splash->n_old_scanout);
-> +
-> +	return ret;
-> +}
-
-[Severity: Medium]
-In drivers/gpu/drm/clients/drm_splash.c, can a restore deferred during
-suspend be skipped on resume when splash->n_scanout is 0, or lose the force
-flag?
-
-If a hotplug event finds no usable modesets or fails buffer allocation,
-drm_splash_client_hotplug() moves the previously active scanouts to
-splash->old_scanout and calls drm_splash_free_scanout(), which clears
-client->modesets via drm_splash_modeset_off() and leaves splash->n_scanout
-at 0.
-
-If drm_splash_client_restore() is then called while splash->suspended is
-true (for example, via drm_lastclose() when a userspace master closes its
-DRM file descriptor), it sets splash->work_skipped =3D true and returns 0,
-relying on drm_splash_client_resume() to queue drm_splash_work() to perform
-the commit.
-
-However, when drm_splash_work() runs on resume, it checks:
-
-	if (!splash->n_scanout)
-		return;
-
-and returns before calling drm_client_modeset_commit(client) and
-drm_splash_delete_scanouts(&splash->old_scanout, &splash->n_old_scanout).
-Wouldn't this leave the disabled modesets uncommitted and splash->old_scano=
-ut
-unfreed?
-
-Additionally, if drm_splash_client_restore(client, true) is called while
-suspended, the force argument is not recorded, so drm_splash_work() will
-call drm_client_modeset_commit() instead of
-drm_client_modeset_commit_locked() and fail with -EBUSY if a DRM master is
-still active.
-
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261027135342.2003=
-632-1-maximpedraza@gmail.com?part=3D4
