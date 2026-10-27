@@ -1,113 +1,47 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.57.61
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1793115670;
-	b=DvW7H3hRmVFl8kg/Erunu+nmMWKR/oiRDHwvtiJ6QwTz17U3nYD9MxxsDIXgA5lOZgDr
-	 x4IsmMiih/GaYy2Yyq63t/YLv4HKlA9yafabHVknYOXmDBxp3QPMkoHVpapZnus0ideha
-	 vo6ge2md4UdyK3QMJND9zTOC0wGcwqSpf3fXBQdKf5M/AQOwza6sG9PcXXjsAn/ZluUiq
-	 LM2Q3jThh/60yoRsVkvOeg+3z32HaRIaM1aktJdRtPAFO96UdiJzDZEg994Ka2zTMsGIt
-	 GdlK4dN+Eh3R971Kl1Z31Kt9XrqSserbg95WkqORscXPikKy3r+lFqg0e+9cnVjJ2AQ==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793115670;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:Date:From:To:Cc:
-	 Subject:Message-ID:References:Content-Type:Content-Disposition:
-	 In-Reply-To:X-ClientProxiedBy:MIME-Version:X-MS-PublicTrafficType:
-	 X-MS-TrafficTypeDiagnostic:X-MS-Office365-Filtering-Correlation-Id:
-	 X-MS-Exchange-SenderADCheck:X-MS-Exchange-AntiSpam-Relay:
-	 X-Microsoft-Antispam:X-Microsoft-Antispam-Message-Info:
-	 X-Forefront-Antispam-Report:
-	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
-	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
-	 X-MS-Exchange-CrossTenant-FromEntityHeader:
-	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
-	 X-MS-Exchange-CrossTenant-UserPrincipalName:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=+p6nG3kPSl+4+8AQOLFlHL/hfyMc7R+DO34PRO5plDw=;
-	b=L9phbQSa16HbyWHPH+vDW8TEyInd1I9krPN2i+a65DXELMTzsdxvxFXDwwvlh6zl2AH3
-	 2Yt4cmqiwID1eYIAittA/96uUygfBSnnjw5gkzbfS8IEVOOcExUuH4Ax/l7u3pvuOCm6u
-	 lA+02ELZ2d1AOxTdOHePfq3DVkeDPZdIVTjePiY0rO5DjRnN/29Dlf4/jP6NN1voYcnQ2
-	 AiQNimIjJBV43KvzIJLyj/BReP4Es3rN1NAZskMmtrJiPW78SH8oooP1AlX5gPK5AOvY6
-	 toQdwG3yjg9BdUwhhF6Radu65udgTZjml9pCEtStetNfC1PXnowHNwqIjkzCugG/jSw==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=nvidia.com;
-	spf=fail smtp.mailfrom=nvidia.com;
-	dkim=pass header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=LLeSWfiO;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.57.61
-Received: from BN8PR05CU002.outbound.protection.outlook.com (mail-eastus2azon11011061.outbound.protection.outlook.com [52.101.57.61])
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1793127560;
+	b=SM49DYo7QIOvkcoyXwTaecferE99SoNBWU7PchM3BVDMPtMUIT+LKH00r/G3MqwnLk6N
+	 Nhc2O7eOxL+TSVQ4CA6ReLlOmTxGialIM7gK3EA7r2T16V5/3cSt7djwI/Q9+0xKl7VRE
+	 HcJrYXGc3THSgHNYzLiiEUAjW1uJkHIdQJ/IPquSXc/mCdmfE/k5HdRwJqehbBFiqmn0E
+	 7W4/upJ9AC5HTErvslH58Zu7ofByvtThsBiwyP9ixueNxZ1eXiDlghKxNiG/oAwUjstD+
+	 3z3kYmqPiLWHhPBVfK/Fq1Xg/ukgeYBhFOUxIg0Brl4z2QSVTjKpi7sbdsInQLVAQpA==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793127560;
+	h=Received:DKIM-Signature:Date:Content-Type:Content-Transfer-Encoding:
+	 MIME-Version:From:Cc:To:In-Reply-To:References:Message-Id:Subject;
+	bh=dQ+cCxuwh8Zl3zbw4eqIfOHayKknJP6gyts2HlafbsQ=;
+	b=zfZqSTn+wgP1X2loiFNS361lVnUfcNkfgJor/jaEHcohM9O80/k6PmTcdo9Gr3zAXSuH
+	 zUHJyfF3neInlOef3vb93DourynhCUtAEfNdhg0luG7VsurXh9Lag7lS8zBHGPrzoepy6
+	 rxGc8tBJwmpDcXwsZO3Ekyoix1ZuhqKuGiB9xTn7y5ZaNf70O0GW1rJN5w3A/8Zfp9Uqn
+	 xRT6ig8HiY8WbwN4zzXz+xCbNSNEYaxNPecw1w4iRl6eerPfilns6LIGh5CcVHRByEyA2
+	 NeG21R/I9if0qQrLFwvPolQ3nAE79uWYc2idDasvD1IsiXSvnzB0VZAGyAC2gyppeDg==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Luhdb2cJ;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80A22606A31D;
-	Tue, 27 Oct 2026 15:41:09 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 80A22606A31D
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63767606A31A;
+	Tue, 27 Oct 2026 18:59:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=LLeSWfiO
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=KIOqyPRFCkjBAXqzSjoNa+17XK/+sVx6w7pC3+7g8mN6qf8xGfSxkUJSjP4nlV3xASG9hfTdF8fHpdve1uVNg1oPbPoZ4qMSEy+1+DuhJO8fMPsBvwE1bZrpwX5n/7xtSJlzNVAHRixRzCbT0/7VtSmYKQc+wTDGXnXSWXGpZT/X4psWsPkAL0emFEsdbhInpYCIhzb9QIHYPJkU3cwAh48YVkMOw3aKYEbyaUXV4SPq0ZR7Uvnl1VS+DZEfWpSvGROAKbPdJgEoKmLP2/m6L306Hl6qvKZ3HV9SH6VL29w4HGHe5dt9iLOEiT2NA59DHXStHD/NoIySdjqtGyVY7Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=+p6nG3kPSl+4+8AQOLFlHL/hfyMc7R+DO34PRO5plDw=;
- b=eoZYhd437ANreRdHZg5D+C4tcRcWo1pFGCUzUj3cTEOksxyYxRAgPp2LykKPv8vmcXIZt1QSNLfE99nMDvkxaQugrDn2xFuKMfYiAqbYTHXa+OF+KJ0YlkoYgyKOu9x0rS483YDCaWaNX9Zo59otUKsHm0MWab7eHo6j1rfC/Napu8eYUZ/g3RaiWYNd/kR7QQuzZBxz2qAhNduC28lLeMyLhzQMgQP0BHwKXBwkWq4ok0mKuf2gPf+0dlqaKdQmn1s4cdxr0+iqiCXR+furq6sc7rYPf6SRrRxpdyAf89cLW7oFcpXdn3hspJEqvZC7Wd0OlLYZGdU6A6wN6Gd1Fg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
- dkim=pass header.d=nvidia.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+p6nG3kPSl+4+8AQOLFlHL/hfyMc7R+DO34PRO5plDw=;
- b=LLeSWfiOz2LBiJdTEhJNpvpnhFunZNVbsoixbyFiJdRHtBPKhmbZY1iqi55qESXvABrBoq974rlCkd3F07a+wfkNR8W8mpm2A+1TwvAdLYS7IUzd7O3Y2UZiaGEWXIYpNXclDKbvHFZt3pHdS38kggOpTBQ4o6bDuw+Mdz4x02q0uU+CB4RX52TozwkZhzRyp54k2+2vtcCsgAx9jTXmJGoOaI8YnzKxGw3qNI2CW62q6/udaDlzFOeJ0MgyXVpni7GwB/xnA5M2/xw4uO5gjDj02X+CcUp+BAmaoj54z34dPAo0Ow59sVZqKuB+pboYdf6znHW9O8OEQhjawVTd0w==
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nvidia.com;
-Received: from CHBPR12MB731189.namprd12.prod.outlook.com
- (2603:10b6:610:33d::12) by CH3PR12MB8993.namprd12.prod.outlook.com
- (2603:10b6:610:17b::16) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.546.22; Tue, 27 Oct
- 2026 15:40:59 +0000
-Received: from CHBPR12MB731189.namprd12.prod.outlook.com
- ([fe80::b0e5:123d:fe06:e10d]) by CHBPR12MB731189.namprd12.prod.outlook.com
- ([fe80::b0e5:123d:fe06:e10d%6]) with mapi id 15.21.0546.021; Tue, 27 Oct 2026
- 15:40:59 +0000
-Date: Tue, 27 Oct 2026 12:40:58 -0300
-From: Jason Gunthorpe <jgg@nvidia.com>
-To: Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>
-Cc: Alexandre Ghiti <alex@ghiti.fr>, Albert Ou <aou@eecs.berkeley.edu>,
-	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Jonathan Corbet <corbet@lwn.net>, David Sterba <dsterba@suse.com>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-doc@vger.kernel.org, linux-efi@vger.kernel.org,
-	linux-riscv@lists.infradead.org,
-	Mark Rutland <mark.rutland@arm.com>,
-	Palmer Dabbelt <palmer@dabbelt.com>, Paul Walmsley <pjw@kernel.org>,
-	Randy Dunlap <rdunlap@infradead.org>,
-	Simon Glass <sjg@chromium.org>,
-	Shuah Khan <skhan@linuxfoundation.org>,
-	Nick Terrell <terrelln@fb.com>, Will Deacon <will@kernel.org>,
-	Alexandre Ghiti <alexghiti@rivosinc.com>,
-	Conor Dooley <conor.dooley@microchip.com>,
-	linux-integrity@vger.kernel.org,
-	Palmer Dabbelt <palmer@rivosinc.com>, patches@lists.linux.dev,
-	Piotr =?utf-8?B?S3LDs2w=?= <piotr.krol@3mdeb.com>,
-	Ross Philipson <ross.philipson@gmail.com>,
-	Sami Tolvanen <samitolvanen@google.com>,
-	Song Shuai <songshuaishuai@tinylab.org>
-Subject: Re: [PATCH v2 14/15] arm64: drtm: Call UNPROTECT_MEMORY
-Message-ID: <20261027154058.GC2418472@nvidia.com>
-References: <0-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
- <14-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
- <20261021104726.00002640@oss.qualcomm.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261021104726.00002640@oss.qualcomm.com>
-X-ClientProxiedBy: DM6PR02CA0137.namprd02.prod.outlook.com
- (2603:10b6:5:1b4::39) To CHBPR12MB731189.namprd12.prod.outlook.com
- (2603:10b6:610:33d::12)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Luhdb2cJ
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B456A1F01825;
+	Tue, 27 Oct 2026 18:59:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793127560;
+	bh=dQ+cCxuwh8Zl3zbw4eqIfOHayKknJP6gyts2HlafbsQ=;
+	h=Date:From:Cc:To:In-Reply-To:References:Subject;
+	b=Luhdb2cJRg0tQy9wrmxUhuSF4OlugZTomN5BeG4ucjo9tjm5hWhP+JiWmXDmF6ajd
+	 rXTJSDiNxKj0+pXKlZeX15BhG8aIKOE5aISdW0h9BhBhaVIiX042ZYUMuL9isdm0gs
+	 p1XiJFS33DA/WCZCh2cqp0xExWn1cdsAgYFchbxJDJU9yi68zL3G6UWRCFllM39TrF
+	 HE+qsC1FzN/rakkcvbeXTUMXepXqlOmnYcvueLMn2dzdnU7u6K0WMv/BClVAxz9Mgb
+	 r6XzBSW2XaL7JactruIWVXTy0AojaC1d2vRfzo/cfcPGTP97m8At6TN9PyMROMjuFo
+	 nGufISP/pu4/Q==
+Date: Tue, 27 Oct 2026 13:59:16 -0500
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -117,94 +51,94 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CHBPR12MB731189:EE_|CH3PR12MB8993:EE_
-X-MS-Office365-Filtering-Correlation-Id: 4dc8a41d-9990-4fa0-11aa-08df3440b2e1
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|1800799024|376014|23010399003|7416014|261009223027099003|261021121427099003|10067099003|56012099006|261026121527099003|6133799003|22082099003|18002099003|4143699003|11063799006;
-X-Microsoft-Antispam-Message-Info:
-	WYfQwgWB6bwQkl9kW9H+qaXPaHSW5TBrI7lXo3o74dC6JiK8y+2qGMHQum3a7DJH/3GUy4jRpWBsrKOEGQTmATEkrowUIDhI6I/U4QvgqhG6R1qfTlbVUbjp+9ktFnOIr+i89dkrNTpojCshn41dJySpSOgyddn5Nk3bPQUMZhVXEaoXGQJE5Y5hNdk9pt0TK9B8WyD2426SPA4OD9mR+CMYXDXswzxWsuEEbmKCrWKNPDYJ5N1Hdgt9HpuPCHHrpCj2xfGTpVuipEQe7u5rfOro6UelZ0o6EAF2WyyWEpMyMheO6rcBkuAH7RN019hgo7bZzEjbfDiD29Ksp5jUJd5Deh79G+Lcrgkz+d83PvVVW9S8DVywt317hpqWEFryNlxhOu2Rqdbu6g1+22sZExzZNWdtdUr+XLbJXvdMtZdEcls1kMr3ULUMwuORtFJGSSlZDNKFoTYz665LI233f9/Nt3PWy5ITcz5X1zNDcBvGFfd6ERiiYVCjdKOifm1T602RhNVKYUKyS4DPX9ciGr1fBpOz9tZTdbXoFuS4zZHZEyc4WnsOu3A3tB2yflGhNKylxRZ3j7snrgB6IgvnRHrmS0USZIqp1Rp39+DC0N9NYMlWYEsd6U3GwpqKrBxUcVrEXurDI92723VI2F+K90AAqSr4WLCn4tam6iPlFzs=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CHBPR12MB731189.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(23010399003)(7416014)(261009223027099003)(261021121427099003)(10067099003)(56012099006)(261026121527099003)(6133799003)(22082099003)(18002099003)(4143699003)(11063799006);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?ieIOZouIj29AK3ETQ9CRvYw4WbvTSS76ExTfs5WsJV40phZZKdOhAvPZGIGm?=
- =?us-ascii?Q?tsIKx0voDqmKcmtHwPPC4yDaOPEwKmP15mzzqWz7X0j00NomrUKxuiTvvVJd?=
- =?us-ascii?Q?uckGZCPP8OrKSX1EVF2qFznk5BGm3GjHhhgTkBgt8bILto2rl3Ad7FU570Xy?=
- =?us-ascii?Q?jiw2HGSqsyxQ1/Ks2SO8pcG0+i6oSx0WlNigtnRt03YOM8snb6YNGOmYfqaG?=
- =?us-ascii?Q?0QYpw4nZLisGpZmjRLQ9XCfPMgs9S98+sIY4Ldzw/tmUVTrS0TvB8U4jbHv0?=
- =?us-ascii?Q?I2f+BPM7Oit4ZCvqxmDFIrh+I/bIyaEU0uLu8nnOBhWPioc6LiEtvfDnl7Md?=
- =?us-ascii?Q?5NmtgYcGsnDHSsqU+NiEYDPZUXHT6rnfYzxfTQesCwdaLXBJdCY6fn4L3fYe?=
- =?us-ascii?Q?tScZSgh8UYBbhTfpYneKaH080/fxssn6y9qOaCPyZNDllxjz+Oo0AWfSRWy9?=
- =?us-ascii?Q?yclgzUBsHRUAkiq6PZGzsfvJhkyhN1bcBZS5bb7Yr3WgpTM9r4fxdTy4pZqT?=
- =?us-ascii?Q?OuOzlRwUl+j4l0iO2F2/06eJq2XXDeeLEF5NbYpopdjWQZPjSm7OrBXxWt2h?=
- =?us-ascii?Q?t4qd68rLBfZ05M6N0kJNUy5yVLj+Mo2OhNMkUFzJ69xzaMzjbZZEncA/zlXM?=
- =?us-ascii?Q?2CA58wOP+sTuPH9zh9iGXutCaTUtqlQZdwT2aANpjM/lkMWVIVfshUynGaH/?=
- =?us-ascii?Q?KeN6N/f0Bl4b0cOv3A+3QBTVp/ITevzfaoZeiUKslSIdhTugafQVs4O5EkLn?=
- =?us-ascii?Q?mkYHJ7DoS2FPpQ1jdDJrm3Dy+/nrdefWqEioXj4AS8wDfDwwZceaILFbHA7a?=
- =?us-ascii?Q?E/iD9E6vtAQyoFQEZLLjqeIHB81mmySJn8C0H5XfTVi3wftIJ1SsMYeX43C3?=
- =?us-ascii?Q?i5NX02PQWBhUuSlww+/a7vLb1DaTyfl9Umo37zKtyizJqUK8104Xsey/6pA6?=
- =?us-ascii?Q?JriwUvDdbUZN1bKU8QQXCkPDsO8Xja7uGug8ZKYiio8tbrDJw+NcTysVZbwI?=
- =?us-ascii?Q?nYX1AqmQuJ3OWIc28lNBHmyeY6nZ/c0VjxVEDg6Y+xEgzkjQIQNihsHpkfM3?=
- =?us-ascii?Q?uAX9DN6yb1I7EmWKmoq2XPWzLdffpBuVg/tIoX0cbRuYudu+pBEUvMZzsCgY?=
- =?us-ascii?Q?vy7nsppkmQP4WyouFO3vM4oSklkoR7jkrID2KJShlz+fqCffa2o0LdOoVRIK?=
- =?us-ascii?Q?+PSSGdFFkyR3p3YV94SvwBam3AMDI4o5Rd3qFYa3UEsybDffSgyBQ/XETcra?=
- =?us-ascii?Q?FeVd8Meehdh1d5LwBoh1Wk9EV751zPSGrUhtDIIDc2+AZJBChMYj2bxsxfBF?=
- =?us-ascii?Q?7nxCwwt1taDCgtjFIPnz+z+CiuDa7lwOw2HN5vxm+apVs4edK2aRNYim+/GX?=
- =?us-ascii?Q?4BlAtn6EGEm4RysFzmrQFpJZYkeSvWaX2UCyNaD0cIxSK3XEoiUlNvraxmfV?=
- =?us-ascii?Q?0qmfvK5VTdkEV+ZIsyqnhlH/iSozDSbKXaSoUX89FCGJo7naWJauGjrpPs17?=
- =?us-ascii?Q?Hz6Awi8dJwMzAsT1Rzxqtxrnr0qb3OmMdv+J8E09jISkgdmoOIkf7uo2Wzxe?=
- =?us-ascii?Q?IrAhFsKrCEslZ2ZK3VxjPyz/x6C0EMsmZCvHLBd5yktrqZt7hw8ioOlbTGB8?=
- =?us-ascii?Q?fSsHm4ii3ELSp2XX0JIEWYV92QP28rnFwp6iH37QBpb44yoS+HlJzEuVJMoP?=
- =?us-ascii?Q?MxN6ceYei+HmNtqBpElgrhrOWpQl3tTo7XDuWQnxyEKiM0OF?=
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 4dc8a41d-9990-4fa0-11aa-08df3440b2e1
-X-MS-Exchange-CrossTenant-AuthSource: CHBPR12MB731189.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Oct 2026 15:40:59.4300
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: P8uXy90GJwgZWWkj/9pI//nAJntZ4ud4twNrzvhtNFMT7UllTuVPRWEU+HNylLyf
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH3PR12MB8993
+From: "Rob Herring (Arm)" <robh@kernel.org>
+Cc: linux-doc@vger.kernel.org, 
+ Mario Limonciello <mario.limonciello@amd.com>, 
+ Thomas Zimmermann <tzimmermann@suse.de>, 
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+ Conor Dooley <conor+dt@kernel.org>, linux-kernel@vger.kernel.org, 
+ Shuah Khan <skhan@linuxfoundation.org>, 
+ Randy Dunlap <rdunlap@infradead.org>, 
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
+ Helge Deller <deller@gmx.de>, David Airlie <airlied@gmail.com>, 
+ Javier Martinez Canillas <javierm@redhat.com>, 
+ Ard Biesheuvel <ardb@kernel.org>, linux-embedded@vger.kernel.org, 
+ Francesco Valla <francesco@valla.it>, 
+ Jani Nikula <jani.nikula@linux.intel.com>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Peter Jones <pjones@redhat.com>, 
+ linux-fbdev@vger.kernel.org, Jonathan Corbet <corbet@lwn.net>, 
+ Maxime Ripard <mripard@kernel.org>, Simona Vetter <simona@ffwll.ch>, 
+ linux-efi@vger.kernel.org, dri-devel@lists.freedesktop.org, 
+ Sam Ravnborg <sam@ravnborg.org>, Jocelyn Falempe <jfalempe@redhat.com>, 
+ devicetree@vger.kernel.org
+To: =?utf-8?q?M=C3=A0xim_Pedraza_Padilla?= <maximpedraza@gmail.com>
+In-Reply-To: <20261027135342.2003632-8-maximpedraza@gmail.com>
+References: <20261027135342.2003632-1-maximpedraza@gmail.com>
+ <20261027135342.2003632-8-maximpedraza@gmail.com>
+Message-Id: <179312747851.232790.4690032223617337169.robh@kernel.org>
+Subject: Re: [PATCH v6 07/15] dt-bindings: display: add a boot logo node
+ under /chosen
 
-On Wed, Oct 21, 2026 at 10:47:26AM -0700, Jonathan Cameron wrote:
-> > diff --git a/arch/arm64/kernel/drtm.c b/arch/arm64/kernel/drtm.c
-> > index 14493948a27f0d..6062980a5d9e53 100644
-> > --- a/arch/arm64/kernel/drtm.c
-> > +++ b/arch/arm64/kernel/drtm.c
-> > @@ -3,8 +3,47 @@
-> >   *
-> >   * Support functions for ARM DEN 0113 "DRTM Architecture for Arm"
-> >   */
-> > +#include <linux/bug.h>
-> >  #include <linux/efi.h>
-> > +#include <linux/init.h>
-> > +#include <linux/printk.h>
-> >  
-> >  #include <asm/drtm.h>
-> >  
-> >  struct arm64_drtm_handoff arm64_drtm_handoff __efi_data_handoff;
-> > +
-> > +static int __init arm64_drtm_unprotect_memory(void)
-> > +{
-> > +	s64 status;
-> > +
-> > +	if (!arm64_drtm_handoff.drtm_enabled)
-> > +		return 0;
-> > +
-> > +	/*
-> > +	 * Currently Linux can only fully support a DRTM implementation that
-> > +	 * relies only the SMMU.
+
+On Tue, 27 Oct 2026 14:53:34 +0100, Màxim Pedraza Padilla wrote:
+> Products built on the same board often differ only in branding. On UEFI
+> systems the firmware hands the operating system its boot logo through
+> the ACPI BGRT; a device tree system has no such table, so today the logo
+> is built into the kernel, and each product needs its own kernel image.
+> With U-Boot's Falcon mode the device tree is the only thing that reaches
+> the kernel, so it is also the only place the logo can come from.
 > 
-> That sentence doesn't parse.  relies on maybe?
+> Add a "logo" node, compatible "boot-logo", under /chosen. It lives
+> there because a logo is configuration handed over by firmware rather
+> than a description of the hardware, as simple-framebuffer nodes already
+> are.
+> 
+> The image is a BMP with 24 bits per pixel and no compression, the
+> format of the BGRT image, so that one file serves the firmware splash,
+> a BMP loaded as firmware and this node alike. It is carried either in
+> a "logo-image" property, which dtc fills in from the file with /incbin/,
+> or in a reserved memory region the bootloader loaded it into, named by
+> "memory-region". Exactly one of the two must be present.
+> 
+> "logo-position" takes -1 on an axis to mean centre on that axis, which
+> is the only way to say it when the device tree does not know the image
+> size, and "logo-offset" is added afterwards. "rotation" is the one of
+> panel-common.yaml, degrees counter clockwise, but turns the image rather
+> than the screen, so position and offset stay in screen pixels. The
+> optional "background-color" goes with the image, since a logo designed
+> for one background looks wrong on another.
+> 
+> Assisted-by: Claude:claude-opus-5-5
+> Signed-off-by: Màxim Pedraza Padilla <maximpedraza@gmail.com>
+> ---
+>  .../bindings/display/boot-logo.yaml           | 156 ++++++++++++++++++
+>  MAINTAINERS                                   |   1 +
+>  2 files changed, 157 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/display/boot-logo.yaml
+> 
 
-Yep
+My bot found errors running 'make dt_binding_check' on your patch:
 
-I'm also going to move this file to drivers/firmware/drtm/arm64.c
+yamllint warnings/errors:
 
-Thanks,
-Jason
+dtschema/dtc warnings/errors:
+Documentation/devicetree/bindings/display/boot-logo.example.dtb: chosen: 'logo' does not match any of the regexes: '^framebuffer', '^pinctrl-[0-9]+$'
+	from schema $id: http://devicetree.org/schemas/chosen.yaml
+
+doc reference errors (make refcheckdocs):
+
+See https://patchwork.kernel.org/project/devicetree/patch/20261027135342.2003632-8-maximpedraza@gmail.com
+
+The base for the series is generally the latest rc1. A different dependency
+should be noted in *this* patch.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit after running the above command yourself. Note
+that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+your schema. However, it must be unset to test all examples with your schema.
+
