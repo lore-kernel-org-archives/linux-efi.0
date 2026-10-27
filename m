@@ -1,47 +1,75 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.167.200
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793007675;
-	b=GXE1SCOOtVkDRmLotGJj8sI9VR8AlRacXgzLul6x/LRzQ9cuEbKnuV1XFbbf3lgQOHu+
-	 ShccIMVgfMb1lMKsFjUGQcyAZzTVAyNSn+s/FL1+ng1Rhdo+3Bx8htdU/sNC3TkNWsntd
-	 t447mJygD1nOLrhbdC+yfAqivltGU+DJKJX6JReULx+rVE6R4YjQ6z6eGpsOwF8ZLUbTd
-	 Sah0qAm2cw3nOb5TiARR04mv4aqrdrUjg+/L+dugOJQX2rVrfmfsPw5dawk4tviPA7jGc
-	 6Lcwe/Vy2IICoQ3pufLO9zCWhFGyKMAcnZpCyntNAvGFvDpa3huFZSOI9gE+UgSH9UQ==
+	t=1793069802;
+	b=pFEYvAiJr2qANTjR7J8MQl5yQw5FxGS0Q35YsoLufLaJOQHzxVUqtLJJXVBuEYKYlgTg
+	 daUJR2aPs97AvL+LXVwyIPL+GMlGm0x7zlVUFwljxMSYeCj1b713bpKzKPV+P0M9tSG6A
+	 wszTq+Qz59HlRdVaraqbvSWUFjqPwbopl2ZFKVXR3dSEXOYCv/LBBw7txPkfMjNXS7/c0
+	 9oztYo8vG4ALEO61O19cwaF+BkjPytycC2vI6uJCGRR9SUolLti7p+bBzEhExGK8toOAI
+	 PKnQLIXvgHc6R8IKDQDBZYUMAzQfiAIcG20KaaUXDYksLkH5qlW9rXUJGQKUsLSIyag==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793007675;
-	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
-	 Subject:To:Cc:References:From:Content-Language:Autocrypt:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding;
-	bh=fmErr11J4yiDe+oqOLxrAHXMe+lgqHj/gW1PNNiv0PY=;
-	b=R+RiHAC8GtzZb4e8+UvCbZ7Pa4QpNPXM/tT9OsvYXUbloTqigPDBGEb6e640/O8EwVHL
-	 WxAHy5x1v67Mqj4eO822ValNvhCB61K3JswqUyqL5Tm0Is3hOuH5mSrONNJ2uvQO3DiLE
-	 lejRDQ8Riav8CnImEjtQsWqeDxCC19ulX9EMwDZXUBTXAuk//dE5uZf5MrFB94q5GYTtZ
-	 b0tsp9LYMTetxgGUinbzEeSalalaHAd6KAQH1lMnqDliF5hyS/ygszNh+rQFSSl+/YjyQ
-	 aH/gevGmDEEVKmWtWJoa+3AxOQk3apsF3NApCunseh4c4OCA6yukg3CEv5R8U/NnU0g==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793069802;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Received:Date:In-Reply-To:
+	 Mime-Version:References:X-Mailer:Message-ID:Subject:From:To:Cc:
+	 Content-Type;
+	bh=GOMxiaMp4kiAv1sy1QvOMscX3P97g6hNx07NHuZ9MZc=;
+	b=HelY6LpX2dMijSbHxvqft+kJOABs7xl6PYZ4w4M3BxtBzxo/90rNCm/AeIvRezeEm8aV
+	 brpLjLkTiG4jsMH/b7l+Mv8U7/UJTGT68CqdwpTyCX5DpHESpE4WlruD5so7hb1sZ+ypE
+	 NTmHA6wNHOm4q2DbktAIralhg7akrZO8+eqFE+SeWWpizzdYMoDznkdXi9m++lVlprs3v
+	 5sFbiD2qm6kP4sd+fLElJzmClA7lc55Z/OCBUX/fS0NNOIfk+Ipt+dWcG2WHN306zNR+b
+	 PDSOIqDB9c3B6fVP8BH4TgP99ygtx9X7JftXEsYZddRCTxKiCWDCAEx4k3I4MDUIl8Q==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hoY+nVJd;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	dmarc=pass header.from=google.com;
+	spf=pass smtp.mailfrom=flex--kevinloughlin.bounces.google.com;
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20251104 header.b=AAry79Vj;
+	arc=none smtp.remote-ip=209.85.167.200
+Received: from mail-oi1-f200.google.com (mail-oi1-f200.google.com [209.85.167.200])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C43B9606A330;
-	Mon, 26 Oct 2026 09:41:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23A94606A31B
+	for <linux-efi@vger.kernel.org>; Tue, 27 Oct 2026 02:56:41 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 23A94606A31B
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--kevinloughlin.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hoY+nVJd
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D56F11F031E2;
-	Mon, 26 Oct 2026 09:41:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793007674;
-	bh=fmErr11J4yiDe+oqOLxrAHXMe+lgqHj/gW1PNNiv0PY=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=hoY+nVJdTpF+bOnGRqA60bqEon5wES0uTDgRThXCOwAPT/eYwNotrJ8PurgaBDBH8
-	 6RTUTlsQSoBeGbuLzwDPLxO6Tg9aX0DzEGmjJzZhajmJdWtdQFKWaGv+iqM+2uBKpu
-	 026t64oG7a4GhVyDaiFRtUzs+QhNWsy1qp4OK/oABUnwArhQHMz6REf23JPiDPpyUt
-	 H3PBDpVbqxeuL8lP8i6Dj/GHiIrypsBVaNKkQxsf+1b7KTZ/1TIdboA/vnbPXaRbcE
-	 n8p/qSrc52pFTkI67KgPo+ShAyE6zmyE2/FC0JJN0+EVo+8neJxNDYKWgRVYf+Oiv/
-	 WBm0YdS18Y/Ng==
-Message-ID: <a6cbfb24-efea-41ef-8f1b-dd2bd160cff4@kernel.org>
-Date: Sun, 25 Oct 2026 13:43:55 +0100
+	dkim=pass (2048-bit key, unprotected) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20251104 header.b=AAry79Vj
+Received: by mail-oi1-f200.google.com with SMTP id 5614622812f47-5384e381fbbso3608996b6e.2
+        for <linux-efi@vger.kernel.org>; Mon, 26 Oct 2026 19:56:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20251104; t=1793069801; x=1793674601; darn=vger.kernel.org;
+        h=content-type:cc:to:from:subject:message-id:references:mime-version
+         :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=GOMxiaMp4kiAv1sy1QvOMscX3P97g6hNx07NHuZ9MZc=;
+        b=AAry79VjZ4pZ2rQbZ0VLmG1my5o4V/Cl3z7uD8i8+UEZi00dNWDWKlx3/krTQlY1Ua
+         plx8zD9ovnp5LHTl5Fd9GQl0XOBLCMkZTVnMobkHFEn2jKV7R4yMGwvSlhhUoDpj0u1l
+         c5+tiiXr+qUU0mTub3oOjmmbmGlT4IprCZxXJQQIMOxQU6W7luUPFGPkymIPBgMluIyU
+         iGd3Vc3P+UAL8M2XGWBnfmgjYwns4A3fOCjcVc9rQyHHqX2HOOi9amT6YIKsOGpO6ulP
+         RXIxJZVQ5d1Q02UljAbJkFQ/iG62F5iT4S5PTHFj+v8abHsBE4T7x4qp61k376UzdJ6A
+         ILUw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1793069801; x=1793674601;
+        h=content-type:cc:to:from:subject:message-id:references:mime-version
+         :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=GOMxiaMp4kiAv1sy1QvOMscX3P97g6hNx07NHuZ9MZc=;
+        b=YKG0UtjcTwMXVFulfEeu43teSRwO/67fE8fE9HenK3Zleqp6dswQkLomPbLpaUBJJw
+         Ve3S3q58AXRTV9qJJ8nCHwaO/kS1tNThG4SrrU1zGvAZOoYTUSxRKFwYlFIWmoLbNchb
+         pyUD0y+czrjzt3Z8kHUuTEgLrlUE6kBlZBxsBZny/Hp2pj6xDL2c3u8AAzR+8jwTJmEk
+         9OUBRxAuRf+Jyt9108okBZyU17j8LXB4CaBYlKH/jZFD1jIm0en9320qDtC6jpKgaRAT
+         cL/R2doFFE+GnKLtkVa8sNXBfTvNAy7wPAcpfo3BFE5PqRQ5bBd7qaOIdcWlsCKQEU7H
+         61QA==
+X-Forwarded-Encrypted: i=1; AKwUvBxd7fzTS2CStO8qQWZtjp0CarPoW4NZ2benV+lxh8E4dDGi+AvSygMgOwzWQtibQcTcebYypkEO97k=@vger.kernel.org
+X-Gm-Message-State: AFq9FYL45qLLmxC9EXjQJAm23Jvfzc6iwbxXSaBdWiQaIUMvUBVGmTKM
+	oqQMniUSBR8i8VOZUwQYScuqz3uU3mnGyhFKMY2P7qMLGKN+eWKQtbuwgskeOdPyu6+xjoGdOXT
+	OnLraoLYuB2v7Kw7yZpnPHaG0iEmd3uLWxw==
+X-Received: from jabhk1.prod.google.com ([2002:a05:6638:8081:b0:61a:c6d0:40f4])
+ (user=kevinloughlin job=prod-delivery.src-stubby-dispatcher) by
+ 2002:a05:6808:148c:b0:4f6:2ccb:c2a with SMTP id 5614622812f47-55c0039eb90mr5670563b6e.68.1793069800756;
+ Mon, 26 Oct 2026 19:56:40 -0700 (PDT)
+Date: Tue, 27 Oct 2026 02:56:04 +0000
+In-Reply-To: <20261027025616.1632690-1-kevinloughlin@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -50,184 +78,344 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mm: ppm: add PPM (Page-Plugger Under Memory) to Page
- Fault and Overcommit elimination
-To: dev12124 <joaoanandalima@gmail.com>, linux-mm@kvack.org
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-doc@vger.kernel.org, ardb@kernel.org, keescook@chromium.org
-References: <20261024104552.394-1-joaoanandalima@gmail.com>
-From: "David Hildenbrand (Arm)" <david@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=david@kernel.org; keydata=
- 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
- qIws/H2t
-In-Reply-To: <20261024104552.394-1-joaoanandalima@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Mime-Version: 1.0
+References: <20261027025616.1632690-1-kevinloughlin@google.com>
+X-Mailer: git-send-email 2.56.0.307.g5fe7bd680c-goog
+Message-ID: <20261027025616.1632690-2-kevinloughlin@google.com>
+Subject: [PATCH 01/13] virtio_ring: support per-virtqueue DMA mapping ops
+From: Kevin Loughlin <kevinloughlin@google.com>
+To: "Michael S. Tsirkin" <mst@redhat.com>, David Hildenbrand <david@kernel.org>, Jason Wang <jasowangio@gmail.com>, 
+	"=?UTF-8?q?Eugenio=20P=C3=A9rez?=" <eperezma@redhat.com>, Xuan Zhuo <xuanzhuo@linux.alibaba.com>, 
+	Ard Biesheuvel <ardb@kernel.org>, Kiryl Shutsemau <kas@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
+	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, 
+	"H. Peter Anvin" <hpa@zytor.com>, Tom Lendacky <thomas.lendacky@amd.com>, 
+	Ashish Kalra <ashish.kalra@amd.com>, Michael Roth <michael.roth@amd.com>, 
+	Rick Edgecombe <rick.p.edgecombe@intel.com>, Andrew Morton <akpm@linux-foundation.org>, 
+	Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>, 
+	Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>, 
+	Brendan Jackman <brendan.jackman@linux.dev>, Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>, 
+	Alexander Duyck <alexanderduyck@fb.com>
+Cc: virtualization@lists.linux.dev, linux-coco@lists.linux.dev, 
+	linux-efi@vger.kernel.org, linux-mm@kvack.org, linux-kernel@vger.kernel.org, 
+	Sidharth Telang <sidtelang@google.com>, Punit Salian <psalian@google.com>, 
+	Peter Gonda <pgonda@google.com>, Ackerley Tng <ackerleytng@google.com>, 
+	Jacky Li <jackyli@google.com>, Steve Rutherford <srutherford@google.com>, 
+	David Skidmore <davidskidmore@google.com>, Kevin Loughlin <kevinloughlin@google.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On 10/24/26 12:45, dev12124 wrote:
-> Hi mm subsystem,
+Allow individual virtqueues to override the device-wide DMA mapping
+operations via virtqueue_set_map_ops(). When custom per-virtqueue
+mapping operations are configured, vring_map_one_sg(), vring_unmap_one(),
+vring_mapping_error(), and the DMA sync helpers dispatch through
+vq->map_ops instead of the parent virtio_device DMA API path.
 
-Hi,
+Replace vring_map_single() with vring_map_indirect() and
+vring_unmap_indirect() using the device-level mapping path (vdev->map
+or dma_map_page_attrs()) so that indirect descriptor tables continue to
+be DMA-mapped for host VMM access even when a virtqueue overrides buffer
+mapping via vq->map_ops.
 
-> 
-> This patch implements the Memory Tatic called PPM, Page-Plugger Under Memory.
-> The Main Objective is: Page Faults and Overcommit Elimination.
-> 
-> A few points under additionate:
-> 
-> 1. Allocation Handshake (ppm_kalloc):
-> Using the GFP_PLUG_MEMORY mask, the allocator completely bypasses
-> passive overcommit verification. It instantly isolates physical frames
-> on the RAM, maps the page table entries síncronamente, and forces the
-> Present Bit and Writable Bit to 1 before returning the address block
-> register to the CPU.
-> 
-> 2. Desallocation Cleanup (ppm_kfree):
-> Triggered via the GFP_FREE_T parameter, the release phase executes an
-> immediate length truncation to 0. It forces a synchronous TLB
-> invalidation (via invlpg execution) and flushes the data out of the L3
-> cache lines using clflushopt instructions before moving the hot clean
-> pages into a dedicated priority recycling pool.
-> 
-> I additionate a Buffer/Cache with store important objects.
+Signed-off-by: Kevin Loughlin <kevinloughlin@google.com>
+---
+ drivers/virtio/virtio_ring.c | 136 ++++++++++++++++++++++++-----------
+ include/linux/virtio.h       |   4 ++
+ 2 files changed, 98 insertions(+), 42 deletions(-)
 
-Reading this description I have no idea what this patch does, what it tries to
-solve, and why anybody should spend their time to look into it.
-
-> ---
->  include/linux/ppm/gfp_types.h |  74 ++++++++++++++++
->  include/linux/slab.h          |  11 +++
->  mm/memory.c                   | 158 ++++++++++++++++++++++++++++++++++
->  3 files changed, 243 insertions(+)
->  create mode 100644 include/linux/ppm/gfp_types.h
-> 
-> diff --git a/include/linux/ppm/gfp_types.h b/include/linux/ppm/gfp_types.h
-> new file mode 100644
-> index 000000000..741122b2d
-> --- /dev/null
-> +++ b/include/linux/ppm/gfp_types.h
-> @@ -0,0 +1,74 @@
-> +/* 
-> +  Memory Tatic: PPM (Page-Plugger Under Memory).
-> +  This File is for PPM Flags/Macros/Functions/Types.
-> +  Engineer (brazilian): João Guilherme da Silva Freitas Lima <joanandalima@gmail.com>
-> + */
-> +
-> +/* Types Include Guards */
-> +#ifndef __PPM_TYPES_MEMORY 
-> +#define __PPM_TYPES_MEMORY 
-> +
-> +typedef unsigned char uint8_t;
-> +typedef unsigned short uint16_t;
-> +typedef unsigned int uint32_t;
-> +typedef unsigned long long uint64_t;
-> +typedef uint64_t gfp_t;
-> +/* For errors in Allocation */
-> +#define __PPM_ALLOC_ERROR -102
-> +/* For errors in Desallocation */
-> +#define __PPM_FREE_ERROR 0x04 
-> +/* For success */
-> +#define __PPM_SUCCESS 0
-> +#endif
-> +
-> +/* Functions Include Guards */
-> +#ifndef __PPM_FUNCTIONS_MEMORY
-> +#define __PPM_FUNCTIONS_MEMORY 
-> +
-> +/* Initializer */
-> +void __init_ppm_memory();
-> +
-> +/* Allocator Optimized */
-> +int ppm_kalloc(unsigned long address, uint64_t size, gfp_t flags);
-> +
-> +/* Desallocator Optimized */
-> +int ppm_kfree(uint64_t size);
-> +
-> +#endif
-> +
-> +/* Flags Include Guards */
-> +#ifndef __PPM_FLAGS_MEMORY 
-> +#define __PPM_FLAGS_MEMORY
-> +
-> +/* PPM inits/starts in Bit 54 of a 
-> +   64-bit variable 
-> + */
-> +gfp_t GFP_PLUG_MEMORY = (1ULL << 54); 
-> +
-> +/* For free memory, the Bit 55 is 
-> +   used 
-> + */
-> +gfp_t GFP_FREE_T = (1ULL << 55);
-> +
-> +#endif 
-> +
-> +/* Macros Include Guards */
-> +#ifndef __PPM_MACROS_MEMORY
-> +#define __PPM_MACROS_MEMORY
-> +
-> +/* For Kernel Kernel tests 2 Bits (54 and 55) in 
-> +  1 Clock Cycle (or in small clocks, example: 5 Clocks), 
-> +  is used a mask using | 
-> + */
-> +gfp_t GFP_MASK = GFP_PLUG_MEMORY | GFP_FREE_T;
-> +
-> +#endif
-> +
-> +/* 
-> +  Notes:
-> +    E-Mail of RFC:
-> +        [RFC] mm: page-fault: overcommit: PPM (Page-Plugger Under Memory)
-> +    
-> +    
-> +    Assigned-Off-by: João <joanandalima@gmail.com>
-
-I don't know if I am supposed to laugh or cry ;)
-
+diff --git a/drivers/virtio/virtio_ring.c b/drivers/virtio/virtio_ring.c
+index db678f5a80e0..9c6a1e9f0a0b 100644
+--- a/drivers/virtio/virtio_ring.c
++++ b/drivers/virtio/virtio_ring.c
+@@ -261,6 +261,7 @@ struct vring_virtqueue {
+ 	bool we_own_ring;
+ 
+ 	union virtio_map map;
++	const struct virtio_map_ops *map_ops;
+ 
+ #ifdef DEBUG
+ 	/* They're supposed to lock for us. */
+@@ -477,16 +478,32 @@ static struct device *vring_dma_dev(const struct vring_virtqueue *vq)
+ 	return vq->map.dma_dev;
+ }
+ 
++static inline const struct virtio_map_ops *vring_get_map_ops(const struct vring_virtqueue *vq)
++{
++	if (vq->map_ops)
++		return vq->map_ops;
++	return vq->vq.vdev->map;
++}
++
++void virtqueue_set_map_ops(struct virtqueue *_vq,
++			   const struct virtio_map_ops *map_ops)
++{
++	struct vring_virtqueue *vq = to_vvq(_vq);
++
++	vq->map_ops = map_ops;
++}
++EXPORT_SYMBOL_GPL(virtqueue_set_map_ops);
++
+ static int vring_mapping_error(const struct vring_virtqueue *vq,
+ 			       dma_addr_t addr)
+ {
+-	struct virtio_device *vdev = vq->vq.vdev;
++	const struct virtio_map_ops *map_ops = vring_get_map_ops(vq);
+ 
+ 	if (!vq->use_map_api)
+ 		return 0;
+ 
+-	if (vdev->map)
+-		return vdev->map->mapping_error(vq->map, addr);
++	if (map_ops)
++		return map_ops->mapping_error(vq->map, addr);
+ 	else
+ 		return dma_mapping_error(vring_dma_dev(vq), addr);
+ }
+@@ -530,15 +547,45 @@ static int vring_map_one_sg(const struct vring_virtqueue *vq, struct scatterlist
+ 	return 0;
+ }
+ 
+-static dma_addr_t vring_map_single(const struct vring_virtqueue *vq,
+-				   void *cpu_addr, size_t size,
+-				   enum dma_data_direction direction)
++static int vring_map_indirect(const struct vring_virtqueue *vq, void *cpu_addr,
++			      size_t size, dma_addr_t *addr)
+ {
+-	if (!vq->use_map_api)
+-		return (dma_addr_t)virt_to_phys(cpu_addr);
++	struct virtio_device *vdev = vq->vq.vdev;
++
++	if (!vq->use_map_api) {
++		kmsan_handle_dma(virt_to_phys(cpu_addr), size, DMA_TO_DEVICE);
++		*addr = (dma_addr_t)virt_to_phys(cpu_addr);
++		return 0;
++	}
++
++	if (vdev->map) {
++		*addr = vdev->map->map_page(vq->map, virt_to_page(cpu_addr),
++					    offset_in_page(cpu_addr), size,
++					    DMA_TO_DEVICE, 0);
++		if (vdev->map->mapping_error(vq->map, *addr))
++			return -ENOMEM;
++		return 0;
++	}
++
++	*addr = dma_map_page_attrs(vring_dma_dev(vq), virt_to_page(cpu_addr),
++				   offset_in_page(cpu_addr), size,
++				   DMA_TO_DEVICE, 0);
++	if (dma_mapping_error(vring_dma_dev(vq), *addr))
++		return -ENOMEM;
+ 
+-	return virtqueue_map_single_attrs(&vq->vq, cpu_addr,
+-					  size, direction, 0);
++	return 0;
++}
++
++static void vring_unmap_indirect(const struct vring_virtqueue *vq,
++				 dma_addr_t addr, size_t size)
++{
++	struct virtio_device *vdev = vq->vq.vdev;
++
++	if (vdev->map)
++		vdev->map->unmap_page(vq->map, addr, size, DMA_TO_DEVICE, 0);
++	else
++		dma_unmap_page_attrs(vring_dma_dev(vq), addr, size,
++				     DMA_TO_DEVICE, 0);
+ }
+ 
+ static void virtqueue_init(struct vring_virtqueue *vq, u32 num)
+@@ -576,6 +623,8 @@ static unsigned int vring_unmap_one_split(const struct vring_virtqueue *vq,
+ 	if (flags & VRING_DESC_F_INDIRECT) {
+ 		if (!vq->use_map_api)
+ 			goto out;
++		vring_unmap_indirect(vq, extra->addr, extra->len);
++		goto out;
+ 	} else if (!vring_need_unmap_buffer(vq, extra))
+ 		goto out;
+ 
+@@ -761,10 +810,11 @@ static inline int virtqueue_add_split(struct vring_virtqueue *vq,
+ 
+ 	if (indirect) {
+ 		/* Now that the indirect table is filled in, map it. */
+-		dma_addr_t addr = vring_map_single(
+-			vq, desc, total_sg * sizeof(struct vring_desc),
+-			DMA_TO_DEVICE);
+-		if (vring_mapping_error(vq, addr))
++		dma_addr_t addr;
++
++		if (vring_map_indirect(vq, desc,
++				       total_sg * sizeof(struct vring_desc),
++				       &addr))
+ 			goto unmap_release;
+ 
+ 		virtqueue_add_desc_split(vq, vq->split.vring.desc,
+@@ -1370,6 +1420,7 @@ static struct virtqueue *__vring_new_virtqueue_split(unsigned int index,
+ #endif
+ 	vq->map = map;
+ 	vq->use_map_api = vring_use_map_api(vdev);
++	vq->map_ops = NULL;
+ 
+ 	vq->indirect = virtio_has_feature(vdev, VIRTIO_RING_F_INDIRECT_DESC) &&
+ 		!context;
+@@ -1488,6 +1539,8 @@ static void vring_unmap_extra_packed(const struct vring_virtqueue *vq,
+ 	if (flags & VRING_DESC_F_INDIRECT) {
+ 		if (!vq->use_map_api)
+ 			return;
++		vring_unmap_indirect(vq, extra->addr, extra->len);
++		return;
+ 	} else if (!vring_need_unmap_buffer(vq, extra))
+ 		return;
+ 
+@@ -1585,10 +1638,9 @@ static int virtqueue_add_indirect_packed(struct vring_virtqueue *vq,
+ 	}
+ 
+ 	/* Now that the indirect table is filled in, map it. */
+-	addr = vring_map_single(vq, desc,
+-			total_sg * sizeof(struct vring_packed_desc),
+-			DMA_TO_DEVICE);
+-	if (vring_mapping_error(vq, addr))
++	if (vring_map_indirect(vq, desc,
++			       total_sg * sizeof(struct vring_packed_desc),
++			       &addr))
+ 		goto unmap_release;
+ 
+ 	vq->packed.vring.desc[head].addr = cpu_to_le64(addr);
+@@ -2620,6 +2672,7 @@ static struct virtqueue *__vring_new_virtqueue_packed(unsigned int index,
+ #endif
+ 	vq->map = map;
+ 	vq->use_map_api = vring_use_map_api(vdev);
++	vq->map_ops = NULL;
+ 
+ 	vq->indirect = virtio_has_feature(vdev, VIRTIO_RING_F_INDIRECT_DESC) &&
+ 		!context;
+@@ -3064,7 +3117,7 @@ struct device *virtqueue_dma_dev(struct virtqueue *_vq)
+ {
+ 	struct vring_virtqueue *vq = to_vvq(_vq);
+ 
+-	if (vq->use_map_api && !_vq->vdev->map)
++	if (vq->use_map_api && !vring_get_map_ops(vq))
+ 		return vq->map.dma_dev;
+ 	else
+ 		return NULL;
+@@ -3809,18 +3862,17 @@ EXPORT_SYMBOL_GPL(virtqueue_map_free_coherent);
+  */
+ dma_addr_t virtqueue_map_page_attrs(const struct virtqueue *_vq,
+ 				    struct page *page,
+-				    unsigned long offset,
+-				    size_t size,
++				    unsigned long offset, size_t size,
+ 				    enum dma_data_direction dir,
+ 				    unsigned long attrs)
+ {
+ 	const struct vring_virtqueue *vq = to_vvq(_vq);
+-	struct virtio_device *vdev = _vq->vdev;
++	const struct virtio_map_ops *map_ops = vring_get_map_ops(vq);
+ 
+-	if (vdev->map)
+-		return vdev->map->map_page(vq->map,
+-					   page, offset, size,
+-					   dir, attrs);
++	if (map_ops)
++		return map_ops->map_page(vq->map,
++					 page, offset, size,
++					 dir, attrs);
+ 
+ 	return dma_map_page_attrs(vring_dma_dev(vq),
+ 				  page, offset, size,
+@@ -3842,11 +3894,11 @@ void virtqueue_unmap_page_attrs(const struct virtqueue *_vq,
+ 				unsigned long attrs)
+ {
+ 	const struct vring_virtqueue *vq = to_vvq(_vq);
+-	struct virtio_device *vdev = _vq->vdev;
++	const struct virtio_map_ops *map_ops = vring_get_map_ops(vq);
+ 
+-	if (vdev->map)
+-		vdev->map->unmap_page(vq->map,
+-				      map_handle, size, dir, attrs);
++	if (map_ops)
++		map_ops->unmap_page(vq->map,
++				    map_handle, size, dir, attrs);
+ 	else
+ 		dma_unmap_page_attrs(vring_dma_dev(vq), map_handle,
+ 				     size, dir, attrs);
+@@ -3941,13 +3993,13 @@ EXPORT_SYMBOL_GPL(virtqueue_map_mapping_error);
+ bool virtqueue_map_need_sync(const struct virtqueue *_vq, dma_addr_t addr)
+ {
+ 	const struct vring_virtqueue *vq = to_vvq(_vq);
+-	struct virtio_device *vdev = _vq->vdev;
++	const struct virtio_map_ops *map_ops = vring_get_map_ops(vq);
+ 
+ 	if (!vq->use_map_api)
+ 		return false;
+ 
+-	if (vdev->map)
+-		return vdev->map->need_sync(vq->map, addr);
++	if (map_ops)
++		return map_ops->need_sync(vq->map, addr);
+ 	else
+ 		return dma_need_sync(vring_dma_dev(vq), addr);
+ }
+@@ -3971,14 +4023,14 @@ void virtqueue_map_sync_single_range_for_cpu(const struct virtqueue *_vq,
+ 					     enum dma_data_direction dir)
+ {
+ 	const struct vring_virtqueue *vq = to_vvq(_vq);
+-	struct virtio_device *vdev = _vq->vdev;
++	const struct virtio_map_ops *map_ops = vring_get_map_ops(vq);
+ 
+ 	if (!vq->use_map_api)
+ 		return;
+ 
+-	if (vdev->map)
+-		vdev->map->sync_single_for_cpu(vq->map,
+-					       addr + offset, size, dir);
++	if (map_ops)
++		map_ops->sync_single_for_cpu(vq->map,
++					     addr + offset, size, dir);
+ 	else
+ 		dma_sync_single_range_for_cpu(vring_dma_dev(vq),
+ 					      addr, offset, size, dir);
+@@ -4002,15 +4054,15 @@ void virtqueue_map_sync_single_range_for_device(const struct virtqueue *_vq,
+ 						enum dma_data_direction dir)
+ {
+ 	const struct vring_virtqueue *vq = to_vvq(_vq);
+-	struct virtio_device *vdev = _vq->vdev;
++	const struct virtio_map_ops *map_ops = vring_get_map_ops(vq);
+ 
+ 	if (!vq->use_map_api)
+ 		return;
+ 
+-	if (vdev->map)
+-		vdev->map->sync_single_for_device(vq->map,
+-						  addr + offset,
+-						  size, dir);
++	if (map_ops)
++		map_ops->sync_single_for_device(vq->map,
++						addr + offset,
++						size, dir);
+ 	else
+ 		dma_sync_single_range_for_device(vring_dma_dev(vq), addr,
+ 						 offset, size, dir);
+diff --git a/include/linux/virtio.h b/include/linux/virtio.h
+index f923e42cfd01..20fe333d6778 100644
+--- a/include/linux/virtio.h
++++ b/include/linux/virtio.h
+@@ -44,6 +44,7 @@ struct virtqueue {
+ };
+ 
+ struct vduse_vq_group;
++struct virtio_map_ops;
+ 
+ union virtio_map {
+ 	/* Device that performs DMA */
+@@ -294,6 +295,9 @@ void virtqueue_map_free_coherent(struct virtio_device *vdev,
+ 				 size_t size, void *vaddr,
+ 				 dma_addr_t dma_handle);
+ 
++void virtqueue_set_map_ops(struct virtqueue *_vq,
++			   const struct virtio_map_ops *map_ops);
++
+ dma_addr_t virtqueue_map_page_attrs(const struct virtqueue *_vq,
+ 				    struct page *page,
+ 				    unsigned long offset,
 -- 
-Cheers,
+2.56.0.307.g5fe7bd680c-goog
 
-David
