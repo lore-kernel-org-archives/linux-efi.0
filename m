@@ -1,47 +1,47 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793177951;
-	b=XWERHlRUEwwB2Hm+AtvHDDY9l5ZRpLy9uTf0FNLosXndUbtQaI9gKEPElZGxLVD2KiDi
-	 G1Fc+H2u9M95IHRz3V8zyBj6njxWWyBiRjQlO+DCUp3toMDPduq+zHFthpshABoAjAnqc
-	 urehBVRUezvKGiZ/HJg3D8Zfq85SJ/rHGGnKoQcUfImj7Bi8O6lfzamtqLH51oZmcsfkW
-	 Kw48aotQqgQIblKmAcX3GQlESjCckVSE2M5u1etIZimflkALWtd9uZLJDTnCFDCpdy3aK
-	 22rcDk+5xDnvTZ4N74/4iLcKP954Pz+fexuWFv4zUY78mSFUK1oXBx2UQ3tkte0bZpQ==
+	t=1793178069;
+	b=Kno3sxq3rdNSamVaAxpFmR7CP/ZddnUVvJ7yL4x8j8os0EjpKYpG5zcxL7tNe0GH6EkJ
+	 atvh/JIk71abC6QpY1zy5DcH+qE3e8m+HZTYy73rQH5gS6IQZlAlz8uZmIJHAuU4P/egb
+	 m6HM3ekyV7BHmDOkrWicTT0jYxWcnZ0rK6ce6DSJAxfWA91j00cYGlgEeTppFWLVsWB3E
+	 AVKb75xeLafEpaKVKEEgjo+QfS4Ppc2V/gEQz8cT6yvGzs0iZEkb1G6c9CW3RrLSdCqIE
+	 I9lh17Ntsa6v9TtWD+0f0HNwl6bCX24nzPWpYTUVd4vf8DOSdIPMt5XUxYD3H4BZhqQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793177951;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793178069;
 	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
 	 Subject:To:Cc:References:From:Content-Language:Autocrypt:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=i9qOtY7a0khzZp+2JUyiQcNdwBewsSehqHZrdYTNXPA=;
-	b=ykOaqkMuZflWdplabZhceEISyqreZ4zCuihkAIQwd7BsEWHK7qJkEkUjFP6ia2ZSWUW+
-	 hAOfqfZucAt74sKlQqz9G6vjHQ+ifPK0DKBPnWUgrOvoI/YiIGK6fTS4pUklq/lsAlauz
-	 dbd+9HJ0w9P7y+wQHNWPh3SOVkVGo6ezUrA/NqVlNQvirwCWXovKzXqgoIdy/en73cio1
-	 V4IAf5/G0LUJQ3i4m9dB6/9um7mqU8IafEZ3MAQbS+GkswIetc7rzNxdnDt9ho1sGUVLx
-	 8Pc4U6ej33/JvBiE+G+cKj+jIECreKQw5wrTmQjsy4VhssClLd/yFZ1DCnzv8rJjdkg==
+	bh=R5wr0if4ae6etOqOYy2puT3KmtBxIJiRCgooahnyzco=;
+	b=1POexTvxu5peTraAzbKKR4MCEU/gm5yrotbSoZo4fR60PKFIthRSBfzxdrF//Ykfox+u
+	 k5U+mqJj/m5OR6Lgwye2PLLXtGawHbLh2Y1k84eXskU5cSItoCq5b66/amPNGMYLmG/0S
+	 R9awA2cVFBjyYh8wi3UKz4exUe/lAcXaE7sSrTAkR2oEUQ9nfNCCESOaveJpQsWW7jfMz
+	 PsjxR0ARmG4w9tG9vUH0637mhBQhunsjtLK9jvTI1ZscQaMZY0IoNK/t9p7xf3RqJcLi4
+	 pLysPp+n+iOgMxa6JIfwhu4Ourmmgsw6ESeknNaDg9vhI0IXo1nZgQojG9aQh2HXGsg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=n9uz2qBx;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=gzxSbj9g;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACB30606A31A;
-	Wed, 28 Oct 2026 08:59:10 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6827A606A31A;
+	Wed, 28 Oct 2026 09:01:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=n9uz2qBx
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 95DD01F01825;
-	Wed, 28 Oct 2026 08:59:02 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=gzxSbj9g
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 33AE21F01825;
+	Wed, 28 Oct 2026 09:01:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793177950;
-	bh=i9qOtY7a0khzZp+2JUyiQcNdwBewsSehqHZrdYTNXPA=;
+	s=k20260515; t=1793178069;
+	bh=R5wr0if4ae6etOqOYy2puT3KmtBxIJiRCgooahnyzco=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=n9uz2qBxwkdOt+BBYDqcRYBsL0H4V2Ug9Ow5tu7fLk3/xzx2mxzf+HMTVGUiIJnbu
-	 UHfvtxmIjhY+xQ766vsmgwePsLiGx8kAmPZPlD4WCnC+4rJaxzKpjDf8l/PxSRuS7U
-	 ixLAvMeOxeiUvefXEFI/jfC9xp7ljf7OTppVYZjzY1dNcHcmh1NZWDF2vGHdc49hWv
-	 uTT0NSrtYNOYOcDppWH6dHgfZpTd171QUNIp7WpPs8lDGkcfpOKXPATlxU3qiH1ANx
-	 V+qfMdLsle8HqlqWD8gAGSfEwjudq/PMbS1R0zs9PPUAGsrYy40er4yK4lQU4aDgLA
-	 HllBmwshL59LQ==
-Message-ID: <2976bc2d-2642-4448-9c1f-ec13e67e45d5@kernel.org>
-Date: Wed, 28 Oct 2026 09:58:59 +0100
+	b=gzxSbj9g/L8dIM/Z9ZCKHBBWWjg3GQ5Pvl/B5ss+vAH76KF8/PhGk1dpgDiRbXFC1
+	 H2ityu3ASdu+2cdnEDMuFjbHfPVqep29gXZtqdbdl/Ey8cQOE0eZr3Ialo+zTRc+Z6
+	 BI0muSRnXfNXEU+tuoQGSZxWLm3IXexoLjucgsc2XnL5hT6/90eQxpuwvl6t5zPNOb
+	 VUItlXz5psLqiRVgAPCYEkB27MqQmqhzANZtA0Z7M2UOGFEmjdPsTWHDclbPNUSXjg
+	 xTPgu1yDpAoejTsURH+8G9NuIwJ1cOnB2ITDtnB2NiulVDurOMRka9lvx9gWIUz4/Q
+	 rnWE2Mi1GUNig==
+Message-ID: <279a92da-772c-422b-8047-ad37dbae211f@kernel.org>
+Date: Wed, 28 Oct 2026 10:00:58 +0100
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -52,7 +52,8 @@ List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 10/13] virtio_balloon: add higher-order page inflation
+Subject: Re: [PATCH 00/13] virtio_balloon, efi/unaccepted: support memory
+ ballooning and free page reporting in CoCo guests
 To: Kevin Loughlin <kevinloughlin@google.com>,
  "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowangio@gmail.com>,
  =?UTF-8?Q?Eugenio_P=C3=A9rez?= <eperezma@redhat.com>,
@@ -76,7 +77,6 @@ Cc: virtualization@lists.linux.dev, linux-coco@lists.linux.dev,
  Jacky Li <jackyli@google.com>, Steve Rutherford <srutherford@google.com>,
  David Skidmore <davidskidmore@google.com>
 References: <20261027025616.1632690-1-kevinloughlin@google.com>
- <20261027025616.1632690-11-kevinloughlin@google.com>
 From: "David Hildenbrand (Arm)" <david@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=david@kernel.org; keydata=
@@ -123,29 +123,180 @@ Autocrypt: addr=david@kernel.org; keydata=
  3iyY2Nsd7JxfKu1PRhCGwXzRw5TlfEsoRI7V9A8isUCoqE2Dzh3FvYHVeX4Us+bRL/oqareJ
  CIFqgYMyvHj7Q06kTKmauOe4Nf0l0qEkIuIzfoLJ3qr5UyXc2hLtWyT9Ir+lYlX9efqh7mOY
  qIws/H2t
-In-Reply-To: <20261027025616.1632690-11-kevinloughlin@google.com>
+In-Reply-To: <20261027025616.1632690-1-kevinloughlin@google.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 10/27/26 03:56, Kevin Loughlin wrote:
-> In confidential computing guests requiring page state transitions,
-> unaccepted memory tracking operates at the EFI unaccepted memory unit
-> granularity (typically 2MB / order 9 on x86). Inflating the balloon
-> with 4KB pages would prevent unaccepting the backing 2MB unit.
+> This series enables virtio-balloon free page reporting and memory balloon
+> inflation/deflation in Confidential Computing (CoCo) guests, starting
+> with architectural hooks implemented for AMD SEV variants, in order to
+> support dynamic CoCo guest resizing.
 > 
-> Inflate balloon pages at unaccepted_memory_order() when
-> virtballoon_cc_needs_state_transition() is true, while retaining
-> order-0 allocations for non-CoCo guests and CoCo guests that do not
-> use unaccepted memory transitions. When a higher-order balloon page
-> spans more 4KB balloon PFNs than VIRTIO_BALLOON_ARRAY_PFNS_MAX (256),
-> transmit its PFNs to the host in VIRTIO_BALLOON_ARRAY_PFNS_MAX chunks.
+> Today, memory ballooning and free page reporting are essentially unusable
+> in CoCo guests due to three main roadblocks:
 > 
-> Signed-off-by: Kevin Loughlin <kevinloughlin@google.com>
+> 1. SWIOTLB Bounce-Buffering on Free Page Reporting:
+>    Under VIRTIO_F_ACCESS_PLATFORM, virtqueue_add_inbuf() maps every
+>    scatterlist entry through the DMA API. For reporting_vq, these are
+>    multi-megabyte ranges of free buddy pages. The host never DMA-reads
+>    or writes the page contents; it only inspects the GPA to punch holes
+>    in backing memory. Running these ranges through SWIOTLB exhausts
+>    bounce buffer pools and wastes cycles copying gigabytes of
+>    unencrypted free memory.
+> 
+> 2. Dynamic Memory Unacceptance & Re-acceptance:
+>    When the host reclaims guest physical pages via hole punching,
+>    the guest must transition those GPAs back to unaccepted/shared before
+>    the host reclaims them (rescinding PVALIDATE and issuing a GHCB Page
+>    State Change on SEV-SNP). Otherwise, any subsequent access triggers a
+>    fatal #NPF or #VC. While the EFI unaccepted memory subsystem handles
+>    boot-time lazy acceptance, it lacks an API or state tracking to
+>    dynamically unaccept memory at runtime or route unaccepted freed
+>    pages in the page allocator.
+> 
+> 3. Acceptance Granularity (2 MiB) vs. Balloon Pages (4 KiB):
+>    On x86, the EFI unaccepted memory bitmap tracks state at 2 MiB
+>    (PMD_ORDER) granularity both to keep the bitmap compact and for
+>    performance: accepting and unaccepting in 2 MiB blocks preserves
+>    2 MiB host hugepage mappings (NPT/RMP on SEV-SNP and Secure EPT on
+>    TDX), avoids 512x per-4 KiB page state transition and validation
+>    overhead, and prevents RMP/SEPT size-mismatch splits. Because a
+>    2 MiB bitmap unit cannot be partially unaccepted, CoCo free page
+>    reporting and balloon inflation require 2 MiB blocks and do not
+>    fall back to 4 KiB allocations (though low-level PVALIDATE still
+>    falls back to 4 KiB instructions if the host RMP entry was already
+>    split). Standard virtio-balloon allocates 4 KiB pages and caps its
+>    PFN array at 256 PFNs (1 KiB descriptor), so CoCo guests must
+>    allocate 2 MiB compound pages while streaming PFNs in 256-PFN chunks
+>    to respect existing VMM descriptor limits (such as QEMU's 1024-byte
+>    cap).
+> 
+>    As a trade-off of requiring 2 MiB blocks rather than 4 KiB pages,
+>    the effectiveness of balloon inflation/deflation in CoCo guests
+>    depends on guest memory not being overly fragmented (which guest
+>    kernel command-line options like movablecore / ZONE_MOVABLE or
+>    background compaction can help mitigate). Even when unmovable
+>    allocations fragment some pageblocks, free page reporting already
+>    operates at this same 2 MiB (pageblock_order) granularity on x86_64
+>    and continues to reclaim contiguous free blocks opportunistically.
+> 
+> Key Design Elements in This Series
+> ==================================
+> - Per-virtqueue DMA map ops (Patches 1-2):
+>   Extends virtio_ring to allow individual virtqueues to install custom
+>   struct virtio_map_ops. For reporting_vq, virtio_balloon installs a
+>   no-op GPA identity mapper so free page ranges are passed directly
+>   without SWIOTLB bounce buffers, while keeping the descriptor ring and
+>   any indirect descriptor tables securely mapped via the device-level
+>   DMA API.
+> 
+> - Dynamic unacceptance & SEV-SNP hooks (Patches 3-4):
+>   Adds arch_unaccept_memory() / snp_unaccept_memory() for SEV-SNP. Also
+>   adds exception fixup in vc_raw_handle_exception() for
+>   SVM_EXIT_PAGE_NOT_VALIDATED (0x404) and SVM_EXIT_NPF (0x400) at
+>   EX_TYPE_ZEROPAD instructions so speculative reads from
+>   load_unaligned_zeropad() that touch the edge of dynamically unaccepted
+>   memory are handled cleanly without kernel panics.
+> 
+> - Dynamic unaccepted memory tracking & MM routing (Patches 5-9):
+>   Anchors the EFI unaccepted table at base 0 when unaccepted memory is
+>   present, introduces mark_memory_unaccepted() with error reporting and
+>   proper locking, generalizes zone->unaccepted_pages to variable orders
+>   >= unaccepted_memory_order(), and updates mm/page_alloc,
+>   mm/page_isolation, mm/page_owner, and mm/page_reporting to route
+>   unaccepted pages back to zone->unaccepted_pages without corrupting
+>   them with page poisoning, KASAN, or init_on_free before re-acceptance.
+> 
+>   Generalizing zone->unaccepted_pages from MAX_PAGE_ORDER (4 MiB on x86)
+>   down to >= unaccepted_memory_order() (2 MiB) aligns allocator tracking
+>   with the underlying hardware validation/RMP/SEPT and EFI bitmap unit:
+>   even when boot-time lazy acceptance processes a MAX_PAGE_ORDER block,
+>   the hardware and bitmap validate it in 2 MiB chunks, and runtime
+>   allocations, pageblocks, and mm/page_reporting split accepted memory
+>   below MAX_PAGE_ORDER anyway.
+> 
+>   Note for reviewers: The three mm/ patches (Patches 7-9) are the most
+>   intricate part of this series due to the interactions between lazy
+>   acceptance, page isolation, and page reporting. Extra scrutiny from
+>   mm reviewers to ensure no page-allocator or pageblock corner cases
+>   were missed would be especially appreciated.
+> 
+> - 2 MiB compound ballooning with 256-PFN chunking (Patch 10):
+>   Allocates compound pages at PMD_ORDER in CoCo guests that require page
+>   state transitions, breaking them into 256-PFN chunks when queuing to
+>   the host so virtqueue descriptors remain at 1 KiB, preserving
+>   out-of-the-box compatibility with existing hypervisors.
+> 
+> - Balloon state transitions & CoCo ACCESS_PLATFORM (Patches 11-13):
+>   Calls mark_memory_unaccepted() on reported ranges and inflated pages
+>   before adding buffers to reporting_vq and kicking the virtqueue, routes
+>   deflated pages to unaccepted freelists, preserves
+>   VIRTIO_F_ACCESS_PLATFORM, disables VIRTIO_BALLOON_F_FREE_PAGE_HINT and
+>   unsupported VIRTIO_BALLOON_F_PAGE_POISON in CoCo guests, and rejects
+>   probing on CoCo platforms where balloon page state transitions are
+>   unsupported.
+> 
+> Why Both Free Page Reporting and Inflation/Deflation
+> ====================================================
+> CoCo guests using lazy memory acceptance boot with their maximum RAM
+> declared as EFI_UNACCEPTED_MEMORY in the initial EFI memory map,
+> avoiding runtime ACPI/virtio memory hotplug. Prior to this series, lazy
+> acceptance was a one-way ratchet: once a workload spike caused the
+> guest to accept pages from zone->unaccepted_pages, those pages could
+> never be unaccepted or returned to the host.
+> 
+> Turning EFI unaccepted memory into a bidirectional lifecycle enables two
+> complementary mechanisms on initial boot RAM:
+> - Free Page Reporting (reporting_vq): Autonomously reports idle 2 MiB
+>   free buddy pages to the host for hole-punching, and lazily re-accepts
+>   them locally from zone->unaccepted_pages on demand without a host
+>   virtqueue round-trip.
+> - Balloon Inflation/Deflation (inflate_vq / deflate_vq): Allows VMMs
+>   that size guests without hotplugging to actively apply memory pressure
+>   (triggering guest reclaim) and enforce dynamic memory targets on boot
+>   RAM.
+> 
+> Architecture Support & Intel TDX Follow-Up
+> ==========================================
+> The efi/unaccepted, mm/, and virtio_balloon changes in this series are
+> architecture-agnostic, with architecture hooks (arch_unaccept_memory())
+> wired up first for AMD SEV-SNP via snp_unaccept_memory() (alongside
+> VIRTIO_F_ACCESS_PLATFORM support for SEV-ES).
+> 
+> On Intel TDX, I think dynamic unacceptance should use
+> TDG.MEM.PAGE.RELEASE to transition private pages from MAPPED back to
+> PENDING so the host VMM can reclaim them (and the guest can later
+> re-accept them via the existing TDG.MEM.PAGE.ACCEPT path in
+> tdx_accept_memory()). Once TDG.MEM.PAGE.RELEASE support and
+> load_unaligned_zeropad() handling for dynamically unaccepted pages
+> (e.g., via direct-map unmapping under SEPT_VE_DISABLE) land upstream in
+> arch/x86/coco/tdx/, tdx_unaccept_memory() can slot directly into
+> arch_unaccept_memory().
+> 
+> Testing
+> =======
+> - AMD SEV-SNP Milan hardware (CoCo): Passed end-to-end memory pressure
+>   soak testing with live guest_memfd hole punching (FALLOC_FL_PUNCH_HOLE)
+>   and dynamic lazy re-acceptance under memory pressure on an internal
+>   hypervisor.
+> - Cloud Hypervisor & QEMU: Verified standard non-confidential
+>   ballooning remains compatible. End-to-end SEV-SNP balloon testing on
+>   upstream Cloud Hypervisor and QEMU has been limited so far (while
+>   both punch holes in guest_memfd on shared page-state transitions,
+>   QEMU's virtio-balloon still issues MADV_WILLNEED on shared HVA
+>   mappings during deflate); any testing help or suggestions on these
+>   hypervisors are greatly appreciated.
+> 
+> Note: An LLM coding assistant was used during the development of this
+> series to assist with code and commit message drafting and refactoring.
+> I have reviewed and verified all changes.
 
-Sorry, not happening. There is no migration support for these (large) things,
-and there likely won't be any time soon.
+[...]
 
-NAK
+>  mm/page_alloc.c                               | 248 ++++++++++++-----
+
+This diff stat should give you a good indication why this series is not acceptable.
 
 -- 
 Cheers,
