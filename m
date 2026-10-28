@@ -1,138 +1,47 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793133572;
-	b=XSaG7t+sAZO3fEFrNfyLEVNOzAqlolDE6SV1kJy8LS4grhFJ/TSrCU7QcpBC2u27vqP6
-	 pZCsDzgJC/1Lf+o3WOFGqnd5NAlqYzTm/evZsAKDpna8w8ZcFD6Hp99mp7rJ3S0gCtee0
-	 KSexq1WpkR8x6Yq4pWEzlBvDLOvOzeLXAa79LTslEH2oaHgwX1O0eMXSeMRULcJBIVsTd
-	 wxOnZyz92BoSqxGr70fOvIB/AM6bABxnHJOpaBUSa/zkGFtnoHB1bS7WdfsE0SoKsPZZY
-	 DNxrANRMxNlQmol+RnK5Uvd69/cLjQqEEXyBiSfEOPJSG5ywI+69HC0s4rX4RxUdjug==
+	t=1793176795;
+	b=wPSqrLZF/23HWRcaXTuEccfXnCvIhoE4wOhhZFZoM3yx/mEThzLg3DBRoDy1EE50kDip
+	 lush4m2oO3AFPN9Ev+9zrVb/vvoGD9lqI4Va/5HKPVt2wN1uyg6EhFRqhC2YYfjWWC01g
+	 6/cvs8RtjeBb39+BZHniLH6JajWOdXAaFjLEXX437YoHplIhX8lRYbLDTL7jnOFWe4XRr
+	 m2p3D7kWRkwszTfG58wGWZZSpS1VwPIZwHro5WhaIC7q8v/L1zPKUAlJve+hi3I3ttH2K
+	 N8mradZHw2Iemf516Zlc/4zOUmvQ1+Y9LpFoAQDYVd2R9jO/RZCaHVdRi++rZgRM/og==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793133572;
-	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
-	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
-	 X-Received:Received:Date:From:To:Cc:Subject:Message-ID:References:
-	 MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
-	bh=roOwYu0f5KwBgODRuBr3gTl9MLGpmNzor9SYb28//4o=;
-	b=MfcAq258L1jG6hATZol+/bZwRBxKBAaSnBKOf5qxgSJ1YZPyU+IfdVZfl9hr7mfl/CZQ
-	 ffZN50ZZ3jsozFt9p8u0SNzorSbFbMNDadIO3eBEUoxSaNNChZsKYrbSV+YVXUUJF8fzS
-	 zwHXoVlZ4DV9oeqJAmd5YWdtJsx2121vKnjo49I63+b6Zwr7lpYRMHWlEtC1h1N1CL4Sj
-	 1Rdc1jj2VTN3uRaG9KppQv4bbvNlxf2PPDokghDWNrdsYpUaHD4DIXdngQwaRYj4Z0Ota
-	 f06AHODoWDwtKamPc4+1aiBbdLammY1SY74V/uJmBxjPJ7HzolBDv6NET9w8m19BzCA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793176795;
+	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
+	 Subject:To:Cc:References:From:Content-Language:Autocrypt:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=EuSPBpfPiwDzYLE9j3bMQIok2xPGQVDesPuFSULAs28=;
+	b=c8t1RsEhTzmVkjIbwHV/UjQijG3dzmD2DfJYpt+VV69drjAUsCusgGf3c7TRhGj93bjT
+	 icfp2JBmhunwxGh4TYbJZas9WAWgKgGgMvKAXIMOYCTdklDJ79uOVus8RrwIgLr0eyEtX
+	 UnsVQw4xDMXBRVUh6RyKEXKPQIfab5Ay6tLrcrfNu1cn8x7FxUaT0EbIz7Ely6E3AY/9N
+	 ticod/+chC8zOX/ygz4selH/2rlJ/VUbGOjSBZgHLwwZ8ApovNYywA9laVnSopxbTo3LI
+	 RZghq9sPjdfKP7qhHC8pHb70gUBGPvOJNqxvBFrrY/HXaLd8VOG+xfeX9QXlcAxKZhw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=redhat.com;
-	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=akK1+Pw6;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=Yud68Rxl;
-	arc=none smtp.remote-ip=170.10.129.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mie8jh39;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 441FA606A31D
-	for <linux-efi@vger.kernel.org>; Tue, 27 Oct 2026 20:39:32 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 441FA606A31D
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F100606A31A;
+	Wed, 28 Oct 2026 08:39:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=akK1+Pw6;
-	dkim=pass (2048-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=Yud68Rxl
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1793133571;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=roOwYu0f5KwBgODRuBr3gTl9MLGpmNzor9SYb28//4o=;
-	b=akK1+Pw6QAhpkcxtlACExkkdPBQa023n24AZ7US++Mz705Iu3vo+9YZJZPKDWtQNE98RpT
-	4mhHalLOuPoBzFxX0fsOK0RJr1ZFmQmYctf9yuxGMPltIChuWxw0KoapX9NRCDVqsSkpe/
-	B+g+McnWvhefWkzsq9iounxCS9miPkw=
-Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
- [209.85.221.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-591-GyrULXlwPgOajgIuNXi2Ug-1; Tue, 27 Oct 2026 16:39:29 -0400
-X-MC-Unique: GyrULXlwPgOajgIuNXi2Ug-1
-X-Mimecast-MFC-AGG-ID: GyrULXlwPgOajgIuNXi2Ug_1793133569
-Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-48dea677afcso132403f8f.1
-        for <linux-efi@vger.kernel.org>; Tue, 27 Oct 2026 13:39:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1793133569; x=1793738369; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=roOwYu0f5KwBgODRuBr3gTl9MLGpmNzor9SYb28//4o=;
-        b=Yud68RxltWRXbksRawyGLsb9m5yTw4huJO/PzLPdrZpZctGkEvhppeJwqJ1JGyIm2Y
-         8Zkx48VRjl7Q1u2T6tsOshUrqQdMMtvOGB4Val+ifVU1cOckruygN4ufvG167mQzDrke
-         O/sy/P3XZBT8Dnhtri/JXdmEDPuucApXrpaDPhRZCf854Yie7+wdS48Z5/S0uyJDKcxW
-         0MG00dCFI/HI5RNTGpubqNEhxNj/fJWw68UHmZEeu9ybIjU8U1ACH7lSC2NoetKvZdvG
-         pNYa4LXIZlklsE7YxLzOl+d+3Rm047m45KLnZnxn9WfYe4f9FAeIpOqkp80iXke3MKYD
-         Iz8w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793133569; x=1793738369;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=roOwYu0f5KwBgODRuBr3gTl9MLGpmNzor9SYb28//4o=;
-        b=rTJGWR68DiKz0V5iHGc8ve46Oq5xToEwZsV2j4SRFMfKYSyLn5Mrl1vsvE4c0//+LW
-         rn0jhTGH0K68fs4Z8ill2XMG4srtU81C3WuUfVdflVwM7FEgKhcD8q0TRkG6u5Ize/h7
-         plUJ/jW+qTfZbv4/KExLzKXsXv5A5khSI7Gz+pnfGOIQ/HC2+W0+BxFC9DtFH/j0qn+E
-         PR3g807ksDF8043Cmiy5guKS0A5mvO83YBWL5Bg3INwOaDiyD2oZfaGyrhrusdAFgevs
-         JWtKTJuU8MbAa01QnKc1cfqw5bBHdKGS6zgjKm1TRQU3n8PaAla9h7kXLcMi+RacWhTo
-         2YJQ==
-X-Forwarded-Encrypted: i=1; AKwUvBxOtJofxSC4wtJvueOWUNL0PJNJ7BsnRPtUU+lH59/OjIxvF/0C1KSzM2egC8UnIs7tS27ijjzvR08=@vger.kernel.org
-X-Gm-Message-State: AFq9FYKzmTIuNijuSWJaRL8fIxWaqSdUzt2QNQ+bZrcD4lSb7tUSMlXS
-	yu7O0n9xWoIZ5D7jKFshYEuIBvEqwpeXQdgZlsiOYzLkhVv6IApx5SvGeEdc3Uf+/3zqe2m0fuE
-	0I/Gzl7h0uxkpHiaUS1QbRd5xqWUPVIxeUJTLTQ+rnaPcNVJJy6TRLO+nsylPsw==
-X-Gm-Gg: AYBFou3inEfDutt8kPnOM42Cj7XtVnhfanlxcx5rqQSYbl1Zj7oHhGzlxoUCItfpalK
-	eeR52e2VKOWtfQOvq9+DTlhxA0YOqHTCUHno0Dp7vk9x+NK1XuDeRLDTQiuJ/iQnhjomES7pkRj
-	WlSfUExuAOKOgvsodjJY/s0C3Tyy2TARbFO1j7xpJP0e/iBHF4HzXim0K80TX0qDEpYq5IWEeFQ
-	55bUSdf0R7a9cko7Fp1HWIn/NNhzsaD7HZSmiHO/0zsSJP1hiGmEIp2GWRVp9G7j/MC6+Qt1uq6
-	DJiJfJR4eBqYXko2txJ33sKDuKAhP9Nl5MI+6GOTlxr7HhwSLOABC3xAAB6UPzdHre4=
-X-Received: by 2002:a05:6000:60f:b0:48e:850:c0b7 with SMTP id ffacd0b85a97d-48e5d28705fmr1693106f8f.1.1793133568602;
-        Tue, 27 Oct 2026 13:39:28 -0700 (PDT)
-X-Received: by 2002:a05:6000:60f:b0:48e:850:c0b7 with SMTP id ffacd0b85a97d-48e5d28705fmr1693005f8f.1.1793133567964;
-        Tue, 27 Oct 2026 13:39:27 -0700 (PDT)
-Received: from redhat.com ([2a0d:6fc0:1536:fc00:b838:383:1c7:6e81])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48e3ecdd5b3sm24553225f8f.53.2026.10.27.13.39.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Oct 2026 13:39:24 -0700 (PDT)
-Date: Tue, 27 Oct 2026 16:39:18 -0400
-From: "Michael S. Tsirkin" <mst@redhat.com>
-To: Kevin Loughlin <kevinloughlin@google.com>
-Cc: David Hildenbrand <david@kernel.org>, Jason Wang <jasowangio@gmail.com>,
-	Eugenio =?iso-8859-1?Q?P=E9rez?= <eperezma@redhat.com>,
-	Xuan Zhuo <xuanzhuo@linux.alibaba.com>,
-	Ard Biesheuvel <ardb@kernel.org>, Kiryl Shutsemau <kas@kernel.org>,
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-	"H. Peter Anvin" <hpa@zytor.com>,
-	Tom Lendacky <thomas.lendacky@amd.com>,
-	Ashish Kalra <ashish.kalra@amd.com>,
-	Michael Roth <michael.roth@amd.com>,
-	Rick Edgecombe <rick.p.edgecombe@intel.com>,
-	Andrew Morton <akpm@linux-foundation.org>,
-	Vlastimil Babka <vbabka@kernel.org>,
-	Mike Rapoport <rppt@kernel.org>,
-	Suren Baghdasaryan <surenb@google.com>,
-	Michal Hocko <mhocko@suse.com>,
-	Brendan Jackman <brendan.jackman@linux.dev>,
-	Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>,
-	Alexander Duyck <alexanderduyck@fb.com>,
-	virtualization@lists.linux.dev, linux-coco@lists.linux.dev,
-	linux-efi@vger.kernel.org, linux-mm@kvack.org,
-	linux-kernel@vger.kernel.org,
-	Sidharth Telang <sidtelang@google.com>,
-	Punit Salian <psalian@google.com>, Peter Gonda <pgonda@google.com>,
-	Ackerley Tng <ackerleytng@google.com>,
-	Jacky Li <jackyli@google.com>,
-	Steve Rutherford <srutherford@google.com>,
-	David Skidmore <davidskidmore@google.com>
-Subject: Re: [PATCH 00/13] virtio_balloon, efi/unaccepted: support memory
- ballooning and free page reporting in CoCo guests
-Message-ID: <20261027163814-mutt-send-email-mst@kernel.org>
-References: <20261027025616.1632690-1-kevinloughlin@google.com>
- <20261027051245-mutt-send-email-mst@kernel.org>
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mie8jh39
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E0C5C1F01825;
+	Wed, 28 Oct 2026 08:39:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793176794;
+	bh=EuSPBpfPiwDzYLE9j3bMQIok2xPGQVDesPuFSULAs28=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=mie8jh39y/BQE69uPA+3u6b6UyI8Nt1ralfAIWhFNNTRSMdv0XI1QmX/FC3Ny7Qhc
+	 ZhQ9zZCJWtKIugv7K14H8T+1uM1GyTD2K+4besn4VLQgQkW0azexi8qFk91TF3cfTh
+	 W9sNM5Dbkm4U6TAmERY2uj+6WxDmECEAcWSNnpza1ypv+e+bAHytezpfAPK4IflUL5
+	 jgnR5HSXmZ7J/8+Y6XMGRBhEhR4u8Ie9eq1TsMurpfZOGG3BEhRgQYQuQy05WH3QLU
+	 lsPjzcgAhHRLG8M9IZ0wwLs9qt3S+cNesJUmdjM1eCXsrG6MUKIAfMCaOzb4Q9OrCD
+	 yVBzjZZdFzzVg==
+Message-ID: <524ee7d9-790d-48b6-8613-841da042c32a@kernel.org>
+Date: Wed, 28 Oct 2026 09:39:42 +0100
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -142,75 +51,107 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261027051245-mutt-send-email-mst@kernel.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v6 4/7] mm/memblock: add a reserved-region flag for
+ poisoned frames
+To: Mike Rapoport <rppt@kernel.org>, Breno Leitao <leitao@debian.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+ Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
+ x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>,
+ Andrew Morton <akpm@linux-foundation.org>, Lorenzo Stoakes <ljs@kernel.org>,
+ "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
+ Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>,
+ Miaohe Lin <linmiaohe@huawei.com>, Naoya Horiguchi
+ <nao.horiguchi@gmail.com>, Oscar Salvador <osalvador@suse.de>,
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ "Rafael J. Wysocki" <rafael@kernel.org>, Danilo Krummrich <dakr@kernel.org>,
+ Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
+ Mark Rutland <mark.rutland@arm.com>, kas@kernel.org,
+ kexec@lists.infradead.org, Brendan Jackman <brendan.jackman@linux.dev>,
+ Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>,
+ shakeel.butt@linux.dev, linux-efi@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-cxl@vger.kernel.org,
+ driver-core@lists.linux.dev, linux-arm-kernel@lists.infradead.org,
+ rmikey@meta.com, riel@surriel.com, harry@kernel.org, kernel-team@meta.com
+References: <20261016-hwpoison-kho-v6-0-f304255147da@debian.org>
+ <20261016-hwpoison-kho-v6-4-f304255147da@debian.org>
+ <ato62palTbNjLwN7@kernel.org>
+From: "David Hildenbrand (Arm)" <david@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=david@kernel.org; keydata=
+ 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
+ qIws/H2t
+In-Reply-To: <ato62palTbNjLwN7@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Tue, Oct 27, 2026 at 06:29:35AM -0400, Michael S. Tsirkin wrote:
-> On Tue, Oct 27, 2026 at 02:56:03AM +0000, Kevin Loughlin wrote:
-> > This series enables virtio-balloon free page reporting and memory balloon
-> > inflation/deflation in Confidential Computing (CoCo) guests, starting
-> > with architectural hooks implemented for AMD SEV variants, in order to
-> > support dynamic CoCo guest resizing.
-> > 
-> > Today, memory ballooning and free page reporting are essentially unusable
-> > in CoCo guests due to three main roadblocks:
+On 10/22/26 18:33, Mike Rapoport wrote:
+> Hi Breno,
 > 
+> On Fri, Oct 16, 2026 at 05:15:44AM -0700, Breno Leitao wrote:
+>> memblock allocates from and frees to buddy whatever is not reserved, and
+>> knows nothing about frames an earlier kernel found hardware-poisoned.
+>> Such a frame can back the memmap, a page table or a percpu area before
+>> any hwpoison code runs, and otherwise reaches the buddy allocator like
+>> any other free frame.
+>>
+>> Add MEMBLOCK_RSRV_HWPOISON for a reserved range holding those frames.
 > 
-> For me, the bigger question is not whether we can, but whether we
-> should. Considerations I would like to see addressed:
+> How much this would fragment memblock.reserved?
 > 
-> Security, e.g.: does knowing which memory is free leak information from
-> the guest? If no, why not?
-> Consider CONFIG_SHUFFLE_PAGE_ALLOCATOR, RANDSTRUCT, etc.
-> 
-> correctness, e.g.:  Linux has init on free (and default on windows), if
-> initialized pages are dropped and host can not be trusted, they have to be
-> re-initialized. Is this handled? I don't see it in code.
-> 
-> Also, performance, e.g.: How much does this re-initialization cost?
-> 
-> Management: it was simple with balloon off unconditionally.
-> Now we are in murkier waters with various features offering
-> various performance/security tradeoffs.
-> What if some guests want the tradeoffs but others don't?
-> 
-> Documentation: for all of the above.
-> 
-> -- 
-> MST
+> memblock is not very scalable, to say the least, and each new flag
+> increases the size of memblock arrays which obviously hurts performance.
 
-And to give this a bit more perspective, I present:
+I assume that if you have too many regions there, you have different problems
+than scalability problems.
 
-commit ab676b7d6fbf4b294bf198fb27ade5b0e865c7ce
-Author: Kiryl Shutsemau <kas@kernel.org>
-Date:   Mon Mar 9 23:11:12 2015 +0200
-
-    pagemap: do not leak physical addresses to non-privileged userspace
-    
-    As pointed by recent post[1] on exploiting DRAM physical imperfection,
-    /proc/PID/pagemap exposes sensitive information which can be used to do
-    attacks.
-    
-    This disallows anybody without CAP_SYS_ADMIN to read the pagemap.
-    
-    [1] http://googleprojectzero.blogspot.com/2015/03/exploiting-dram-rowhammer-bug-to-gain.html
-    
-    [ Eventually we might want to do anything more finegrained, but for now
-      this is the simple model.   - Linus ]
-    
-    Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-    Acked-by: Konstantin Khlebnikov <khlebnikov@openvz.org>
-    Acked-by: Andy Lutomirski <luto@amacapital.net>
-    Cc: Pavel Emelyanov <xemul@parallels.com>
-    Cc: Andrew Morton <akpm@linux-foundation.org>
-    Cc: Mark Seaborn <mseaborn@chromium.org>
-    Cc: stable@vger.kernel.org
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
-
-Leaking phys addresses to unpriveleged entities might not be wise.
+We should cut out larger chunks, and if they are all over your address space you
+should scrap that machine.
 
 -- 
-MST
+Cheers,
 
+David
