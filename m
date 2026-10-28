@@ -1,101 +1,100 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.218.48
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1793201944;
-	b=ooKnwMobrVYtgcaHDXMNKc1+P8dPTGFUgrgqptrwYpOo7U1W9YZdJrmaDUP4kB18ok0r
-	 OQZa3y63OiJhsTR1Y5qLs658HBqOkpxbf/7ybmFDbTO1GoGTq/c22po//dEg2fx4uaA5L
-	 rCXfJ5lZbUtRsmo7gafov3d4Gd1yr7cjaU6eMX4kjbccvK6e8Vf4Xw1GmSe0lPqXP1uAh
-	 IroT0hawGTozFUHuELhoZYfthrGRxzaUJpQoNrwQF9dOMEwo1s2xd/vwFbdZqauQrl5Fs
-	 0qVwpRr9qpx9DxQl8NA36tdRI4mWvvBnwqnEHOJtPefMHnnhhOh0DfCKU5HrjI7CiPA==
+	t=1793202008;
+	b=eDW355eLR3dT2NK7wZ9Q++LUoGXDG1Szu7Opg0/efPYV/2cmxp6kUL6y5e+SqkBqRNJZ
+	 DV2KZMWpf3/5F64E1JHuoVmj3EtBsoQcGXA+UbaCTj4vip9VPj3ZtqtWSjjZffpSgcQvV
+	 HMkR//aZDWLbwbQpM1jwal6yaQJBJnTfCCG1H3R+f4/yVQVJ7FqQakq5G4vhlrOvxOjyC
+	 UrQfnCG9Cfs/J6XwIXC78Ip3zm5AQvH73BCTBtKJGhiyKl5tCRDOQ5ocYz0b3D0IfmQuJ
+	 lGZ9VhaUzb/n11uxfN1r2AENZmgu5/E9qQ2ggRievTuQEOZJdY9abS0ujUwf3Q7YYdw==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793201944;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793202008;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
 	 MIME-Version:References:In-Reply-To:From:Date:X-Gm-Features:
 	 Message-ID:Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
-	bh=y7xxxnWLJ3cqzVXeSgOYrxm108qFnX6tdnhI16mhQOo=;
-	b=bC3yamsq8T/zN1EbPRRwQlz47PI7qWIiGOHFfdMg7qIOScjggDQmv9msDtKzqcEwoQZv
-	 1KBcbm2WMA67F7mxHPrqixCoL/i0BLPCTtt17NhoQyq5J+DgBdxCsIT3joxj6YBpwrqEf
-	 KqcYcC3ET7ZTTAJTALJzaR6dCJ//nfXvYxhNeQ6cyijWwBU2cqdlcC/Cnd+frgNQadGWZ
-	 Oqj/qyneBAvQFnPeiuBj1bBHjRSVpLGWOX1gzuHQqlS/R1LHMyGWrtoZq7slexqBR43v9
-	 OU3FF22ZN3VAeNfoX9RyTG8NWz1tojlI+yHOCpmS1S45x181AYN4Up1a695uZEN54Kw==
+	bh=0L3UJe+6XjER+KzlgRD/7xotzxSyGvuQzLO/yjOCn+Q=;
+	b=PWkCY6EXomGVKUeXo6nTkFp0cuHuEaXSYX25QvUyxNYWEcnU70/5H/EfhArXhRJKZqy8
+	 6CoxxyK9D80ylk+f+azdkoJfsPvbKc1n6CXsQTlqdknCzstRZXs20bYMC1HXOV8wMMzzz
+	 m7mQQ6U3j1J4iQkUsWxotmsiGavn48k3ksWTCQiESjWk/k357P7U1jmS82BZe99nsPT3x
+	 8/gEVAJ1EwFdeuTVZovedbBKBH8z39Ewjw6p4Pw6L1mJYkujfRJaRionU403Qq9knoebO
+	 1TA9em6YLwH9h4Ze/ZIC9tbGYJxQbOaK80VgeoXzzlAYhYfL+k1EgeD0RWxGaMUb3rA==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=google.com;
 	spf=pass smtp.mailfrom=google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b="Jo/hfhVR";
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=Lzrv5baS;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.218.48
 Received: from mail-ej1-f48.google.com (mail-ej1-f48.google.com [209.85.218.48])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65F61606A31D
-	for <linux-efi@vger.kernel.org>; Wed, 28 Oct 2026 15:39:03 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 65F61606A31D
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7263606A31D
+	for <linux-efi@vger.kernel.org>; Wed, 28 Oct 2026 15:40:07 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B7263606A31D
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=Jo/hfhVR
-Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-c423b145922so156941266b.3
-        for <linux-efi@vger.kernel.org>; Wed, 28 Oct 2026 08:39:03 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1793201942; cv=none;
+	dkim=pass (2048-bit key, unprotected) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=Lzrv5baS
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-c46d41f6af3so165820166b.1
+        for <linux-efi@vger.kernel.org>; Wed, 28 Oct 2026 08:40:07 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1793202006; cv=none;
         d=google.com; s=arc-20260327;
-        b=eN8IdW8lsqp5Y1aEiFYdqIw4AV7GPcP6LRyFyES8nskTYn8iQCDafLZ0vc7u30Jiem
-         /dJf0c3NmRiXP70QnyJSGUeCpyVZjzZXpqJ2INRyKTBQ1H5EUb9qKCJiOFhkKxZagcGd
-         PlhvE0KLGekAuf+IKcnF2yunHui5cCJ+qZKmv+gD2JUORDDiHcbf8mrGQfikVALbh5HX
-         ghQW1OeiRZczWonPrjsylmVilHHH1IAFWy7+lwZO8Ikx8X+98R4M33odSf0pSTCrAkua
-         fjFBcz9EyPNy+aqolAXU+dyxXaw07GeSFZlODcyVZLaofHfNmdHHvAOdp+c5YeTDeq8o
-         KhKA==
+        b=aj+aX83WTU9eiGoZXqK6C8IKvYcDQVSYpuTZJVrpdsIcqGOVCQgPmQpDl5PU4LSlrv
+         88f0ttc4hlSQcs+l75hNoE+iM6hwEBccUt84ry3qhJrCEh4aec3InkURTDQ3KRYcXhjE
+         Z9pYLp2XW4EX3Ja4jQBzOd/KHTIigc+R9VlgjN0gu3cbtcQDWp4+kZ5mzN6Vr6gY235g
+         IujokTAVZTnj7LlA/ZaDf6MFKpxDVnsa8MBaLgcRMMFqIVesHSbadStuxwUlAcU1VtS1
+         an/1/jr7yK53xn5d2ciQIiOKrQEUzdqc1k9FBeU6FnewxyHw07RF/DZB3DtOyGWBJxKA
+         69zg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=y7xxxnWLJ3cqzVXeSgOYrxm108qFnX6tdnhI16mhQOo=;
-        fh=hkj/UcDNledWTLL+5RDG2BGKkpbwTJY2TK3Zi4TH2ws=;
-        b=ByLS7mDpdwVSb+7c1mEn0qQDpvoin5/vXPGLGwxvDiJJo4RsDIiL1t5SiJzbBvpRVo
-         UZvwR7t7SsKCXsvb/0FMEy47VbFFds9GwP12/yKfTKcZCQDjcJCoCntsxtY8qjtAxNur
-         qA1eJQQgH3iGRYkDfTuEe73g0bNr2S12c+yZGWpFu++JMpTRxobo8SAGLrN6R0utUBfI
-         pWYZj0GQypu1tvYrtCIUjgabLeUcyTbUTg4W8hG02juKRIlyyAcmoPc+X5FY2krvKehC
-         9s7gxbD/tnNIbDVXoSxvr3FMMSbe/3j1ak6agnSggrXgtLVbTgfRh5y5R8gukJMqg+xZ
-         CR3w==;
+        bh=0L3UJe+6XjER+KzlgRD/7xotzxSyGvuQzLO/yjOCn+Q=;
+        fh=JqctlGlX52h/vekLmd809xbQlKuSW+FuaiEIZ98GM9Q=;
+        b=WwBKYOL2TTpkWZ6UIu3thKQplKnFwYOdLnMPWToFjG6Dnh82nxigr9Rfd2N7LcZ8MN
+         Gzr55WdaBuVh2R/V+uTQgbOQRse4S31DgV+nQwpFXlDeqlmaJyWIG0wn8H3OF1E+JOvA
+         7O0OUfxzoIH3OqsUZSuLpqpfREj4R+JYZykpBzayJafOM88P5UgKcuPfNtrAhsgSbvj5
+         rRBRko4d7nrgZyr8XLeGCcsmACyD91H9RaS/zR/ehaTtp0OyYFSBrwPPYrz6SRULZhMI
+         r8hPcxBElF2bJEZHTAL+3eS/DwkGT9D53qpY3gVLbC7/YKKt62pPPpLUuA4h+EL8eCn3
+         udJA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1793201942; x=1793806742; darn=vger.kernel.org;
+        d=google.com; s=20260707; t=1793202006; x=1793806806; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=y7xxxnWLJ3cqzVXeSgOYrxm108qFnX6tdnhI16mhQOo=;
-        b=Jo/hfhVRv+oZjqTkmJ4+dL24FIaKzcvsi3pdmy3HAlGeHEIfzZHjqlPLUyOGXe4+CW
-         wsuVi1Utas9P0WXG7bx1cnkNHsHu/klbTZtjQWHIr0gxVjwzCPPzuBGrqvAordXXNadI
-         OKdm3dGndlPEzpukVWLfFzGLXlrjvSxK+70XEYUozWgQy7wPa1gAK8FtfZ5f8iqrzuNZ
-         dfZLFNf+mKjskkbpSgi/qIpHqqRNbqzXAhA6LhPTDB36MNu9Fgg3wfujeERwjNlPWwwE
-         /KZJ00iqzA7S1HHj3jqFAOSCjJyC+Lj6ef2AIsczC7rTqBfJsZuEbWzJpxmsK8s5UTpe
-         i4PA==
+        bh=0L3UJe+6XjER+KzlgRD/7xotzxSyGvuQzLO/yjOCn+Q=;
+        b=Lzrv5baS7hZO56ak+j11CZOpo9nSwSzqR++f9YLzcEmSTxWwZQFwBFUDMJCR2ak458
+         4zMWtmZpd7fl6+iHDAzFDsltCruFoM9m3rKAF1nbPQ38QQ97sY2Oupi3jTQRUS0z07kY
+         /4Z189+g74DrIJpLSPIaqW0Bv5NK/A9ybyIm4LoLz8S2Dg6JPDCBW/twsdfd/BstNY1X
+         F0WE1g9ZDMJ4pA1yfDaNgvWXRaX4rRhgbH2DVsxdAtmw362z1jqaE4q9w2rVRSV1bYNz
+         pdw0GNIfu1bkawf3pNYOq8fyug2JYA/oXfjTKXh6bb7aKySduRXo4Bb5IJ2R/4FiPFli
+         vAyg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793201942; x=1793806742;
+        d=1e100.net; s=20260707; t=1793202006; x=1793806806;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=y7xxxnWLJ3cqzVXeSgOYrxm108qFnX6tdnhI16mhQOo=;
-        b=CWOXMV/We26vID3mMBh4/XdufGvEmWh+IBwSulbKljSotJcd93B97hwpUYPKKE3eBO
-         SeiAw3CC4tm8z0otSRLPW7Zm6iRBYBwydqqNTkZs9m5y9puwqxfNXIm03cQh2r3EiL5T
-         bblakKUvz4D9OUSFjIhOqyjSLd76yn++QGMeGYEuFwez3hSgVvTQaqlIZjADNddaTaU5
-         b7F6esyE8iIy58BL72ugzAQWEqnS7fGp4rehY4tqYP0Sh218NHyhkquflULme+s+uPmQ
-         GcL+iTBMLsA2tc+kXAYmxfBa5yTUfbheIQHVu2bDOsiP2U6PcBI6Ir3M16mJPtr40/qG
-         KP9A==
-X-Forwarded-Encrypted: i=1; AKwUvByC9Rk6dkeaA5Sankuoo0WjWbadbh/7FnncgxA20IRNJ7xoA04oaCV6Qa8sF8EwX3kEbNb+QStBhbM=@vger.kernel.org
-X-Gm-Message-State: AFq9FYLqBx4SrXUNVSaUuGHLcXRORaZesZikudAoyYfgT+ruz3hiWdB0
-	gb/9I6Vk74349QcE3YHvHroA0LXjjpyPOlKXtNx6Yx31edXpQD13Lv8f12boOUfC8HYHblXvzWY
-	pjbip2GODky8Xp6ruGsfxUeTGqDjZueMbI9Dzc+fa
-X-Gm-Gg: AYBFou2X4/6Xa9m7EIyiz7fUy0NJyi2FbADIA4vlWBvHovVj0/BRPkcbOE8FQ2OvjwP
-	JcUvtkAqgN14vdBG6cPkd0A6oKuyatEITLffUb6x0vbN84svcwIyAYd1Nxv5Apg0RGFW8/JpYN1
-	jqnkc4Co+h1GQH9hGLfv/oPQB1og34nauGAHTkpBBJvsh9NolYUqTavETRTaBCpLCRU/oaemCYN
-	V90RguuK5qNxBD03J79vwGUESmxrjZjNxv0z8TpHV32go763ieXgLAxyvV5ApvRvD0NvOkJbdrz
-	7ofIi4TOThhAazirGq9XcjeZUe9ilTkspkGqcC0A1xYmkj1ZYNQ4wJkZdbczre2XwKxknrKzZoe
-	gdhfTyKhUd+B19qgnHF90DypbO7fHJnh/eIPi7PNpO+phOlvYuBh9r8O9KpmqUg7PP0ZAOLiXYx
-	HGNUEUbmpLvFY=
-X-Received: by 2002:a17:907:d308:b0:c3f:7ab8:bef1 with SMTP id
- a640c23a62f3a-c49bdf2f80cmr259829766b.34.1793201941132; Wed, 28 Oct 2026
- 08:39:01 -0700 (PDT)
+        bh=0L3UJe+6XjER+KzlgRD/7xotzxSyGvuQzLO/yjOCn+Q=;
+        b=0uqKqDjCc0KBs1ydkxnKKFKTnzEH4id6hP7NFk/SZb0g9Ysh8rPAOWK7H1JyzHjELh
+         pkaKnCP0voAbG7f77zmsflZZAb4hujjyRzNp1L7DWUA0HABWX0oJPrizQydQqi2OrFFp
+         JQKmH9qx8ZKgfXtWQYc8djMU3no/CyDmBh5/z58FZ+ApBkY2xkDBYikZqVCA2kes1+oC
+         iax/86TdnDZtz11xw7FfNzJCZc8tX28b5wbsaa9UgSKeuksTYRxaTgSWyB8VDQ+3nXPq
+         cuyxZM9K07aofBzxS+/u7Xs49qrXXntKwujsfvbeMdZKR+G9LBGyVY2aubaGafsRsx/W
+         vPQw==
+X-Forwarded-Encrypted: i=1; AKwUvByMBC+RaphX6w0LaU+dR+OMqeH3o2Pk+6tOhwKjadrYutsADI5rsVEiR0uQWt4L++RSRN5Kejifmmc=@vger.kernel.org
+X-Gm-Message-State: AFq9FYL+xC+21Grto+5Hk4XZVqTpaLGZWFL2XhB+JcYi/yMtjDU0yljh
+	pyzIw4oKjmGBWeALQe883mSItFsiXF8+Cj1M9SuI3zU+mP9BPa/lvJ6MTcr8U7sBhKU3E2JTfSF
+	TW01buRqr5A+aUuSHYDQdqi9OU/yip8v/l61oLRza
+X-Gm-Gg: AYBFou1/li+/jCskoVurpCZnck5bBBQzz1iWS1ssPWY+gj1H6Xb8mz2exIOfEsciGhD
+	NTcF52jhT0dj6wFepFQAYTAkkVvWl8x/MO69B3vZqB6h5LX2YYiadWzluUS9ZuRh7oix2PmCs3J
+	JyCnyXMwQOjr8iheqvucrG48UGe6alV7mKg48BZnSqmd9sEsCXeGmrB8wJf77LkTo6EdJifgjCV
+	UdIuu4iqDlGM5mLrur8mygUubzSaMuNxBhEVfPI63NOoMi5nDk9h0yhfF4LDJGhfDfCc9kA58eM
+	9Qpy4c1mZIMzDge8OnTXChn3uyzuNYFrMe6OzUSmgYAUTeixtbPE6Si/QsMdxTm/bD3RVtCGjE3
+	o86q94GrKUA0gtRanaOOaBZGfCfoVmH+od1MMseW/Zcpm9mTcZP4IlPWe9TgscvVQ3g==
+X-Received: by 2002:a17:906:9f86:b0:c41:960c:8c62 with SMTP id
+ a640c23a62f3a-c49bdfecbf3mr243566066b.30.1793202005586; Wed, 28 Oct 2026
+ 08:40:05 -0700 (PDT)
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -106,13 +105,13 @@ List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 References: <20261027025616.1632690-1-kevinloughlin@google.com>
- <20261027025616.1632690-2-kevinloughlin@google.com> <20261027053843-mutt-send-email-mst@kernel.org>
-In-Reply-To: <20261027053843-mutt-send-email-mst@kernel.org>
+ <20261027025616.1632690-11-kevinloughlin@google.com> <20261027052057-mutt-send-email-mst@kernel.org>
+In-Reply-To: <20261027052057-mutt-send-email-mst@kernel.org>
 From: Kevin Loughlin <kevinloughlin@google.com>
-Date: Wed, 28 Oct 2026 08:38:46 -0700
-X-Gm-Features: AclHuK-vBr-9NFy3pcmA7HqGTQSybdCjlTCvxPcN7DJFBT-excWUi_DEsSkfHKE
-Message-ID: <CAGdbjmK_vbmxX5Dti9+RwEiWkxQDHz+Dg9ToNnyEd_z-2ncdPQ@mail.gmail.com>
-Subject: Re: [PATCH 01/13] virtio_ring: support per-virtqueue DMA mapping ops
+Date: Wed, 28 Oct 2026 08:39:50 -0700
+X-Gm-Features: AclHuK_MLzRdQo76ylDi6PC5wwAQyJcXzBectQ_iPw892kOlvxApU7OSZmy7jAE
+Message-ID: <CAGdbjmJjBp4WPqkWs0KNLpH2ve+Q+y26yOg1PO4TJHwKfu1uZw@mail.gmail.com>
+Subject: Re: [PATCH 10/13] virtio_balloon: add higher-order page inflation
 To: "Michael S. Tsirkin" <mst@redhat.com>
 Cc: David Hildenbrand <david@kernel.org>, Jason Wang <jasowangio@gmail.com>, 
 	=?UTF-8?Q?Eugenio_P=C3=A9rez?= <eperezma@redhat.com>, 
@@ -134,31 +133,70 @@ Cc: David Hildenbrand <david@kernel.org>, Jason Wang <jasowangio@gmail.com>,
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Oct 27, 2026 at 2:42=E2=80=AFAM Michael S. Tsirkin <mst@redhat.com>=
+On Tue, Oct 27, 2026 at 2:35=E2=80=AFAM Michael S. Tsirkin <mst@redhat.com>=
  wrote:
 >
-> On Tue, Oct 27, 2026 at 02:56:04AM +0000, Kevin Loughlin wrote:
-> > Allow individual virtqueues to override the device-wide DMA mapping
-> > operations via virtqueue_set_map_ops(). When custom per-virtqueue
-> > mapping operations are configured, vring_map_one_sg(), vring_unmap_one(=
-),
-> > vring_mapping_error(), and the DMA sync helpers dispatch through
-> > vq->map_ops instead of the parent virtio_device DMA API path.
+> On Tue, Oct 27, 2026 at 02:56:13AM +0000, Kevin Loughlin wrote:
+> > In confidential computing guests requiring page state transitions,
+> > unaccepted memory tracking operates at the EFI unaccepted memory unit
+> > granularity (typically 2MB / order 9 on x86). Inflating the balloon
+> > with 4KB pages would prevent unaccepting the backing 2MB unit.
 > >
-> > Replace vring_map_single() with vring_map_indirect() and
-> > vring_unmap_indirect() using the device-level mapping path (vdev->map
-> > or dma_map_page_attrs()) so that indirect descriptor tables continue to
-> > be DMA-mapped for host VMM access even when a virtqueue overrides buffe=
-r
-> > mapping via vq->map_ops.
+> > Inflate balloon pages at unaccepted_memory_order() when
+> > virtballoon_cc_needs_state_transition() is true, while retaining
+> > order-0 allocations for non-CoCo guests and CoCo guests that do not
+> > use unaccepted memory transitions. When a higher-order balloon page
+> > spans more 4KB balloon PFNs than VIRTIO_BALLOON_ARRAY_PFNS_MAX (256),
+> > transmit its PFNs to the host in VIRTIO_BALLOON_ARRAY_PFNS_MAX chunks.
 > >
 > > Signed-off-by: Kevin Loughlin <kevinloughlin@google.com>
 >
-> Please, don't. The automatic mappings inside virtio core are there
-> to keep simple things, simple.
+> I'm not too happy that this rides on the legacy PFN thing
+> which is after all limited to 44 bit addresses.
 >
-> Everyone doing something funky with mappings should use the premapped API=
-.
+> And given it is passing around 2MB chunks, then one 16 byte descriptor
+> covering all of 2MB would actually be more efficient than 512 4-byte
+> PFNs.
 
-Thanks for suggesting. I will use the premapped API if I end up sending a v=
-2.
+Agreed. I debated initially doing this in a single descriptor but was
+trying to avoid also needing VMM changes.
+
+Regardless, after reading yours and David's comments, I honestly think
+it's better to just drop the legacy inflate/deflate and only include
+the free page reporting functionality if we end up adding some form of
+CoCo ballooning support. Beyond being inefficient-at-best here and
+potentially making fragmentation worse as you noted in another
+comment, the legacy inflate/deflate path is the biggest source of
+bloat in the mm/ side of changes for this series.
+
+> > ---
+> >  drivers/virtio/virtio_balloon.c | 87 ++++++++++++++++++++++++++-------
+> >  include/linux/balloon.h         |  1 +
+> >  mm/balloon.c                    | 67 +++++++++++++++++++------
+> >  3 files changed, 121 insertions(+), 34 deletions(-)
+> >
+> > diff --git a/drivers/virtio/virtio_balloon.c b/drivers/virtio/virtio_ba=
+lloon.c
+> > index 11f74848fdc4..d162c162b496 100644
+> > --- a/drivers/virtio/virtio_balloon.c
+> > +++ b/drivers/virtio/virtio_balloon.c
+> > @@ -182,6 +182,13 @@ static void balloon_ack(struct virtqueue *vq)
+> >       wake_up(&vb->acked);
+> >  }
+> >
+> > +static inline bool virtballoon_cc_needs_state_transition(void)
+> > +{
+> > +     return IS_ENABLED(CONFIG_UNACCEPTED_MEMORY) &&
+> > +            cc_platform_has(CC_ATTR_GUEST_MEM_ENCRYPT) &&
+> > +            has_unaccepted_memory();
+> > +}
+> > +
+> >  static void tell_host(struct virtio_balloon *vb, struct virtqueue *vq)
+> >  {
+> >       struct scatterlist sg;
+>
+>
+> Put all this, and preferred order, etc etc in kernel core somewhere,
+> and expose some sensible APIs that devices can use.
+
+Good call, will do.
