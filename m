@@ -1,79 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=91.218.175.204
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793295067;
-	b=FkNqALdMiGvbAjU8cYZozikAlQzZqPVwZVSGTm1efHet65dMuGMsU3IkaEVieyZjF/jl
-	 zGaiWOmW798pd5fqjSl92e8XiP3Xuzw4GITF23D8VpcYZKL8BL/mgqCJ4iURWLzObUIft
-	 BE0AF/SceCRvmFTDFZhtjcvVjaAc7OasoVM1enyeeVpZXIuIkDK4Kg2OMJPetbW/vQveC
-	 tQahiVEikBiymcKV6ztcOoEx6YHr3ZDKdn7ryZqPE6oVFhblqeHawDi85YPS2Cm+gHQAe
-	 nN2nWl84HG4s6V7QMrhQVuvdORV+1qEe0jZpDdoh5FlQYm+4EdTiSoI8jLujexbGdrw==
+	t=1793302109;
+	b=B1G27VHzgPKbZxOt/PCBTTyzx2PtfsO7Qy95D2ExkE7b82PVhkRCs+sLcvXmRQ1jdyVG
+	 fR9Oz5oV6JnRLp9WXJEiUg+f5c0I0VfBWICjQtNFEbqhzJvWgk4kZrYn/L76IsBts8cA/
+	 g/r1M7m0U9H+nA5zRtUyrdqtVPzyh1Be3vQcVcbWQvU1+4w6XZSB5a8bUHMFJe1AX3vP3
+	 j6y6yKNQQSHJPP0dwBHsbpPAaTgthJJ4Hisd/4nY9zMgk6KpW1XlXaAxljXyNnc6SUcIV
+	 NFqSCRVrHqdiNXA7+B/4R2rlt00Ik7iMD3hjngSPofVWcEcq5R8N/+uXlTmI2NB5e0w==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793295067;
-	h=DMARC-Filter:X-Envelope-To:DKIM-Signature:X-Envelope-To:Received:
-	 X-Mizu-Trace-ID:X-Migadu-Flow:From:To:Cc:Subject:Date:Message-ID:
-	 X-Mailer:In-Reply-To:References:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=hjl3YWLB9mIMK4NxN5xFoTsa4zvmwEeXlgSjnO0OUbA=;
-	b=xnMzwoFNCzTi25Hh0Kwhc4L1nk4fmqaHMJfEUrrfMYF325YVStOSDjFevgBnKDrrDelM
-	 BALTab59Jg3c7Zlz5r/hmABYSs5s2wLnSBlz/KexmJ4zWFcaq3vdevmcHMOBK8iOIawBQ
-	 7fCgId2+rxrV2X77nH1qGE5USkKNFSLWrTquTrw05Q4Pv2oSnAxoUbn1xZzWk27ZjJH2/
-	 8rkLZ7CYB51if+h6S8eWOEuMunHXB5jh1/Y+/zu1UFZ4mSxfm2PmG6Ytpos04spJvHFYT
-	 K9Pt3/TT7CUDNtRzlCoM6AiE9uLi6Ie/gOvHq8XepU3hqUQToah47Ul9AUAENFV+vng==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793302109;
+	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
+	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type:Content-Transfer-Encoding;
+	bh=l0+5ubFd1J4lsWZ084UYpuCIbDZPJCuWoPpCJ9/g/fE=;
+	b=dBCEsI+tnnlpP9y+yjZd1S5YG2OPExKJlMR57j8ZXLLED2P9FJq7VhYwxo1e7WE9GoCQ
+	 +6ZJiZubL8/slx3BKQ0Qs7q5R16oIkxl8P0CUmN0dvDX5EOz71Ea5v4KQnY48jzzIGuxD
+	 JQLugwn+LcIGZBFw3W9Byif8XoXFcfRfV1SaHDRKtbUgBM9mjSMgRjfRLUJ4JufSRvIo5
+	 4BWZzdXmHLKmsUCIrpyqFf52ajv9wBXG9Z0WDSPUfPbDxul7WpLz5xQ2Hpq4GeZ++T0jy
+	 X1NEiohruTPLo7dtYGvTgdcXgbITVJWVFM346hFJ/cj6rBPlVNeN5IY3mmU8LP4ZdQw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=linux.dev;
-	spf=pass smtp.mailfrom=linux.dev;
-	dkim=pass header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=W9LFoFBs;
-	arc=none smtp.remote-ip=91.218.175.204
-Received: from mta0.migadu.com (out-204.mta0.migadu.com [91.218.175.204])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=RGkwUZO4;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A2C6606A327
-	for <linux-efi@vger.kernel.org>; Thu, 29 Oct 2026 17:31:06 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5A2C6606A327
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3BBE3606A31E;
+	Thu, 29 Oct 2026 19:28:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=W9LFoFBs
-X-Envelope-To: linux-efi@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=GBih4azSAalhMpwQa4vAt/wr7df5ETSpm+lkTN2YYcw=;
- c=simple/simple; d=linux.dev;
- h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1793295064; v=1; x=1793899864;
- b=W9LFoFBszpWry1/NSZbVhjNsFbcVuSrt/CoO/JfaLe7WiVW7vFpNJY7uGjKf+aJPQSKJXkIV
- 06V+5qqpODl9AsLap7BQ8oVrkrYL+GpTR9hNsSgs8TMSSct9wgIdgHD1c/40EKKFuVfRSevj1BA
- V7H11bHuwTRyacCfRGC8mjeE=
-X-Envelope-To: linux-efi@vger.kernel.org
-Received: by smtp.migadu.com with ESMTPS id d28391d344248cfb;
-	Thu, 29 Oct 2026 17:31:04 +0000
-X-Mizu-Trace-ID: d28391d344248cfb
-X-Migadu-Flow: FLOW_OUT
-From: George Guo <dongtai.guo@linux.dev>
-To: rppt@kernel.org,
-	pasha.tatashin@soleen.com,
-	pratyush@kernel.org,
-	chenhuacai@kernel.org,
-	ardb@kernel.org,
-	shuah@kernel.org
-Cc: ilias.apalodimas@linaro.org,
-	akpm@linux-foundation.org,
-	baoquan.he@linux.dev,
-	ruirui.yang@linux.dev,
-	guodongtai@kylinos.cn,
-	kernel@xen0n.name,
-	graf@amazon.com,
-	liukexin@kylinos.cn,
-	loongarch@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	kexec@lists.infradead.org,
-	linux-mm@kvack.org,
-	linux-kselftest@vger.kernel.org,
-	linux-efi@vger.kernel.org
-Subject: [PATCH v6 8/8] selftests/liveupdate: Add LoongArch vmtest support
-Date: Fri, 30 Oct 2026 02:29:55 +0900
-Message-ID: <20261029172956.20791-9-dongtai.guo@linux.dev>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20261029172956.20791-1-dongtai.guo@linux.dev>
-References: <20261029172956.20791-1-dongtai.guo@linux.dev>
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=RGkwUZO4
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 42BEB1F01825;
+	Thu, 29 Oct 2026 19:28:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793302108;
+	bh=l0+5ubFd1J4lsWZ084UYpuCIbDZPJCuWoPpCJ9/g/fE=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=RGkwUZO4lk0dRv+GCt6hx+Fa3JOBxQ5LpFilAhtlj+7EgNtaLZsNIsmN7bBZoimWF
+	 mbYVmeEC6H8Wal5rW6OFzXmN8XqQHluMk/wmMoiH7gkBHSF8eJ0ss1U8W/vFZnIjY0
+	 J9etYb5B/EbNd0+VKAQdCBGYywn3pjsITdP8ljx0ZZjnWMLsh/h0q2Xmya5JARAT/e
+	 G/03IGzogJXIVC6ACnxCg2WckjZFCOVBszefNj4FOk0Kp3mOnXAtdZz/E2F9FSisRn
+	 k/+IkAHFs4FpgJkfprKkYtiyXUKTuK6I+YkkcS8nHysmEKvq/kQ9WUkcGsmDERCUYJ
+	 yxpeOhPFPCKQA==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 84372198003A;
+	Thu, 29 Oct 2026 15:28:25 -0400 (EDT)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Thu, 29 Oct 2026 15:28:25 -0400
+X-ME-Sender: <xms:Vp7japqDDH7MTBpj2o1_0HawlWVyvY0FOU7D8Nd9IguEUhdaix0NLg>
+    <xme:Vp7jamc4F6MAAJVzCkF6_bNAJ-7k-8SOvhUA7n3HuyFOvMyH0BMFlNP5K3bDlVkmU
+    _MmSSbFPwfBRpUeSAyALsDRKfHwP5svjvMMMnJX_-T0oDwT3xHlOQ>
+X-ME-Proxy-Cause: dmFkZTEUgvLRPruJWwMD4Akvs3ZiKwYmL4oDztPDoA8hrr5wiy3BkBr/L+J8ffIc495+a8
+    sVhiVVtwPIuNAOKAlOpndG4mY3OFBA0yxH/iDkko4Iw92VWlZpDVx91SpbqSTdnJwCsCmq
+    fNWy+5fryrK9SVPiry0Lo1zBi6buqOp0lcoqLNhSe+EeqeBh3swNKQj473ROSt/e3Q3YzT
+    Y6Vqe3oHE7LWnGQ7fdLxgfCMkC2+Mben6NfQDOT8lpSGnMgUR7e0byjD60bSFe5B3Hne7U
+    w5Gfiok6+D9TuVISthJHKLQtTSjEFU84bn3lh0P6LFT1Swa09hrw4mNbqBD5zejN/EOIVm
+    llqnU5WA+hypRMru22igAtp2EarCpc/fa5olztzEdkS0JpQS4cjmX6GqUrUxqz7IITIK4z
+    K3yxyQbcBGMl04ZmpOqisSGPU9G/2asCSPnYRTSQLv5jInUHP/+yzOxTPG2wbvC9GhIS8Z
+    nwAjnIxctRgMiScIn7m6OoJIyndLKBXCkesgX55ummn8NiOto5buDBM9zYGYlz6iHP3oCs
+    7guFdH0nVF56k6/788zHoqITj7rHth1rQqq8VphlCPUZPp0f0Tf2V7S+aum5FfPDPzLsPo
+    sw2J/w3694XUXfHo/Js1a6n736sSGucGslN4UA8hN96a5+o4rLIesRyiQSiw
+X-ME-Proxy: <xmx:WZ7jam3_6jP7JYZKi7_ncq2u7jb1GraqdICHIIEXhUjfDVgazjJ8Gw>
+    <xmx:WZ7javjQ0EQPb0oalPZ_Y84GSb9fuBCm5hcsd0-_BmBh8nf4QJ4h4A>
+    <xmx:WZ7jasZ9VmdjIbSXaeztyyyt16GVwnJztwEObzWgR8yzA6LOMR-XqA>
+    <xmx:WZ7jagN_FdpPrbKtzGVUnXth4ieCquH3vlgtCHvjBwW2p6cxqSnNgQ>
+    <xmx:WZ7jaoR32XkuWPNxMvWbVBj2VFK7d4bzjxxEq1WJNsRrSY-uXsbr36X4>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id F28D7F80093; Thu, 29 Oct 2026 15:28:21 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -83,110 +77,60 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Date: Thu, 29 Oct 2026 20:28:01 +0100
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "George Guo" <dongtai.guo@linux.dev>, "Mike Rapoport" <rppt@kernel.org>,
+ "Pasha Tatashin" <pasha.tatashin@soleen.com>,
+ "Pratyush Yadav" <pratyush@kernel.org>,
+ "Huacai Chen" <chenhuacai@kernel.org>, shuah@kernel.org
+Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "Andrew Morton" <akpm@linux-foundation.org>, baoquan.he@linux.dev,
+ ruirui.yang@linux.dev, guodongtai@kylinos.cn,
+ "WANG Xuerui" <kernel@xen0n.name>, "Alexander Graf" <graf@amazon.com>,
+ liukexin@kylinos.cn, loongarch@lists.linux.dev, linux-kernel@vger.kernel.org,
+ kexec@lists.infradead.org, linux-mm@kvack.org,
+ linux-kselftest@vger.kernel.org, linux-efi@vger.kernel.org
+Message-Id: <2382a0ee-cb6d-4572-be6e-ce3cf4d006e5@app.fastmail.com>
+In-Reply-To: <20261029172956.20791-2-dongtai.guo@linux.dev>
+References: <20261029172956.20791-1-dongtai.guo@linux.dev>
+ <20261029172956.20791-2-dongtai.guo@linux.dev>
+Subject: Re: [PATCH v6 1/8] efi: Pass KHO state to the next kernel in a configuration
+ table
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-From: George Guo <guodongtai@kylinos.cn>
 
-Add the LoongArch kernel configuration, target and cross-compiler
-detection, and include loongarch64 in the VM test suite.
+On Thu, 29 Oct 2026, at 18:29, George Guo wrote:
+> From: George Guo <guodongtai@kylinos.cn>
+>
+> KHO has to give the next kernel two addresses: the KHO FDT and the
+> bootmem area list. arm64 and riscv put them under /chosen in the boot
+> FDT. LoongArch systems booting with EFI and ACPI do not require a boot
+> FDT, so KHO needs another way to pass this information.
+>
+> Add a Linux EFI configuration table for them, under
+> LINUX_EFI_KEXEC_HANDOVER_GUID. It points to a struct linux_efi_kho_data.
+>
+>   - On a cold boot, the LoongArch EFI stub installs the table, zeroed.
+>     Each kexec'd kernel is given the same EFI system table, so it finds
+>     the same table.
+>
+>   - In early boot, efi_config_parse_tables() reserves the table so
+>     neither the page allocator nor kexec segments use it, and calls
+>     kho_populate() if the table holds KHO state.
+>
+>   - Provide efi_kho_update() to update the table before kexec. Map the
+>     table during boot so updates do not require allocation or mapping
+>     at panic time.
+>
+>   - efi_kho_table_found() tells architecture code whether the table was
+>     found at boot, so it can turn KHO off when the table is missing.
+>
+> Only the LoongArch stub installs the table, and only with
+> CONFIG_KEXEC_HANDOVER. Elsewhere there is no table and this code does
+> nothing.
+>
 
-Boot vmlinux.efi through EFI firmware so the EFI stub installs the KHO
-table. Allow the firmware path to be set with QEMU_EFI and skip the test
-if it is unavailable.
-
-Co-developed-by: Kexin Liu <liukexin@kylinos.cn>
-Signed-off-by: Kexin Liu <liukexin@kylinos.cn>
-Signed-off-by: George Guo <guodongtai@kylinos.cn>
----
- .../selftests/liveupdate/config.loongarch64        |  5 +++++
- tools/testing/selftests/liveupdate/run-vmtests.sh  |  4 ++--
- tools/testing/selftests/liveupdate/vmtest.sh       | 14 +++++++++++++-
- 3 files changed, 20 insertions(+), 3 deletions(-)
- create mode 100644 tools/testing/selftests/liveupdate/config.loongarch64
-
-diff --git a/tools/testing/selftests/liveupdate/config.loongarch64 b/tools/testing/selftests/liveupdate/config.loongarch64
-new file mode 100644
-index 000000000000..264067ef5ab1
---- /dev/null
-+++ b/tools/testing/selftests/liveupdate/config.loongarch64
-@@ -0,0 +1,5 @@
-+CONFIG_ACPI_SPCR_TABLE=y
-+CONFIG_PCI_HOST_GENERIC=y
-+CONFIG_SERIAL_8250=y
-+CONFIG_SERIAL_8250_CONSOLE=y
-+CONFIG_SMP=y
-diff --git a/tools/testing/selftests/liveupdate/run-vmtests.sh b/tools/testing/selftests/liveupdate/run-vmtests.sh
-index d656ce58c5a7..f6cfb76b1dac 100755
---- a/tools/testing/selftests/liveupdate/run-vmtests.sh
-+++ b/tools/testing/selftests/liveupdate/run-vmtests.sh
-@@ -4,7 +4,7 @@
- SCRIPT_DIR=$(dirname "$(realpath "$0")")
- TEST_RUNNER="$SCRIPT_DIR/vmtest.sh"
- 
--TARGETS=("x86_64" "aarch64")
-+TARGETS=("x86_64" "aarch64" "loongarch64")
- 
- GREEN='\033[0;32m'
- RED='\033[0;31m'
-@@ -72,7 +72,7 @@ function main() {
- 		for test_name in "${TEST_NAMES[@]}"; do
- 			log="$output_dir/${arch}_${test_name}.log"
- 
--			printf "  -> %-8s %-24s ... " "$arch" "$test_name"
-+			printf "  -> %-11s %-24s ... " "$arch" "$test_name"
- 
- 			"$TEST_RUNNER" -t "$arch" -T "$test_name" &> "$log"
- 			exit_code=$?
-diff --git a/tools/testing/selftests/liveupdate/vmtest.sh b/tools/testing/selftests/liveupdate/vmtest.sh
-index 69beda6c961d..ffe82512f3e4 100755
---- a/tools/testing/selftests/liveupdate/vmtest.sh
-+++ b/tools/testing/selftests/liveupdate/vmtest.sh
-@@ -21,6 +21,12 @@ function get_arch_conf() {
- 		QEMU_CMD="qemu-system-aarch64 -M virt -cpu max"
- 		KERNEL_IMAGE="Image"
- 		KERNEL_CMDLINE="console=ttyAMA0"
-+	elif [[ "$arch" == "loongarch" ]]; then
-+		local qemu_efi="${QEMU_EFI:-/usr/share/edk2/loongarch64/QEMU_EFI.fd}"
-+		[ -r "$qemu_efi" ] || skip "EFI firmware '$qemu_efi' not found, set QEMU_EFI"
-+		QEMU_CMD="qemu-system-loongarch64 -M virt -cpu la464 -bios $qemu_efi"
-+		KERNEL_IMAGE="vmlinux.efi"
-+		KERNEL_CMDLINE="console=ttyS0 earlycon"
- 	elif [[ "$arch" == "x86" ]]; then
- 		QEMU_CMD="qemu-system-x86_64"
- 		KERNEL_IMAGE="bzImage"
-@@ -37,11 +43,15 @@ $0 [-d build_dir] [-j jobs] [-t target_arch] [-T test_name] [-w workspace_dir] [
- Options:
- 	-d)	path to the kernel build directory (default: .luo_test_build.<arch>)
- 	-j)	number of jobs for compilation
--	-t)	run test for target_arch (aarch64, x86_64)
-+	-t)	run test for target_arch (aarch64, loongarch64, x86_64)
- 	-T)	test name to run (default: luo_kexec_simple)
- 	-w)	custom workspace directory (default: creates temp dir)
- 	-k)	keep workspace directory after successful test
- 	-h)	display this help
-+
-+Environment:
-+	QEMU_EFI	LoongArch EFI firmware path
-+			(default: /usr/share/edk2/loongarch64/QEMU_EFI.fd)
- EOF
- }
- 
-@@ -86,6 +96,7 @@ function detect_cross_compile() {
- 	local candidate=""
- 	case "$target" in
- 		aarch64) candidate="aarch64-linux-gnu-" ;;
-+		loongarch64) candidate="loongarch64-linux-gnu-" ;;
- 		x86_64)  candidate="x86_64-linux-gnu-" ;;
- 		*)       skip "Auto-detection for target '$target' not supported. Please set CROSS_COMPILE manually." ;;
- 	esac
-@@ -193,6 +204,7 @@ function target_to_arch() {
- 	local target=$1
- 	case $target in
- 	     aarch64) echo "arm64" ;;
-+	     loongarch64) echo "loongarch" ;;
- 	     x86_64) echo "x86" ;;
- 	     *) skip "architecture $target is not supported"
- 	esac
--- 
-2.53.0
+Can we handle this as an arch table then, and handle everything in
+the LoongArch arch code?
 
