@@ -1,118 +1,57 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=212.42.244.94
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793366994;
-	b=KITLk868xANVPlXQjCxsYcohC4PQ4FTtRK/rE4Yp+G8hdqYefJ69rlVW8ontzFGuAEZw
-	 /ekRclvU5SAx6dLu/zUXw5ScDdL6HsbOeJpNWcmfW/VQPkceClVhdrkR8EfWAGI+nONbc
-	 6ElWuzDo64Artr/cVS51oL+lc/u5Q5ETb4yldAbeDI4iEMlfnM1XnGkUW9x835/FSsOQs
-	 oWT+6xZAJ5ncZB6hj/ntH0Vdf+QeuId4i3vtW2GUm9nflflvXfeRE4LWeNiX4J41lHg+j
-	 BUjeQKDRytVCQUeydKsL5LmWI9m6nkr5yLsK/YhMZ9s+2tNhO+IiXKx1FmnJQr+grZQ==
+	t=1793376590;
+	b=tiGyRtO3F6DRRkma6PpkTdHeSIR2z92SA2J3kd/fD8h7SB5m154CTTbHz312yp2wl5Ph
+	 Dv6tONa5KCN+syupxoIhIkXYbtpRZ7Mk6piTwl2+YA2PiBdj19OeRBbxuhVYfdnp9XbKq
+	 i0JguBRDJsVB63QJ1w81GguFRHOScwdXjGks+FUYxwmAk1EFzrrQ+JdLwfwKd6+oL9A7c
+	 OWmo1w0gtcuytIOJivctPBemBlVWCIRACPcFeBhDVFhUQP4Czo6NaKtr1g7+FxKp1RESo
+	 0I2qcS056yjRe4gK8xENdzzO3iQG8IK2N7PNHet4CMT9oH/REC1vTI6yI0HLW8RNzXA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793366994;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:Date:From:To:Cc:
-	 Subject:Message-ID:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To:Organization:x-ms-reactions:
-	 X-purgate-ID:X-purgate-type:X-purgate-size:X-Notice:X-purgate:
-	 X-purgate:X-pfmilter;
-	bh=QpUKaSoVRoEgdKmoyk8G7l81p1qWRtQXTZ0eVa1XsI0=;
-	b=f6IDDM4NhbwiFYS1LPPUgfuV6ppKu5XuPxXLtW7xeqN9V1JOseEiUh9Ym+JHytrC3ri8
-	 niXReb0ZZpep/ay+qqNUMlQqLw5ywqp1kDK50usUApkWS2AowDj4KChpaXhYAW1JqyuTK
-	 bRks7wyIOVdnrE0CzfF2YwVAR6xsge6tCQhIDoDHPFYw7CURjXO0ttpQwCsfgiu9yKiei
-	 5IE/ce36xBl3He+xzzi4Ud+JiM05GpuIn/yCQO9rx7UvRJMZ+bxJpHb10mrYdVLt0Vdr+
-	 YVhbGt++F9QmDr7NmacCzl89Ya9GELVFZcZcUDpk7//VlbyC/t/sgSBvI6x9xPFnVKA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793376590;
+	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
+	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
+	bh=/Mychch7C97ZshwEL9ueE88CfYbxixMq3ZaDwvqpgks=;
+	b=RWQp+HpUpz9lVgIzQGL9+kdxsp15Zt7Z10BzDdqa/B9m3SKzPv/Zikq52IsJdGwPOVwB
+	 iO4VGOiW6vkXJO1pBLRhsfOIHKEWXsRSyrSupJj8BZngevH/i5wlRsOJrqSRx2LKkHJu8
+	 A0DGa9IT2pZ5Q0MYH9ghUhjzQtFqJKoUzH+waPATk7KQKFoNPjFDXVbJQ7IJO0VS02KjL
+	 dMrqC/dGaDo10LUiG+5FvGBYVDamSidNKPQlAuAxE6Nt16zxMjisfz6RmIXybce644Oho
+	 09HWjw6doUSwQVq8ZVGu1xRWXTyaelgW8JMx74p5TrP986eCxZXZMk6IKHE3b0B4i1A==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=fritz.com;
-	spf=pass smtp.mailfrom=fritz.com;
-	dkim=pass header.d=fritz.com header.i=@fritz.com header.a=rsa-sha256 header.s=mail header.b=AmiP1sdZ;
-	arc=none smtp.remote-ip=212.42.244.94
-Received: from mail.avm.de (mail.avm.de [212.42.244.94])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=RMKXxT+B;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E99AC606A31C;
-	Fri, 30 Oct 2026 13:29:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E99AC606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fritz.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fritz.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF5AC606A321;
+	Fri, 30 Oct 2026 16:09:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=fritz.com header.i=@fritz.com header.a=rsa-sha256 header.s=mail header.b=AmiP1sdZ
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=fritz.com; s=mail;
-	t=1793366980; bh=a/fEt90n+2smzc8tULN5m3m/hMMA3WQXHcvWhcoynLc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=AmiP1sdZKE4ipmV9XkFzIAg6sDdTc8piKssit8JG5M7jVm+wWoA9HNBcL6nnioxmf
-	 UtVWmWL8HC8cipXhGGKFKn344d7QBy4BigwXDhd9cibHOOYqfnPwcm+wl7S8LyH40H
-	 PIcRpdlbp12mkcZ/qVoxVXxHxdsVB4yBgm4K8e8Gb7j8o5MGT6HVOS52CCT1ImUgYM
-	 rC8fGm5esO5fYtQK82TXSmpyrCUdX6hUkhNuydSuiEjRPAEuIkSRJ3Vr5CzOMuVEiE
-	 +YmeA56zTDNX6G2v3XBcddEQclfpxGdALH3GP+htSNoKgdV3GvyPoPiSSRu1+yw2Ux
-	 Cmo8WDvejZ5Lw==
-Received: from [212.42.244.78] (helo=mail.avm.de)
-	by mail.avm.de with ESMTP (eXpurgate 4.57.1)
-	(envelope-from <n.schier@fritz.com>)
-	id 6ae49bc4-23c8-7f0000032729-7f0000019972-1
-	for <multiple-recipients>; Fri, 30 Oct 2026 14:29:40 +0100
-Received: from mail-auth.fritz.com (unknown [212.42.244.78])
-	by mail.avm.de (Postfix) with ESMTPS;
-	Fri, 30 Oct 2026 14:29:40 +0100 (CET)
-Date: Fri, 30 Oct 2026 14:29:39 +0100
-From: Nicolas Schier <n.schier@fritz.com>
-To: Thomas Huth <thuth@redhat.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Nathan Chancellor <nathan@kernel.org>,
-	Richard Henderson <richard.henderson@linaro.org>,
-	Matt Turner <mattst88@gmail.com>,
-	Magnus Lindholm <linmag7@gmail.com>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Will Deacon <will@kernel.org>, Huacai Chen <chenhuacai@kernel.org>,
-	Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-	Madhavan Srinivasan <maddy@linux.ibm.com>,
-	Heiko Carstens <hca@linux.ibm.com>,
-	Vasily Gorbik <gor@linux.ibm.com>,
-	Alexander Gordeev <agordeev@linux.ibm.com>,
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-	Chris Zankel <chris@zankel.net>, Max Filippov <jcmvbkbc@gmail.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Andrew Lunn <andrew+netdev@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@kernel.org>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Luis Augenstein <luis.augenstein@tngtech.com>,
-	Maximilian Huber <maximilian.huber@tngtech.com>,
-	Anup Patel <anup@brainfault.org>,
-	Paolo Bonzini <pbonzini@redhat.com>, Shuah Khan <shuah@kernel.org>,
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>,
-	Andy Lutomirski <luto@kernel.org>,
-	Vincenzo Frascino <vincenzo.frascino@arm.com>, soc@lists.linux.dev,
-	linux-kernel@vger.kernel.org, linux-kbuild@vger.kernel.org,
-	Thomas =?utf-8?Q?Wei=C3=9Fschuh?= <linux@weissschuh.net>,
-	Mark Rutland <mark.rutland@arm.com>,
-	WANG Xuerui <kernel@xen0n.name>,
-	Michael Ellerman <mpe@ellerman.id.au>,
-	Nicholas Piggin <npiggin@gmail.com>,
-	"Christophe Leroy (CS GROUP)" <chleroy@kernel.org>,
-	"Ritesh Harjani (IBM)" <ritesh.list@gmail.com>,
-	Shrikanth Hegde <sshegde@linux.ibm.com>,
-	Christian Borntraeger <borntraeger@linux.ibm.com>,
-	Sven Schnelle <svens@linux.ibm.com>,
-	"H. Peter Anvin" <hpa@zytor.com>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Atish Patra <atish.patra@linux.dev>,
-	Sean Christopherson <seanjc@google.com>,
-	Alexandre Ghiti <alex@ghiti.fr>,
-	Nick Desaulniers <ndesaulniers@google.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>, linux-alpha@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org, loongarch@lists.linux.dev,
-	linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-	linux-s390@vger.kernel.org, linux-efi@vger.kernel.org,
-	netdev@vger.kernel.org, kvm@vger.kernel.org,
-	kvm-riscv@lists.infradead.org, linux-riscv@lists.infradead.org,
-	linux-kselftest@vger.kernel.org, llvm@lists.linux.dev
-Subject: Re: [PATCH v5 13/13] treewide: Stop defining __ASSEMBLY__ for
- assembler files
-Message-ID: <20261030-dexterous-manatee-of-honor-eac4eb@l-nschier-z2>
-References: <20261023064908.66707-1-thuth@redhat.com>
- <20261023064908.66707-14-thuth@redhat.com>
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=RMKXxT+B
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E68531F0093A;
+	Fri, 30 Oct 2026 16:09:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793376589;
+	bh=/Mychch7C97ZshwEL9ueE88CfYbxixMq3ZaDwvqpgks=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=RMKXxT+B4dNKzdHHvyHv7QRa6GglJeLRWrTxOikxDwc+SHMb9xEBrc8c1E9TrVOgi
+	 mGRCZmfYcTpwdmiI/rDvNEsuRV9zmPLQs9306hQFzPqtnwO1tweYM6fsBJmWTJHCls
+	 M60ZKwJvGWH6hZPdqx5fTZg68tpin62dI971F3w0H7Evh06LXtdzT/FuCJKVvucO4h
+	 9kTAPmXgB97nIAHmjSnQLmOlFmtmqO4k81UX7OuFWTo/Ti9+6gy8rvCksSOeO5HcOA
+	 nP8VIjciRIKaR9iRXnHUu4XmgWL2lJe7XKja19iNq7XFA4nJOjWleVOBosgPGKedBh
+	 ZR6+8hCxaOHHQ==
+Message-ID: <sashiko-outbox-191221@kernel.org>
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH v2 02/34] ecryptfs: fall back to a read-only lower file
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.com>
+Cc: "Al Viro" <viro@zeniv.linux.org.uk>, linux-ext4@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org, dsterba@suse.cz, tytso@mit.edu, "Mark
+ Fasheh" <mark@fasheh.com>, "Joel Becker" <jlbec@evilplan.org>, "Joseph Qi" <joseph.qi@linux.alibaba.com>
+In-Reply-To: <20261029-work-fs-sb_rdonly-v2-2-2f44f64f0b66@kernel.org>
+References: <20261029-work-fs-sb_rdonly-v2-0-2f44f64f0b66@kernel.org>
+ <20261029-work-fs-sb_rdonly-v2-2-2f44f64f0b66@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Fri, 30 Oct 2026 16:09:48 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -121,78 +60,87 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="FhzCQO4A3K0b968D"
-Content-Disposition: inline
-In-Reply-To: <20261023064908.66707-14-thuth@redhat.com>
-Organization: FRITZ! Technology GmbH
-x-ms-reactions: disallow
-X-purgate-ID: 149429::1793366980-1E7C8EE4-1E744FE6/0/0
-X-purgate-type: clean
-X-purgate-size: 2843
-X-Notice: Whitelisted
-X-purgate: This mail is considered clean (visit https://www.eleven.de for further information)
-X-purgate: clean
-X-pfmilter: host: postfix-mx-03  mail-id: E6A11A07A2  external: no
 
---FhzCQO4A3K0b968D
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Thank you for your contribution! Sashiko AI review found 1 potential issue(=
+s) to consider:
+- [Medium] ecryptfs: ECRYPTFS_KEY_VALID left set after ecryptfs_initialize_=
+file() fails
+--
 
-On Fri, Oct 23, 2026 at 08:48:50AM +0200, Thomas Huth wrote:
-> All spots have been changed to __ASSEMBLER__ (i.e. the macro that
-> gets defined by the compiler), so we don't have to manually define
-> __ASSEMBLY__ anymore.
->=20
-> Signed-off-by: Thomas Huth <thuth@redhat.com>
-> ---
->  Makefile                                             | 2 +-
->  arch/alpha/boot/compressed/Makefile                  | 2 +-
->  arch/arm64/kernel/vdso32/Makefile                    | 1 -
->  arch/loongarch/vdso/Makefile                         | 2 +-
->  arch/mips/boot/compressed/Makefile                   | 2 +-
->  arch/mips/vdso/Makefile                              | 2 +-
->  arch/powerpc/boot/Makefile                           | 2 +-
->  arch/powerpc/platforms/cell/spufs/Makefile           | 2 +-
->  arch/s390/Makefile                                   | 2 +-
->  arch/x86/boot/Makefile                               | 2 +-
->  arch/x86/boot/compressed/Makefile                    | 2 +-
->  arch/x86/realmode/rm/Makefile                        | 2 +-
->  arch/xtensa/kernel/Makefile                          | 2 +-
->  drivers/firmware/efi/libstub/Makefile                | 2 +-
->  drivers/net/wan/Makefile                             | 2 +-
->  scripts/Makefile.build                               | 2 +-
->  scripts/gfp-translate                                | 2 +-
->  scripts/headers_install.sh                           | 1 -
->  scripts/sbom/tests/cmd_graph/test_savedcmd_parser.py | 2 +-
->  tools/testing/selftests/kvm/lib/riscv/handlers.S     | 4 ----
->  tools/testing/selftests/vDSO/vgetrandom-chacha.S     | 2 --
->  21 files changed, 17 insertions(+), 25 deletions(-)
->=20
+commit f7dbc785a33f0a188b62f1d0ae6c24e5fc32a62c
+Author: Christian Brauner <brauner@kernel.org>
 
-Reviewed-by: Nicolas Schier <n.schier@fritz.com>
+ecryptfs: fall back to a read-only lower file
 
+This commit falls back to opening the lower file read-only when opening it
+read-write fails with EROFS, and rejects writes to a read-only lower file in
+ecryptfs_write_lower() and __ecryptfs_truncate() with EROFS.
 
---FhzCQO4A3K0b968D
-Content-Type: application/pgp-signature; name=signature.asc
+> diff --git a/fs/ecryptfs/read_write.c b/fs/ecryptfs/read_write.c
+> index b3b451c2b9410..b3956ae50ff66 100644
+> --- a/fs/ecryptfs/read_write.c
+> +++ b/fs/ecryptfs/read_write.c
+> @@ -33,6 +33,9 @@ int ecryptfs_write_lower(struct inode *ecryptfs_inode, =
+char *data,
+>  	lower_file =3D ecryptfs_inode_to_private(ecryptfs_inode)->lower_file;
+>  	if (!lower_file)
+>  		return -EIO;
+> +	/* ecryptfs_open_lower() may have fallen back to a read-only file. */
+> +	if (!(lower_file->f_mode & FMODE_WRITE))
+> +		return -EROFS;
 
------BEGIN PGP SIGNATURE-----
+[Severity: Medium]
+When opening an existing 0-byte lower file with O_RDONLY on a read-only low=
+er
+mount (or a lower filesystem in an error state) with default mount options,
+ecryptfs_open() sets ECRYPTFS_POLICY_APPLIED | ECRYPTFS_ENCRYPTED on
+crypt_stat->flags and calls read_or_initialize_metadata().
 
-iQIzBAABCAAdFiEEDv+Fiet06YHnC6RpiMa8nIiabbgFAmrkm8MACgkQiMa8nIia
-bbgYnhAAoBtAI6CuFq9HQy+0LMEBBrZiObTja20n/nhSog1KoLUqfiUozqhmkZ/q
-CT6UauaVVL+guGjUkQd4MU9Y4sF+qy0kKmfzavbo/MIofHFX6fypq5WinV83BS4k
-PfHvku6pkGUFMvVkCliG3iiJVbANl4MGycOY5VxIXI9veRse6+SRuWaP5fqRD0dv
-XZHNc+ZmLOMmkijTKgYUq7fUIdBhxmeq4Px5Q0aq0cESHCORoGOcUcdASB8KRxr/
-S2whk42NUvuQxJF/S68XDQ9N3LdkhPBY2Y0GHdcJ+esswGxGJVb7rfY38dRXkz8R
-a/X59L/D+n6k/1v/xfmmj36rd/INoushZOa+gNXEg5KPwORqTYICzhwVlfZz5mdv
-0XgTKePC+FBeKnCHfJjMK1P6SAnag5q59vu8MXmzNGH9HIhm2PzyPhRrPYA4lwBl
-N1Hh9kQBBwy4oEdLX69syKiLtIA3mDxbo80VqRIUm6MpUjxkTbkAgLQgfXDRz2M0
-Wa9/fDB/O1tJKj8IR8V+jbjPqz5/6/fNkpD9/6fpqvBgeD2vkjOk3q/IvTq5gvHK
-ApKpaLY5DYJBXdX80Rm5ofEmFac0/p9C+eX3ovHAHFIG7JPR5kTF3fwDtbSbP7z6
-ghTZsJCcqEgyM22oqOSpskYbUmxnPEnUkGMg6K1a7KZPgUJQ9zA=
-=Pwya
------END PGP SIGNATURE-----
+Because the lower file is empty, ecryptfs_read_metadata() fails and
+read_or_initialize_metadata() calls ecryptfs_initialize_file():
 
---FhzCQO4A3K0b968D--
+fs/ecryptfs/inode.c:ecryptfs_initialize_file() {
+	rc =3D ecryptfs_new_file_context(ecryptfs_inode);
+	if (rc) {
+		...
+		goto out;
+	}
+	rc =3D ecryptfs_get_lower_file(ecryptfs_dentry, ecryptfs_inode);
+	...
+	rc =3D ecryptfs_write_metadata(ecryptfs_dentry, ecryptfs_inode);
+	if (rc)
+		printk(KERN_ERR "Error writing headers; rc =3D [%d]\n", rc);
+	ecryptfs_put_lower_file(ecryptfs_inode);
+out:
+	return rc;
+}
+
+ecryptfs_new_file_context() sets ECRYPTFS_ENCRYPTED | ECRYPTFS_KEY_VALID in
+crypt_stat->flags before ecryptfs_write_metadata() calls
+ecryptfs_write_lower() and fails with -EROFS. Neither
+ecryptfs_initialize_file() nor read_or_initialize_metadata() clears
+ECRYPTFS_KEY_VALID (or ECRYPTFS_POLICY_APPLIED) on failure.
+
+On a second open(O_RDONLY) or ecryptfs_setattr() on the same cached inode,
+read_or_initialize_metadata() checks the flags at the start of the function:
+
+fs/ecryptfs/file.c:read_or_initialize_metadata() {
+	if (crypt_stat->flags & ECRYPTFS_POLICY_APPLIED &&
+	    crypt_stat->flags & ECRYPTFS_KEY_VALID) {
+		rc =3D 0;
+		goto out;
+	}
+	...
+}
+
+Because both flags remain set from the failed initialization, does the seco=
+nd
+open short-circuit metadata validation and succeed on the uninitialized emp=
+ty
+file (and if the lower mount is later remounted read-write, allow writes us=
+ing
+an in-memory key whose header was never written to disk)?
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261029-work-fs-sb=
+_rdonly-v2-0-2f44f64f0b66@kernel.org?part=3D2
