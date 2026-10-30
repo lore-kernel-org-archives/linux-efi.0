@@ -1,58 +1,58 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793376604;
-	b=a/qqIU7tkFhLMWehKQCq9OELaeKgMD7QAQxq8hBhcz+9HPG/+Uom44t9Bu44Svt2Rqtk
-	 pZu0C7CgipxSvTkZcRChUiKzMqNfHQBA/o4A9fdOa3Qz0VSKRFFroaNELMH4YQMAcyLdO
-	 X3rY4OgkNjTg0o33gOoBcaAIX48f7Qcy6N1a6qfidi9Lg7XTLZ8o+p35AGrcR8MJXyH+q
-	 QjQdLJFawDVSNtTOKIkDE5ai54sIUWncS1VH8YTBJMCnfeR0ZIOfMVAgT5AXEFzpBaQJr
-	 XDpZ+7hWfLO47Pgrw8i+j50RTRqTNxurLVHWdmsCEuAG/x4uwmdJWGLt7MtlTQAuL4A==
+	t=1793376596;
+	b=At+t46Pi8lh3Hblh25BFNG2OlSi17F7RuCKdExI2IOiStj5Pj4NA2HOjjHSI0bgKZ6YT
+	 xcMJCjoygcqvyQo4mxoKOuQGIADtd6LDIjW0Rs6biq9/u7ZcETje7xKgujnZbdd6aMAcI
+	 sHfARtxNDu1EMtkZOOQYOe4swzlN3L/GJcoonaHIJHQq1s3YygMlnHwGnD9xf2bxIFmcB
+	 vijITqPZweijqS3x4kNpJcxS2/JbjHlY99Rj5UJ7J3Y5DPiaEAGopLcdDvXJaW1AfhY7+
+	 UhEDefITiK2kCxkgmZ659TX8f4mtNNDYQRDu1G8Os+QY1OYal2algmq7a/36G/bgPiw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793376604;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793376596;
 	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
 	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
-	bh=v6Q73W+VdmnakUy7Y5elmMaCWEDdB23SrYHzIAMDn7g=;
-	b=JWMMTrtHOSf69kEKocDcuYLwbSZALqbDBkHukhZlGQBUeRYQboRUiQvM+u66gIDTSP/m
-	 p+X+PKXsuIGIhg+pxIIORS5rQdqSY6MqxPT0BPfxNxMrCxolzRaXGcFE4h5iI477AbFEM
-	 JZZwGkU5IceyZUWgv6OtWLSaCc3wcImSh7yz6GT0mtEOM/SRj/ow9JOxBlE+2l1btzQV8
-	 YEyUPRHnRPwiCztFD/eaXIsOhWb6kzqFoZQ0o30zSASSaoc0jedq1ejOm07OONKYJQVRc
-	 UNSf57qv0jaNJcYoucszfjy8y0ImL/Mcj+Iqzf9YiEbEB4BIRht89RH0lmoccIS0Dug==
+	bh=Fcm+hIfEyXj/1FIUdG0rmsM/tGutxaQ6UYWcc0TMcU8=;
+	b=E7HDK/e9pIfPwPUyYoVXi8lfzj03bv59ePP1uygRCWoTqOZE4sfqQ7cJKpAWV+KOg/ft
+	 Bzfv+Xb6NeBUqVYcWADw2fgBmO9sgt9fo5HO6nHsTpnuECPBvNG1Y6gTp+UPiWUmnpZ+Z
+	 hkPhlRZLqBAGm4EvP7iZie2Dwal/uJCHBwoY7Qep+lYC8kH3SkobrJgBpc0teju54cQkh
+	 zsOj2oAMZkATIb08GOB+hGF8GvHGf5bbQoc19tB4PkpKXsXVZ7waSLuPR+N/8o+UAYhYk
+	 Y76Fm0yV5nNEMOnXonUkxdh7Qi+pedAs2LbXE1/eRQy+161EFM64Afb3bhyJSutH/qQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=BAF3VZkc;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QI6bw7Wp;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD081606A338;
-	Fri, 30 Oct 2026 16:10:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DBF5606A33C;
+	Fri, 30 Oct 2026 16:09:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=BAF3VZkc
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B1431F0093A;
-	Fri, 30 Oct 2026 16:10:03 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QI6bw7Wp
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9CF091F00A17;
+	Fri, 30 Oct 2026 16:09:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793376603;
-	bh=v6Q73W+VdmnakUy7Y5elmMaCWEDdB23SrYHzIAMDn7g=;
+	s=k20260515; t=1793376596;
+	bh=Fcm+hIfEyXj/1FIUdG0rmsM/tGutxaQ6UYWcc0TMcU8=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=BAF3VZkcESPBHNBLVO+30EPHzGf30kWo2ewHfgcMcy0jZo/r31QELbi3CpNQSemRk
-	 3jFK0IS0u1K8btB8A4IZtH4bxRpuOgmyD/v0pMe1RDMYYMgCeikbG9p5MfYBp+aFIy
-	 q5o2RcOwBTAlx0TKCDeLbm1S1Esxvcy7VxkzcSTuhRDKa2/OWC5ieOSS1A/RNedgjc
-	 lv00s+NpcaSsuscaiBChDBuC3qDMvI+l7HDCHsaqNeum48k/ObujKmh1wZeDbFJ+4a
-	 yiUQ9ThrQ9Ownz28NCXdyTMWXDUd7uT6q8giDsM/ukhvIcLJoyAzUrxqWXsNHtWgkF
-	 vWVomann4IZOA==
-Message-ID: <sashiko-outbox-191236@kernel.org>
+	b=QI6bw7Wpe0jvnRPZ/15BzNWtxNle/TBdjDueozdSB/u2+/+fN4EKSixohfH5HY8vF
+	 hPc/925bZQTYTslO+O7V3sjaQP8Q4jnS47UWxyoQhVd3NuruyQmqu5PyHSYDWcmfVF
+	 2r6pd4ob3QSIt8N/S0Ra/BZ8+RRVJk2wFTjqxvITxBIchJXK6FE66lWDShwdQqP0CN
+	 lUBtcpSOBG+XvEynjhP6CpHYGeTlxDVG3rz9pVGpRy/D8t6rMhUhVLrDhyseFKXrbY
+	 b0W63QZ0rPxzdHARLQo2Yxq7pucvv7/7vOOY68ITxchgMhLfPg+AWOiAcUjYzSEkWH
+	 Rw2ljddrjlsEg==
+Message-ID: <sashiko-outbox-191228@kernel.org>
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v2 17/34] ntfs: don't set SB_RDONLY after filesystem
+Subject: Re: [PATCH v2 09/34] exfat: don't set SB_RDONLY after filesystem
  errors
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.com>
 Cc: "Al Viro" <viro@zeniv.linux.org.uk>, linux-ext4@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org, dsterba@suse.cz, tytso@mit.edu, "Mark
  Fasheh" <mark@fasheh.com>, "Joel Becker" <jlbec@evilplan.org>, "Joseph Qi" <joseph.qi@linux.alibaba.com>
-In-Reply-To: <20261029-work-fs-sb_rdonly-v2-17-2f44f64f0b66@kernel.org>
+In-Reply-To: <20261029-work-fs-sb_rdonly-v2-9-2f44f64f0b66@kernel.org>
 References: <20261029-work-fs-sb_rdonly-v2-0-2f44f64f0b66@kernel.org>
- <20261029-work-fs-sb_rdonly-v2-17-2f44f64f0b66@kernel.org>
+ <20261029-work-fs-sb_rdonly-v2-9-2f44f64f0b66@kernel.org>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Fri, 30 Oct 2026 16:10:02 +0000
+Date: Fri, 30 Oct 2026 16:09:55 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -62,123 +62,106 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 
-Thank you for your contribution! Sashiko AI review found 2 potential issue(=
+Thank you for your contribution! Sashiko AI review found 1 potential issue(=
 s) to consider:
-- [Medium] ntfs: missing ntfs_emergency_state() check in ntfs_drop_big_inod=
-e()
-- [Medium] ntfs: ntfs_trim_prealloc() mutates MFT records in emergency RO s=
-tate
+- [High] exfat: __exfat_truncate() and exfat_evict_inode() modify fs in eme=
+rgency RO
 --
 
-commit f2f6f70fa52c8d2d01384c57dde6822ea706a5e3
+commit 17c10ac04b3dad50bb870e977d92e72ea9d3bcfd
 Author: Christian Brauner <brauner@kernel.org>
 
-ntfs: don't set SB_RDONLY after filesystem errors
+exfat: don't set SB_RDONLY after filesystem errors
 
-This commit replaces setting SB_RDONLY on filesystem errors when mounted wi=
-th
-errors=3Dremount-ro with a new NV_EmergencyRO volume flag and an
-ntfs_emergency_state() helper so that freezing and thawing the superblock
-does not leave s_writers locked. It also adds an error_work work item to
-persist the dirty volume flag and updates write paths to check
-ntfs_emergency_state().
+This commit introduces EXFAT_FLAGS_EMERGENCY_RO and exfat_emergency_state()=
+ so
+that filesystem errors after mount mark the filesystem emergency read-only
+rather than setting SB_RDONLY without holding s_umount.
 
-> diff --git a/fs/ntfs/file.c b/fs/ntfs/file.c
-> index b2f5882d9990d..fbfbd94c60924 100644
-> --- a/fs/ntfs/file.c
-> +++ b/fs/ntfs/file.c
-> @@ -55,9 +55,14 @@
->  int ntfs_file_open(struct inode *vi, struct file *filp)
+> diff --git a/fs/exfat/inode.c b/fs/exfat/inode.c
+> index 5129df1e79b44..3f24e5bd3eb11 100644
+> --- a/fs/exfat/inode.c
+> +++ b/fs/exfat/inode.c
+> @@ -114,8 +114,9 @@ int exfat_write_inode(struct inode *inode, struct wri=
+teback_control *wbc)
 >  {
->  	struct ntfs_inode *ni =3D NTFS_I(vi);
-> +	int err;
+>  	int ret;
 > =20
-> -	if (NVolShutdown(ni->vol))
+> -	if (unlikely(exfat_forced_shutdown(inode->i_sb)))
 > -		return -EIO;
-> +	if (filp->f_mode & FMODE_WRITE)
-> +		err =3D ntfs_emergency_state(ni->vol);
-> +	else
-> +		err =3D NVolShutdown(ni->vol) ? -EIO : 0;
-> +	if (err)
-> +		return err;
-
-[Severity: Medium]
-Should ntfs_trim_prealloc() (called from ntfs_file_release() and
-ntfs_stream_file_release()) also check ntfs_emergency_state(vol) before
-rolling back preallocated blocks?
-
-When small writes in ntfs_file_write_iter() -> ntfs_expand_for_write() leave
-ni->allocated_size larger than ni->data_size using trailing LCN_HOLE runlist
-entries, and the volume subsequently enters NV_EmergencyRO or NV_Shutdown,
-closing the open file descriptor invokes:
-
-  ntfs_file_release()
-    ntfs_trim_prealloc()
-      ntfs_rl_truncate_nolock()
-      ntfs_attr_update_mapping_pairs_locked()
-
-Because neither function checks ntfs_emergency_state(vol), closing the file
-mutates the runlist and MFT record mapping pairs and dirties the MFT record
-and VFS inode even though __ntfs_write_inode() and ntfs_mft_writepages() now
-refuse writeback with -EROFS or -EIO.
-
-If the trailing hole run spanned an extent MFT record,
-__ntfs_attr_update_mapping_pairs() -> ntfs_attr_record_rm() removes the
-attribute and $ATTRIBUTE_LIST entry and then calls ntfs_mft_record_free(),
-which now fails with -EROFS due to the new ntfs_emergency_state(vol) check,
-leaving the extent partially removed and triggering secondary ntfs_error()
-messages.
-
-[ ... ]
-
-> diff --git a/fs/ntfs/inode.c b/fs/ntfs/inode.c
-> index 206db4e99ef13..6219aed945dfc 100644
-> --- a/fs/ntfs/inode.c
-> +++ b/fs/ntfs/inode.c
-> @@ -2434,7 +2434,11 @@ void ntfs_evict_big_inode(struct inode *vi)
+> +	ret =3D exfat_emergency_state(inode->i_sb);
+> +	if (unlikely(ret))
+> +		return ret;
 > =20
->  	truncate_inode_pages_final(&vi->i_data);
-> =20
-> -	if (!vi->i_nlink) {
-> +	/*
-> +	 * After an error the freed mft record would go out right away while
-> +	 * the rest of the deletion can't, leave the inode to chkdsk.
-> +	 */
-> +	if (!vi->i_nlink && !ntfs_emergency_state(ni->vol)) {
->  		if (!NInoAttr(ni)) {
->  			/* Never called with extent inodes */
->  			WARN_ON(ni->nr_extents =3D=3D -1);
+>  	mutex_lock(&EXFAT_SB(inode->i_sb)->s_lock);
+>  	ret =3D __exfat_write_inode(inode, wbc->sync_mode =3D=3D WB_SYNC_ALL);
 
-[Severity: Medium]
-Does ntfs_drop_big_inode() need the same !ntfs_emergency_state(ni->vol) gua=
-rd
-when truncating unlinked inodes with I_SYNC set?
+[Severity: High]
+Should __exfat_truncate() or exfat_evict_inode() also check
+exfat_emergency_state()?
 
-In fs/ntfs/inode.c:ntfs_drop_big_inode():
+When an unlinked file is closed (or during unmount) after a filesystem error
+sets EXFAT_FLAGS_EMERGENCY_RO (or SB_STATE_EMERGENCY_RO in the follow-up
+commit "exfat: use the generic emergency read-only state"),
+exfat_evict_inode() calls __exfat_truncate():
 
-	if (!inode_unhashed(inode) && inode_state_read_once(inode) & I_SYNC) {
-		if (ni->type =3D=3D AT_DATA || ni->type =3D=3D AT_INDEX_ALLOCATION) {
-			if (!inode->i_nlink) {
-				...
-				truncate_setsize(VFS_I(ni), 0);
-				ntfs_truncate_vfs(VFS_I(ni), 0, 1);
+fs/exfat/inode.c:exfat_evict_inode() {
+	truncate_inode_pages_final(&inode->i_data);
 
-If an unlinked inode is undergoing writeback with I_SYNC set in
-ntfs_writepages() or __ntfs_write_inode() when an error triggers
-ntfs_handle_error() and sets NV_EmergencyRO (or in commit "ntfs: use the
-generic emergency read-only state", SB_STATE_EMERGENCY_RO), dropping the la=
-st
-inode reference via iput() while I_SYNC is still held enters
-ntfs_drop_big_inode().
+	if (!inode->i_nlink) {
+		i_size_write(inode, 0);
+		mutex_lock(&EXFAT_SB(inode->i_sb)->s_lock);
+		__exfat_truncate(inode);
+		mutex_unlock(&EXFAT_SB(inode->i_sb)->s_lock);
+	}
+    ...
+}
 
-Without checking !ntfs_emergency_state(ni->vol), ntfs_drop_big_inode() still
-calls ntfs_truncate_vfs() -> __ntfs_attr_truncate_vfs() ->
-ntfs_non_resident_attr_shrink() -> ntfs_cluster_free(), which frees clusters
-in $Bitmap, fails partway through extent removal when ntfs_mft_record_free()
-returns -EROFS, and on mounts with NVolDiscard issues blkdev_issue_discard()
-on the file's clusters even though the on-disk MFT record and bitmap updates
-cannot be written back for chkdsk.
+Similarly, if a write in exfat_file_write_iter() encounters a corrupted FAT
+chain or cluster error that sets EXFAT_FLAGS_EMERGENCY_RO via
+exfat_fs_error(), the error unwind in exfat_extend_valid_size() or
+exfat_write_failed() calls exfat_truncate() -> __exfat_truncate().
+
+Because __exfat_truncate() in fs/exfat/file.c calls __exfat_write_inode()
+directly rather than exfat_write_inode(), it bypasses the
+exfat_emergency_state() check above:
+
+fs/exfat/file.c:__exfat_truncate() {
+    ...
+	if (__exfat_write_inode(inode, inode_needs_sync(inode)))
+		return -EIO;
+
+	/* cut off from the FAT chain */
+	if (ei->flags =3D=3D ALLOC_FAT_CHAIN && last_clu !=3D EXFAT_FREE_CLUSTER &&
+			last_clu !=3D EXFAT_EOF_CLUSTER) {
+		if (exfat_ent_set(sb, last_clu, EXFAT_EOF_CLUSTER))
+			return -EIO;
+	}
+    ...
+	/* free the clusters */
+	if (exfat_free_cluster(inode, &clu))
+		return -EIO;
+    ...
+}
+
+This modifies directory entries, FAT entries, and allocation bitmap buffers=
+ via
+exfat_free_cluster() -> __exfat_free_cluster() -> exfat_clear_bitmap() (whi=
+ch
+also writes synchronously when IS_DIRSYNC(inode) is set), and if mounted wi=
+th
+discard (which __exfat_fs_error() does not clear, unlike
+exfat_force_shutdown()), issues block device discard requests via
+exfat_discard_cluster() while walking a potentially corrupted cluster chain.
+Furthermore, because SB_RDONLY is no longer set on error, sync_filesystem()=
+ no
+longer returns early at sb_rdonly(sb) and flushes those dirtied metadata
+buffers to disk.
+
+Can __exfat_truncate() and/or exfat_evict_inode() check
+exfat_emergency_state() to prevent metadata modifications and discards after
+the filesystem enters emergency read-only state?
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261029-work-fs-sb=
-_rdonly-v2-0-2f44f64f0b66@kernel.org?part=3D17
+_rdonly-v2-0-2f44f64f0b66@kernel.org?part=3D9
