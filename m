@@ -1,73 +1,66 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=113.46.200.216
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=217.140.110.172
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793331744;
-	b=3xTupxsKZjGRhzEbpgzf/sOpeax244df113/8Evr6Hbha/6SW/g/XnaXaZUl434TUYWt
-	 NYHSelkVaCiMogKxvlto78o5hn+jAq24cXbUfNBbOvbZnhOu5EOQo/yy/65dmKk/YlOr9
-	 BbpFedJd1yd3lx5AKtnFPcLVkdX+reIFDGZcW5vXxUsewTcT0ZNmc4oihALInAA4bPAGr
-	 S2TkPjbEI9P1aoYxrm0tl1qjshuln+hG/hXJ7l5S3YlRWjswR2a3G22iUNPyj1W4ryJmu
-	 xAnSiEr0XQo3IY+IQPJwQzhClAgZLRmSUjTPDdLOOMJrhx/5RV/2hrUMFUJG3cu4UVA==
+	t=1793336395;
+	b=YxZq5sRs+G6hL66ECqMNP0PCgcRO43ETSB6pPlG81KnMcr4sbpeXwCtmDiiTy/T8b/TS
+	 J7VKT8cEvt6sMuA95MsK6W2mrTsyRDLQ5VO5MiUJiB50yUqDPgMabF9RN5JkTIEHxXy8P
+	 O2ZjHVBLIvCdobf5uVrKN0fJWTwY0kILoi+VT/LqaRIxV4k9JF2Yz4MuNC/kDTMiHfKSm
+	 Tfo31s1XlskgT2ksGGfmlzsgsKFVwsNQKZujE/lKfJ9WvBLQ+OkneXFTTXV6+RZ8as2vP
+	 7EtIpxNkt2aOrwfBMASsnJmJJF+m0q7wVAdFYXszegk9Ey2tOo6DeVif9MZyQn5bccA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793331744;
-	h=DMARC-Filter:dkim-signature:Received:Received:Received:Subject:To:CC:
-	 References:From:Message-ID:Date:User-Agent:MIME-Version:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding:X-Originating-IP:
-	 X-ClientProxiedBy;
-	bh=lyCCkGxsVqCH5Jxp2Gx73Ra2R6gYJ0X0+xLM8KV7Nyw=;
-	b=Cce5bxcyXsnKfxtSViQeH7U7kdjdN2GXhyL1yiznbCiwv6DP/FFzLdSkX2hNJkojpA3x
-	 u0eUahX36f7mqDBX01lioEgHjNPPzus5EDoakjoYNUxmKi2KfwNMbJEYDdsMyLgF6CVb/
-	 wgbIuSQQuFKeqO94zOLjmVI7ijk8Gxm4W8KaWQReS6vhD2xv9Ws5+8kUZIUMHLzVVgvzT
-	 d3YCzZfUeqrxToaVUeAupwLXFBaDJAKJf6FHJsK9yLNrLrgLdOYK3s6eYk5KJoWivg3cG
-	 wBa4KM35tAg1xPiqOg6cB/YOCfXF7pyeB1CQnZAonlVwiH4I+mUDbiOwIw3UJP2gOhA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793336395;
+	h=DMARC-Filter:Received:Received:DKIM-Signature:Date:From:To:Cc:
+	 Subject:Message-ID:References:MIME-Version:Content-Type:
+	 Content-Disposition:Content-Transfer-Encoding:In-Reply-To;
+	bh=XHtOnNb/QT0KYcuG2D6k7Sc+gTZ6iTr4Jo8NFEFUk6c=;
+	b=vUONokwTwUZvlDCJTxjqwRlKEMccPNlwr78UGMl4p6Qg0/5EQs2BIzNoZMu4WKXDhg8l
+	 IPtKPtreN/U5cBbxMIPIuqkNOLpG6HTloNl367gxxS5do8ALXi33NOj27cx+q5dwo0TZZ
+	 kZrYxk6MnRvk7BFRJAwf7lNdWfzV9h5FCp7mwNkXH8VITfdea8xRSjRWI27ifQW5mX9yH
+	 uHIKWp9g8xSyUCaJqcEGGv+63HbUdxTsFzFFYz3/biYPBdf+dy+WUL8hUUoR9X/RPcJzs
+	 L+X1dPrmGZCw4O/2r7D7sSd+S4PaTmRXex3veZls+K1XvsDJcAYJbXt/slBU6Mje+xA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=huawei.com;
-	spf=pass smtp.mailfrom=huawei.com;
-	dkim=pass header.d=huawei.com header.i=@huawei.com header.a=rsa-sha256 header.s=dkim header.b=6lgTf+Ts;
-	arc=none smtp.remote-ip=113.46.200.216
-Received: from canpmsgout01.his.huawei.com (canpmsgout01.his.huawei.com [113.46.200.216])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2ECBA606A31C;
-	Fri, 30 Oct 2026 03:42:20 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2ECBA606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
+	dmarc=pass header.from=arm.com;
+	spf=pass smtp.mailfrom=arm.com;
+	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=kfqKBl33;
+	arc=none smtp.remote-ip=217.140.110.172
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 5FEAB606A31E;
+	Fri, 30 Oct 2026 04:59:53 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5FEAB606A31E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=huawei.com header.i=@huawei.com header.a=rsa-sha256 header.s=dkim header.b=6lgTf+Ts
-dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
-	c=relaxed/relaxed; q=dns/txt;
-	h=From;
-	bh=lyCCkGxsVqCH5Jxp2Gx73Ra2R6gYJ0X0+xLM8KV7Nyw=;
-	b=6lgTf+Ts1V+YHSBCrEFvDEXDhiMC9GXMq3b2wsOqtZVSt4aNi9cNouzzS6JDieVJF34tbk3Eh
-	hET2+S5R51zLlg3+fDdAp58YFcw5B6/T2rmuCau0hbz720kofk1l0vMy/ktC5xSYSNUX71IMs/h
-	Me1Uuzuu58wyIDDAb/XNnkQ=
-Received: from mail.maildlp.com (unknown [172.19.162.140])
-	by canpmsgout01.his.huawei.com (SkyGuard) with ESMTPS id 4jG6NZ0f5mz1T4G5;
-	Fri, 30 Oct 2026 11:42:06 +0800 (CST)
-Received: from whupemo200011.china.huawei.com (unknown [7.152.185.179])
-	by mail.maildlp.com (Postfix) with ESMTPS id 483B3202E6;
-	Fri, 30 Oct 2026 11:42:18 +0800 (CST)
-Received: from [10.174.178.46] (10.174.178.46) by
- whupemo200011.china.huawei.com (7.152.185.179) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.45; Fri, 30 Oct 2026 11:42:16 +0800
-Subject: Re: [PATCH v2 28/34] ubifs: don't set SB_RDONLY after errors
-To: Christian Brauner <brauner@kernel.org>, <linux-fsdevel@vger.kernel.org>,
-	Jan Kara <jack@suse.com>
-CC: Al Viro <viro@zeniv.linux.org.uk>, <ecryptfs@vger.kernel.org>,
-	<linux-ext4@vger.kernel.org>, <jfs-discussion@lists.sourceforge.net>,
-	<linux-nilfs@vger.kernel.org>, <exfat@lists.linux.dev>, <linux-mm@kvack.org>,
-	<ntfs@lists.linux.dev>, <ocfs2-devel@lists.linux.dev>,
-	<linux-btrfs@vger.kernel.org>, <gfs2@lists.linux.dev>,
-	<linux-efi@vger.kernel.org>, <linux-mtd@lists.infradead.org>,
-	<linux-xfs@vger.kernel.org>
-References: <20261029-work-fs-sb_rdonly-v2-0-2f44f64f0b66@kernel.org>
- <20261029-work-fs-sb_rdonly-v2-28-2f44f64f0b66@kernel.org>
-From: Zhihao Cheng <chengzhihao1@huawei.com>
-Message-ID: <0d472865-6cbb-cbb5-b361-1f2bf71dd528@huawei.com>
-Date: Fri, 30 Oct 2026 11:42:15 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+	dkim=pass (1024-bit key, unprotected) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=kfqKBl33
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 127671576;
+	Thu, 29 Oct 2026 21:59:49 -0700 (PDT)
+Received: from localhost (a079125.arm.com [10.164.21.43])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 746343F673;
+	Thu, 29 Oct 2026 21:59:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
+	t=1793336392; bh=qCqzGHRAYqmG7w1mdu0JzAwGvdKPeHbAcgCcr7TK1pE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=kfqKBl33CLhrnzoGB+6Iy03S+L8vPpDEwz6ocMm//mxaOyrP9GhpqNf/hh1XVwBIG
+	 F/nI4qjS9fEJ/dofCdVjLv2KmQyoK7ov7wq48ZWfvIY+x2tj8NHXxrjFf9kSmUUcLz
+	 44+EAy3HrVUb6U1Vf8i+RtQk34iRvhMM403lVbK8=
+Date: Fri, 30 Oct 2026 10:29:48 +0530
+From: Linu Cherian <linu.cherian@arm.com>
+To: Kristina =?utf-8?Q?Mart=C5=A1enko?= <kristina.martsenko@arm.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-acpi@vger.kernel.org, 
+	kvmarm@lists.linux.dev, linux-efi@vger.kernel.org, 
+	Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, 
+	Mark Rutland <mark.rutland@arm.com>, Ryan Roberts <ryan.roberts@arm.com>, 
+	David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>, 
+	Anshuman Khandual <anshuman.khandual@arm.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>, 
+	Hanjun Guo <guohanjun@huawei.com>, Sudeep Holla <sudeep.holla@kernel.org>, 
+	Marc Zyngier <maz@kernel.org>, Oliver Upton <oupton@kernel.org>, 
+	Fuad Tabba <fuad.tabba@linux.dev>, Joey Gouly <joey.gouly@arm.com>, 
+	Steffen Eiden <seiden@linux.ibm.com>, Suzuki K Poulose <suzuki.poulose@arm.com>, 
+	Zenghui Yu <yuzenghui@huawei.com>, Ard Biesheuvel <ardb@kernel.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Subject: Re: [RFC 02/12] arm64: Detect FEAT_TLBID
+Message-ID: <tzt7fqgh6ksbuo5pe7qeh6gofjsumwrw7w6pw5iwdu3b5nd5dm@zkzrelsc2upt>
+References: <20261001110655.461473-1-kristina.martsenko@arm.com>
+ <20261001110655.461473-3-kristina.martsenko@arm.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -77,106 +70,87 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-In-Reply-To: <20261029-work-fs-sb_rdonly-v2-28-2f44f64f0b66@kernel.org>
-Content-Type: text/plain; charset="gbk"; format=flowed
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: kwepems200002.china.huawei.com (7.221.188.68) To
- whupemo200011.china.huawei.com (7.152.185.179)
+In-Reply-To: <20261001110655.461473-3-kristina.martsenko@arm.com>
 
-‘⁄ 2026/10/30 0:07, Christian Brauner –¥µ¿:
-> ubifs_ro_mode() sets c->ro_error and SB_RDONLY from whatever context hit
-> the error, e.g. a failing write, and without holding s_umount. UBIFS
-> can't be frozen but that still races with everyone else changing
-> sb->s_flags. And c->ro_error alone already makes every write fail with
-> EROFS.
+Hi,
+
+On Thu, Oct 01, 2026 at 12:06:45PM +0100, Kristina Mart≈°enko wrote:
+> Detect if FEAT_TLBID is supported by the system. Detect TLBID
+> configuration from TLBIDIDR_EL1. This information will be used in later
+> patches.
 > 
-> So only set SB_RDONLY while the filesystem is still being mounted and
-> call sb_set_emergency_ro() after that. The xattr setters check
-> c->ro_error as well because ecryptfs calls them without write access on
-> the lower mount and they change the inode in memory first.
+> Set HFGRTR2_EL2.nTLBIDIDR_EL1 so that the kernel can access TLBIDIDR_EL1
+> at EL1 (in case of nVHE/hVHE).
 > 
-> So far a remount to read-only after an error was refused and a remount
-> to read-write went through and cleared SB_RDONLY again because
-> c->ro_mount was never set. Now going read-only works and its writes fail
-> with EROFS before any I/O, and going read-write is refused by the VFS.
-> fsync() fails with EROFS instead of taking ubifs_fsync()'s read-only
-> shortcut.
-> 
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+> Signed-off-by: Kristina Mart≈°enko <kristina.martsenko@arm.com>
 > ---
->   fs/ubifs/io.c    | 9 ++++++++-
->   fs/ubifs/super.c | 5 +----
->   fs/ubifs/xattr.c | 6 ++++++
->   3 files changed, 15 insertions(+), 5 deletions(-)
+>  arch/arm64/include/asm/cpu.h        |  1 +
+>  arch/arm64/include/asm/cpufeature.h |  7 +++++++
+>  arch/arm64/include/asm/el2_setup.h  |  9 ++++++++-
+>  arch/arm64/kernel/cpufeature.c      | 25 +++++++++++++++++++++++++
+>  arch/arm64/kernel/cpuinfo.c         |  3 +++
+>  arch/arm64/tools/cpucaps            |  1 +
+>  6 files changed, 45 insertions(+), 1 deletion(-)
 > 
-> diff --git a/fs/ubifs/io.c b/fs/ubifs/io.c
-> index 6c6d68242779..7a59aa1ea5ce 100644
-> --- a/fs/ubifs/io.c
-> +++ b/fs/ubifs/io.c
-> @@ -72,7 +72,14 @@ void ubifs_ro_mode(struct ubifs_info *c, int err)
->   	if (!c->ro_error) {
->   		c->ro_error = 1;
->   		c->no_chk_data_crc = 0;
-> -		c->vfs_sb->s_flags |= SB_RDONLY;
-> +		/*
-> +		 * Before SB_BORN the mounter holds s_umount, later see
-> +		 * sb_set_emergency_ro().
-> +		 */
-> +		if (!(c->vfs_sb->s_flags & SB_BORN))
-> +			c->vfs_sb->s_flags |= SB_RDONLY;
-> +		else
-> +			sb_set_emergency_ro(c->vfs_sb);
->   		ubifs_warn(c, "switched to read-only mode, error %d", err);
->   		dump_stack();
->   	}
-> diff --git a/fs/ubifs/super.c b/fs/ubifs/super.c
-> index 38972786817e..ef39da4e780b 100644
-> --- a/fs/ubifs/super.c
-> +++ b/fs/ubifs/super.c
-> @@ -1977,10 +1977,7 @@ static int ubifs_reconfigure(struct fs_context *fc)
->   		if (err)
->   			return err;
->   	} else if (!c->ro_mount && (fc->sb_flags & SB_RDONLY)) {
-> -		if (c->ro_error) {
-> -			ubifs_msg(c, "cannot re-mount R/O due to prior errors");
-> -			return -EROFS;
-> -		}
-> +		/* After an error ubifs_remount_ro() can't write but still works. */
+> diff --git a/arch/arm64/include/asm/cpu.h b/arch/arm64/include/asm/cpu.h
+> index 3c008821219c..967ccdedf526 100644
+> --- a/arch/arm64/include/asm/cpu.h
+> +++ b/arch/arm64/include/asm/cpu.h
+> @@ -48,6 +48,7 @@ struct cpuinfo_arm64 {
+>  	u64		reg_gmid;
+>  	u64		reg_smidr;
+>  	u64		reg_mpamidr;
+> +	u64		reg_tlbididr;
+>  
+>  	u64		reg_id_aa64dfr0;
+>  	u64		reg_id_aa64dfr1;
+> diff --git a/arch/arm64/include/asm/cpufeature.h b/arch/arm64/include/asm/cpufeature.h
+> index 4f04ad82ea34..d4e7497143b2 100644
+> --- a/arch/arm64/include/asm/cpufeature.h
+> +++ b/arch/arm64/include/asm/cpufeature.h
+> @@ -627,6 +627,13 @@ static inline bool id_aa64pfr1_mpamfrac(u64 pfr1)
+>  	return val > 0;
+>  }
+>  
+> +static inline bool id_aa64mmfr4_tlbid(u64 mmfr4)
+> +{
+> +	u32 val = cpuid_feature_extract_unsigned_field(mmfr4, ID_AA64MMFR4_EL1_TLBID_SHIFT);
+> +
+> +	return val > 0;
+> +}
+> +
+>  void __init setup_boot_cpu_features(void);
+>  void __init setup_system_features(void);
+>  void __init setup_user_features(void);
+> diff --git a/arch/arm64/include/asm/el2_setup.h b/arch/arm64/include/asm/el2_setup.h
+> index aa8ec9df8024..bd70a470596c 100644
+> --- a/arch/arm64/include/asm/el2_setup.h
+> +++ b/arch/arm64/include/asm/el2_setup.h
+> @@ -438,9 +438,16 @@
+>  	orr	x0, x0, #HDFGRTR2_EL2_nPMSDSFR_EL1
+>  
+>  .Lskip_spefds_\@:
+> +	mov	x1, xzr
+> +	mrs_s	x2, SYS_ID_AA64MMFR4_EL1
+> +	ubfx	x2, x2, #ID_AA64MMFR4_EL1_TLBID_SHIFT, #ID_AA64MMFR4_EL1_TLBID_WIDTH
+> +	cbz	x2, .Lskip_tlbid_\@
+> +	orr	x1, x1, #HFGRTR2_EL2_nTLBIDIDR_EL1
+> +
+> +.Lskip_tlbid_\@:
+>  	msr_s   SYS_HDFGRTR2_EL2, x0
+>  	msr_s   SYS_HDFGWTR2_EL2, x0
+> -	msr_s   SYS_HFGRTR2_EL2, xzr
+> +	msr_s   SYS_HFGRTR2_EL2, x1
+>  	msr_s   SYS_HFGWTR2_EL2, xzr
+>  	msr_s   SYS_HFGITR2_EL2, xzr
+>  .Lskip_fgt2_\@:
 
-Hi, Brauner
-If we remove the c->ro_error check, ubifs_remount_ro->ubifs_wbuf_sync 
-will return EROFS and trigger ubifs_ro_mode() again, I think we can 
-retain the pre-check placement to trigger more error printing.
-BTW, a remount to read-write after an error is refused too.
->   		ubifs_remount_ro(c);
->   	}
->   
-> diff --git a/fs/ubifs/xattr.c b/fs/ubifs/xattr.c
-> index 3b0e8a270f59..572f6f3e52ad 100644
-> --- a/fs/ubifs/xattr.c
-> +++ b/fs/ubifs/xattr.c
-> @@ -260,6 +260,9 @@ int ubifs_xattr_set(struct inode *host, const char *name, const void *value,
->   	if (check_lock)
->   		ubifs_assert(c, inode_is_locked(host));
->   
-> +	if (c->ro_error)
-> +		return -EROFS;
-> +
->   	if (size > UBIFS_MAX_INO_DATA)
->   		return -ERANGE;
->   
-> @@ -564,6 +567,9 @@ static int ubifs_xattr_remove(struct inode *host, const char *name)
->   
->   	ubifs_assert(c, inode_is_locked(host));
->   
-> +	if (c->ro_error)
-> +		return -EROFS;
-> +
->   	if (fname_len(&nm) > UBIFS_MAX_NLEN)
->   		return -ENAMETOOLONG;
->   
-> 
-The sb_rdonly won't affect the sync_fs_one_sb() after an error, and 
-sb_emergency_ro check in not added into sync_fs_one_sb, should we add 
-the c->ro_error check in ubifs_sync_fs() to prevent the failure 
-ubifs_wbuf_sync executing?
+IMO, would be good to move the above changes into a separate patch.
+
+Thanks,
+Linu Cherian.
+
+ 
