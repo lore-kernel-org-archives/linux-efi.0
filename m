@@ -1,88 +1,49 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.42
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793501795;
-	b=NYD+qiYz5ODk6W01F4XuMJ2g4B0kx6JIKVKUx/4Ea9MBDMb6vc+T32uh2CzhEf1tmXLk
-	 ba+bupR6S/mZfHjNqXUJ2vvR7KSBjSGavdmcjdnDhf1zGEnNQ4Swi0ILQXjJCCehPRMiN
-	 PCx/HKrlK9iet9STtiE9zqLpzYlZ255Wba57IaFgg+2hIi56Y8miTAjBjsprY6D6CeUSF
-	 Nk10oxigg2VRg1TpFrAplhL20N5QBAaLNMZW2aDVRFOpLseP8VA/eTaCip+ECpZStzYc0
-	 gdKXHAadBSO8w1iFqHYU3nvGRdmDUM7AM1H0GVCBWpbdz9yWv5zML6lYSTYDRG34wQA==
+	t=1793571362;
+	b=wBpL0o2qBEvZPND2iRs5ecw0ka+hhZozI1NFC5KMsomclDHgmC4vpEITK+VPq8Hl8GzV
+	 /sHE0pHdd13sZZ5X/F8sFdHBjAiKgDHztZhGeHfNM2DTTREnYieaVMAQz2Fs9UaQTOp9d
+	 HyNpfGiHb5+dFDLlhlOotGvDEcFJ3bLdFGr0Y8Jm8UhWCtbSrihRIUHdqMuwfQ9s4G3HG
+	 2BytculgquSPL52/LR0pM+CchqKOZLtKSrZYwyY4SpprQ4blz94rxGLyXwLZpECQBWMBy
+	 AkrI5qHeNk37qZ/Hg8fu4NazzaJnut0dCLiLhXa2UvCafHL3DfCtqSjUSjeUVWVmfuw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793501795;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 Message-ID:Date:MIME-Version:User-Agent:Subject:To:Cc:References:
-	 Content-Language:From:Autocrypt:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding;
-	bh=V3mO2oJ9wvsyKjU2ihhIv9+VvyGcAnmDb2trz7FBpaI=;
-	b=m8WsJ6eC+C4iGtf46knDUYH3S4cqH7TpKyF7wNPSFvamNvm7rIxb7sbmxWlXJ0OveZh0
-	 jCW6KkxkYzw/znE+0YWtZNJG49zpMDwmvzunb36RYD/LG6J0+FY8oU0jsdbNg7JwIZCMg
-	 NsxVfIZ4tr/8kVwf7pmoAjA9Mgpz+q3Gttf6/Wp1GON3ym3uAKpYG4Hw4gOMgdVjWgwLR
-	 qT7wCl6HtJwurpD+sggu3atZ60KlhUb8Z63n8f1QOwNevzGJa4bjMVLK/DtCLgZieaWPZ
-	 7oSWzDSsrZBPKVzG2z4VI4A+MsOvlDyNZjMMG+cO1MUJJDJddqu+gWZN8ArM6mG0aSA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793571362;
+	h=Received:DKIM-Signature:Received:Content-Type:MIME-Version:
+	 Content-Transfer-Encoding:Subject:From:Message-Id:Date:References:
+	 In-Reply-To:To:Cc;
+	bh=/L1K5/K20Lylg3Y8uBVzdGE1hVGy8dUc9P/IZwg+EOY=;
+	b=u2HCXs+16XpuuA3VXdArIAmTlnuUvxzOijtNOb5NV94OT6ehklPDFPQMjI6mGD7CLs9t
+	 1ED8N2DY2ra0hk8iwcttxyDcHCGp9fw3TpHWtdj4f2YT4AIH+IrIyfeHW2x26qZa+vvHE
+	 jUAW/PkoNZuVD4X5La2hkE1kVNYKAMXDkBrsx9Jgg/h9eVgxCaWvbSKIEdTyiNdtpyedT
+	 GnCHLZS5sI6iAyKU8dYIzoc2B75ppxkDDpp0CMCgtly53cyzRgMsyY4sD59clnPsPkNvb
+	 zP7h5IV2P3BXd0Px8lQdH4Q/DvAcSHRvEVoibf/hrgnBI0bvdBgv6H6ulrZMRAg8APw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=suse.com;
-	spf=pass smtp.mailfrom=suse.com;
-	dkim=pass header.d=suse.com header.i=@suse.com header.a=rsa-sha256 header.s=google header.b=d1dbxGOQ;
-	arc=none smtp.remote-ip=209.85.128.42
-Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=aQ9aTFbN;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F26DE606A330
-	for <linux-efi@vger.kernel.org>; Sun,  1 Nov 2026 02:56:33 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org F26DE606A330
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3709B60A2628;
+	Sun,  1 Nov 2026 22:16:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=suse.com header.i=@suse.com header.a=rsa-sha256 header.s=google header.b=d1dbxGOQ
-Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-49d05d51553so11394845e9.2
-        for <linux-efi@vger.kernel.org>; Sat, 31 Oct 2026 19:56:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1793501792; x=1794106592; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=V3mO2oJ9wvsyKjU2ihhIv9+VvyGcAnmDb2trz7FBpaI=;
-        b=d1dbxGOQENePeinCh7PuomEmARdqfoQnLYj0EU2dsmG4bDBe6mtaZDcIFxTJcwv5Qt
-         PjFnpISJsKmVeoojSUxx4CRWDiyDCa44QwL3JlPP//w7WnwLKKWNM3u4UdLMmNi3dsp8
-         hA6FJYDzw6KKrnHzVYpsX3Gv04wRbmkREt76YrZjzkg7/t7HfsECrMpjCT2tfXtOa4BX
-         841sc8J92WQ/YSQgfnnkfCmyBxxrfqLTzhfC/zR3bwYSu51judWYj9L7q+9RbcwryTaQ
-         mdSwCdSM5yH3kJRuSuleLMLhLrUmc7Fd027D7dRD2/vfY8TfIJ/FVbi2AEKc5+m2aOUM
-         LaCw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793501792; x=1794106592;
-        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=V3mO2oJ9wvsyKjU2ihhIv9+VvyGcAnmDb2trz7FBpaI=;
-        b=XkK9zuNiYXxrKYasktzS3yjCdX/VqONpR53TBFktmpnjnWD90KTMcFbUWtw3uTQgmt
-         vQ0MCvbKt+0eN5dWR2QcsZEgrRjgNEPc9Tne9UBA7Y8qZQuOczhTQ10AMGeCL9xsDVKK
-         fSCFSABMVx1RYF4uiB/0krWlOpESTKT0UDt+G6RbAs1I9cV4C3XAPxYtnn6pDeXeG2Mb
-         WNUpgjw11FxLUyXcKt4lYzlpY5FaxVnbVJzFjsQs7/73vpWUfgrFLbh3SJ4ZED5qdjhY
-         YyGxt6/mAmUBW5SmOMwI1L7lAos7skv4r0lAo/YeQ89EPzIbk8GUNDH8sbkiqyJKWP5C
-         dvOQ==
-X-Forwarded-Encrypted: i=1; AKwUvByR62khw6qN6mKlnvdcrnPm17C/5vymS3wrrXNIDkFX0960LMJ3bTgUcI2fZ3wT4Bdyn18VvOICrFA=@vger.kernel.org
-X-Gm-Message-State: AFq9FYJKccJsFRaOFmFN+rKL0Tp0IjjJ3Vp0nIKtrTn2MEU/9P+1QnhI
-	6gRkKh6K5aN40a19kRFv1m9O8XLW0+MsZM/1Mng+UvNTnd5LhBHHas2ElKvV06y7S+s=
-X-Gm-Gg: AYBFou1K4JVFYeE+768L9zklTxliSHLqYdTQ3bEnMdjl0XOyxehi9ZRdaOc8fqnaFRs
-	J8wzt4wAoQUnI9qOW+PGfgJOwrt6nh/IpNBWD9P0IaKvs3WwVgXMzsEE9iUXnvCrNuH5WCAbI02
-	wqycKDbgKO4RQ2MUH3Zus6gTcK9VLKp3Ojw6AiFIvUSONfoi5z6FPjokI4WMimcjaHxIZR23Itp
-	bjNB0h3qJGrtqmy5BuH7i+B49tk37jyKIPUIzbP7ep5lgvv+DtW3YZCL8v7/wP+VELPQbUx5zJO
-	pGBpEXfEGyACxgUwL7I/JNaODy8CKN6UxBDARunkUtT1IaUo45v/oeK6lUYvMyCld/BfvTVVYEn
-	50ys9hnnuWSFrkqXtQmcvmFbgcWdMpFXWhss3NHZFQ9WaDoLYeizxoAQ4SpWgWcVMdFFdjWGu6r
-	YgN+lXaNfxIs8M/iMS3IP5U5R8eO2vWd8WTXqdC8zW63ph83EOJy9E3GvcYtT0HGMCPRzXgUd5B
-	Gku3o7Ly3xVCH/k357CkKzVk/Aj+WVSpZTQf7HaxtURIXR0vyJ2npRPWT+HePheuQv4NuGLSukN
-	rB89+8X3V7blSySb4NxDIw==
-X-Received: by 2002:a05:600c:4e90:b0:4a4:f48e:78fa with SMTP id 5b1f17b1804b1-4ac175669e4mr143258175e9.12.1793501792111;
-        Sat, 31 Oct 2026 19:56:32 -0700 (PDT)
-Received: from [172.16.0.229] ([159.196.52.54])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-1ac194b5437sm22760079c88.13.2026.10.31.19.56.26
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 31 Oct 2026 19:56:31 -0700 (PDT)
-Message-ID: <c88e4e9c-6b86-4fbb-94bf-909522badf83@suse.com>
-Date: Sun, 1 Nov 2026 13:26:22 +1030
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=aQ9aTFbN
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 178411F00A15;
+	Sun,  1 Nov 2026 22:16:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793571362;
+	bh=/L1K5/K20Lylg3Y8uBVzdGE1hVGy8dUc9P/IZwg+EOY=;
+	h=Subject:From:Date:References:In-Reply-To:To:Cc;
+	b=aQ9aTFbN6x7ouscVsLZNxTXAO5E8ItcKZ9dPsJi9yvOWb/a0tVFSzFxK6HBHwvwkR
+	 qnGRH5hE04iqB7Hbx0soOLs60ndhW9fPRu1docmwvHJCPZ1sGH3aXo+aMYOMYvfS/m
+	 gLRk+lBuqCl595dJR/qDiLKaO5xzK3h4Qld2hh9aTq14S9IhqhLCn8gScipgdXhxZ4
+	 yz+eYaG3uHp5cGLm2P5HKV4lVfGfqkmRrBkNdAW5mFqV2BM1XB5v27eb8KPzOhQwgY
+	 8+dN6TuAxSwtlFieAsFFjpYJH+0D2okoO4dGm6PQ3yCoJG1GIK5OBjtH+j2NcShuR6
+	 6ScWRzm3UZjKQ==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 031C838003B8;
+	Sun,  1 Nov 2026 22:16:02 +0000 (UTC)
+Content-Type: text/plain; charset="utf-8"
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -92,439 +53,101 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 23/34] btrfs: check BTRFS_FS_STATE_RO instead of
- SB_RDONLY at runtime
-To: Christian Brauner <brauner@kernel.org>, linux-fsdevel@vger.kernel.org,
- Jan Kara <jack@suse.com>
-Cc: Al Viro <viro@zeniv.linux.org.uk>, ecryptfs@vger.kernel.org,
- linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net,
- linux-nilfs@vger.kernel.org, exfat@lists.linux.dev, linux-mm@kvack.org,
- ntfs@lists.linux.dev, ocfs2-devel@lists.linux.dev,
- linux-btrfs@vger.kernel.org, gfs2@lists.linux.dev,
- linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org,
- linux-xfs@vger.kernel.org
-References: <20261029-work-fs-sb_rdonly-v2-0-2f44f64f0b66@kernel.org>
- <20261029-work-fs-sb_rdonly-v2-23-2f44f64f0b66@kernel.org>
-Content-Language: en-US
-From: Qu Wenruo <wqu@suse.com>
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJq3ujyBQkUpLw5AAoJEMI9kfOh
- Jf6o8OIH/0mqW+TQM4m2x3hCsnK+oB4yJH1qnGvIhFF/Lhs48wI02sGh6/4aA0hkCDfd9LHQ
- +ci4FUepZ9y4VS01+oIExbg/8ytzGYTzLtb44jK2GBOBVSJkMiha6jp22XFt7WUkT/tvbreu
- WWdGsaJIRQaZChy7xsMI8lqQ2WdmluZJ4LT0wD3l/l6QU1ZseMGySebdY9sVOQEOJNV7Qj92
- /KOAFNmeZshV/qDI8Iw1RTs6TvLqCcqmlZLCmJkYSVhT1RonWRren8xIRcFEgMe004IDnt7V
- qdQhk/nhTS9x9MBAhMRl0TTE1VKDLvVALsud3iZLrmmtYvwPApzGJk052f0m28vOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJq3ukKBQkUzDspAAoJEMI9kfOhJf6o
- SNsH/1ysUWOKmzY0rGS3ZdS61QgqMGhSWD/EJ4UiPw+xO4l4+GtX0fOAqxqsmBKqje3vyhBa
- Z5o/1Y+gNiN+E6RBcSz4b1TAd78sQ2bvT5DWOvBjeeVxHdiuQMIn4S8xk5ZpySBw5ifjoiuL
- 0M33UVtJOzM8yfAeL+d/Rp4leJw72SutjkLyZTG/gJIp4pJGD/kFHn24OLL0IxEcO0gOekNZ
- os5e1R6jAJ2ILk7+MDnvU8wXHcCiVzuDhJLI1tih1uUIE50muHQJWbYuVBbdJeu8WlIDDssx
- UOCxLylNG3gDXV5MhLubPTOpp9OiFc/XC37nvkgEcrlmlOFBv4/NJCbECpo=
-In-Reply-To: <20261029-work-fs-sb_rdonly-v2-23-2f44f64f0b66@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+Subject: Re: [PATCH v4 00/22] kbuild: significantly speed up kernel builds
+From: patchwork-bot+linux-riscv@kernel.org
+Message-Id: 
+ <179357136054.2624073.6980997342883603672.git-patchwork-notify@kernel.org>
+Date: Sun, 01 Nov 2026 22:16:00 +0000
+References: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
+In-Reply-To: <20260923-build-speedup-v4-0-73128809a4a4@kernel.org>
+To: Lorenzo Stoakes (ARM) <ljs@kernel.org>
+Cc: linux-riscv@lists.infradead.org, torvalds@linux-foundation.org,
+ nathan@kernel.org, nsc@kernel.org, ndesaulniers@google.com, morbo@google.com,
+ justinstitt@google.com, masahiroy@kernel.org, legion@kernel.org,
+ tglx@kernel.org, mingo@redhat.com, bp@alien8.de, dave.hansen@linux.intel.com,
+ x86@kernel.org, hpa@zytor.com, pjw@kernel.org, palmer@dabbelt.com,
+ aou@eecs.berkeley.edu, alex@ghiti.fr, arnd@arndb.de, catalin.marinas@arm.com,
+ will@kernel.org, mark.rutland@arm.com, ardb@kernel.org,
+ ilias.apalodimas@linaro.org, jpoimboe@kernel.org, peterz@infradead.org,
+ ojeda@kernel.org, boqun@kernel.org, gary@garyguo.net,
+ bjorn3_gh@protonmail.com, lossin@kernel.org, a.hindborg@kernel.org,
+ aliceryhl@google.com, tmgross@umich.edu, dakr@kernel.org,
+ daniel.almeida@collabora.com, tamird@kernel.org, acourbot@nvidia.com,
+ work@onurozkan.dev, corbet@lwn.net, rdunlap@infradead.org, kees@kernel.org,
+ gustavoars@kernel.org, linux-kbuild@vger.kernel.org,
+ linux-kernel@vger.kernel.org, llvm@lists.linux.dev,
+ linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-efi@vger.kernel.org, rust-for-linux@vger.kernel.org,
+ linux-doc@vger.kernel.org, axboe@kernel.dk, linux-hardening@vger.kernel.org,
+ petr.pavlu@suse.com, n.schier@fritz.com, manuelebnerli@mailbox.org
 
+Hello:
 
+This series was applied to riscv/linux.git (fixes)
+by Nathan Chancellor <nathan@kernel.org>:
 
-在 2026/10/30 02:37, Christian Brauner 写道:
-> Add btrfs_fs_rdonly() which tests BTRFS_FS_STATE_RO and use it instead
-> of sb_rdonly() wherever btrfs checks for a read-only filesystem at
-> runtime: the error handler, read repair, async discard, close_ctree(),
-> btrfs_inc_block_group_ro(), check_inode_item(), device replace and add,
-> cancelling a balance, the sysfs label and force_chunk_alloc stores, the
-> qgroup PERTRANS conversions and the subvolume orphan cleanup. And check
-> it next to every btrfs_root_readonly() check that guards a modification,
-> e.g. in btrfs_permission(), btrfs_setattr(), btrfs_update_time(), the
-> xattr and ACL handlers, btrfs_fileattr_set() and
-> btrfs_remap_file_range_prep().
+On Wed, 23 Sep 2026 18:17:49 +0100 you wrote:
+> A typical kernel build consists of a frustratingly large amount of time
+> spent stuck in single-threaded bottlenecks.
 > 
-> BTRFS_FS_STATE_RO has always been set and cleared together with
-> SB_RDONLY. The remaining sb_rdonly() users are mount and remount paths
-> plus btrfs_is_full_ro() which only matters for rescue mounts.
+> It turns out that there's a lot we can do about this and doing so
+> significantly impacts kernel build times.
 > 
-> This prepares for not setting SB_RDONLY from the error handler. Until
-> then the only difference is that ftruncate() and FICLONE through files
-> that were opened for writing before a forced remount to read-only, e.g.
-> by sysrq u, fail with EROFS now instead of modifying the filesystem.
-
-I love the idea. This reminds me exactly why for btrfs_force_shutdown(), 
-we have to manually set the fs error without marking the fs RO, to avoid 
-exactly the same problem.
-
-With that said, can you also a set_bit() call in btrfs_force_shutdown() 
-to also set that flag instead of the exsting setting fs_info->fs_error?
-
-Thanks,
-Qu
-
+> This series makes allmodconfig builds up to 36% faster, incremental builds
+> up to ~70% faster, and noop builds up to ~90% faster.
 > 
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
-> ---
->   fs/btrfs/acl.c          |  3 ++-
->   fs/btrfs/bio.c          |  2 +-
->   fs/btrfs/block-group.c  |  2 +-
->   fs/btrfs/dev-replace.c  |  2 +-
->   fs/btrfs/discard.c      |  2 +-
->   fs/btrfs/disk-io.c      |  4 ++--
->   fs/btrfs/fs.h           | 10 ++++++++++
->   fs/btrfs/inode.c        |  8 ++++----
->   fs/btrfs/ioctl.c        |  8 ++++----
->   fs/btrfs/messages.c     |  8 ++++----
->   fs/btrfs/qgroup.c       |  4 ++--
->   fs/btrfs/reflink.c      |  3 ++-
->   fs/btrfs/sysfs.c        |  4 ++--
->   fs/btrfs/tree-checker.c |  2 +-
->   fs/btrfs/volumes.c      |  4 ++--
->   fs/btrfs/xattr.c        |  8 ++++++--
->   16 files changed, 45 insertions(+), 29 deletions(-)
-> 
-> diff --git a/fs/btrfs/acl.c b/fs/btrfs/acl.c
-> index 10a0d733bfd1..8bf11da118f7 100644
-> --- a/fs/btrfs/acl.c
-> +++ b/fs/btrfs/acl.c
-> @@ -107,8 +107,9 @@ int btrfs_set_acl(const struct mnt_idmap *idmap, struct dentry *dentry,
->   	int ret;
->   	struct inode *inode = d_inode(dentry);
->   	umode_t old_mode = inode->i_mode;
-> +	struct btrfs_root *root = BTRFS_I(inode)->root;
->   
-> -	if (btrfs_root_readonly(BTRFS_I(inode)->root))
-> +	if (btrfs_root_readonly(root) || btrfs_fs_rdonly(root->fs_info))
->   		return -EROFS;
->   
->   	if (type == ACL_TYPE_ACCESS && acl) {
-> diff --git a/fs/btrfs/bio.c b/fs/btrfs/bio.c
-> index 2c6234f6182f..987f29b1ac46 100644
-> --- a/fs/btrfs/bio.c
-> +++ b/fs/btrfs/bio.c
-> @@ -924,7 +924,7 @@ int btrfs_repair_bbio_failure(struct btrfs_bio *bbio, const struct bvec_iter *or
->   	 * The fs either mounted RO or hit critical errors, no need
->   	 * to continue repairing.
->   	 */
-> -	if (unlikely(sb_rdonly(fs_info->sb)))
-> +	if (unlikely(btrfs_fs_rdonly(fs_info)))
->   		return 0;
->   
->   	if (btrfs_repair_one_zone(fs_info, logical))
-> diff --git a/fs/btrfs/block-group.c b/fs/btrfs/block-group.c
-> index 9a98e291769c..04c0c0b0c489 100644
-> --- a/fs/btrfs/block-group.c
-> +++ b/fs/btrfs/block-group.c
-> @@ -3138,7 +3138,7 @@ int btrfs_inc_block_group_ro(struct btrfs_block_group *cache,
->   	 * In that case we should not start a new transaction on read-only fs.
->   	 * Thus here we skip all chunk allocations.
->   	 */
-> -	if (sb_rdonly(fs_info->sb)) {
-> +	if (btrfs_fs_rdonly(fs_info)) {
->   		mutex_lock(&fs_info->ro_block_group_mutex);
->   		ret = inc_block_group_ro(cache, false);
->   		mutex_unlock(&fs_info->ro_block_group_mutex);
-> diff --git a/fs/btrfs/dev-replace.c b/fs/btrfs/dev-replace.c
-> index cdfe093e5c5c..943ce620a046 100644
-> --- a/fs/btrfs/dev-replace.c
-> +++ b/fs/btrfs/dev-replace.c
-> @@ -1115,7 +1115,7 @@ int btrfs_dev_replace_cancel(struct btrfs_fs_info *fs_info)
->   	int result;
->   	int ret;
->   
-> -	if (sb_rdonly(fs_info->sb))
-> +	if (btrfs_fs_rdonly(fs_info))
->   		return -EROFS;
->   
->   	mutex_lock(&dev_replace->lock_finishing_cancel_unmount);
-> diff --git a/fs/btrfs/discard.c b/fs/btrfs/discard.c
-> index 1c304bf473e5..e5c029813228 100644
-> --- a/fs/btrfs/discard.c
-> +++ b/fs/btrfs/discard.c
-> @@ -86,7 +86,7 @@ static bool btrfs_run_discard_work(const struct btrfs_discard_ctl *discard_ctl)
->   						     struct btrfs_fs_info,
->   						     discard_ctl);
->   
-> -	return (!(fs_info->sb->s_flags & SB_RDONLY) &&
-> +	return (!btrfs_fs_rdonly(fs_info) &&
->   		test_bit(BTRFS_FS_DISCARD_RUNNING, &fs_info->flags));
->   }
->   
-> diff --git a/fs/btrfs/disk-io.c b/fs/btrfs/disk-io.c
-> index c45cda4290d5..3dcacf7e4d1d 100644
-> --- a/fs/btrfs/disk-io.c
-> +++ b/fs/btrfs/disk-io.c
-> @@ -177,7 +177,7 @@ static int btrfs_repair_eb_io_failure(const struct extent_buffer *eb,
->   	struct btrfs_bio *bbio;
->   	int ret;
->   
-> -	if (sb_rdonly(fs_info->sb))
-> +	if (btrfs_fs_rdonly(fs_info))
->   		return -EROFS;
->   
->   	/*
-> @@ -4483,7 +4483,7 @@ void __cold close_ctree(struct btrfs_fs_info *fs_info)
->   	/* Cancel or finish ongoing discard work */
->   	btrfs_discard_cleanup(fs_info);
->   
-> -	if (!sb_rdonly(fs_info->sb)) {
-> +	if (!btrfs_fs_rdonly(fs_info)) {
->   		/*
->   		 * The cleaner kthread is stopped, so do one final pass over
->   		 * unused block groups.
-> diff --git a/fs/btrfs/fs.h b/fs/btrfs/fs.h
-> index 2dd167c32d61..024c3ec7d058 100644
-> --- a/fs/btrfs/fs.h
-> +++ b/fs/btrfs/fs.h
-> @@ -1194,6 +1194,16 @@ static inline int btrfs_need_cleaner_sleep(const struct btrfs_fs_info *fs_info)
->   		btrfs_fs_closing(fs_info);
->   }
->   
-> +/*
-> + * Check whether the filesystem is read-only. BTRFS_FS_STATE_RO is set and
-> + * cleared together with SB_RDONLY on mount, on remount and when an error forces
-> + * the filesystem read-only. Use this instead of sb_rdonly() at runtime.
-> + */
-> +static inline bool btrfs_fs_rdonly(const struct btrfs_fs_info *fs_info)
-> +{
-> +	return test_bit(BTRFS_FS_STATE_RO, &fs_info->fs_state);
-> +}
-> +
->   static inline void btrfs_wake_unfinished_drop(struct btrfs_fs_info *fs_info)
->   {
->   	clear_and_wake_up_bit(BTRFS_FS_UNFINISHED_DROPS, &fs_info->flags);
-> diff --git a/fs/btrfs/inode.c b/fs/btrfs/inode.c
-> index abaa33471456..415c5145fcbe 100644
-> --- a/fs/btrfs/inode.c
-> +++ b/fs/btrfs/inode.c
-> @@ -5433,7 +5433,7 @@ static int btrfs_setattr(const struct mnt_idmap *idmap, struct dentry *dentry,
->   	struct btrfs_root *root = BTRFS_I(inode)->root;
->   	int ret;
->   
-> -	if (btrfs_root_readonly(root))
-> +	if (btrfs_root_readonly(root) || btrfs_fs_rdonly(root->fs_info))
->   		return -EROFS;
->   
->   	ret = setattr_prepare(idmap, dentry, attr);
-> @@ -6058,7 +6058,7 @@ struct inode *btrfs_lookup_dentry(struct inode *dir, struct dentry *dentry)
->   			return ERR_CAST(inode);
->   
->   		down_read(&fs_info->cleanup_work_sem);
-> -		if (!sb_rdonly(inode->vfs_inode.i_sb))
-> +		if (!btrfs_fs_rdonly(fs_info))
->   			ret = btrfs_orphan_cleanup(sub_root);
->   		up_read(&fs_info->cleanup_work_sem);
->   		if (ret) {
-> @@ -6421,7 +6421,7 @@ static int btrfs_update_time(struct inode *inode, enum fs_update_time type,
->   	struct btrfs_root *root = BTRFS_I(inode)->root;
->   	int dirty;
->   
-> -	if (btrfs_root_readonly(root))
-> +	if (btrfs_root_readonly(root) || btrfs_fs_rdonly(root->fs_info))
->   		return -EROFS;
->   	if (flags & IOCB_NOWAIT)
->   		return -EAGAIN;
-> @@ -9316,7 +9316,7 @@ static int btrfs_permission(const struct mnt_idmap *idmap,
->   
->   	if (mask & MAY_WRITE &&
->   	    (S_ISREG(mode) || S_ISDIR(mode) || S_ISLNK(mode))) {
-> -		if (btrfs_root_readonly(root))
-> +		if (btrfs_root_readonly(root) || btrfs_fs_rdonly(root->fs_info))
->   			return -EROFS;
->   		if (BTRFS_I(inode)->flags & BTRFS_INODE_READONLY)
->   			return -EACCES;
-> diff --git a/fs/btrfs/ioctl.c b/fs/btrfs/ioctl.c
-> index f3e2afe221be..2063075906c8 100644
-> --- a/fs/btrfs/ioctl.c
-> +++ b/fs/btrfs/ioctl.c
-> @@ -291,7 +291,7 @@ int btrfs_fileattr_set(const struct mnt_idmap *idmap,
->   	u32 inode_flags;
->   	bool prop_set = false;
->   
-> -	if (btrfs_root_readonly(root))
-> +	if (btrfs_root_readonly(root) || btrfs_fs_rdonly(fs_info))
->   		return -EROFS;
->   
->   	if (fileattr_has_fsx(fa))
-> @@ -2453,7 +2453,7 @@ static int btrfs_ioctl_defrag(struct file *file, void __user *argp)
->   	if (ret)
->   		return ret;
->   
-> -	if (btrfs_root_readonly(root)) {
-> +	if (btrfs_root_readonly(root) || btrfs_fs_rdonly(root->fs_info)) {
->   		ret = -EROFS;
->   		goto out;
->   	}
-> @@ -3191,7 +3191,7 @@ static long btrfs_ioctl_dev_replace(struct btrfs_fs_info *fs_info,
->   
->   	switch (p->cmd) {
->   	case BTRFS_IOCTL_DEV_REPLACE_CMD_START:
-> -		if (sb_rdonly(fs_info->sb))
-> +		if (btrfs_fs_rdonly(fs_info))
->   			return -EROFS;
->   		if (!btrfs_exclop_start(fs_info, BTRFS_EXCLOP_DEV_REPLACE)) {
->   			ret = BTRFS_ERROR_DEV_EXCL_RUN_IN_PROGRESS;
-> @@ -3927,7 +3927,7 @@ static long _btrfs_ioctl_set_received_subvol(struct file *file,
->   		goto out;
->   	}
->   
-> -	if (btrfs_root_readonly(root)) {
-> +	if (btrfs_root_readonly(root) || btrfs_fs_rdonly(fs_info)) {
->   		ret = -EROFS;
->   		goto out;
->   	}
-> diff --git a/fs/btrfs/messages.c b/fs/btrfs/messages.c
-> index 0704be7be871..cedca4050831 100644
-> --- a/fs/btrfs/messages.c
-> +++ b/fs/btrfs/messages.c
-> @@ -132,10 +132,10 @@ void __btrfs_handle_fs_error(struct btrfs_fs_info *fs_info, const char *function
->   #endif
->   
->   	/*
-> -	 * Special case: if the error is EROFS, and we're already under
-> -	 * SB_RDONLY, then it is safe here.
-> +	 * Special case: if the error is EROFS, and we're already read-only,
-> +	 * then it is safe here.
->   	 */
-> -	if (error == -EROFS && sb_rdonly(sb))
-> +	if (error == -EROFS && btrfs_fs_rdonly(fs_info))
->   		return;
->   
->   #ifdef CONFIG_PRINTK
-> @@ -168,7 +168,7 @@ void __btrfs_handle_fs_error(struct btrfs_fs_info *fs_info, const char *function
->   	if (!(sb->s_flags & SB_BORN))
->   		return;
->   
-> -	if (sb_rdonly(sb))
-> +	if (btrfs_fs_rdonly(fs_info))
->   		return;
->   
->   	btrfs_discard_stop(fs_info);
-> diff --git a/fs/btrfs/qgroup.c b/fs/btrfs/qgroup.c
-> index a0651fbfe778..dc96c6aca1a9 100644
-> --- a/fs/btrfs/qgroup.c
-> +++ b/fs/btrfs/qgroup.c
-> @@ -4658,7 +4658,7 @@ static void qgroup_convert_meta(struct btrfs_fs_info *fs_info, u64 ref_root,
->   
->   		qgroup_rsv_release(fs_info, qgroup, num_bytes,
->   				BTRFS_QGROUP_RSV_META_PREALLOC);
-> -		if (!sb_rdonly(fs_info->sb))
-> +		if (!btrfs_fs_rdonly(fs_info))
->   			qgroup_rsv_add(fs_info, qgroup, num_bytes,
->   				       BTRFS_QGROUP_RSV_META_PERTRANS);
->   
-> @@ -4688,7 +4688,7 @@ void btrfs_qgroup_convert_reserved_meta(struct btrfs_root *root, int num_bytes)
->   				      BTRFS_QGROUP_RSV_META_PREALLOC);
->   	trace_btrfs_qgroup_meta_convert(root, num_bytes);
->   	qgroup_convert_meta(fs_info, btrfs_root_id(root), num_bytes);
-> -	if (!sb_rdonly(fs_info->sb))
-> +	if (!btrfs_fs_rdonly(fs_info))
->   		add_root_meta_rsv(root, num_bytes, BTRFS_QGROUP_RSV_META_PERTRANS);
->   }
->   
-> diff --git a/fs/btrfs/reflink.c b/fs/btrfs/reflink.c
-> index b5d2c094941d..de9bc8ba5028 100644
-> --- a/fs/btrfs/reflink.c
-> +++ b/fs/btrfs/reflink.c
-> @@ -857,7 +857,8 @@ static int btrfs_remap_file_range_prep(struct file *file_in, loff_t pos_in,
->   	if (!(remap_flags & REMAP_FILE_DEDUP)) {
->   		struct btrfs_root *root_out = inode_out->root;
->   
-> -		if (btrfs_root_readonly(root_out))
-> +		if (btrfs_root_readonly(root_out) ||
-> +		    btrfs_fs_rdonly(root_out->fs_info))
->   			return -EROFS;
->   
->   		ASSERT(inode_in->vfs_inode.i_sb == inode_out->vfs_inode.i_sb);
-> diff --git a/fs/btrfs/sysfs.c b/fs/btrfs/sysfs.c
-> index 3ac1fa608d3b..c7522aafde1b 100644
-> --- a/fs/btrfs/sysfs.c
-> +++ b/fs/btrfs/sysfs.c
-> @@ -751,7 +751,7 @@ static ssize_t btrfs_force_chunk_alloc_store(struct kobject *kobj,
->   	if (!capable(CAP_SYS_ADMIN))
->   		return -EPERM;
->   
-> -	if (sb_rdonly(fs_info->sb))
-> +	if (btrfs_fs_rdonly(fs_info))
->   		return -EROFS;
->   
->   	ret = kstrtobool(buf, &val);
-> @@ -980,7 +980,7 @@ static ssize_t btrfs_label_store(struct kobject *kobj,
->   	if (!fs_info)
->   		return -EPERM;
->   
-> -	if (sb_rdonly(fs_info->sb))
-> +	if (btrfs_fs_rdonly(fs_info))
->   		return -EROFS;
->   
->   	/*
-> diff --git a/fs/btrfs/tree-checker.c b/fs/btrfs/tree-checker.c
-> index 9cd79d97b9b5..6cce0e6c759e 100644
-> --- a/fs/btrfs/tree-checker.c
-> +++ b/fs/btrfs/tree-checker.c
-> @@ -1325,7 +1325,7 @@ static int check_inode_item(struct extent_buffer *leaf,
->   			       "unknown incompat flags detected: 0x%x", flags);
->   		return -EUCLEAN;
->   	}
-> -	if (unlikely(!sb_rdonly(fs_info->sb) &&
-> +	if (unlikely(!btrfs_fs_rdonly(fs_info) &&
->   		     (ro_flags & ~BTRFS_INODE_RO_FLAG_MASK))) {
->   		inode_item_err(leaf, slot,
->   			"unknown ro-compat flags detected on writeable mount: 0x%x",
-> diff --git a/fs/btrfs/volumes.c b/fs/btrfs/volumes.c
-> index d3e6a9b429dd..47879cc2160d 100644
-> --- a/fs/btrfs/volumes.c
-> +++ b/fs/btrfs/volumes.c
-> @@ -2964,7 +2964,7 @@ int btrfs_init_new_device(struct btrfs_fs_info *fs_info, const char *device_path
->   	bool seeding_dev = false;
->   	bool locked = false;
->   
-> -	if (sb_rdonly(sb) && !fs_devices->seeding)
-> +	if (btrfs_fs_rdonly(fs_info) && !fs_devices->seeding)
->   		return -EROFS;
->   
->   	/* Forbid freezing until the device is a committed member (or unwound). */
-> @@ -5297,7 +5297,7 @@ int btrfs_cancel_balance(struct btrfs_fs_info *fs_info)
->   	 * mount time if the mount is read-write. Otherwise it's still paused
->   	 * and we must not allow cancelling as it deletes the item.
->   	 */
-> -	if (sb_rdonly(fs_info->sb)) {
-> +	if (btrfs_fs_rdonly(fs_info)) {
->   		mutex_unlock(&fs_info->balance_mutex);
->   		return -EROFS;
->   	}
-> diff --git a/fs/btrfs/xattr.c b/fs/btrfs/xattr.c
-> index cbee10b6b49a..c38ddee78636 100644
-> --- a/fs/btrfs/xattr.c
-> +++ b/fs/btrfs/xattr.c
-> @@ -365,7 +365,9 @@ static int btrfs_xattr_handler_set(const struct xattr_handler *handler,
->   				   const char *name, const void *buffer,
->   				   size_t size, int flags)
->   {
-> -	if (btrfs_root_readonly(BTRFS_I(inode)->root))
-> +	struct btrfs_root *root = BTRFS_I(inode)->root;
-> +
-> +	if (btrfs_root_readonly(root) || btrfs_fs_rdonly(root->fs_info))
->   		return -EROFS;
->   
->   	name = xattr_full_name(handler, name);
-> @@ -409,7 +411,9 @@ static int btrfs_xattr_handler_set_security(const struct xattr_handler *handler,
->   					    const void *buffer,
->   					    size_t size, int flags)
->   {
-> -	if (btrfs_root_readonly(BTRFS_I(inode)->root))
-> +	struct btrfs_root *root = BTRFS_I(inode)->root;
-> +
-> +	if (btrfs_root_readonly(root) || btrfs_fs_rdonly(root->fs_info))
->   		return -EROFS;
->   
->   	name = xattr_full_name(handler, name);
-> 
+> [...]
+
+Here is the summary with links:
+  - [v4,01/22] kbuild: do not allocate .modinfo in vmlinux
+    https://git.kernel.org/riscv/c/5fe4dd596641
+  - [v4,02/22] kallsyms: index symbols by token to speed up table compression
+    https://git.kernel.org/riscv/c/6f014bf46faf
+  - [v4,03/22] kallsyms: output binary data to speed output and kallsyms assembly
+    https://git.kernel.org/riscv/c/83da9f3197e5
+  - [v4,04/22] sorttable: parse nm output correctly
+    https://git.kernel.org/riscv/c/4719513c0fa2
+  - [v4,05/22] kbuild: do not sort nm output where the order is irrelevant
+    https://git.kernel.org/riscv/c/c2970d8b52d1
+  - [v4,06/22] kbuild: only emit vmlinux relocations when required
+    https://git.kernel.org/riscv/c/8050568e0a46
+  - [v4,07/22] elf-parse: add section flags, symbol binding and mapping helpers
+    https://git.kernel.org/riscv/c/5005f8043c09
+  - [v4,08/22] kallsyms: reimplement mksysmap in C
+    https://git.kernel.org/riscv/c/531980b4b17e
+  - [v4,09/22] kbuild: calculate list, composite object state per object
+    (no matching commit)
+  - [v4,10/22] kbuild: implement and use depcheck to check dependency timestamps
+    (no matching commit)
+  - [v4,11/22] kbuild: move the toolchain checks into scripts/Kconfig.toolchain
+    https://git.kernel.org/riscv/c/f85147b291e3
+  - [v4,12/22] kbuild: avoid re-running compiler and linker probes
+    https://git.kernel.org/riscv/c/454e00cf8ee5
+  - [v4,13/22] modpost: cache section relocation mismatch state
+    (no matching commit)
+  - [v4,14/22] modpost: emit module descriptors as assembly
+    (no matching commit)
+  - [v4,15/22] kbuild: batch module finalisation
+    (no matching commit)
+  - [v4,16/22] objtool: do not hash DWARF relocations
+    (no matching commit)
+  - [v4,17/22] objtool: cache relocations, do less work, eliminate relocation hash
+    (no matching commit)
+  - [v4,18/22] objtool: size the instruction hash to the text
+    (no matching commit)
+  - [v4,19/22] objtool: decode instructions and resolve branch targets in parallel
+    (no matching commit)
+  - [v4,20/22] rust: make exports.o depend on the headers generated for it
+    (no matching commit)
+  - [v4,21/22] kbuild: build rust crates in parallel with the rest of the build
+    (no matching commit)
+  - [v4,22/22] kbuild: compress the kernel with pigz if available
+    https://git.kernel.org/riscv/c/48ebe1cbbeb5
+
+You are awesome, thank you!
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/patchwork/pwbot.html
+
 
