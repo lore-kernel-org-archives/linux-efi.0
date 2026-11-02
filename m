@@ -1,48 +1,49 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793654976;
-	b=NIJ4csUSiVAmoIAkkhZjd5IOceZ/4rFGeN+9y21xoPu7U8n5/2UjDm/s0jWyngemOBja
-	 wppttlbHwUlY7hEeIfMlOhRQdB3nKGw6cwN52GUcbxUGqz0tsb9/jOTtqal5lroaNXR4P
-	 wbciIAUl9WrXCACPzwb5c26IAqnpypldv0pygBGy5MXaGfDT+aroMETIwhNWClGNXqFe/
-	 h8c8Qs+IVN1scDMg77Vg+/jeduKerdjbdQVWMA2+fLdU8wLmg2ol3wA5sNMZZzxI7DBwl
-	 VEt5hrAht/tt7qeVZjUE99i3+518kDXWAryT+PRrYdmeqvRj4PLyg1Qgmlh3jlXuw1w==
+	t=1793654988;
+	b=2HPZpkhNZKcF7AsUia23E8CIHrPlqyDGPLD+iK7YOn9Eq8H/1RaIF/s1DYPvk9GAIzjm
+	 oeaxHM6YwtZXCZmMM0qfzEBV+8tDpDpKArTpMTVwil9uCBdLNYqOD0hYocmgHsAvfreXB
+	 Quju6Cz6duhUNhWtQUsaQiyRcBiDDH4/P9+gdtyWMEDP4DErlbuwwVX17thTAXsxGOwxa
+	 UUY4PeEREkHH82zq+jOJo/y9RREVju2UDltkvnvlnCn0GFfGk0WC30U0pYlJBIjQNwEzK
+	 2LsB03iWK0hsWIpEGActRNNm2pz6IjHuXEEXNmxaisgWdJJVmMTyyFPXIqDgQ4YeJvg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793654976;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793654988;
 	h=Received:DKIM-Signature:From:Date:Subject:MIME-Version:Content-Type:
 	 Content-Transfer-Encoding:Message-Id:References:In-Reply-To:To:Cc:
 	 X-Mailer:X-Developer-Signature:X-Developer-Key;
-	bh=Qgxf6cPMRa2fgOZLNkKYBji7ae+uqYeBopsxbR/dI6Y=;
-	b=gWC8tOk5o09OrYIlv9Yyk3Au/F195LVIcp7ATXwCQTkSt+XFXhH9KM4REvCloIa1FkLD
-	 SWCsgTPpaeeaKrpoXt3zVQ+OfzjcpDB036yqqEBjHCR649dUwSSZKQaGhOH1f0GGD0K/T
-	 hpH0yMP85kTiOpAyL9MLe7JG2X6nOiFF2oTlhtaPb5k9HAznmURvgx8MY5+7qsV8ER7p3
-	 tPy94TpZYEyp+3CwN0LFn2Hl9o61kawp8+uz4Aw0PFe3nfEZh0nup9W8QTnkz4wn0LrG5
-	 3Nj+bTvPyoiCS+GT8WqR8Txp/lL6uoMekhuZ40Zyz8kffD9SwzXSjL7/Slxsz3L49jA==
+	bh=iL0WXHPzfSDYj+2NNvJf3YEsbcQ4lzs85l94ET+86GM=;
+	b=mE2F+ctyCEnaFPAbzgq7TiXg0t84ZUxMFpz96hyi7qzJGDPRw443a3Ra/zFJU+Y5EhJR
+	 7Ess50OxzSeOfsRHLZ96SLXYNvsfC8K3A5b/wTcnoYRDY1z56bDpim/aGDXcCAim6icdb
+	 GEMRvwf7gj97JG19itWriNG6H93TMALSHG4yRZRnYYdOwm6m6P/6+dzMDmswInr6Q902F
+	 b65K9gdMQaqRuziOK53ECJ3yObm3yNPfu3v4mQ8QwP5DFEbI5sxihdSVUALcuJVtH5WCT
+	 fWBpGomarzMzBNi4VCmuQyA5M/2LxZhR1dgN7h2KNmy/nfaJ9/PiC11zazh3OFGRXJQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Gw6nyaBf;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="L73xfRF/";
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAC2B606A329;
-	Mon,  2 Nov 2026 21:29:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 103BE606D835;
+	Mon,  2 Nov 2026 21:29:48 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Gw6nyaBf
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5D501F00A16;
-	Mon,  2 Nov 2026 21:29:31 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=L73xfRF/
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 43BB61F00A17;
+	Mon,  2 Nov 2026 21:29:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793654975;
-	bh=Qgxf6cPMRa2fgOZLNkKYBji7ae+uqYeBopsxbR/dI6Y=;
+	s=k20260515; t=1793654987;
+	bh=iL0WXHPzfSDYj+2NNvJf3YEsbcQ4lzs85l94ET+86GM=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=Gw6nyaBfkvLjKlF9cbp+6df2Lwbw0+pS5533QsbvNM8MFMZ7Ya8MTBYT2iFT/Y1a8
-	 LE4unNtcs7xv3KszNBJ1PgFUhOKH8vI+AfiwbCbuWs/Md4pWVBgl69YoRSg2Z1IBM/
-	 gmteFYQXV81Zc2wc7SleSMdx2uLm9z2u2K0ehAvnOblx+ROmN1+5meitHSyEnwnhZQ
-	 MWfvc0MQ0gEX2Y7F/Y+A2Nu9os5f8Cu/p7tXkW3q3yl4jJuaVZjkC7LHj0Sqsy0VFe
-	 3ylGyoy6t5fBwhzHg5708KSgYacJxaqD3kWL5Ie69Ho5PEJMXNPmXZbMdDNaWPIWGD
-	 aJx8q81bf6yRQ==
+	b=L73xfRF/wcgMh0/wXCSR66SLKo3JPcyhiHDaw9m3GD6wi8/li+lNmEFV/ACGoFoYE
+	 be9yxThzATISR2uD5UBSo8mjxH3W23XS3OVySFzTS/W3lrV+B1qH1U+5vqns5foHnF
+	 JjxuM8YjhQxMhmwquwjKFJPVgSAUanMw7fW1Z7q9nhHNeGB6iFq9ubQqUeI+2Mpznu
+	 FXBDAsytku3tUCWUjIps2lrhvYPgJhrCYjH5XXX93Phkzp9Av5be0X6/hjxBGMsumI
+	 QFNjpzKQqVy/2+ScpEgNtzpxOtXV6T2VsbUX+uNZHz4npUyE4KfWL/asrhFMmvmV/g
+	 Ktt2vI35FKvOQ==
 From: Vincent Mailhol <mailhol@kernel.org>
-Date: Mon, 02 Nov 2026 22:29:09 +0100
-Subject: [PATCH v3 2/7] block: add DPS root partition type UUID definitions
+Date: Mon, 02 Nov 2026 22:29:12 +0100
+Subject: [PATCH v3 5/7] block: skip partitions with DPS no-auto GPT
+ attribute
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -54,7 +55,7 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20261102-discoverable-root_partitions-v3-2-27f04b69b7ab@kernel.org>
+Message-Id: <20261102-discoverable-root_partitions-v3-5-27f04b69b7ab@kernel.org>
 References: <20261102-discoverable-root_partitions-v3-0-27f04b69b7ab@kernel.org>
 In-Reply-To: <20261102-discoverable-root_partitions-v3-0-27f04b69b7ab@kernel.org>
 To: Jens Axboe <axboe@kernel.dk>, Davidlohr Bueso <dave@stgolabs.net>, 
@@ -67,59 +68,81 @@ Cc: linux-kernel@vger.kernel.org, linux-block@vger.kernel.org,
  Helge Deller <deller@gmx.de>, Matthew Wilcox <willy@infradead.org>, 
  Vincent Mailhol <mailhol@kernel.org>
 X-Mailer: b4 0.16.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1660; i=mailhol@kernel.org;
- h=from:subject:message-id; bh=AL8uN7/7MSksrsBruApS+z49m8V8+cpTPrJkxJAGLio=;
- b=owGbwMvMwCV2McXO4Xp97WbG02pJDFkvGTaKrrMKeGDHovigW1E9O7Ds++NfNsdfiry0MJ81c
- 6OM97pLHRNZGMS4GCzFFFmWlXNyK3QUeocd+msJM4eVCWSItEgDAxCwMPDlJuaVGukY6ZlqG+oZ
- Ahk6RgxcnAIw1fHPGf6XsGi8n3o3hlfW9XJklnvlzT6dOe3+vz/f0EthZnbXt//F8Ffysk3icr5
- psdOupB2oC5l/aYOGp5JLwK/mDz8n6i2S8uUHAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2347; i=mailhol@kernel.org;
+ h=from:subject:message-id; bh=Yj6HfKP/i1Jap5YE+cXAWCTV9qeDS+8QPHbth9OyDkM=;
+ b=owGbwMvMwCV2McXO4Xp97WbG02pJDFkvGTau2/j/c57FXrlqBn3rxuCCqgSl7M02d0L9s/6G8
+ nOxMit0TGRhEONisBRTZFlWzsmt0FHoHXboryXMHFYmkCHSIg0MQMDCwJebmFdqpGOkZ6ptqGcI
+ ZOgYMXBxCsBUf9Bl+B9bplT94J740SmLb9y9uDJ3yzwP9r91ZW4J/KHvDzRltVcz/DNfLi64eLd
+ nq8jP89UzpqjuX2J5YtvBr+c2abyqcj2r+osFAA==
 X-Developer-Key: i=mailhol@kernel.org; a=openpgp;
  fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
 
-DPS [1] assigns a native root partition type UUID to each supported
-architecture. Add a hidden DPS_ROOT_PARTITION_TYPE_UUID string symbol
-and populate it from the architecture selected in Kconfig. Only
-architectures with EFI support in the kernel are added.
+DPS [1] defines GPT attribute bit 63 as no-auto. Partitions with this
+bit set must not be used by automatic discovery.
 
-Gate the symbol on EFI and EFI_PARTITION because discovery needs block
-devices, EFI runtime services and GPT partition parsing.
-
-Derive the hidden DPS_ROOT_AUTO_DISCOVERY boolean from whether
-DPS_ROOT_PARTITION_TYPE_UUID is nonempty.
+Store the GPT attributes in partition_meta_info and check
+GPT_ATTR_NO_AUTO_DISCOVERY when matching a root partition by type UUID.
 
 [1] The Discoverable Partitions Specification (DPS)
 Link: https://uapi-group.org/specifications/specs/discoverable_partitions_specification/
 
 Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
 ---
- block/Kconfig | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+ block/early-lookup.c   | 1 +
+ block/partitions/efi.c | 1 +
+ include/linux/blkdev.h | 4 ++++
+ 3 files changed, 6 insertions(+)
 
-diff --git a/block/Kconfig b/block/Kconfig
-index 70e4a66d941f..3b5d3ad42dde 100644
---- a/block/Kconfig
-+++ b/block/Kconfig
-@@ -211,6 +211,20 @@ config BLK_INLINE_ENCRYPTION_FALLBACK
+diff --git a/block/early-lookup.c b/block/early-lookup.c
+index e3da4bfb41e7..c59d14889fee 100644
+--- a/block/early-lookup.c
++++ b/block/early-lookup.c
+@@ -261,6 +261,7 @@ static int __init match_dev_by_type_uuid(struct device *dev, const void *data)
+ 	const struct uuidcmp *cmp = data;
  
- source "block/partitions/Kconfig"
+ 	return bdev->bd_disk == cmp->disk && bdev->bd_meta_info &&
++		!(bdev->bd_meta_info->gpt_attr & GPT_ATTR_NO_AUTO_DISCOVERY) &&
+ 		!strcasecmp(cmp->uuid, bdev->bd_meta_info->type_uuid);
+ }
  
-+config DPS_ROOT_PARTITION_TYPE_UUID
-+	depends on EFI && EFI_PARTITION
-+	string
-+	default "69dad710-2ce4-4e3c-b16c-21a1d49abed3" if ARM
-+	default "b921b045-1df0-41c3-af44-4c6f280d3fae" if ARM64
-+	default "77055800-792c-4f94-b39a-98c91b762bb6" if LOONGARCH && 64BIT
-+	default "72ec70a6-cf74-40e6-bd49-4bda08e8f224" if RISCV && 64BIT
-+	default "60d5a7fe-8e7d-435c-b714-3dd8162144e1" if RISCV
-+	default "4f68bce3-e8cd-4db1-96e7-fbcaf984b709" if X86_64
-+	default "44479540-f297-41b2-9af7-d131d5f0458a" if X86
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 4a3835ed9561..ed5e2f21ad85 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -741,6 +741,7 @@ int efi_partition(struct parsed_partitions *state)
+ 			state->parts[i + 1].flags = ADDPART_FLAG_RAID;
+ 
+ 		info = &state->parts[i + 1].info;
++		info->gpt_attr = le64_to_cpu(ptes[i].attributes);
+ 		efi_guid_to_str(&ptes[i].unique_partition_guid, info->uuid);
+ 		efi_guid_to_str(&ptes[i].partition_type_guid, info->type_uuid);
+ 
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index 5cfef05b552e..fd6d809189e8 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -5,6 +5,7 @@
+ #ifndef _LINUX_BLKDEV_H
+ #define _LINUX_BLKDEV_H
+ 
++#include <linux/bits.h>
+ #include <linux/types.h>
+ #include <linux/blk_types.h>
+ #include <linux/blk_plug.h>
+@@ -65,10 +66,13 @@ extern const struct class block_class;
+  */
+ #define PARTITION_META_INFO_UUIDLTH	(UUID_STRING_LEN + 1)
+ 
++#define GPT_ATTR_NO_AUTO_DISCOVERY	BIT_U64(63)
 +
-+config DPS_ROOT_AUTO_DISCOVERY
-+	def_bool DPS_ROOT_PARTITION_TYPE_UUID != ""
-+
- config BLK_PM
- 	def_bool PM
+ struct partition_meta_info {
+ 	char uuid[PARTITION_META_INFO_UUIDLTH];
+ 	char type_uuid[PARTITION_META_INFO_UUIDLTH];
+ 	u8 volname[PARTITION_META_INFO_VOLNAMELTH];
++	u64 gpt_attr;
+ };
  
+ /**
 
 -- 
 2.56.0
