@@ -1,81 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=82.195.75.108
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=95.215.58.112
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793700427;
-	b=WAdqlzKX7fnAEEzep/l7YnUTCUARqunsPpPXqZwmvg4wd1N9kyE1ujpufomzQCd5ee9b
-	 +w4j3q47l+A6ffoej5rfjHNH0OmBPbmvRWIB/vnjzIQ/lZe0hUYUHz3EwqhLPdZ27Frwc
-	 bQdXnq8seFJSfuDr1bGx/0NPXloKcrjcvfrsV7eIKw/6kRAJZoo1wDviqgYP694vjVPNx
-	 v7vI7gtgSMZzM/W/dbw/nh08Co23HP1uFrz76TH3Tulk+JOtIYKiaH8FIzEf6bDBLG09B
-	 QMFbzxvd9dlrAGCBM34TP5Souuk3qx8/TIBqF14nOAf7MK/NC95Lhcay1Cwa4DEQzag==
+	t=1793701788;
+	b=CdtzpTxU8G0U8e6lBhcklphsfOqTx48vbQ0JseXQU0FFx2+Wk2PQ8GisxP5qyBC4fADF
+	 nso1A8QObDoYZIZfgjfc8F51no7evix3g09S40g4gtylCRp0chMBbkoxFIRE1RKWvLXaT
+	 cOYU8pwprdDWdqr0xlgse/IrZZnslR9tsQZh84H7ImKiIkcn3slEFNN2TYAsHDUtBRUXl
+	 z8/tvlZ7Nm4nsRXuuez9be/0scXnrtSQrk4/m/5coSGqv/FS0sZycfUkmCwiLSoHYTFMF
+	 zPZiaaWp8MO7c4Lnw73Q7idxQP/U6mq2yB/QqAwpm31PNlmcM+ZBhnTa0ygth1Mu/vQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793700427;
-	h=DMARC-Filter:DKIM-Signature:Received:Date:From:To:Cc:Subject:
-	 Message-ID:References:MIME-Version:Content-Type:Content-Disposition:
-	 In-Reply-To:X-Debian-User;
-	bh=yOEv4rlICtm+9MGZIVJit4iJjbb/HbqDxTBh2E0PNYM=;
-	b=LNhC64guaf3KjAswSa3mZeOtQ4U+zS7S9s1ElT+kbhyp/ULN+ndbqDkI3FQ4m4I1uLkt
-	 M62ys3EdWWnc2ruDCqWk19kL2rvr2xxFzfjwIivmVrI6d+hoBIir6bOmoA+TG/+OGNNvq
-	 ACj0DythNFt4WxdkfpHiDAQhpFw1cazFLKVvUh+yGeOgyQH91gyvWFDoHzPpnpaPxqPqz
-	 utoHbQUcGi7WnWYJHu0urjtY1KxmQpBnEe5p5glsu22OUv5lQqw4pQkVBFHTWgIRiRDj2
-	 XaE7cYTbpkUzViuQVkXs8wTZR6NAKENFztLbYqTYYWezYhRv12wL3U0Wjgxc+XqRG7g==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793701788;
+	h=DMARC-Filter:X-Envelope-To:DKIM-Signature:X-Envelope-To:Received:
+	 X-Mizu-Trace-ID:X-Migadu-Flow:From:To:Cc:Subject:Date:Message-ID:
+	 X-Mailer:In-Reply-To:References:MIME-Version:
+	 Content-Transfer-Encoding;
+	bh=9OSvScGRwha8A7Tb2tHR3R5F02sXRmMamVkr8+PRTWs=;
+	b=wn052scmxwX2oHtu2WXfqO0SCZiOD9HTOV8cfyk1JJGglztoU/4fyfaEA2bT51o67GAm
+	 CqdtD1FcHy/LmGGpshQzae8xlSD7Mgsk7wz9hYkv8FhXWWYK7r5w9ffnGi6bHS5Xjw9UF
+	 rxPAVZE7XQx6C649FgInlN7fXNrSY/iN2uGVCh7H98Znmp9xTQcADzwvIMXX2tIkHfB5/
+	 h0IHvffA+QTrazEdRzjZplhR4DBAtf+9inqSalFnseHyPSHPBeX2fwT82MQoUAjTRRWyj
+	 vIsvN7egUvVdlS4TwY/dbGy8B2Y2J4jOmxa1XTZLwongm8DOIxBKpgHzRQ7MuHMvbzg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=debian.org;
-	spf=pass smtp.mailfrom=debian.org;
-	dkim=pass header.d=debian.org header.i=@debian.org header.a=rsa-sha256 header.s=smtpauto.stravinsky header.b=T8GHUIeu;
-	arc=none smtp.remote-ip=82.195.75.108
-Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (prime256v1) server-signature ECDSA (prime256v1) server-digest SHA256)
+	dmarc=pass header.from=linux.dev;
+	spf=pass smtp.mailfrom=linux.dev;
+	dkim=pass header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=QQ1qfgqU;
+	arc=none smtp.remote-ip=95.215.58.112
+Received: from mta1.migadu.com (out-112.mta1.migadu.com [95.215.58.112])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C679D606A817;
-	Tue,  3 Nov 2026 10:07:06 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C679D606A817
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C212606B12B
+	for <linux-efi@vger.kernel.org>; Tue,  3 Nov 2026 10:29:47 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9C212606B12B
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=debian.org header.i=@debian.org header.a=rsa-sha256 header.s=smtpauto.stravinsky header.b=T8GHUIeu
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
-	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=yOEv4rlICtm+9MGZIVJit4iJjbb/HbqDxTBh2E0PNYM=; b=T8GHUIeuwcDQEX7YFBA0dHaPtB
-	2kVj9KSOFPEikB0F9pAaccEJIVjNxbKR3+e0f9oaOThinmGoXpI0EvZVDNwsXfU7AGr9ATQG+ak4X
-	z2dA0u862tnlHdxULQMW9u6wC8/34oIlt51HyBjY2ZPhPEqEQ7F2QlBBCab/c1vclkwgOD+hM7I5Y
-	Apd1Al26l3U1O8FO7cvKq+udwXcUON4wKT7E1OLcFB1DgsHO9juQDwNhoajOQfbR9TQ7vZZE+8K4T
-	LmEzS5pvIZvxQ3GwRaJaAmhojV9r2fEIapcI/uXjfq4sDAf9cLR2RFL0jyHQmO9HjiEpQaLi6OAZZ
-	0upLu0Xg==;
-Received: from authenticated-user
-	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
-	(Exim 4.96)
-	(envelope-from <leitao@debian.org>)
-	id 1xOBPO-006r0Z-0j;
-	Tue, 03 Nov 2026 10:06:26 +0000
-Date: Tue, 3 Nov 2026 02:06:17 -0800
-From: Breno Leitao <leitao@debian.org>
-To: Mike Rapoport <rppt@kernel.org>
-Cc: Ard Biesheuvel <ardb@kernel.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Thomas Gleixner <tglx@kernel.org>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
-	Andrew Morton <akpm@linux-foundation.org>, David Hildenbrand <david@kernel.org>, 
-	Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett" <liam@infradead.org>, 
-	Vlastimil Babka <vbabka@kernel.org>, Suren Baghdasaryan <surenb@google.com>, 
-	Michal Hocko <mhocko@suse.com>, Miaohe Lin <linmiaohe@huawei.com>, 
-	Naoya Horiguchi <nao.horiguchi@gmail.com>, Oscar Salvador <osalvador@suse.de>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael J. Wysocki" <rafael@kernel.org>, 
-	Danilo Krummrich <dakr@kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, 
-	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>, kas@kernel.org, 
-	kexec@lists.infradead.org, Brendan Jackman <brendan.jackman@linux.dev>, 
-	Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>, shakeel.butt@linux.dev, 
-	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, 
-	linux-cxl@vger.kernel.org, driver-core@lists.linux.dev, 
-	linux-arm-kernel@lists.infradead.org, rmikey@meta.com, riel@surriel.com, harry@kernel.org, 
-	kernel-team@meta.com
-Subject: Re: [PATCH v6 3/7] mm/memory-failure: add hwpoison_boot_page() to
- flag an inherited frame
-Message-ID: <aumvVjoHo4KeuyEp@gmail.com>
-References: <20261016-hwpoison-kho-v6-0-f304255147da@debian.org>
- <20261016-hwpoison-kho-v6-3-f304255147da@debian.org>
- <aumt-4kfGGtoXuh-@kernel.org>
+	dkim=pass (1024-bit key, unprotected) header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=QQ1qfgqU
+X-Envelope-To: linux-efi@vger.kernel.org
+DKIM-Signature: a=rsa-sha256; bh=9OSvScGRwha8A7Tb2tHR3R5F02sXRmMamVkr8+PRTWs=;
+ c=simple/simple; d=linux.dev;
+ h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
+ t=1793701785; v=1; x=1794306585;
+ b=QQ1qfgqUbGhGBerxeLuJhyNk7bgr29IpB6mdUWq7I5GBjwVxZyy1/52gPaY/7kXtM0GXHLCx
+ 4RpcT2uiJ1ar4EFiI4YDe8tiB1L5f3BVfM1Orm01rf7eF0WUMSfamObsQPcMPJ6r1YAuC3tWkmp
+ 0vu1Vhi7wZbuoThW/OWjzw8w=
+X-Envelope-To: linux-efi@vger.kernel.org
+Received: by smtp.migadu.com with ESMTPS id 129eb9b76a2afe71;
+	Tue, 03 Nov 2026 10:29:45 +0000
+X-Mizu-Trace-ID: 129eb9b76a2afe71
+X-Migadu-Flow: FLOW_OUT
+From: George Guo <dongtai.guo@linux.dev>
+To: ardb@kernel.org,
+	pratyush@kernel.org
+Cc: rppt@kernel.org,
+	pasha.tatashin@soleen.com,
+	chenhuacai@kernel.org,
+	shuah@kernel.org,
+	ilias.apalodimas@linaro.org,
+	akpm@linux-foundation.org,
+	baoquan.he@linux.dev,
+	ruirui.yang@linux.dev,
+	guodongtai@kylinos.cn,
+	kernel@xen0n.name,
+	graf@amazon.com,
+	liukexin@kylinos.cn,
+	loongarch@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	kexec@lists.infradead.org,
+	linux-mm@kvack.org,
+	linux-kselftest@vger.kernel.org,
+	linux-efi@vger.kernel.org
+Subject: Re: [PATCH v6 1/8] efi: Pass KHO state to the next kernel in a configuration table
+Date: Tue,  3 Nov 2026 19:29:41 +0900
+Message-ID: <20261103102941.11087-1-dongtai.guo@linux.dev>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <2382a0ee-cb6d-4572-be6e-ce3cf4d006e5@app.fastmail.com>
+References: <2382a0ee-cb6d-4572-be6e-ce3cf4d006e5@app.fastmail.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -85,25 +83,25 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aumt-4kfGGtoXuh-@kernel.org>
-X-Debian-User: leitao
+Content-Transfer-Encoding: 8bit
 
-On Tue, Nov 03, 2026 at 11:48:43AM +0200, Mike Rapoport wrote:
-> > --- a/mm/internal.h
-> > +++ b/mm/internal.h
-> 
-> We've been splitting internal.h to smaller headers, maybe it's time to add
-> "memory-faulure.h"?
+Hi Ard, Pratyush,
 
-Ack. I'm happy to move the "mm/memory-failure.c" section out of
-mm/internal.h into a new mm/memory-failure.h, as preparation for this
-patch.
+On Thu, Oct 29 2026, Ard Biesheuvel wrote:
+> Can we handle this as an arch table then, and handle everything in
+> the LoongArch arch code?
 
-Since this patchset is moving slowly, I'll start the header split in
-parallel as a separate series, and rebase this patchset on top of it
-when I respin. Is it this ok?
+Ard, LoongArch is currently the only user, so I understand the suggestion
+to keep the handling in the architecture code.
+
+My preference is to keep the table definition and handling common, given
+the potential for x86 to use it as Pratyush described in his reply, to
+replace setup_data once x86 gains EFI support. The table contains no
+LoongArch-specific fields, and only the LoongArch stub installs it. On
+systems without the table, the common code does nothing.
+
+Would that be acceptable, or would you prefer to keep the handling in
+LoongArch until a second architecture adopts it?
 
 Thanks,
---breno
+George
