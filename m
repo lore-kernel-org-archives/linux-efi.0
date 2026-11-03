@@ -1,60 +1,51 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=213.95.11.211
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793656024;
-	b=HnQxvjqf2+rrKi/0NKoVU/zG7L5TC+86KCtyMmDcNPfbe8ARlyLxpVadU12aTInpdBhs
-	 hgBuYqFcGaWoK+Cc1LmjwFG6fOLTKqganasf6V7nsCLLiPfHfq2eSt3wE1stCXhzSVVLP
-	 4ussMV2Zb2JBjbDB3jtK/mj1IxTXNoMMGd0Aa7P0CPa3GUIG3Yk9Bacy6ThYiYvKi7Ln2
-	 kErQnCJ2wsvbR5HtvepjzkoftTm2beJRUA+QSBw7iGkFWRBp4kr4+Q4JYx1Sv7ZBBuXhu
-	 yiI7vQCyVkxFz8x5vNiE3Vqct3ahaoN9fXW+F43KIysRd2PRzbO+GyL6PeduDq8BVUg==
+	t=1793684519;
+	b=0cdOk2bB75mGAnPcgYnDlXijK+Qb4Z5bzvXcvOdn1E0rfj5UHaCOo6tT1QUGYhP2gH+7
+	 00G+xxQgg5briVDOLofW+J2qY00fyWxD6JW+1U7+8JLoWzElo7/i9/Kk9QpzmaCtt2Igz
+	 MhLJR4aI6Nl7sHtW3T/ULZbrqOu0Esh9avlLJT8+hDl/2fHFooVxd4B/A1k+4BwhpLMwP
+	 VwmA1y+sWf3awrmFWKHhPrbN51AUxNzUuIlT+b8zrhPFf6tCVteB8hiQ+ubQwcuLc3UfE
+	 5bxTltDcj5ka7qdXGHv6y1Sd8Wr6HqrYvC6q7fFsSXBRZVfi2pUle6thR0KOY5hNBFg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793656024;
-	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
-	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
-	bh=QPZgK+2ggTjV2BZHpoUXBwscjutTkEWYEQcx8WgyZH0=;
-	b=TEEH7blDuWi6g5tsS4qmmgo03BLT6jCEQkQc1KdI9w0rB8/Ed4tyW5T88Kils60/+2oe
-	 VuGLLik62enU0s/SOBt0FWgnA+U2LjcN6irRoJrybnJ2EpTGRhEO9+hkWN1/DU57r3yQT
-	 e+m7Xcnb/8GyS6istqcGj7Ykdxwqy1CBzDqLyU3OqyIV08b2vYNLsAVgZJTqlGTyg+fod
-	 +P+laDxaDhPOCSeyymgkart9h7PZFNjiPESZUNn/pbesYY8D01GUpVxTIu0hYuENraP3L
-	 XkeUwKaCMkP04nNJIPmRy16yyms2lILOqsAWBro1U53ElxS01hf/kwcqJ9cmYdiOBSg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793684519;
+	h=DMARC-Filter:Received:Date:From:To:Cc:Subject:Message-ID:References:
+	 MIME-Version:Content-Type:Content-Disposition:In-Reply-To:User-Agent;
+	bh=bQ8ajFT5xhILdB0dsRYEtZZRvSWnG4oIvX2mQOlC0CI=;
+	b=Gbr2BRCLIinP2xc2kLrVO+qrWZx1Xrs1zclomEmz85OELmRlOH4lwzlvVgvXNyoFMlR3
+	 gGeAHgMGDc+LL/uUmi/Y5HfFF1srs6Y6mdfi+/vwz80oGbBBx8CWS0XJfAgC+ZILlVi2z
+	 JEv+2iLQLx1Thr6iCtjcgmJZRvpHyI4yDV8w0ch5tT1VxLsOWkAscCOc42fxjdBM4hoV2
+	 CNXjeMA6T4ipGsJCRoSbw+7RSfze7G22oMocTdV4rlql6eqpnht0EikzHG4w5N7DB+gB3
+	 GmtdzAtQFcDL0Q3ylGsGh+h46LwJxc765RmBX7vx9e+AcpOX6Cb5cOjpUQNcboPE/mA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="HSSxJ/nJ";
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	dmarc=pass header.from=lst.de;
+	spf=pass smtp.mailfrom=lst.de;
+	arc=none smtp.remote-ip=213.95.11.211
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 461C9606D806
-	for <linux-efi@vger.kernel.org>; Mon,  2 Nov 2026 21:47:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=HSSxJ/nJ
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5286F1F00A17;
-	Mon,  2 Nov 2026 21:47:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793656023;
-	bh=QPZgK+2ggTjV2BZHpoUXBwscjutTkEWYEQcx8WgyZH0=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=HSSxJ/nJipbAH9DLgYnA12V3CqksOXfgNrywpcb9r4NIPylmFuQFhZOTnLhJnMcXs
-	 m4zMYoyvDfrNtkjj9DsjPMD29DVLbpFmVe9KmyzdSaDyxO4YR0N108iQFKdJr6zebl
-	 aWYETmIYn02hKPDVM6G7525wXLP4eXHw/S6vWDf9CjyPf+F0FuwWdE1yAGF6jgT5+D
-	 EwGoh9EGkz6Mg3SrEvOzOPQP21mcfF5L1fRvbU3KcC9mlx0VS6P6CYcp+VHPsaFPGO
-	 rfOe+w1MhO3i7XYUWDO59vFtxb+EMBssVPubr3w92SNbCuf3F7jRsxX79UMwr7UmNK
-	 7fXXPJLPrg+TQ==
-Message-ID: <sashiko-outbox-194234@kernel.org>
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v3 4/7] block: discover root by DPS partition type UUID
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Vincent Mailhol" <mailhol@kernel.org>, "Jens Axboe" <axboe@kernel.dk>, "Davidlohr
- Bueso" <dave@stgolabs.net>, "Alexander Viro" <viro@zeniv.linux.org.uk>, "Christian
- Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.cz>
-Cc: linux-efi@vger.kernel.org, "Dave Hansen" <dave.hansen@intel.com>, "James
- Bottomley" <James.Bottomley@HansenPartnership.com>, "Helge Deller" <deller@gmx.de>, "Matthew
- Wilcox" <willy@infradead.org>
-In-Reply-To: <20261102-discoverable-root_partitions-v3-4-27f04b69b7ab@kernel.org>
-References: <20261102-discoverable-root_partitions-v3-0-27f04b69b7ab@kernel.org>
- <20261102-discoverable-root_partitions-v3-4-27f04b69b7ab@kernel.org>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Mon, 02 Nov 2026 21:47:02 +0000
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E7BB606A324;
+	Tue,  3 Nov 2026 05:41:58 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8E7BB606A324
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 3967B68AFE; Tue,  3 Nov 2026 06:41:55 +0100 (CET)
+Date: Tue, 3 Nov 2026 06:41:55 +0100
+From: Christoph Hellwig <hch@lst.de>
+To: Christian Brauner <brauner@kernel.org>
+Cc: linux-fsdevel@vger.kernel.org, Jan Kara <jack@suse.com>,
+	Al Viro <viro@zeniv.linux.org.uk>, ecryptfs@vger.kernel.org,
+	linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net,
+	linux-nilfs@vger.kernel.org, exfat@lists.linux.dev,
+	linux-mm@kvack.org, ntfs@lists.linux.dev,
+	ocfs2-devel@lists.linux.dev, linux-btrfs@vger.kernel.org,
+	gfs2@lists.linux.dev, linux-efi@vger.kernel.org,
+	linux-mtd@lists.infradead.org, linux-xfs@vger.kernel.org,
+	stable@vger.kernel.org, Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH v2 33/34] xfs: allow remounting read-only after a
+ shutdown
+Message-ID: <20261103054155.GB1559@lst.de>
+References: <20261029-work-fs-sb_rdonly-v2-0-2f44f64f0b66@kernel.org> <20261029-work-fs-sb_rdonly-v2-33-2f44f64f0b66@kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -63,142 +54,16 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261029-work-fs-sb_rdonly-v2-33-2f44f64f0b66@kernel.org>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-Thank you for your contribution! Sashiko AI review found 2 potential issue(=
-s) to consider:
-- [High] init: unconditional DPS discovery in prepare_namespace() breaks no=
-dev root
-- [High] init: DPS root auto-discovery in lookup_root_device() rejected by =
-maintainer
---
+Btw, if my previous reply wasn't clear:  please add the test for this
+to xfstests where they actually get run regularly and not the kernel
+selftests which for file systems are basically unused.
 
-commit 810f32136ad63589849b2f0f1f1255fa412bff0c
-Author: Vincent Mailhol <mailhol@kernel.org>
+Bonus points for having generic tests instead of purely file system
+specific ones.
 
-block: discover root by DPS partition type UUID
-
-This commit adds root block device discovery using the architecture's
-Discoverable Partitions Specification (DPS) root partition type UUID when
-root=3D and ROOT_DEV are not set. It reads LoaderDevicePartUUID from EFI to
-locate the disk containing the active EFI System Partition and searches that
-disk for a matching root partition.
-
-Link: https://uapi-group.org/specifications/specs/discoverable_partitions_s=
-pecification/
-
-> diff --git a/init/do_mounts.c b/init/do_mounts.c
-> index b0dccad209710..c1106e3cab3dc 100644
-> --- a/init/do_mounts.c
-> +++ b/init/do_mounts.c
-> @@ -406,10 +406,24 @@ static int __init lookup_root_device(const char *ro=
-ot_device_name, dev_t *dev)
->  {
->  	int err;
-> =20
-> -	err =3D early_lookup_bdev(root_device_name, dev);
-> +	if (root_device_name[0]) {
-> +		err =3D early_lookup_bdev(root_device_name, dev);
-> +		if (err =3D=3D -EINVAL && root_wait) {
-> +			pr_err("VFS: root=3D is invalid; disabling rootwait.\n");
-> +			root_wait =3D 0;
-> +		}
-> +		return err;
-> +	}
-> +
-> +	err =3D early_lookup_dps_root(dev);
-
-[Severity: High]
-As reported by Christian Brauner on v1 [1], does in-kernel DPS root
-auto-discovery belong in the kernel?
-
-On v1 of this series, the VFS subsystem maintainer objected to adding DPS
-auto-discovery to the kernel, noting that DPS is complex userspace policy a=
-nd
-should not be implemented in the kernel for root auto-discovery.
-
-This patch still adds early_lookup_dps_root() in block/early-lookup.c and
-wires it into prepare_namespace() -> parse_root_device() ->
-lookup_root_device() in init/do_mounts.c when root=3D and ROOT_DEV are unse=
-t.
-
->  	if (err =3D=3D -EINVAL && root_wait) {
-> -		pr_err("VFS: root=3D is invalid; disabling rootwait.\n");
-> +		pr_err("VFS: Root discovery is unavailable; disabling rootwait.\n");
->  		root_wait =3D 0;
-> +	} else if (err =3D=3D -ENODEV) {
-> +		pr_err("VFS: No discoverable root partition found; aborting.\n");
-> +		root_wait =3D 0;
-> +		*dev =3D 0;
-> +		return 0;
->  	}
->  	return err;
->  }
-
-[ ... ]
-
-> @@ -480,7 +497,7 @@ void __init prepare_namespace(void)
-> =20
->  	md_run_setup();
-> =20
-> -	if (saved_root_name[0])
-> +	if (saved_root_name[0] || !ROOT_DEV)
->  		ROOT_DEV =3D parse_root_device(saved_root_name);
-
-[Severity: High]
-Does calling parse_root_device() unconditionally when saved_root_name is
-empty and ROOT_DEV is 0 cause a regression for nodev root filesystems
-(such as tmpfs, ramfs, virtiofs, or 9p) configured via rootfstype=3D without
-root=3D?
-
-Previously, when booting without root=3D and with rootfstype=3D specifying a
-nodev filesystem, prepare_namespace() skipped parse_root_device() and left
-ROOT_DEV as 0, allowing mount_root() to reach case 0 and call
-mount_nodev_root():
-
-init/do_mounts.c:mount_root() {
-	switch (ROOT_DEV) {
-	...
-	case 0:
-		if (root_device_name && root_fs_names &&
-		    mount_nodev_root(root_device_name) =3D=3D 0)
-			break;
-		fallthrough;
-	default:
-		mount_block_root(root_device_name);
-		break;
-	}
-}
-
-With this change, prepare_namespace() invokes parse_root_device() ->
-lookup_root_device() -> early_lookup_dps_root() before mount_root() checks
-for a nodev rootfstype=3D.
-
-If the system boots via EFI from a disk that happens to contain a partition
-matching the architecture DPS root type UUID (for example, a VM or host disk
-with an installed OS image booting a kernel with rootfstype=3Dtmpfs or
-rootfstype=3Dvirtiofs and no root=3D), early_lookup_dps_root() sets ROOT_DE=
-V to
-that block partition. mount_root() then skips case 0 and enters
-mount_block_root() instead of mount_nodev_root(), either hijacking the root
-mount or panicking when the nodev filesystem rejects /dev/root.
-
-Even when no matching DPS partition exists on the ESP disk (or when
-LoaderDevicePartUUID is absent), early_lookup_dps_root() and
-lookup_root_device() unconditionally log KERN_ERR messages such as:
-
-	pr_err("VFS: No discoverable root partition found; aborting.\n");
-
-or:
-
-	pr_err("VFS: Unable to get EFI partition UUID: %pe, skipping root partitio=
-n discovery\n",
-		ERR_PTR(err));
-
-right before mount_nodev_root() proceeds to mount the nodev root filesystem.
-
-[1] https://lore.kernel.org/r/20260617-irritation-rollen-wirst-7d636cbfec92=
-@brauner
-
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261102-discoverab=
-le-root_partitions-v3-0-27f04b69b7ab@kernel.org?part=3D4
