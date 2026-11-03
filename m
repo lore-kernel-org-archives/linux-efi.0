@@ -1,51 +1,80 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793696608;
-	b=DU9mrYFYA+9tbkXceLPmH5ce/A6DpApLNJNTvE9fwKFRTvTuBo8wQR2M77tZ7SXbNCjs
-	 20KX0V2kzPJCYPVl17sjxBYoSCIuNLS8QjZw5ixngMLryH2QBeODsKpvhMCxH/339xsdD
-	 gB+6ZAJrOQsBluQkYM/gmRWxOxBaCjFEIGVe3ggT1HETAJ2GoYBYvh9LCRpl8+dxAUVxJ
-	 YOiEGxPyPzSpCJ+whgZn28L7iwXKtC9WaLM3KqzC5eM8HV5nMSOOXP8wfNuwUk12wiGYV
-	 8EgGAwlbKUQ42VZLBlcMj7fAMbOSi1Pnf0GnMtCFviahGs4HsYudk0bMZrkUGdxL7Cw==
+	t=1793699341;
+	b=ecvFUg1QQ4N5CDLeqa1F/kC2tK0JrFfLJdnyYNQO62TQ+yuQfPOeZ/p1Z/gReir5zaXn
+	 uyXu1hWXl/sKyo2FEJe2TbRiO5ZBVqA/UjQW6bq0R/KVB1HO+RLyJEBw4M3cdfxcFxdrc
+	 4vpzwxRnDXIh7JcNjSFXyixMC5vERrsCUfVtlaXNW7HYiGMbUBpUBBETEJfjjOHZPtvUs
+	 I/KMWVuqef0YeeeDUElpV3gk/kqkprB/wzNFuuLTnvUjSsdI6OdwDgmI2yAqWZJ+o08jg
+	 8boPCUsDnsb5xURQe5k++0tqQeMCAiMBaxJHiWtFdkZqU4QHHPxz4iTcmCDGA10oUKQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793696608;
-	h=DMARC-Filter:Received:Date:From:To:Cc:Subject:Message-ID:References:
-	 MIME-Version:Content-Type:Content-Disposition:In-Reply-To:User-Agent;
-	bh=GHGz850caSwjJKS3oE56h9NFkxUphg5/vIJAawh3jok=;
-	b=k4yxZeiMWGruwUyXYm5MCV4jiMCyRAzW14y/arMovpcLNNxCzvT/8s2zgQanriJkU+PF
-	 bDkID6GDpEv8GYvX8eqRy082/BwqOXdZsdHSLk1wex9zscouIVutCZwl4Dq/iHQ/osTA9
-	 o9UwFnSsbWOkihshU5OQBj/sCuVcqZkSPVqvk/YhKlWxIk7CFdxsCG9fxpjxUa+ho5ZrS
-	 lqwzbeCETJwKgHNOSB49ZhJSdm9VlBUMn3x2tewC6KtjMwocRa65kiZ490NuJ9nJmXWjf
-	 m/6/XtfxCuqkYqwlHd3F9h1qo99qblwpaeROMrl2YUeFwl7LYV/+ZWAfGSCt4B7I2mA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793699341;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=cgwH7+eb4DO1f1hZBo5/HU3TXgqaVoeCZLybivmvUJo=;
+	b=uvb4NzaOh/gx1RbbQeyIChyd5i1jL4GqNXp/K9f+yzRY/Sz3MKzZKrA9gzt9o+mshRYp
+	 ouAt/C1nkR/B0EDJuhsmo9lg2M5qfykNyGQtDh1dSMCYkkjh19VOVElZ/0tYDKb0hALoM
+	 DhxV6v9NruVmNTRY/kawW4An01BLsC2gC9j8iJB+T/BD07o7/u4olQyOBhCCckNYgntGf
+	 s8l1mMPcZzc80u1t6DtOmc0YzKI4Wm4kpDPpv21PVqDMcr6a1EJwYE/BBVvy9P/J58AdR
+	 vYvrA+5jDhKpPHEpNebFHHhMlps1hzzsPqYC56+chpChldwrQP6k/f35wuMlZnylgyQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=lst.de;
-	spf=pass smtp.mailfrom=lst.de;
-	arc=none smtp.remote-ip=213.95.11.211
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=GV++1Djw;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0F7D606A324;
-	Tue,  3 Nov 2026 09:03:27 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B0F7D606A324
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id 5881F68B05; Tue,  3 Nov 2026 10:03:23 +0100 (CET)
-Date: Tue, 3 Nov 2026 10:03:23 +0100
-From: Christoph Hellwig <hch@lst.de>
-To: Christian Brauner <brauner@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, linux-fsdevel@vger.kernel.org,
-	Jan Kara <jack@suse.com>, Al Viro <viro@zeniv.linux.org.uk>,
-	ecryptfs@vger.kernel.org, linux-ext4@vger.kernel.org,
-	jfs-discussion@lists.sourceforge.net, linux-nilfs@vger.kernel.org,
-	exfat@lists.linux.dev, linux-mm@kvack.org, ntfs@lists.linux.dev,
-	ocfs2-devel@lists.linux.dev, linux-btrfs@vger.kernel.org,
-	gfs2@lists.linux.dev, linux-efi@vger.kernel.org,
-	linux-mtd@lists.infradead.org, linux-xfs@vger.kernel.org,
-	stable@vger.kernel.org
-Subject: Re: [PATCH v2 33/34] xfs: allow remounting read-only after a
- shutdown
-Message-ID: <20261103090323.GA5314@lst.de>
-References: <20261029-work-fs-sb_rdonly-v2-0-2f44f64f0b66@kernel.org> <20261029-work-fs-sb_rdonly-v2-33-2f44f64f0b66@kernel.org> <20261103054155.GB1559@lst.de> <20261103-galgen-ehebruch-stehen-a967c14ce53e@brauner>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 049AE606A327;
+	Tue,  3 Nov 2026 09:49:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=GV++1Djw
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A74261F000C1;
+	Tue,  3 Nov 2026 09:48:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793699340;
+	bh=cgwH7+eb4DO1f1hZBo5/HU3TXgqaVoeCZLybivmvUJo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=GV++1DjwxRqBZTgtqKQjH8FDRWWNjQ0UExyz4D4wPRG6CXHgHqlai8IgSZ5/B9AVO
+	 fyr6sYpt+ugUguBnTwfa9EONvXK3lfiCOo8fFL2gesEHkb4WUZGfvT6fCfMJNsI31Z
+	 Vw/EI3JAg4jrRuPcmYktzzSqUrEL7bUe5ETL5f1c0mbZHI+qxZizlD4FmPKJbOX8x8
+	 UcFo7Cvy49IASUxO9wd2cXytT8/WMCHJsvvJP/mjOG1ZnH5zkongCwU5jFXzRP2W/i
+	 UHtO33zaLptW2P5/6tQLOOQzYQ1+oU9XS++2xZHKEc1aCasgMoti+lnda5b6BltK8l
+	 casrwkwEvaa2g==
+Date: Tue, 3 Nov 2026 11:48:43 +0200
+From: Mike Rapoport <rppt@kernel.org>
+To: Breno Leitao <leitao@debian.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+	"H. Peter Anvin" <hpa@zytor.com>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	David Hildenbrand <david@kernel.org>,
+	Lorenzo Stoakes <ljs@kernel.org>,
+	"Liam R. Howlett" <liam@infradead.org>,
+	Vlastimil Babka <vbabka@kernel.org>,
+	Suren Baghdasaryan <surenb@google.com>,
+	Michal Hocko <mhocko@suse.com>, Miaohe Lin <linmiaohe@huawei.com>,
+	Naoya Horiguchi <nao.horiguchi@gmail.com>,
+	Oscar Salvador <osalvador@suse.de>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	Danilo Krummrich <dakr@kernel.org>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
+	kas@kernel.org, kexec@lists.infradead.org,
+	Brendan Jackman <brendan.jackman@linux.dev>,
+	Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>,
+	shakeel.butt@linux.dev, linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-mm@kvack.org,
+	linux-cxl@vger.kernel.org, driver-core@lists.linux.dev,
+	linux-arm-kernel@lists.infradead.org, rmikey@meta.com,
+	riel@surriel.com, harry@kernel.org, kernel-team@meta.com
+Subject: Re: [PATCH v6 3/7] mm/memory-failure: add hwpoison_boot_page() to
+ flag an inherited frame
+Message-ID: <aumt-4kfGGtoXuh-@kernel.org>
+References: <20261016-hwpoison-kho-v6-0-f304255147da@debian.org>
+ <20261016-hwpoison-kho-v6-3-f304255147da@debian.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -57,20 +86,90 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261103-galgen-ehebruch-stehen-a967c14ce53e@brauner>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <20261016-hwpoison-kho-v6-3-f304255147da@debian.org>
 
-On Tue, Nov 03, 2026 at 09:41:58AM +0100, Christian Brauner wrote:
-> On Tue, Nov 03, 2026 at 06:41:55AM +0100, Christoph Hellwig wrote:
-> > Btw, if my previous reply wasn't clear:  please add the test for this
-> > to xfstests where they actually get run regularly and not the kernel
-> > selftests which for file systems are basically unused.
-> > 
-> > Bonus points for having generic tests instead of purely file system
-> > specific ones.
+On Fri, Oct 16, 2026 at 05:15:43AM -0700, Breno Leitao wrote:
+> A kernel that kexecs inherits the frames its predecessor found
+> hardware-poisoned. It has to carry them as PG_hwpoison in its own memmap,
+> so that everything that already understands the flag covers them,
+> including the kexec segment placement check.
 > 
-> I can drop the tests from this series but xfstests for this will be a
-> follow-up.
+> Add a helper that sets the flag and counts the frame in
+> num_poisoned_pages. It runs while the memmap is initialised, before
+> memory_dev_init() has run. memblk_nr_poison_inc() divides by
+> sections_per_block, which memory_dev_init() sets, so the helper
+> increments num_poisoned_pages itself instead of calling
+> num_poisoned_pages_inc().
+> 
+> An inherited frame is a hardware failure like any other, so the helper
+> sets hw_memory_failure. Without it, unpoison_memory() accepts the frame,
+> clears the flag and drops the last reference, which frees a frame that
+> is still bad.
+> 
+> The helper also counts the frame as managed, as a frame that fails at
+> run time stays counted. Memory offlining subtracts every frame of the
+> block that is not PageOffline, so a frame that was never counted leaves
+> the managed page count too low after an offline.
+> 
+> The per-node memory failure statistics are not updated. This kernel
+> handled no failure, it only inherited one.
+> 
+> Signed-off-by: Breno Leitao <leitao@debian.org>
+> ---
+>  mm/internal.h       | 5 +++++
+>  mm/memory-failure.c | 8 ++++++++
+>  2 files changed, 13 insertions(+)
+> 
+> diff --git a/mm/internal.h b/mm/internal.h
+> index da14c56fb24e11..4bd3bbce86e0ad 100644
+> --- a/mm/internal.h
+> +++ b/mm/internal.h
+> @@ -1169,6 +1169,7 @@ void SetPageHWPoisonTakenOff(struct page *page);
+>  void ClearPageHWPoisonTakenOff(struct page *page);
+>  bool take_page_off_buddy(struct page *page);
+>  bool put_page_back_buddy(struct page *page);
+> +void __init hwpoison_boot_page(struct page *page);
+>  struct task_struct *task_early_kill(struct task_struct *tsk, int force_early);
+>  void add_to_kill_ksm(struct task_struct *tsk, const struct page *p,
+>  		     struct vm_area_struct *vma, struct list_head *to_kill,
+> @@ -1181,6 +1182,10 @@ static inline int unmap_poisoned_folio(struct folio *folio, unsigned long pfn, b
+>  {
+>  	return -EBUSY;
+>  }
+> +
+> +static inline void hwpoison_boot_page(struct page *page)
+> +{
+> +}
+>  #endif
 
-I'd much prefer to have one canonical place for the tests over having
-them in two places.
+We've been splitting internal.h to smaller headers, maybe it's time to add
+"memory-faulure.h"?
+  
+>  extern unsigned long  __must_check vm_mmap_pgoff(struct file *, unsigned long,
+> diff --git a/mm/memory-failure.c b/mm/memory-failure.c
+> index a2ca8df501caee..d0d6b184ee469f 100644
+> --- a/mm/memory-failure.c
+> +++ b/mm/memory-failure.c
+> @@ -96,6 +96,14 @@ void num_poisoned_pages_sub(unsigned long pfn, long i)
+>  		memblk_nr_poison_sub(pfn, i);
+>  }
+>  
+> +void __init hwpoison_boot_page(struct page *page)
+> +{
+> +	SetPageHWPoison(page);
+> +	atomic_long_inc(&num_poisoned_pages);
+> +	hw_memory_failure = true;
+> +	adjust_managed_page_count(page, 1);
+> +}
+> +
+>  /*
+>   * Return the first or the last hardware-poisoned online page in [start,
+>   * start + size), or PHYS_ADDR_MAX if the range is clean.
+> 
+> -- 
+> 2.53.0-Meta
+> 
+
+-- 
+Sincerely yours,
+Mike.
