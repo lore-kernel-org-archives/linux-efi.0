@@ -1,84 +1,73 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793788833;
-	b=AChHRBJQ9eXHZu44tsnlvP+RZiyJJfo3VUF6K7WAyLcC6h1h/D4EYboyTlYlt2xRt7eA
-	 gnHoH6YwHSVFP2JJC9kD8flJ57dCO0+DYTtanjqoXIK6TmBNc3wyZjQZ1C9uBdG8cFLtJ
-	 4LwsSRKLbXtjqYAvmpBWup/gNTxvnjed4zUVHLHcAZgWUc5jFQLgVqMivN5AD4Cu8kdmY
-	 ZuERU6J+sTFQ6KrvZyLaQJVpYbqn2flrvdtx3R2TinpxZXKIftXEabGypy7VVK6uj9w5C
-	 30H4NP+MJspSzQtz9cb0gJSC7S0Am7ngwjhtMAxo0edXInmi3Vj+nAG8dbqaKnHE78g==
+	t=1793789225;
+	b=fdfSqlDA48f0s41mgFbrRDpWLrsnmmPROl3tbCBis0vhjBPv7qFT/FcQbmiM276Km4l7
+	 bnJJgx+G91CZlQRJmJWpZJfqrtlI1kSBMX+pTNK7lTeETjtnHFhUNMDt5yl2mCMrxDrkk
+	 Rquhqsv8sr8qD1XzfYJSKup7jhB+ucGhND5JCqD4oidpXCIMMQ7/W9W28fvFzBLkbqx0T
+	 +H2KDlhOGGpdNlgLHilopMcacYJyXWDrBW29kQc/kLLsf1OjGlf6FRRQwy9ZtDPP6v7AM
+	 DvCCU1lFxmhhgvTX+X90CVU9n0bh8fmrgEJXJrtRlssZRmsYjGs8eL6Z+P6mfUWoCiw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793788833;
-	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
-	bh=OHhrH3mVCZL9F+uul7Pko5LwqezUEkg/0ds9TVqWkW0=;
-	b=5RCWKwpjtnQej81oKuXr8ZjP/iYBhJ+bR/n4dfeV3oC9HScPGN1n+pBg7lwSuqfM268Q
-	 CjiIM2eyt2qlqWTeKcKsj+mBOJzWWSZkTH7mnWd2kHIa50BMOe+nHct7kvhIPx4TRAqRl
-	 G+Bj40VgCgDtrN/gXoMe9m/KqJgOGA63212Crij/2wQCRmTww0Ktr+SlwQXUs8Wuq6prl
-	 gGhUgKTTFaALbD8QyFV+bRNVvFEr/iMauy++nX6dKNH2XDjkCIcp1hkEb6OKeE8+ub4Dr
-	 /0GwkXDi9/qkZM148YVmgeA3HlzQy3k/gYw926fQ0v51ZqgX2vFNE8P0/iMCFIxeuWg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793789225;
+	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
+	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type:Content-Transfer-Encoding;
+	bh=bhOmEa952md/X2FxyjNFbUxSEKG6z2HGY2NSxyblu7s=;
+	b=UqKPE4K8/4iFd1Jd6AkM0E/pKnbJHhPaTg2j3Ovl+ykfSHW8LxfZMbm0Uz5nNMC1kx5w
+	 tFQCVlQsNknqYhBSlGVIEQKfrrwNV20J5bc4CiD4iQHYbgKYlTDL7xJI/uDRRNl3YbEIn
+	 MnW6IDDJYaYwxx7Ikx/KBRhor2CgzpVjdwno/vsHbcm7v648y4EtV0QDPh5Zo8/u5SEOP
+	 u7y2TeP92mmYHsxis4PjtfCjUTpEVz4xVaFKCyM5o/G5aIL2grjD6RrdPQqfU6UHn58kL
+	 EtQayShi9sMU6wUwx/A3B3MU/z+fYMza7/39LkripRv6yP2gYJTEak0YU9CO1C8nFPA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=EeMZhO8D;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="VJrT2/1Q";
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7936606A31B;
-	Wed,  4 Nov 2026 10:40:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E977D606A329;
+	Wed,  4 Nov 2026 10:47:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=EeMZhO8D
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 962121F000C1;
-	Wed,  4 Nov 2026 10:40:20 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=VJrT2/1Q
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7CDC51F00A16;
+	Wed,  4 Nov 2026 10:47:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793788832;
-	bh=OHhrH3mVCZL9F+uul7Pko5LwqezUEkg/0ds9TVqWkW0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=EeMZhO8DjG4Z1LNGDG6wdfrR5/jvvahFgvuj3m7HOQrS5HMxi/U+6lT8CdBS1mQBG
-	 IC79mPKN5pooYxKGcfp/3nadOdWf8Fym3XSVAO968hO1SW6hTg6elGvzxmkBPwmNaS
-	 v9T63ChJrQAQbad0an5kGXooCbmvv9MDXmPvDoorGg+XyLiYGBnkViAIHcypGwqbpJ
-	 ppQezfycclcHYH/cH5pj6vY3QPZi1ua1tE+LaTlont55dEIEeB+v8CFlcxuVMlA3hL
-	 myTh9yVFL8UBjo6Snz+ghL8sE2j0/RkU7G36RxL7WrUdRykGnhNHAiwYwIXZ3Ksf2n
-	 rYu3AjolMYkzw==
-Date: Wed, 4 Nov 2026 12:40:16 +0200
-From: Mike Rapoport <rppt@kernel.org>
-To: Breno Leitao <leitao@debian.org>
-Cc: Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-	"H. Peter Anvin" <hpa@zytor.com>,
-	Andrew Morton <akpm@linux-foundation.org>,
-	David Hildenbrand <david@kernel.org>,
-	Lorenzo Stoakes <ljs@kernel.org>,
-	"Liam R. Howlett" <liam@infradead.org>,
-	Vlastimil Babka <vbabka@kernel.org>,
-	Suren Baghdasaryan <surenb@google.com>,
-	Michal Hocko <mhocko@suse.com>, Miaohe Lin <linmiaohe@huawei.com>,
-	Naoya Horiguchi <nao.horiguchi@gmail.com>,
-	Oscar Salvador <osalvador@suse.de>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	"Rafael J. Wysocki" <rafael@kernel.org>,
-	Danilo Krummrich <dakr@kernel.org>,
-	Catalin Marinas <catalin.marinas@arm.com>,
-	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
-	kas@kernel.org, kexec@lists.infradead.org,
-	Brendan Jackman <brendan.jackman@linux.dev>,
-	Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>,
-	shakeel.butt@linux.dev, linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-mm@kvack.org,
-	linux-cxl@vger.kernel.org, driver-core@lists.linux.dev,
-	linux-arm-kernel@lists.infradead.org, rmikey@meta.com,
-	riel@surriel.com, harry@kernel.org, kernel-team@meta.com
-Subject: Re: [PATCH v6 3/7] mm/memory-failure: add hwpoison_boot_page() to
- flag an inherited frame
-Message-ID: <ausLkNhb8ZPz0ra_@kernel.org>
-References: <20261016-hwpoison-kho-v6-0-f304255147da@debian.org>
- <20261016-hwpoison-kho-v6-3-f304255147da@debian.org>
- <aumt-4kfGGtoXuh-@kernel.org>
- <aumvVjoHo4KeuyEp@gmail.com>
- <auovL7i1rEcXCeGS@kernel.org>
- <auo3ScXy6dk0Gr3-@gmail.com>
+	s=k20260515; t=1793789224;
+	bh=bhOmEa952md/X2FxyjNFbUxSEKG6z2HGY2NSxyblu7s=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=VJrT2/1QLEtsT7IAJHPVIQ2ISxt4hMdc3map/aD2+trIBN9mSj3nx2Q9bTpfMT3MF
+	 cGNw4vlunjJnW2IgqkdannjrufnBjkEyqAdwxHFKLVUEMfE+G1hX5DaeWBXjmWX36S
+	 imsPN3k2zFxiGZhrAEtQPYo34cnkB1wIfefgCgCRieHnN8ascqJ5oPN4Fh4QbYtHlq
+	 7/wVgTJuM16kHNFu8An5p+QSkHTadJXmkvy+7t9tMNoYCB9OvYjalYNNGUIRajXJbd
+	 YN4n/cPqhT0kWRFpjhDg6dKdJbl4dZ4IR8N3yu9oo0FcspYKIrDgWmd+hMBEXfPmLJ
+	 lIvFousnuVg2A==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id BE33A198003A;
+	Wed,  4 Nov 2026 05:47:00 -0500 (EST)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Wed, 04 Nov 2026 05:47:00 -0500
+X-ME-Sender: <xms:Hw3ranMJL85RL35ZdIqlVZy7B5jeINP5BbPezeQrDi-SF2g1QOUblw>
+    <xme:Hw3raswrF1gip8laAtOzF-VI-pmh8_xio3Iv18-kjvZb7gAJgZagRdgIgdR_Z9VpH
+    3aGcEn9wEYZRA1vkqbcSrpJfGBueP2SI-2Ks1wLLANcLZGoARC6PFs>
+X-ME-Proxy-Cause: dmFkZTFcPavaLWIfgpoRM8kguzVyv4s6FUkLYAQNGvkUHQVN3xVxVzv9NryfTRmBx2+1+T
+    O8Nt36zML1hPcpqbZ31+TrK5u1pojcuEtJ4d9wGWUhJ3PA4GR64AER0KVm/mg5J8CEvDjb
+    87JxU7ByEHQUkd87rjl5YJ6VpVGYEteXdzVHpDfaZbUb25I8yUXHEzXzvTki5YhHrX0+Ff
+    dEw6DUI60ChXVG7qPis8rKSRSBjgm3FH41orMrqi8AzmwVObG7DSV0A/n08w8QClZ1o7l+
+    535jOrxx7Ryk22b71pTU7piz9TOaOxspVPbT5mctmMzGlgM03lWJfWSB8QGDefxIJWbjYs
+    SWRWaf8wtqVtG/y8VhcGvWaXz0LsELuUcWCWXl8uYz0FlppVOkjLlTI83jJnQvIsR6wW9A
+    CHbjI9SRCOspRJI14AvVQ1gcqqNFg/aukBnzTQSgDXsMSAvOzAUMquE+WlSukqk5s0kWpa
+    njVLPVqOL6PMp5x3IoZtBkRTGd/N3jxEy8pK1FCY/kEv9MN3SOjavcn9IuRnWmh/83Rc77
+    6GG8VVWJng4fdcHXdysUYGD2mMNjsZxD/N6+r+yDqOve4t+C3EzK9VWq9skd3rDm5qfSyS
+    0v1Q3nZRYNBxw1A74kxjY01EsAfvmnziAM0IIiwwBMPqwOU9vx9fO+TEwqTQ
+X-ME-Proxy: <xmx:JA3rarOc2on3e1xb7iUIdCss_xeJ3zdgPplKMTBac8Yz3xu00QXGXA>
+    <xmx:JA3rakancmdTtLZDM22WzdIgr8lJQn3ocDdsi_RjrSD_VtAdD8coHg>
+    <xmx:JA3ras7McSax5611gqIhLQldHowrwdBi4-xbCgqokzbp7BU_VCYGyw>
+    <xmx:JA3rarBd0hh0XKEJUgCfUXIrbQcvdDWVyz9bN0fiE8VImxPs8sd5Dg>
+    <xmx:JA3rar7rbi7TJSfdSFS58Fu87suf-sHWjoQzGw8ON1-8MnFv5N6AUirL>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 3A57AF8008E; Wed,  4 Nov 2026 05:46:55 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -88,42 +77,61 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <auo3ScXy6dk0Gr3-@gmail.com>
+Date: Wed, 04 Nov 2026 11:46:33 +0100
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Jason Gunthorpe" <jgg@nvidia.com>
+Cc: "Alexandre Ghiti" <alex@ghiti.fr>, "Albert Ou" <aou@eecs.berkeley.edu>,
+ "Arnd Bergmann" <arnd@arndb.de>, "Catalin Marinas" <catalin.marinas@arm.com>,
+ "Jonathan Corbet" <corbet@lwn.net>, "David Sterba" <dsterba@suse.com>,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>, linux-arch@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-doc@vger.kernel.org,
+ linux-efi@vger.kernel.org, linux-riscv@lists.infradead.org,
+ "Mark Rutland" <mark.rutland@arm.com>, "Palmer Dabbelt" <palmer@dabbelt.com>,
+ "Paul Walmsley" <pjw@kernel.org>, "Randy Dunlap" <rdunlap@infradead.org>,
+ "Simon Glass" <sjg@chromium.org>, "Shuah Khan" <skhan@linuxfoundation.org>,
+ "Nick Terrell" <terrelln@fb.com>, "Will Deacon" <will@kernel.org>,
+ "Alexandre Ghiti" <alexghiti@rivosinc.com>,
+ "Conor Dooley" <conor.dooley@microchip.com>,
+ "Jonathan Cameron" <jonathan.cameron@oss.qualcomm.com>,
+ linux-integrity@vger.kernel.org, "Palmer Dabbelt" <palmer@rivosinc.com>,
+ patches@lists.linux.dev, =?UTF-8?Q?Piotr_Kr=C3=B3l?= <piotr.krol@3mdeb.com>,
+ "Ross Philipson" <ross.philipson@gmail.com>,
+ "Sami Tolvanen" <samitolvanen@google.com>,
+ "Song Shuai" <songshuaishuai@tinylab.org>
+Message-Id: <cc4d09b6-a56b-44a2-a137-f27bc87e96e3@app.fastmail.com>
+In-Reply-To: <20261103160138.GA3165945@nvidia.com>
+References: <0-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
+ <4-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com>
+ <20261103160138.GA3165945@nvidia.com>
+Subject: Re: [PATCH v2 04/15] efi/libstub: Add a general way to get symbols from the
+ vmlinux into zboot
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Tue, Nov 03, 2026 at 11:49:44AM -0800, Breno Leitao wrote:
-> On Tue, Nov 03, 2026 at 08:59:59PM +0200, Mike Rapoport wrote:
-> > On Tue, Nov 03, 2026 at 02:06:17AM -0800, Breno Leitao wrote:
-> > > On Tue, Nov 03, 2026 at 11:48:43AM +0200, Mike Rapoport wrote:
-> > > > > --- a/mm/internal.h
-> > > > > +++ b/mm/internal.h
-> > > > 
-> > > > We've been splitting internal.h to smaller headers, maybe it's time to add
-> > > > "memory-faulure.h"?
-> > > 
-> > > Ack. I'm happy to move the "mm/memory-failure.c" section out of
-> > > mm/internal.h into a new mm/memory-failure.h, as preparation for this
-> > > patch.
-> > > 
-> > > Since this patchset is moving slowly, I'll start the header split in
-> > > parallel as a separate series, and rebase this patchset on top of it
-> > > when I respin. Is it this ok?
-> > 
-> > Sounds good to me.
-> > 
-> > Just be aware that MM folks are knee deep into fixes this cycle, so both
-> > sets could be moving slowly :)
-> 
-> Appreciate the heads up. In that case, should I hold off on the header
-> split until the next cycle instead of starting it now?
 
-I believe one header split patch is small enough and not controversial to
-have it this cycle.
- 
-> Thanks,
-> --breno
 
--- 
-Sincerely yours,
-Mike.
+On Tue, 3 Nov 2026, at 17:01, Jason Gunthorpe wrote:
+> On Fri, Oct 02, 2026 at 08:31:41PM -0300, Jason Gunthorpe wrote:
+>> Currently the zboot stub has no access to symbols in the vmlinux. In
+>> contrast x86 has a voffsets.h header that allows the stub to know whatever
+>> symbols it wants for the decompressed image. ARM DRTM needs another 4
+>> symbol locations to work, and it also wants to compile the DRTM libstub
+>> code once and have it work in both zboot and embedded.
+>> 
+>> The current solution in arm is "code_size" from commit 45dd403da851
+>> ("efi/zboot: arm64: Inject kernel code size symbol into the zboot
+>> payload"). This is neat, but it makes the zboot and embedded cases
+>> work differently.
+>> 
+>> The x86 voffsets.h approach is also nice, but it can only work in zboot
+>> since it relies on 'nm vmlinux' to extract the locations. That's a
+>> circular dependency for the embedded stub.
+>
+> Ard,
+>
+> Did you have any further thoughts on this patch? Did the sketch you
+> showed me at LPC turn into anything?
+>
+
+I will get back to you before the end of the week.
+
