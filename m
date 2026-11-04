@@ -1,99 +1,55 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.216.43
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793753735;
-	b=RnteOJP+HZqMEnR14xGrOWl0hdgtosxKq0Hg9ETNAJ4qPHqdy737rNCrxmCJvvraZJOd
-	 h8S17PX5PBsGrX1sY+o+SznGEO0icAHKVUWILkCe8swhDAtUh7SfRYTPtxDelqEJpqI9X
-	 onzkH8d8armunpN3djQjjW3DCMDkxYSwupEIraZxRWHo8aiCcrUSxeibqvS+6YWa6rK80
-	 HoxFUdW2gzqhpSuTfQw75gqov3EvUXGtTOqRfuqSoQqgcFm3AWUxTYVJweddKuEuNZt/w
-	 jFm6xLfZ6eZBM/wF7T8ePJDAHx/622ayLtMSWi+Ee79kU8vvA9HoiBHYbPsDvWphMNw==
+	t=1793764770;
+	b=AK/L0mfbOzPW7B++63KYDtY2ZXhdR7d8hjAKxO5lMXN6HStG7UklfJtdurtrjDq1LWwN
+	 W3tIanlkSEjnMjwn2G25uw6ENO6YoC3n881FAs5yHkmlyG+QM7JvRjUeuihU/sAlLqmm9
+	 2GTDcZb+UDSXC9IQEZk/+C/PixLlzYAsbWVbVFfzcLIeZ68MksW4dRDpI0oX8snEpmqWR
+	 pLc0IfXiPFkZDsaGVucNdf+eHPgU3d6ehBA9eKFKSQ894EbSfYpQE/xwLDgXqTJomRUj9
+	 hQltqwrdKV2qfCJFUBsISHyXt8Zf4cxJuQMU/cLjEuNSCD367XEcE+PWpBFQt8T+pgw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793753735;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To;
-	bh=xG5t3xikeZrgWEXDIQ9E66WF0APj2TRUKkrk3j8LkpE=;
-	b=kHMN0S5hOePI58szzuPSc3rucGPEW4DsL380fA1QtyqtMIy+oQqU25C/kCWgJJQIA3OE
-	 YajAmhJyUztiEcVRnNtbyJkZNfPuTyhr2QFV0HGhB5VkQHJlRTj+Sy0LEZ1PQXyQC6g2W
-	 nl+SB5tnUbSN4Piocgm7fUMKzHXjFHpNIzuWZ16nVPy7hCD6M+A1Iaj3Dbnha5mjZtY8d
-	 H4ycUkMxIqX/6nQTtNYDb/f8HiElbPyPjzqrr5c80TTmNA5AWnQLpqpZEulR83V+jfnzv
-	 xcZvkRhUPocfa5RcV6pCD+w/L2AkWEVAlcs6x4sdRvbgXa/lYhjLetm+g2BlThYHmhQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793764770;
+	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
+	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
+	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
+	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
+	bh=aVD57Vyoa++azfiqBAhfzngOl8QvU9DsGw/NobLJvHM=;
+	b=QE7UTI6u/bGeDbtgDTp2e8s6bLIw7+ba4uiNyTeVc8xouHO8rM9iR6HfHUh4sJAPC8eB
+	 /XD8jSfwWa1fJ5Ia2cPJA7q4y39ByKFkyBnR7n9Le0gpfYfkOJ+xR0Fxy1Z5PNojqQunO
+	 JrlphnjkbX1jhyMDxPVQO27tLkhamro0cEiS7S7eA4tVTwpYcG+CEC5LLJO21G10zPbZ7
+	 nQgDl1g4OjnvcbYexwzSzrWm9UzVKKWQQ0uz8M0pmy7xH526g3azRNvMSI/ZvqrJSpgSY
+	 41GeguR763FrJQjeT8BW1EzyP0PUE39Y5/LIgk7zDPzXaYEtWJEvfwQu5w/9eRaqWOw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=sudo5wuz;
-	arc=none smtp.remote-ip=209.85.216.43
-Received: from mail-pj1-f43.google.com (mail-pj1-f43.google.com [209.85.216.43])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=MD8HHl2V;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71D58606A331
-	for <linux-efi@vger.kernel.org>; Wed,  4 Nov 2026 00:55:34 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 71D58606A331
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9DC4E606A328
+	for <linux-efi@vger.kernel.org>; Wed,  4 Nov 2026 03:59:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=sudo5wuz
-Received: by mail-pj1-f43.google.com with SMTP id 98e67ed59e1d1-3ac7842c17dso153317a91.3
-        for <linux-efi@vger.kernel.org>; Tue, 03 Nov 2026 16:55:34 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1793753734; x=1794358534; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=xG5t3xikeZrgWEXDIQ9E66WF0APj2TRUKkrk3j8LkpE=;
-        b=sudo5wuzf8me28sIhbntLBwUiKNWuwSV6wtIncQpUBbsN4Zu1yMj1uOdtNMULS+qse
-         p10GSTbsQZQej+RmcaRVIPfYXpiJc7DVP332tBPCeYi6iIxYHtw/pCGnwu6pUZaiYkuu
-         1jzqj0fIApJI24vXlIZRW+4LFyo/2rv7mV5cIr8Gch74DjfIbhBYVLv8/dyYnqAxTrWw
-         7/Kxsv4asQfbrP6PWPBOlk/xWVzyI0hLDQrJy+RjayW+oFANYAqhfVZpq60HUf6srI5f
-         LvFF0LRAtEUesVRTlzKq8hIDxyh050q8ogJnunYhdFI0Mss29VGLQmid0PHrrP/vhgJw
-         FudA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793753734; x=1794358534;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=xG5t3xikeZrgWEXDIQ9E66WF0APj2TRUKkrk3j8LkpE=;
-        b=MXFjwtIxihVtq0gM3xNOuRMlFJDawKFsr2sq+FKu9KyPLsdYjNM1ErrIin7lBTk3yQ
-         GQX81OtxOvzDO0yXbqxZRKLyAq3furcuco/u+GlvLAdO2TR8w6tFLcSmpTwyYwdjwE2a
-         i3GlpRC1qXyH+TfYv771Xk1UmUkKhAwxl+p0gOGq73ttcy6L/kBBAkXCPecVHKbW57yl
-         0y5FE14yIwuLhc9omoQIBq0Za8cFAD4fnHYZcAWCaNKze5cJ8Bk1+mvJ2iY0Xhpxcpxr
-         LDB3QV03AQXkZ+r5ptEn5hAxFEXp2jV4OjVM8AkpFeCFZUFHMtiA1NJfXWRv9sJ8vUKn
-         pxBQ==
-X-Forwarded-Encrypted: i=1; AKwUvBxdRSznVBpPVHsZpsmR5om9af/8LFLO093uqSquf/Znf+rcSfN7SDky9VGQftg9gm31MCxfCNW7+Kg=@vger.kernel.org
-X-Gm-Message-State: APuU4Z90KrVsCmY0Q5riAhmbZURnWP4HtcHtHM25IT58v99sc1KfgrG6
-	9kJlWliLyQ9lKEo+JUqf1YoMSwdPvcqYP/1pP2MILPJL9B0I1Iv7kdk3
-X-Gm-Gg: AYBFou2FOTwMHFJ8Vn6iXMaBILETlYaRcFcbW5O+0ZzRb/7/VMHyPUQW5HA8kQMWPsX
-	vonKXHS7/ZWTzjebto4E/2MI7ry6Bfy4I6r4u1HrDosHcVCjJa1rUY3cyd4Fq2GHEo2ZA6UUkSJ
-	mYyIs/M2x2YM4bFfS1B1aB+J0IRhtVj5vIcu25gs3Eg+O48tdUDM2uQn/6+QvCcLayqVPaWrJRc
-	GEcnjGp1D8jv9heNvu04mjmYZlgB0axv73S/POAty+HH1Marqf8hwMB2X5GGow77X7cChFxM2QS
-	sxObN25fifzmloGRWTFuwbIz23DJ94e7iTnFSIZUsNFJXNW6tEK/cbOd675VBC+OFBpbSXCoNxz
-	NVsSXnPbXnXlHSU9klCH16JFPhLufN6DbV4uW8FC7i/s8CySfg7spUULNB/u+dU7yYzRSYchbW1
-	EImHJ9swjNiGw7jK74sh409i96U9HJEyXFzW4DiFo75a+3UF0cOCaqEdWLfV/FySkJVU9E732n1
-	T1mYozKRJ5JEbnLYY/zV8ur3j5y/Og9axom8tPUZiIYkONcuhnA9NrM0ZsMn6ch4H+YQIOWqPGz
-	XgSDf94TUJ4Z98TpEQ==
-X-Received: by 2002:a17:90b:184f:b0:3ac:83c1:2c0 with SMTP id 98e67ed59e1d1-3ae897e06efmr11479861a91.64.1793753733906;
-        Tue, 03 Nov 2026 16:55:33 -0800 (PST)
-Received: from localhost ([27.122.242.71])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3b09445f7b3sm1222403a91.5.2026.11.03.16.55.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 03 Nov 2026 16:55:33 -0800 (PST)
-Date: Wed, 4 Nov 2026 09:55:30 +0900
-From: Hyunchul Lee <hyc.lee@gmail.com>
-To: Christian Brauner <brauner@kernel.org>
-Cc: linux-fsdevel@vger.kernel.org, Jan Kara <jack@suse.com>,
-	Al Viro <viro@zeniv.linux.org.uk>, ecryptfs@vger.kernel.org,
-	linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net,
-	linux-nilfs@vger.kernel.org, exfat@lists.linux.dev,
-	linux-mm@kvack.org, ntfs@lists.linux.dev,
-	ocfs2-devel@lists.linux.dev, linux-btrfs@vger.kernel.org,
-	gfs2@lists.linux.dev, linux-efi@vger.kernel.org,
-	linux-mtd@lists.infradead.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH v2 18/34] ntfs: use the generic emergency read-only state
-Message-ID: <auqCgguXEsKCq9p2@hyunchul-PC02>
-References: <20261029-work-fs-sb_rdonly-v2-0-2f44f64f0b66@kernel.org>
- <20261029-work-fs-sb_rdonly-v2-18-2f44f64f0b66@kernel.org>
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=MD8HHl2V
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 250D31F00A17
+	for <linux-efi@vger.kernel.org>; Wed,  4 Nov 2026 03:59:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793764770;
+	bh=aVD57Vyoa++azfiqBAhfzngOl8QvU9DsGw/NobLJvHM=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc;
+	b=MD8HHl2V9nd3qEjuMbvRrBTZH2bsLxioMX7oFVjfHv6Tesnt0q7hLLNSr/m+49jT8
+	 lSaMljX+4CfG6xelFsRF1fxldkH8GVcb5JOkwpvBTB6C904Npj4yaJEsjO6nsYj8ky
+	 PiTyHb3iLt9aZhE4hj5wbXMfIg2RSBp5ev3N2fC5Zj1mxwDiJy86cQwRZb4AVliw3Q
+	 RwP5uHM1C6vmwTxZCfbm+Pbg1xxqSdX9YQI/nAp+Zkv4z5kDyaFy/li/WcsfKzh4sk
+	 2fq9e0+Qa+LlcBpy/2sOS5dBim+3SbmMjvx243pGgrt4PUVTbroGo+xDHS+eYE2LqK
+	 T53xBvgdG3ILQ==
+Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-6b21cf1a580so287362a12.1
+        for <linux-efi@vger.kernel.org>; Tue, 03 Nov 2026 19:59:30 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AKwUvBzJsM2naNMYneWzDJuz3QprOwytDShBS+93WgODlbn3lXQIY4jVmI1BLa9EqoLZ7XbtewSpRNDxGZc=@vger.kernel.org
+X-Gm-Message-State: APuU4Z/BkhnY2naHw5AEhyFGxaPhhjMJ9TVik8IR6HIzQitAD07Q3kMS
+	Wwi4oKq9gGOzvt05UoBAN0LpMkbpEkURS13sl8ozU3HEqWC5TxpHNDNlNtMLkiP9RlHKusDW788
+	EkKfQI6mcWKaBlDCwLItBuoiBmaFhpsY=
+X-Received: by 2002:a05:6402:270f:b0:6ac:934e:a9ca with SMTP id
+ 4fb4d7f45d1cf-6b4d3289b13mr10634683a12.0.1793764768813; Tue, 03 Nov 2026
+ 19:59:28 -0800 (PST)
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -103,23 +59,51 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20261029-work-fs-sb_rdonly-v2-18-2f44f64f0b66@kernel.org>
+References: <2382a0ee-cb6d-4572-be6e-ce3cf4d006e5@app.fastmail.com> <20261103102941.11087-1-dongtai.guo@linux.dev>
+In-Reply-To: <20261103102941.11087-1-dongtai.guo@linux.dev>
+From: Huacai Chen <chenhuacai@kernel.org>
+Date: Wed, 4 Nov 2026 11:59:14 +0800
+X-Gmail-Original-Message-ID: <CAAhV-H5Vse=pKC3Beqhqxa7fqadiGVNqkSy_06HZ3Luw2Pmj5Q@mail.gmail.com>
+X-Gm-Features: AclHuK_D5CUCusV0Gl1o9MYw2oMRSISAj8jwmHzHqtDwF9y7DdV5NfyDMepEVEM
+Message-ID: <CAAhV-H5Vse=pKC3Beqhqxa7fqadiGVNqkSy_06HZ3Luw2Pmj5Q@mail.gmail.com>
+Subject: Re: [PATCH v6 1/8] efi: Pass KHO state to the next kernel in a
+ configuration table
+To: George Guo <dongtai.guo@linux.dev>
+Cc: ardb@kernel.org, pratyush@kernel.org, rppt@kernel.org, 
+	pasha.tatashin@soleen.com, shuah@kernel.org, ilias.apalodimas@linaro.org, 
+	akpm@linux-foundation.org, baoquan.he@linux.dev, ruirui.yang@linux.dev, 
+	guodongtai@kylinos.cn, kernel@xen0n.name, graf@amazon.com, 
+	liukexin@kylinos.cn, loongarch@lists.linux.dev, linux-kernel@vger.kernel.org, 
+	kexec@lists.infradead.org, linux-mm@kvack.org, 
+	linux-kselftest@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Oct 29, 2026 at 05:07:09PM +0100, Christian Brauner wrote:
-> Set SB_STATE_EMERGENCY_RO instead of the NV_EmergencyRO volume flag when
-> an error makes the volume read-only. ntfs_emergency_state() keeps
-> telling a shutdown (EIO) and the emergency state (EROFS) apart so all of
-> its callers stay as they are. /proc/mounts shows the volume read-only
-> again.
-> 
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+On Tue, Nov 3, 2026 at 6:29=E2=80=AFPM George Guo <dongtai.guo@linux.dev> w=
+rote:
+>
+> Hi Ard, Pratyush,
+>
+> On Thu, Oct 29 2026, Ard Biesheuvel wrote:
+> > Can we handle this as an arch table then, and handle everything in
+> > the LoongArch arch code?
+>
+> Ard, LoongArch is currently the only user, so I understand the suggestion
+> to keep the handling in the architecture code.
+>
+> My preference is to keep the table definition and handling common, given
+> the potential for x86 to use it as Pratyush described in his reply, to
+> replace setup_data once x86 gains EFI support. The table contains no
+> LoongArch-specific fields, and only the LoongArch stub installs it. On
+> systems without the table, the common code does nothing.
+>
+> Would that be acceptable, or would you prefer to keep the handling in
+> LoongArch until a second architecture adopts it?
+I prefer to keep it in LoongArch until a second architecture, and I
+think Ard is the same. But this is not a strong objection to Pratyush.
 
-Looks good to me.
+Huacai
 
-Reviewed-by: Hyunchul Lee <hyc.lee@gmail.com>
-
--- 
-Thanks,
-Hyunchul
+>
+> Thanks,
+> George
