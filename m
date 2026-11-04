@@ -1,55 +1,84 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793764770;
-	b=AK/L0mfbOzPW7B++63KYDtY2ZXhdR7d8hjAKxO5lMXN6HStG7UklfJtdurtrjDq1LWwN
-	 W3tIanlkSEjnMjwn2G25uw6ENO6YoC3n881FAs5yHkmlyG+QM7JvRjUeuihU/sAlLqmm9
-	 2GTDcZb+UDSXC9IQEZk/+C/PixLlzYAsbWVbVFfzcLIeZ68MksW4dRDpI0oX8snEpmqWR
-	 pLc0IfXiPFkZDsaGVucNdf+eHPgU3d6ehBA9eKFKSQ894EbSfYpQE/xwLDgXqTJomRUj9
-	 hQltqwrdKV2qfCJFUBsISHyXt8Zf4cxJuQMU/cLjEuNSCD367XEcE+PWpBFQt8T+pgw==
+	t=1793788833;
+	b=AChHRBJQ9eXHZu44tsnlvP+RZiyJJfo3VUF6K7WAyLcC6h1h/D4EYboyTlYlt2xRt7eA
+	 gnHoH6YwHSVFP2JJC9kD8flJ57dCO0+DYTtanjqoXIK6TmBNc3wyZjQZ1C9uBdG8cFLtJ
+	 4LwsSRKLbXtjqYAvmpBWup/gNTxvnjed4zUVHLHcAZgWUc5jFQLgVqMivN5AD4Cu8kdmY
+	 ZuERU6J+sTFQ6KrvZyLaQJVpYbqn2flrvdtx3R2TinpxZXKIftXEabGypy7VVK6uj9w5C
+	 30H4NP+MJspSzQtz9cb0gJSC7S0Am7ngwjhtMAxo0edXInmi3Vj+nAG8dbqaKnHE78g==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793764770;
-	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
-	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
-	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
-	bh=aVD57Vyoa++azfiqBAhfzngOl8QvU9DsGw/NobLJvHM=;
-	b=QE7UTI6u/bGeDbtgDTp2e8s6bLIw7+ba4uiNyTeVc8xouHO8rM9iR6HfHUh4sJAPC8eB
-	 /XD8jSfwWa1fJ5Ia2cPJA7q4y39ByKFkyBnR7n9Le0gpfYfkOJ+xR0Fxy1Z5PNojqQunO
-	 JrlphnjkbX1jhyMDxPVQO27tLkhamro0cEiS7S7eA4tVTwpYcG+CEC5LLJO21G10zPbZ7
-	 nQgDl1g4OjnvcbYexwzSzrWm9UzVKKWQQ0uz8M0pmy7xH526g3azRNvMSI/ZvqrJSpgSY
-	 41GeguR763FrJQjeT8BW1EzyP0PUE39Y5/LIgk7zDPzXaYEtWJEvfwQu5w/9eRaqWOw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793788833;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=OHhrH3mVCZL9F+uul7Pko5LwqezUEkg/0ds9TVqWkW0=;
+	b=5RCWKwpjtnQej81oKuXr8ZjP/iYBhJ+bR/n4dfeV3oC9HScPGN1n+pBg7lwSuqfM268Q
+	 CjiIM2eyt2qlqWTeKcKsj+mBOJzWWSZkTH7mnWd2kHIa50BMOe+nHct7kvhIPx4TRAqRl
+	 G+Bj40VgCgDtrN/gXoMe9m/KqJgOGA63212Crij/2wQCRmTww0Ktr+SlwQXUs8Wuq6prl
+	 gGhUgKTTFaALbD8QyFV+bRNVvFEr/iMauy++nX6dKNH2XDjkCIcp1hkEb6OKeE8+ub4Dr
+	 /0GwkXDi9/qkZM148YVmgeA3HlzQy3k/gYw926fQ0v51ZqgX2vFNE8P0/iMCFIxeuWg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=MD8HHl2V;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=EeMZhO8D;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9DC4E606A328
-	for <linux-efi@vger.kernel.org>; Wed,  4 Nov 2026 03:59:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7936606A31B;
+	Wed,  4 Nov 2026 10:40:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=MD8HHl2V
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 250D31F00A17
-	for <linux-efi@vger.kernel.org>; Wed,  4 Nov 2026 03:59:30 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=EeMZhO8D
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 962121F000C1;
+	Wed,  4 Nov 2026 10:40:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793764770;
-	bh=aVD57Vyoa++azfiqBAhfzngOl8QvU9DsGw/NobLJvHM=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=MD8HHl2V9nd3qEjuMbvRrBTZH2bsLxioMX7oFVjfHv6Tesnt0q7hLLNSr/m+49jT8
-	 lSaMljX+4CfG6xelFsRF1fxldkH8GVcb5JOkwpvBTB6C904Npj4yaJEsjO6nsYj8ky
-	 PiTyHb3iLt9aZhE4hj5wbXMfIg2RSBp5ev3N2fC5Zj1mxwDiJy86cQwRZb4AVliw3Q
-	 RwP5uHM1C6vmwTxZCfbm+Pbg1xxqSdX9YQI/nAp+Zkv4z5kDyaFy/li/WcsfKzh4sk
-	 2fq9e0+Qa+LlcBpy/2sOS5dBim+3SbmMjvx243pGgrt4PUVTbroGo+xDHS+eYE2LqK
-	 T53xBvgdG3ILQ==
-Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-6b21cf1a580so287362a12.1
-        for <linux-efi@vger.kernel.org>; Tue, 03 Nov 2026 19:59:30 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AKwUvBzJsM2naNMYneWzDJuz3QprOwytDShBS+93WgODlbn3lXQIY4jVmI1BLa9EqoLZ7XbtewSpRNDxGZc=@vger.kernel.org
-X-Gm-Message-State: APuU4Z/BkhnY2naHw5AEhyFGxaPhhjMJ9TVik8IR6HIzQitAD07Q3kMS
-	Wwi4oKq9gGOzvt05UoBAN0LpMkbpEkURS13sl8ozU3HEqWC5TxpHNDNlNtMLkiP9RlHKusDW788
-	EkKfQI6mcWKaBlDCwLItBuoiBmaFhpsY=
-X-Received: by 2002:a05:6402:270f:b0:6ac:934e:a9ca with SMTP id
- 4fb4d7f45d1cf-6b4d3289b13mr10634683a12.0.1793764768813; Tue, 03 Nov 2026
- 19:59:28 -0800 (PST)
+	s=k20260515; t=1793788832;
+	bh=OHhrH3mVCZL9F+uul7Pko5LwqezUEkg/0ds9TVqWkW0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=EeMZhO8DjG4Z1LNGDG6wdfrR5/jvvahFgvuj3m7HOQrS5HMxi/U+6lT8CdBS1mQBG
+	 IC79mPKN5pooYxKGcfp/3nadOdWf8Fym3XSVAO968hO1SW6hTg6elGvzxmkBPwmNaS
+	 v9T63ChJrQAQbad0an5kGXooCbmvv9MDXmPvDoorGg+XyLiYGBnkViAIHcypGwqbpJ
+	 ppQezfycclcHYH/cH5pj6vY3QPZi1ua1tE+LaTlont55dEIEeB+v8CFlcxuVMlA3hL
+	 myTh9yVFL8UBjo6Snz+ghL8sE2j0/RkU7G36RxL7WrUdRykGnhNHAiwYwIXZ3Ksf2n
+	 rYu3AjolMYkzw==
+Date: Wed, 4 Nov 2026 12:40:16 +0200
+From: Mike Rapoport <rppt@kernel.org>
+To: Breno Leitao <leitao@debian.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+	"H. Peter Anvin" <hpa@zytor.com>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	David Hildenbrand <david@kernel.org>,
+	Lorenzo Stoakes <ljs@kernel.org>,
+	"Liam R. Howlett" <liam@infradead.org>,
+	Vlastimil Babka <vbabka@kernel.org>,
+	Suren Baghdasaryan <surenb@google.com>,
+	Michal Hocko <mhocko@suse.com>, Miaohe Lin <linmiaohe@huawei.com>,
+	Naoya Horiguchi <nao.horiguchi@gmail.com>,
+	Oscar Salvador <osalvador@suse.de>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	Danilo Krummrich <dakr@kernel.org>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Will Deacon <will@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
+	kas@kernel.org, kexec@lists.infradead.org,
+	Brendan Jackman <brendan.jackman@linux.dev>,
+	Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>,
+	shakeel.butt@linux.dev, linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-mm@kvack.org,
+	linux-cxl@vger.kernel.org, driver-core@lists.linux.dev,
+	linux-arm-kernel@lists.infradead.org, rmikey@meta.com,
+	riel@surriel.com, harry@kernel.org, kernel-team@meta.com
+Subject: Re: [PATCH v6 3/7] mm/memory-failure: add hwpoison_boot_page() to
+ flag an inherited frame
+Message-ID: <ausLkNhb8ZPz0ra_@kernel.org>
+References: <20261016-hwpoison-kho-v6-0-f304255147da@debian.org>
+ <20261016-hwpoison-kho-v6-3-f304255147da@debian.org>
+ <aumt-4kfGGtoXuh-@kernel.org>
+ <aumvVjoHo4KeuyEp@gmail.com>
+ <auovL7i1rEcXCeGS@kernel.org>
+ <auo3ScXy6dk0Gr3-@gmail.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -59,51 +88,42 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <2382a0ee-cb6d-4572-be6e-ce3cf4d006e5@app.fastmail.com> <20261103102941.11087-1-dongtai.guo@linux.dev>
-In-Reply-To: <20261103102941.11087-1-dongtai.guo@linux.dev>
-From: Huacai Chen <chenhuacai@kernel.org>
-Date: Wed, 4 Nov 2026 11:59:14 +0800
-X-Gmail-Original-Message-ID: <CAAhV-H5Vse=pKC3Beqhqxa7fqadiGVNqkSy_06HZ3Luw2Pmj5Q@mail.gmail.com>
-X-Gm-Features: AclHuK_D5CUCusV0Gl1o9MYw2oMRSISAj8jwmHzHqtDwF9y7DdV5NfyDMepEVEM
-Message-ID: <CAAhV-H5Vse=pKC3Beqhqxa7fqadiGVNqkSy_06HZ3Luw2Pmj5Q@mail.gmail.com>
-Subject: Re: [PATCH v6 1/8] efi: Pass KHO state to the next kernel in a
- configuration table
-To: George Guo <dongtai.guo@linux.dev>
-Cc: ardb@kernel.org, pratyush@kernel.org, rppt@kernel.org, 
-	pasha.tatashin@soleen.com, shuah@kernel.org, ilias.apalodimas@linaro.org, 
-	akpm@linux-foundation.org, baoquan.he@linux.dev, ruirui.yang@linux.dev, 
-	guodongtai@kylinos.cn, kernel@xen0n.name, graf@amazon.com, 
-	liukexin@kylinos.cn, loongarch@lists.linux.dev, linux-kernel@vger.kernel.org, 
-	kexec@lists.infradead.org, linux-mm@kvack.org, 
-	linux-kselftest@vger.kernel.org, linux-efi@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <auo3ScXy6dk0Gr3-@gmail.com>
 
-On Tue, Nov 3, 2026 at 6:29=E2=80=AFPM George Guo <dongtai.guo@linux.dev> w=
-rote:
->
-> Hi Ard, Pratyush,
->
-> On Thu, Oct 29 2026, Ard Biesheuvel wrote:
-> > Can we handle this as an arch table then, and handle everything in
-> > the LoongArch arch code?
->
-> Ard, LoongArch is currently the only user, so I understand the suggestion
-> to keep the handling in the architecture code.
->
-> My preference is to keep the table definition and handling common, given
-> the potential for x86 to use it as Pratyush described in his reply, to
-> replace setup_data once x86 gains EFI support. The table contains no
-> LoongArch-specific fields, and only the LoongArch stub installs it. On
-> systems without the table, the common code does nothing.
->
-> Would that be acceptable, or would you prefer to keep the handling in
-> LoongArch until a second architecture adopts it?
-I prefer to keep it in LoongArch until a second architecture, and I
-think Ard is the same. But this is not a strong objection to Pratyush.
+On Tue, Nov 03, 2026 at 11:49:44AM -0800, Breno Leitao wrote:
+> On Tue, Nov 03, 2026 at 08:59:59PM +0200, Mike Rapoport wrote:
+> > On Tue, Nov 03, 2026 at 02:06:17AM -0800, Breno Leitao wrote:
+> > > On Tue, Nov 03, 2026 at 11:48:43AM +0200, Mike Rapoport wrote:
+> > > > > --- a/mm/internal.h
+> > > > > +++ b/mm/internal.h
+> > > > 
+> > > > We've been splitting internal.h to smaller headers, maybe it's time to add
+> > > > "memory-faulure.h"?
+> > > 
+> > > Ack. I'm happy to move the "mm/memory-failure.c" section out of
+> > > mm/internal.h into a new mm/memory-failure.h, as preparation for this
+> > > patch.
+> > > 
+> > > Since this patchset is moving slowly, I'll start the header split in
+> > > parallel as a separate series, and rebase this patchset on top of it
+> > > when I respin. Is it this ok?
+> > 
+> > Sounds good to me.
+> > 
+> > Just be aware that MM folks are knee deep into fixes this cycle, so both
+> > sets could be moving slowly :)
+> 
+> Appreciate the heads up. In that case, should I hold off on the header
+> split until the next cycle instead of starting it now?
 
-Huacai
-
->
+I believe one header split patch is small enough and not controversial to
+have it this cycle.
+ 
 > Thanks,
-> George
+> --breno
+
+-- 
+Sincerely yours,
+Mike.
