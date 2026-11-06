@@ -1,55 +1,58 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793975718;
-	b=MDvSSkUzKrVzD5jULTsdcKsMnVzmEzJIXB+4StEAjfGBUlRJJBjUCJ5fYbO0R9wymQGD
-	 4EBRDexyq/yUxpuWUHG+UsDETrDsG7R6OAcbodnVDQAxKlw3S7tukeZHeu1MLyt9bpYyU
-	 hPrlNZPX7Ptxsh3GpWp229Dgd4qQYe44EsRYhexdw71npgtXU91zPitvM7491QiWIYfPU
-	 7zvKGwowfOVpgObukXtQOLKP8V0qg4uvsLq4iU9dpD/Pm/T/F5ih851TxPrjTgfEm6Bx+
-	 ecgFLuheZdyTSPdEZU1rBCF/k2z4lF+q0RNWsF61GsZy6/8zxdPJ4kw74DSl+f2Or1g==
+	t=1793975767;
+	b=BNbKg1YQ5lDIe/deerp1PgunN/I6LZ4afGnjQCsy6GHVJ6az9ZXhThhP2MFHxV1tEZdt
+	 Ilk0StmcUm/TuoUqnc3YfgeQWjB2i97UOYUKDwOVW2mEu6WnPeiICOgrCmgrfdyBOdDKY
+	 Q7pk9X055ceui6ZuaH34Hxs5CZB5/zogYa2K2ol6hKqpkT7rpdDZ/hKw6IgiQa31yESDc
+	 zKTPUc8dQl6ZsZ6Eo4iQBALp7/xfbNJMG0UWbaRiutEhOdfUj4pCxv6H8CJ5llkmHFPj5
+	 WgmbHWq0oZG9M2l9v0lW1AVM3breDzacqdPtSQip6EnYK+YksyCNHYcJM5bFg/+fqNg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793975718;
-	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
-	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
-	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
-	bh=ABFV9qqW5v9B/veTK1qFSxVFzw8UX9r8phfo5f88bHM=;
-	b=LoRHcwvQ3TqNmpINzu+JrujOUWM83Gop1VWhw0WIAyN92uZ1omcZ+nNuvrqehyBgHE4I
-	 NrLRSueq2vJ+pkphyjkXVwNA0xU4ILLFRpnwOe+UVRVRngYMyIx2DkCki1y7wcA4zyae1
-	 +8JO80hGZ0D4e9xCGAtEBXn0udvIPh54AfjibE9Y2r1OoKw5Qdy45GZ9OrstRt+Ut6DaZ
-	 6Y628kPIuDF5u56KaFw1novw37f9KeDRxUDCCqY9hhdb2cU1ulmXZh3GMPYQ4L6VCwxDu
-	 KiyjUCu75CsERWO4uOPW7Cz2iqSfQ/Wkwxg0hOCCtmq4YiDCxKNZSmPK7MMdaX1oVlQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793975767;
+	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
+	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
+	bh=Od1x68R8c3AJiu0H1ikFF3XxZZhgOVLWJP+1o+BxS4M=;
+	b=pFlZieW546REW6RaAvprBQA//LN40GlRaf3gJr8XTbvBWgsoGpFoacDQuLoq1i2qcQ6J
+	 39HHIuxNyOTIi40q9srdNNfd+963irJDBfwhUKrabcirUAVDC1G1x3/IY/P2jpVlmukX+
+	 CmyiewH/sT+h67XWJeS8ClJjK/tYdzxhkaS+gXYlxvzulz+TWfVw7b/gvI7tAEKwKz9Ak
+	 H5W5N6TB/z8Ld2CEiyCAGimEa5U7cHzzNcfa6TcfDJzo5p0Gmjov3TUmobEPwFkpC2IkF
+	 tRYF+IQP4sf4T6qhk+4XS4NztJnyjw7P9+3x6c/Hgrayf72uXqPtnBdr7qdj7gvDNPw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=a7LdKMpo;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=VtEJlKdA;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96845606A331
-	for <linux-efi@vger.kernel.org>; Fri,  6 Nov 2026 14:35:13 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16FD7606A330
+	for <linux-efi@vger.kernel.org>; Fri,  6 Nov 2026 14:36:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=a7LdKMpo
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 21E121F00907
-	for <linux-efi@vger.kernel.org>; Fri,  6 Nov 2026 14:35:13 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=VtEJlKdA
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5D15C1F008A3;
+	Fri,  6 Nov 2026 14:36:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793975713;
-	bh=ABFV9qqW5v9B/veTK1qFSxVFzw8UX9r8phfo5f88bHM=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=a7LdKMpoABR41gUzcHoVbB11ZSqAhEI7ksiYmrBmVIMoLE4+exZ0z1ZbAUDkTAQ7A
-	 VnZON0YcjmLVL0l3KiRts6YZttZHIsit3U/hSekKUtQfCvpSRAe5wgqrX+nizmAq6B
-	 pUwVBY9cU/y9IRbgLaIO//6RcUCnpi5ITVMhrR/k7j/cQiy8IgLXBx6KR4b/2Sf7bp
-	 nH1n4vZjf7wCcdHRAKr4ovoS6JJy7XvG0Z+EqZoaDWIfhO2MyR+QFynbk4EoLoSwzH
-	 +BWrUi1wDukYRSEJ7ww9XGzZQqvCyFe7GrcMeU2KcAVFN+2mCsbKRUhW5JgumVuKlR
-	 nCwWDpi/f2fUw==
-Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-6b1b13e09ffso850475a12.3
-        for <linux-efi@vger.kernel.org>; Fri, 06 Nov 2026 06:35:13 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AL+hErEIJzQqmriiZv3AX8LoYjGU6IgVWiggiglVtn9NLAtvDwXcEVMO7+58eSCxSF4GvksCRenEbXvG0Ps=@vger.kernel.org
-X-Gm-Message-State: APuU4Z/zOZUrHjzUv9idG6IZ4gx7nYfBVQ9BqWEDbN7obHLvebBzHsF/
-	g068SMTtwx5s24Ht5UcAJXGIsN2FT4wMS7z8oRa/rtALI9YLGbv+ozK/FwRdgog8oxFPCDv6Ddb
-	xO+M+6rh2VQ7DRZYbSX/48mGnyMIpXDw=
-X-Received: by 2002:a05:6402:1e94:b0:6b6:edd7:7928 with SMTP id
- 4fb4d7f45d1cf-6b6edd7899emr802991a12.26.1793975711577; Fri, 06 Nov 2026
- 06:35:11 -0800 (PST)
+	s=k20260515; t=1793975766;
+	bh=Od1x68R8c3AJiu0H1ikFF3XxZZhgOVLWJP+1o+BxS4M=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=VtEJlKdAMZbV1qA9YvmNT+GJkwzPvUesfZzcPenvriVO84yr7H4ppRHM/TcyBPhFa
+	 cbOiV2oPOApbj85Xa3edkFx2uqWbEY1CymnPPxLW7meO+WZ48R3EN3ondq+6haW3QF
+	 XICkp01/ymqh7lI6lc9bEsifI62Qi9omJo2SiJhZwpLg/nntpN5vq4H3QWTdiLBonX
+	 g79s1Ard3fXJiboMW058jiCsAhfZBcpz6mlEgi3Bfdtc2svMvygF8bpJ7RNXOJiUGY
+	 xr68+ba4Ask8VOID56/8Yp00tkYvrqzidL4ci87wqQYIMPNq44Bsojaq6POuRafhE6
+	 D6kyLBJO+Ea4g==
+Message-ID: <sashiko-outbox-201592@kernel.org>
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH 1/5] efi/libstub: Make efi_remap_image() return
+ efi_status_t
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Ard Biesheuvel" <ardb+git@google.com>, linux-efi@vger.kernel.org
+Cc: mark.rutland@arm.com, will@kernel.org, catalin.marinas@arm.com, "Ard
+ Biesheuvel" <ardb@kernel.org>, "Jason Gunthorpe" <jgg@nvidia.com>
+In-Reply-To: <20261106141936.2744481-8-ardb+git@google.com>
+References: <20261106141936.2744481-7-ardb+git@google.com>
+ <20261106141936.2744481-8-ardb+git@google.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Fri, 06 Nov 2026 14:36:05 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -58,79 +61,44 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-MIME-Version: 1.0
-References: <20261029172956.20791-1-dongtai.guo@linux.dev> <20261029172956.20791-6-dongtai.guo@linux.dev>
- <aux9Hm0QFJLUDPWv@kernel.org> <CAAhV-H7Dsnz03iXChzE6nYM2cs+D6fdDFiWrDxX5jM13kYL6HA@mail.gmail.com>
- <auypq8_7T-vml5_B@kernel.org>
-In-Reply-To: <auypq8_7T-vml5_B@kernel.org>
-From: Huacai Chen <chenhuacai@kernel.org>
-Date: Fri, 6 Nov 2026 22:35:01 +0800
-X-Gmail-Original-Message-ID: <CAAhV-H6aO_QNEzV-r6+FbNa=9EUQgv1vH0ET-ETXAH5x6oQGjA@mail.gmail.com>
-X-Gm-Features: AclHuK9KCIrf61pzsewLNfcg32ftrSETM4BdWXL6OTYNNDPn4F3U0UamXyiZ-QM
-Message-ID: <CAAhV-H6aO_QNEzV-r6+FbNa=9EUQgv1vH0ET-ETXAH5x6oQGjA@mail.gmail.com>
-Subject: Re: [PATCH v6 5/8] LoongArch: Allow memblock arrays to resize
-To: Mike Rapoport <rppt@kernel.org>
-Cc: George Guo <dongtai.guo@linux.dev>, pasha.tatashin@soleen.com, pratyush@kernel.org, 
-	ardb@kernel.org, shuah@kernel.org, ilias.apalodimas@linaro.org, 
-	akpm@linux-foundation.org, baoquan.he@linux.dev, ruirui.yang@linux.dev, 
-	guodongtai@kylinos.cn, kernel@xen0n.name, graf@amazon.com, 
-	liukexin@kylinos.cn, loongarch@lists.linux.dev, linux-kernel@vger.kernel.org, 
-	kexec@lists.infradead.org, linux-mm@kvack.org, 
-	linux-kselftest@vger.kernel.org, linux-efi@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Fri, Nov 6, 2026 at 12:07=E2=80=AFAM Mike Rapoport <rppt@kernel.org> wro=
-te:
->
-> On Thu, Nov 05, 2026 at 11:07:01PM +0800, Huacai Chen wrote:
-> > Hi, Mike,
-> >
-> > On Thu, Nov 5, 2026 at 8:57=E2=80=AFPM Mike Rapoport <rppt@kernel.org> =
-wrote:
-> > >
-> > > On Fri, Oct 30, 2026 at 02:29:52AM +0900, George Guo wrote:
-> > > > From: George Guo <guodongtai@kylinos.cn>
-> > > >
-> > > > LoongArch never calls memblock_allow_resize(), so the reserved regi=
-on
-> > > > array cannot grow beyond INIT_MEMBLOCK_RESERVED_REGIONS entries
-> > > > (INIT_MEMBLOCK_REGIONS + NR_CPUS).
-> > >
-> > > This might be something to fix independent of KHO.
-> > >
-> > > Huacai,
-> > >
-> > > What's the reason LoongArch never enables memblock resizing and why i=
-t
-> > > defines INIT_MEMBLOCK_RESERVED_REGIONS to include NR_CPUS?
-> > At first we didn't define INIT_MEMBLOCK_RESERVED_REGIONS, then we got
-> > boot failures on a 128-cores machine, so define it, and the value is
-> > similar to arm64.
->
-> AFAIR, arm64 had to reserve some per cpu data before they could enable
-> memblock resizing, so they had to make it static.
-LoongArch is similar, so below 64-cores machine has no problem.
+Thank you for your contribution! Sashiko AI review found 1 potential
+issue to consider:
+- [Low] efi/libstub: missing Return: section in efi_remap_image()
+  kernel-doc
+--
 
->
-> > The reason LoongArch never enables memblock resizing is because the mm
-> > code is derived from MIPS, and MIPS never enables it.
->
-> If that's the only reason, you might want to revisit that :)
-Yes, it seems we need memblock_allow_resize(), but maybe it is better
-to bring back paging_init()? Most other archs call
-memblock_allow_resize() in paging_init().
+commit 87d3e561f50dd1226f0d061af43fd4aa4ab0ee9c
+Author: Ard Biesheuvel <ardb@kernel.org>
 
-Huacai
+efi/libstub: Make efi_remap_image() return efi_status_t
 
->
-> > Huacai
-> >
-> > >
-> > > --
-> > > Sincerely yours,
-> > > Mike.
->
-> --
-> Sincerely yours,
-> Mike.
+This commit changes efi_remap_image() to return an efi_status_t so callers
+are notified if remapping code or data regions via the EFI Memory
+Attributes Protocol fails.
+
+> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/fir=
+mware/efi/libstub/efi-stub-helper.c
+> index 8e43eb3f418b1..b2ad081cf324c 100644
+> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> @@ -698,8 +698,8 @@ efi_status_t efi_wait_for_key(unsigned long usec, efi=
+_input_key_t *key)
+>   * read-write/non-executable. The code region is assumed to start at the=
+ base
+>   * of the image, and will therefore cover the PE/COFF header as well.
+>   */
+> -void efi_remap_image(unsigned long image_base, unsigned alloc_size,
+> -		     unsigned long code_size)
+> +efi_status_t efi_remap_image(unsigned long image_base, unsigned alloc_si=
+ze,
+> +			     unsigned long code_size)
+
+[Severity: Low]
+This isn't a bug, but now that efi_remap_image() returns efi_status_t
+instead of void, the preceding kernel-doc comment needs a Return: section
+to avoid a kernel-doc -Wreturn warning (make W=3D2).
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261106141936.2744=
+481-7-ardb+git@google.com?part=3D1
