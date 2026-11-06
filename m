@@ -1,58 +1,58 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793975615;
-	b=HnjAloJCHeYNF1c8GPj08I0NSDhOJ6SpX1JOJnEc65KoikOT0SOHNopTFHi6JzWwQIhs
-	 Vao5ou70W2xhmdw2zRwjv52qvHRXdoxnbujWbAxFhQeTMArDZoF6nFbMlB2VcrH9c+rZw
-	 UVyG0YpUAK0M+S/icwoQGlRIwDPF0R53DmEPJ84UCFnySm/OIV4lfVI/YldvUfwDV+Ktc
-	 6xDReiMedYXkzJEYEvEHF8/EgnQJjBUXzUZZ+zgzWAVJI2E9plgRZwHYRN73CTwYxUlFU
-	 UxaC5JC+O0crfFpL+QU8mSz5Du5MVRDucC5mgzscd9nQWa9Ecg4FfpXl7Kgpfgsn3bw==
+	t=1793975661;
+	b=QQ0+dpsXgbGoGWfS+cDSIJ5LmuJTONAXIoNPfjP2hXvbv+YpdvxcSVx7wJUptw2oyofg
+	 djI2skIwNG3+goQWmL5jsvfZ7z5yQ+BsC1KM1S/Mzj3as6vJA8bo3CsJAx4veYkjiQO5X
+	 8zj/iOuPibgO9+u4ERkj1ZyoNzySfhyPhqxDUli5+cSXTUyDkffpi7LcNG2MoFMTRQgEh
+	 TpOqFqA7p3EIENguf2E38HlgcOGYL9a433pwjQv/vwnuYUxXQr/arPD7/+PGXfTLSVA3K
+	 ul72EPF6MSB2KRmlgcQkmfZKKbm6e2lObB1xHzuWRiy8zqtPbTPk+u7jQ12sW5fPU8w==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793975615;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793975661;
 	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
 	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
-	bh=lLU7ErUhJ3C4lw1lteIKrhZU7YDWmuaEy2OdiaVI1Io=;
-	b=yGK/oP3fZiiO/VV/ImQUjlPNLoYtfXiKIG8vBowjGJ45GvbK/QbwMXvadCNTaj2WuEon
-	 PMRaPgznwHzNABQiVUOC2FCSJKV+PYZnEBCxwT2ar5TuelXVHCjJgTQ4m6NK0efbeyP0i
-	 WHQvQpWPRY0+nhwnWi+sIldV8yKV5ne2aUGIICHoL7yCllUBT46SeCxrEvF/C81K3XP3i
-	 UvKQ5qKsha4NmBQO27w7ICoTgwJ0AoPcr74B0ah3qIlUGk+6kn3HylCcKkjJTZY+siyFB
-	 lrCuZzz/7GEla8Hu26xnXq4x40qXI9r+sfJ91MYKTf7hl929Umps49/s6cLPxgbrHGQ==
+	bh=kXmXl/Rwf8V1iqZXYuEqdBxWJuGqqtcyLegwix+W4r8=;
+	b=MdTNpoqkbPgFxlNZPNlRxHp5SS6LKacUuxnSYeYUy0H4IEMR/cUIca4vrES0VwyCiRYN
+	 7Idm6Ghq6uEggS/qhsNl7i4MK9EVRlw01oXEa2QHBY8nKfKLX6FYAdkBWfJCzx69AaKVM
+	 i6lKWsrezYDwNIM0YzWffWmgF6/IZMsDENsQoiZJZHUgGQHPPcKmQO/NJUUmLeEZi0vWO
+	 0b5zOlDkHPREUJ8lfCVyEcxPlt3SUr80OWTx/k2luJlyWO1ZKSwdY/QA11uMWnoljlga5
+	 P/8FeEy+F4UUONXp96IyEHGuPRCbfGnjGEjJeJIsPnifS/9Jl9GW7KkS9iqrXrCu5iw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=c4XrkwXh;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=cTUCAJqK;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37B31606D80A
-	for <linux-efi@vger.kernel.org>; Fri,  6 Nov 2026 14:33:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BDEDA606A336
+	for <linux-efi@vger.kernel.org>; Fri,  6 Nov 2026 14:34:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=c4XrkwXh
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5BE5F1F008A1;
-	Fri,  6 Nov 2026 14:33:34 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=cTUCAJqK
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 44DC91F008A5;
+	Fri,  6 Nov 2026 14:34:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793975614;
-	bh=lLU7ErUhJ3C4lw1lteIKrhZU7YDWmuaEy2OdiaVI1Io=;
+	s=k20260515; t=1793975660;
+	bh=kXmXl/Rwf8V1iqZXYuEqdBxWJuGqqtcyLegwix+W4r8=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=c4XrkwXhhr096JIfReu2hKr7+tc0E+jAT77vzGGxWHxWcnENQe5uc9zqm8XFFj7lK
-	 BsjUm/vGgWG9CowgUGbyagZDsExWVhSp3JuxOlAsRYGoMWGiWVtruMrZAWHSPcdvFg
-	 vpI9ddM+UriVN7yeqKGseJijxvdPPHlOhfE2sKbwSguw66wAj5P/tW31XkWMPSM8bx
-	 xW57D3d8H9SMeqd9v/fAq/GhX69rsrYw0vG47bFGshn/ebycHJZGd7h8XGY5Gd0oL8
-	 2jgpzQIZ2CbzTqJ8aUbu1bbpLNHBA+7peMFO0RYiy/uiNDyH1W4BU4aAoWXhLjzPMC
-	 sR1lfjJXVnGlQ==
-Message-ID: <sashiko-outbox-201588@kernel.org>
+	b=cTUCAJqKq6zfhnXgYrMqouHzaH/nNQ6SHsvHHLGJuAjsLIkuLHcL0GdJalAsIifUU
+	 8qQ2n1T5Toeo1pjOPYGgcWEr9Yx0QOqx+rmIQr+/K6QGkCtnldeYHUO9vPFM7yXgf3
+	 EL2O2uvo/QTjTosAr+j00bdv62aBFiIEUvXF1Xt9qghH7V7D2vhvkoOMcIu322rkKs
+	 xRTJtbH+pEgym+8de3txKSVIfYnmTsTUIQPR5opdSndJazvCKLvWb5cauCPufIZayz
+	 RAxwtlMQZ5Y2TYj7kApQNHf8JgPLOZBXyF4VfLT0qauPtqhNdgVPCW5sTRle6cAvAX
+	 vUTdZ1k4lSBBg==
+Message-ID: <sashiko-outbox-201591@kernel.org>
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH 5/5] efi/arm64: Drop build and linker script hacks to
- obtain image code size
+Subject: Re: [PATCH 3/5] efi/zboot: Disentangle efi_remap_image() from
+ efi_cache_sync_image()
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Ard Biesheuvel" <ardb+git@google.com>, linux-efi@vger.kernel.org
 Cc: mark.rutland@arm.com, will@kernel.org, catalin.marinas@arm.com, "Ard
  Biesheuvel" <ardb@kernel.org>, "Jason Gunthorpe" <jgg@nvidia.com>
-In-Reply-To: <20261106141936.2744481-12-ardb+git@google.com>
+In-Reply-To: <20261106141936.2744481-10-ardb+git@google.com>
 References: <20261106141936.2744481-7-ardb+git@google.com>
- <20261106141936.2744481-12-ardb+git@google.com>
+ <20261106141936.2744481-10-ardb+git@google.com>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Fri, 06 Nov 2026 14:33:33 +0000
+Date: Fri, 06 Nov 2026 14:34:19 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -64,88 +64,64 @@ Precedence: list
 
 Thank you for your contribution! Sashiko AI review found 1 potential
 issue to consider:
-- [Low] efi/zboot: redundant full-image cache sync in
-  efi_zboot_decompress()
-It also noticed 1 related pre-existing issue this patch does not
-introduce:
-- [High] efi/libstub: arm64: missing DSB ISH in efi_cache_sync_image()
-  [1]
+- [Low] efi/zboot: duplicate efi_cache_sync_image() calls after
+  decompression
 --
 
-commit 579820756d50227a71aeb397996f2064f5e5696a
+commit c04555ab5ec2e8a3cceff169f625d907a16b1267
 Author: Ard Biesheuvel <ardb@kernel.org>
 
-efi/arm64: Drop build and linker script hacks to obtain image code size
+efi/zboot: Disentangle efi_remap_image() from efi_cache_sync_image()
 
-This commit replaces the build-time symbol injection and linker script
-logic for obtaining the kernel code size in EFI zboot with offsets stored
-in struct efi_image_info, and updates efi_cache_sync_image() to use its
-alloc_size argument.
+This commit moves the efi_remap_image() call out of arm64's
+efi_cache_sync_image() into a new efi_zboot_remap_image() helper called from
+efi_zboot_entry().
 
-> diff --git a/drivers/firmware/efi/libstub/arm64.c b/drivers/firmware/efi/=
-libstub/arm64.c
-> index 190cf180bb234..da6fa2f6c8219 100644
-> --- a/drivers/firmware/efi/libstub/arm64.c
-> +++ b/drivers/firmware/efi/libstub/arm64.c
-> @@ -88,8 +88,6 @@ efi_status_t check_platform_features(void)
->  #define DCTYPE	"cvau"
->  #endif
+> diff --git a/drivers/firmware/efi/libstub/zboot.c b/drivers/firmware/efi/=
+libstub/zboot.c
+> index 97ae706c034ad..27f6661253c08 100644
+> --- a/drivers/firmware/efi/libstub/zboot.c
+> +++ b/drivers/firmware/efi/libstub/zboot.c
+> @@ -36,6 +36,26 @@ const struct efi_image_info * __weak zboot_get_image_i=
+nfo(unsigned long image_ba
+>  	return NULL;
+>  }
 > =20
-> -u32 __weak code_size;
-> -
->  void efi_cache_sync_image(unsigned long image_base,
->  			  unsigned long alloc_size)
->  {
-> @@ -100,7 +98,7 @@ void efi_cache_sync_image(unsigned long image_base,
->  	/* only perform the cache maintenance if needed for I/D coherency */
->  	if (!(ctr & BIT(CTR_EL0_IDC_SHIFT))) {
->  		unsigned long base =3D image_base;
-> -		unsigned long size =3D code_size;
-> +		unsigned long size =3D alloc_size;
-> =20
->  		do {
->  			asm("dc " DCTYPE ", %0" :: "r"(base));
+> +static efi_status_t efi_zboot_remap_image(const struct efi_image_info *i=
+mage_info,
+> +					  unsigned long image_base,
+> +					  unsigned long image_size)
+> +{
+> +	unsigned long code_size =3D efistub_get_code_size(image_info);
+> +	efi_status_t status;
+> +
+> +	if (code_size) {
+> +		efi_cache_sync_image(image_base, code_size);
+> +
+> +		status =3D efi_remap_image(image_base, image_size, code_size);
+> +		if (status !=3D EFI_SUCCESS)
+> +			return status;
+> +	} else {
+> +		efi_cache_sync_image(image_base, image_size);
+> +	}
+> +
+> +	return EFI_SUCCESS;
+> +}
 
 [Severity: Low]
-Does changing size from code_size to alloc_size cause efi_zboot_decompress()
-to clean the data cache across the entire decompressed image allocation
-before efi_zboot_remap_image() syncs the code region a second time?
+Does calling efi_cache_sync_image() in efi_zboot_remap_image() duplicate the
+cache sync already performed at the end of efi_zboot_decompress()?
 
-Both gzip and zstd implementations of efi_zboot_decompress() still call
-efi_cache_sync_image((unsigned long)out, outlen) with the full allocation
-size (including rodata, data, and BSS), and efi_zboot_entry() then calls
-efi_zboot_remap_image() -> efi_cache_sync_image(image_base, code_size)
-immediately afterward.
-
-[Severity: High]
-This problem wasn't introduced by this patch, but is a dsb(ish) barrier
-needed [1] between the data cache clean loop and ic ialluis in
-efi_cache_sync_image()?
-
-drivers/firmware/efi/libstub/arm64.c:efi_cache_sync_image() {
-	...
-	if (!(ctr & BIT(CTR_EL0_IDC_SHIFT))) {
-		unsigned long base =3D image_base;
-		unsigned long size =3D alloc_size;
-
-		do {
-			asm("dc " DCTYPE ", %0" :: "r"(base));
-			base +=3D lsize;
-			size -=3D lsize;
-		} while (size >=3D lsize);
-	}
-
-	asm("ic ialluis");
-	dsb(ish);
-	isb();
-}
-
-Without a barrier after the dc maintenance instructions, ic ialluis can
-execute before the data cache cleans complete, allowing the instruction
-cache to refetch stale instructions during early boot.
-
-[1] https://sashiko.dev/#/bug/linux-3f5f98cd-053a-49ef-9e97-834ca6744a2c
+0dc1754e16b4 ("efi/libstub: Avoid legacy decompressor zlib/zstd wrappers")
+moved efi_cache_sync_image((unsigned long)out, outlen) into
+efi_zboot_decompress() in both zboot-decompress-gzip.c and
+zboot-decompress-zstd.c.  Because efi_zboot_entry() calls
+efi_zboot_remap_image() right after efi_zboot_decompress(),
+efi_cache_sync_image() now runs twice back-to-back on every zboot boot, fir=
+st
+over the full allocation and then over code_size.  Should the
+efi_cache_sync_image() calls in efi_zboot_decompress() be dropped?
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261106141936.2744=
-481-7-ardb+git@google.com?part=3D5
+481-7-ardb+git@google.com?part=3D3
