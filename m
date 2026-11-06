@@ -1,74 +1,58 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.218.69
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793974798;
-	b=nwnAq+mMriq4idBmEwFDcHzkBxiTjmBtmGapWd/MSF5GjI8Buo21bznVOMVwYP8Cng3t
-	 Uj2B8GRi3AfWPT2FRlSHONaZ+l1CUI2/sI7n1EIzrdg9ONbKbQ2U/98cCDAH6CqVAsPBO
-	 4s8KDH6W8LjoIsbmfZ7zXCx2ov58Y87ofe+pDBa7Xi2/5lEXOzHmNJd1znHVmk9n7fFwX
-	 EM8+vGeOmWJmhYzoqxpHaAgxvHDc75/tqG00Evee4xh+m+6feSP4izxIyisospXepfi2v
-	 KWy/fHBdmSqGUx+nGvLmIVEMD8Jr+kXPVHcJrKqiy8TnUpyLeQgmyBY4LEJMiRZ8oRg==
+	t=1793975234;
+	b=1/M7QFmR1bf/T9X7jR3GCnx/5wYEOs6gT2HhAXlcdnfeVyPQdKokfV7nCIsdKLGysdf7
+	 QXafGC5+Qx3SHaevgo4dwa2SgAt+Kq0pIP9Get7pGjGrE1D/X6Ev7JpgkQpYpHX6UjbR8
+	 KP/IenuvamHV/ErcEQI4lI3vT1a9pxE47jdJ7yJNmfuq6cdX5a9FY0DHyNz80x8LAb59I
+	 0vmzLKT5OHGWz0MzI3VURHe9deayeLpg8Q0WPaLi9+0bb3UhTqDK/hY5CEQYowq/XAuTM
+	 OBE0AKuYZuDA2IL4jwUQhSEYOYlnwUwb6UgxHpXybCIeozrvbdQW35C7riF5dC6AGMQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793974798;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Received:Date:In-Reply-To:Mime-Version:
-	 References:X-Mailer:Message-ID:Subject:From:To:Cc:Content-Type;
-	bh=Q87JkWe4IOxAaj+S1cTCBpK2mbAExz1BAJFg9wuG6Mc=;
-	b=yn5Gt+IRonBlMDy+VMZAsE7AA5bxD0WXKOWussYc8MToxkk64KroanvdsBlFvH9dnGsJ
-	 /07AwkROWqIXIaNpiSMwrg6RYDoCLwlU86zaYN8NngfnhnUT0B1pyPNPw06hmyNEvSukQ
-	 IPiGJdopPqF2kxwfsE88GWRkWKKTh0cTyllvoQ8Cx3yXbDM+m99pvnPxbiTHWC+4Akm1T
-	 jkuldpwvqjtiMgLIEyplYcg3XKRoIbgX3WlZcD0Ned1qZOdMIzVQo659i/ml95H5lRtOu
-	 hFg4RvJtyXPtLlmtDNE6UQFNvtsp/Xt9esaDqNSkIJqQwW2JOjfcWorQxCmt9bSBvOw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793975234;
+	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
+	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
+	bh=McL+qlRafJt4/CvILnPjwSzZJgK/KTNvUdlPEjYpNAo=;
+	b=cQTnC6pZPia1Ez+AyB6ZcUGX3c1UwUwHbKYuFLiu6YIyKkBHmLlU61k8xVF1xYMXkNve
+	 wQHb9g/IXBANq/9BAMtAHnC9DZRX6+rniI+/023jZTEEUkHq38fdiNFNSu7kMCOTPYLNk
+	 mjPksYdmXy8Pgh9CV4Aazc6WyleX/3OvcKmdSQEqrhdNZeoknEAPaHgcRpKxJTSgW6UtG
+	 iACnhILk6B6zSpNbFLbz/z2DJf256VDYNm7oFFqTRvoQa2X3EnGIqV7GZ6QcQyhQh4YYu
+	 Dy4tm+SPrcYvUKIOsxMQb4eatQY1s0RjguiA8ym7BtWHCPGqjGCry+5XHDStsG4+tbg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=google.com;
-	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=Znu86eqF;
-	arc=none smtp.remote-ip=209.85.218.69
-Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com [209.85.218.69])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Yxur28cM;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4B29606A330
-	for <linux-efi@vger.kernel.org>; Fri,  6 Nov 2026 14:19:57 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D4B29606A330
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD45E606A329
+	for <linux-efi@vger.kernel.org>; Fri,  6 Nov 2026 14:27:13 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=Znu86eqF
-Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-c49b95262a5so54404166b.3
-        for <linux-efi@vger.kernel.org>; Fri, 06 Nov 2026 06:19:57 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1793974796; x=1794579596; darn=vger.kernel.org;
-        h=content-type:cc:to:from:subject:message-id:references:mime-version
-         :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=Q87JkWe4IOxAaj+S1cTCBpK2mbAExz1BAJFg9wuG6Mc=;
-        b=Znu86eqFCd9FyEdQbuDEnFYavZ8IfUej/NwuYZBEfxAfYiG8FgPl5IPsx/WCh6krVp
-         wbHyKJbL2aWOo7NjkQNcPL7NtpWtxPKrO5wCX3v3doLmkmNWrLUld2x7btNjVvq9htZc
-         TdTFhN40uj326utK6/gpvRmLatFS02sxJr1sr+b9wmE0FokpUfKOxxGmW7I+7q2V+UII
-         ezBYv6hZtLgNT69rDDgpi+lSlOHHoCStjiT2iFZVm+OQBqHKBVFKb3e4/47wEjXSVQH4
-         IE6tlOQgJgqzfM6G3X3QvIxGM2deGClYXO0IRkjPI8ebN8C2uh+uksXV8pDcvzwJCgYW
-         HVCw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793974796; x=1794579596;
-        h=content-type:cc:to:from:subject:message-id:references:mime-version
-         :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=Q87JkWe4IOxAaj+S1cTCBpK2mbAExz1BAJFg9wuG6Mc=;
-        b=js68m6EJHbRRweAV263iym1wdEczCgi+nZzhM+uvUDYMI+xAGTlFVXAAshUQmIvfWg
-         /TbQDHglhpwQBIMkZq3oRBUbqJhZYJdzsGAmPxpDCn/EHInMnEQX40LleaOpO0Wbxrjw
-         rYxzYN9RbNENqoxaJBSgfl2a980idj67vRrE/FtRWdYUVaxGSZNIRQgRd59dXshcQ9fh
-         hqm0CQdDE+N7lAI/JOd7in5jUC7CU6Ab75pqdaTXMJPwG9I41XFS1YYqHJUnLXvIbF/U
-         X6yrA7Abu/qtyYIZETKLuKBFrKW9weGy4ZaXXlNtYtnTLtOJ+V5978mJARdrsmzL2jpO
-         bxQg==
-X-Gm-Message-State: APuU4Z9KMHd6qmAEUIFbz8+LPmcuHhBIN0qPGXWgtMFGF/jjp77bYqgo
-	5ccV/shqLUp179QL5c74HTmguu0GZcLhTQVb4VNXCTL7hIg56BhBF2pC5DWBAoEs2+6OL0gjw8X
-	uCp8CZmOnyVsYpvqZFL27oADeT2iKvXhQPwUkMDKY3/2GaJ2fhseZt9Y9kwaau7Jf7m4n8gUYbw
-	BrU8ImDgRE6lcBDD8Ef1X/Pld3fYggJA==
-X-Received: from ejda5.prod.google.com ([2002:a17:906:2745:b0:c3f:8199:7182])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a17:906:99c1:b0:c49:df71:14f5
- with SMTP id a640c23a62f3a-c4d34c5fe59mr235201566b.31.1793974795660; Fri, 06
- Nov 2026 06:19:55 -0800 (PST)
-Date: Fri,  6 Nov 2026 15:19:42 +0100
-In-Reply-To: <20261106141936.2744481-7-ardb+git@google.com>
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Yxur28cM
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 09D541F0089F;
+	Fri,  6 Nov 2026 14:27:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793975233;
+	bh=McL+qlRafJt4/CvILnPjwSzZJgK/KTNvUdlPEjYpNAo=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=Yxur28cMGmqX44lThFiepwmjJvpDTyOYr2lhZc3O9caGAbTncz+2zaluBZSB5RJmM
+	 sYs5jDoDCuqgVcko2Ri/QjtVBq/bovHprGDcPMv1twcbNRJpO07QuQUVzzLiITyOu+
+	 Uud+NyU3h0rxIsg55fwqOe47StxvNdDR3zXakLjjurJz0+Qw4JPC9WoLrVuEkKBUwk
+	 0JQTTrsztan/R8lNK2eh5Puk5Fw6+I4MMT7T45zpBSqZelBOEM+Vtrpa2yRXVYuSCf
+	 zpG8VHt7HRt4nVZMcPINEiIoX/lYfZXHOlRXlB7gb0Zm1/gsrhBDgm1x3EqYAWpMV4
+	 /elDIHVlnCAhQ==
+Message-ID: <sashiko-outbox-201577@kernel.org>
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH 2/5] efi/libstub: Pass a struct efi_image_info to
+ efi_stub_common()
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Ard Biesheuvel" <ardb+git@google.com>, linux-efi@vger.kernel.org
+Cc: mark.rutland@arm.com, will@kernel.org, catalin.marinas@arm.com, "Ard
+ Biesheuvel" <ardb@kernel.org>, "Jason Gunthorpe" <jgg@nvidia.com>
+In-Reply-To: <20261106141936.2744481-9-ardb+git@google.com>
+References: <20261106141936.2744481-7-ardb+git@google.com>
+ <20261106141936.2744481-9-ardb+git@google.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Fri, 06 Nov 2026 14:27:12 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -77,145 +61,65 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-Mime-Version: 1.0
-References: <20261106141936.2744481-7-ardb+git@google.com>
-X-Mailer: git-send-email 2.56.0.455.g6c5a503b38-goog
-Message-ID: <20261106141936.2744481-12-ardb+git@google.com>
-Subject: [PATCH 5/5] efi/arm64: Drop build and linker script hacks to obtain
- image code size
-From: Ard Biesheuvel <ardb+git@google.com>
-To: linux-efi@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, mark.rutland@arm.com, 
-	will@kernel.org, catalin.marinas@arm.com, Ard Biesheuvel <ardb@kernel.org>, 
-	Jason Gunthorpe <jgg@nvidia.com>
-Content-Type: text/plain; charset="UTF-8"
 
-From: Ard Biesheuvel <ardb@kernel.org>
+Thank you for your contribution! Sashiko AI review found no new issues
+in this patch, but noticed 1 related pre-existing issue it does not
+introduce:
+- [High] efi/libstub: freed memory retains RO/XP attributes in
+  efi_zboot_entry() [1]
+--
 
-Instead of taking vmlinux symbol values at build time and poking them
-into the zboot linker script, wire up struct efi_image_info so this
-information can be obtained from the code.
+commit ddd62e73ed528e3f2c2ae65f0467b40b21e1c353
+Author: Ard Biesheuvel <ardb@kernel.org>
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- arch/arm64/boot/Makefile                  |  3 ---
- arch/arm64/include/asm/efi.h              | 11 ++++++++---
- arch/arm64/kernel/image-vars.h            |  4 ----
- drivers/firmware/efi/libstub/arm64-stub.c |  2 ++
- drivers/firmware/efi/libstub/arm64.c      |  4 +---
- drivers/firmware/efi/libstub/zboot.lds    |  7 -------
- 6 files changed, 11 insertions(+), 20 deletions(-)
+efi/libstub: Pass a struct efi_image_info to efi_stub_common()
 
-diff --git a/arch/arm64/boot/Makefile b/arch/arm64/boot/Makefile
-index d42d07667822..509b59518818 100644
---- a/arch/arm64/boot/Makefile
-+++ b/arch/arm64/boot/Makefile
-@@ -51,7 +51,4 @@ EFI_ZBOOT_BFD_TARGET	:= elf64-littleaarch64
- EFI_ZBOOT_MACH_TYPE	:= ARM64
- EFI_ZBOOT_FORWARD_CFI	:= $(CONFIG_ARM64_BTI_KERNEL)
- 
--EFI_ZBOOT_OBJCOPY_FLAGS	= --add-symbol zboot_code_size=0x$$( \
--				$(NM) vmlinux|grep _kernel_codesize|cut -d' ' -f1)
--
- include $(srctree)/drivers/firmware/efi/libstub/Makefile.zboot
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index b0c9120b9741..3194e133a4d5 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -151,10 +151,15 @@ efi_status_t efi_handle_corrupted_x18(efi_status_t s, const char *f);
- 
- void efi_icache_sync(unsigned long start, unsigned long end);
- 
--// temporary resolution for efistub_get_code_size()
--#define efistub_get_code_size(image_info) ({ extern u32 code_size; code_size; })
--
- struct efi_image_info {
-+	s32 _text_offset;
-+	s32 __inittext_end_offset;
- };
- 
-+static inline u32 efistub_get_code_size(const struct efi_image_info *info)
-+{
-+	return info->__inittext_end_offset - info->_text_offset;
-+}
-+#define efistub_get_code_size efistub_get_code_size
-+
- #endif /* _ASM_EFI_H */
-diff --git a/arch/arm64/kernel/image-vars.h b/arch/arm64/kernel/image-vars.h
-index 19d602e45523..b02234f080b0 100644
---- a/arch/arm64/kernel/image-vars.h
-+++ b/arch/arm64/kernel/image-vars.h
-@@ -150,10 +150,6 @@ KVM_NVHE_ALIAS(kvm_protected_mode_initialized);
- 
- #endif /* CONFIG_KVM */
- 
--#ifdef CONFIG_EFI_ZBOOT
--_kernel_codesize = ABSOLUTE(__inittext_end - _text);
--#endif
--
- /*
-  * LLD will occasionally error out with a '__init_end does not converge' error
-  * if INIT_IDMAP_DIR_SIZE is defined in terms of _end, as this results in a
-diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index 8daed681f97d..754cb2843967 100644
---- a/drivers/firmware/efi/libstub/arm64-stub.c
-+++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -68,6 +68,8 @@ asm("	.section \".rodata\", \"a\", %progbits;			" \
-     "	.align	3;						" \
-     "	.globl	efi_image_info;					" \
-     "efi_image_info:						" \
-+    "	.long	_text - efi_image_info;				" \
-+    "	.long	__inittext_end - efi_image_info;		" \
-     "	.previous						");
- 
- 
-diff --git a/drivers/firmware/efi/libstub/arm64.c b/drivers/firmware/efi/libstub/arm64.c
-index 190cf180bb23..da6fa2f6c821 100644
---- a/drivers/firmware/efi/libstub/arm64.c
-+++ b/drivers/firmware/efi/libstub/arm64.c
-@@ -88,8 +88,6 @@ efi_status_t check_platform_features(void)
- #define DCTYPE	"cvau"
- #endif
- 
--u32 __weak code_size;
--
- void efi_cache_sync_image(unsigned long image_base,
- 			  unsigned long alloc_size)
- {
-@@ -100,7 +98,7 @@ void efi_cache_sync_image(unsigned long image_base,
- 	/* only perform the cache maintenance if needed for I/D coherency */
- 	if (!(ctr & BIT(CTR_EL0_IDC_SHIFT))) {
- 		unsigned long base = image_base;
--		unsigned long size = code_size;
-+		unsigned long size = alloc_size;
- 
- 		do {
- 			asm("dc " DCTYPE ", %0" :: "r"(base));
-diff --git a/drivers/firmware/efi/libstub/zboot.lds b/drivers/firmware/efi/libstub/zboot.lds
-index 367907eb7d86..61714a151766 100644
---- a/drivers/firmware/efi/libstub/zboot.lds
-+++ b/drivers/firmware/efi/libstub/zboot.lds
-@@ -2,8 +2,6 @@
- 
- ENTRY(__efistub_efi_zboot_header);
- 
--PROVIDE(zboot_code_size = ABSOLUTE(0));
--
- SECTIONS
- {
- 	.head : ALIGN(4096) {
-@@ -20,11 +18,6 @@ SECTIONS
- 		__efistub_payload_size = . - 4;
- 		__efistub__gzdata_end = .;
- 		*(.rodata* .init.rodata* .srodata*)
--
--		. = ALIGN(4);
--		__efistub_code_size = .;
--		LONG(zboot_code_size);
--
- 		_etext = ALIGN(4096);
- 		. = _etext;
- 	}
--- 
-2.56.0.455.g6c5a503b38-goog
+This commit passes a struct efi_image_info pointer from both efi_pe_entry()
+and efi_zboot_entry() into efi_stub_common().
 
+> diff --git a/drivers/firmware/efi/libstub/zboot.c b/drivers/firmware/efi/=
+libstub/zboot.c
+> index 4a5ffe164873e..97ae706c034ad 100644
+> --- a/drivers/firmware/efi/libstub/zboot.c
+> +++ b/drivers/firmware/efi/libstub/zboot.c
+[ ... ]
+> @@ -93,9 +98,15 @@ efi_zboot_entry(efi_handle_t handle, efi_system_table_=
+t *systab)
+>  	}
+> =20
+>  	// Decompress the payload into the newly allocated buffer
+> -	status =3D efi_zboot_decompress((void *)image_base, alloc_size) ?:
+> -	         efi_stub_common(handle, image, image_base, cmdline_ptr);
+> +	status =3D efi_zboot_decompress((void *)image_base, alloc_size);
+> +	if (status !=3D EFI_SUCCESS)
+> +		goto error;
+> +
+> +	auto image_info =3D zboot_get_image_info(image_base);
+> +	status =3D efi_stub_common(handle, image, image_base, cmdline_ptr,
+> +				 image_info);
+> =20
+> +error:
+>  	efi_free(alloc_size, image_base);
+>  	return status;
+>  }
+
+[Severity: High]
+This problem wasn't introduced by this patch, but can efi_free() return
+pages at image_base to the firmware pool while they still carry EFI_MEMORY_=
+RO
+and EFI_MEMORY_XP attributes [1]?
+
+When efi_zboot_decompress() succeeds, it remaps the decompressed image's co=
+de
+as read-only and its data as non-executable via efi_remap_image().  If
+efi_stub_common() then fails, efi_free() frees image_base without clearing
+those attributes, and UEFI does not require FreePages() to clear memory
+attributes automatically.  Later firmware allocations that reuse those pages
+(such as during boot fallback) can fault and crash when writing data or
+executing code.
+
+[1] https://sashiko.dev/#/bug/linux-e232037c-ef9b-47bd-b6d0-1bea4732c0e2
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261106141936.2744=
+481-7-ardb+git@google.com?part=3D2
