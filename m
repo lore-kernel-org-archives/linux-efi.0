@@ -1,119 +1,81 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.160.181
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794073085;
-	b=T7gwcgbszsDSiM7Y0yN0i+0ogWH3d0EnWNUw2xyELDvQQxXOh/CBzPMyCf1L4AUzvVvF
-	 oM+RcUW2tRFB2BpGQUfd3mUcWFCGjmyl/Rd87tIPSUgM76gJtXEll9wJkko0xIah7IJEa
-	 MkXem/ec0Rjef3UlbmF0Hx5qVXl990w3o5l0K1mcvQ/WZfZvhgPhL2xtRVq43EYDUzol0
-	 SAefQiO2ih7jGGrIKiQr3/Ip4w+lK1Rnq7JtgOed9teWnTxuRSrdqovbOTe7jBDOcK6nq
-	 MsszIRsfIwKuGb35VkreiewUroGMg6nP2oG+yeDp+Y/Eq/khF1XMuTfzsbsHJAUrTaw==
+	t=1794090869;
+	b=pqfKb2Ew+AgmanxpnY/V6mixC5Brs7kvmZDZo/miHhNdVN4qL2NcwkJGHTr7a3JQ0eA3
+	 gJkrNq7n894NVRs2RzBXdIlvszREv27pG7EWdFpUveeYUHxWgWJMHQDXPmEoF/x+wMVBq
+	 6lDiHmxceFyfO8Dk/YuKmHUhdvRjdKSvLYqi8g672vwnoxYO+UXQXHHBqHbj7uAOTcUEt
+	 Rt0VpqdIaR1ITtHkSyXAGWLmAn/AoP1Eq/b0uEkk2eGXCqvR58AD9T9W6s56vECBIqbi+
+	 16y2bqXUYGvkkJtww9cXfed4f6vXxp7sjrOe1Lw9a8d+ZGaSmlp+o6/gy3ks1SGzVnQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794073085;
-	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
-	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
-	 X-Received:Received:Date:From:To:Cc:Subject:Message-ID:References:
-	 MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
-	bh=Z24fIgrg332IE6A60r7YoNBcp+hbvJa6DyUXEc2zlxA=;
-	b=awGu+Q+wPBO9WjHLsCQ6FlweDdrSep5eLb5B44dFk4YA4WkTs/5QKi1WooKX7fdcBKQL
-	 eypHEEqlmHdfZZVEUSMIWw/egZ3Fjh/7XU+0uzry/GF8ZiD3r+y4sXP6H6VJ/z0aI8Fr0
-	 /HZCsYOziZvTRSjmsIMKClxB5aK1PyceQgsEnjqZe/GSi6tebBWBGctg56bNMy7XsfkMc
-	 Df/aJrRMHh/3ZfjjPUlU9gS8gu//utg1uw69nLAANeytX4PqevGgKmS/BhOdJXX4K4USo
-	 b1bLN0liP2fCsq3NBXbEi8Tk5WysInmaIh14fi92rxDeSS8W/VQm7caLAOpHN6g+LEA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794090869;
+	h=DMARC-Filter:Received:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
+	 Date:Message-ID:In-Reply-To:References:MIME-Version:
+	 Content-Transfer-Encoding:Content-Type;
+	bh=wR5HXTh16ddUXMlLaMHcCDUi43szIAAM9f7TTgkHzr4=;
+	b=PMdoLodFvYbUQE2NWYDSt7Ue++MZLPfRqzivNsX1atF7PmDbjsQVh60oGBxP55O6d9JZ
+	 rS8EhL4EHbsW03AZDKAzRr6ACz5UpJIqG1roY1v82OwQmK+g6SCMkr+oCzvueJcz3ytZH
+	 3wBWBOvUneIW3ncC6NN9jHSwOXaNPYOqSVwEIm2WRnpbi+si4hXkStjOqaBA3y8j/8Ff7
+	 7t8hXdUySpIOH6MgiyF7O8HhTMGgQ199OAjVA8Gw4aiHXMPC5mQZoYeOFCi6Wc2C17dNc
+	 muKnUdH2SZ70s4aLVP8VSExr6UaQMPzkihcDImljySsvThNxV6QLwAB+1ijxugbting==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=redhat.com;
-	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=V3tndzGI;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=UToDImFb;
-	arc=none smtp.remote-ip=170.10.129.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	dmarc=none header.from=gompa.dev;
+	spf=pass smtp.mailfrom=gmail.com;
+	arc=none smtp.remote-ip=209.85.160.181
+Received: from mail-qt1-f181.google.com (mail-qt1-f181.google.com [209.85.160.181])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96635606A326
-	for <linux-efi@vger.kernel.org>; Sat,  7 Nov 2026 17:38:04 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 96635606A326
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=V3tndzGI;
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=UToDImFb
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1794073083;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Z24fIgrg332IE6A60r7YoNBcp+hbvJa6DyUXEc2zlxA=;
-	b=V3tndzGIAzjBwFHoAsFZf+uJAIbisrBFmB7jkFrvS1vwHiFM6NeaMKp8Ss+1B4V3d2fj8M
-	SoPMZgdwwJm3SyqcNOhLx79bsxWAkpYdTqlKVkfV9vPArE4+X4zUrUlFJspXqmpk7amjbi
-	Q2js/PoiIvrVJvx47idMnrkVDuPQa0Y=
-Received: from mail-yw1-f199.google.com (mail-yw1-f199.google.com
- [209.85.128.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-661-GgQ0MlbDM-6KDmC1DkpcBw-1; Sat, 07 Nov 2026 12:38:00 -0500
-X-MC-Unique: GgQ0MlbDM-6KDmC1DkpcBw-1
-X-Mimecast-MFC-AGG-ID: GgQ0MlbDM-6KDmC1DkpcBw_1794073080
-Received: by mail-yw1-f199.google.com with SMTP id 00721157ae682-8b0e4c2f052so25611137b3.3
-        for <linux-efi@vger.kernel.org>; Sat, 07 Nov 2026 09:38:00 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1794073080; x=1794677880; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=Z24fIgrg332IE6A60r7YoNBcp+hbvJa6DyUXEc2zlxA=;
-        b=UToDImFbgIathTRFcm0KCUed+Rq+pCXk9AjiiRXnexCf10ZTT/1t33J3uGJtXxw3oo
-         L2vBOwAUTi87dlYvU7h68uQrvBfEgpf708DjZkBr2gvk5zIZ0keeqITRbi86k0zyc/mT
-         mzcIoBIUfUgkgWfQKM+zkRkHSZMRmalmeWRnydT7DwzfKeQ7e+KYX8G9mnzcXmIG3wFe
-         Nqn8rMKoWkNxXJ3O9y2MQMNsPKI4Hqz4iMbF/3jl5LiiliNbZBXgbDQ/Duq9UgOIQzzl
-         85pD+pmL7M8/NQio698gkwH2SVGby2o0OaDfot4/PflOP0uxquxVvy1e8tYTpmSess6p
-         hxIg==
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9DA56606A32C
+	for <linux-efi@vger.kernel.org>; Sat,  7 Nov 2026 22:34:28 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9DA56606A32C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gompa.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-qt1-f181.google.com with SMTP id d75a77b69052e-5364648ae07so833001cf.1
+        for <linux-efi@vger.kernel.org>; Sat, 07 Nov 2026 14:34:28 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794073080; x=1794677880;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:x-gm-gg
+        d=1e100.net; s=20260707; t=1794090867; x=1794695667;
+        h=content-type:content-transfer-encoding:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=Z24fIgrg332IE6A60r7YoNBcp+hbvJa6DyUXEc2zlxA=;
-        b=HTEoaIdj9wgBE3fJS7OVECaVGCaj5eaHxuFTq3ZEdF3a7gONE2hpxSwmTTdfLSAKlL
-         AHU8iUveX05fAaQCj1JQlseMyLSamOIm6n8YAEAW2WE25OuvSFWLAL5ToO7Zk9rM7XHs
-         Ia1dLHYVq5GkWD15gBJ36sYkVAOgNtR9ehEIcxa372JzFbe4+AeJ4TvDvZ9VgZF7mLB1
-         GwX3dCiSMx9T0opTbgyrhRmOq/f84mdUQ2TgbG98rKcGYPXjyFu+DCbW9MuSCsf3Q/VG
-         cmWV0SzqNlpsI3ikoWsBkauZmMKS19Pk7PuOn5GiIipNjlqMwyMShqRxP8iLMfwurS3s
-         p/HA==
-X-Forwarded-Encrypted: i=1; AL+hErHfvYrOearpwiN1uNpy0NaRQ1AHD9EIdaGUMxJdL6dacrJSOn+GFuHCqJd+/5ldfC9QOH5sx02uoUw=@vger.kernel.org
-X-Gm-Message-State: APuU4Z/KYY5uJ371YpVazhnNrM16jguNpZEpUT4GyJauSVMLeSRB1A98
-	briR/A9tOkbGPxgho2p8UBIsQBimncDdB5AsyAzlvdmFUOVloScPYTrKdv2alsDCAWENnAVqbqw
-	cEjwvufkNZQ68DiPkzZRMObWk4AlcchF+/DOuS1shL5Y4XQbUXGIJk7JwdIewqw==
-X-Gm-Gg: AYBFou2a5mzDULx8p7ux7jXoh8+GeLnL4Bk2Xhcevomq2R40JfH9FRgRYJkR6anDdZI
-	jCzg2Z53+X13UQkv/oKEc2YDJq7lDHPfvVV4Q8J12BNWl4AcezpDq3RQQUvGS/qGDS4LwnbjzG2
-	ACs9sTJMQDaYXxp7HI2ZO/lXFrh/V634ecOxHR+YQxGV4DPhcmmj7yOHs4Y/IUGJwM4dZxODbUC
-	f+YAQ9PFhOoas5xGFQJ73mVkQmy/nXTXXuFsTEzm7CqGUDL55NR12YFaG6VZWWLHT62qlyYXnmU
-	Ir+iAEEWkD1DSdsypr/zzCUJrsnFjVvrB4hu7cEmtP5mFBPC7sluikBckeLr8HofA7aKxiD76eV
-	1UXYlsDGx5CBS3EabiRSoOKQ/
-X-Received: by 2002:a05:690c:dc3:b0:8b0:ecb2:883a with SMTP id 00721157ae682-8b341b65934mr35021097b3.62.1794073079872;
-        Sat, 07 Nov 2026 09:37:59 -0800 (PST)
-X-Received: by 2002:a05:690c:dc3:b0:8b0:ecb2:883a with SMTP id 00721157ae682-8b341b65934mr35020987b3.62.1794073079453;
-        Sat, 07 Nov 2026 09:37:59 -0800 (PST)
-Received: from rhdev ([2600:1700:f361:20bf::14c1])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-8b33f5f525fsm44439167b3.5.2026.11.07.09.37.58
+        bh=wR5HXTh16ddUXMlLaMHcCDUi43szIAAM9f7TTgkHzr4=;
+        b=HKEKXQTwZlSQlM4GtAS7aDStLGLONe1cXOmCcM+khoZZAOrRe6Lk7MbxGqE/P3zjVD
+         jXPDw+vS1ai8+DN1XjZ7eVqVXA/khStjJa5SJnm4k54iTbjkFeAU3wJJUvIt9jdHWyv1
+         V+zz6ZKqclL0XubytQ02eKhnAiASykfC3dqC+3LUZ5vxxQtAfI2ShimfVOq4W8VNLs6V
+         EGKxIHiBG+/CQ9G+PSLQiYz/JpwSUfk038W45HJlYJHZDri/MHG9mFvEWP1MGAx6BOSa
+         nPreahSUPBlELaa/n9fzCUzBNBgCF7RU9e9vw81wZdGEFJVgRmJ6DEoKhDNvWBs7fpdC
+         RXtg==
+X-Forwarded-Encrypted: i=1; AKwUvBzUGxnpQbOAM3VR78eQU+S2jHTITNhA0RSKY3Eb85UWajud2FTYGco98NObGGo8u+YbgDBAO0W4MR0=@vger.kernel.org
+X-Gm-Message-State: APuU4Z+yXep1aM1nmMh3Q2fuCFjbMPn0VL1irZs6nmPqYPpUN/vtwT8Y
+	WFrbEGJ1ax6yl/CZhdEMjXTuR8tD7WH6fdGyANWqHQM/fC6ffBS/qzc/
+X-Gm-Gg: AYBFou12L7NsB9brHdS65EE3c7wkw8gZtHjHJbVfTnyqS4GrDiFo1lX0fcRz5ySouET
+	ZsrGQeHgnGNFKFl3v/jQZK4/4fE45Sr5YZ8Q9vzyG9Tuax8tLnMwFrPZWk2vKjfGIYFXNfMELQ1
+	zH6uPrWwAHKXG/ddLE7OHIp46UNeqmd0Mx3l43Z61N9CxK5EF4OZigEmPngYz/2QHu4+Tds2qxF
+	4SakXpIojMP+i8mCr6nLTAnjKOiHd0Z00af6I3igUHg5Nu7YQJ+EWAlfcYwlY5gdlVNwQgum1iv
+	smeJQS6UTrUFTH6OCob9WnJiVtdmOcTruWZ5m65Ggmv9ZWim6FWKXhOQCVe/LndCAJyTMouo2Is
+	/w2gWCY1jYDl3RF1xRMU1MTbuqcfeI2F7NbLyZxFapWx4Jx9bvhF1m/P/2s4v17euLQch+7OH5M
+	Mw+VXz36rc1uOfBQXrzUPZaZfx72JDsqZ1Z3UUdnGPJFCVFdB4AZbufBPFhreZsZyRw96W7NB8I
+	i7DVeGF8brnuckMN3f717vOxDw/mTqBopptOlu3inYrFfomTW784uXFaEQiiOLuXiOgbpfzU4tU
+	ul8VnkSW+q0KXpk3agZbX94J26JU4FAUxCi2JJo4bf5SxSlzgn1PTtL50krrk2ltQK/SR3Tzxgc
+	AI1JSVWRFLdOaO+UyrAqywX+O9ZvWURQ1pGbeMf5VsXyPGW1N5TUnv4fP+Ogx2wtJmSQAQD6kgI
+	us
+X-Received: by 2002:a05:622a:494:b0:533:8900:4eb2 with SMTP id d75a77b69052e-54e14e77819mr102542781cf.58.1794090867395;
+        Sat, 07 Nov 2026 14:34:27 -0800 (PST)
+Received: from skuld-framework.localnet ([32.221.37.233])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-5526454c1e2sm3581101cf.22.2026.11.07.14.34.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 07 Nov 2026 09:37:58 -0800 (PST)
-Date: Sat, 7 Nov 2026 12:37:56 -0500
-From: Jennifer Berringer <jberring@redhat.com>
-To: gaohan@iscas.ac.cn
-Cc: Ard Biesheuvel <ardb@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	Javier Martinez Canillas <javierm@redhat.com>,
-	Borislav Petkov <bp@suse.de>,
-	Simona Vetter <simona.vetter@ffwll.ch>, linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org,
-	linux-riscv@lists.infradead.org, Han Gao <rabenda.cn@gmail.com>,
-	stable@vger.kernel.org, Xincheng Ji <jixincheng@ultrarisc.com>,
-	Jia Wang <wangjia@ultrarisc.com>
-Subject: Re: [PATCH] firmware/sysfb: Avoid simple-framebuffer behind DT PCI
- host bridges
-Message-ID: <20261107173756.1d273aa5@redhat.com>
-References: <20261107-sysfb-dt-pci-efifb-v1-1-86d6c598671a@iscas.ac.cn>
+        Sat, 07 Nov 2026 14:34:26 -0800 (PST)
+From: Neal Gompa <neal@gompa.dev>
+To: mjg59@srcf.ucam.org, Matthew Garrett <matthewg@nvidia.com>
+Cc: keyrings@vger.kernel.org, James.Bottomley@hansenpartnership.com,
+ linux-integrity@vger.kernel.org, rafael@kernel.org, linux-pm@vger.kernel.org,
+ linux-efi@vger.kernel.org
+Subject: Re: [RFC] Make hibernation work with lockdown
+Date: Sat, 07 Nov 2026 17:34:25 -0500
+Message-ID: <Qc3eI7EOR8ep1b77lr0gsw@gompa.dev>
+In-Reply-To: <20261008132532.1155166-1-matthewg@nvidia.com>
+References: <20261008132532.1155166-1-matthewg@nvidia.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -123,134 +85,98 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261107-sysfb-dt-pci-efifb-v1-1-86d6c598671a@iscas.ac.cn>
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
 
-Hi,
+On Thursday, October 8, 2026 9:20:16=E2=80=AFAM Eastern Standard Time Matth=
+ew Garrett=20
+wrote:
+> Hibernation writes out the full system state to disk in an unencrypted
+> and unauthenticated manner. Resuming from hibernate reads that data and
+> throws it directly into RAM, then jumps into it. This is effectively an
+> entirely unauthenticated mechanism for putting whatever you want into
+> kernel space. This violates the assumptions around lockdown (root can
+> write whatever they want to the swap partition and then trigger a
+> resume), and as such lockdown blocks hibernate.
+>=20
+> This has made many people unhappy.
+>=20
+> This patchset seeks to solve this problem. In order for hibernation to
+> be trustworthy we need to be able to prove that the image was generated
+> by the kernel and not modified after that. This is not an easy task, and
+> requires some infrastructural framework. To that end, this patchset does
+> the following:
+>=20
+> 1) Co-opts a TPM NV index for the kernel's sole use. This is currently a
+> placeholder and we should register one explicitly from an appropriate
+> range in order to ensure that we don't conflict with userland.
+>=20
+> 2) Does something horrifying with PCR 5 in order to prove that a given
+> kernel supports (1). We need to extend and cap a PCR before userland is
+> running in order to prove that the kernel has support for this feature,
+> but since we don't currently cap any PCRs there's nothing stopping
+> userland from doing the same and so achieving the same state. The way
+> around this is to rely on a feature of PCR 5 - it is extended as a
+> result of ExitBootServices being called, and since the boot stub can
+> execute code before that happens we can perform the proof extension
+> there and then have it implicitly capped by the firmware's extension.
+>=20
+> 3) Adds support for audited TPM sessions in the kernel, allowing us to
+> generate signed digests of the commands that were executed in that
+> session and their results
+>=20
+> 4) Adds support for generating a predictable AK that can be used to sign
+> digests from those audit sessions
+>=20
+> 5) Adds support for generating a TPM signing key in such a session, and
+> using the signed digest to prove that the session took place in the
+> kernel
+>=20
+> 6) Signs the hibernation image with such a key
+>=20
+> An old kernel that doesn't implement (1) won't be able to mimic the same
+> PCR 5 value. Userland won't be able to mimic the NV index value because
+> the kernel will block it. This means that the only way that key could
+> have been created is by the kernel, and so we can trust that the image
+> was generated by the kernel.
+>=20
+> QUESTIONS:
+>=20
+> 1) I haven't tried to make the key management generic, since this isn't
+> intended to ever be exposed to userland in any way. Should it be
+> integrated into the trusted keys layer anyway?
+>=20
+> 2) Filtering TPM commands from userland isn't ideal - anyone able to
+> poke commands into the TPM directly is in a position to violate the
+> assumptions here. Is there any way we can get a secret into the kernel
+> that can be used as an auth value? It would need to be impossible to
+> obtain from userland and it would need to be consistent over platform
+> reboots.
 
-On Sat, Nov 07, 2026 at 04:46:40PM +0800, Han Gao via B4 Relay wrote:
-> From: Han Gao <gaohan@iscas.ac.cn>
-> 
-> With SYSFB_SIMPLEFB, sysfb registers a simple-framebuffer device that
-> claims the framebuffer memory when it is added. On DT systems, the PCI
-> host bridge may probe later and then fails to claim its memory window.
-> On QEMU RISC-V virt with EDK2, a bochs-display and pci-host-generic
-> built as a module:
-> 
->   [    0.703813] pci-host-generic 30000000.pci: resource collision: [mem 0x40000000-0x7fffffff] conflicts with BOOTFB [mem 0x40000000-0x403e7fff]
-> 
-> In that case, register an efi-framebuffer device instead. It claims no
-> memory before it probes, and commit 64c8a0cd0a53 ("efi/arm: Defer probe
-> of PCIe backed efifb on DT systems") makes it wait for the host bridge.
-> 
-> Tested on a HiFive Unmatched with EDK2 and a PCIe graphics card, and on
-> QEMU.
-> 
-> Fixes: 8633ef82f101 ("drivers/firmware: consolidate EFI framebuffer setup for all arches")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Han Gao <gaohan@iscas.ac.cn>
-> ---
+Looking over the patch set, it seems like this should be okay with swap fil=
+es=20
+being used for hibernation, right? I don't see a reason it wouldn't work, b=
+ut=20
+I figure it would be worth directly asking.
 
-This issue also affects UltraRISC DP1000 boards such as Milk-V Titan.
-For that system, a2d4a2d2479b ("clk: ultrarisc: Register DP1000 clock
-provider earlier") was recently added to clk-next and can serve as a
-workaround to make its pci driver be able to initialize before sysfb,
-but only if both the clock and pci drivers are built in rather than
-built as modules.
+The reason I am asking is because I am looking at integrating KDE's dynamic-
+hibernate[1][2] to allow Fedora Linux to dynamically generate files specifi=
+cally=20
+for hibernation.
 
-I confirmed that your patch resolves the issue on Milk-V Titan even when
-building with CONFIG_PCIE_ULTRARISC=m, making a PCIe graphics card able
-to initialize and function without issue. CC'd the ultrarisc developers.
+Obviously, this works fine in non-SB environments since lockdown doesn't=20
+negatively impact power management there, but if this manages to make it ov=
+er=20
+the finish line in some form, I would like to be sure the approach is=20
+compatible or can be made compatible.
 
-Tested-by: Jennifer Berringer <jberring@redhat.com> # Milk-V Titan
+[1]: https://invent.kde.org/tduck/dynamic-hibernate
+[2]: https://src.fedoraproject.org/rpms/dynamic-hibernate
 
-> In QEMU, efifb takes over with SYSFB_SIMPLEFB and efidrm without it.
-> With pci-host-generic built in, simpledrm is still used.
-> ---
->  drivers/firmware/efi/sysfb_efi.c | 16 ++++++++++++++++
->  drivers/firmware/sysfb.c         |  8 +++++++-
->  include/linux/sysfb.h            |  6 ++++++
->  3 files changed, 29 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
-> index 2338de73c62c..5c2cb87178ff 100644
-> --- a/drivers/firmware/efi/sysfb_efi.c
-> +++ b/drivers/firmware/efi/sysfb_efi.c
-> @@ -421,6 +421,22 @@ __init void sysfb_apply_efi_quirks(struct screen_info *si)
->  		dmi_check_system(efifb_dmi_swap_width_height);
->  }
->  
-> +/* Returns true if the EFI framebuffer is in a DT PCI host bridge window */
-> +__init bool sysfb_efifb_behind_dt_pci(const struct screen_info *si)
-> +{
-> +	struct device_node *np;
-> +
-> +	if (si->orig_video_isVGA != VIDEO_TYPE_EFI || !IS_ENABLED(CONFIG_PCI))
-> +		return false;
-> +
-> +	np = find_pci_overlap_node();
-> +	if (!np)
-> +		return false;
-> +
-> +	of_node_put(np);
-> +	return true;
-> +}
-> +
->  __init void sysfb_set_efifb_fwnode(const struct screen_info *si, struct platform_device *pd)
->  {
->  	if (si->orig_video_isVGA == VIDEO_TYPE_EFI && IS_ENABLED(CONFIG_PCI)) {
-> diff --git a/drivers/firmware/sysfb.c b/drivers/firmware/sysfb.c
-> index 8833582c1883..8853a74560b9 100644
-> --- a/drivers/firmware/sysfb.c
-> +++ b/drivers/firmware/sysfb.c
-> @@ -164,8 +164,14 @@ static __init int sysfb_init(void)
->  		goto unlock_mutex;
->  	}
->  
-> -	/* try to create a simple-framebuffer device */
-> +	/*
-> +	 * Try to create a simple-framebuffer device. It claims the memory
-> +	 * when it is added, so a DT PCI host bridge that probes later would
-> +	 * fail. Use an efi-framebuffer device there; it waits for the bridge.
-> +	 */
->  	compatible = sysfb_parse_mode(si, &mode);
-> +	if (compatible && !parent && sysfb_efifb_behind_dt_pci(si))
-> +		compatible = false;
->  	if (compatible) {
->  		pd = sysfb_create_simplefb(si, &mode, parent);
->  		if (!IS_ERR(pd))
-> diff --git a/include/linux/sysfb.h b/include/linux/sysfb.h
-> index ed23d6516223..b136fdebc746 100644
-> --- a/include/linux/sysfb.h
-> +++ b/include/linux/sysfb.h
-> @@ -95,6 +95,7 @@ static inline bool sysfb_handles_screen_info(void)
->  
->  extern struct efifb_dmi_info efifb_dmi_list[];
->  void sysfb_apply_efi_quirks(struct screen_info *si);
-> +bool sysfb_efifb_behind_dt_pci(const struct screen_info *si);
->  void sysfb_set_efifb_fwnode(const struct screen_info *si, struct platform_device *pd);
->  
->  #else /* CONFIG_EFI */
-> @@ -103,6 +104,11 @@ static inline void sysfb_apply_efi_quirks(struct screen_info *si)
->  {
->  }
->  
-> +static inline bool sysfb_efifb_behind_dt_pci(const struct screen_info *si)
-> +{
-> +	return false;
-> +}
-> +
->  static inline void sysfb_set_efifb_fwnode(const struct screen_info *si,
->  					  struct platform_device *pd)
->  {
-> 
-> ---
-> base-commit: 6628e7d4c6b25c8d18f1345e3a20d21829aae7e4
-> change-id: 20261107-sysfb-dt-pci-efifb-d73b08ded4b2
-> 
-> Best regards,
-> --  
-> Han Gao <gaohan@iscas.ac.cn>
-> 
+
+
+=2D-=20
+=E7=9C=9F=E5=AE=9F=E3=81=AF=E3=81=84=E3=81=A4=E3=82=82=E4=B8=80=E3=81=A4=EF=
+=BC=81/ Always, there's only one truth!
+
 
