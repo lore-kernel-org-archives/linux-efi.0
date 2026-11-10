@@ -1,57 +1,58 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794304198;
-	b=qA/07/qbHRUYVvj/Y26RASbJlvQsDJGlZ34LorcRekrhPNOQnL22TrgP9BwHvNrlsTlH
-	 rjfCR4F30rStVoxp1HAm+avo7o0lFQSBpn8abMelP1k3pApdoqh+ERe6D7t6hAC4GcILr
-	 PU9XtzxqJzezJtcP1dcXxOizRW1lC8wv6lpNbsD+pjIl4QqCebWCh9VGd6nXQYD6+3FKs
-	 /tOb6Y300WeKNKTwB9C7tV7tvF6zwrHK0EqcugwBwIoqEo4l7mKs+4QDu5dzXX9e6+xz9
-	 T/UEXvyuB3WsPKbEBKx97lLkGidazfALa3DVlBl/z5zxUXUTvQPoZ01TdqpxOiiSlhg==
+	t=1794304371;
+	b=t0nKk1z58N3Z23h6p8MUKT7x1VpP3M/qDVtZralY7rzEvBAUsMbxbMn/XNZNNKuSYQ0f
+	 LdRG1keOKP84eOgj1VBJa+CBn+WsRanWCN4uTFXhrTbstpBauKdLwrJzp5TdOQ1viV+us
+	 NAFjZkQ/A1vVTgXoZKQqoqJdfIL/F78a+Q+fN/TDBRHZL2R4O0jYykqX2TPCbcR+LYAjI
+	 LCftAGhDbGR/SHfKnm8ek3cjoowbUPjr9jCbt3vFAOOASp9OM3lGjkNBUPfO8URjTv7Cr
+	 yS7tC0WDU4fafn2pvyOws+h1eolG8Gj0dKn/RfLQO9ab0G0f4Aql5YF5XcF5FkzBRjw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794304198;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794304371;
 	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
 	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
-	bh=EkW17L+a59OE+CXhcmIv0XZlGY6UV7TlmqO6tXYqc5g=;
-	b=T+H0jnemRI/nuxIcALH9O111J0csmkTBYnWvDXyYD0VIqHE1i9Cihob0zYDAoagptUBx
-	 Nw5omLdbw+GBauKkTyBT8s/adwQjVKJ4yoYlYswoyFGTSZX0L4wxZldCcfnTqpkANtq7w
-	 mGcHGJOFzVGcJWeAxPoeRY6NIBRix1fogruXqNbiiJIOAB595vKcVudx7rL/tjUjgAlfY
-	 1YypT2l14NqRiJubvUzPprB40qod2GJWmuN0TJBvcZxbbhQRZTZrEjI165CGdqn8tczsO
-	 Y4rpjz85+kNywH1wt5hZzCFEZOP7/KTPuwefy6iR8X1s6TP+10VTUCg8mIxJSyzC9sg==
+	bh=Hfq/kOs5cw7B07R6GcfDw9v+ujkNam4XqUR61qSPAu4=;
+	b=WcUASdpYrmHiyV9pgSzSAy6ixH5fwBrf4uywRQavYJjDSwrGtFCCoGiTvml66dawUUIR
+	 79jYkzEREUf6H2L6ZP82URJQgoN+yJ/T6cdRguKTX5e+emsRc3+t7cfE4x5Ae5Fr9PJfO
+	 duhaOz9qHAJTY3gioEh5IXEIfJfpHhxhaJbcH3BXVlReeRYcvzY2CvKsHv/ynRTtP56zq
+	 N4n2OWF9SsED6FPPIspRr3NGdGawz8fvGWXWd1PDB3h6Jq7ylg7CJZ3Z24zefDJnzpl4l
+	 BwGquVToYvosq8cCnoo62y74gQ0NN3r8UmJhtxeHmUjoACZ2sE2O7RN/tqP8YS0KK/Q==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=awKkjim9;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ZwvckUs0;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E4BE6606BF08;
-	Tue, 10 Nov 2026 09:49:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58AAE606B16D;
+	Tue, 10 Nov 2026 09:52:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=awKkjim9
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1F3661F0089F;
-	Tue, 10 Nov 2026 09:49:57 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ZwvckUs0
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3F4391F0089F;
+	Tue, 10 Nov 2026 09:52:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794304197;
-	bh=EkW17L+a59OE+CXhcmIv0XZlGY6UV7TlmqO6tXYqc5g=;
+	s=k20260515; t=1794304370;
+	bh=Hfq/kOs5cw7B07R6GcfDw9v+ujkNam4XqUR61qSPAu4=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=awKkjim9o7JgaEKDKF5VKbjB/H3xMfo1h4DSJpG6bM5HSo4hr+p1sU2TvRcG1eC1R
-	 iqSYq7/nJVPOqUrAGEh2AhMTr3Yv8New1U0oVgcTMnv5uS/SzfHsm/CBt23RMktm+D
-	 19FnGFhAZXpuutv9YXITOnMY2Sk3HBnnjRPLT9wtS8Yanz5IDi4jdQL3bZtzEz9hNo
-	 xjj8dEgam/Gl7ocq2XEaeaElEpDifNYEt9dGg5GwMKcQvfGkY541Jcesq7kK7+/bdx
-	 gNdRCNGYLSkVlsAPUtY46OOUKvG/59nyIho9YrfbiCJ4qReXRXAZ2Dan/qs4u18YlH
-	 5CnuZkLYH/qRg==
-Message-ID: <sashiko-outbox-206807@kernel.org>
+	b=ZwvckUs0s86Ap8OnkM9izM6yH/l01+Ag7+Q7RqYaBxVDoQZ5Q4ulNT7s8Ir0jecxM
+	 8DsUmS0DUM/4BiEnKWZ/bWjj6tKr5mpCzqRnFEcnpIHSiAZ4iQC8zsRNH1n31UfOfI
+	 6DcwU5KUwfJcN7HgoDsifG/S0pncl2STV4zRaYh5tf3MdwW0xwBcndaOrMvRq131Uy
+	 cYyvaeaRIdeFknxWfxdWFYkyVEd1CospVC6P7QV0CsuIZG/5z8cbKJ9R2C9lO/bqOD
+	 mbAHca0vhLpiWN0JsHXjIFCTlP9KTZGf+Y6lI4ktJHtJR9RjzpMsjvbHuiWcGF1ywT
+	 c6O8UfdmmwH9A==
+Message-ID: <sashiko-outbox-206810@kernel.org>
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v3 6/6] PCI/VGA: Enable firmware default device
- detection on LoongArch
+Subject: Re: [PATCH v3 2/6] LoongArch/PCI: Refresh screen_info after
+ resource assignment
 Reply-To: sashiko-reviews@lists.linux.dev
 To: wuqianhai@loongson.cn, chenhuacai@kernel.org, kernel@xen0n.name, tzimmermann@suse.de, deller@gmx.de, bhelgaas@google.com
 Cc: ardb@kernel.org, ilias.apalodimas@linaro.org, javierm@redhat.com, linux-pci@vger.kernel.org, linux-efi@vger.kernel.org, dri-devel@lists.freedesktop.org
-In-Reply-To: <20261110092426.2647976-1-wuqianhai@loongson.cn>
-References: <20261110090203.2631481-1-wuqianhai@loongson.cn>
- <20261110092426.2647976-1-wuqianhai@loongson.cn>
+In-Reply-To: <20261110090203.2631481-3-wuqianhai@loongson.cn>
+References: <20261029033440.973077-1-wuqianhai@loongson.cn>
+ <20261110090203.2631481-1-wuqianhai@loongson.cn>
+ <20261110090203.2631481-3-wuqianhai@loongson.cn>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Tue, 10 Nov 2026 09:49:56 +0000
+Date: Tue, 10 Nov 2026 09:52:49 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -63,54 +64,66 @@ Precedence: list
 
 Thank you for your contribution! Sashiko AI review found 1 potential
 issue to consider:
-- [Medium] PCI/VGA: stale screen_info on DT/non-x86 paths in
-  vga_is_firmware_default()
+- [Medium] LoongArch/PCI: repeated fixup and UAF via
+  screen_info_apply_fixups()
 --
 
-commit cc9285f73294dc9c72f6466431882028a26deb92
+commit 1413644b1b0b80d135ecb2502366b5c2eb670d52
 Author: wuqianhai <wuqianhai@loongson.cn>
 
-PCI/VGA: Enable firmware default device detection on LoongArch
+LoongArch/PCI: Refresh screen_info after resource assignment
 
-This commit selects SCREEN_INFO for VGA_ARB on LoongArch and switches
-vga_is_firmware_default() from a CONFIG_X86 guard to CONFIG_SCREEN_INFO.
+This commit calls screen_info_apply_fixups() in pci_acpi_scan_root() after
+assigning root bus resources so that screen_info reflects any relocated
+firmware framebuffer BAR before vga_arb_device_init() and sysfb_init() run.
 
-> diff --git a/drivers/pci/vgaarb.c b/drivers/pci/vgaarb.c
-> index 3e58b2c05c854..4528ad0386102 100644
-> --- a/drivers/pci/vgaarb.c
-> +++ b/drivers/pci/vgaarb.c
-> @@ -566,7 +566,7 @@ EXPORT_SYMBOL(vga_put);
+> diff --git a/arch/loongarch/pci/acpi.c b/arch/loongarch/pci/acpi.c
+> index ccbcea61fcd9c..cb313ff67f7e7 100644
+> --- a/arch/loongarch/pci/acpi.c
+> +++ b/arch/loongarch/pci/acpi.c
+[ ... ]
+> @@ -256,6 +257,9 @@ struct pci_bus *pci_acpi_scan_root(struct acpi_pci_ro=
+ot *root)
+>  		 */
+>  		pci_assign_unassigned_root_bus_resources(bus);
 > =20
->  static bool vga_is_firmware_default(struct pci_dev *pdev)
->  {
-> -#if defined CONFIG_X86
-> +#ifdef CONFIG_SCREEN_INFO
->  	return pdev =3D=3D screen_info_pci_dev(&sysfb_primary_display.screen);
->  #else
->  	return false;
+> +		if (IS_ENABLED(CONFIG_SCREEN_INFO))
+> +			screen_info_apply_fixups();
 
 [Severity: Medium]
-Does guarding this with CONFIG_SCREEN_INFO cause vga_is_firmware_default()
-to read a stale sysfb_primary_display.screen.lfb_base on LoongArch
-DeviceTree systems and other non-x86 EFI architectures (such as ARM64, ARM
-and RISC-V with CONFIG_SYSFB=3Dy)?
+Is screen_info_apply_fixups() safe to call from pci_acpi_scan_root()?
 
-Commit "LoongArch/PCI: Refresh screen_info after resource assignment" only
-adds screen_info_apply_fixups() to LoongArch's ACPI pci_acpi_scan_root().
-When PCI probing runs via pci_host_probe() (e.g. loongson_pci_probe()) or
-generic pci_acpi_scan_root() in drivers/pci/pci-acpi.c,
-vga_arb_device_init() runs at subsys_initcall_sync time before
-sysfb_init() calls screen_info_apply_fixups() at device_initcall time.  If
-the firmware framebuffer BAR was relocated during resource assignment or
-sits behind a host bridge with a non-zero CPU-to-PCI offset,
-screen_info_pci_dev() will not match pdev and fails to select the firmware
-default VGA device.
+screen_info_apply_fixups() was previously called only once from
+sysfb_init().  When it updates the framebuffer address, it neither updates
+screen_info_lfb_res_start nor clears screen_info_lfb_pdev:
 
-Also, the second paragraph of the commit message says the previous patch
-handled screen_info staleness so vga_arb_device_init() no longer needs to
-refresh screen_info itself, which looks like leftover commentary from an
-earlier version of the series.
+drivers/video/screen_info_pci.c:screen_info_apply_fixups() {
+	...
+	if (screen_info_lfb_pdev) {
+		struct resource *pr =3D &screen_info_lfb_pdev->resource[screen_info_lfb_b=
+ar];
+
+		if (pr->start !=3D screen_info_lfb_res_start) {
+			if (__screen_info_relocation_is_valid(si, pr)) {
+				__screen_info_set_lfb_base(si, pr->start + screen_info_lfb_offset);
+				pr_info("Relocating firmware framebuffer to offset %pa[d] within %pr\n",
+					&screen_info_lfb_offset, pr);
+	...
+}
+
+Because pr->start !=3D screen_info_lfb_res_start remains true after a
+relocation, every subsequent root bridge scan on multi-root systems and the
+later call in sysfb_init() will re-run the relocation branch and emit
+duplicate messages.  If a built-in DRM driver probes before sysfb_init(),
+calls sysfb_disable(), and resizes the BAR, sysfb_init() will also
+re-evaluate the resized BAR before checking whether sysfb was disabled.
+
+In addition, screen_info_lfb_pdev is an unreferenced pointer that is never
+cleared on PCI device removal, while pci_acpi_scan_root() can be called
+after boot via acpi_pci_root_add() hotplug.  Removing the boot display PCI
+device and hot-adding an ACPI PCI root bridge would dereference the freed
+screen_info_lfb_pdev in screen_info_apply_fixups().
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261110090203.2631=
-481-1-wuqianhai@loongson.cn?part=3D6
+481-1-wuqianhai@loongson.cn?part=3D2
