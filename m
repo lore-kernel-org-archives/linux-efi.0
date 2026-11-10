@@ -1,48 +1,48 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794302267;
-	b=PwsM2sBl7rBq0Dwp0hYnctePUGQKz9iI8YmFbddPGKthLdKp1AZeHIk+UiJ9a67PSZ5r
-	 vYMt47b48AZznHjVC21Zt7QHRk9MSkZ6bfeFa53ZSfmt79oviiCIwaJMN0w6hTSmybkQB
-	 /heMh74JG6H/eUhT/K171ISoTzfApjZuYVik1iSF9PoVIiYSXF0TK5SiOtptIyxr/8aVX
-	 yi11vS/WWuSv1VnALIfZ+Bsdn1CFMpiCiCnF3Cg+QrknVMLxNTb2ArRalABvOuAkI+UpM
-	 96M+Ij3Nicz+Zu7aeEfP62Gs+7RlUTwQICh1VozuzgdvAH4FuBIV0/1qlCC9Nwq046Q==
+	t=1794302281;
+	b=QkF5dRLU2RsrY5N6upTjDfqENbWa2kFvXfoTiHh4zCXnnnkPK+NOzdLzFEJl5V3v9Ipa
+	 t9caO6vUc6MIVNBRKY4VEJ2A1QClE2VgLr1Z67D9vQn8u4AhqNxMdrjYOmDQ6gHeg+98U
+	 FQRWC4QzHnHh+s5eco1S44eW9y93vIq/E4WDI49IYBp172cG7VhPNz7RFqJjpGqqkYdCP
+	 15Ecsl+4ZvTDxZ+1F5pgi/C3X9sbHe9XIAN0IPHUnyT/eP23D2djmWnOwuWcCut/rHLNi
+	 WsbGUPeP9u564zhjSilg0XDBQ/CScLurwWnGUHX9m+TD4fXw3AoqQw39zJcg6vSeh7Q==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794302267;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794302281;
 	h=Received:DKIM-Signature:From:Date:Subject:MIME-Version:Content-Type:
 	 Content-Transfer-Encoding:Message-Id:References:In-Reply-To:To:Cc:
 	 X-Mailer:X-Developer-Signature:X-Developer-Key;
-	bh=l8LDAQNHphQBAnLKVY0j2bP3Ogdq6gK5b5xHcx0dYsg=;
-	b=YC4zEwwBRXGsnDaq0giU+N/8uOA8eRKtaZKNg2/QSpZaQ9gyOACd5gIxNN8eV3WDp071
-	 EEhXEgMrHR1aCYbwmUamC0Kz+h6wHbTJFu8/kwodUMzfbhaSFS9kVF7GTTFigHNWlrWBa
-	 1rygROC730AhnJ2GEPi4YzWFGaG9i9bF9W0zphBRUkoZamn7GHekSQzxra1phcAhiinWz
-	 hhEwNBPmEV/179sGYeS4DipX6TFJHjHnuOx+G+vm3L7x5AkCJ+/UspYr1QLdIiN6y13HZ
-	 Yi/qcqL/ul3g67mgFDX3PWn24cA4/+OukP2KNxsR6xPlXHEvMphjd1f2GLzWS0rl0Bg==
+	bh=8foKI6JmuMCwlgA1vbndmP56m7vz0lsh+SJERlRxyTw=;
+	b=DreVYpbK6Vk0XKT07wumXBNgN/v5EzBZmG9kdjs/zxC4WdBe1G3KJAOwAPPAEmu6sq2m
+	 DGvwAYeCIZiD9+f2vAGlOtZbOCnenHXJ+i7H21KqtKnEhdNJM9hYDolxp+I1yjdnNS2mv
+	 vXsTUukw5ZydzKZia+yk2DBUmc2zDT86hsfE6sNYYPTrs3+mV3kI7iVExK0mGvprMZGUW
+	 isDJ51jOS3R5pCjxJAPJPWbeML3y9WMhEOF6KVGwbpFgtXrVTn/GF45kER96QNJjm816b
+	 xf2z+N+l2I6pka2+Pi+94c+UCrtdHUOmmDCUkKfDI1yM9lOC5tB9Bk64UHGgcXemhcg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=R9v9qHLP;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=dmhfQG5W;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A452606A9A6;
-	Tue, 10 Nov 2026 09:17:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B10A16071E41;
+	Tue, 10 Nov 2026 09:18:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=R9v9qHLP
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 987041F008A1;
-	Tue, 10 Nov 2026 09:17:40 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=dmhfQG5W
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3D7F41F008A1;
+	Tue, 10 Nov 2026 09:17:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794302266;
-	bh=l8LDAQNHphQBAnLKVY0j2bP3Ogdq6gK5b5xHcx0dYsg=;
+	s=k20260515; t=1794302280;
+	bh=8foKI6JmuMCwlgA1vbndmP56m7vz0lsh+SJERlRxyTw=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=R9v9qHLPfZZRHObjYnC3o1mAzO1hP+/9155v1wxmmC7hQDax+NvgTbE4W9xrNan6b
-	 z0Sdkmw0b24b+Z76hEcw0ec7fC8rhBm0gmhG32Dr9KvOltCueuenMbGzfKiksYbb/R
-	 A6o9Yo/dPlBuObvaZL1En87DLRIXfZzEMhiQLtg8EsJhl2E4mtXzQGo9ABc14bgHRe
-	 PZldAZR1cxgMtFhW4nTK2eKI2Yi5t+MGsF5VrX1YHsgpjfxFteN0G7738shRXMLGdm
-	 N33HXtEWu+Tp9JkAiYvDDygE7C96rLISq1P2stvft/KA/fCZ0rHgRq5v+c5DMmWCFV
-	 ymFNp2JgMpqoQ==
+	b=dmhfQG5Wa9F1vl+Ncla7LH9qR2Pb19MWVA960fv/qPgnC3PfvrweEc5lpNq7tg5cv
+	 X5jebb+YDcv3+oNILPlH9pzpQZuHd5gXnfWtjGHFm2sCmt+GLljdrB8ed3e2EDVoxW
+	 6qwLDDuejmnmabFf6S4yipLYILlMtcgi/B3PaMm2jtiYlDVjoc2AfZI3TB5b25URyB
+	 9JqF6aBLQhF8lrePFMLHHrz/X2m11imH2EHUNar9GCgoanthwCkg9zDKmfEF8OQXN7
+	 FbpquhbOcx9HJMB4de2od2c6Rsbmt4mVOK3tjcZbRaBQ7AHeFHK8pVFWivdn0ZmDS9
+	 s18yL7iJzQ1pg==
 From: Christian Brauner <brauner@kernel.org>
-Date: Tue, 10 Nov 2026 10:14:32 +0100
-Subject: [PATCH RFC 16/41] configfs: use fc_init_pseudo()
+Date: Tue, 10 Nov 2026 10:14:34 +0100
+Subject: [PATCH RFC 18/41] selinux: use fc_init_pseudo() for selinuxfs
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -54,7 +54,7 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20261110-work-loop-pseudo-v1-16-4c998976c6c7@kernel.org>
+Message-Id: <20261110-work-loop-pseudo-v1-18-4c998976c6c7@kernel.org>
 References: <20261110-work-loop-pseudo-v1-0-4c998976c6c7@kernel.org>
 In-Reply-To: <20261110-work-loop-pseudo-v1-0-4c998976c6c7@kernel.org>
 To: linux-fsdevel@vger.kernel.org
@@ -75,42 +75,59 @@ Cc: Jann Horn <jannh@google.com>, Chris Mason <mason@kernel.org>,
  linux-kselftest@vger.kernel.org, 
  "Christian Brauner (Amutable)" <brauner@kernel.org>
 X-Mailer: b4 0.17-dev-ce4c1
-X-Developer-Signature: v=1; a=openpgp-sha256; l=912; i=brauner@kernel.org;
- h=from:subject:message-id; bh=FZSn8pZNkelWJZuy96PPD0cDLXKTFQ+NnjbEVUus4Cs=;
- b=owGbwMvMwCU28Zj0gdSKO4sYT6slMWR9erAsoPxm8YvkDfvCz87c1p11JmKH6fuChtd3Yuf8U
- K0rc7F601HKwiDGxSArpsji0G4SLrecp2KzUaYGzBxWJpAhDFycAjARx10M/11uxYdrM97avS7+
- mvJWaemvRj2ydif4HQs8FhZrHNFqm8Dw33+Ncnarxkp9i/liZ7b1r790NO6pyta3nhe6A+fNCn7
- EzQEA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1631; i=brauner@kernel.org;
+ h=from:subject:message-id; bh=G6GyKhtPUuEHs5LrXzW88WAPZ6YLQCvHyquwK5OU8Mc=;
+ b=owGbwMvMwCU28Zj0gdSKO4sYT6slMWR9erCSv4OpQlCv+sKCEKYLJnl7XiQuW3g/KvNGSuDNm
+ Z9Edkzu6yhlYRDjYpAVU2RxaDcJl1vOU7HZKFMDZg4rE8gQBi5OAZhIwRJGho3heV555heiU9OC
+ joYteqa/h+mn21yLC5/8Vn9e8++ltjrDfz95yYxJLSHu6Y6WLBnlx5eIrDRyi2Wcy6Ybt7PmXsR
+ WHgA=
 X-Developer-Key: i=brauner@kernel.org; a=openpgp;
  fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
 
-Initialize configfs as a pseudo filesystem. This raises SB_I_PSEUDO and
-also SB_I_NOEXEC and SB_I_NODEV. configfs never holds executables or
-device nodes.
+Initialize selinuxfs as a pseudo filesystem. This raises SB_I_PSEUDO and
+SB_I_NOEXEC. selinuxfs never holds executables. SB_I_NOEXEC also
+refuses PROT_EXEC mappings but the status and policy files are only
+ever mapped for reading.
+
+But selinuxfs needs device nodes. The kernel replaces file descriptors
+with /sys/fs/selinux/null on exec via dentry_open() which doesn't care
+about SB_I_NODEV. Android init however opens /sys/fs/selinux/null by
+path as /dev/null doesn't exist yet at that point. So clear SB_I_NODEV
+again in sel_fill_super().
 
 Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
 ---
- fs/configfs/mount.c | 2 ++
- 1 file changed, 2 insertions(+)
+ security/selinux/selinuxfs.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/fs/configfs/mount.c b/fs/configfs/mount.c
-index d8cac1cbf3bd..60ba24e7ae2b 100644
---- a/fs/configfs/mount.c
-+++ b/fs/configfs/mount.c
-@@ -13,6 +13,7 @@
- #include <linux/module.h>
- #include <linux/mount.h>
+diff --git a/security/selinux/selinuxfs.c b/security/selinux/selinuxfs.c
+index 310e19efff1d..d7ae853b6d68 100644
+--- a/security/selinux/selinuxfs.c
++++ b/security/selinux/selinuxfs.c
+@@ -18,6 +18,7 @@
+ #include <linux/vmalloc.h>
+ #include <linux/fs.h>
  #include <linux/fs_context.h>
 +#include <linux/pseudo_fs.h>
- #include <linux/pagemap.h>
- #include <linux/init.h>
- #include <linux/slab.h>
-@@ -106,6 +107,7 @@ static const struct fs_context_operations configfs_context_ops = {
+ #include <linux/hex.h>
+ #include <linux/mount.h>
+ #include <linux/mutex.h>
+@@ -1852,6 +1853,9 @@ static int sel_fill_super(struct super_block *sb, struct fs_context *fc)
+ 		/* last one */ {"", NULL, 0}
+ 	};
  
- static int configfs_init_fs_context(struct fs_context *fc)
++	/* Android init opens the null device below by path. */
++	sb->s_iflags &= ~SB_I_NODEV;
++
+ 	ret = selinux_fs_info_create(sb);
+ 	if (ret)
+ 		goto err;
+@@ -1955,6 +1959,7 @@ static const struct fs_context_operations sel_context_ops = {
+ 
+ static int sel_init_fs_context(struct fs_context *fc)
  {
 +	fc_init_pseudo(fc);
- 	fc->ops = &configfs_context_ops;
+ 	fc->ops = &sel_context_ops;
  	return 0;
  }
 
