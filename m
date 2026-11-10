@@ -1,73 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.70
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.72
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794313063;
-	b=HBmQjO0A2yCa4qduFHBb7bw6ygbiMDRDVyoiGq9YOK9SYq4616vq9ev307THI/pe1U/x
-	 xiTyiazFQmkI9pXe381e3V3hLgF7w1xE9QvxMCgH2e+3zQJQ11zuuDMd93bTyrk9YnOEX
-	 re8nNxnojr3D2B/ALxyahAmIFO15bz3lupwXy9BtlEp4+lbyPApps78DigM/8koPnDhdy
-	 3vxcUYyqzjbCUmtD1POW77z8PvTUPI2DcnedHnxDUNp/TA9/s73D/oro+wSbO5Xol9lGm
-	 KgnqlSfnhmJRhi2FxRHg2slSCiONhErpJ4xS+wv62XSZ24+YVRSMIZ/v4MPkJPKgQeA==
+	t=1794313064;
+	b=uFq8fn+iRm2eHVs69AtNrxa9ewIi8iKxSxPA5cPtXiveQm77+yRSguQ5IhYz2wRU4QVF
+	 lXELDWIwO708pi9JyRfKYM+tLA5cKReguO01ymJe7MSh+t/bQc/ctaAw7+g3IMzNcmM5i
+	 PSfuchCXBLJYA3agc86KSjr9Tw3QiJOpmNWNoGrwW7m++Fnf20LvHZmkWrq5+Mzyu+g/j
+	 uDyzJGd2KAd7rKXWIzDsilhZueI2k57Wsl7HBWKydKG6SUJuk1MB51LsvF0XqMKrGtop6
+	 CS5gWddzPUASliTJSxa8TYhefJa5G2TCTJCbV83sOQ60sY7O7+KBMyznPGHwwPb2mjw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794313063;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794313064;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Received:Date:In-Reply-To:Mime-Version:
 	 References:X-Mailer:Message-ID:Subject:From:To:Cc:Content-Type;
-	bh=FKyHqeXkJfnFo2/e42CmLuZIRnayYURfHn0ko47n0QU=;
-	b=ZG5EyEHw4SShsbIsNYzYsnnivcrfKAX2f1EcFUY1zOW6GGmOQsNO9PDB7jbhEkuOZ7ej
-	 VtNJ92oJNjjzEU616DUL8WKqcSeDRzRMc0uAogM/E0zZ+Ep4s3T60rDT94ICj/UOeXiMT
-	 S1rBrgneiKEP71mhFKLSjb828+t03A5TjwAi0/coHzWt8H8P79Zm18gP14pKT1aEmD/Zb
-	 MqowSOlQIFPsi9VXD+Bn114GBEYwnwljXIXTfZie2FS5zveoVh+DNGaaEuNh/8OZMQT0B
-	 azfWOA4kN2s+Y0aajZpTILpbrEMyevraj/gn/W+wUiXK7g7qCsDc9g/4z1fDoKmnPag==
+	bh=Gy+owdWhI9aq49SvOXumwy6C5wawdvH/TU7Zgbh6cFQ=;
+	b=vctDBqMZuem4rEXCgRRLIw78cZOLkRNXSMhDUnsKv+01MJWGz+G4isFK/MkfryZ0bl6g
+	 BVOl7TWGt7wAbM+2QXNM5A51mhtzr1zJG8bu/OsiZDTX5NL28UdTNllmcP215f4jpTlbg
+	 M60x3BBm+WykUJbjfiQTd+UlVMa5mK5yriIt6T45S8QbUnK52pTrfE+mbweIRdWXubMvZ
+	 hhlPuRalOsgNMSZ78ylap8II7FDF8G9pkA1jdkbh5cyvFubq4x8SZlg1Jl9dM7J6SkQ6i
+	 8U5q7nEijPcsC3gF80SxRIRLhNzOs254s9wjaLHTzYDn+N8xZYnNTe5SprkLWHvRCXw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=google.com;
 	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=LqGiCAVn;
-	arc=none smtp.remote-ip=209.85.128.70
-Received: from mail-wm1-f70.google.com (mail-wm1-f70.google.com [209.85.128.70])
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=fEir1LAL;
+	arc=none smtp.remote-ip=209.85.221.72
+Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com [209.85.221.72])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 619EC606A337
-	for <linux-efi@vger.kernel.org>; Tue, 10 Nov 2026 12:17:43 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 619EC606A337
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 331E5606A337
+	for <linux-efi@vger.kernel.org>; Tue, 10 Nov 2026 12:17:44 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 331E5606A337
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=LqGiCAVn
-Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-4a0284121c6so14461985e9.3
-        for <linux-efi@vger.kernel.org>; Tue, 10 Nov 2026 04:17:43 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=fEir1LAL
+Received: by mail-wr1-f72.google.com with SMTP id ffacd0b85a97d-49187ad6a72so1391223f8f.0
+        for <linux-efi@vger.kernel.org>; Tue, 10 Nov 2026 04:17:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20260707; t=1794313062; x=1794917862; darn=vger.kernel.org;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=FKyHqeXkJfnFo2/e42CmLuZIRnayYURfHn0ko47n0QU=;
-        b=LqGiCAVnMT4v01Gcy54a9sqhPccraR9pZHNHo6a6Rko7B0Wnpet5sE++UG4GkGIlf3
-         7+ZYvNtez14dEsRumfX5w2L4qj9FYxFGrgmpwST4OWmezPuBAL6wPuRy+ZtJXw6ZTJF6
-         po7dlwRVWa0GMSsbaCclMSCh3S1UMztOo6wlhdxxBErBtS5HOFEyPWgp2FY7gegzmUTw
-         /pWYdw0LPNRn6wqLo6TX9/h6NNulsOEXqjingsEE/+EyxaeUQOs2oSpixhzry64fyAC2
-         etQbDsM3k6QMMUbczXIOlvyx4EslLuCB8R0eGV9kzUqPtROQrx5FVfHzxZVsS/j8vhsF
-         xpBQ==
+        bh=Gy+owdWhI9aq49SvOXumwy6C5wawdvH/TU7Zgbh6cFQ=;
+        b=fEir1LALKMuKNlwZMjIN94dfEx8f4aeYgDo/ciR9CyHks99jB3MF0OHzl42OY5Buu0
+         RulElpuR0reJHDOeq3SZxcPlgRtV25WiNs6wtniZR+is6WAybrV3UPI3gxhk1Eo0LUgK
+         rW3/BEt5d6Hbp6skziT3s8e2n+Ok53/h6ApKeihqc+1N4ByJPg8vniur4QFAjUi3heIe
+         4LV/0C5rOYrQL0BBqoNCWZJlGltfJhNe49Mq04RrOa1de6jkz5IVTQSF+Jjir8wVP4qm
+         0+vd9VWl+v37WeaL8Q4YFw0X62N+3D8EFYVulmqP/ytkqhsGNgqJZAjcZ9jOSvn3Sy1f
+         eP1w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20260707; t=1794313062; x=1794917862;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=FKyHqeXkJfnFo2/e42CmLuZIRnayYURfHn0ko47n0QU=;
-        b=pj9IqCo9kEEgvWwJaJ/y/rXH8vHrvxQQ83K/9S0DNT8fx06iKKIJWUSIIEuvjnTQ4K
-         iwoA716YHqYOBF+H1lsM45mWKXnZKcIdhNyq4HKaip6ATc07Nss3DLaRVZqHXHn0zAqx
-         tM+sN5r6AJ5AXKL22V7cidRIB6mTm/ii55C87PGun0XeFJMJ3EkVTnrlZD8wOABySaRh
-         bmB/22YnwyVkCMipy99EbPCr8TR5Soi1qtqSzSqt29w5mE55io3dmreuXWbCHf4s43QP
-         VPU3z238a7lasl28ExCg/s4sU6uev8HsxjDbMNbGyx4pdvMjQfRq7B6BhpxMDU2YbLCz
-         zr3Q==
-X-Gm-Message-State: APuU4Z92k3fcPfSjp+VtxnlDDvrGHH1dL6GnJtS2oeyYfEIMmwVXdMZ/
-	3I90z7W+3viLtB+y2FdfrwN4zPdsgDLpTAge2MGcohzD/S0ADzx0WA33VzTlXKYeMVGLEeECxym
-	k/az4+Sx6ZTVjDg0YthHe4WpLBfp0sQRNDGrZcjmeOnP9DqXONkp+lBayqmzx3L31KIPZhikYD3
-	CymLCYwoAdB63YaTG4+/iwPL4IssSpUQ==
-X-Received: from wrul8.prod.google.com ([2002:a5d:6688:0:b0:48d:edc0:5a37])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:198f:b0:4b4:49d7:bc25
- with SMTP id 5b1f17b1804b1-4ba0234a940mr39574545e9.21.1794313061406; Tue, 10
- Nov 2026 04:17:41 -0800 (PST)
-Date: Tue, 10 Nov 2026 13:17:34 +0100
+        bh=Gy+owdWhI9aq49SvOXumwy6C5wawdvH/TU7Zgbh6cFQ=;
+        b=ZPLfqCld/BQ1JoqOBn+uFCBVuEsUo2UIy2j3q39UvBM1tzbKuP1eHkD5nxuN6TLa8X
+         LCj8nnOuDQhPzk0AYRvqdjMXig1oNyG4RJFM4ztbS9YnzWLpuWA9mxsEe8ltAh1Ft1hn
+         gCHrb8H6VIGcyruYwaAme4ybjPJFfGHfGUPI4Bcpvc3BP9zVRUCUcp4Ae8pVRKMJBZFH
+         SizneaXgF5JkoU/zm++Y6SzFMe4+xQftg10yKkNbI1ylYp1xwnMVjYnquamhHLaibxhq
+         q6TVl110xx0RP4+5x3korn8D4z7G0TxS7MLTR94ctG2z/62qSdtWSUy2iqxzQvI2/giA
+         XRvw==
+X-Gm-Message-State: APuU4Z8v3DJoDu/Jei/PS0PJKWNvvambYGV+qg+Z+1JkunzT+522q4mz
+	6D78AO/IKVdJE2SRbUZ+Pdilhg2vHKGosvHXwvOj6f+TenznI8YpKi4Z9mDJXhPLr48cg2b4gwa
+	0g7qk4hbK0XJTyPedZbw0J0DUKrJRZl2HCzUYjGl6Sp+/ELWzKAgPHNXQ7XmvjljaBLFlFIbKAn
+	8bZ24Rhjq+i1SepsWooVFjD5GihpTN/A==
+X-Received: from wrxp4.prod.google.com ([2002:a05:6000:184:b0:495:feb9:bf43])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:298d:20b0:48e:202:6718
+ with SMTP id ffacd0b85a97d-4982ecf6701mr3321662f8f.25.1794313062387; Tue, 10
+ Nov 2026 04:17:42 -0800 (PST)
+Date: Tue, 10 Nov 2026 13:17:35 +0100
 In-Reply-To: <20261110121731.2728824-12-ardb+git@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -80,9 +80,8 @@ Precedence: list
 Mime-Version: 1.0
 References: <20261110121731.2728824-12-ardb+git@google.com>
 X-Mailer: git-send-email 2.56.0.542.g3ef89b7020-goog
-Message-ID: <20261110121731.2728824-14-ardb+git@google.com>
-Subject: [PATCH v2 02/10] efi/riscv: Rename __init_text_end to __inittext_end
- like other archs
+Message-ID: <20261110121731.2728824-15-ardb+git@google.com>
+Subject: [PATCH v2 03/10] efi/libstub: Avoid _end section marker in library code
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Ard Biesheuvel <ardb@kernel.org>, 
@@ -93,80 +92,31 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-Align RISC-V with arm64, LoongArch and x86, and drop the underscore
-between 'init' and 'text' in the section markers. This allows the value
-to be captured by generic EFI stub code that can be shared between all
-those architectures.
+The _end marker could point to the end of the kernel image being loaded,
+or to the _end of the zboot decompressor image, and so it should only be
+used in code that is obviously only intended for the former case.
+
+So instead, use kernel_memsize and the image address to obtain the same
+quantity.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/riscv/include/asm/sections.h         | 2 +-
- arch/riscv/kernel/image-vars.h            | 2 +-
- arch/riscv/kernel/vmlinux.lds.S           | 4 ++--
- drivers/firmware/efi/libstub/riscv-stub.c | 2 +-
- 4 files changed, 5 insertions(+), 5 deletions(-)
+ drivers/firmware/efi/libstub/kaslr.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/riscv/include/asm/sections.h b/arch/riscv/include/asm/sections.h
-index a393d5035c54..4a882a28f414 100644
---- a/arch/riscv/include/asm/sections.h
-+++ b/arch/riscv/include/asm/sections.h
-@@ -11,7 +11,7 @@
- extern char _start[];
- extern char _start_kernel[];
- extern char __init_data_begin[], __init_data_end[];
--extern char __init_text_begin[], __init_text_end[];
-+extern char __inittext_begin[], __inittext_end[];
- extern char __alt_start[], __alt_end[];
- extern char __exittext_begin[], __exittext_end[];
- 
-diff --git a/arch/riscv/kernel/image-vars.h b/arch/riscv/kernel/image-vars.h
-index 7b44b94f1283..bf703eba3fa5 100644
---- a/arch/riscv/kernel/image-vars.h
-+++ b/arch/riscv/kernel/image-vars.h
-@@ -27,7 +27,7 @@ __efistub__start		= _start;
- __efistub__start_kernel		= _start_kernel;
- __efistub__end			= _end;
- __efistub__edata		= _edata;
--__efistub___init_text_end	= __init_text_end;
-+__efistub___inittext_end	= __inittext_end;
- #if defined(CONFIG_EFI_EARLYCON) || defined(CONFIG_SYSFB)
- __efistub_sysfb_primary_display	= sysfb_primary_display;
- #endif
-diff --git a/arch/riscv/kernel/vmlinux.lds.S b/arch/riscv/kernel/vmlinux.lds.S
-index 1f4f8496941a..08ada0591f3a 100644
---- a/arch/riscv/kernel/vmlinux.lds.S
-+++ b/arch/riscv/kernel/vmlinux.lds.S
-@@ -46,7 +46,7 @@ SECTIONS
- 
- 	. = ALIGN(SECTION_ALIGN);
- 	__init_begin = .;
--	__init_text_begin = .;
-+	__inittext_begin = .;
- 	.init.text : AT(ADDR(.init.text) - LOAD_OFFSET) ALIGN(SECTION_ALIGN) { \
- 		_sinittext = .;						\
- 		INIT_TEXT						\
-@@ -72,7 +72,7 @@ SECTIONS
- 	}
- 	__exittext_end = .;
- 
--	__init_text_end = .;
-+	__inittext_end = .;
- 	. = ALIGN(SECTION_ALIGN);
- #ifdef CONFIG_EFI
- 	. = ALIGN(PECOFF_SECTION_ALIGNMENT);
-diff --git a/drivers/firmware/efi/libstub/riscv-stub.c b/drivers/firmware/efi/libstub/riscv-stub.c
-index 725b634c5179..5cbc50a814e1 100644
---- a/drivers/firmware/efi/libstub/riscv-stub.c
-+++ b/drivers/firmware/efi/libstub/riscv-stub.c
-@@ -34,7 +34,7 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	efi_status_t status;
- 
- 	kernel_size = _edata - _start;
--	kernel_codesize = __init_text_end - _start;
-+	kernel_codesize = __inittext_end - _start;
- 	kernel_memsize = kernel_size + (_end - _edata);
- 	*image_addr = (unsigned long)_start;
- 	*reserve_size = kernel_memsize;
+diff --git a/drivers/firmware/efi/libstub/kaslr.c b/drivers/firmware/efi/libstub/kaslr.c
+index 8f8dc335b3b3..b34e4599f0f6 100644
+--- a/drivers/firmware/efi/libstub/kaslr.c
++++ b/drivers/firmware/efi/libstub/kaslr.c
+@@ -125,7 +125,7 @@ efi_status_t efi_kaslr_relocate_kernel(unsigned long *image_addr,
+ 		if (!check_image_region(*image_addr, kernel_memsize)) {
+ 			efi_err("FIRMWARE BUG: Image BSS overlaps adjacent EFI memory region\n");
+ 		} else if (IS_ALIGNED(*image_addr, min_kimg_align) &&
+-			   (unsigned long)_end < EFI_ALLOC_LIMIT) {
++			   (*image_addr + kernel_memsize) < EFI_ALLOC_LIMIT) {
+ 			/*
+ 			 * Just execute from wherever we were loaded by the
+ 			 * UEFI PE/COFF loader if the placement is suitable.
 -- 
 2.56.0.542.g3ef89b7020-goog
 
