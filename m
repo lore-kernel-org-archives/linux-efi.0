@@ -1,116 +1,104 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.131
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794315802;
-	b=uCLByQljC/l08kH9TfWom6cjwV8PUXQI96SZL4kmTvEU+USMswxkiwcJGa8MMDrYoDqz
-	 dyG2oGVBnkR51sxAmC0I7Z+szOCVGYg3EDi65D5xqyc9B2kV3AvFvLDHqInWy4wCeoATY
-	 fIrxI6rykQq6X3d7OOXtJGAkXzSxz8BgvXADU6AcZH1NiWQ8TiK1rNR1w3gepktwokKn1
-	 u9LeFc4op7Uw5CIjTh16gVIIC3ZZpXHpBYweTkyZ2PL3fVdal2Sxb5fbL2ZTnsMBzC2Zn
-	 SZX0Sq2sDZGx1AAdtyXJZAHctd04/Hx/gKtUBiZ8ymI2v0sTfRx3y40yZKligA0gsjw==
+	t=1794321263;
+	b=VcTKC/M2UMPSrKA+Z0eL5c/eQr8utlMsfvDz0HB6EOFOZJN5OiwG8RBQuNMeoMQeqMV2
+	 OHdvuy3KOSo3+j2j/6ilE+osz8v5qOQVfpC4ons2ltK43uVg/ZFfRgkK2drU4nb8P6ZXe
+	 lGtzoTH08a6kqDjmpBdgTKd4skFgctJc2oR1Ouiu98xfrLkAIr1264J7/Ii7/QZFiyuPH
+	 V8gGmF/KLFtxKBNrio/SDSDD8p4nHLAEOgVomO+cgpRRClSRPb/yQPAjk/xnafU4hWn0Q
+	 1iu3CxMnAh455fgDLr3QUpGYMEDsm3MGU/+beVU5IBy8LUDaZrhTBD0onhXtxbBnykg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794315802;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794321263;
 	h=DMARC-Filter:Received:DKIM-Signature:DKIM-Signature:DKIM-Signature:
-	 DKIM-Signature:Received:Received:Received:Date:From:To:Cc:Subject:
-	 Message-ID:References:MIME-Version:Content-Type:Content-Disposition:
-	 In-Reply-To:X-Spam-Flag:X-Spam-Level:X-Spamd-Result:X-Spam-Score;
-	bh=l0P34w8QQvLO5YW5vCLMJ84QpfDMX9/Bu1FrRmyy2v8=;
-	b=DFbQ+mz6Xx6CA3XASYaFPM6Yn6qN9Ub78vKEXY6qCm8Y0mdL/kLpahcnw+wk2hrJMdZw
-	 ia0qgYyFJaV4i9JOTeBVZZicZ0tm4VFaBIGta7Nv4XnzjF/rIH2iPXB717S13KbjHdV78
-	 B8h/yr/w5T8DrD+yiubMM8+Mh3vxXbu/3P4iuDboF03h+LwQtFJe/f3UNHp+69C4TblzO
-	 /0Zr4Aw+5dw8zTMvt1W9p6CgCAriSYFVjAXcjFtZ29PxNclgFC/RyJK4hqae4oKSyqjlV
-	 IAAqXRsqOhm+zwHCrjrnlvui3jAm7tCBmxfhXq7PwxrFvl3W6+MccduJGwGwMO9G6FQ==
+	 DKIM-Signature:Received:Received:Message-ID:Date:MIME-Version:
+	 User-Agent:Subject:To:Cc:References:Content-Language:From:Autocrypt:
+	 In-Reply-To:Content-Type:Content-Transfer-Encoding:X-Spamd-Result:
+	 X-Rspamd-Server:X-Rspamd-Action:X-Spam-Flag:X-Spam-Score:X-Spam-Level:
+	 X-Rspamd-Queue-Id;
+	bh=zhlfAbU+RkEaMeHpJ5g5gZDOhJEWeCavfCtrrHQ9BPY=;
+	b=YeT14AwL+mD2xxV+K/aIet/U2hUT0qiqqUwlWqISdIysJUpFNnI/3NFIz9iBiFFCT6Za
+	 gVNSxNNYQWRH4r9ZZK3QCCwLc0PLWhowgw2j7zD4lkwuopMcwrvEClrfvhZFM5V+S+eWB
+	 bb/VxI0jg7XANlj67AzfVwrPe2T4lthSiSzy35BM0WLAJY9VJMpGJOKH36VFufsaZPBwa
+	 LV/GR2Qg5ApkzBqDCdyCWFEMNi9siQbof3aPIcreqD9EzO1SGjj3FagD/5aoOLBb7NPNs
+	 VxVto08e474OsiEK/sauWKLjLFeQKbvAvSzv11j32JYS/gyssLdwisRlPdX3o/Sm+zw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=suse.cz;
-	spf=pass smtp.mailfrom=suse.cz;
-	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=nU4XxgAL;
-	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=Mnc4QrSZ;
-	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=nU4XxgAL;
-	dkim=neutral header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=Mnc4QrSZ;
-	arc=none smtp.remote-ip=195.135.223.130
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	dmarc=pass header.from=suse.de;
+	spf=pass smtp.mailfrom=suse.de;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=ZTh445E5;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=VahZZXHk;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=ZTh445E5;
+	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=VahZZXHk;
+	arc=none smtp.remote-ip=195.135.223.131
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88A0C606A74B;
-	Tue, 10 Nov 2026 13:03:21 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 88A0C606A74B
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B5A0606A33C;
+	Tue, 10 Nov 2026 14:34:22 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9B5A0606A33C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=nU4XxgAL;
-	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=Mnc4QrSZ;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=nU4XxgAL;
-	dkim=neutral header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=Mnc4QrSZ
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=ZTh445E5;
+	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=VahZZXHk;
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=ZTh445E5;
+	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=VahZZXHk
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id C0D9421F77;
-	Tue, 10 Nov 2026 13:03:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1794315799; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 8F8C11F7E9;
+	Tue, 10 Nov 2026 14:34:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1794321260; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=l0P34w8QQvLO5YW5vCLMJ84QpfDMX9/Bu1FrRmyy2v8=;
-	b=nU4XxgALhU6j4K3Mxr5ngQH1kaedGJkQyEqwlGUplEx9hMxQ3fo4McMmOwr1ERv3Mkpxw3
-	gLCfI+EWYKzq/l9mRzhXb6GJ0h3nlI+5tsg9MpjQ2PJDBC1XC/U5s6EqGl5dlEXIEKPAnz
-	BBcKQlac9Q1+gcOvfNs3dKHhhfnARxs=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1794315799;
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=zhlfAbU+RkEaMeHpJ5g5gZDOhJEWeCavfCtrrHQ9BPY=;
+	b=ZTh445E5L8KNoOq+Qvu1Aisct4dn10+ORt/gcCxSxPobkymCZc6RldE0RkDkyNhqD6g2iW
+	Ukv+o4aAzW9aoHEIzDZVa+TjS+/urb7FM2OJSj/1KKmofcUqvXgjQBc0uzqHgzRYOm7y8r
+	dbDkG/ZXHvuiSkbuivgyuVbEbogSsXI=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1794321260;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=l0P34w8QQvLO5YW5vCLMJ84QpfDMX9/Bu1FrRmyy2v8=;
-	b=Mnc4QrSZrRmpafaJe4iOnLi1RuOTcqJe/GGSNdftVub9UNeD+cHjavH2Su/fUJ6PuunSLs
-	aVyAWefkY3MWbuCw==
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1794315799; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=zhlfAbU+RkEaMeHpJ5g5gZDOhJEWeCavfCtrrHQ9BPY=;
+	b=VahZZXHk35FogwG7kQFefrHnrVzAqos3dckwYxXUAUfKLYoJRnIf+FpkquPbWofZScNfIN
+	wVDt6/SlAWj+d+DQ==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=ZTh445E5;
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=VahZZXHk
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1794321260; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=l0P34w8QQvLO5YW5vCLMJ84QpfDMX9/Bu1FrRmyy2v8=;
-	b=nU4XxgALhU6j4K3Mxr5ngQH1kaedGJkQyEqwlGUplEx9hMxQ3fo4McMmOwr1ERv3Mkpxw3
-	gLCfI+EWYKzq/l9mRzhXb6GJ0h3nlI+5tsg9MpjQ2PJDBC1XC/U5s6EqGl5dlEXIEKPAnz
-	BBcKQlac9Q1+gcOvfNs3dKHhhfnARxs=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1794315799;
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=zhlfAbU+RkEaMeHpJ5g5gZDOhJEWeCavfCtrrHQ9BPY=;
+	b=ZTh445E5L8KNoOq+Qvu1Aisct4dn10+ORt/gcCxSxPobkymCZc6RldE0RkDkyNhqD6g2iW
+	Ukv+o4aAzW9aoHEIzDZVa+TjS+/urb7FM2OJSj/1KKmofcUqvXgjQBc0uzqHgzRYOm7y8r
+	dbDkG/ZXHvuiSkbuivgyuVbEbogSsXI=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1794321260;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=l0P34w8QQvLO5YW5vCLMJ84QpfDMX9/Bu1FrRmyy2v8=;
-	b=Mnc4QrSZrRmpafaJe4iOnLi1RuOTcqJe/GGSNdftVub9UNeD+cHjavH2Su/fUJ6PuunSLs
-	aVyAWefkY3MWbuCw==
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=zhlfAbU+RkEaMeHpJ5g5gZDOhJEWeCavfCtrrHQ9BPY=;
+	b=VahZZXHk35FogwG7kQFefrHnrVzAqos3dckwYxXUAUfKLYoJRnIf+FpkquPbWofZScNfIN
+	wVDt6/SlAWj+d+DQ==
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 960C61339F;
-	Tue, 10 Nov 2026 13:03:19 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 62FF91339F;
+	Tue, 10 Nov 2026 14:34:19 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id e3rfGxcW82q6SgAAD6G6ig
-	(envelope-from <jack@suse.cz>); Tue, 10 Nov 2026 13:03:19 +0000
-Received: by quack.suse.cz (Postfix, from userid 1000)
-	id 35CB1224F7; Tue, 10 Nov 2026 14:03:15 +0100 (CET)
-Date: Tue, 10 Nov 2026 14:03:15 +0100
-From: Jan Kara <jack@suse.cz>
-To: Christian Brauner <brauner@kernel.org>
-Cc: linux-fsdevel@vger.kernel.org, Jann Horn <jannh@google.com>, 
-	Chris Mason <mason@kernel.org>, Josef Bacik <josef@toxicpanda.com>, 
-	Christoph Hellwig <hch@lst.de>, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-nvme@lists.infradead.org, Alexander Viro <viro@zeniv.linux.org.uk>, 
-	Jan Kara <jack@suse.cz>, linux-scsi@vger.kernel.org, target-devel@vger.kernel.org, 
-	driver-core@lists.linux.dev, linux-mm@kvack.org, bpf@vger.kernel.org, 
-	linux-security-module@vger.kernel.org, selinux@vger.kernel.org, apparmor@lists.ubuntu.com, 
-	linux-nfs@vger.kernel.org, netdev@vger.kernel.org, fuse-devel@lists.linux.dev, 
-	linux-efi@vger.kernel.org, xen-devel@lists.xenproject.org, ocfs2-devel@lists.linux.dev, 
-	linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-usb@vger.kernel.org, 
-	Amir Goldstein <amir73il@gmail.com>, linux-erofs@lists.ozlabs.org, linux-kselftest@vger.kernel.org
-Subject: Re: [PATCH RFC 34/41] loop: refuse files on pseudo filesystems as
- backing files
-Message-ID: <xlql7gc5uyvehjvin4ls3okfnv32xxdj45bjvamf2vdkrakvjx@u4iwy4ydmphs>
-References: <20261110-work-loop-pseudo-v1-0-4c998976c6c7@kernel.org>
- <20261110-work-loop-pseudo-v1-34-4c998976c6c7@kernel.org>
+	id PicADmsr82qQKgAAD6G6ig
+	(envelope-from <tzimmermann@suse.de>); Tue, 10 Nov 2026 14:34:19 +0000
+Message-ID: <9667af1e-4ad1-4d98-bd8d-38a548899a0a@suse.de>
+Date: Tue, 10 Nov 2026 15:34:18 +0100
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -120,104 +108,158 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261110-work-loop-pseudo-v1-34-4c998976c6c7@kernel.org>
-X-Spam-Flag: NO
-X-Spam-Level: 
-X-Spamd-Result: default: False [-12.80 / 50.00];
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 1/6] LoongArch: efi: Provide sysfb_primary_display for
+ screen_info users
+To: wuqianhai@loongson.cn, chenhuacai@kernel.org, kernel@xen0n.name,
+ deller@gmx.de, bhelgaas@google.com
+Cc: ardb@kernel.org, ilias.apalodimas@linaro.org, javierm@redhat.com,
+ loongarch@lists.linux.dev, linux-pci@vger.kernel.org,
+ linux-efi@vger.kernel.org, dri-devel@lists.freedesktop.org,
+ linux-fbdev@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20261029033440.973077-1-wuqianhai@loongson.cn>
+ <20261110085617.2626835-1-wuqianhai@loongson.cn>
+ <20261110085617.2626835-2-wuqianhai@loongson.cn>
+Content-Language: en-US
+From: Thomas Zimmermann <tzimmermann@suse.de>
+Autocrypt: addr=tzimmermann@suse.de; keydata=
+ xsBNBFs50uABCADEHPidWt974CaxBVbrIBwqcq/WURinJ3+2WlIrKWspiP83vfZKaXhFYsdg
+ XH47fDVbPPj+d6tQrw5lPQCyqjwrCPYnq3WlIBnGPJ4/jreTL6V+qfKRDlGLWFjZcsrPJGE0
+ BeB5BbqP5erN1qylK9i3gPoQjXGhpBpQYwRrEyQyjuvk+Ev0K1Jc5tVDeJAuau3TGNgah4Yc
+ hdHm3bkPjz9EErV85RwvImQ1dptvx6s7xzwXTgGAsaYZsL8WCwDaTuqFa1d1jjlaxg6+tZsB
+ 9GluwvIhSezPgnEmimZDkGnZRRSFiGP8yjqTjjWuf0bSj5rUnTGiyLyRZRNGcXmu6hjlABEB
+ AAHNJ1Rob21hcyBaaW1tZXJtYW5uIDx0emltbWVybWFubkBzdXNlLmRlPsLAjgQTAQgAOAIb
+ AwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftODH
+ AAoJEGgNwR1TC3ojx1wH/0hKGWugiqDgLNXLRD/4TfHBEKmxIrmfu9Z5t7vwUKfwhFL6hqvo
+ lXPJJKQpQ2z8+X2vZm/slsLn7J1yjrOsoJhKABDi+3QWWSGkaGwRJAdPVVyJMfJRNNNIKwVb
+ U6B1BkX2XDKDGffF4TxlOpSQzdtNI/9gleOoUA8+jy8knnDYzjBNOZqLG2FuTdicBXblz0Mf
+ vg41gd9kCwYXDnD91rJU8tzylXv03E75NCaTxTM+FBXPmsAVYQ4GYhhgFt8S2UWMoaaABLDe
+ 7l5FdnLdDEcbmd8uLU2CaG4W2cLrUaI4jz2XbkcPQkqTQ3EB67hYkjiEE6Zy3ggOitiQGcqp
+ j//OwE0EWznS4AEIAMYmP4M/V+T5RY5at/g7rUdNsLhWv1APYrh9RQefODYHrNRHUE9eosYb
+ T6XMryR9hT8XlGOYRwKWwiQBoWSDiTMo/Xi29jUnn4BXfI2px2DTXwc22LKtLAgTRjP+qbU6
+ 3Y0xnQN29UGDbYgyyK51DW3H0If2a3JNsheAAK+Xc9baj0LGIc8T9uiEWHBnCH+RdhgATnWW
+ GKdDegUR5BkDfDg5O/FISymJBHx2Dyoklv5g4BzkgqTqwmaYzsl8UxZKvbaxq0zbehDda8lv
+ hFXodNFMAgTLJlLuDYOGLK2AwbrS3Sp0AEbkpdJBb44qVlGm5bApZouHeJ/+n+7r12+lqdsA
+ EQEAAcLAdgQYAQgAIAIbDBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftOH6AAoJEGgNwR1T
+ C3ojVSkIALpAPkIJPQoURPb1VWjh34l0HlglmYHvZszJWTXYwavHR8+k6Baa6H7ufXNQtThR
+ yIxJrQLW6rV5lm7TjhffEhxVCn37+cg0zZ3j7zIsSS0rx/aMwi6VhFJA5hfn3T0TtrijKP4A
+ SAQO9xD1Zk9/61JWk8OysuIh7MXkl0fxbRKWE93XeQBhIJHQfnc+YBLprdnxR446Sh8Wn/2D
+ Ya8cavuWf2zrB6cZurs048xe0UbSW5AOSo4V9M0jzYI4nZqTmPxYyXbm30Kvmz0rYVRaitYJ
+ 4kyYYMhuULvrJDMjZRvaNe52tkKAvMevcGdt38H4KSVXAylqyQOW5zvPc4/sq9c=
+In-Reply-To: <20261110085617.2626835-2-wuqianhai@loongson.cn>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Spamd-Result: default: False [-13.50 / 50.00];
 	SUSE_INTERNAL_BYPASS(-9.00)[];
 	BAYES_HAM(-3.00)[100.00%];
 	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
 	NEURAL_HAM_SHORT(-0.20)[-1.000];
 	MIME_GOOD(-0.10)[text/plain];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	MISSING_XM_UA(0.00)[];
+	XM_UA_NO_VERSION(0.01)[];
+	MX_GOOD(-0.01)[];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	FREEMAIL_TO(0.00)[loongson.cn,kernel.org,xen0n.name,gmx.de,google.com];
 	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	RCPT_COUNT_TWELVE(0.00)[31];
-	RCVD_COUNT_THREE(0.00)[3];
-	FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	FROM_HAS_DN(0.00)[];
-	FREEMAIL_CC(0.00)[vger.kernel.org,google.com,kernel.org,toxicpanda.com,lst.de,lists.infradead.org,zeniv.linux.org.uk,suse.cz,lists.linux.dev,kvack.org,lists.ubuntu.com,lists.xenproject.org,lists.ozlabs.org,gmail.com];
-	TO_DN_SOME(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCVD_TLS_LAST(0.00)[];
 	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.cz:email,imap1.dmz-prg2.suse.org:helo]
-X-Spam-Score: -12.80
+	ARC_NA(0.00)[];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	FREEMAIL_ENVRCPT(0.00)[gmx.de];
+	DKIM_TRACE(0.00)[suse.de:+];
+	RCPT_COUNT_TWELVE(0.00)[14];
+	RCVD_COUNT_TWO(0.00)[2];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	MID_RHS_MATCH_FROM(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.com:url,suse.de:dkim]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Action: no action
+X-Spam-Flag: NO
+X-Spam-Score: -13.50
+X-Spam-Level: 
+X-Rspamd-Queue-Id: 8F8C11F7E9
 
-On Tue 10-11-26 10:14:50, Christian Brauner wrote:
-> Currently loop accepts any regular file that implements ->read_iter() as
-> a backing file and any that also implements ->write_iter() as a writable
-> one. That includes files on procfs, sysfs and other pseudo filesystems.
-> For example, /proc/kcore attaches read-only as a loop device the size of
-> the kernel's virtual address space, 64 PiB with 5-level paging. sysfs
-> attributes attach read-write as 4096 byte loop devices. Writing a block
-> to the loop device of /sys/kernel/mm/transparent_hugepage/enabled
-> changes the THP setting.
-> 
-> That's not just nonsensical, it can be abused. Loop calls ->read_iter()
-> and ->write_iter() of the backing file directly from its worker which
-> runs with kernel credentials. But pseudo files enforce part of their
-> access rules at read and write time against current. Dozens of sysfs
-> ->show() and ->store() methods call capable(). Behind a loop device all
-> of these checks are done against the loop worker instead of the task
-> that opened the file. And setting up a loop device requires no
-> capabilities, only access to the device nodes. So on v7.4-rc1:
-> 
-> - uid 0 without any capabilities can't write to /sys/kernel/reboot/mode
->   as mode_store() requires CAP_SYS_BOOT. Writing "warm" through a loop
->   device works.
-> 
-> - uid 0 without any capabilities can't read the files in
->   /sys/firmware/dmi/entries/*/ as dmi_sysfs_attr_show() requires
->   CAP_SYS_ADMIN. Reading them through a loop device works.
-> 
-> - An unprivileged container that was handed a loop device can't change
->   gro_flush_timeout of its own network devices as
->   gro_flush_timeout_store() requires CAP_NET_ADMIN in the initial user
->   namespace. Writing it through a loop device works.
-> 
-> The same goes for hard_offline_page, the md and sd attributes, rfkill
-> and others.
-> 
-> Refuse files on pseudo filesystems as loop backing files. Note that
-> file_is_pseudo() looks through overlayfs so stacking overlayfs on top of
-> sysfs doesn't get around this.
-> 
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+Hi
 
-Looks good. Feel free to add:
-
-Reviewed-by: Jan Kara <jack@suse.cz>
-
-								Honza
-
+Am 10.11.26 um 09:56 schrieb wuqianhai@loongson.cn:
+> From: wuqianhai <wuqianhai@loongson.cn>
+>
+> LoongArch defines and initializes sysfb_primary_display only when
+> CONFIG_SYSFB or CONFIG_EFI_EARLYCON is enabled.  The PCI VGA arbiter and
+> the framebuffer console need the firmware framebuffer information through
+> screen_info whenever CONFIG_SCREEN_INFO is enabled, even if neither of
+> those options is set.
+>
+> Drop the guards so sysfb_primary_display is always defined and
+> initialized, and its EFI stub alias is always provided, mirroring x86.
+> This avoids selecting SYSFB just to obtain the symbol.
+>
+> Signed-off-by: wuqianhai <wuqianhai@loongson.cn>
 > ---
->  drivers/block/loop.c | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/drivers/block/loop.c b/drivers/block/loop.c
-> index c96e35c3ef42..1482580a1979 100644
-> --- a/drivers/block/loop.c
-> +++ b/drivers/block/loop.c
-> @@ -537,6 +537,9 @@ static int loop_check_backing_file(struct file *file)
->  	if ((file->f_mode & FMODE_WRITE) && !file->f_op->write_iter)
->  		return -EINVAL;
->  
-> +	if (file_is_pseudo(file))
-> +		return -EINVAL;
-> +
->  	return 0;
->  }
->  
-> 
-> -- 
-> 2.53.0
-> 
+>   arch/loongarch/kernel/efi.c        | 5 +----
+>   arch/loongarch/kernel/image-vars.h | 2 --
+>   2 files changed, 1 insertion(+), 6 deletions(-)
+>
+> diff --git a/arch/loongarch/kernel/efi.c b/arch/loongarch/kernel/efi.c
+> index 69dd83f8082f..e491a82b2e0d 100644
+> --- a/arch/loongarch/kernel/efi.c
+> +++ b/arch/loongarch/kernel/efi.c
+> @@ -74,10 +74,8 @@ bool efi_poweroff_required(void)
+>   
+>   unsigned long __initdata primary_display_table = EFI_INVALID_TABLE_ADDR;
+>   
+> -#if defined(CONFIG_SYSFB) || defined(CONFIG_EFI_EARLYCON)
+>   struct sysfb_display_info sysfb_primary_display __section(".data");
+>   EXPORT_SYMBOL_GPL(sysfb_primary_display);
+> -#endif
+
+I never understood how linking works. I would assume that this symbol 
+interferes with the shared one at [1]. Can't loongarch use that as well?
+
+[1] 
+https://elixir.bootlin.com/linux/v7.3.1/source/drivers/firmware/efi/efi-init.c#L64
+
+Best regards
+Thomas
+
+>   
+>   static void __init init_primary_display(void)
+>   {
+> @@ -129,8 +127,7 @@ void __init efi_init(void)
+>   
+>   	set_bit(EFI_CONFIG_TABLES, &efi.flags);
+>   
+> -	if (IS_ENABLED(CONFIG_EFI_EARLYCON) || IS_ENABLED(CONFIG_SYSFB))
+> -		init_primary_display();
+> +	init_primary_display();
+>   
+>   	if (boot_memmap == EFI_INVALID_TABLE_ADDR)
+>   		return;
+> diff --git a/arch/loongarch/kernel/image-vars.h b/arch/loongarch/kernel/image-vars.h
+> index e557ebd46c2b..4d1d7978553a 100644
+> --- a/arch/loongarch/kernel/image-vars.h
+> +++ b/arch/loongarch/kernel/image-vars.h
+> @@ -11,9 +11,7 @@ __efistub_strcmp		= strcmp;
+>   __efistub_kernel_entry		= kernel_entry;
+>   __efistub_kernel_asize		= kernel_asize;
+>   __efistub_kernel_fsize		= kernel_fsize;
+> -#if defined(CONFIG_EFI_EARLYCON) || defined(CONFIG_SYSFB)
+>   __efistub_sysfb_primary_display	= sysfb_primary_display;
+> -#endif
+>   
+>   #endif
+>   
+
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+--
+Thomas Zimmermann
+Graphics Driver Developer
+SUSE Software Solutions Germany GmbH
+Frankenstr. 146, 90461 Nürnberg, Germany, www.suse.com
+GF: Stefan Gaiser, Jochen Jaser, Abhinav Puri, (HRB 36809, AG Nürnberg)
+
+
