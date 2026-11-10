@@ -1,104 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794322008;
-	b=BBzO37faRxvaWSxLgwL7fz+AymGCHtcpgw8QnGvTXzLMO+V/esYAVFlfiEplWUFy+UME
-	 /mLig7rstleG4BYfPlkIAYJ0uF4L7dymE/IgukbhEf4TJZxiHwhJKjPLfRO65PfxJTZ4n
-	 VmOVCorSuMTLELL+mhacUXZm2atF9HQQkuXmm5Wk8SUAOhVUJKU+kzZDX2FoscHkll3xS
-	 t00DtOUQNQ5nk0bbe3eP56nEC/dDjS6k4QvTdeoNwUbY/qn86ZEc858zRqfYC3hBAVgpk
-	 SHaI1Th1maxKk+hLHwYR0szNSaRmM8oePqNWLaTARVxGh1ZHOg63hW4Pgq2fNbV5WWg==
+	t=1794322549;
+	b=yCDXNxsGT/yrdvS5aDbxt9QWi/67ooLgb4x7UYxobjBHL/uhKtCjTs64014oRfgxVbI4
+	 O6b99TJX0mcW2/MRayJhflzCn6amYiniSQfPyKHHpM7605KaRqsRFNj0kWmis1sYkEBiv
+	 ffeyRaWt+lMepgTM9FVYasE+zrgF8dHtyw4dUXmXzXZlVxIKrmetF/QT3RLOjTniBQYP3
+	 XurIxTdlTswlgSKnp516UyfxPONBC6/kURo/qwBFZBYbcEeW5YGUd9rK4eyUhSeiGhHuK
+	 FTgrZXbPzEYhsXT/Qd9MSNwAfzCMrSXvhnxIFnEstceIOi9RmaHuYlxrxFDGiWe/ohA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794322008;
-	h=DMARC-Filter:Received:DKIM-Signature:DKIM-Signature:DKIM-Signature:
-	 DKIM-Signature:Received:Received:Message-ID:Date:MIME-Version:
-	 User-Agent:Subject:To:Cc:References:Content-Language:From:Autocrypt:
-	 In-Reply-To:Content-Type:Content-Transfer-Encoding:X-Spamd-Result:
-	 X-Rspamd-Server:X-Rspamd-Action:X-Spam-Flag:X-Spam-Score:X-Spam-Level:
-	 X-Rspamd-Queue-Id;
-	bh=3fpw5vkQV00MZzYQ5OK3lZxe4BbABKYr3Pz4v+FktUg=;
-	b=XDbNWKnWSUCfxC1J21eYEp5zRUi8M96S4w4XOvWgz/MqepGo8rTN6o+gQvFOaWTyTTH2
-	 LJ4sghQ1/uhApgRozWr7yl3Tvuj3YphWM1ZrI9jA942o5TFmXf/9GYaA+zJ1n9gMqrVcv
-	 J942LXhdERPrkQtXVl/OQZNG2uqwYGuZi27LzfwwW9ll3V0pzDG/MHCg4pjjok9qkWcLH
-	 cMENNy9dfxBme2J+aY5Xlzsi9aq+dJZj0COtSe6v07r/2V3SD56Vl1QXw7nn4ryQokGOt
-	 nGrLyytzXiNg11emxRr/J76dIHT+B3ccSfpOWMLItnJyFq+c8+27c2rsMurghyFXqvw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794322549;
+	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
+	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	 MIME-Version:X-ThreadId:Date:From:To:Cc:Message-Id:In-Reply-To:
+	 References:Subject:Content-Type:Content-Transfer-Encoding;
+	bh=zSjXnOetE5oKa5v8S9LBrUhcmgizc8ch93AeD/W6gEI=;
+	b=d2IcXSEVbVXFqDkS10/KP8lc3kHMGnVTqbPQ02a/hd2KBjjDPNAiAyU+HixpD+j2HkZH
+	 KGngR46XaGLTRECz1WWUyC6a3rgX3GI6yVHYPYH4HZbGcWVZH0b5sNgF4s6hOxHFTPvX6
+	 Mh/oQ+irELtztP4PCVl+gCl/dTEz4NMDzYOZ1yK1m7tc16oSJ6aQ0410VpWQWT41U9NPV
+	 tNqW46E4biIDyiD3W9uVY7LS6WppTYKg/RuHsmY9/mqzQ2lB5WeW8U+0l8uaa8/4Jn+Wf
+	 qZlh3tBIRJc4E/294YrWiGI2UjSosK5xy3nZLoZ9FXlzhC0zya4QnZfPYMwcCTtWPJA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=suse.de;
-	spf=pass smtp.mailfrom=suse.de;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=vGXUB5CM;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b="5vwS/Kh1";
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=vGXUB5CM;
-	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b="5vwS/Kh1";
-	arc=none smtp.remote-ip=195.135.223.130
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="Tcwd7Q8/";
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BE57606A336;
-	Tue, 10 Nov 2026 14:46:47 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6BE57606A336
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B09F606A325;
+	Tue, 10 Nov 2026 14:55:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=vGXUB5CM;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=5vwS/Kh1;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=vGXUB5CM;
-	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=5vwS/Kh1
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 74A6121F09;
-	Tue, 10 Nov 2026 14:46:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1794322005; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=3fpw5vkQV00MZzYQ5OK3lZxe4BbABKYr3Pz4v+FktUg=;
-	b=vGXUB5CMFdvnAKPLlYK1zWAQuk/FiBryrNG327MvzaMIDpJzZzfPBVkRGlnt9oyVwbtOIO
-	nnZPHGMWffgmh1tPmMhTPKB8lg4In8N339yacvLbiXGmIv6WZ5kSHLZBePOy9B9h74/NeV
-	HA6fDdfsBf9k3YSGKrPyMdc4pkaC5XE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1794322005;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=3fpw5vkQV00MZzYQ5OK3lZxe4BbABKYr3Pz4v+FktUg=;
-	b=5vwS/Kh1ntJmKOvwdlC32GY7RBrN5Z8bSngFoKazMeGR1LlCBEKsxMH+AoxIbo2MjY+jrO
-	AdDZrTNYuBOqvtAg==
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=vGXUB5CM;
-	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b="5vwS/Kh1"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1794322005; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=3fpw5vkQV00MZzYQ5OK3lZxe4BbABKYr3Pz4v+FktUg=;
-	b=vGXUB5CMFdvnAKPLlYK1zWAQuk/FiBryrNG327MvzaMIDpJzZzfPBVkRGlnt9oyVwbtOIO
-	nnZPHGMWffgmh1tPmMhTPKB8lg4In8N339yacvLbiXGmIv6WZ5kSHLZBePOy9B9h74/NeV
-	HA6fDdfsBf9k3YSGKrPyMdc4pkaC5XE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1794322005;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=3fpw5vkQV00MZzYQ5OK3lZxe4BbABKYr3Pz4v+FktUg=;
-	b=5vwS/Kh1ntJmKOvwdlC32GY7RBrN5Z8bSngFoKazMeGR1LlCBEKsxMH+AoxIbo2MjY+jrO
-	AdDZrTNYuBOqvtAg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id EDA1A1339F;
-	Tue, 10 Nov 2026 14:46:44 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id HNSjMFQu82rQNwAAD6G6ig
-	(envelope-from <tzimmermann@suse.de>); Tue, 10 Nov 2026 14:46:44 +0000
-Message-ID: <ad517faa-3c8d-43a5-a3d6-8cd6f046f757@suse.de>
-Date: Tue, 10 Nov 2026 15:46:44 +0100
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Tcwd7Q8/
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 90E4C1F008A3;
+	Tue, 10 Nov 2026 14:55:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794322549;
+	bh=zSjXnOetE5oKa5v8S9LBrUhcmgizc8ch93AeD/W6gEI=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=Tcwd7Q8/BgCZr0AJA+q53XtkaEXHNBQAptcCIoE3INOkDT8T++JPLwFgnijhu6LIp
+	 QoJCfJqeBNhK26M7LL9xd4MzXxKVISVDOEW1cYrYEyBiFKRmR2hdLsioEex6m+2Rc5
+	 2AgfVzjCsuMDtAVvAKOrFX1qXAfAYeUYjVl2rownrESZ29DXkmWTHYRM7alPMZLQ6M
+	 DZH727vPlYTYzZb+oco6o/Bkhlk4m5LBSezhlvCb0bhHHiXIMbUlIMDObU3PIfYN46
+	 k7napT6YlagBuXnh78UDBF3WtFBwiJfcd2zG9H8WTZ7Zkc62YNaLopDBhwYuzfc472
+	 iPuH2WgxnRVeQ==
+Received: from phl-compute-10.internal (phl-compute-10.internal [10.202.2.50])
+	by mailfauth.phl.internal (Postfix) with ESMTP id B2761F40069;
+	Tue, 10 Nov 2026 09:55:47 -0500 (EST)
+Received: from phl-imap-15 ([10.202.2.104])
+  by phl-compute-10.internal (MEProxy); Tue, 10 Nov 2026 09:55:47 -0500
+X-ME-Sender: <xms:czDzahOxHA_IGoa_FJdwV0BFPQw-nSdKO6kKGUN5puCfrxj2G2sK_w>
+    <xme:czDzauxKYck9zKSqhpZaTHxPL9lIOi42MPCnrNTR7eaQqnpkmbe8dEx0PuhUogQkg
+    tb2W38kOzksOJlDJ4uTGR7-rkbiwtctKuF5oVtOm556TqS1yjjUw9U>
+X-ME-Proxy-Cause: dmFkZTE8jIcOTzT9axQiHwEjJScKTRkNH3ZVhgYbwXrBMnGwr/PZk5kUfGxy+RC0ezRM03
+    2Axgl1A3kstcvJQqQJ+tEirxS634eXBQm2b+wwk+7byJnMoEdYYw7Lfb7185Bnwoliq1Mt
+    XZ8lliUhOZ8AACZwbl4T2Tc7NYRy4GvnOujvSweRGBGAD4OQXGjTipshhA5n2cB6RQlk4p
+    zmTRFZMOMjoY8cueG7e24ndoN2R/gq/lSNUbCVZu/PUOrAg9f6aovYYa9SSKBBYGtgXYMN
+    0qbpFOi4S4kwXDcxuFcZlmK43Jt2p3+0W9uSzX8U3QJynW/odwma6a1hhpAbc8zEaSnbtk
+    CFI/IAk8YwHJ0hyg7qaH8oiiVC3V/1ZiobIhoPO231VrqQk5oaP4jl+jS7yMnBbNxynDhF
+    /tTsfxMaF/A9xwJBu4sKm+3lzwzMEEbqt79mE4Lq/VAgowI2/Z3gVdFMTE48DIB1KcUvAe
+    gGFx1Bx/tQmWXfeE09uUSkiQ2KYN+OrlgTMnrepjVRxO73rY2t7sodPh2AhJIAG1ZYT5ga
+    3nwb3G0mQrnmFOm4Qa4C2JwbajMdJBWMeam4uZKQraajbqcBHzCXvMtQm1fQbm3S2rexTo
+    KA6wW/vDabSoXlut9Nm5uKTSjp20eGQ9lpLOxOz31c8eLm8Mlp10sjOYDNZA
+X-ME-Proxy: <xmx:czDzaoanLMdLTFqhzMhrxv5H09chgFe3GMMhc1XBCkfiMJQ_ckta8Q>
+    <xmx:czDzauzWTK7EYc76X_4JSXvP7e9Yqejr2yggz6O-tuvCpsEWBQGUaQ>
+    <xmx:czDzasWQEDY8T3p3eaJhPzKDKFxYGPCQnFb1-n-prg7tBs3f0gJpWA>
+    <xmx:czDzaqbpJaYjvNkk5zy3xoww5EsXMA5_awnvU25FYCgSdhgQQ41Hfg>
+    <xmx:czDzavOKwCwywHfR1JNgdmNe33GAeUXrw31wmu_3YBRbMsucyl2ChD_t>
+Feedback-ID: ifa6e4810:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id 7D2B9780070; Tue, 10 Nov 2026 09:55:47 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -108,139 +77,71 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 2/6] LoongArch/PCI: Refresh screen_info after resource
- assignment
-To: wuqianhai@loongson.cn, chenhuacai@kernel.org, kernel@xen0n.name,
- deller@gmx.de, bhelgaas@google.com
-Cc: ardb@kernel.org, ilias.apalodimas@linaro.org, javierm@redhat.com,
- loongarch@lists.linux.dev, linux-pci@vger.kernel.org,
- linux-efi@vger.kernel.org, dri-devel@lists.freedesktop.org,
- linux-fbdev@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20261029033440.973077-1-wuqianhai@loongson.cn>
- <20261110085617.2626835-1-wuqianhai@loongson.cn>
- <20261110085617.2626835-3-wuqianhai@loongson.cn>
-Content-Language: en-US
-From: Thomas Zimmermann <tzimmermann@suse.de>
-Autocrypt: addr=tzimmermann@suse.de; keydata=
- xsBNBFs50uABCADEHPidWt974CaxBVbrIBwqcq/WURinJ3+2WlIrKWspiP83vfZKaXhFYsdg
- XH47fDVbPPj+d6tQrw5lPQCyqjwrCPYnq3WlIBnGPJ4/jreTL6V+qfKRDlGLWFjZcsrPJGE0
- BeB5BbqP5erN1qylK9i3gPoQjXGhpBpQYwRrEyQyjuvk+Ev0K1Jc5tVDeJAuau3TGNgah4Yc
- hdHm3bkPjz9EErV85RwvImQ1dptvx6s7xzwXTgGAsaYZsL8WCwDaTuqFa1d1jjlaxg6+tZsB
- 9GluwvIhSezPgnEmimZDkGnZRRSFiGP8yjqTjjWuf0bSj5rUnTGiyLyRZRNGcXmu6hjlABEB
- AAHNJ1Rob21hcyBaaW1tZXJtYW5uIDx0emltbWVybWFubkBzdXNlLmRlPsLAjgQTAQgAOAIb
- AwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftODH
- AAoJEGgNwR1TC3ojx1wH/0hKGWugiqDgLNXLRD/4TfHBEKmxIrmfu9Z5t7vwUKfwhFL6hqvo
- lXPJJKQpQ2z8+X2vZm/slsLn7J1yjrOsoJhKABDi+3QWWSGkaGwRJAdPVVyJMfJRNNNIKwVb
- U6B1BkX2XDKDGffF4TxlOpSQzdtNI/9gleOoUA8+jy8knnDYzjBNOZqLG2FuTdicBXblz0Mf
- vg41gd9kCwYXDnD91rJU8tzylXv03E75NCaTxTM+FBXPmsAVYQ4GYhhgFt8S2UWMoaaABLDe
- 7l5FdnLdDEcbmd8uLU2CaG4W2cLrUaI4jz2XbkcPQkqTQ3EB67hYkjiEE6Zy3ggOitiQGcqp
- j//OwE0EWznS4AEIAMYmP4M/V+T5RY5at/g7rUdNsLhWv1APYrh9RQefODYHrNRHUE9eosYb
- T6XMryR9hT8XlGOYRwKWwiQBoWSDiTMo/Xi29jUnn4BXfI2px2DTXwc22LKtLAgTRjP+qbU6
- 3Y0xnQN29UGDbYgyyK51DW3H0If2a3JNsheAAK+Xc9baj0LGIc8T9uiEWHBnCH+RdhgATnWW
- GKdDegUR5BkDfDg5O/FISymJBHx2Dyoklv5g4BzkgqTqwmaYzsl8UxZKvbaxq0zbehDda8lv
- hFXodNFMAgTLJlLuDYOGLK2AwbrS3Sp0AEbkpdJBb44qVlGm5bApZouHeJ/+n+7r12+lqdsA
- EQEAAcLAdgQYAQgAIAIbDBYhBHIX+6yM6c9jRKFo5WgNwR1TC3ojBQJftOH6AAoJEGgNwR1T
- C3ojVSkIALpAPkIJPQoURPb1VWjh34l0HlglmYHvZszJWTXYwavHR8+k6Baa6H7ufXNQtThR
- yIxJrQLW6rV5lm7TjhffEhxVCn37+cg0zZ3j7zIsSS0rx/aMwi6VhFJA5hfn3T0TtrijKP4A
- SAQO9xD1Zk9/61JWk8OysuIh7MXkl0fxbRKWE93XeQBhIJHQfnc+YBLprdnxR446Sh8Wn/2D
- Ya8cavuWf2zrB6cZurs048xe0UbSW5AOSo4V9M0jzYI4nZqTmPxYyXbm30Kvmz0rYVRaitYJ
- 4kyYYMhuULvrJDMjZRvaNe52tkKAvMevcGdt38H4KSVXAylqyQOW5zvPc4/sq9c=
-In-Reply-To: <20261110085617.2626835-3-wuqianhai@loongson.cn>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Spamd-Result: default: False [-13.50 / 50.00];
-	SUSE_INTERNAL_BYPASS(-9.00)[];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	XM_UA_NO_VERSION(0.01)[];
-	MX_GOOD(-0.01)[];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	FREEMAIL_TO(0.00)[loongson.cn,kernel.org,xen0n.name,gmx.de,google.com];
-	MIME_TRACE(0.00)[0:+];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	ARC_NA(0.00)[];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	FREEMAIL_ENVRCPT(0.00)[gmx.de];
-	DKIM_TRACE(0.00)[suse.de:+];
-	RCPT_COUNT_TWELVE(0.00)[14];
-	RCVD_COUNT_TWO(0.00)[2];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	MID_RHS_MATCH_FROM(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:url,loongson.cn:email,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.de:dkim]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Rspamd-Action: no action
-X-Spam-Flag: NO
-X-Spam-Score: -13.50
-X-Spam-Level: 
-X-Rspamd-Queue-Id: 74A6121F09
+X-ThreadId: AKCAcWHxcB8B
+Date: Tue, 10 Nov 2026 09:55:27 -0500
+From: "Chuck Lever" <cel@kernel.org>
+To: "Christian Brauner" <brauner@kernel.org>, linux-fsdevel@vger.kernel.org
+Cc: "Jann Horn" <jannh@google.com>, "Chris Mason" <mason@kernel.org>,
+ "Josef Bacik" <josef@toxicpanda.com>, "Christoph Hellwig" <hch@lst.de>,
+ "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
+ linux-kernel@vger.kernel.org, linux-nvme@lists.infradead.org,
+ "Alexander Viro" <viro@zeniv.linux.org.uk>, "Jan Kara" <jack@suse.cz>,
+ "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
+ target-devel@vger.kernel.org, driver-core@lists.linux.dev,
+ linux-mm@kvack.org, bpf@vger.kernel.org,
+ linux-security-module@vger.kernel.org, selinux@vger.kernel.org,
+ apparmor@lists.ubuntu.com, linux-nfs@vger.kernel.org, netdev@vger.kernel.org,
+ fuse-devel@lists.linux.dev, linux-efi@vger.kernel.org,
+ xen-devel@lists.xenproject.org, ocfs2-devel@lists.linux.dev,
+ linux-s390@vger.kernel.org, "Linuxppc Dev" <linuxppc-dev@lists.ozlabs.org>,
+ linux-usb@vger.kernel.org, "Amir Goldstein" <amir73il@gmail.com>,
+ linux-erofs@lists.ozlabs.org, linux-kselftest@vger.kernel.org
+Message-Id: <47b8b8cb-aadb-4f84-aa5c-c5a74d73fac1@app.fastmail.com>
+In-Reply-To: <20261110-work-loop-pseudo-v1-21-4c998976c6c7@kernel.org>
+References: <20261110-work-loop-pseudo-v1-0-4c998976c6c7@kernel.org>
+ <20261110-work-loop-pseudo-v1-21-4c998976c6c7@kernel.org>
+Subject: Re: [PATCH RFC 21/41] nfsd: use fc_init_pseudo()
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-Hi
 
-Am 10.11.26 um 09:56 schrieb wuqianhai@loongson.cn:
-> From: wuqianhai <wuqianhai@loongson.cn>
+
+On Tue, Nov 10, 2026, at 4:14 AM, Christian Brauner wrote:
+> Initialize the nfsd filesystem as a pseudo filesystem. This raises
+> SB_I_PSEUDO and also SB_I_NOEXEC and SB_I_NODEV. It never holds
+> executables or device nodes.
 >
-> PCI resource assignment runs from acpi_init() at subsys_initcall time.
-> The firmware framebuffer BAR can be relocated, leaving screen_info's
-> lfb_base stale.  vga_arb_device_init() runs later at subsys_initcall_sync
-> time and reads screen_info to identify the firmware default VGA device.
->
-> Update screen_info through the generic screen_info_apply_fixups() helper
-> right after the root bus resources have been assigned, so both the VGA
-> arbiter and sysfb_init() observe the final framebuffer address.
-
-I don't know much about the internals of the PCI subsystem.  But I would 
-assume that there's a common function that sets up PCI resources on all 
-architectures. And this is the place where we'd want to call 
-screen_info_apply_fixups().
-
-Best regards
-Thomas
-
-
->
-> Signed-off-by: wuqianhai <wuqianhai@loongson.cn>
+> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
 > ---
->   arch/loongarch/pci/acpi.c | 4 ++++
->   1 file changed, 4 insertions(+)
+>  fs/nfsd/nfsctl.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/arch/loongarch/pci/acpi.c b/arch/loongarch/pci/acpi.c
-> index ccbcea61fcd9..cb313ff67f7e 100644
-> --- a/arch/loongarch/pci/acpi.c
-> +++ b/arch/loongarch/pci/acpi.c
+> diff --git a/fs/nfsd/nfsctl.c b/fs/nfsd/nfsctl.c
+> index f32311f2d7cf..ce2666deddbd 100644
+> --- a/fs/nfsd/nfsctl.c
+> +++ b/fs/nfsd/nfsctl.c
 > @@ -9,6 +9,7 @@
->   #include <linux/slab.h>
->   #include <linux/pci-acpi.h>
->   #include <linux/pci-ecam.h>
-> +#include <linux/screen_info.h>
->   
->   #include <asm/pci.h>
->   #include <asm/numa.h>
-> @@ -256,6 +257,9 @@ struct pci_bus *pci_acpi_scan_root(struct acpi_pci_root *root)
->   		 */
->   		pci_assign_unassigned_root_bus_resources(bus);
->   
-> +		if (IS_ENABLED(CONFIG_SCREEN_INFO))
-> +			screen_info_apply_fixups();
-> +
->   		list_for_each_entry(child, &bus->children, node)
->   			pcie_bus_configure_settings(child);
->   	}
+>  #include <linux/namei.h>
+>  #include <linux/ctype.h>
+>  #include <linux/fs_context.h>
+> +#include <linux/pseudo_fs.h>
+> 
+>  #include <linux/sunrpc/cache.h>
+>  #include <linux/sunrpc/svcsock.h>
+> @@ -1375,6 +1376,7 @@ static int nfsd_init_fs_context(struct fs_context *fc)
+>  {
+>  	put_user_ns(fc->user_ns);
+>  	fc->user_ns = get_user_ns(fc->net_ns->user_ns);
+> +	fc_init_pseudo(fc);
+>  	fc->ops = &nfsd_fs_context_ops;
+>  	return 0;
+>  }
+>
+> -- 
+> 2.53.0
+
+Acked-by: Chuck Lever <cel@kernel.org>
+
 
 -- 
---
-Thomas Zimmermann
-Graphics Driver Developer
-SUSE Software Solutions Germany GmbH
-Frankenstr. 146, 90461 Nürnberg, Germany, www.suse.com
-GF: Stefan Gaiser, Jochen Jaser, Abhinav Puri, (HRB 36809, AG Nürnberg)
-
-
+Chuck Lever (Come to NFS bake-a-thon! https://nfsv4bat.org)
