@@ -1,56 +1,72 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=82.195.75.108
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794389828;
-	b=Rtca4QfuD4Vdl9/+ivx6wUsknxcgtb4Sv5kuPyC50j0mmhU/ESAD4P7fuW1ffR3RCax7
-	 TOrVBJdu085tV4JmpZflw/sWoNsDXuXbWyzQ6/xQRB26kVyNT866vhpnUvmEg7SK8NKV2
-	 302IxzS0iSLukWlYseK+kdJ4vs0108Pqbx8BMLP9iIEORDxAuV6ARAoGkXUYsPA/s7UxK
-	 BanaOt6BCYfk0Q2FOaTdBm9wX1knDLzJUrUYivoU7uTAsY5CO5qUsku1+vSovrOV0xMM9
-	 W29o/pWWNTY5z7n0BVvgjjYS78pu0Fb2JbHhs+Kh1BZw4M2k5m1YuxQ+eanPbNkMTdg==
+	t=1794390418;
+	b=Nhg17AHd9HIsgif4fVjmYtD/xKXR+uvPcs3IYUG3gJChisY2yxpIKMyBa6l0T1/NbsSq
+	 EYYJGywpl7EdxgBl8jYPljIws1lM368Pqk9GPcDVGGI67G44dCXiSZFGmgdVgWoShTCRP
+	 wIrtM6S0f/VLX+QQSIXgFVzoyeoglxgdJRyjtGFjGoZ1SG+Hrr9gjHPlRDNzktmrCt95J
+	 8bBRmZYy2HeXjR+QxNau+0VzK9STPFreHMv90uwyI7klW1CopIxlfUPgEViqIxj1EhRnH
+	 U94oxaU/dZIdfz4QWzSSg1O69Wt6cexCjRZFKveTyhZKPD+rxl+g/HPH8za6UmRWJqw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794389828;
-	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
-	bh=V3OCk+N8SB0awCd36HtzgSzqG30/oaImEUc9AZVKUng=;
-	b=wzBZurbBF98D6A8cQwjmPZC2kjYZIaRVsP7GXo/dWF6fUR/PFVY5jCABCvUE3kEN7XGU
-	 MjMxe83E06HoIhz6YPCagOiyOUs+yCrZuvn5XiED88jBp3oBQq+GEfZmMY/AQJc6kUyS/
-	 7IA84gKPpMPaDpdQKuBHDhC6ZV0Zpte7yLFTEwQ6ZMt2Si1UPSjWsjJj/kirXFdiVfpBW
-	 MtPNhscXVCUP7l8Y7KRiX7Ylaix1vqXw3uq9r+Vg4uprA6GHngWF1SxAnGf2Gmanielld
-	 nKgdTZj1f4gz2dNUK/xm6Bpga6uFhb8VWreX40zk/hFTGIt0he8S0NgjxL+e1tATupQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794390418;
+	h=DMARC-Filter:DKIM-Signature:Received:Date:From:To:Cc:Subject:
+	 Message-ID:References:MIME-Version:Content-Type:Content-Disposition:
+	 In-Reply-To:X-Debian-User;
+	bh=g4FJ8o8UQUtyD0eGI0sUCpicqPvdI4Vdc4LMM0bmn0w=;
+	b=Hswx4nOcAxEn2mYXM+ZJr7H/uWd6tZV0QzCT4hYr1fl+14rNU9s+/ViqQ9z1Ugna1oRS
+	 BFkTk1j+MqQiagMQvynOawuKEKyONjBiV18uaMTwiPLVAq7qzB8keqRfSSA42kc6ODfXz
+	 i1+GfJfXQwnp8403YtvM1/TYnjXvY21mSx2W/lDKVBjpVKjMcIfgQdOpTRQe1RmRd7ZaQ
+	 bXcnFeiSpsBlotq3RK0uh3T+hRiWbt4uovHA8I7iYaz1An7qvtsK2GXwM4oWNwVjWkjHF
+	 06u2vbn8KvnfDrbtUbRfIimbv4xggVXvUlwGDZG1XSbiMUrd1DLUsP0sDl3FiaimEdg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=S3A4M8PG;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	dmarc=pass header.from=debian.org;
+	spf=pass smtp.mailfrom=debian.org;
+	dkim=pass header.d=debian.org header.i=@debian.org header.a=rsa-sha256 header.s=smtpauto.stravinsky header.b=cmZW0raJ;
+	arc=none smtp.remote-ip=82.195.75.108
+Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange ECDHE (prime256v1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8B07606A324;
-	Wed, 11 Nov 2026 09:37:08 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A60BA606A332;
+	Wed, 11 Nov 2026 09:46:57 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A60BA606A332
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=debian.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=debian.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=S3A4M8PG
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 13D071F00A05;
-	Wed, 11 Nov 2026 09:37:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794389828;
-	bh=V3OCk+N8SB0awCd36HtzgSzqG30/oaImEUc9AZVKUng=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=S3A4M8PGrXZZOjpczvfRgaHWV379jGtDI+QSGgXmCBtKj/ifTm4o2c/Ak/jI1r70F
-	 2G46uDCdpQPL2kqtHqHS5rV/1XDUQoXAxQT2YrsX0fEoyBXHynKrsDXD6F4ZFfE9Iv
-	 rg9rJLzMKxS14WpcNgCywWHctZHbfmICCX40LkQshwDheWrF1im1dw2Juu+6OxXvsI
-	 QR+QoVJrLogbfPB2tmdB2QXkbfq6pDu14YuQu21BrehPbP86A/CS6YUpMGnawv5j+g
-	 vvsgo74iOZRxBtosfh27sXCrUErO6RMDC9/L5pG6pwW800na+FQoE9k4Xsp5ln0jFn
-	 2jqesqNPs4+vQ==
-Date: Wed, 11 Nov 2026 10:37:02 +0100
-From: Christian Brauner <brauner@kernel.org>
-To: sashiko-reviews@lists.linux.dev
-Cc: Jan Kara <jack@suse.com>, Al Viro <viro@zeniv.linux.org.uk>, 
-	linux-ext4@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, 
-	linux-mtd@lists.infradead.org, dsterba@suse.cz, tytso@mit.edu, Mark Fasheh <mark@fasheh.com>, 
-	Joel Becker <jlbec@evilplan.org>, Joseph Qi <joseph.qi@linux.alibaba.com>
-Subject: Re: [PATCH v2 28/34] ubifs: don't set SB_RDONLY after errors
-Message-ID: <20261111-perfekt-dekaden-bildband-0e31f4bd1858@brauner>
-References: <20261029-work-fs-sb_rdonly-v2-0-2f44f64f0b66@kernel.org>
- <20261029-work-fs-sb_rdonly-v2-28-2f44f64f0b66@kernel.org>
- <sashiko-outbox-191247@kernel.org>
+	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.a=rsa-sha256 header.s=smtpauto.stravinsky header.b=cmZW0raJ
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
+	s=smtpauto.stravinsky; h=X-Debian-User:In-Reply-To:Content-Type:MIME-Version:
+	References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=g4FJ8o8UQUtyD0eGI0sUCpicqPvdI4Vdc4LMM0bmn0w=; b=cmZW0raJpZImC504fK0B0kMd2h
+	XJQXfLj15TrbtRxuoXIll7+dYj88ZVAl2AayT9vhDBlAQ57+Eho/cFEk5It94wIbKS4EH4G+cdutI
+	0K9jgabrgunrLX95HA3KOWeYRz+hLh5iGe5EyD3w5xx8w9MzCtlstOcNUcfrAtIPd3RxiWEjnELaD
+	hbo41pU2e/eygmvhOngKp7971UVKKEY71/mIvuWf0WfaOur34IyUdpGFowB9/oVJFRm81ZxsZDxLw
+	5M54Kif6OKPedXxyOCO9YpK4/4uqCIxZE2p81NHj3kV9mf9cnMGZSmbBCsLntHmPvgWT1OTOymjci
+	CwvzesXA==;
+Received: from authenticated-user
+	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
+	(Exim 4.96)
+	(envelope-from <leitao@debian.org>)
+	id 1xR4up-00D5nW-2D;
+	Wed, 11 Nov 2026 09:46:51 +0000
+Date: Wed, 11 Nov 2026 01:46:43 -0800
+From: Breno Leitao <leitao@debian.org>
+To: Christian Brauner <brauner@kernel.org>
+Cc: linux-fsdevel@vger.kernel.org, Jann Horn <jannh@google.com>, 
+	Chris Mason <mason@kernel.org>, Josef Bacik <josef@toxicpanda.com>, 
+	Christoph Hellwig <hch@lst.de>, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-nvme@lists.infradead.org, Alexander Viro <viro@zeniv.linux.org.uk>, 
+	Jan Kara <jack@suse.cz>, linux-scsi@vger.kernel.org, target-devel@vger.kernel.org, 
+	driver-core@lists.linux.dev, linux-mm@kvack.org, bpf@vger.kernel.org, 
+	linux-security-module@vger.kernel.org, selinux@vger.kernel.org, apparmor@lists.ubuntu.com, 
+	linux-nfs@vger.kernel.org, netdev@vger.kernel.org, fuse-devel@lists.linux.dev, 
+	linux-efi@vger.kernel.org, xen-devel@lists.xenproject.org, ocfs2-devel@lists.linux.dev, 
+	linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-usb@vger.kernel.org, 
+	Amir Goldstein <amir73il@gmail.com>, linux-erofs@lists.ozlabs.org, linux-kselftest@vger.kernel.org
+Subject: Re: [PATCH RFC 16/41] configfs: use fc_init_pseudo()
+Message-ID: <avQ5dv0747H-XKmD@gmail.com>
+References: <20261110-work-loop-pseudo-v1-0-4c998976c6c7@kernel.org>
+ <20261110-work-loop-pseudo-v1-16-4c998976c6c7@kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -60,25 +76,16 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <sashiko-outbox-191247@kernel.org>
+In-Reply-To: <20261110-work-loop-pseudo-v1-16-4c998976c6c7@kernel.org>
+X-Debian-User: leitao
 
-On Fri, Oct 30, 2026 at 04:10:12PM +0000, sashiko-bot@kernel.org wrote:
-> Should ubifs_ro_mode() call sb_set_emergency_ro(c->vfs_sb) unconditionally?
+On Tue, Nov 10, 2026 at 10:14:32AM +0100, Christian Brauner wrote:
+> Initialize configfs as a pseudo filesystem. This raises SB_I_PSEUDO and
+> also SB_I_NOEXEC and SB_I_NODEV. configfs never holds executables or
+> device nodes.
+> 
+> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
 
-Yes, the background thread doesn't hold s_umount. I'll do that.
-
-> Does allowing ubifs_remount_ro() to run after c->ro_error is set cause a NULL
-> pointer dereference on c->write_reserve_buf or trigger assertions in
-> reserve_space() and ubifs_wbuf_sync_nolock()?
-
-ubifs_remount_ro() won't sync the write-buffers or write the master node
-after an error anymore and ubifs_sync_fs() fails early. See my other reply.
-
-> Now that ubifs_reconfigure() no longer returns -EROFS on a read-only remount
-> when c->ro_error is set, should the assertion at the end of
-> ubifs_reconfigure() also be guarded by !c->ro_error, similar to
-> ubifs_put_super()?
-
-Yes.
+Acked-by: Breno Leitao <leitao@debian.org>
