@@ -1,80 +1,47 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=66.163.188.212
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=117.135.210.4
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794448237;
-	b=ENtvxPf6PG7e8rIl0HnVFO4cGAUrOMsWWGvJYkZMis/t4lDVm1UXkS/O5iEDZ4GirTe6
-	 A+5A5X7/UnyGHU5/Q3BQofftoUdPrvtoFXaur6E9SgIfu9Xk4rQZeJpqnsTcSXDBr4aIj
-	 vzu4mUxNb3y+2x+NMPKOnS8Jot+CZLFHzs0YgMfuNPpx6yX4xwljFiMh2ZgDc1Jv3Qo5g
-	 8aHhqg/ANxayxw3/OxrlJQwHcCiC1MTUCrTdrbW40bpjSd7/i6q+E8i3LdRmhbNL7NQSr
-	 ETmITTt5tCW9+WjDJCaI/SGOLU9bpJBXCwhqqg5b81RImDgZFVpT9aCR9Br3v1e9Pww==
+	t=1794452405;
+	b=KgEQbhS6EcZVOCaqwgU4iT9zvd3WTrlz8wWExmrnid2A9nvUqSVAYMwjVyQfOGcR4fKG
+	 zCyzZ5403sEgbh21bR6tlqLS5PkpCTtHgNdlhfGaU0M/F3wFiFOcS3pverQjVtFBy/sGf
+	 saHpGvJgcz9GhAqKr1VzxlbgsU1tfBM88i4wipXM5uOXg4KlbQa7S1MqNho9P1z4n/CIO
+	 ZJsSlPlPoeB6wWeiwaMpRY+uXvF7E6rlnSdXsOCvBZ8uAkL/Bxp0YIaZy3CUFdR+9QLIS
+	 MhXouR4pwsisAOQqw/RaA7O20K1lMwUnta2O+M+KvtGGvkmKomrfxzVLdwpv5SUsefw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794448237;
-	h=DMARC-Filter:DKIM-Signature:X-SONIC-DKIM-SIGN:X-YMail-OSG:X-Sonic-MF:
-	 X-Sonic-ID:Received:Received:Message-ID:Date:MIME-Version:User-Agent:
+	a=rsa-sha256; c=relaxed/relaxed; t=1794452405;
+	h=DMARC-Filter:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
 	 Subject:To:Cc:References:Content-Language:From:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding:X-Mailer;
-	bh=O8h9fybdyu+Al7CdWlfRBQ6LgqQutaBSF+Rc2HGjCVE=;
-	b=em9qQ0Sjc/pgMt563btDPgd/xj6BqsngzE5O6rTya7e7bmIrsUJwjQP+NINrR46pevjE
-	 rKYTCTSWQkKlsalS2FJuj8VU1wfDvV1gS82KJ2xdV7wg7sh67NYniWj32+ZvWCMXH9avN
-	 7aK+LH88wPf9+RWafAKdvpp7WwdI2mT5RaRfzyJ2b9BMmDo0b4TrQ8nmiMmDY2DvnM0sE
-	 KsIlZH5iAGG3qwkwjjcviqlYYNoGoKjVwymLT1nvuAKpHUftrCa4/Ds14VHI0vA+5Z7fw
-	 jQ31QZrZAMEhyGY2hSsy44thB7X/e3bIb+jGRLwaRICH8V0Vz+OCi/7FHaKGF23RqWw==
+	 Content-Type:Content-Transfer-Encoding:X-CM-TRANSID:
+	 X-Coremail-Antispam:X-CM-SenderInfo;
+	bh=zYiGSF0ZZ4GiiESqs52zyLdAhl05Iuf9955b3bBWHVk=;
+	b=kSTL4kZ3cb4J+n4jSM85nx9WgreAVWBq9eIjqFALgeJ0pV6MOtkZ8Ilv27DkecbttYSq
+	 wsVxd7x/WJJgC1ktiydZ5vZ17Q1CmJAOFOLIDDlo8fDGNYZuDpfEUHICncFDxZTcJ5dnu
+	 2AINokH1GU7CBI8A0J1CxIK13kxz9eHZqXgTvPsX9wW5re/zIBivqJZlKM4t3hVENn1wS
+	 0w0HuCc/ZWyKdtW8rL/cNhs7MQN9k/eKjsf2jbfJTxfA2B5VHbaK1ZeZT+pSCdnfuWQyt
+	 h7kz7VRow0/Z69J/CV6jlOWvtnWjKXw0iEEWQaiQdMx0jA+v6K/yhPO08MURpS0kclQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=schaufler-ca.com;
-	spf=pass smtp.mailfrom=schaufler-ca.com;
-	dkim=pass header.d=yahoo.com header.i=@yahoo.com header.a=rsa-sha256 header.s=s2048 header.b=F+m434hx;
-	arc=none smtp.remote-ip=66.163.188.212
-Received: from sonic311-31.consmr.mail.ne1.yahoo.com (sonic311-31.consmr.mail.ne1.yahoo.com [66.163.188.212])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dmarc=pass header.from=163.com;
+	spf=pass smtp.mailfrom=163.com;
+	dkim=pass header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=Xkyr5AjL;
+	arc=none smtp.remote-ip=117.135.210.4
+Received: from m16.mail.163.com (m16.mail.163.com [117.135.210.4])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AEA86606A324
-	for <linux-efi@vger.kernel.org>; Thu, 12 Nov 2026 01:50:36 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org AEA86606A324
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=schaufler-ca.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=schaufler-ca.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45121606A323
+	for <linux-efi@vger.kernel.org>; Thu, 12 Nov 2026 03:00:01 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 45121606A323
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=163.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=yahoo.com header.i=@yahoo.com header.a=rsa-sha256 header.s=s2048 header.b=F+m434hx
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1794448235; bh=O8h9fybdyu+Al7CdWlfRBQ6LgqQutaBSF+Rc2HGjCVE=; h=Date:Subject:To:Cc:References:From:In-Reply-To:Content-Type:From:Subject:Reply-To:Content-Type; b=F+m434hxnazo+znIsDN87b1q6q2BjDXrSK85l4sPO4/7/Nv6ouklEMGBpfrTHUnO8eGiNQoV5Bbw/uB3JZACliQBg8PtdTRYRP97HHZoegx3ArYwH69kAdVaUPkV7WcyNd89YKs91cZCwmWeziNsUM+FCRLahqzZW3a6Ku8pvIiJlMO/7XaKbdkzRicymfmmSk9XFsFNG+fkHI8UO70pZ1hFT9v2XQiwRrAslvpHUFbDR+3rpTT4Ikh/N/oSBL0qRMnhxDrBkdI0Mmku6tTsyJWpgcJjSTSvBuepznmh0kGiP8yElqSHRAm6ov8qvVTBbZJZj+71HtVfmpD+WAp7XA==
-X-SONIC-DKIM-SIGN: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1794448235; bh=cB6ms4YZu3OSr7Oj5Ktyy9vRYllWqlKKBSjCDtAOhd3=; h=X-Sonic-MF:Date:Subject:To:From:From:Subject; b=Wh5tO+A7k6l9RAB9CmF+7nFPpV+s7vwQOvHRCpB836zmpk+EmZdiT1obFQYb3eEYUV/ZZrDMNSGrpqiSFrVBvEAP1+BcX3bVXL8AkZe5aM0djERGyxVy+oivb40ItIA89tHRP/kW5BzO7GaPGZrOTfFkDQF1HHnKQVH/ifoH5PYTL/BXjLkbPViq5JKecTMlRIryhz3iU6NkOHkP1F3oliaijdeTD+Tk00HCA4w802Q1PFZvsZSndMk6hlb4A1wMRPh3z4tVeu12oZckS5JIJR1ywCFknBKWBE+hVxojbZ57Qr3RCaKJrua5vLBD1s/SnsdmRZ+/JLOhUlVDaAQyJw==
-X-YMail-OSG: zqmnDtkVM1n5t6ueog55b_vkFHSYM5E1qoECEJywzBr3UwiKAfUIVI_o6w7R9SH
- CQ1t93f4qyBpZEcVGjU2OBO9C0Of8.lRAD_UtcVdUMSf6_GiG98G7rNXb1ZhUGsyYLDyJE5oLG69
- MPpknxdoviNcfunvMa.q1ATsxUiRNZaaYFEtaSi7o3ARz3uzFbYwa4zXUFVTxVNR1M4yEm8E_vMu
- CX3lc6b1b0MWbnmh3DAeGebLmTpZwI12LuF9QH7MRRpV.Y7YkiPkkooycQl42qWPa_ZCsKSCVnTi
- cfYjzn7ZtEqmGYVjYEY1kEbVCA4JoS5GMMDKMoO39G5YhBugROnX2jrgGh0AwdwAby30.ZBxmd.l
- S62hS2hlPvIDoPxGhzS2whxCcIZrt8XbiUGRsBq2lfu8t9x.TIubZ4wIiRqzfDYoZIwioLDCjm6k
- .cljRFJEOnSix_ImX_sSyVP7eQAAEJ1GsHeUHb7atzAIHDlw0lV7YT_EQZaDbjuCghjYyGwMa7FJ
- LxdRDFOXlr05WMcbROqV0a4sd0J7UyT01rGVa2p8mqlfg_ZPSk1p0.zKLMJDr5A1o8n0sxe4LbiR
- qbREBgT6XAwECEJNbNHKO1YTM4iOmevp8GvnGDd6MDNapigfFoPwfu59SMy7zYd9LO3Z8_0VkIJt
- aPlGTgcyxBF.v1wQggIdb30_WaSmydGJlcGPdQ03irHq2wrwxiCoQO6IJUZEr0jypo3mUQnAGyDG
- k9vUUntKtCsyi.w0t_vFjR1T1M3Z6Xk5RLKDL9njS7LNW.CupQSEmNQ1GkX7kSwPFQP21HwmyMsp
- i9SdJowJ0s5y.bw2SrHxrP7sM6YbNToNL5ZVELMODpe5VuCBtDWl7VcCxYMmahr5455.ZE_hGmHs
- LrmFJx1uQ46OcZ2Ii956498sukETOy0INQsrtoq.ypS01I6QTO8GSI7rVFeq81ZNfcHhvUGJ06ME
- B8yJmeeVBase_8cBDx_Yk7y0xRppCWZz9S9bNwiHzQcmhSHJ99JaTf4E0zOIsgLWqU5tZh4wLZKp
- MnYneLIuBkBNwjBcYTuKXcpCwff8fTcsfan2g9ag6_HRqbKvb3lqTrnQRPIG.IGMBIXdu4D1HB2r
- Ygn65JHFmN1QF2ROBGshwilsGajQNSqHXHgx.co9RO5Evfjv8vx67t__1ew7rn3sc1C.7W_m4N4M
- cSR8SYdV43PcknGSee9yB1x8pWannWLYRUROzisZnoPLwDPX1S0a5pIeYojUo9jnHaAdfaOw5IJs
- bc0nB3tQZQ.0b782FrYX_n_pf05DxifKK1hrJ0OqXSo23BlRt.p63_4auT8X4tq9HTs9fxQLg0OA
- ydi2BtTIKopjFdQtWH0NOUC1U6_wILbgtZfZnlVsbVhHJ7Tk.UZGmAVff_vQl8b4id5D4T9jwtS9
- 8nKfk1Ghey2tqeZDF9SgVACRH_x6kJa81R1e4J_83TMyBY4Ays_MTt39YbFzXRfBMRqG0I92h9IS
- Xl4i4wMK_gUqmjpP0P_oaDsTzptxLp7NMOmOY3T81w3i60pQpmuYMvggEU3dv.ebRC4Brat.KcXq
- ZyjrZ4BouQUvapbNSNNP1Y253sBId7Ys37DryRT0fCsyFp6LIN0DYA1xElaICSH34S2v84muDGZe
- .CGRnjEo0Q2679LeUfRrG7eDmdHtGbtXa02kyQjntuOc7VrR9y8jRUHqkLiiITgSdxH1QGB5PWuQ
- ARpFP1xjX3OHKFGeQd7o8WX3xDhKeppcWAPJEhIosno79RY0IQ4.4JX7WCaXgDYbj6BL4okuPPnu
- 9CEiWKr_A1oRBHcXo_t2XyX1N2Jd1tPqjLAB1WY0vIGe1SVdGRdRloM6.RT24mU1pbFP4DjeRn1w
- _aXrAymHoztvd7BVNk78MI6f1URU2iBFJ6msmP6JgXQac5cfrtvlS9yn2eohnwEPfv__IKNy26n1
- mYs7i0yOvj6LH9jEvBJfejsFOAeuf8LBdL.MbTk8ZZiVorhzaxO81Zf4PRAQwZfM29CLtP5dAKbb
- klVicXy3HgsPrMZiM94qTb2yOlO2WSLEgrPS_2Vx31FNEHJNJpuKXHkfgTtKgjLPmpCr4Taq44yO
- KB8vbaoDybAHzNwFN22pWQG3NDp.x8aciLmMT8fUQgwMgW8NlLKb6ErL7ChYlwsHUhzhzMbUfvnT
- 2bA6QlHpoN4OcRsGeb2ygbIpUCMhvL1tqClAnkg41oGlCJa3crNRCKKeXXqZBarf9KzLHJa8i581
- 0YgHHROuHzbtZ8GRm6ggBoLbsrITMfTGKIshO9uwpGYYxl6nVscbC6LtZUsxlV5iP8t8XsYi.ga0
- EDsRWYHlK
-X-Sonic-MF: <casey@schaufler-ca.com>
-X-Sonic-ID: 4e6572e0-628c-4102-8309-f6caa349ac8e
-Received: from sonic.gate.mail.ne1.yahoo.com by sonic311.consmr.mail.ne1.yahoo.com with HTTP; Thu, 12 Nov 2026 01:50:35 +0000
-Received: by hermes--production-gq1-fd7994565-9vhlr (Yahoo Inc. Hermes SMTP Server) with ESMTPA ID 15d81e1a8a6348ae9dcd84771e3b8196;
-          Thu, 12 Nov 2026 01:50:33 +0000 (UTC)
-Message-ID: <41617b0a-90d9-484e-a143-78e2a92e872c@schaufler-ca.com>
-Date: Wed, 11 Nov 2026 17:50:30 -0800
+	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=Xkyr5AjL
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
+	s=s110527; h=Message-ID:Date:MIME-Version:Subject:To:From:
+	Content-Type; bh=zYiGSF0ZZ4GiiESqs52zyLdAhl05Iuf9955b3bBWHVk=;
+	b=Xkyr5AjLUa+Y2ROZqvr+CuhethrbpdBDV1SLKzPeegs2Iscaw4xmuxXBMP0jL3
+	gb2YkC5MNxouMZBE2fryECP/pwuQqsBv67zTrZ7X8QMjVQG8cNaOEYHsPx6+hU7K
+	IJnm9ep0d25Yyq6nZU65H6EunR1hdi1fvYic62HIFEofs=
+Message-ID: <63d0fb19-b1cb-4729-839a-b9e1f1379473@163.com>
+Date: Thu, 12 Nov 2026 10:57:05 +0800
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -85,67 +52,143 @@ List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [apparmor] [PATCH RFC 19/41] smack: use fc_init_pseudo() for
- smackfs
-To: Christian Brauner <brauner@kernel.org>, linux-fsdevel@vger.kernel.org
-Cc: linux-efi@vger.kernel.org, Jan Kara <jack@suse.cz>,
- Amir Goldstein <amir73il@gmail.com>, linux-nvme@lists.infradead.org,
- fuse-devel@lists.linux.dev, linux-mm@kvack.org,
- target-devel@vger.kernel.org, linux-kselftest@vger.kernel.org,
- Chris Mason <mason@kernel.org>, Christoph Hellwig <hch@lst.de>,
- linux-s390@vger.kernel.org, linux-erofs@lists.ozlabs.org,
- linux-scsi@vger.kernel.org, xen-devel@lists.xenproject.org,
- driver-core@lists.linux.dev, Jann Horn <jannh@google.com>,
- selinux@vger.kernel.org, apparmor@lists.ubuntu.com,
- Josef Bacik <josef@toxicpanda.com>, linux-block@vger.kernel.org,
- ocfs2-devel@lists.linux.dev, Alexander Viro <viro@zeniv.linux.org.uk>,
- linux-nfs@vger.kernel.org, netdev@vger.kernel.org,
- linux-usb@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-security-module@vger.kernel.org, bpf@vger.kernel.org,
- linuxppc-dev@lists.ozlabs.org, Casey Schaufler <casey@schaufler-ca.com>
-References: <20261110-work-loop-pseudo-v1-0-4c998976c6c7@kernel.org>
- <20261110-work-loop-pseudo-v1-19-4c998976c6c7@kernel.org>
-Content-Language: en-US
-From: Casey Schaufler <casey@schaufler-ca.com>
-In-Reply-To: <20261110-work-loop-pseudo-v1-19-4c998976c6c7@kernel.org>
+Subject: Re: [PATCH] efi: efibc: Optionally report panic as a reboot reason
+To: "Guilherme G. Piccoli" <gpiccoli@igalia.com>, linux-efi@vger.kernel.org
+Cc: ardb@kernel.org, ilias.apalodimas@linaro.org,
+ jeremy.compostella@intel.com, matthew.k.gumbel@intel.com,
+ kernel-dev@igalia.com, kernel@gpiccoli.net, kexec@lists.infradead.org
+References: <20261108003549.745697-1-gpiccoli@igalia.com>
+Content-Language: en-US, en-GB
+From: Dave Young <hidave@163.com>
+In-Reply-To: <20261108003549.745697-1-gpiccoli@igalia.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Mailer: WebService/1.1.26943 mail.backend.jedi.jws.acl:role.jedi.acl.token.atz.jws.hermes.yahoo
+X-CM-TRANSID:_____wDXHyh4K_VqvdTrGw--.58296S2
+X-Coremail-Antispam: 1Uf129KBjvJXoWxCFWDJr43GFyrJw45Zr4rGrg_yoWrXF43pa
+	y8GrZ8GF4kJa4xWayfZF4UZFyYvw4xJryUuFy3C34UAr4qkr9rtrW0kw4Y9FyxJa4xGryr
+	Kw4jqa4kCa1DtaDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07UIdgtUUUUU=
+X-CM-SenderInfo: pklgt4rh6rljoofrz/xtbC7hkBw2r1K3mDxwAA38
 
-On 11/10/2026 1:14 AM, Christian Brauner via AppArmor wrote:
-> Initialize smackfs as a pseudo filesystem. This raises SB_I_PSEUDO and
-> also SB_I_NOEXEC and SB_I_NODEV. smackfs never holds executables or
-> device nodes.
+Cc kexec list
+
+On 11/8/26 8:34 AM, Guilherme G. Piccoli wrote:
+> The small efibc driver can be used to determine the cause of a reboot,
+> in addition to controlling bootloader behavior. Currently, this driver
+> reports "shutdown" or "reboot" as possible reasons for a system restart.
 >
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
-
-Please include me at least as a CC on Smack patches.
-I ain't dead yet. Nonetheless,
-
-Acked-by: Casey Schaufler <casey@schaufler-ca.com>
-
+> Add support for panic reporting, gated by a module parameter. If users
+> set the parameter, a panic notifier is registered and tries to save
+> "panic" as the reboot reason, if the kernel is configured to reboot on
+> panic. Note that it is a best-effort approach, relying on the nonblocking
+> version of the EFI variable setter.
+>
+> Signed-off-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
 > ---
->  security/smack/smackfs.c | 2 ++
->  1 file changed, 2 insertions(+)
 >
-> diff --git a/security/smack/smackfs.c b/security/smack/smackfs.c
-> index a72bc7fabea9..4a56bbeaeca3 100644
-> --- a/security/smack/smackfs.c
-> +++ b/security/smack/smackfs.c
-> @@ -25,6 +25,7 @@
->  #include <linux/magic.h>
->  #include <linux/mount.h>
->  #include <linux/fs_context.h>
-> +#include <linux/pseudo_fs.h>
->  #include "smack.h"
+>
+> Hi folks, this is a 2nd attempt to make the kernel notify UEFI about
+> a panic. The first proposal was a new (small) driver, sent here:
+> https://lore.kernel.org/r/20220729194532.228403-1-gpiccoli@igalia.com/
+>
+> The idea is to have a simple mechanism, independent of efi-pstore (since
+> users could be using other pstore backends, or do not wish to collect
+> logs for privacy), to let UEFI know a panic happened. Using efibc seems
+> to be a reasonable and simple approach.
+>
+> The option is gated by a parameter; this could be removed in case it's
+> considered unnecessary. I think a parameter is less invasive than just
+> changing the default.
+>
+> Feedback / reviews are greatly appreciated.
+> Thanks in advance,
+>
+> Guilherme
+>
+>
+>  drivers/firmware/efi/efibc.c | 46 ++++++++++++++++++++++++++++++++++--
+>  1 file changed, 44 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
+> index 345a10aa7086..b4014500513f 100644
+> --- a/drivers/firmware/efi/efibc.c
+> +++ b/drivers/firmware/efi/efibc.c
+> @@ -11,9 +11,14 @@
+>  #include <linux/reboot.h>
+>  #include <linux/slab.h>
+>  #include <linux/ucs2_string.h>
+> +#include <linux/panic_notifier.h>
 >  
->  #define BEBITS	(sizeof(__be32) * 8)
-> @@ -2880,6 +2881,7 @@ static const struct fs_context_operations smk_context_ops = {
->   */
->  static int smk_init_fs_context(struct fs_context *fc)
+>  #define MAX_DATA_LEN	512
+>  
+> +static bool report_panic;
+> +module_param(report_panic, bool, 0444);
+> +MODULE_PARM_DESC(report_panic, "Report kernel panic as a reboot reason too (default N)");
+> +
+>  static int efibc_set_variable(efi_char16_t *name, efi_char16_t *value,
+>  			      unsigned long len)
 >  {
-> +	fc_init_pseudo(fc);
->  	fc->ops = &smk_context_ops;
->  	return 0;
+> @@ -65,6 +70,30 @@ static struct notifier_block efibc_reboot_notifier = {
+>  	.notifier_call = efibc_reboot_notifier_call,
+>  };
+>  
+> +static int efibc_panic_notifier_call(struct notifier_block *notifier,
+> +				     unsigned long event, void *data)
+> +{
+> +	efi_char16_t *reason = L"panic";
+> +
+> +	/* Skip if we aren't rebooting on panic. */
+> +	if (!panic_timeout)
+> +		return NOTIFY_DONE;
+> +
+> +	efi.set_variable_nonblocking(L"LoaderEntryRebootReason",
+> +				&LINUX_EFI_LOADER_ENTRY_GUID,
+> +				EFI_VARIABLE_NON_VOLATILE
+> +				| EFI_VARIABLE_BOOTSERVICE_ACCESS
+> +				| EFI_VARIABLE_RUNTIME_ACCESS,
+> +				ucs2_strlen(reason) * sizeof(efi_char16_t),
+> +				reason);
+> +	return NOTIFY_DONE;
+> +}
+> +
+> +static struct notifier_block efibc_panic_nb = {
+> +	.notifier_call	= efibc_panic_notifier_call,
+> +	.priority	= INT_MIN,
+> +};
+> +
+>  static int __init efibc_init(void)
+>  {
+>  	int ret;
+> @@ -73,16 +102,29 @@ static int __init efibc_init(void)
+>  		return -ENODEV;
+>  
+>  	ret = register_reboot_notifier(&efibc_reboot_notifier);
+> -	if (ret)
+> +	if (ret) {
+>  		pr_err("unable to register reboot notifier\n");
+> +		return ret;
+> +	}
+>  
+> -	return ret;
+> +	if (report_panic && efi.set_variable_nonblocking) {
+> +		ret = atomic_notifier_chain_register(&panic_notifier_list,
+> +							&efibc_panic_nb);
+> +		if (ret)
+> +			pr_err("unable to register panic notifier\n");
+> +	}
+> +
+> +	return 0;
 >  }
->
+>  module_init(efibc_init);
+>  
+>  static void __exit efibc_exit(void)
+>  {
+>  	unregister_reboot_notifier(&efibc_reboot_notifier);
+> +
+> +	if (report_panic && efi.set_variable_nonblocking)
+> +		atomic_notifier_chain_unregister(&panic_notifier_list,
+> +							&efibc_panic_nb);
+>  }
+>  module_exit(efibc_exit);
+>  
+
