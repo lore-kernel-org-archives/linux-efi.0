@@ -1,109 +1,80 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=185.56.87.1
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794434206;
-	b=coZ3WKBCeZI/nb/x8lSlhsA8qPEvNey6B9qpQWDoseqsoaxTLnDasjGQ1YwLzN61ZVd9
-	 1pFIk8dzatJRJtd9O4olNIEkYDsrBS2lbldSHBnHzgMbEmK62tU7Bj0NdcGQZTYWStzz6
-	 YCQBlYhpstq8aDIfqUOf8FzJTUqz5cXNehfWm2o6JEfFdDhl/c+6w7awtiPN7xkdERKZs
-	 CiGRhMWDElKKvq8EIdyKt9QkIyCzeMB37NUbyrqH4mIprtAqkc6BYmpAS5LU5r9qn3aFc
-	 1q052+OvIbkEaeclYJyz12Kfg5NwUY+Rz0YVdUYFd0Oa//QFtOk5JXtPbobyQyF8R7g==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794434206;
-	h=DMARC-Filter:DKIM-Signature:Received:DKIM-Signature:Received:Date:
-	 From:To:Cc:Subject:Message-ID:References:MIME-Version:Content-Type:
-	 Content-Disposition:Content-Transfer-Encoding:In-Reply-To:X-AntiAbuse:
-	 X-AntiAbuse:X-AntiAbuse:X-AntiAbuse:X-AntiAbuse:X-Source:
-	 X-Source-Args:X-Source-Dir:X-SGantispam-id:X-AntiAbuse:AntiSpam-DLS:
-	 AntiSpam-DLSP:AntiSpam-DLSRS:AntiSpam-TS:CFBL-Address:
-	 CFBL-Feedback-ID;
-	bh=dJgiLhwnxl07OmJUhfJ5CpoeivoNNwCPag679Wtgjv0=;
-	b=vu1LBd+VTTKQS2sk0OHZwxcBLEZPvE5yvFT7n458jJfKRaXoC/icIbACSohJ/3GW3Ff8
-	 coPaZ7Tlh4dRL7cc24dX/LtGfcu/gGOGakmTCb/CPOtjNTryZtxl53iqrblJmkRCT/ivb
-	 RfOma/En5aOd3F+epqXMFXubNIKQlj9yX9ZhKV+DAUCLWMtyX4cdoXB8Vf86D9yUax9FR
-	 nUbadyHzTamnLtObPAlU4SUcMJIRQltLjrF7vEQiPGPcXcI1N24d2/STzo6Nf2z/5JDU8
-	 7aJLddjkY83/bcMr9I+t7tIm/ByeBZ1gBBXuFVgB2/SGeyqJjYfXj3wmg7N+RiYGELw==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=valla.it;
-	spf=pass smtp.mailfrom=valla.it;
-	dkim=pass header.d=antispam.mailspamprotection.com header.i=@antispam.mailspamprotection.com header.a=rsa-sha256 header.s=default header.b=1GpxIO77;
-	dkim=pass header.d=valla.it header.i=@valla.it header.a=rsa-sha256 header.s=default header.b=df24bgxE;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=185.56.87.1
-Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=66.163.188.212
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1794448237;
+	b=ENtvxPf6PG7e8rIl0HnVFO4cGAUrOMsWWGvJYkZMis/t4lDVm1UXkS/O5iEDZ4GirTe6
+	 A+5A5X7/UnyGHU5/Q3BQofftoUdPrvtoFXaur6E9SgIfu9Xk4rQZeJpqnsTcSXDBr4aIj
+	 vzu4mUxNb3y+2x+NMPKOnS8Jot+CZLFHzs0YgMfuNPpx6yX4xwljFiMh2ZgDc1Jv3Qo5g
+	 8aHhqg/ANxayxw3/OxrlJQwHcCiC1MTUCrTdrbW40bpjSd7/i6q+E8i3LdRmhbNL7NQSr
+	 ETmITTt5tCW9+WjDJCaI/SGOLU9bpJBXCwhqqg5b81RImDgZFVpT9aCR9Br3v1e9Pww==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794448237;
+	h=DMARC-Filter:DKIM-Signature:X-SONIC-DKIM-SIGN:X-YMail-OSG:X-Sonic-MF:
+	 X-Sonic-ID:Received:Received:Message-ID:Date:MIME-Version:User-Agent:
+	 Subject:To:Cc:References:Content-Language:From:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:X-Mailer;
+	bh=O8h9fybdyu+Al7CdWlfRBQ6LgqQutaBSF+Rc2HGjCVE=;
+	b=em9qQ0Sjc/pgMt563btDPgd/xj6BqsngzE5O6rTya7e7bmIrsUJwjQP+NINrR46pevjE
+	 rKYTCTSWQkKlsalS2FJuj8VU1wfDvV1gS82KJ2xdV7wg7sh67NYniWj32+ZvWCMXH9avN
+	 7aK+LH88wPf9+RWafAKdvpp7WwdI2mT5RaRfzyJ2b9BMmDo0b4TrQ8nmiMmDY2DvnM0sE
+	 KsIlZH5iAGG3qwkwjjcviqlYYNoGoKjVwymLT1nvuAKpHUftrCa4/Ds14VHI0vA+5Z7fw
+	 jQ31QZrZAMEhyGY2hSsy44thB7X/e3bIb+jGRLwaRICH8V0Vz+OCi/7FHaKGF23RqWw==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=schaufler-ca.com;
+	spf=pass smtp.mailfrom=schaufler-ca.com;
+	dkim=pass header.d=yahoo.com header.i=@yahoo.com header.a=rsa-sha256 header.s=s2048 header.b=F+m434hx;
+	arc=none smtp.remote-ip=66.163.188.212
+Received: from sonic311-31.consmr.mail.ne1.yahoo.com (sonic311-31.consmr.mail.ne1.yahoo.com [66.163.188.212])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 607A3606A321;
-	Wed, 11 Nov 2026 21:56:45 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 607A3606A321
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AEA86606A324
+	for <linux-efi@vger.kernel.org>; Thu, 12 Nov 2026 01:50:36 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org AEA86606A324
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=schaufler-ca.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=schaufler-ca.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=antispam.mailspamprotection.com header.i=@antispam.mailspamprotection.com header.a=rsa-sha256 header.s=default header.b=1GpxIO77;
-	dkim=pass (1024-bit key, unprotected) header.d=valla.it header.i=@valla.it header.a=rsa-sha256 header.s=default header.b=df24bgxE
-ARC-Seal: i=1; cv=none; a=rsa-sha256; d=outgoing.instance-europe-west4-qv6g.prod.antispam.mailspamprotection.com; s=arckey; t=1794434205;
-	 b=NZMQzMdi1AT2LEr4lRcZW7rd0hLeUdrmSa2N5cIII/3+/1aPWIwisQU/+n1L5XW0O40Qi3BcjC
-	  xe3Uo8dPvBXRZ3V2qbI+CkmmjDFmB0HpvKTUcq/v7b3v0YPZxvbPdcVwBWNJpJ46vLhE3koDC5
-	  bGjT7PKUinhnQPY7JLRgd2sy0rljWPdfACtc78Uz+AvZzEs5w8GIkh8cqf9cKM1iimu1CRiK8y
-	  sEA0aJA4mwMOkhjwsTmUNYRuGfuyvDBypjb7gRa5jjwmBqNzCzxvDWFoCBC44MBuT3jPGunmyT
-	  NI2PgGpGa6Fx7gTN7Lu/cs6Wx9P7AwhpldhsytUmAFvdVg==;
-ARC-Authentication-Results: i=1; outgoing.instance-europe-west4-qv6g.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=outgoing.instance-europe-west4-qv6g.prod.antispam.mailspamprotection.com; s=arckey; t=1794434205;
-	bh=ZWHYAXJh8M23GgTHS9F/68nHKMuIi5pIeMMp0ENqHgI=;
-	h=In-Reply-To:Content-Transfer-Encoding:Content-Type:MIME-Version:References:
-	  Message-ID:Subject:Cc:To:From:Date:DKIM-Signature:DKIM-Signature;
-	b=UKc3a9BHkS7SzDCYd/Zk16HBFPzJT16vK47exNMCPUjsGrKAtvkeKYTHTKCzEeF2I7T6esNq67
-	  ru2Buu8e9RReiuBIwwtGoEuKsMgbSE2Wm1JhIHL9oIw89iKkZwtRdlbGZ8thvi/82cK7nY8vy2
-	  8d0Hx/RXu1KgE+n/e9DkrOD5URa8VtAgLsnMNbGbDAS5oB4vFZ5bVREyYJ8H7fETrgfQGpwHWy
-	  s+48AKaidemed4W+MuyH7oH55cqcTGBajnlz1Uyf3k4RtrFW/lUTzagIUIBH7tMBeaBYvMtcya
-	  CyztzREt5j6kuRIS4M6BgGcTIYM1Ja2kpFmRVzAjOA6OEA==;
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=antispam.mailspamprotection.com; s=default; h=CFBL-Feedback-ID:CFBL-Address
-	:Content-Transfer-Encoding:Content-Type:MIME-Version:Message-ID:Subject:Cc:To
-	:From:Date:Reply-To:List-Unsubscribe;
-	bh=dJgiLhwnxl07OmJUhfJ5CpoeivoNNwCPag679Wtgjv0=; b=1GpxIO77H+pCebtcOry2W7wEMN
-	N6o1Z6ypcRnNwhq3YdLr3vc2TcMLzRxd0twNOm3tu8Sz6QucYIiAWNOYwS6nAwR+hnDaJLYgYoQIg
-	k2UoOvY+lGFBmpZZAUghe6F909QcjcRmAEJfy+R4QcrGKdJV5P6x4SkZmyMU48WhBAr4=;
-Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
-	by instance-europe-west4-qv6g.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.100.1)
-	(envelope-from <francesco@valla.it>)
-	id 1xRGJ3-0000000HACC-376R;
-	Wed, 11 Nov 2026 21:56:38 +0000
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
-	s=default; h=Subject:Cc:To:From:Date:list-help:list-unsubscribe:
-	list-subscribe:list-post:list-owner:list-archive;
-	bh=dJgiLhwnxl07OmJUhfJ5CpoeivoNNwCPag679Wtgjv0=; b=df24bgxEnOqCeuhgE5/Vkt7aYo
-	NqMMrcKi2X0+MPYvvdEA0l97DuzRosc+bZCoNUxVo+/HXKbeAjRI+DthEMN0VJGE9pJu2Bf5zBWHf
-	3b1JA1B2t61gBHNDk6N2At/yfb9+GePnBCmJTdpKBhvEqfCSddqPd/rtIfIgv14ZgF8k=;
-Received: from [79.17.15.196] (port=60109 helo=bywater)
-	by esm19.siteground.biz with essmtpa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.100.1)
-	(envelope-from <francesco@valla.it>)
-	id 1xRGIe-00000000J0c-38Lm;
-	Wed, 11 Nov 2026 21:56:12 +0000
-Date: Wed, 11 Nov 2026 22:56:10 +0100
-From: Francesco Valla <francesco@valla.it>
-To: Thomas Zimmermann <tzimmermann@suse.de>
-Cc: =?utf-8?B?TcOgeGlt?= Pedraza Padilla <maximpedraza@gmail.com>, 
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Ard Biesheuvel <ardb@kernel.org>, Jonathan Corbet <corbet@lwn.net>, Helge Deller <deller@gmx.de>, 
-	Peter Jones <pjones@redhat.com>, Jani Nikula <jani.nikula@linux.intel.com>, 
-	Mario Limonciello <mario.limonciello@amd.com>, Javier Martinez Canillas <javierm@redhat.com>, 
-	Jocelyn Falempe <jfalempe@redhat.com>, Sam Ravnborg <sam@ravnborg.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Shuah Khan <skhan@linuxfoundation.org>, 
-	Randy Dunlap <rdunlap@infradead.org>, dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org, 
-	linux-efi@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-doc@vger.kernel.org, 
-	linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v6 05/15] MAINTAINERS: add entry for DRM splash client
-Message-ID: <avTjrfIEPgyvPDti@bywater>
-References: <20261027135342.2003632-1-maximpedraza@gmail.com>
- <20261027135342.2003632-6-maximpedraza@gmail.com>
- <ed28619d-6ca7-46aa-82c0-c83f30a836e3@suse.de>
+	dkim=pass (2048-bit key) header.d=yahoo.com header.i=@yahoo.com header.a=rsa-sha256 header.s=s2048 header.b=F+m434hx
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1794448235; bh=O8h9fybdyu+Al7CdWlfRBQ6LgqQutaBSF+Rc2HGjCVE=; h=Date:Subject:To:Cc:References:From:In-Reply-To:Content-Type:From:Subject:Reply-To:Content-Type; b=F+m434hxnazo+znIsDN87b1q6q2BjDXrSK85l4sPO4/7/Nv6ouklEMGBpfrTHUnO8eGiNQoV5Bbw/uB3JZACliQBg8PtdTRYRP97HHZoegx3ArYwH69kAdVaUPkV7WcyNd89YKs91cZCwmWeziNsUM+FCRLahqzZW3a6Ku8pvIiJlMO/7XaKbdkzRicymfmmSk9XFsFNG+fkHI8UO70pZ1hFT9v2XQiwRrAslvpHUFbDR+3rpTT4Ikh/N/oSBL0qRMnhxDrBkdI0Mmku6tTsyJWpgcJjSTSvBuepznmh0kGiP8yElqSHRAm6ov8qvVTBbZJZj+71HtVfmpD+WAp7XA==
+X-SONIC-DKIM-SIGN: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1794448235; bh=cB6ms4YZu3OSr7Oj5Ktyy9vRYllWqlKKBSjCDtAOhd3=; h=X-Sonic-MF:Date:Subject:To:From:From:Subject; b=Wh5tO+A7k6l9RAB9CmF+7nFPpV+s7vwQOvHRCpB836zmpk+EmZdiT1obFQYb3eEYUV/ZZrDMNSGrpqiSFrVBvEAP1+BcX3bVXL8AkZe5aM0djERGyxVy+oivb40ItIA89tHRP/kW5BzO7GaPGZrOTfFkDQF1HHnKQVH/ifoH5PYTL/BXjLkbPViq5JKecTMlRIryhz3iU6NkOHkP1F3oliaijdeTD+Tk00HCA4w802Q1PFZvsZSndMk6hlb4A1wMRPh3z4tVeu12oZckS5JIJR1ywCFknBKWBE+hVxojbZ57Qr3RCaKJrua5vLBD1s/SnsdmRZ+/JLOhUlVDaAQyJw==
+X-YMail-OSG: zqmnDtkVM1n5t6ueog55b_vkFHSYM5E1qoECEJywzBr3UwiKAfUIVI_o6w7R9SH
+ CQ1t93f4qyBpZEcVGjU2OBO9C0Of8.lRAD_UtcVdUMSf6_GiG98G7rNXb1ZhUGsyYLDyJE5oLG69
+ MPpknxdoviNcfunvMa.q1ATsxUiRNZaaYFEtaSi7o3ARz3uzFbYwa4zXUFVTxVNR1M4yEm8E_vMu
+ CX3lc6b1b0MWbnmh3DAeGebLmTpZwI12LuF9QH7MRRpV.Y7YkiPkkooycQl42qWPa_ZCsKSCVnTi
+ cfYjzn7ZtEqmGYVjYEY1kEbVCA4JoS5GMMDKMoO39G5YhBugROnX2jrgGh0AwdwAby30.ZBxmd.l
+ S62hS2hlPvIDoPxGhzS2whxCcIZrt8XbiUGRsBq2lfu8t9x.TIubZ4wIiRqzfDYoZIwioLDCjm6k
+ .cljRFJEOnSix_ImX_sSyVP7eQAAEJ1GsHeUHb7atzAIHDlw0lV7YT_EQZaDbjuCghjYyGwMa7FJ
+ LxdRDFOXlr05WMcbROqV0a4sd0J7UyT01rGVa2p8mqlfg_ZPSk1p0.zKLMJDr5A1o8n0sxe4LbiR
+ qbREBgT6XAwECEJNbNHKO1YTM4iOmevp8GvnGDd6MDNapigfFoPwfu59SMy7zYd9LO3Z8_0VkIJt
+ aPlGTgcyxBF.v1wQggIdb30_WaSmydGJlcGPdQ03irHq2wrwxiCoQO6IJUZEr0jypo3mUQnAGyDG
+ k9vUUntKtCsyi.w0t_vFjR1T1M3Z6Xk5RLKDL9njS7LNW.CupQSEmNQ1GkX7kSwPFQP21HwmyMsp
+ i9SdJowJ0s5y.bw2SrHxrP7sM6YbNToNL5ZVELMODpe5VuCBtDWl7VcCxYMmahr5455.ZE_hGmHs
+ LrmFJx1uQ46OcZ2Ii956498sukETOy0INQsrtoq.ypS01I6QTO8GSI7rVFeq81ZNfcHhvUGJ06ME
+ B8yJmeeVBase_8cBDx_Yk7y0xRppCWZz9S9bNwiHzQcmhSHJ99JaTf4E0zOIsgLWqU5tZh4wLZKp
+ MnYneLIuBkBNwjBcYTuKXcpCwff8fTcsfan2g9ag6_HRqbKvb3lqTrnQRPIG.IGMBIXdu4D1HB2r
+ Ygn65JHFmN1QF2ROBGshwilsGajQNSqHXHgx.co9RO5Evfjv8vx67t__1ew7rn3sc1C.7W_m4N4M
+ cSR8SYdV43PcknGSee9yB1x8pWannWLYRUROzisZnoPLwDPX1S0a5pIeYojUo9jnHaAdfaOw5IJs
+ bc0nB3tQZQ.0b782FrYX_n_pf05DxifKK1hrJ0OqXSo23BlRt.p63_4auT8X4tq9HTs9fxQLg0OA
+ ydi2BtTIKopjFdQtWH0NOUC1U6_wILbgtZfZnlVsbVhHJ7Tk.UZGmAVff_vQl8b4id5D4T9jwtS9
+ 8nKfk1Ghey2tqeZDF9SgVACRH_x6kJa81R1e4J_83TMyBY4Ays_MTt39YbFzXRfBMRqG0I92h9IS
+ Xl4i4wMK_gUqmjpP0P_oaDsTzptxLp7NMOmOY3T81w3i60pQpmuYMvggEU3dv.ebRC4Brat.KcXq
+ ZyjrZ4BouQUvapbNSNNP1Y253sBId7Ys37DryRT0fCsyFp6LIN0DYA1xElaICSH34S2v84muDGZe
+ .CGRnjEo0Q2679LeUfRrG7eDmdHtGbtXa02kyQjntuOc7VrR9y8jRUHqkLiiITgSdxH1QGB5PWuQ
+ ARpFP1xjX3OHKFGeQd7o8WX3xDhKeppcWAPJEhIosno79RY0IQ4.4JX7WCaXgDYbj6BL4okuPPnu
+ 9CEiWKr_A1oRBHcXo_t2XyX1N2Jd1tPqjLAB1WY0vIGe1SVdGRdRloM6.RT24mU1pbFP4DjeRn1w
+ _aXrAymHoztvd7BVNk78MI6f1URU2iBFJ6msmP6JgXQac5cfrtvlS9yn2eohnwEPfv__IKNy26n1
+ mYs7i0yOvj6LH9jEvBJfejsFOAeuf8LBdL.MbTk8ZZiVorhzaxO81Zf4PRAQwZfM29CLtP5dAKbb
+ klVicXy3HgsPrMZiM94qTb2yOlO2WSLEgrPS_2Vx31FNEHJNJpuKXHkfgTtKgjLPmpCr4Taq44yO
+ KB8vbaoDybAHzNwFN22pWQG3NDp.x8aciLmMT8fUQgwMgW8NlLKb6ErL7ChYlwsHUhzhzMbUfvnT
+ 2bA6QlHpoN4OcRsGeb2ygbIpUCMhvL1tqClAnkg41oGlCJa3crNRCKKeXXqZBarf9KzLHJa8i581
+ 0YgHHROuHzbtZ8GRm6ggBoLbsrITMfTGKIshO9uwpGYYxl6nVscbC6LtZUsxlV5iP8t8XsYi.ga0
+ EDsRWYHlK
+X-Sonic-MF: <casey@schaufler-ca.com>
+X-Sonic-ID: 4e6572e0-628c-4102-8309-f6caa349ac8e
+Received: from sonic.gate.mail.ne1.yahoo.com by sonic311.consmr.mail.ne1.yahoo.com with HTTP; Thu, 12 Nov 2026 01:50:35 +0000
+Received: by hermes--production-gq1-fd7994565-9vhlr (Yahoo Inc. Hermes SMTP Server) with ESMTPA ID 15d81e1a8a6348ae9dcd84771e3b8196;
+          Thu, 12 Nov 2026 01:50:33 +0000 (UTC)
+Message-ID: <41617b0a-90d9-484e-a143-78e2a92e872c@schaufler-ca.com>
+Date: Wed, 11 Nov 2026 17:50:30 -0800
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -113,80 +84,68 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <ed28619d-6ca7-46aa-82c0-c83f30a836e3@suse.de>
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - esm19.siteground.biz
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - valla.it
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-SGantispam-id: 409e35b0fa1265cbd8659dabe4aea8a7
-X-AntiAbuse: ID - 409e35b0fa1265cbd8659dabe4aea8a7
-AntiSpam-DLS: false
-AntiSpam-DLSP: 
-AntiSpam-DLSRS: 
-AntiSpam-TS: 1.0
-CFBL-Address: feedback@antispam.mailspamprotection.com; report=arf
-CFBL-Feedback-ID: 1xRGJ3-0000000HACC-376R-feedback@antispam.mailspamprotection.com
-Authentication-Results: outgoing.instance-europe-west4-qv6g.prod.antispam.mailspamprotection.com;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
+User-Agent: Mozilla Thunderbird
+Subject: Re: [apparmor] [PATCH RFC 19/41] smack: use fc_init_pseudo() for
+ smackfs
+To: Christian Brauner <brauner@kernel.org>, linux-fsdevel@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, Jan Kara <jack@suse.cz>,
+ Amir Goldstein <amir73il@gmail.com>, linux-nvme@lists.infradead.org,
+ fuse-devel@lists.linux.dev, linux-mm@kvack.org,
+ target-devel@vger.kernel.org, linux-kselftest@vger.kernel.org,
+ Chris Mason <mason@kernel.org>, Christoph Hellwig <hch@lst.de>,
+ linux-s390@vger.kernel.org, linux-erofs@lists.ozlabs.org,
+ linux-scsi@vger.kernel.org, xen-devel@lists.xenproject.org,
+ driver-core@lists.linux.dev, Jann Horn <jannh@google.com>,
+ selinux@vger.kernel.org, apparmor@lists.ubuntu.com,
+ Josef Bacik <josef@toxicpanda.com>, linux-block@vger.kernel.org,
+ ocfs2-devel@lists.linux.dev, Alexander Viro <viro@zeniv.linux.org.uk>,
+ linux-nfs@vger.kernel.org, netdev@vger.kernel.org,
+ linux-usb@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-security-module@vger.kernel.org, bpf@vger.kernel.org,
+ linuxppc-dev@lists.ozlabs.org, Casey Schaufler <casey@schaufler-ca.com>
+References: <20261110-work-loop-pseudo-v1-0-4c998976c6c7@kernel.org>
+ <20261110-work-loop-pseudo-v1-19-4c998976c6c7@kernel.org>
+Content-Language: en-US
+From: Casey Schaufler <casey@schaufler-ca.com>
+In-Reply-To: <20261110-work-loop-pseudo-v1-19-4c998976c6c7@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Mailer: WebService/1.1.26943 mail.backend.jedi.jws.acl:role.jedi.acl.token.atz.jws.hermes.yahoo
 
-Hi,
-
-On Wed, Nov 11, 2026 at 02:31:51PM +0100, Thomas Zimmermann wrote:
-> Hi
-> 
-> Am 27.10.26 um 14:53 schrieb Màxim Pedraza Padilla:
-> > From: Francesco Valla <francesco@valla.it>
-> > 
-> > Add myself as maintainer for the DRM splash client.
-> > 
-> > Signed-off-by: Francesco Valla <francesco@valla.it>
-> > [Màxim: add myself as co-maintainer]
-> > Signed-off-by: Màxim Pedraza Padilla <maximpedraza@gmail.com>
-> > ---
-> >   MAINTAINERS | 8 ++++++++
-> >   1 file changed, 8 insertions(+)
-> > 
-> > diff --git a/MAINTAINERS b/MAINTAINERS
-> > index a08087fb6e67..321ecb9f5b5b 100644
-> > --- a/MAINTAINERS
-> > +++ b/MAINTAINERS
-> > @@ -9168,6 +9168,14 @@ F:	Documentation/gpu/drm-ras.rst
-> >   F:	drivers/gpu/drm/drm_ras*
-> >   F:	include/drm/drm_ras*
-> > +DRM SPLASH
-> > +M:	Francesco Valla <francesco@valla.it>
-> > +M:	Màxim Pedraza Padilla <maximpedraza@gmail.com>
-> 
-> I don't think Francesco should be listed here. Although he wrote the initial
-> implementation, it's yours now.  Maybe list him as R: if you want to.
-> 
-
-I agree with Thomas here, you definitely did most of the work and
-deserve to be the maintainer. Feel free to keep me as a reviewer though,
-I'll be happy to help!
-
-> 
-> > +L:	dri-devel@lists.freedesktop.org
-> > +S:	Maintained
-> > +T:	git https://gitlab.freedesktop.org/drm/misc/kernel.git
-> > +F:	drivers/gpu/drm/clients/drm_splash.c
-> 
-> This patch should be merged with the one that added drm_splash.c.
-> 
-> Best regards
-> Thomas
+On 11/10/2026 1:14 AM, Christian Brauner via AppArmor wrote:
+> Initialize smackfs as a pseudo filesystem. This raises SB_I_PSEUDO and
+> also SB_I_NOEXEC and SB_I_NODEV. smackfs never holds executables or
+> device nodes.
 >
+> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
 
-Regards,
-Francesco
+Please include me at least as a CC on Smack patches.
+I ain't dead yet. Nonetheless,
 
+Acked-by: Casey Schaufler <casey@schaufler-ca.com>
+
+> ---
+>  security/smack/smackfs.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/security/smack/smackfs.c b/security/smack/smackfs.c
+> index a72bc7fabea9..4a56bbeaeca3 100644
+> --- a/security/smack/smackfs.c
+> +++ b/security/smack/smackfs.c
+> @@ -25,6 +25,7 @@
+>  #include <linux/magic.h>
+>  #include <linux/mount.h>
+>  #include <linux/fs_context.h>
+> +#include <linux/pseudo_fs.h>
+>  #include "smack.h"
+>  
+>  #define BEBITS	(sizeof(__be32) * 8)
+> @@ -2880,6 +2881,7 @@ static const struct fs_context_operations smk_context_ops = {
+>   */
+>  static int smk_init_fs_context(struct fs_context *fc)
+>  {
+> +	fc_init_pseudo(fc);
+>  	fc->ops = &smk_context_ops;
+>  	return 0;
+>  }
+>
