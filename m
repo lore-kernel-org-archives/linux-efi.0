@@ -1,53 +1,62 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=213.97.179.56
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794453209;
-	b=jsHTL1moX6KKRsMV/pmR38AAtF04O6eASksC3o8jpNzV6eYKY7PHYuk3RpduTTJOl8RY
-	 0Qe/ocCMetpy40sIXC233OuP7iIzwt0APjb+J0LBOqKrVoFm+oIbfzLT1PEwbZ1KOtgxS
-	 6wxU/l46QqtTFmzmBNppR5mKfvUHfAeoGxD1PkwNrzG0ndtPMuO/8DjVZtc/5RRg9F08T
-	 jbofry04yRcSrW23UO0kfL1mXhtAfNk7sEv3WMNSrSm5xXna28E7TDEZATbb/KvksscMg
-	 +YYjRIQqhHafdw3pi6Eo8sZrvx1rF21WefXkQeXkJypmVHTjeMDDmvgsyGjU9baPapQ==
+	t=1794484901;
+	b=bmDDCcw77wIxWcFvO2VZsmtypk3dBAY68z1q5/YO/KXz9bZgorLr5x4PUnyx++QGF2Kx
+	 4lfBBKQl0LP5jhx0Jfn2UFMk90O5IfMagFW4rFSOvc4Sh5PaMdXdn6bCHOWn78palPH2J
+	 UobA+bOjXZSY2sHQyRbzeVmAGKDdV6bJUa6UVhHYApoXxe8VbnS3FlNUFYGNb3w+Uiqae
+	 AqHLu6eDCeuuPzn04luG9VJgsX3sKW8xkDur03hmXB7BxdJr4xVHS5CKt94Y9XmFuYdfb
+	 LuYzotHiM3GbX6UYzlGnBc3x1Bg3yeTWAu9acgdaZD9GwrE+K/SUV406qHNrHNmv1AQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794453209;
-	h=DMARC-Filter:DKIM-Signature:Received:Message-ID:Date:MIME-Version:
-	 User-Agent:Subject:Content-Language:To:Cc:References:From:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding;
-	bh=f8mmUDpXbdelWthFJmC6h2O4KuH79ZCjDuO+eZML6XE=;
-	b=G+nMhM4Q5OumkJVezGTmEhdiQTEf3r8uXCaZ2MdOUKSOfajqxqKWnPd+3Sv+/8RWhuKQ
-	 +b5BB8jBVFeeBNNmXRv5lkyb0gl9lX6a0aHCsdI9e1frtWNGcYBHEpGUmk7coaNZEWyX0
-	 BcJ8NGwdLWOpJ4/A+0hh25r6PKf7SYJa/J9kpiIE4vFsKwUmFFfydizjN43+ytxbngpSA
-	 BhGoYv4LTsVyFmtDqAxIRV0V4cpLC007u7YhOwieD0n4n+e+DtEBsmwB75m6lUmFv651A
-	 vNGKH4meoD8Aa8B/s0QNcfTG0e5fAuDiYsGdx4cjErFl7TI4+195MCGuuLEtpV/TnsQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794484901;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=54I5bKtP4WSw79RGADSyevDuBquelpIbRaI3K1RVgo8=;
+	b=SRdLbN+3Cdgn7G6uU6Wy5X/mMytQ0PVlRRGvvyzwEvlrwK3LCpuwXLf5AiEjlIDRHpEQ
+	 28EFvUZmSiH862dBo56Ij/dFwcwJsPw0ukS5uJoG4ogVoE5a50kuwUH/RJIvzZ+zKt+iE
+	 +q1LXx52aQIvRwhY/EL6oEor1I8UGSk4Jx4Ba+1BDJcFo16wBBBqCpuho05pyzjQQmFMR
+	 AJ5uBJ0gDGtitPZaFIVjEGTbX4J8WeLtboI0IeoSvTpyzdQW51wlmoibI7HFQLp2DhHp+
+	 /duaZWrejqy4h36Ma3Xer0Js3HwvW/I44CEirOzwZWdYAEjaBWYHfhSkX9viXij5Crw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=igalia.com;
-	spf=pass smtp.mailfrom=igalia.com;
-	dkim=pass header.d=igalia.com header.i=@igalia.com header.a=rsa-sha256 header.s=20170329 header.b=XCX0QDL5;
-	arc=none smtp.remote-ip=213.97.179.56
-Received: from fanzine2.igalia.com (fanzine2.igalia.com [213.97.179.56])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QprEbjuf;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (prime256v1) server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB6FA606A31C
-	for <linux-efi@vger.kernel.org>; Thu, 12 Nov 2026 03:13:28 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org CB6FA606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=igalia.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77299606A896;
+	Thu, 12 Nov 2026 12:01:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.a=rsa-sha256 header.s=20170329 header.b=XCX0QDL5
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
-	s=20170329; h=Content-Transfer-Encoding:Content-Type:From:Cc:To:Subject:
-	MIME-Version:Date:Message-ID:From:Reply-To;
-	bh=f8mmUDpXbdelWthFJmC6h2O4KuH79ZCjDuO+eZML6XE=; t=1794453208; x=2109813208; 
-	b=XCX0QDL5oVSv/aIPeStvvQTrl3WY9BGY64xwHzDN97H6Z6xJR7EbJWNeyuaauNOBhOmM4CrFrRI
-	f1BH1KdHkLd43Mtf9TAeYL+FWkjSPi0CfbfvZEKo3MndOytoqxkbu2OP6ktHQY6pCxW+EdVs/VAfD
-	B8VuyIIrX+ZZO1tTfK1pS6AYod4iFd4MkUZU3ll5hMW1atVWbVbClLFjiu7vDcegguzo7bBS7HFr+
-	kHaGY4nAoY3Gtpvk3N1CHa12BehqTFWbTSPfPIzexKSoDohLNLs2xiKo1MM/l7ueR7X9Xtjv+PAY8
-	cuIadTKhAQo1SA5VG9WA60X08t6upSWiP7Pw==;
-Received: from [189.110.51.50] (helo=[192.168.15.3])
-	by fanzine2.igalia.com with esmtpsa 
-	(Cipher TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_128_GCM:128) (Exim)
-	id 1xRLFW-009Gwm-22; Thu, 12 Nov 2026 04:13:18 +0100
-Message-ID: <4a29a98e-92b0-7271-e2e5-10d159ee4a4f@igalia.com>
-Date: Thu, 12 Nov 2026 00:13:12 -0300
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QprEbjuf
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EFA7E1F00A06;
+	Thu, 12 Nov 2026 12:01:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794484900;
+	bh=54I5bKtP4WSw79RGADSyevDuBquelpIbRaI3K1RVgo8=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=QprEbjufNb+tvrOa7rBrGmxplqbmNy39Rmf2KUfr+AHg8IrdqKnppWAi/6c1jQ5lw
+	 1qQwMsR8fpHwFmAmOjHt6xx/GSD6lfIfUEbOqwxFxYqpUqqxaGguK/FgeQ9b4yse7n
+	 X5Gu+V8HvIKolxJnQl0GAY0dMopIoY1Zswfa1hVJnxH54H1V2CcTIR0C3XNIO1kYQQ
+	 jb08MOlodWLAKvfmxQBVrfP5uY0qBjF050j5MxuY9KrdgN1iuTLU+0ziIbWc5XAA1N
+	 31t4iwXyBD3El+zm85fqmePh/BsB9Y9+wkUwIt81ymt+t2A7BgUdE1+/gxOp3PTE+D
+	 sGRcdsQZ5uAtA==
+Date: Thu, 12 Nov 2026 13:01:34 +0100
+From: Christian Brauner <brauner@kernel.org>
+To: Jan Kara <jack@suse.cz>
+Cc: linux-fsdevel@vger.kernel.org, Jan Kara <jack@suse.com>, 
+	Al Viro <viro@zeniv.linux.org.uk>, ecryptfs@vger.kernel.org, linux-ext4@vger.kernel.org, 
+	jfs-discussion@lists.sourceforge.net, linux-nilfs@vger.kernel.org, exfat@lists.linux.dev, 
+	linux-mm@kvack.org, ntfs@lists.linux.dev, ocfs2-devel@lists.linux.dev, 
+	linux-btrfs@vger.kernel.org, gfs2@lists.linux.dev, linux-efi@vger.kernel.org, 
+	linux-mtd@lists.infradead.org, linux-xfs@vger.kernel.org, 
+	Karl Mehltretter <kmehltretter@gmail.com>, Dave Kleikamp <shaggy@kernel.org>
+Subject: Re: [PATCH v2 04/34] ext2: don't set SB_RDONLY after filesystem
+ errors
+Message-ID: <20261112-wohncontainer-saurier-wonnen-91f30c3b3ae2@brauner>
+References: <20261029-work-fs-sb_rdonly-v2-0-2f44f64f0b66@kernel.org>
+ <20261029-work-fs-sb_rdonly-v2-4-2f44f64f0b66@kernel.org>
+ <5qefa4mracb3x2z4vsdejmkyyfrhdcrixmmnooz4rzwcdfoejm@mqkvixj6afwp>
+ <20261110-kargheit-impfen-pausieren-881763d28b19@brauner>
+ <za33axmgzmuzsj3zmfeh43fkphtcsqtkhhrauwuvs7aiftelgp@dzl6z322st5f>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -57,27 +66,51 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH] efi: efibc: Optionally report panic as a reboot reason
-Content-Language: en-US
-To: Dave Young <hidave@163.com>
-Cc: ardb@kernel.org, linux-efi@vger.kernel.org, ilias.apalodimas@linaro.org,
- jeremy.compostella@intel.com, matthew.k.gumbel@intel.com,
- kernel-dev@igalia.com, kernel@gpiccoli.net, kexec@lists.infradead.org
-References: <20261108003549.745697-1-gpiccoli@igalia.com>
- <63d0fb19-b1cb-4729-839a-b9e1f1379473@163.com>
-From: "Guilherme G. Piccoli" <gpiccoli@igalia.com>
-In-Reply-To: <63d0fb19-b1cb-4729-839a-b9e1f1379473@163.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <za33axmgzmuzsj3zmfeh43fkphtcsqtkhhrauwuvs7aiftelgp@dzl6z322st5f>
 
-On 11/11/2026 23:57, Dave Young wrote:
-> Cc kexec list
-> 
+On Wed, Nov 11, 2026 at 03:15:11PM +0100, Jan Kara wrote:
+> OK, so instead of BUGing in jfs_evict_inode(), shouldn't JFS just do
+> something like:
+>
+> -	BUG_ON(!list_empty(&ji->anon_inode_list));
+> +	if (!list_empty(&ji->anon_inode_list)) {
+> +		WARN_ON_ONCE(!sb_emergency_ro(inode->i_sb));
+> +		/* This needs helper in fs/jfs/jfs_txnmgr.c */
+> +		TXN_LOCK();
+> +		list_del_init(&ji->anon_inode_list);
+> +		TXN_UNLOCK();
+> +	}
 
-Thanks a lot - a very good idea. I forgot doing it, my apologies.
-Cheers,
+Fwiw, this leaks the inode's anonymous tlocks. They're from TxLock which
+is shared by all jfs mounts. txLock() also sets mp->lid and pinned the
+metapages with metapage_nohomeok().
 
+So the helper would have to tear all of that down like txAbort() does
+and drop the pins. Doable, I guess not sure if this belongs into the
+series.
 
-Guilherme
+> So that JFS doesn't block everybody else? Because conceptually, once sb is
+> marked as emergency read-only, we really want to stop writeback so letting
+> sync_inodes() run seems moot.
+
+Meh, but a check in sync_filesystem() doesn't stop writeback? The
+flusher doesn't know about the emergency state and keeps calling
+->writepages() and ->write_inode().
+
+And kill_block_super() calls sync_blockdev() after
+generic_shutdown_super() so everything in the bdev mapping
+(FAT, bitmaps, inode table blocks) gets writeback anyway. All the check
+does is make syncfs() return without writing anything and make unmount
+drop whatever the flusher hasn't gotten to yet. Which might be the goal
+you're after?
+
+> Argh, also NFS I assume. OK, that won't be easy to get rid of AFAICT (we
+> generally don't have mount available there).
+
+So nfsd_setxattr() takes write access to the export's mount via
+fh_want_write(). So this would get EROFS from the VFS. Afaict it's
+ecryptfs and IMA? ima_fix_xattr() only checks IS_RDONLY().
+
+-- 
