@@ -1,112 +1,97 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.131
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794581692;
-	b=P3vItzE8r1DQcizJZsjg2bpfSJEXxGao4bEKPt1HtSmcWRm8I4Dx3KMYiwXXBxolyo9P
-	 CnQZNZAHkrI+hk8UK+1LpVuTp85HeSGA1JN4t2Kq2bCQJEoJvqmrTHxD+xU8SNOxX3oSO
-	 83IkkzZPr4JcS6mBFDRyyailn+1Pw1NLdjx4uTxeQdoOvOylT04Z/aMe3CTwf36OWEy+F
-	 tBo7B8wDMhtuzyuG8U6fXXZ6MnLRPA0J3iLkoUO5TISLRK6vwZLwDh0NZuvSQ2MMpuw8e
-	 s4RpFhTedHCpD4fHdPPaT+itNbDLOMFouNpJj+uvx5AkyZEi1DvTxq8djOyieWJd8HQ==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794581692;
-	h=DMARC-Filter:Received:DKIM-Signature:DKIM-Signature:DKIM-Signature:
-	 DKIM-Signature:Received:Received:Received:Date:From:To:Cc:Subject:
-	 Message-ID:References:MIME-Version:Content-Type:Content-Disposition:
-	 In-Reply-To:X-Spamd-Result:X-Spam-Score:X-Spam-Level:X-Spam-Flag;
-	bh=kLg1wy+Nl3hNJVUViyQU914DrXr8uKXxDSBe+HH3+OI=;
-	b=gswewipYS8rwZ/40HbDDL7NFZqaakXNJchVEnvaFqxkaZZerFaHvK54i13BZN9+UMo3o
-	 7FaHoGQVyZWK6pR5fWFTz8h3EeMbEde+UuxYhhkwOfXINDxyvuGOotptQj+qEJADD21Jq
-	 Xuaire+yNvh8pYYSir4PspT+wp1rCIQMoDQ3Tyq3dQjgQCng21unuGrsWl+4gxsVhld5O
-	 Pecvl4ne3eRq6nbcc+vxsPt1om9EpyK2W18Xs8S1Mme3aYgJpDZdCxzdjNmbvoBkskuKz
-	 l9NrzZSu10MDyeeFmJnlcPfCcu9PP8Sn/Q0xuM3QGfBQniFwa4Aw3v9gpFS0qyDi8zQ==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=suse.cz;
-	spf=pass smtp.mailfrom=suse.cz;
-	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=HbiPobah;
-	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=QBNwugyQ;
-	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=HbiPobah;
-	dkim=neutral header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=QBNwugyQ;
-	arc=none smtp.remote-ip=195.135.223.131
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.56.34
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1794582636;
+	b=SyT3c27iO/cJAAdt1L6UEiy3RePUrKj6yQjeaOWOXiirEHLeeNzAwMA9m8v0EcnBTCGr
+	 3oi8tnKvkFQ45eCR6pLaJ354CnQB0uU8tYIx8fXvgMH3fL/u4G2VS7NTX0acaWNUA6BFN
+	 4zrvm5gPthsuNdWIlF+R9ohsqbdn6B4ZQMI0uXqX36id+6Rns6LDGUa8RmwyCLwCs+dlO
+	 CJ46mszaHKB2zgZu+s3+j6rmR3PARIt9GiAFYmQQChBUAr3f7tOsJaVqLrfPfidoO71yL
+	 10AzHKna0BBV0CtNtkJmDfY3pVdu/tkoHklBCb86XqNZnyZh5rq0yd7CQoucvXIXskQ==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794582636;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:Content-Type:
+	 Content-Transfer-Encoding:Subject:From:To:Cc:In-Reply-To:References:
+	 Date:Message-Id:X-Mailer:X-ClientProxiedBy:MIME-Version:
+	 X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
+	 X-MS-Office365-Filtering-Correlation-Id:X-MS-Exchange-SenderADCheck:
+	 X-MS-Exchange-AntiSpam-Relay:X-Microsoft-Antispam:
+	 X-Microsoft-Antispam-Message-Info:X-Forefront-Antispam-Report:
+	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
+	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
+	 X-MS-Exchange-CrossTenant-Network-Message-Id:
+	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
+	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
+	 X-MS-Exchange-CrossTenant-FromEntityHeader:
+	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
+	 X-MS-Exchange-CrossTenant-UserPrincipalName:
+	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
+	bh=k6x0VuUO0GYkxDaYcjvmAuGzdvUMZ0O8Cyp9uzcwxKY=;
+	b=l2xAPf4Dm5C3t5ecfEcf9pHR4x0vb5eqvOPyk/yDQ1rH3p7Q7grOkpCTO7oziXSrDH/m
+	 5Q29vn8kZw32M/kA6/lUzEaEnt/WiwwCK+dBMeo6YLNw0M287Ciw/r7eGIE427xgf5FzG
+	 O618/MgRF9L6XdXBA/X2ZrmdQgZgCKj1DAKWyfTDABGnWryqd3coNFBQHNhlT5rX/0lfv
+	 30cNwMgNveoaOHiuX/wZMfLG4/kk6X3AGyRFNt+UUe2NpcCGZldTq7S19j1+a/dhYuwuc
+	 RMPqoIdJVXpd8hU1VhjgQEtPbRLAcZg4nrDi/RQSDfKnCYrnNMvFachTmvHw59DzoiQ==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=nvidia.com;
+	spf=fail smtp.mailfrom=nvidia.com;
+	dkim=pass header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=WMs3Cyj6;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.56.34
+Received: from BN1PR04CU002.outbound.protection.outlook.com (mail-eastus2azon11010034.outbound.protection.outlook.com [52.101.56.34])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D64FE606A330;
-	Fri, 13 Nov 2026 14:54:51 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D64FE606A330
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D740A606A333
+	for <linux-efi@vger.kernel.org>; Fri, 13 Nov 2026 15:10:35 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D740A606A333
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=HbiPobah;
-	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=QBNwugyQ;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=HbiPobah;
-	dkim=neutral header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=QBNwugyQ
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 0100E1F76B;
-	Fri, 13 Nov 2026 14:54:50 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1794581690; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=kLg1wy+Nl3hNJVUViyQU914DrXr8uKXxDSBe+HH3+OI=;
-	b=HbiPobahhoFdy1JualtlCQSG5WiHGbYkeN97T1slq4syz8ydxAAmyFBMnw9wIWMymvWQBA
-	OibY1yJc8woYnm917MtaAgfxA3/FGLQWnqOg9S4/Gje0GR/2m8TO3d0XcGyF5ZnSISlDva
-	Pm+cC9vb75/3LpW2TrEGkQOayOm27Hw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1794581690;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=kLg1wy+Nl3hNJVUViyQU914DrXr8uKXxDSBe+HH3+OI=;
-	b=QBNwugyQn7fvnUpfJc61DDJ3B5ezL3Vu/dwAt7y/gE33yL9lBDupL5AB9JAf8phimNZdBs
-	djr90So7chpqQRAg==
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1794581690; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=kLg1wy+Nl3hNJVUViyQU914DrXr8uKXxDSBe+HH3+OI=;
-	b=HbiPobahhoFdy1JualtlCQSG5WiHGbYkeN97T1slq4syz8ydxAAmyFBMnw9wIWMymvWQBA
-	OibY1yJc8woYnm917MtaAgfxA3/FGLQWnqOg9S4/Gje0GR/2m8TO3d0XcGyF5ZnSISlDva
-	Pm+cC9vb75/3LpW2TrEGkQOayOm27Hw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1794581690;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=kLg1wy+Nl3hNJVUViyQU914DrXr8uKXxDSBe+HH3+OI=;
-	b=QBNwugyQn7fvnUpfJc61DDJ3B5ezL3Vu/dwAt7y/gE33yL9lBDupL5AB9JAf8phimNZdBs
-	djr90So7chpqQRAg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id BBF48134C3;
-	Fri, 13 Nov 2026 14:54:49 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id hybEI7kk92pSFgAAD6G6ig
-	(envelope-from <jack@suse.cz>); Fri, 13 Nov 2026 14:54:49 +0000
-Received: by quack.suse.cz (Postfix, from userid 1000)
-	id 50A352396E; Fri, 13 Nov 2026 15:54:49 +0100 (CET)
-Date: Fri, 13 Nov 2026 15:54:49 +0100
-From: Jan Kara <jack@suse.cz>
-To: Christian Brauner <brauner@kernel.org>
-Cc: linux-fsdevel@vger.kernel.org, Jan Kara <jack@suse.com>, 
-	Al Viro <viro@zeniv.linux.org.uk>, ecryptfs@vger.kernel.org, linux-ext4@vger.kernel.org, 
-	jfs-discussion@lists.sourceforge.net, linux-nilfs@vger.kernel.org, exfat@lists.linux.dev, 
-	linux-mm@kvack.org, ntfs@lists.linux.dev, ocfs2-devel@lists.linux.dev, 
-	linux-btrfs@vger.kernel.org, gfs2@lists.linux.dev, linux-efi@vger.kernel.org, 
-	linux-mtd@lists.infradead.org, linux-xfs@vger.kernel.org, 
-	Karl Mehltretter <kmehltretter@gmail.com>
-Subject: Re: [PATCH v3 06/33] ext2: don't set SB_RDONLY after filesystem
- errors
-Message-ID: <wsdk673ps54ncvmj7xvgzghgcf7y27uw4w7ahrgbytdy6tdxg3@ldvmi2yk3lm7>
-References: <20261113-work-fs-sb_rdonly-v3-0-0be92bb73709@kernel.org>
- <20261113-work-fs-sb_rdonly-v3-6-0be92bb73709@kernel.org>
+	dkim=pass (2048-bit key, unprotected) header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=WMs3Cyj6
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=qeiFExsnHvWQeOLTwl1yONqTD+gRKI+oO3dDFM/TPHvYOiD0Yh1suennGeynZUnF5yemofLy7FkITfDaXxXk9uULzsvMf5uCW03ZzDnLQrKCSqW8JjAdUFTX49vT7g7Mwzp3uJGnp1GKXBq3GPhmpyOgsTCWnSr5bIfU55Bjct4jNl8EhsMqBACvY2sVxC8GlHomYSMKNUVhXUjwSAOc9FyOpv9E1Bg+fYDuc5tmOaq+EYmi+o5s82ZEmMn+wMZsTozPRdqdpmHctTK/YhVVrlcIFp7sjtEZANGgsoF3xaqLFsuotVVdZXZDOCIXflbqCthIXA57WgYpySbm4bcBqQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=k6x0VuUO0GYkxDaYcjvmAuGzdvUMZ0O8Cyp9uzcwxKY=;
+ b=XXypcempK/coKxuAO7DMfG3j6xp5kP4OQrLltXOOtngcbjbtZOkdsmPQNLwHckkAgYqc+GoKeFTu3ERLqsW8D9ophh2asFXklI1kDO3he7CzbVP6kAQ6sVnAu3NqAm2F42aY7I1xY8BuBjN685JPjzbw4dQHxTjYKG5NCCSOHFwPty554DZ2AM3cU6+8nvCp3Ze2Gn9cwWqI1/dTDnRrEmfAgH2pJEz90+YUvxvk1l/x21mUI3wohYj1aI+ftcBFb1UzLAht3vkWzzTAEJKbRVa59BivdHRSHNuU+xaPuoyit+z+FSiKrVOkU9tHyoy5eXC1tzq0UUFVyW7voWeOZg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
+ dkim=pass header.d=nvidia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=k6x0VuUO0GYkxDaYcjvmAuGzdvUMZ0O8Cyp9uzcwxKY=;
+ b=WMs3Cyj6bH2WlpwMvKqr8RxjuU63y+Rq/DBmqn1OwWFDerB4ELGnwSY2yZfVNmwAuw5LprY7g+SnOafZoINCdCFSL8I4Q1vPoh1n7KTrv64aMh+rBoNv6Dk02HHyve/Te0DvtiyCTK09hj5ZurS+FoxiXMbQV9UO1LENjTr1KpmuGD7XPk3hvL+4W1j9IwDiqIL7BSNqK0/yHEk/Cn9sV9NTb38iZmXEOVgG6f5GWrxpWHS7hftKLk3Uq3gUsWR/EiMH2D06o0l5wy8eQL+AMMzmuOxkRKwDajvhkQCuVAfeZE6qI+GtE1f/Wo+JaLkaViST2yTdEdf4Jeox83JCrg==
+Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nvidia.com;
+Received: from CHBPR12MB731189.namprd12.prod.outlook.com
+ (2603:10b6:610:33d::12) by LV3PR12MB9332.namprd12.prod.outlook.com
+ (2603:10b6:408:20f::14) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.615.8; Fri, 13 Nov
+ 2026 15:10:25 +0000
+Received: from CHBPR12MB731189.namprd12.prod.outlook.com
+ ([fe80::b0e5:123d:fe06:e10d]) by CHBPR12MB731189.namprd12.prod.outlook.com
+ ([fe80::b0e5:123d:fe06:e10d%6]) with mapi id 15.21.0615.009; Fri, 13 Nov 2026
+ 15:10:25 +0000
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v2 02/10] efi/riscv: Rename __init_text_end to
+ __inittext_end like other archs
+From: Jason Gunthorpe <jgg@nvidia.com>
+To: Ard Biesheuvel <ardb+git@google.com>
+Cc: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ Ard Biesheuvel <ardb@kernel.org>, Jason Gunthorpe <jgg@nvidia.com>, 
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+ Albert Ou <aou@eecs.berkeley.edu>, Huacai Chen <chenhuacai@kernel.org>, 
+ loongarch@lists.linux.dev, linux-riscv@lists.infradead.org
+In-Reply-To: <20261110121731.2728824-14-ardb+git@google.com>
+References: <20261110121731.2728824-12-ardb+git@google.com>
+ <20261110121731.2728824-14-ardb+git@google.com>
+Date: Fri, 13 Nov 2026 11:10:21 -0400
+Message-Id: <179458262193.3625095.9553451202764579940.b4-review@b4>
+X-Mailer: b4 0.17-dev
+X-ClientProxiedBy: YT4PR01CA0272.CANPRD01.PROD.OUTLOOK.COM
+ (2603:10b6:b01:109::24) To CHBPR12MB731189.namprd12.prod.outlook.com
+ (2603:10b6:610:33d::12)
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -116,188 +101,77 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261113-work-fs-sb_rdonly-v3-6-0be92bb73709@kernel.org>
-X-Spamd-Result: default: False [-11.30 / 50.00];
-	SUSE_INTERNAL_BYPASS(-9.00)[];
-	BAYES_HAM(-3.00)[100.00%];
-	SUSPICIOUS_RECIPS(1.50)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	MISSING_XM_UA(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	RCPT_COUNT_TWELVE(0.00)[18];
-	FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	TO_DN_SOME(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	FREEMAIL_CC(0.00)[vger.kernel.org,suse.com,zeniv.linux.org.uk,lists.sourceforge.net,lists.linux.dev,kvack.org,lists.infradead.org,gmail.com];
-	RCVD_COUNT_THREE(0.00)[3];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCVD_TLS_LAST(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.cz:email,suse.com:email,imap1.dmz-prg2.suse.org:helo]
-X-Spam-Score: -11.30
-X-Spam-Level: 
-X-Spam-Flag: NO
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CHBPR12MB731189:EE_|LV3PR12MB9332:EE_
+X-MS-Office365-Filtering-Correlation-Id: 794e9d13-b4e9-4366-fb31-08df41983ec9
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|376014|23010399003|7416014|1800799024|366016|11063799006|4143699003|56012099006|18002099003|22082099003|10067099003;
+X-Microsoft-Antispam-Message-Info:
+	FSL0JcNHzpdVjUnKoY1PC718lHe+8Zusg4mT4vMXmPDSjxJ71frWl1JG6eSVGtk3YNKpfcWuZQ5rCWhwwkSBklgFj9/SYBo0xovY+uMusv/6nQvfsgubnh/GyNB0XD0wQA69O5RjQoR0tD+idFS2nHGF8I8ADCamzLt5rPuXOX9blygKldkXD74HpQTeJDJNJ0x+eG5CohdJfsgPfu50Il3740FQKmDWQ6zX2oU6VbC71x/i7UfTxbRNcMZlaWjiQN8sm7bZ+GjM1oa8rGvk2QtMo3PvsudDQmohOKDb3tQxqOmKlxYujK3cr51Qz5fuQ3kztRkJpUnxcvlETT+/s/k5zyAGLKjq70O01rpA1Jm5ZYzHjJTbroJPNmK+Gq+C994sf37pW6/Rv2TKJRkoON2S0HaHjmX+HOfROCA0kUWw5Ytkl/Crbp31B3wJHYLWyEJjUH8Oso0ibgK80jvUd2PDiYHINaeZwYo0NOboQeLR7iC++trci5dm2At+i2YgB/rOdLXe36ibtvdrmcwgfu/qz97/0I4Xd07CR5/c7e7r22EGCHvsOzWx9jmheWxKz0auFVaNuEnsl7/xIbe/Uxexy/VJc2FkN0IVweibHCbC6rIwU9qq9bvtZ5a/2ZSr46R/12IhuZDQrTqrwVoNpK9DPdp5Ef+A5s1WZDkpRiw=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CHBPR12MB731189.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(23010399003)(7416014)(1800799024)(366016)(11063799006)(4143699003)(56012099006)(18002099003)(22082099003)(10067099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?MVBqNnMyQ1VYNTEvS2pHdjU2T0pPYmZqQnUrVW9kUWg3WEd2NkFmekY3Qjhz?=
+ =?utf-8?B?SnppTU94NVR1UTd3ZDFkSUVtN1NUSmNmeDEvTHg2cWc4clNxZDhvbDY1dGRY?=
+ =?utf-8?B?M3hMakw1YW5tYzd5ejVnWXdldVZHZTFVc3UyN1ozckpId2FhVlNNdDJvc1Mw?=
+ =?utf-8?B?ckpuYk5ZTERmeXozVElCbXNYOGcvcnFXWlp3bDROTUNjWU5OYUZEckUrYVJG?=
+ =?utf-8?B?THBEMVdZekIzcnlXaS9kUGplbHQrY1E5MnBDYWdScWUvVFFKMmI2aHNaNnhT?=
+ =?utf-8?B?T2xIZGxRZ3JkUGFuVlExWTBPN2pBV1FDSjV3RklpTWFkY2gwNjA4ajZieTF1?=
+ =?utf-8?B?bWUrRlJsY29JdkNzaXZFN1ZqaHl6eGxvclhtZ3daZGZjVko2RFJOK1IxeVdu?=
+ =?utf-8?B?N3ltay9UTVcza3lMYWsrSFVGVllWb0gyWXQ0WjZkdlJ1c0dRbWNzeXRBaXhx?=
+ =?utf-8?B?RlBHZ3BTc015RGplUy91UEoxdi8vYlc1NkVCREUzOWRXcEZBdEt2NUhuNUVQ?=
+ =?utf-8?B?aTUrQlVyYnFhYjk0ZWhmTjNWN2RVSXFSR3RDMXpwd2k1dGZNM3lZTy9FNXls?=
+ =?utf-8?B?VG5WTzkvaVZBZU1kd2dBbDA2S2VqbDdSVXhTNmpNalBiSFkrQ0JSL1dvb0tX?=
+ =?utf-8?B?Q2gzOWIvTU1ISjFpQ2tyQmd4cTBWNUtDK1ZKcVFFMk0wQ0JjLy9aWE9qZkND?=
+ =?utf-8?B?RzdUam44bmxyU2E0MmZiZ0tRY2ZCdWZCLzZCTU01NnJGYUNoSWZlSitxcytM?=
+ =?utf-8?B?aVhRVG1aRXR2RlkxeklHZC9jbDR1ODkyM20wdFBnSmdZYm5tQ2wyd1YwNlF6?=
+ =?utf-8?B?cnlLTGhnbHp4RUtHV0pQTEtsYnpCb09EbmxSSFROSkhQRlJSRWVQMjVkbFB6?=
+ =?utf-8?B?NVF4clJhdmFaWWZkMXUwdFRSWmNkUGFqZThoQ1Q0WUF0NFhEQ05neWtzenRp?=
+ =?utf-8?B?Nm5YVER1RHYzdlo5dXhZSXpVU01VRnJKUVliYkhpaXdMU0s3N0JvY0ZmclU4?=
+ =?utf-8?B?WVptQkllMU92LzQzRzFCL2EwVGVIdXlLdSsvTXh2aDV1WmhQTmUweWF4U1dO?=
+ =?utf-8?B?TEoxTHpZbnc1MUxYK0NCTmkwS0NSUDhiVkpLamo0YWVMZXhPTEFHM2NialVD?=
+ =?utf-8?B?ZERYSjJSMUpLQW05MWc0aXlhWlVVK3ZzVXVXczF5d0FkQmJPd0sveVBCdjM1?=
+ =?utf-8?B?ZDM4WFR3VFVUTnBNR3dpVDRmeUtUVUVIM1lsRHJLVXFtem55d0R5akRtNE1I?=
+ =?utf-8?B?QytvazJrYkMrb0d0eVkzWjlLSXlIMkdROXBneGtYd1FwZGVURDA4U0Z3dTN2?=
+ =?utf-8?B?UFdYa0lVcmJqU0pXajU1b3FuTGdXbHBQaEljOW5wMjBWbXdQckltdm0vUjYr?=
+ =?utf-8?B?dE9QcEJUY0xmSXY0Y1VYWlNDeDd3d3FLa2FONzNEVU9PQWF4UXBBNGhhNFMy?=
+ =?utf-8?B?cFp3aEN1d1dIQjRRbitOR2lvL3ovREtTbjlPejZVNXdwNUVzZVZIRThESER3?=
+ =?utf-8?B?V1JwT1B0QUsyN3lMZGJJWGJ5VFB2eFhiU2pLK1FZYUVYaHNHV3RzVlBJMTB5?=
+ =?utf-8?B?Q2VMUHB6RUF0M3dUSmdaK09LNnlZNTMvN011RzV3azBVc0YvVldibkRVZkow?=
+ =?utf-8?B?OUJTS2U2K0hXWm9FQUxMWm1mZzJSRkJuMDFRenZ6OFBpMU5zcXhaYnNvam1z?=
+ =?utf-8?B?ZDUxQWI1Z2RWbXprOXJIQkhrT1p1UHUrYlpFRVYxalU4K3F0N3dzQkNMTEZS?=
+ =?utf-8?B?VEF5NGI0RkloTU12QXBmdnUwYk1aMWlOYkdJZHVuY1pLdWxCOXVhS3FDYWhJ?=
+ =?utf-8?B?aytxZWdlcFlVRHhlN0VobTFhZGlZVkg5bTh3K00yWk5kVEdWQXVqWDRMdGMy?=
+ =?utf-8?B?cVYzdEVEM09xdlcwVmc4UXQyZkJ1NmVuaEp2RUJjWVRPdk9pKzZyYTV4Z0Zv?=
+ =?utf-8?B?cVk5dGFyMDFjMThZK3hTTDhzbUZTRHFXd3Y0dkMvRFhIclF3VVJCRGx6MCtR?=
+ =?utf-8?B?dUI1SmFxTVhIZFpLUStzZHhLemgwcjdTdnZjR3luVTdobUxlNXFiaGNXUmhq?=
+ =?utf-8?B?azZhc2hHSEl6SDdvZFZRS0taTGQybVEwQlFUZmxMdi9BeGdLYnM0ZDI2ZGJu?=
+ =?utf-8?B?c1F6d0lReDJqQmV2NVhsUkRMdVI0QkU3M3hCNUY5WmV5ckkwZXFaM1hiQ3pJ?=
+ =?utf-8?B?bmdlam1XbEpSbHpKTVh2am1odGtEb0FvS25WcnFwWHFkY3NNZkNjZGZDaGxx?=
+ =?utf-8?B?RVRWQTlTcGxqd1BmbW04c3BWVjAwb0R5V3pGczdQQXZ4VkJlbjlOVGVOMnU4?=
+ =?utf-8?Q?bURkZ//QkzDAEvxHu4?=
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 794e9d13-b4e9-4366-fb31-08df41983ec9
+X-MS-Exchange-CrossTenant-AuthSource: CHBPR12MB731189.namprd12.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Nov 2026 15:10:25.5390
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: g0mElw+zmWSdBg4PEU100I/31FYBkaaP1x/6JLO5GLcDr7MX2E/tTCWK0Xgp/RjF
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV3PR12MB9332
 
-On Fri 13-11-26 12:59:02, Christian Brauner wrote:
-> With errors=remount-ro ext2_error() sets SB_RDONLY from whatever context
-> hit the error and without holding s_umount. That races with everyone
-> else changing sb->s_flags and it breaks freezing. If it happens while
-> the filesystem is frozen thaw_super() sees a read-only superblock and
-> leaves the s_writers rwsems locked so every writer hangs. A lookup in a
-> corrupted directory is enough. Karl proposed teaching thaw_super() about
-> it but Jan preferred fixing the filesystems (cf. [1]) like ext4 and f2fs
-> already did.
-> 
-> So call sb_set_emergency_ro() instead and let the VFS refuse
-> modifications. ext2 still refuses allocations and ext2_xattr_set()
-> itself, ecryptfs calls the latter without write access on the lower
-> mount. Unlinked inodes are left to e2fsck. ext2_write_inode() keeps
-> working because writeback still writes data, bitmaps, indirect and
-> directory blocks after the error and they'd be lost without the inode.
-> A thaw after an error while frozen still writes the superblock but
-> EXT2_ERROR_FS stays set in it.
-> 
-> After a remount to read-only a remount to read-write fails until umount.
-> A plain remount to read-write right after the error succeeds but the
-> filesystem stays read-only. Writes through file descriptors opened
-> before the error fail with EROFS.
-> 
-> [1]: https://lore.kernel.org/r/hyhuckyohsabx2suvq3z7uy3pbgmihva6wgzxr3op7pzcrlu33@p7zzlgp2ehjf
-> 
-> Reported-by: Karl Mehltretter <kmehltretter@gmail.com>
-> Link: https://lore.kernel.org/r/20260903060855.4610-1-kmehltretter@gmail.com
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+On Tue, 10 Nov 2026 13:17:34 +0100, Ard Biesheuvel <ardb+git@google.com> wrote:
+> Align RISC-V with arm64, LoongArch and x86, and drop the underscore
+> between 'init' and 'text' in the section markers. This allows the value
+> to be captured by generic EFI stub code that can be shared between all
+> those architectures.
 
-Looks good. Feel free to add:
+Reviewed-by: Jason Gunthorpe <jgg@nvidia.com>
 
-Reviewed-by: Jan Kara <jack@suse.cz>
-
-								Honza
-
-> ---
->  fs/ext2/balloc.c |  5 +++++
->  fs/ext2/ialloc.c |  2 ++
->  fs/ext2/inode.c  |  4 +++-
->  fs/ext2/super.c  | 13 ++++++++-----
->  fs/ext2/xattr.c  |  2 ++
->  5 files changed, 20 insertions(+), 6 deletions(-)
-> 
-> diff --git a/fs/ext2/balloc.c b/fs/ext2/balloc.c
-> index 80acc1e193871..77f2ed5a76a28 100644
-> --- a/fs/ext2/balloc.c
-> +++ b/fs/ext2/balloc.c
-> @@ -1236,6 +1236,11 @@ ext2_fsblk_t ext2_new_blocks(struct inode *inode, ext2_fsblk_t goal,
->  	*errp = -ENOSPC;
->  	sb = inode->i_sb;
->  
-> +	if (sb_emergency_ro(sb)) {
-> +		*errp = -EROFS;
-> +		return 0;
-> +	}
-> +
->  	/*
->  	 * Check quota for allocation of this block.
->  	 */
-> diff --git a/fs/ext2/ialloc.c b/fs/ext2/ialloc.c
-> index bf21b57cf98cd..2741ecd2b94fc 100644
-> --- a/fs/ext2/ialloc.c
-> +++ b/fs/ext2/ialloc.c
-> @@ -433,6 +433,8 @@ struct inode *ext2_new_inode(struct inode *dir, umode_t mode,
->  	int err;
->  
->  	sb = dir->i_sb;
-> +	if (sb_emergency_ro(sb))
-> +		return ERR_PTR(-EROFS);
->  	inode = new_inode(sb);
->  	if (!inode)
->  		return ERR_PTR(-ENOMEM);
-> diff --git a/fs/ext2/inode.c b/fs/ext2/inode.c
-> index 12ac4cfe15003..dd28637c60737 100644
-> --- a/fs/ext2/inode.c
-> +++ b/fs/ext2/inode.c
-> @@ -71,7 +71,9 @@ void ext2_evict_inode(struct inode * inode)
->  	struct ext2_block_alloc_info *rsv;
->  	int want_delete = 0;
->  
-> -	if (!inode->i_nlink && !is_bad_inode(inode)) {
-> +	/* After an error made us read-only the inode is left to e2fsck. */
-> +	if (!inode->i_nlink && !is_bad_inode(inode) &&
-> +	    !sb_emergency_ro(inode->i_sb)) {
->  		want_delete = 1;
->  		dquot_initialize(inode);
->  	} else {
-> diff --git a/fs/ext2/super.c b/fs/ext2/super.c
-> index fb217ef2d69f0..10d5165459749 100644
-> --- a/fs/ext2/super.c
-> +++ b/fs/ext2/super.c
-> @@ -53,7 +53,7 @@ void ext2_error(struct super_block *sb, const char *function,
->  	struct ext2_sb_info *sbi = EXT2_SB(sb);
->  	struct ext2_super_block *es = sbi->s_es;
->  
-> -	if (!sb_rdonly(sb)) {
-> +	if (!sb_rdonly_any(sb)) {
->  		spin_lock(&sbi->s_lock);
->  		sbi->s_mount_state |= EXT2_ERROR_FS;
->  		es->s_state |= cpu_to_le16(EXT2_ERROR_FS);
-> @@ -73,11 +73,11 @@ void ext2_error(struct super_block *sb, const char *function,
->  
->  	if (test_opt(sb, ERRORS_PANIC))
->  		panic("EXT2-fs: panic from previous error\n");
-> -	if (!sb_rdonly(sb) && test_opt(sb, ERRORS_RO)) {
-> +	/* SB_RDONLY needs s_umount, see sb_set_emergency_ro(). */
-> +	if (!sb_rdonly(sb) && test_opt(sb, ERRORS_RO) &&
-> +	    sb_set_emergency_ro(sb))
->  		ext2_msg(sb, KERN_CRIT,
->  			     "error: remounting filesystem read-only");
-> -		sb->s_flags |= SB_RDONLY;
-> -	}
->  }
->  
->  static void ext2_msg_fc(struct fs_context *fc, const char *prefix,
-> @@ -179,7 +179,7 @@ static void ext2_put_super (struct super_block * sb)
->  	ext2_xattr_destroy_cache(sbi->s_ea_block_cache);
->  	sbi->s_ea_block_cache = NULL;
->  
-> -	if (!sb_rdonly(sb)) {
-> +	if (!sb_rdonly_any(sb)) {
->  		struct ext2_super_block *es = sbi->s_es;
->  
->  		spin_lock(&sbi->s_lock);
-> @@ -1360,6 +1360,9 @@ static int ext2_reconfigure(struct fs_context *fc)
->  	if ((bool)(flags & SB_RDONLY) == sb_rdonly(sb))
->  		goto out_set;
->  	if (flags & SB_RDONLY) {
-> +		/* After an error nothing may be written, just go read-only. */
-> +		if (sb_emergency_ro(sb))
-> +			goto out_set;
->  		if (le16_to_cpu(es->s_state) & EXT2_VALID_FS ||
->  		    !(sbi->s_mount_state & EXT2_VALID_FS))
->  			goto out_set;
-> diff --git a/fs/ext2/xattr.c b/fs/ext2/xattr.c
-> index 8f608930a48c6..12dfffff189cb 100644
-> --- a/fs/ext2/xattr.c
-> +++ b/fs/ext2/xattr.c
-> @@ -429,6 +429,8 @@ ext2_xattr_set(struct inode *inode, int name_index, const char *name,
->  	ea_idebug(inode, "name=%d.%s, value=%p, value_len=%ld",
->  		  name_index, name, value, (long)value_len);
->  
-> +	if (sb_emergency_ro(sb))
-> +		return -EROFS;
->  	if (value == NULL)
->  		value_len = 0;
->  	if (name == NULL)
-> 
-> -- 
-> 2.53.0
-> 
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+Jason
