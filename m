@@ -1,111 +1,113 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.48
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794565724;
-	b=htoAcFTxZflWXELlhTLo4ksiw0W7XTppplBuCabVLgYSDwX462uGElSR83GRA5vkE10d
-	 iW99sXSo1qMi+SvjH2BCqlG4TL4kxfw58gWZ4LvU0ZCPBxFC2Y/KxSCw02psiYKSxU+aF
-	 BIH8000z0DnH6vTKk4E1YFRwF92iTGtEODjeIxNvhmB2+R32gu1zh+M3viQjBbJdUsrOS
-	 ZNZD0wVGtW9Iud17KrdQDgZjj8JqF/CA4Ik0R1kQYHIO+J1qoGQLZznsWQTXhqmsxOgGY
-	 Ohx/gXgXylcNwRXAc2HuZH0uqfPnO8gvvIHWTjOBWbZ30PLOTYuNWa30G5fGvQX1y+g==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794565724;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Content-Transfer-Encoding:User-Agent:MIME-Version;
-	bh=HIAZ+a2RY8snYu8gjwIzGL7aFLB+UDjcbceUrGWDUl0=;
-	b=j9Pr1VivlxiVY0DPFqTbvzXFlm8B+wbfl27f5zp3V7jmGM6Am77HmXyOD3J9aOXAq7xy
-	 kYEeTIWLXm0G9YbKVqRje0zaiz6keuoHhD3PaoUxWMI0xffC1AgBIt0v8eTXpbiky2/0o
-	 a4sQEU9xw8kArcmMitmLvampwDYrbYlGthBtxfU4Y4dbeN7t00/K1QW5vSCErRrxycPTB
-	 +7Aa1ZT+Nyuh6wXhcjQji5+NFcxOr1Bz3bDA+FJDJxu7EklmZP3N1o9zcNRc0bDjqoP1B
-	 ZAs9++ATSoSZtcasNCzSYe8H/GZZUpZEGcGogbskxmUWThSYfYfCPPgx/OY+EtqPbtA==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=amutable.com;
-	spf=pass smtp.mailfrom=amutable.com;
-	dkim=pass header.d=amutable-com.20260707.gappssmtp.com header.i=@amutable-com.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=QLWbUp+2;
-	arc=none smtp.remote-ip=209.85.128.48
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.53.11
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1794569628;
+	b=QL0w/wanQErPtQS6YbYjQknzv4SadVe/UFNHEfRgvtALww/tonGJWg44pNWRIKTAiuQb
+	 LyassKFzxXubYG0ckg0MmatORsL1XogyObc1R4Nu6BX9OGF6536Rd7HWioNIJkDZO24dN
+	 uxTcoISNHzpLyCpEbY4CXXbtae55CeWSeaMJznAMx/jbgFSjoidbgmvrB7x6LBC902Dv/
+	 UObfAw4vWcjzSQwlfd0JSMFd/AxyoCge5VH21dm79YZErsEW3u6tFgdUA1mviph/14pL3
+	 27FPNFJNtu/Fe0W934TnCmThValFt65X1yNs06qaDqYkYSnT7WhvsmAhqDBDC+dVcuw==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794569628;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:
+	 X-MS-Exchange-Authentication-Results:Received-SPF:Received:Received:
+	 Received:Received:From:To:CC:Subject:Date:Message-ID:X-Mailer:
+	 MIME-Version:Content-Transfer-Encoding:Content-Type:
+	 X-EOPAttributedMessage:X-MS-PublicTrafficType:
+	 X-MS-TrafficTypeDiagnostic:X-MS-Office365-Filtering-Correlation-Id:
+	 X-MS-Exchange-SenderADCheck:X-MS-Exchange-AntiSpam-Relay:
+	 X-Microsoft-Antispam:X-Microsoft-Antispam-Message-Info:
+	 X-Forefront-Antispam-Report:
+	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
+	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
+	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
+	 X-MS-Exchange-CrossTenant-Network-Message-Id:
+	 X-MS-Exchange-CrossTenant-Id:
+	 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp:
+	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
+	 X-MS-Exchange-CrossTenant-FromEntityHeader:
+	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
+	bh=Fn0MxtUkrP78BGjsRvrORM/5qKcHjoQt4s8RCTWu6OA=;
+	b=T9yXcdatf8X9lMZFXx6UTMpLIxf7VClzDdl50pTtALdwPwsnlNJ9q1WKXmmZnDQRe8NH
+	 Er48cC84cmCvnZikfQn7K5XucNDVEEOnOUjuP6PGC+SM3aEHHG1KL1sTRvIhmbRF5CJI9
+	 mlSkePjMEl3ii/Of+V4DugmXdnJPrQXGgFYPWCO8qJsB9waI4FxPUHc1iJP/MHl62WGxV
+	 kiRcVWPcXEVI3fWH2yCz/m6uiKVE3IytJxNFyDEBPH6DN/8PGk/Uw/Tl/V4ycx/dyQwsR
+	 BCJYKt/c3FYkPWhRWUTEEyu2dUwmwu/3hEDmniY0rDLhaxlY2/NB+cKJcV/Lnbu2Nmw==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=amd.com;
+	spf=fail smtp.mailfrom=amd.com;
+	dkim=pass header.d=amd.com header.i=@amd.com header.a=rsa-sha256 header.s=selector1 header.b=KDY5W6UY;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.53.11
+Received: from BL0PR03CU003.outbound.protection.outlook.com (mail-eastusazon11012011.outbound.protection.outlook.com [52.101.53.11])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF19A606A323
-	for <linux-efi@vger.kernel.org>; Fri, 13 Nov 2026 10:28:42 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org DF19A606A323
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=amutable.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=amutable.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1F8C606A885;
+	Fri, 13 Nov 2026 11:33:47 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A1F8C606A885
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=amutable-com.20260707.gappssmtp.com header.i=@amutable-com.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=QLWbUp+2
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-4b7252a32c8so11958705e9.0
-        for <linux-efi@vger.kernel.org>; Fri, 13 Nov 2026 02:28:42 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=amutable-com.20260707.gappssmtp.com; s=20260707; t=1794565721; x=1795170521; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:content-type
-         :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
-         :cc:subject:date:message-id:reply-to:content-type;
-        bh=HIAZ+a2RY8snYu8gjwIzGL7aFLB+UDjcbceUrGWDUl0=;
-        b=QLWbUp+2qzwX+GoUWHB95sxpbKOTowUKZjnO4OEMj4RsWHB//vUyhRWuLB9yqPVjwR
-         fGfqk9OxkJbXk3/6ZWLxC/IKeJNDS3X7DwaIxHW3gRESTvAv4Eekp7DUUiFI0RSTWMhb
-         YiU9Qv30iKrXVu42etYewrW/BDRHybe1f3LGYRy3QFZ2Wnd8qVwamSUTOZX8RhksnWiH
-         hmYW5qsE6/zg5Kf2usKXzo1eH7FntpSlFp2sNzw5FIg/KyF4iGjfFDBfgH19X1pwvutT
-         tSuhIJwUn7q5sVMjoXkVH4kwJhDC2fhwLRQKR4CrsIY9+cK6cretlw8Xmg1Zun/gLJLF
-         1IXA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794565721; x=1795170521;
-        h=mime-version:user-agent:content-transfer-encoding:content-type
-         :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=HIAZ+a2RY8snYu8gjwIzGL7aFLB+UDjcbceUrGWDUl0=;
-        b=tJMuyxV4d5/xGCTW7vTVzIQZdrwRU6TtAzii3h9u3deeJ1Pi5+eoFmUUP7T6CUHKhJ
-         CMqoLtFvrN+VIQrYutY3ataiLLzsKu3DkjdNCO6y9O9CHD1gDLszFtYnLCixdBlBWxhR
-         W+Y2lGyO0IhPmGxbSN3dTv/FUsXCGSM3MaL1ldf8XYFHFuJ0boGEHMbHVJk9VM7eHKrY
-         5mDAl6qp5G6yUghtKqEVGyqIjDKJ61XmO/P1xGEJY/t5wiMhJh0aQHHmB45GoZX5HQCw
-         P4SHADHF7boer65eDLEa5+My7bAHxOmolnVg0DdJEVM+iYDpsNAWDUFdY0ZBedxpvFSB
-         U0TA==
-X-Forwarded-Encrypted: i=1; AL+hErF0uBhegvftJ//pOALFVWZQCDJIjLBlB1uKWbU0cQrspncVl6f2CuMACcx1sYnKjW752gpU7gFlVJI=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+5PSasG19t3URnsXcAm3I0mbgrfueXi1u8ysO0Qu668bD5KChk
-	ynivFEtiyGr/ZRzA+u7Si2+XQ98waaXbMTXyfAOns+Uo5v1vle3PQbX+II/LzGlvrpKB
-X-Gm-Gg: AYBFou2LtyK5T21HDiBCXjDmTIBu8MOs/35Rf2hKUy5oBQ7CBv0LhfnVpVG6zrFHd7E
-	kGdhNWF09YCtbd+TayLg95gM0eB+ZpdNiM+YLR1uY9KYOr1H12e0O7NSy6+YHZYlRTBEmw3Og8d
-	arF2chXBYBTqJsefRkIlfXzetY+jCw17GLMzE8TOAMwLtS5sEHzoKJGRVEZR8DSPKJSu6xy4TAc
-	Uc9bdpE0tqMks49y9Y/3YUixVVdeJSTWLQ9PqtxCA7ajXU0g8OVJ3W/Q4b0NY7txtp9f82ILGO2
-	JR5BKzAnvoK4i3u9ZulDlhBlnWnCArugd66DSkddY4Pnpu0sMc/X0xc/fYImystKzppri0PA10w
-	MiX23GT0a2iy1LY6v74yJW0w5CNZ2ZTeYp8AC0BUKTZCqaeRlGSZ2tP8DG3Jt1CFTbvYzp98Cck
-	pmoXt5ePQ4a052ccsDJxZoXFQ8NYo589tiHANnzm5DnxRUL9F8dMaOvaAIiHAUOeAxw3VgysBZ+
-	eyzsJIB/Woyrul1oJHCtGdCr5CoHWM4RK763yZG1neQyvqGsNXiNfyHKDsw2+QYy2utEd2NNmI/
-	w1XEIMsM+pl1igyJLb4AQ3UE1FEBeEfiPCP5n01ud2xCzlxLhjNWtpU2uXc7prk=
-X-Received: by 2002:a05:600c:428c:b0:4a1:9661:14b5 with SMTP id 5b1f17b1804b1-4bb55aabd53mr26666375e9.29.1794565721222;
-        Fri, 13 Nov 2026 02:28:41 -0800 (PST)
-Received: from [10.0.0.233] (tmo-086-54.customers.d1-online.com. [80.187.86.54])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4bb4e252f7fsm152260095e9.2.2026.11.13.02.28.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Nov 2026 02:28:40 -0800 (PST)
-Message-ID: <ae5a09a7dc0ab5d01e78114c38e90b39af32362c.camel@amutable.com>
-Subject: Re: [PATCH RFC 41/41] selftests/filesystems: add backing file tests
- for pseudo files
-From: Alexander Mikhalitsyn <alex@amutable.com>
-To: Christian Brauner <brauner@kernel.org>, linux-fsdevel@vger.kernel.org
-Cc: Jann Horn <jannh@google.com>, Chris Mason <mason@kernel.org>, Josef
- Bacik	 <josef@toxicpanda.com>, Christoph Hellwig <hch@lst.de>, 
-	linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-nvme@lists.infradead.org, Alexander Viro <viro@zeniv.linux.org.uk>,
- Jan Kara <jack@suse.cz>, linux-scsi@vger.kernel.org,
- target-devel@vger.kernel.org, 	driver-core@lists.linux.dev,
- linux-mm@kvack.org, bpf@vger.kernel.org, 
-	linux-security-module@vger.kernel.org, selinux@vger.kernel.org, 
-	apparmor@lists.ubuntu.com, linux-nfs@vger.kernel.org,
- netdev@vger.kernel.org, 	fuse-devel@lists.linux.dev,
- linux-efi@vger.kernel.org, 	xen-devel@lists.xenproject.org,
- ocfs2-devel@lists.linux.dev, 	linux-s390@vger.kernel.org,
- linuxppc-dev@lists.ozlabs.org, 	linux-usb@vger.kernel.org, Amir Goldstein
- <amir73il@gmail.com>, 	linux-erofs@lists.ozlabs.org,
- linux-kselftest@vger.kernel.org
-Date: Fri, 13 Nov 2026 11:28:38 +0100
-In-Reply-To: <20261110-work-loop-pseudo-v1-41-4c998976c6c7@kernel.org>
-References: <20261110-work-loop-pseudo-v1-0-4c998976c6c7@kernel.org>
-	 <20261110-work-loop-pseudo-v1-41-4c998976c6c7@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.56.2-0+deb13u1 
+	dkim=pass (1024-bit key, unprotected) header.d=amd.com header.i=@amd.com header.a=rsa-sha256 header.s=selector1 header.b=KDY5W6UY
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=JO+fkSt3IxCK0yE1eAhZi/MisTywCTCgIYiUwUronia4ecfbUeTGtb+kJ1l320N8+ALxVm3H4lwR6pnXLfeSQ+hnUhv3nd0AhWiU+xol23+pdM97gZ2FcXi6n/67Faxfh4V664Ib6hBaUwtVq8b1QOZMX8w6xJhwWV1Kfm1R2Hon1ZFCI7GxAvdPNimKT5VK1wRHJlHDPKCeXOczu8N/fQsOyeb39R9mTSK5egoN3gC4hkMKOjnu+d4YMpMP0W8zd2p3sJ5lTrZ5+e9tn5nUZ2NFYW2HcQgvwYqsZ/uGFqAnn5r0NHEWIVVyy3rDzG0udELg5NApylohwgycI9EASg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Fn0MxtUkrP78BGjsRvrORM/5qKcHjoQt4s8RCTWu6OA=;
+ b=lk/vbgCEL2+vzoA8H1Rppq3QWAp/oUeLZRxn0C3fYn60ayl2NSaGGuead0nCxpYgarTGrQ+YEPjiP76fHmKrQvsTh9Cjs4nQI9PJxbX6jFt0DXNLzRyfNUEbFh0PW/zzpAs/zDUBhEBp0BMqHIHZvGLWzborDVzr5OqBN4BHwuUHtdXQWsqD6OrpdYuVFDHzMksGeK+EgNPUNQGV+rCeRvr2/vvqd1TNBM5dguZ2ItnBkQ1EZ9O5uSwP0B4GsMXgAWrUwJvDly9/lltgUKdBo00LPQ8ZQ1HgFJHVk418KrsJ6miPmzwwrBHXQD8p51IMI2hwzkZNyEkR7XC8HYyGCQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Fn0MxtUkrP78BGjsRvrORM/5qKcHjoQt4s8RCTWu6OA=;
+ b=KDY5W6UYb/QtxiNZEpAx0orq9GCiPJDdsQxZkkmCY4Oko5/lfOsE/3dKBDvy7yDC72iuCv9rxmPpCMvu58HKFhL7YTJoDq9cdb+/kDQMD1vki3HXnt41cIA2t/r28kC8TDmwkZYJW/0Q64a3Gj2cTCQbS/lWewraFdhWA7Dc8g8=
+Received: from DB9PR05CA0028.eurprd05.prod.outlook.com (2603:10a6:10:1da::33)
+ by IA4PR12MB574288.namprd12.prod.outlook.com (2603:10b6:207:14c::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.615.10; Fri, 13 Nov
+ 2026 11:33:39 +0000
+Received: from BN3PEPF0000B370.namprd21.prod.outlook.com
+ (2603:10a6:10:1da:cafe::5e) by DB9PR05CA0028.outlook.office365.com
+ (2603:10a6:10:1da::33) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.21.615.9 via Frontend Transport; Fri, 13
+ Nov 2026 11:33:36 +0000
+X-MS-Exchange-Authentication-Results: mx.microsoft.com 1; spf=pass (sender IP
+ is 165.204.84.17) smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=satlexmb07.amd.com; pr=C
+Received: from satlexmb07.amd.com (165.204.84.17) by
+ BN3PEPF0000B370.mail.protection.outlook.com (10.167.243.167) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.21.615.2 via Frontend Transport; Fri, 13 Nov 2026 11:33:35 +0000
+Received: from Satlexmb09.amd.com (10.181.42.218) by satlexmb07.amd.com
+ (10.181.42.216) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.53; Fri, 13 Nov
+ 2026 04:55:55 -0600
+Received: from satlexmb07.amd.com (10.181.42.216) by satlexmb09.amd.com
+ (10.181.42.218) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.53; Fri, 13 Nov
+ 2026 04:55:54 -0600
+Received: from pankaj-M75q.amd.com (10.180.168.240) by satlexmb07.amd.com
+ (10.181.42.216) with Microsoft SMTP Server id 15.2.2562.53 via Frontend
+ Transport; Fri, 13 Nov 2026 04:55:54 -0600
+From: Pankaj Gupta <pankaj.gupta@amd.com>
+To: Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
+	<x86@kernel.org>
+CC: "H . Peter Anvin" <hpa@zytor.com>, Tom Lendacky <thomas.lendacky@amd.com>,
+	Ard Biesheuvel <ardb@kernel.org>, Kiryl Shutsemau <kas@kernel.org>, "Ilias
+ Apalodimas" <ilias.apalodimas@linaro.org>, <linux-kernel@vger.kernel.org>,
+	Mike Rapoport <rppt@kernel.org>, <linux-mm@kvack.org>,
+	<linux-efi@vger.kernel.org>, <Pankaj.gupta.linux@gmail.com>, Pankaj Gupta
+	<pankaj.gupta@amd.com>, <stable@vger.kernel.org>
+Subject: [PATCH v2] x86/unaccepted_memory: Do not accept ranges that are no longer E820 RAM
+Date: Fri, 13 Nov 2026 04:55:54 -0600
+Message-ID: <20261113105554.199912-1-pankaj.gupta@amd.com>
+X-Mailer: git-send-email 2.34.1
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -115,378 +117,160 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BN3PEPF0000B370:EE_|IA4PR12MB574288:EE_
+X-MS-Office365-Filtering-Correlation-Id: 157246f3-2656-4b37-6d8a-08df4179f48d
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|23010399003|36860700016|82310400026|376014|7416014|1800799024|18002099003|261009223027099003|11063799006|56012099006|10067099003|261102123227099003|261022105027099003|261026140227099003|261028144727099003|261021121427099003|261026121527099003|261021123027099003;
+X-Microsoft-Antispam-Message-Info:
+	0h6PefNRxgwF5Hr50dF2rsVWkLmwrLcKa5+UOT+5/KDRwn7T4jcZskZ9nAKdaNIW3+sIfGKkbpShx9kya3OtG6iBMIefjgqae6EaZTAnT9Xxe0v9rr+rYxHlc4HBH6OY2rmS8rCqpAy13cmHBgawgMBm84tg3YGS7mzGnsM0QkMOPjBwipZOvFqOmxU91nnG4dxsQ7DnseUL8oIeFXpFzP9PYJxIzr6jcH57csIXSiqfTkk7n7+b0an8qqtmaj6JKCvUGnqJCMcBckp9S0nXZtFc71ZKn/afHTdNGncTJbY4rtJz9HTqnw7MkagWnaZyAVH4N3TYJ2pm2oC67gyMCvUm2x9/6Q4KK9UmEekRnkzpx/4y3Qgg+OmNHPh3u+BelZ81aUdFnpI3tABBgMoKH8NtsUcN04pvOF1mMQC/dLLL/1OcVi0OWk/QndOgV4cn/0z9YVpUdSgMYrxFYD6vVgWjRQ5CYVNxlRZcqNGU3aoPMzuqBICWw9cxW+e/eegYm10AMsuoJ2BamGS5v9JLgpgcDsd9fJ8sWt0b472J2d5KLpl267sNXHQnwy+LOvu4J9tLTEIntkZFdnUR5B4jdvl+KBGQO46gfV5OvHKjhZIhuDju2UkKq01Pj9JAKU809uFcvQZ2JP6Sd6ikDnUtXQRdM9WuTMp8LUb98z/U0F0=
+X-Forefront-Antispam-Report:
+	CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:satlexmb07.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(23010399003)(36860700016)(82310400026)(376014)(7416014)(1800799024)(18002099003)(261009223027099003)(11063799006)(56012099006)(10067099003)(261102123227099003)(261022105027099003)(261026140227099003)(261028144727099003)(261021121427099003)(261026121527099003)(261021123027099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	EK/PXW+y459foCP6ysFiBP5Uhh4XmpHl5mrRAZejBqVXUVgHJZ2NZi8gEXiD9S3t5PbIe0y9wStN7NUKaCLD6IvOg95sTdCjXL7i/9rbMLB6ChX0RDuPy6AhxtwA9zlgPK/jQCnbCWDFaMGYVh05Po51Cege9BnHTwvl97f/42hYWF6WWu7TkagXTCb9NqZWBg705wwTcu+pENtXbuMOxmzjBob8xrUnxM8sWpGcnzmoM5MGLN0XuO5mfQZXhMM+vSP80Xeakoe91CIYs1t6HWzRymvzxkGdrRFbs4ynitiDs+NgdFsFmVbMJvC5GBR3QRcCQL4G/mFbc5nBPFZbjZvytNQCOSgw+gTWEldShkaInxw4dhokaUXsGUQzSZ5/dsyCbxTRgtdjpspyY8O9i7CoWjv86D4oPGEiA1eP4zbi5X2eOVZKNBjOifcRMacw
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Nov 2026 11:33:35.9167
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 157246f3-2656-4b37-6d8a-08df4179f48d
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[satlexmb07.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	BN3PEPF0000B370.namprd21.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA4PR12MB574288
 
-On Tue, 2026-11-10 at 10:14 +0100, Christian Brauner wrote:
-> Add tests that files on pseudo filesystems can't be used as storage:
->=20
-> - a procfs file attached read-only to a loop device
-> - sysfs files attached read-only and read-write to a loop device
-> - a sysfs file behind a lower-only overlayfs attached to a loop
-> device
-> - a sysfs file as the backing file of a usb mass storage gadget LUN
-> - a sysfs file as the source of a file-backed erofs mount
->=20
-> And make sure that a memfd and another loop device still work as loop
-> backing files and that loop refuses a backing file that isn't open
-> for
-> reading.
->=20
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+The EFI stub builds the unaccepted memory bitmap before the kernel parses
+its command line.  Option memmap=<size>$<addr> removes RAM from the E820 map
+while its bits are still set in the bitmap.
 
-Reviewed-by: Alexander Mikhalitsyn <alex@amutable.com>
+The removed range, such as a memmap=...$... hole, is then still treated as
+unaccepted RAM and accept_memory() tries to accept it.  The hole is not
+mapped, so on SEV-SNP the PVALIDATE faults and the guest crashes early in
+the boot:
 
-> ---
-> =C2=A0tools/testing/selftests/filesystems/.gitignore=C2=A0=C2=A0=C2=A0=C2=
-=A0 |=C2=A0=C2=A0 1 +
-> =C2=A0tools/testing/selftests/filesystems/Makefile=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0 |=C2=A0=C2=A0 2 +-
-> =C2=A0tools/testing/selftests/filesystems/config=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0=C2=A0 9 +
-> =C2=A0.../selftests/filesystems/pseudo_backing_test.c=C2=A0=C2=A0=C2=A0 |=
- 274
-> +++++++++++++++++++++
-> =C2=A04 files changed, 285 insertions(+), 1 deletion(-)
->=20
-> diff --git a/tools/testing/selftests/filesystems/.gitignore
-> b/tools/testing/selftests/filesystems/.gitignore
-> index cf79000e4092..8df38eabb125 100644
-> --- a/tools/testing/selftests/filesystems/.gitignore
-> +++ b/tools/testing/selftests/filesystems/.gitignore
-> @@ -7,3 +7,4 @@ kernfs_test
-> =C2=A0idmapped_tmpfile
-> =C2=A0ustat_test
-> =C2=A0rw_hint_test
-> +pseudo_backing_test
-> diff --git a/tools/testing/selftests/filesystems/Makefile
-> b/tools/testing/selftests/filesystems/Makefile
-> index fbd5c27505ef..0ebb9005bcd2 100644
-> --- a/tools/testing/selftests/filesystems/Makefile
-> +++ b/tools/testing/selftests/filesystems/Makefile
-> @@ -2,7 +2,7 @@
-> =C2=A0
-> =C2=A0CFLAGS +=3D $(KHDR_INCLUDES)
-> =C2=A0TEST_GEN_PROGS :=3D devpts_pts anon_inode_test kernfs_test fclog
-> ustat_test rw_hint_test
-> -TEST_GEN_PROGS +=3D idmapped_tmpfile
-> +TEST_GEN_PROGS +=3D idmapped_tmpfile pseudo_backing_test
-> =C2=A0TEST_GEN_PROGS_EXTENDED :=3D dnotify_test
-> =C2=A0
-> =C2=A0include ../lib.mk
-> diff --git a/tools/testing/selftests/filesystems/config
-> b/tools/testing/selftests/filesystems/config
-> index 9f45bc493a30..228196160d29 100644
-> --- a/tools/testing/selftests/filesystems/config
-> +++ b/tools/testing/selftests/filesystems/config
-> @@ -6,3 +6,12 @@ CONFIG_NET=3Dy
-> =C2=A0CONFIG_NET_NS=3Dy
-> =C2=A0CONFIG_INET=3Dy
-> =C2=A0CONFIG_SYSFS=3Dy
-> +CONFIG_BLK_DEV_LOOP=3Dy
-> +CONFIG_OVERLAY_FS=3Dy
-> +CONFIG_TMPFS=3Dy
-> +CONFIG_CONFIGFS_FS=3Dy
-> +CONFIG_USB_GADGET=3Dy
-> +CONFIG_USB_CONFIGFS=3Dy
-> +CONFIG_USB_CONFIGFS_MASS_STORAGE=3Dy
-> +CONFIG_EROFS_FS=3Dy
-> +CONFIG_EROFS_FS_BACKED_BY_FILE=3Dy
-> diff --git
-> a/tools/testing/selftests/filesystems/pseudo_backing_test.c
-> b/tools/testing/selftests/filesystems/pseudo_backing_test.c
-> new file mode 100644
-> index 000000000000..bc8e17ab8e6e
-> --- /dev/null
-> +++ b/tools/testing/selftests/filesystems/pseudo_backing_test.c
-> @@ -0,0 +1,274 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +#define _GNU_SOURCE
-> +
-> +#include <errno.h>
-> +#include <fcntl.h>
-> +#include <limits.h>
-> +#include <sched.h>
-> +#include <stdbool.h>
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <string.h>
-> +#include <unistd.h>
-> +#include <linux/loop.h>
-> +#include <linux/magic.h>
-> +#include <sys/ioctl.h>
-> +#include <sys/mman.h>
-> +#include <sys/mount.h>
-> +#include <sys/stat.h>
-> +#include <sys/vfs.h>
-> +
-> +#include "kselftest_harness.h"
-> +#include "wrappers.h"
-> +
-> +/*
-> + * Put @fd behind a free loop device. The device is set up with
-> + * LO_FLAGS_AUTOCLEAR and goes away again when it is closed here.
-> + */
-> +static int loop_attach(int fd, bool rw, char *dev, size_t len)
-> +{
-> +	struct loop_config cfg =3D {};
-> +	int ctl, nr, lfd, ret =3D 0;
-> +
-> +	ctl =3D open("/dev/loop-control", O_RDWR | O_CLOEXEC);
-> +	if (ctl < 0)
-> +		return -errno;
-> +	nr =3D ioctl(ctl, LOOP_CTL_GET_FREE);
-> +	if (nr < 0)
-> +		ret =3D -errno;
-> +	close(ctl);
-> +	if (ret)
-> +		return ret;
-> +
-> +	snprintf(dev, len, "/dev/loop%d", nr);
-> +	lfd =3D open(dev, (rw ? O_RDWR : O_RDONLY) | O_CLOEXEC);
-> +	if (lfd < 0)
-> +		return -errno;
-> +
-> +	cfg.fd =3D fd;
-> +	cfg.info.lo_flags =3D LO_FLAGS_AUTOCLEAR;
-> +	if (!rw)
-> +		cfg.info.lo_flags |=3D LO_FLAGS_READ_ONLY;
-> +	if (ioctl(lfd, LOOP_CONFIGURE, &cfg)) {
-> +		ret =3D -errno;
-> +		close(lfd);
-> +	} else {
-> +		ret =3D lfd;
-> +	}
-> +	return ret;
-> +}
-> +
-> +static int attach_path(const char *path, bool rw)
-> +{
-> +	char dev[PATH_MAX];
-> +	int fd, ret;
-> +
-> +	fd =3D open(path, (rw ? O_RDWR : O_RDONLY) | O_CLOEXEC);
-> +	if (fd < 0)
-> +		return -errno;
-> +	ret =3D loop_attach(fd, rw, dev, sizeof(dev));
-> +	close(fd);
-> +	if (ret >=3D 0) {
-> +		close(ret);
-> +		ret =3D 0;
-> +	}
-> +	return ret;
-> +}
-> +
-> +static bool can_use_loop(void)
-> +{
-> +	return geteuid() =3D=3D 0 && access("/dev/loop-control", R_OK |
-> W_OK) =3D=3D 0;
-> +}
-> +
-> +TEST(memfd_backing_file)
-> +{
-> +	char dev[PATH_MAX];
-> +	int fd, lfd;
-> +
-> +	if (!can_use_loop())
-> +		SKIP(return, "loop devices unavailable");
-> +
-> +	fd =3D memfd_create("pseudo_backing_test", MFD_CLOEXEC);
-> +	ASSERT_GE(fd, 0);
-> +	ASSERT_EQ(ftruncate(fd, 1 << 20), 0);
-> +
-> +	lfd =3D loop_attach(fd, true, dev, sizeof(dev));
-> +	ASSERT_GE(lfd, 0);
-> +	EXPECT_EQ(close(lfd), 0);
-> +	EXPECT_EQ(close(fd), 0);
-> +}
-> +
-> +TEST(loop_device_backing_file)
-> +{
-> +	char dev[PATH_MAX], dev2[PATH_MAX];
-> +	int fd, lfd, bfd, lfd2;
-> +
-> +	if (!can_use_loop())
-> +		SKIP(return, "loop devices unavailable");
-> +
-> +	fd =3D memfd_create("pseudo_backing_test", MFD_CLOEXEC);
-> +	ASSERT_GE(fd, 0);
-> +	ASSERT_EQ(ftruncate(fd, 1 << 20), 0);
-> +	lfd =3D loop_attach(fd, true, dev, sizeof(dev));
-> +	ASSERT_GE(lfd, 0);
-> +
-> +	/* A block device stays fine as a backing file. */
-> +	bfd =3D open(dev, O_RDWR | O_CLOEXEC);
-> +	ASSERT_GE(bfd, 0);
-> +	lfd2 =3D loop_attach(bfd, true, dev2, sizeof(dev2));
-> +	ASSERT_GE(lfd2, 0);
-> +
-> +	EXPECT_EQ(close(lfd2), 0);
-> +	EXPECT_EQ(close(bfd), 0);
-> +	EXPECT_EQ(close(lfd), 0);
-> +	EXPECT_EQ(close(fd), 0);
-> +}
-> +
-> +TEST(write_only_backing_file)
-> +{
-> +	char dev[PATH_MAX], path[PATH_MAX];
-> +	int fd, wfd, lfd;
-> +
-> +	if (!can_use_loop())
-> +		SKIP(return, "loop devices unavailable");
-> +
-> +	fd =3D memfd_create("pseudo_backing_test", MFD_CLOEXEC);
-> +	ASSERT_GE(fd, 0);
-> +	ASSERT_EQ(ftruncate(fd, 1 << 20), 0);
-> +
-> +	/* Loop reads from its backing file so it must be open for
-> reading. */
-> +	snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
-> +	wfd =3D open(path, O_WRONLY | O_CLOEXEC);
-> +	ASSERT_GE(wfd, 0);
-> +
-> +	lfd =3D loop_attach(wfd, true, dev, sizeof(dev));
-> +	if (lfd >=3D 0)
-> +		close(lfd);
-> +	EXPECT_EQ(lfd, -EBADF);
-> +	EXPECT_EQ(close(wfd), 0);
-> +	EXPECT_EQ(close(fd), 0);
-> +}
-> +
-> +TEST(procfs_backing_file)
-> +{
-> +	if (!can_use_loop())
-> +		SKIP(return, "loop devices unavailable");
-> +
-> +	ASSERT_EQ(attach_path("/proc/cpuinfo", false), -EINVAL);
-> +}
-> +
-> +TEST(sysfs_backing_file)
-> +{
-> +	if (!can_use_loop())
-> +		SKIP(return, "loop devices unavailable");
-> +
-> +	ASSERT_EQ(attach_path("/sys/kernel/warn_count", false), -
-> EINVAL);
-> +
-> +	if (access("/sys/kernel/reboot/mode", F_OK))
-> +		SKIP(return, "no /sys/kernel/reboot/mode");
-> +	ASSERT_EQ(attach_path("/sys/kernel/reboot/mode", true), -
-> EINVAL);
-> +}
-> +
-> +TEST(overlayfs_on_sysfs_backing_file)
-> +{
-> +	if (!can_use_loop())
-> +		SKIP(return, "loop devices unavailable");
-> +
-> +	ASSERT_EQ(unshare(CLONE_NEWNS), 0);
-> +	ASSERT_EQ(mount(NULL, "/", NULL, MS_REC | MS_PRIVATE, NULL),
-> 0);
-> +	ASSERT_EQ(mount("tmpfs", "/tmp", "tmpfs", 0, NULL), 0);
-> +	ASSERT_EQ(mkdir("/tmp/empty", 0755), 0);
-> +	ASSERT_EQ(mkdir("/tmp/merged", 0755), 0);
-> +
-> +	/* A lower-only overlayfs serves reads from sysfs. */
-> +	if (mount("overlay", "/tmp/merged", "overlay", MS_RDONLY,
-> +		=C2=A0 "lowerdir=3D/sys/kernel:/tmp/empty"))
-> +		SKIP(return, "no overlayfs on top of sysfs: %s",
-> strerror(errno));
-> +
-> +	ASSERT_EQ(attach_path("/tmp/merged/warn_count", false), -
-> EINVAL);
-> +}
-> +
-> +#define CONFIGFS_DIR "/sys/kernel/config"
-> +#define GADGET_DIR CONFIGFS_DIR "/usb_gadget/pseudo_backing_test"
-> +#define MASS_STORAGE_DIR GADGET_DIR "/functions/mass_storage.0"
-> +
-> +TEST(usb_mass_storage_backing_file)
-> +{
-> +	const char *path =3D "/sys/kernel/warn_count";
-> +	struct statfs sfs;
-> +	ssize_t ret;
-> +	int fd, err;
-> +
-> +	if (geteuid())
-> +		SKIP(return, "needs root");
-> +
-> +	/* Mounting configfs on top of itself fails with EBUSY. */
-> +	if (statfs(CONFIGFS_DIR, &sfs) || sfs.f_type !=3D
-> CONFIGFS_MAGIC) {
-> +		ASSERT_EQ(unshare(CLONE_NEWNS), 0);
-> +		ASSERT_EQ(mount(NULL, "/", NULL, MS_REC |
-> MS_PRIVATE, NULL), 0);
-> +		if (mount("configfs", CONFIGFS_DIR, "configfs", 0,
-> NULL))
-> +			SKIP(return, "no configfs: %s",
-> strerror(errno));
-> +	}
-> +
-> +	if (mkdir(GADGET_DIR, 0755))
-> +		SKIP(return, "no usb gadget configfs: %s",
-> strerror(errno));
-> +	if (mkdir(MASS_STORAGE_DIR, 0755)) {
-> +		err =3D errno;
-> +		rmdir(GADGET_DIR);
-> +		SKIP(return, "no usb mass storage function: %s",
-> strerror(err));
-> +	}
-> +
-> +	/* Writing the path opens the LUN's backing file right away.
-> */
-> +	fd =3D open(MASS_STORAGE_DIR "/lun.0/file", O_WRONLY |
-> O_CLOEXEC);
-> +	EXPECT_GE(fd, 0);
-> +	if (fd >=3D 0) {
-> +		ret =3D write(fd, path, strlen(path));
-> +		err =3D errno;
-> +		EXPECT_EQ(ret, -1);
-> +		EXPECT_EQ(err, EINVAL);
-> +		EXPECT_EQ(close(fd), 0);
-> +	}
-> +
-> +	EXPECT_EQ(rmdir(MASS_STORAGE_DIR), 0);
-> +	EXPECT_EQ(rmdir(GADGET_DIR), 0);
-> +}
-> +
-> +TEST(erofs_backing_file)
-> +{
-> +	bool refused =3D false;
-> +	char buf[256];
-> +	int fsfd, ret, err;
-> +	ssize_t n;
-> +
-> +	if (geteuid())
-> +		SKIP(return, "needs root");
-> +
-> +	fsfd =3D sys_fsopen("erofs", FSOPEN_CLOEXEC);
-> +	if (fsfd < 0)
-> +		SKIP(return, "no erofs: %s", strerror(errno));
-> +
-> +	ASSERT_EQ(sys_fsconfig(fsfd, FSCONFIG_SET_STRING, "source",
-> +			=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 "/sys/kernel/warn_count", 0), 0)=
-;
-> +	ret =3D sys_fsconfig(fsfd, FSCONFIG_CMD_CREATE, NULL, NULL,
-> 0);
-> +	err =3D errno;
-> +	if (ret && err =3D=3D ENOTBLK) {
-> +		close(fsfd);
-> +		SKIP(return, "no file-backed erofs mounts");
-> +	}
-> +	ASSERT_EQ(ret, -1);
-> +	ASSERT_EQ(err, EINVAL);
-> +
-> +	/*
-> +	 * Something that isn't an erofs image fails with EINVAL as
-> well so
-> +	 * check that the source itself was refused.
-> +	 */
-> +	while ((n =3D read(fsfd, buf, sizeof(buf) - 1)) > 0) {
-> +		buf[n] =3D '\0';
-> +		if (strstr(buf, "pseudo filesystem"))
-> +			refused =3D true;
-> +	}
-> +	EXPECT_TRUE(refused);
-> +	EXPECT_EQ(close(fsfd), 0);
-> +}
-> +
-> +TEST_HARNESS_MAIN
+  BUG: unable to handle page fault for address: ffff8a14bfe00000
+  RIP: 0010:pvalidate_pages+0xc0/0x250
+   set_pages_state+0x41a/0x440
+   snp_accept_memory+0x3e/0x50
+   accept_memory+0x186/0x260
+   __free_pages_core+0xd2/0x240
+   memblock_free_pages+0x1b/0x30
+   memblock_free_all+0x275/0x2d0
+
+This was seen with memmap=2M$0x1ffe00000, a 2 MiB hole in RAM, on a 19 GiB
+SNP guest with lazy acceptance.
+
+Accept only whole pages of E820 RAM, and clear the bitmap bits only for the
+units in which memory was accepted.
+
+Fixes: 2053bc57f367 ("efi: Add unaccepted memory support")
+Cc: stable@vger.kernel.org
+Signed-off-by: Pankaj Gupta <pankaj.gupta@amd.com>
+---
+v1 -> v2:
+- Clear the bitmap bits only for the accepted memory
+- Round E820 RAM range to page boundaries
+
+v1: https://lore.kernel.org/all/20261102113127.161823-1-pankaj.gupta@amd.com/
+
+ arch/x86/include/asm/unaccepted_memory.h | 44 +++++++++++++++++++++++-
+ drivers/firmware/efi/unaccepted_memory.c |  4 +--
+ 2 files changed, 45 insertions(+), 3 deletions(-)
+
+diff --git a/arch/x86/include/asm/unaccepted_memory.h b/arch/x86/include/asm/unaccepted_memory.h
+index f5937e9866ac..9e27a9953dd8 100644
+--- a/arch/x86/include/asm/unaccepted_memory.h
++++ b/arch/x86/include/asm/unaccepted_memory.h
+@@ -2,10 +2,11 @@
+ #define _ASM_X86_UNACCEPTED_MEMORY_H
+ 
+ #include <linux/efi.h>
++#include <asm/e820/api.h>
+ #include <asm/tdx.h>
+ #include <asm/sev.h>
+ 
+-static inline void arch_accept_memory(phys_addr_t start, phys_addr_t end)
++static inline void __arch_accept_memory(phys_addr_t start, phys_addr_t end)
+ {
+ 	/* Platform-specific memory-acceptance call goes here */
+ 	if (cpu_feature_enabled(X86_FEATURE_TDX_GUEST)) {
+@@ -18,6 +19,47 @@ static inline void arch_accept_memory(phys_addr_t start, phys_addr_t end)
+ 	}
+ }
+ 
++static inline bool e820_ram_pages(struct e820_entry *entry, phys_addr_t start,
++				  phys_addr_t end, phys_addr_t *s, phys_addr_t *e)
++{
++	if (entry->type != E820_TYPE_RAM)
++		return false;
++
++	*s = PAGE_ALIGN(max_t(phys_addr_t, start, entry->addr));
++	*e = PAGE_ALIGN_DOWN(min_t(phys_addr_t, end, entry->addr + entry->size));
++	return *s < *e;
++}
++
++static inline void arch_accept_memory(phys_addr_t start, phys_addr_t end)
++{
++	phys_addr_t s, e;
++	u32 i;
++
++	for (i = 0; i < e820_table->nr_entries; i++) {
++		if (e820_ram_pages(&e820_table->entries[i], start, end, &s, &e))
++			__arch_accept_memory(s, e);
++	}
++}
++
++static inline void arch_clear_accepted(unsigned long *bitmap, phys_addr_t base,
++				       unsigned long unit_size,
++				       phys_addr_t start, phys_addr_t end)
++{
++	phys_addr_t s, e;
++	u32 i;
++
++	for (i = 0; i < e820_table->nr_entries; i++) {
++		unsigned long first, last;
++
++		if (!e820_ram_pages(&e820_table->entries[i], start, end, &s, &e))
++			continue;
++
++		first = (s - base) / unit_size;
++		last = DIV_ROUND_UP(e - base, unit_size);
++		bitmap_clear(bitmap, first, last - first);
++	}
++}
++
+ static inline struct efi_unaccepted_memory *efi_get_unaccepted_table(void)
+ {
+ 	if (efi.unaccepted == EFI_INVALID_TABLE_ADDR)
+diff --git a/drivers/firmware/efi/unaccepted_memory.c b/drivers/firmware/efi/unaccepted_memory.c
+index 4a8ec8d6a571..b8a0c0d1d289 100644
+--- a/drivers/firmware/efi/unaccepted_memory.c
++++ b/drivers/firmware/efi/unaccepted_memory.c
+@@ -130,7 +130,6 @@ void accept_memory(phys_addr_t start, unsigned long size)
+ 	for_each_set_bitrange_from(range_start, range_end, unaccepted->bitmap,
+ 				   range.end) {
+ 		unsigned long phys_start, phys_end;
+-		unsigned long len = range_end - range_start;
+ 
+ 		phys_start = range_start * unit_size + unaccepted->phys_base;
+ 		phys_end = range_end * unit_size + unaccepted->phys_base;
+@@ -150,7 +149,8 @@ void accept_memory(phys_addr_t start, unsigned long size)
+ 		arch_accept_memory(phys_start, phys_end);
+ 
+ 		spin_lock(&unaccepted_memory_lock);
+-		bitmap_clear(unaccepted->bitmap, range_start, len);
++		arch_clear_accepted(unaccepted->bitmap, unaccepted->phys_base,
++				    unit_size, phys_start, phys_end);
+ 	}
+ 
+ 	list_del(&range.list);
+-- 
+2.34.1
+
