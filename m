@@ -1,112 +1,58 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.218.52
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794657338;
-	b=a7/n58XDnhlSYgZnRC3Wkr7oXHTNWpCzSnDuOGvneGOObAzeK6v08gDh1jVDRj9Q2LMb
-	 EtFlPdebIpkiUcPoIJa9b1rv4tgIZLirfGUoeAoe8vcLUbWLvFA5aAHA9v0hub2X+voBb
-	 9tfDl9tqGwlao0bJmkwgFqLHcOcg82mqTOchwBnAG4w3Bki6Wf+3ghlpqjPe/2apAfhT3
-	 HFYmEvxcOK36evx/ZkfAcRDPY4HfwcOrokLsXFHhJFjTud1K9KH1INfy7Pb2yl6p4t7wW
-	 94/HeC75weVpE5PUyuLuR9QujlimDCkVFNwH+DGgnwGuHOO76EXSiHp/xGGOfmqPXsg==
+	t=1794657802;
+	b=midBVZVnhm1hNbTejFuqrgMmeoYeCKnry2vfGTWK3V0cDsuEo1vfcWZIwAcaHSGqDNp+
+	 plUuSSZVH/IRWU49HatunUuyLJ7hNM8wEhAqeE1uQ3/4jXDCLiZhG3m6Q3AL0YPtnJ66w
+	 6/NHmEVnSrGDZTKMaflMuEnuptgJ/UpxUHvkcyHKVZLh9Doe8reX9P13IcAsNHtpWYhGn
+	 HXGCtBHNu1WXRpl7BS/adnqV3HFPMDZuzYPXW5aRGYV2hf1PYdEpdzqS9dBAIfeCtWWzG
+	 rdNDXvfupaltlY/3Pho29rxGS/IrQM3U5fFmZRjlcZs37Xb4yOfh1mHG4M1VTR1hr7g==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794657338;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:Content-Transfer-Encoding:
-	 In-Reply-To;
-	bh=nJvs09p7QWIuuw8YOzj5TR133+2IJ5+yRajckn/hsO0=;
-	b=l4Ljl5JCbdUm+i9cXdkWOOvrQMoD6j2BI89CIegnhRYwarybslA52qblqJ1VeP9qSo+X
-	 MlbL0cYdITc72g44o+8HO2paekYlsRiw4D6PKTvUXV1IQEVmn/ksdoLNFWwoUgIzUD31L
-	 6CDNWf60X8oaxNXgg4HnWiqNSVFCXb/YHXClQy6mGdlnULIOoYLrB9zPasNvCPHcne42t
-	 /uQgKG/8Rh+0IGQh0jhlZIMZqv7WQndhMEwsXF7F1sao9bdeG46lRaNYM75wD6A/Ipiom
-	 1zxoEjtVPHwWIrF6LxucsFjJD1B6gtpFe8spy4q3lBH2Bh4OGOF8rLuzkuNdl5TWgZw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794657802;
+	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
+	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
+	bh=ZtvIFXoOKLAsH+V2h5HHt5wrTO8bTwuJgaiMNtvW4Sw=;
+	b=YcOLFYDsnO6Lk+11mbk9SDaqAXOvdLw4mbKnOuRWNyRlxmx8zs4R4H+8DapsYZJbrefv
+	 /9sMe6CNaPWsFqVAmoND7P4jdCai6MXXIi0xziu279AXmJ6J4NGNpyEdpLRk/IerkXnSl
+	 AJynfom1CMtvrJ4VgBWPacmiQXR8JUc6K19g6HTAzdSqr8GVqtfI7YjcP11dpbw2FxqNz
+	 PgnRzp2wyQgDG315zxNqUhvr+ZegpyhfhU7ZQTJWNYxNkp5PnUB8DcvBn1ngijsNVlDaT
+	 M7zbS++c4bAZokoegY+K9IDVxOHM326R5KA1u7S5ZPn9ru5FpbN7xlK1t5rHQVUjdug==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=MrTBjpIE;
-	arc=none smtp.remote-ip=209.85.218.52
-Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ZBqU4DgI;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69F07606A334
-	for <linux-efi@vger.kernel.org>; Sat, 14 Nov 2026 11:55:38 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 69F07606A334
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 531A6606A327;
+	Sat, 14 Nov 2026 12:03:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=MrTBjpIE
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-c4d2b741ed9so338682466b.2
-        for <linux-efi@vger.kernel.org>; Sat, 14 Nov 2026 03:55:38 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1794657337; x=1795262137; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :content-type:mime-version:references:message-id:subject:cc:to:from
-         :date:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=nJvs09p7QWIuuw8YOzj5TR133+2IJ5+yRajckn/hsO0=;
-        b=MrTBjpIEXzsSZaANjc7oExJhwGnF+j3pBQoJGLV3AozjECewWnT/dOn8PoCfUIeYGI
-         mRgldWBhVoyoY4kjpOu/TkcCPMpetn8bMN74Irqnk0JnK5MAQS777TE3iVfENO0qNvUE
-         8qb82pxhdLikkA/6tATGUpByZMee1vHTbdl6A6vtosorr3+hE9wD/mpuH76lS1WAZqyn
-         nUdTyabyG8UAyWqGnpYJGfY62DgpvBldD5kNADP5MARyaYxmHHJYDsQkr6qVKrnaldzF
-         KHIyaxdpU8Pcl80WjVwUUXXw+yU81KD0D8RdN7wE6Dhf//BzElFXAKq/AgQBu3vGzFII
-         7JmQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794657337; x=1795262137;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :content-type:mime-version:references:message-id:subject:cc:to:from
-         :date:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to:content-type;
-        bh=nJvs09p7QWIuuw8YOzj5TR133+2IJ5+yRajckn/hsO0=;
-        b=lMVGy9DIWeSF1mDwVTP3T6taKE/jvzCJ1qxur6l5kJeg79n4a5JcpYTRNf6raBO6pq
-         8vv+A3VlBnchGN7mNgGFgJDfJQzcQw1gKy+GHVu5rE2eT5U+vYwbQPQ15yYDmDGg4yyD
-         jcv3fmpNI///R4PALpyIXJBujrc85R3TADeBvA+CMlnxOimCqR1NqQJb8Tg18JKdghJE
-         8a/xZz6w43ZKnKDqTV8PWjTV2tKlZ499D0GuvThKH11XJjf+6u1qdhbRXKkepeljQfjE
-         df0OKIbhr49YbbntLSvjbcoFXZ/oR8JRI9LOH4jYXk6NUCIgChAPkU2d2uJPvWGZPYME
-         yrcA==
-X-Forwarded-Encrypted: i=1; AL+hErEeKEVkFe2YIMkmFX9oBlG9/Z6HXVmQICmJjSZ7UGk+m1WLnDCw1X5EZQq1SLbXqO7AzhKOAg1TTrg=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+bTJpzj5MZIPnOU8nH5g/J8Mpl/xtZLlc9aSOCP9rMPTSW2qbe
-	QaIEt3gV9oNwvRhakbIbhcSB3hQBC+GSV6uEmrsj6obOASr/3S6iKjuh
-X-Gm-Gg: AYBFou2jthLZFE+z+LDptlhoWtBwx26HADvSy/v2nHU+qEXGiupfShWG8D5lx4/dxKJ
-	55gjPiWHFAM2IsppzpjLeJBbkDZnD6zJczVSOvwC6Ij4hO3P9PK4dcpYlhR7rbiqY/ud6oJ/7X3
-	lwfDXkc0IHPff4bknZmiALLUlpYTlX6QhDCWZB4Oe1P9XZ+DnSK4fSWtxANd+41Dw9LthhnT2o9
-	wFY+Tdk2oqQJCW7nTpvc779Vqx1aK7XVOZU6X/toqlTPrGtyeZsW6gu/3ai9pYvXGdRSs86i1Jy
-	9+ZIBZ6WslBElJAL9FoOhHT/ot1bVB7juC7Gk1SBM6O4TiHEEiB/i9g8VR1PeanXJWNDLfXrVJv
-	uVC5dCktLJFLOFqugWF3L5Nr7Kym7QTuxZWGt5NVKYNolfdUSoYebO/31IXV4iU34802C3tLzXd
-	6kKHFN5mim1QnSFzqBH6tmnb8nWKDcEr7UeftiwuFsUSWadm4IHiSamru3lG/tTWMjGNH7dzUcp
-	xl+yjtIgvTde0zuxWwHDXmPjMs32yskLbpgrcZBcmzd0yfHZ9lgw5XaDxkGIjI//augqT5oIUyp
-	bm+q43CZp4zaJcl1ztRT//Bs8Skj0XJn0z9LDTzGZJ8GCdkQRGpurpnv4aWYOA/3W4/Mz8rRrhB
-	oCmp5duwdoKU=
-X-Received: by 2002:a17:907:3e10:b0:c40:231:6eab with SMTP id a640c23a62f3a-c5096370c31mr441592966b.16.1794657336589;
-        Sat, 14 Nov 2026 03:55:36 -0800 (PST)
-Received: from localhost (178-84-201-199.dynamic.upc.nl. [178.84.201.199])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c5095b41f44sm206223866b.31.2026.11.14.03.55.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 14 Nov 2026 03:55:36 -0800 (PST)
-Date: Sat, 14 Nov 2026 12:55:35 +0100
-From: Amir Goldstein <amir73il@gmail.com>
-To: Alexander Mikhalitsyn <alex@amutable.com>
-Cc: Christoph Hellwig <hch@lst.de>, Christian Brauner <brauner@kernel.org>,
-	linux-fsdevel@vger.kernel.org, Jann Horn <jannh@google.com>,
-	Chris Mason <mason@kernel.org>, Josef Bacik <josef@toxicpanda.com>,
-	linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-nvme@lists.infradead.org,
-	Alexander Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>,
-	linux-scsi@vger.kernel.org, target-devel@vger.kernel.org,
-	driver-core@lists.linux.dev, linux-mm@kvack.org,
-	bpf@vger.kernel.org, linux-security-module@vger.kernel.org,
-	selinux@vger.kernel.org, apparmor@lists.ubuntu.com,
-	linux-nfs@vger.kernel.org, netdev@vger.kernel.org,
-	fuse-devel@lists.linux.dev, linux-efi@vger.kernel.org,
-	xen-devel@lists.xenproject.org, ocfs2-devel@lists.linux.dev,
-	linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-	linux-usb@vger.kernel.org, linux-erofs@lists.ozlabs.org,
-	linux-kselftest@vger.kernel.org
-Subject: Re: [PATCH RFC 38/41] fuse: refuse files on pseudo filesystems as
- passthrough backing files
-Message-ID: <avhMN39TECaur0sS@amir-ThinkPad-T480>
-References: <20261110-work-loop-pseudo-v1-0-4c998976c6c7@kernel.org>
- <20261110-work-loop-pseudo-v1-38-4c998976c6c7@kernel.org>
- <20261111151202.GA11391@lst.de>
- <fb1d72cf25d10a960da627f6d93a3e041820ed3a.camel@amutable.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ZBqU4DgI
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4FBAB1F000C4;
+	Sat, 14 Nov 2026 12:03:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794657801;
+	bh=ZtvIFXoOKLAsH+V2h5HHt5wrTO8bTwuJgaiMNtvW4Sw=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=ZBqU4DgIsVF4fBQNr4bYIKhPWkjeKQvvtPUUd9Cz31YPzLVJOtMSWjDuH7EGA/h7n
+	 P2EPM9PNC3jDOgl7kqQR3OcR5SuiZnwdbTz/URj/thGHq6pavdyM9GR1V7q5+9Nr9L
+	 ogQpeDGM/vpkwHN2a+d6KH5p1Dq1y5+epVPBRSkaCZhhXeQqYtWZ7nOpi4phoiJOFa
+	 QW2WytooNIT+NaZ1bOtDLE6flFWVJJCUO+3bxaKOxlU9uNVzGHsSLlk/mD2Ae18ZH1
+	 y1aN0XFGCVxI9RZanX5gvGBBfw/tKxhyoRW6iX00wFbvNon9+aBAYwguwpQmTyJmz/
+	 sjdBN32e0lXhA==
+Message-ID: <sashiko-outbox-214452@kernel.org>
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH v3 01/33] jfs: free uncommitted anonymous tlocks when
+ evicting an inode
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.com>
+Cc: "Al Viro" <viro@zeniv.linux.org.uk>, linux-ext4@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org, dsterba@suse.cz, tytso@mit.edu, "Mark
+ Fasheh" <mark@fasheh.com>, "Joel Becker" <jlbec@evilplan.org>, "Joseph Qi" <joseph.qi@linux.alibaba.com>
+In-Reply-To: <20261113-work-fs-sb_rdonly-v3-1-0be92bb73709@kernel.org>
+References: <20261113-work-fs-sb_rdonly-v3-0-0be92bb73709@kernel.org>
+ <20261113-work-fs-sb_rdonly-v3-1-0be92bb73709@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Sat, 14 Nov 2026 12:03:20 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -115,35 +61,180 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <fb1d72cf25d10a960da627f6d93a3e041820ed3a.camel@amutable.com>
 
-On Fri, Nov 13, 2026 at 11:25:57AM +0100, Alexander Mikhalitsyn wrote:
-> Hi Christoph,
-> 
-> On Wed, 2026-11-11 at 16:12 +0100, Christoph Hellwig wrote:
-> > I've seen setups where people use fuse to mediate access to sysfs
-> > sysfs in odd ways.  No idea if that's still around, but if so, this
-> > patch will break it.
-> 
-> 
-> Oh, that's painful. Do they use backing files for that?
-> It's a relatively new feature in FUSE...
-> 
+Thank you for your contribution! Sashiko AI review found 3 potential
+issues to consider:
+- [Medium] jfs: false WARN_ON_ONCE() in jfs_evict_inode() on read-write
+  mounts
+- [Medium] jfs: txAbortAnon() after jfs_free_zero_link() leaks metapages
+  and tlocks
+- [Medium] jfs: race between jfs_evict_inode(), txAbortAnon(), and
+  txQuiesce()
+--
 
-Very unlikely that they use FUSE passthrough and if they did
-very unlikely that it would break their filesystem.
+commit a15655dff32c48b09c331d3e03e198e2173008c1
+Author: Christian Brauner <brauner@kernel.org>
 
-The API for fuse passthrough is that the server requests to setup a
-backing file before open via ioctl and if ioctl fails (as this patch
-does) then server falls back to non-passthrough open.
+jfs: free uncommitted anonymous tlocks when evicting an inode
 
-The ioctl can already fail for many reasons such as MAX_STACK_DEPTH on
-procfs as the commit message says, so server needs to cope with the
-fall back.
+This commit adds txAbortAnon() and calls it from jfs_evict_inode() to
+release uncommitted anonymous transaction locks and metapage pins when an
+inode is evicted before writeback commits them.
 
-Thanks,
-Amir.
+> diff --git a/fs/jfs/inode.c b/fs/jfs/inode.c
+> index c7914dbc91ed9..6390d915c7f11 100644
+> --- a/fs/jfs/inode.c
+> +++ b/fs/jfs/inode.c
+> @@ -172,6 +172,15 @@ void jfs_evict_inode(struct inode *inode)
+>  	clear_inode(inode);
+>  	dquot_drop(inode);
+> =20
+> +	/*
+> +	 * Writeback commits the anonymous transactions of allocations. If the
+> +	 * filesystem went read-only without a sync, e.g. after an error,
+> +	 * nothing did.
+> +	 */
+> +	if (ji->atlhead) {
+> +		WARN_ON_ONCE(!sb_rdonly(inode->i_sb));
+
+[Severity: Medium]
+Can WARN_ON_ONCE(!sb_rdonly(inode->i_sb)) fire on a read-write mount when
+ji->atlhead is left populated without setting COMMIT_Dirty?
+
+In extAlloc(), xtExtend() and xtInsert() acquire anonymous tlocks on
+non-root xtree metapages via txLock() before splitting pages in
+xtSplitUp().  When xtSplitUp() fails with -ENOSPC or -EDQUOT, extAlloc()
+frees the data blocks and returns before calling mark_inode_dirty(ip):
+
+fs/jfs/jfs_extent.c:extAlloc() {
+	...
+	if (xaddr && xaddr =3D=3D nxaddr)
+		rc =3D xtExtend(0, ip, xoff, (int) nxlen, 0);
+	else
+		rc =3D xtInsert(0, ip, xflag, xoff, (int) nxlen, &nxaddr, 0);
+
+	/* if the extend or insert failed,
+	 * free the newly allocated blocks and return the error.
+	 */
+	if (rc) {
+		dbFree(ip, nxaddr, nxlen);
+		dquot_free_block(ip, nxlen);
+		mutex_unlock(&JFS_IP(ip)->commit_mutex);
+		return (rc);
+	}
+	...
+	mark_inode_dirty(ip);
+}
+
+Because COMMIT_Dirty is never set on the inode, jfs_write_inode() does not
+commit the anonymous tlocks, and evicting the inode triggers the warning on
+a read-write filesystem.  The warning also triggers after a filesystem
+error when mounted with errors=3Dcontinue, where jfs_handle_error() marks t=
+he
+superblock dirty without setting SB_RDONLY, or via extRecord() ->
+xtUpdate(), which is fixed in a later patch in this series (commit "jfs:
+don't set SB_RDONLY after filesystem errors").
+
+> +		txAbortAnon(inode);
+> +	}
+
+[Severity: Medium]
+Does calling txAbortAnon() after jfs_free_zero_link() leak metapages and
+linelocks when an unlinked inode with COMMIT_Freewmap is evicted after an
+error?
+
+Earlier in jfs_evict_inode(), an unlinked inode with COMMIT_Freewmap calls
+jfs_free_zero_link() -> xtTruncate(..., COMMIT_WMAP).  For each non-root
+xtree metapage, xtTruncate() marks mp->lid with tlckFREELOCK, calls
+discard_metapage(mp), and finishes with txFreelock(ip):
+
+fs/jfs/jfs_txnmgr.c:txFreelock() {
+	...
+	while ((lid =3D xtlck->next) !=3D 0) {
+		tlck =3D lid_to_tlock(lid);
+		if (tlck->flag & tlckFREELOCK) {
+			xtlck->next =3D tlck->next;
+			txLockFree(lid);
+		} else {
+	...
+}
+
+If the transaction in jfs_unlink() or jfs_rename() aborted after
+commitZeroLink() set COMMIT_Freewmap, ji->atlhead still holds anonymous
+tlckPAGELOCK tlocks when jfs_evict_inode() runs.  txFreelock() unlinks
+those tlocks from ji->atlhead and frees lid before txAbortAnon() runs,
+without dropping mp->nohomeok, clearing mp->lid, or freeing chained
+linelocks.  Calling txAbortAnon() before jfs_free_zero_link() would release
+the metapage pins and linelocks before xtTruncate() discards the pages.
+
+> diff --git a/fs/jfs/jfs_txnmgr.c b/fs/jfs/jfs_txnmgr.c
+> index 083dbbb0c3268..85192dd4461a4 100644
+> --- a/fs/jfs/jfs_txnmgr.c
+> +++ b/fs/jfs/jfs_txnmgr.c
+> @@ -2581,6 +2581,74 @@ void txFreelock(struct inode *ip)
+>  	TXN_UNLOCK();
+>  }
+> =20
+> +/*
+> + *	txAbortAnon()
+> + *
+> + * function:	free the anonymous tlocks of an inode that is evicted
+> + *		before writeback committed them, e.g. because an error made
+> + *		the filesystem read-only.
+> + *
+> + * A page that carries nothing but uncommitted changes isn't written hom=
+e.
+> + * A page that is also waiting to go home with committed changes (mp->ls=
+n)
+> + * goes home with both, after an error the superblock is marked dirty.
+> + */
+> +void txAbortAnon(struct inode *ip)
+> +{
+> +	struct jfs_inode_info *jfs_ip =3D JFS_IP(ip);
+> +	struct linelock *linelock;
+> +	struct metapage *mp;
+> +	struct tlock *tlck;
+> +	lid_t lid, next, llid, k;
+> +
+> +	/* txQuiesce() and jfs_sync() commit under the commit_mutex */
+> +	mutex_lock(&jfs_ip->commit_mutex);
+> +
+> +	TXN_LOCK();
+> +	lid =3D jfs_ip->atlhead;
+> +	jfs_ip->atlhead =3D jfs_ip->atltail =3D 0;
+> +	list_del_init(&jfs_ip->anon_inode_list);
+> +	TXN_UNLOCK();
+
+[Severity: Medium]
+Can jfs_evict_inode() and txAbortAnon() race with txQuiesce() walking the
+global TxAnchor.anon_list?
+
+txQuiesce() walks TxAnchor.anon_list (shared across all JFS mounts) under
+TXN_LOCK() and drops TXN_LOCK() without pinning the inode before taking
+commit_mutex:
+
+CPU0                              CPU1
+txQuiesce()                       jfs_evict_inode()
+  TXN_LOCK()                        txAbortAnon()
+  jfs_ip =3D list_entry(...)            mutex_lock(&jfs_ip->commit_mutex)
+  TXN_UNLOCK()                        TXN_LOCK()
+                                      list_del_init(&jfs_ip->anon_inode_lis=
+t)
+                                      TXN_UNLOCK()
+                                      ...
+                                      mutex_unlock(&jfs_ip->commit_mutex)
+                                    ...
+                                  destroy_inode(ip)
+  txBegin(ip->i_sb, ...)
+  mutex_lock(&jfs_ip->commit_mutex)  <-- use-after-free
+
+In the opposite interleaving, txCommit() called from txQuiesce() clears
+jfs_ip->atlhead =3D 0 before taking TXN_LOCK() to remove
+jfs_ip->anon_inode_list.  Because jfs_evict_inode() checks if (ji->atlhead)
+without commit_mutex or TXN_LOCK(), it can see ji->atlhead =3D=3D 0, skip
+txAbortAnon(), and hit BUG_ON(!list_empty(&ji->anon_inode_list)) or free
+the inode while txCommit() is still running.
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261113-work-fs-sb=
+_rdonly-v3-0-0be92bb73709@kernel.org?part=3D1
