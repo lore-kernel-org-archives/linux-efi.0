@@ -1,57 +1,50 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794657833;
-	b=Jx+KkHKoE+5ZiKWmUv1uiBnNJDyASgMdF954ILF7H2Ape6dq7OomLX7izyLga6K4uofX
-	 pD/JsJwdQuu2/qmLmPzK0PqDqp1gTesojYxRCGYqRmCuxCXBb+Zx+fzyolr8xfkRD+hHm
-	 tgAhem3N4nbpzBpuosJWKHm4TtljrtOnCIswHCJL0/cWdmAZ+b55YSrd3v+W3Uy+dZ9bo
-	 zOt+bup0nBni+29Bs3hiA6x/ZySzkRrRoqDnVQjDHlJc2q4EwSfzKFG6SXIVeGsmJotwO
-	 SthJVM6iuMDJpYq5y2RnmktQqWqn4IknhFrzD1jV1GyCUbkznvxJLsUMQc+Skd70HSg==
+	t=1794661537;
+	b=Tqn16gUoil/ElC6oOe4ssohdauQlhkwZhjNhqqQkrZ0kUQzAc2PCmvoD/0E19YOwWDZ7
+	 Z/Xmt4ZWt20f1llWr7ld5aQuzHnsLJJL2BdJ1NV9IARHBC5aPoQk2COM1cH/BsOhBLPuN
+	 8WW3Cl6ePNr8/EdIXcvebBaaDoAuLBUTSxq9qREdMAdaeHy+9h0B226J8BTpAHvY5wx6C
+	 YTpsqCOFP3wprfr4n298e7MQipv4tWMry6zXao8VlEXfbO7tZPvXcaJm/WFmTnbpH0OMV
+	 P7yTELLCqaDMMKua7MjYLHAdgK9hSrvYGD4yfe2oeDupB2SUci/7arSo8/i0hMGYCBA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794657833;
-	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
-	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
-	bh=h9QvBLMsaftQkNF5XqflyzTjEcAymvR21sTq1hGFR9U=;
-	b=xB5qSGxrMXgAXlE7nh8mENt4nv5VlI81GjWg/BB5k01J1mKLA+/OADIpyB3+yWe+Ufjv
-	 4ikWSx6bhK1G0FAZyUBdChUknGWq6HVVjkC1QfbopQsPW6buQPotJKV8iZPEQnGVhfj/P
-	 UPOXIM//R9X39fuq2ZRfUnQWUMDk+J1m7/08tgcZNApM+amhSRdV6k58erEYnm4R1DEKG
-	 JylMXx73zSd8X/9fzw7qg6TteaKTeecxl1gWj4qFvhaPFUYWDJBhjyG5jfuV2wHsDyumL
-	 gVyq9AOk1rjxvznp+lU4gkV9N689iMnWjFRJn8k/8OT9RvqQ3Ojya0QGp0mntfJ3gjg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794661537;
+	h=Received:DKIM-Signature:From:Subject:Date:Message-Id:MIME-Version:
+	 Content-Type:Content-Transfer-Encoding:X-B4-Tracking:X-Change-ID:To:
+	 Cc:X-Mailer:X-Developer-Signature:X-Developer-Key;
+	bh=CJQu819tgn1Q7KG3DzWeopl4zGjNY06MsJ8ooIiMWRc=;
+	b=oDNm/7RppY/9cGgnAIYOpnZOF+Og5YdFHymPfJUMvF3LNQMaYDQTMzYFiloEbvyjzieJ
+	 94lngAMT3iHeH1dubh2+rm1F7Jlncmx8BbC945KNIvwykps9HMbBv91bqfDpM4vJEySeb
+	 fTNkC5I8b0DhEBkZH/faHWNd7WnF9Kds2Or9NzwrFDb9+t/m/1MWZ3GQTsfi/LmRcXrxc
+	 kQdHCgpX42TyzAIQOc8uN1PDL3ratvEh9R0YbJOBNDMWek8gdFuNpUoVPyq1JrOp/aYxM
+	 DS4UUB1ICAbayyuvBG3Xyla8iYMdkVwilIilua6lgK0vc6xToEHOpp5Gy1WnSbT4+bA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=acRLK16T;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="Vp/8lsUb";
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98D23606A330;
-	Sat, 14 Nov 2026 12:03:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 90FD7606A323;
+	Sat, 14 Nov 2026 13:05:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=acRLK16T
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E7DA11F000C5;
-	Sat, 14 Nov 2026 12:03:52 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Vp/8lsUb
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 85E561F000C4;
+	Sat, 14 Nov 2026 13:05:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794657833;
-	bh=h9QvBLMsaftQkNF5XqflyzTjEcAymvR21sTq1hGFR9U=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=acRLK16Tv5rVfr5zfeXkCS81IwZynV0Iu0o5OGc2HpX3/05hrjbueaWKLxLlYqLmO
-	 z3W+PPmaM3U0hqso0XI+Ooq0RQyvBrwDBT11n9g9KSgX8ZhGVcIxnOI9fIOtTrhxxK
-	 HjE1FgbCj1dbiTCHVsQhDOFs56nIgMByBpuhawWcso3hlxTf//5jcUYgwAaZ04rwjz
-	 BdkAHdeW3WWvKJw7xI6KV+jY+dZQrvNHw7VEagMRPiDHtBYiWi45s6JmOMZp7SE9XB
-	 WqfiGf81GveG6tD+O2sIN9n3nXaeikmtUkJNFdgDSm4yOjub0sItWiIhIB1G/G4u+I
-	 3yjoHedFGAoMA==
-Message-ID: <sashiko-outbox-214481@kernel.org>
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v3 30/33] ubifs: don't set SB_RDONLY after errors
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.com>
-Cc: "Al Viro" <viro@zeniv.linux.org.uk>, linux-ext4@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org, dsterba@suse.cz, tytso@mit.edu, "Mark
- Fasheh" <mark@fasheh.com>, "Joel Becker" <jlbec@evilplan.org>, "Joseph Qi" <joseph.qi@linux.alibaba.com>
-In-Reply-To: <20261113-work-fs-sb_rdonly-v3-30-0be92bb73709@kernel.org>
-References: <20261113-work-fs-sb_rdonly-v3-0-0be92bb73709@kernel.org>
- <20261113-work-fs-sb_rdonly-v3-30-0be92bb73709@kernel.org>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Sat, 14 Nov 2026 12:03:52 +0000
+	s=k20260515; t=1794661537;
+	bh=CJQu819tgn1Q7KG3DzWeopl4zGjNY06MsJ8ooIiMWRc=;
+	h=From:Subject:Date:To:Cc;
+	b=Vp/8lsUbHRSKrh4ttKx/RVHJB7Ec7ONHIIW64irL2cjjacaR6J3rc/TVx34YmN2JY
+	 hD7p4Lvjsdv8bdSTtvVg3Uo8hJbSv98inn/as02deo60GIBVbfirXFgWB/Mcxz4xgu
+	 eNSZC0qRLBqbNvr4t9rxw1I+3C99Y5V4g0RNH0aW7CMG7xAojpfebDeeIxHa/hV/bK
+	 rTGxkqIXzRUJBPtygJ+V6kczZ6fMZdsmbXQvq7GJF04QCZhqWlHP/dZDEjF9dxkMRO
+	 bgT7mx1rfBdc7CasG01hMs/lp2dY+CVgKWNLT/1dXr8V6zJu13+oGNRULDYK5HyWcp
+	 5xD4EImziW4Gg==
+From: Christian Brauner <brauner@kernel.org>
+Subject: [PATCH RFC v2 00/42] fs: don't use pseudo filesystem files as
+ storage
+Date: Sat, 14 Nov 2026 14:01:41 +0100
+Message-Id: <20261114-work-loop-pseudo-v2-0-98639a2286fb@kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -60,160 +53,272 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/2WOQQ6CMBBFr2JmbZuWkNK6MjHxAG4NCygDVEhLW
+ kAN4e5SWLr8f/68vAUCeoMBLqcFPM4mGGe3kJxPoNvCNkhMtWVIWCI4Z4q8ne9I79xAhoBT5Yh
+ UTKYpFxJrDtvb4LE2nx35hMf9BvlRhql8oR4jLM7KIiApfWF1G6uIpRFLDyyN97hrTRid/+6CM
+ 9+hhwtn/y4zJ4ykWimpMqGFzq4deos9db6BfF3XHzBro2XwAAAA
+X-Change-ID: 20261109-work-loop-pseudo-890844168ef1
+To: linux-fsdevel@vger.kernel.org
+Cc: Jann Horn <jannh@google.com>, Chris Mason <mason@kernel.org>, 
+ Josef Bacik <josef@toxicpanda.com>, Christoph Hellwig <hch@lst.de>, 
+ linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ linux-nvme@lists.infradead.org, Alexander Viro <viro@zeniv.linux.org.uk>, 
+ Jan Kara <jack@suse.cz>, linux-scsi@vger.kernel.org, 
+ target-devel@vger.kernel.org, driver-core@lists.linux.dev, 
+ linux-mm@kvack.org, bpf@vger.kernel.org, 
+ linux-security-module@vger.kernel.org, selinux@vger.kernel.org, 
+ apparmor@lists.ubuntu.com, linux-nfs@vger.kernel.org, 
+ netdev@vger.kernel.org, fuse-devel@lists.linux.dev, 
+ linux-efi@vger.kernel.org, xen-devel@lists.xenproject.org, 
+ ocfs2-devel@lists.linux.dev, linux-s390@vger.kernel.org, 
+ linuxppc-dev@lists.ozlabs.org, linux-usb@vger.kernel.org, 
+ Amir Goldstein <amir73il@gmail.com>, linux-erofs@lists.ozlabs.org, 
+ linux-kselftest@vger.kernel.org, 
+ "Christian Brauner (Amutable)" <brauner@kernel.org>, stable@vger.kernel.org, 
+ Alexander Mikhalitsyn <alex@amutable.com>, Breno Leitao <leitao@debian.org>, 
+ Casey Schaufler <casey@schaufler-ca.com>, Chuck Lever <cel@kernel.org>, 
+ Sashiko <sashiko-bot@kernel.org>
+X-Mailer: b4 0.17-dev-ce4c1
+X-Developer-Signature: v=1; a=openpgp-sha256; l=11058; i=brauner@kernel.org;
+ h=from:subject:message-id; bh=1K5fqA8aYSFKqf+hZmwJu8L6D/XIowRL9F+k2izC4+I=;
+ b=owGbwMvMwCU28Zj0gdSKO4sYT6slMWT9iEnN4p/wft6Sgg3772gac+ROEzmmcSOrZ4f1rddhB
+ RrfCvY86yhlYRDjYpAVU2RxaDcJl1vOU7HZKFMDZg4rE8gQBi5OAZhI0xOG/7GX+s0nhAj+YWd+
+ 7PfmzuuVXtolzr/nsKTMzc7ROfLNoZfhf1He254pcgrflbqY9lh2nVZVKVy6ZZGJ5E1Ny1XLT7L
+ k8wEA
+X-Developer-Key: i=brauner@kernel.org; a=openpgp;
+ fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
 
-Thank you for your contribution! Sashiko AI review found 3 potential
-issues to consider:
-- [Medium] ubifs: false space accounting error in ubifs_remount_ro()
-  after error
-- [Medium] ubifs: ubifs_fsync() trips !c->ro_mount assert after error
-  remount
-- [Medium] ubifs: race between in-flight writeback and
-  ubifs_remount_ro() after error
---
+Loop happily takes any regular file with ->read_iter() as a backing
+file and any file that also has ->write_iter() as a writable one. A few
+examples:
 
-commit fda6fbd307537dfd99ef75b3610022c5af4a9353
-Author: Christian Brauner <brauner@kernel.org>
+* /proc/kcore attaches read-only as a loop device the size of the
+  kernel's virtual address space (64 PiB with 5-level paging)
+* sysfs attributes attach read-write as 4096 byte loop devices
+* using /sys/kernel/mm/transparent_hugepage/enabled for the loop device
+  and writing a block to the loop device changes the THP setting
 
-ubifs: don't set SB_RDONLY after errors
+It's not just silly. It's abusable (is that a word?). Loop calls
+->read_iter() and ->write_iter() of the backing file directly from its
+kworker which runs with kernel credentials.
 
-This commit switches ubifs_ro_mode() from setting SB_RDONLY directly on
-s_flags to calling sb_set_emergency_ro(), allows remounting read-only after
-an error, and drops dirty folios and inodes during writeback once
-c->ro_error is set.
+But pseudo files enforce part of their access rules at read and write
+against the caller. So dozens of sysfs ->show() and ->store() methods
+call capable().
 
-> diff --git a/fs/ubifs/super.c b/fs/ubifs/super.c
-> index 38972786817e7..2d71274e89ad0 100644
-> --- a/fs/ubifs/super.c
-> +++ b/fs/ubifs/super.c
-[ ... ]
-> @@ -1839,19 +1846,26 @@ static void ubifs_remount_ro(struct ubifs_info *c)
-> =20
->  	dbg_save_space_info(c);
-> =20
-> -	for (i =3D 0; i < c->jhead_cnt; i++) {
-> -		err =3D ubifs_wbuf_sync(&c->jheads[i].wbuf);
-> +	/* Like ubifs_put_super(), don't write anything after an error. */
-> +	if (!c->ro_error) {
-> +		for (i =3D 0; i < c->jhead_cnt; i++) {
-> +			err =3D ubifs_wbuf_sync(&c->jheads[i].wbuf);
-> +			if (err)
-> +				ubifs_ro_mode(c, err);
-> +		}
-> +
-> +		c->mst_node->flags &=3D ~cpu_to_le32(UBIFS_MST_DIRTY);
-> +		c->mst_node->flags |=3D cpu_to_le32(UBIFS_MST_NO_ORPHS);
-> +		c->mst_node->gc_lnum =3D cpu_to_le32(c->gc_lnum);
-> +		err =3D ubifs_write_master(c);
->  		if (err)
->  			ubifs_ro_mode(c, err);
-> +	} else {
-> +		/* Syncing the write-buffers would have canceled them. */
-> +		for (i =3D 0; i < c->jhead_cnt; i++)
-> +			hrtimer_cancel(&c->jheads[i].wbuf.timer);
->  	}
+But setting up a loop device requires no capabilities. It only requires
+access to the device nodes. So whoever has a loop device skips all of
+the capable() checks.
 
-[Severity: Medium]
-Can an in-flight ubifs_fsync() trip the !c->ro_mount assertion in
-ubifs_wbuf_sync_nolock() when racing with a read-only remount after an
-error?
+A couple of fun examples:
 
-When c->ro_error is set, skipping ubifs_wbuf_sync() leaves wbuf->used and
-wbuf->inodes[] populated while ubifs_remount_ro() sets c->ro_mount =3D 1.
-Because vfs_fsync_range() does not hold s_umount or mnt_want_write(), an
-fsync() on an inode whose node is already buffered in a wbuf (with no dirty
-folios and ui->dirty =3D=3D 0) can interleave with ubifs_remount_ro():
+On v7.4-rc1 uid 0 without any capabilities can't kill a process of uid
+1000 and can't poison its memory either:
 
-CPU0                              CPU1
-ubifs_fsync()
-  if (c->ro_mount)
-    return 0;
-  file_write_and_wait_range()
-  ubifs_write_inode() -> 0
-                                  ubifs_remount_ro()
-                                    hrtimer_cancel(&wbuf->timer)
-                                    c->ro_mount =3D 1
-  ubifs_sync_wbufs_by_inode()
-    ubifs_wbuf_sync_nolock(wbuf)
-      ubifs_assert(c, !c->ro_media && !c->ro_mount)
-        <-- assertion failure
+    $ grep CapEff /proc/self/status
+    CapEff: 0000000000000000
+    $ kill -9 327
+    bash: kill: (327) - Operation not permitted
+    $ echo 0x220689000 > /sys/devices/system/memory/hard_offline_page
+    bash: echo: write error: Operation not permitted
 
-In ubifs_wbuf_sync_nolock(), the !c->ro_mount assertion runs before the
-if (c->ro_error) return -EROFS check, causing a warning and stack dump (or
-a panic when mounted with assert=3Dpanic).
+But put hard_offline_page behind a loop device, write a block
+containing 0x220689000 to the loop device and the loop worker happily
+does it:
 
-> -
-> -	c->mst_node->flags &=3D ~cpu_to_le32(UBIFS_MST_DIRTY);
-> -	c->mst_node->flags |=3D cpu_to_le32(UBIFS_MST_NO_ORPHS);
-> -	c->mst_node->gc_lnum =3D cpu_to_le32(c->gc_lnum);
-> -	err =3D ubifs_write_master(c);
-> -	if (err)
-> -		ubifs_ro_mode(c, err);
-> -
->  	vfree(c->orph_buf);
->  	c->orph_buf =3D NULL;
->  	kfree(c->write_reserve_buf);
+    Memory failure: 0x220689: recovery action for dirty LRU page: Recovered
+    MCE: Killing victim:327 due to hardware memory corruption fault at 7f468e972000
 
-[Severity: Medium]
-Can ubifs_remount_ro() free c->write_reserve_buf and set c->ro_mount =3D 1
-while an in-flight do_writepage() is still running?
+That hard_offline_page is a write-only file doesn't stop loop from
+using it as a writable backing file either.
 
-Once ubifs_ro_mode() calls sb_set_emergency_ro(), sync_filesystem(sb) in
-ubifs_reconfigure() returns immediately at sb_rdonly_any(sb) without
-calling sync_inodes_sb() or waiting for in-flight writeback.  A writeback
-caller that does not take mnt_want_write() or s_umount (such as
-sync_file_range()) can pass the unlocked c->ro_error check in
-do_writepage() just before an error occurs and then race with
-ubifs_remount_ro():
+Other fun examples:
 
-CPU0                              CPU1
-do_writepage()
-  if (unlikely(c->ro_error))
-  ubifs_jnl_write_data()
-                                  ubifs_ro_mode()
-                                    c->ro_error =3D 1
-                                    sb_set_emergency_ro(sb)
-                                  ubifs_reconfigure()
-                                    sync_filesystem(sb) -> 0
-                                    ubifs_remount_ro()
-                                      kfree(c->write_reserve_buf)
-                                      c->write_reserve_buf =3D NULL
-                                      c->ro_mount =3D 1
-    mutex_lock(&c->write_reserve_mutex)
-    data =3D c->write_reserve_buf
-    data->ch.node_type =3D ...
-      <-- NULL dereference or use-after-free
+(1) soft-block radios via /sys/class/rfkill/rfkill*/soft
+    (CAP_NET_ADMIN)
 
-Even when kmalloc() succeeds in ubifs_jnl_write_data(), make_reservation()
-subsequently calls reserve_space(), tripping
-ubifs_assert(c, !c->ro_media && !c->ro_mount).
+(2) change the reboot mode via /sys/kernel/reboot/mode (CAP_SYS_BOOT)
 
-> @@ -1977,10 +1991,7 @@ static int ubifs_reconfigure(struct fs_context *fc)
->  		if (err)
->  			return err;
->  	} else if (!c->ro_mount && (fc->sb_flags & SB_RDONLY)) {
-> -		if (c->ro_error) {
-> -			ubifs_msg(c, "cannot re-mount R/O due to prior errors");
-> -			return -EROFS;
-> -		}
-> +		/* After an error ubifs_remount_ro() can't write but still works. */
->  		ubifs_remount_ro(c);
->  	}
+(3) reconfigure md arrays via /sys/block/md*/md/. md_attr_store()
+    requires CAP_SYS_ADMIN for every md attribute.
 
-[Severity: Medium]
-Should ubifs_remount_ro() skip dbg_save_space_info() and
-dbg_check_space_info() when c->ro_error is set, as ubifs_put_super() and
-the taken_empty_lebs check in ubifs_reconfigure() do?
+(4) reconfigure scsi disks via /sys/class/scsi_disk/*/allow_restart and
+    friends (CAP_SYS_ADMIN)
 
-Because sync_filesystem() is a no-op once sb_set_emergency_ro() is set,
-dirty folios and dirty inodes remain pending during ubifs_remount_ro().
-dbg_save_space_info() snapshots ubifs_get_free_space_nolock(), which
-includes c->bi.data_growth and c->bi.dd_growth.  If a concurrent writeback
-or folio release drops a dirty folio via do_writepage() or a dirty inode
-via ubifs_write_inode() before dbg_check_space_info() runs at the end of
-ubifs_remount_ro(), releasing that page or inode budget changes the
-reported free space and causes dbg_check_space_info() to log a false "free
-space changed" error and call dump_stack().
+(5) read dmi-sysfs attributes (CAP_SYS_ADMIN)
 
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261113-work-fs-sb=
-_rdonly-v3-0-0be92bb73709@kernel.org?part=3D30
+And an unprivileged container that was handed a loop device can change
+gro_flush_timeout of its own network devices. That usually requires
+CAP_NET_ADMIN in the initial user namespace (via sysfs and via netlink).
+
+I've reproduced that all on v7.4-rc1.
+
+Aaaand zloop, the nvme target's file backend, the scsi target's fileio
+backend, fuse passthrough and the usb mass storage gadget have the same
+problem. erofs takes pseudo files as images for file-backed mounts as
+well. It reads them with the mounter's credentials though so that's just
+silly and not abusable.
+
+Fwiw, device mapper doesn't need anything. It only takes block devices.
+md's deprecated bitmap file is fine as well. It maps the file with
+bmap() which no pseudo filesystem implements.
+
+So this series adds SB_I_PSEUDO to state that the regular files of a
+filesystem are kernel interfaces and not storage and makes all seven
+refuse such files.
+
+I didn't want to sprinkle SB_I_PSEUDO over all pseudo filesystems one by
+one. Instead there's now a common initialization point for all of them
+via fc_init_pseudo().
+
+init_pseudo() uses it for the internal pseudo filesystems and all
+mountable pseudo filesystems call it from their ->init_fs_context().
+
+kernfs does it once in kernfs_get_tree(). It raises SB_I_PSEUDO,
+SB_I_NOEXEC and SB_I_NODEV. Pseudo filesystems never hold executables or
+device nodes. Some of them raised SB_I_NOEXEC and SB_I_NODEV already,
+most didn't.
+
+I went through every single one of them. None of them needs to execute
+anything. The files that can be mmap()ed map data and the tracing ring
+buffer refuses VM_EXEC anyway.
+
+SB_I_NODEV is cleared again by devpts, binderfs and selinuxfs. The first
+two did that already. selinuxfs needs it because Android init opens
+/sys/fs/selinux/null by path as /dev/null doesn't exist yet at that
+point. Note that systemd mounts most of these filesystems with noexec
+and nodev already.
+
+file_check_backing() looks at d_real_inode(). overlayfs happily stacks on
+top of sysfs, cgroup2, debugfs, tracefs, configfs and securityfs and
+reads of such overlayfs files are served by the pseudo file. Only procfs
+and binfmt_misc are refused as they set s_stack_depth to
+FILESYSTEM_MAX_STACK_DEPTH.
+
+Whether all pseudo filesystems should refuse stacking is a separate
+discussion. overlayfs reads the lower file with the mounter's
+credentials so a root-mounted overlayfs on top of a sysfs directory
+hands capability gated reads to every reader. With SB_I_PSEUDO overlayfs
+could easily refuse them.
+
+The first three patches are independent fixes. Loop never checked
+whether its backing file is open for reading. It relied on
+vfs_iter_read() refusing such files. Direct I/O never went through
+vfs_iter_read() and since v6.15 buffered I/O doesn't either. So whoever
+has a loop device can read files they could only open for writing. And
+the nvme target's file backend and the scsi target's fileio backend call
+->read_iter() and ->write_iter() without checking that they exist.
+
+Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+---
+Changes in v2:
+- Add file_check_backing() and use it in all consumers. It replaces
+  file_is_pseudo() and the open-coded file type, open mode and method
+  checks.
+- nvmet, fileio and zloop refuse everything that isn't a regular file
+  or, for nvmet and fileio, a block device.
+- fileio: check the protection file as well. (sashiko)
+- acct: refuse files on all pseudo filesystems. (Alexander)
+- selftests: add nvmet (Bui), fileio, zloop, link, FIFO and character
+  device tests.
+- Collect tags. They are dropped on the patches that changed.
+- Link to v1: https://patch.msgid.link/20261110-work-loop-pseudo-v1-0-4c998976c6c7@kernel.org
+
+---
+Christian Brauner (42):
+      loop: refuse backing files that aren't open for reading
+      nvmet: check that the file backend supports ->{read,write}_iter
+      target: fileio: check that the backing file supports ->{read,write}_iter
+      fs: add SB_I_PSEUDO
+      kernfs: use fc_init_pseudo()
+      proc: use fc_init_pseudo()
+      binfmt_misc: use fc_init_pseudo()
+      mqueue: use fc_init_pseudo()
+      bpf: use fc_init_pseudo() for bpffs
+      nullfs: use fc_init_pseudo()
+      failfs: use fc_init_pseudo()
+      rust_binderfs: use fc_init_pseudo()
+      devpts: use fc_init_pseudo()
+      debugfs: use fc_init_pseudo()
+      tracefs: use fc_init_pseudo()
+      configfs: use fc_init_pseudo()
+      securityfs: use fc_init_pseudo()
+      selinux: use fc_init_pseudo() for selinuxfs
+      smack: use fc_init_pseudo() for smackfs
+      apparmor: use fc_init_pseudo() for apparmorfs
+      nfsd: use fc_init_pseudo()
+      sunrpc: use fc_init_pseudo() for rpc_pipefs
+      fuse: use fc_init_pseudo() for fusectl
+      efivarfs: use fc_init_pseudo()
+      pstore: use fc_init_pseudo()
+      xenfs: use fc_init_pseudo()
+      openpromfs: use fc_init_pseudo()
+      ocfs2: use fc_init_pseudo() for dlmfs
+      s390/hypfs: use fc_init_pseudo()
+      powerpc/spufs: use fc_init_pseudo()
+      usb: gadget: f_fs: use fc_init_pseudo()
+      usb: gadget: gadgetfs: use fc_init_pseudo()
+      fs: add file_check_backing()
+      loop: refuse files on pseudo filesystems as backing files
+      zloop: refuse zone files on pseudo filesystems
+      nvmet: refuse files on pseudo filesystems as namespace backing files
+      target: fileio: refuse files on pseudo filesystems as backing files
+      fuse: refuse files on pseudo filesystems as passthrough backing files
+      usb: gadget: f_mass_storage: refuse files on pseudo filesystems
+      erofs: refuse files on pseudo filesystems as backing files
+      acct: refuse files on pseudo filesystems
+      selftests/filesystems: add backing file tests for pseudo files
+
+ arch/powerpc/platforms/cell/spufs/inode.c          |   2 +
+ arch/s390/hypfs/inode.c                            |   2 +
+ drivers/android/binder/rust_binderfs.c             |   3 +-
+ drivers/block/loop.c                               |  14 +-
+ drivers/block/zloop.c                              |   5 +-
+ drivers/nvme/target/io-cmd-file.c                  |   4 +
+ drivers/target/target_core_file.c                  |  14 +
+ drivers/usb/gadget/function/f_fs.c                 |   2 +
+ drivers/usb/gadget/function/storage_common.c       |  11 +-
+ drivers/usb/gadget/legacy/inode.c                  |   2 +
+ drivers/xen/xenfs/super.c                          |   2 +
+ fs/binfmt_misc.c                                   |   5 +-
+ fs/configfs/mount.c                                |   2 +
+ fs/debugfs/inode.c                                 |   2 +
+ fs/devpts/inode.c                                  |   2 +
+ fs/efivarfs/super.c                                |   2 +
+ fs/erofs/super.c                                   |   5 +-
+ fs/failfs.c                                        |   3 +-
+ fs/fuse/backing.c                                  |   4 +
+ fs/fuse/control.c                                  |   2 +
+ fs/kernfs/mount.c                                  |   4 +-
+ fs/libfs.c                                         |   2 +-
+ fs/nfsd/nfsctl.c                                   |   2 +
+ fs/nullfs.c                                        |   3 +-
+ fs/ocfs2/dlmfs/dlmfs.c                             |   2 +
+ fs/openpromfs/inode.c                              |   2 +
+ fs/proc/root.c                                     |   4 +-
+ fs/pstore/inode.c                                  |   2 +
+ fs/read_write.c                                    |  48 ++
+ fs/tracefs/inode.c                                 |   2 +
+ include/linux/fs.h                                 |   2 +
+ include/linux/fs/super_types.h                     |   1 +
+ include/linux/pseudo_fs.h                          |  11 +
+ ipc/mqueue.c                                       |   3 +-
+ kernel/acct.c                                      |   6 +-
+ kernel/bpf/inode.c                                 |   4 +-
+ net/sunrpc/rpc_pipe.c                              |   2 +
+ security/apparmor/apparmorfs.c                     |   2 +
+ security/inode.c                                   |   2 +
+ security/selinux/selinuxfs.c                       |   5 +
+ security/smack/smackfs.c                           |   2 +
+ tools/testing/selftests/filesystems/.gitignore     |   1 +
+ tools/testing/selftests/filesystems/Makefile       |   2 +-
+ tools/testing/selftests/filesystems/config         |  14 +
+ .../selftests/filesystems/pseudo_backing_test.c    | 570 +++++++++++++++++++++
+ 45 files changed, 747 insertions(+), 39 deletions(-)
+---
+base-commit: 6628e7d4c6b25c8d18f1345e3a20d21829aae7e4
+change-id: 20261109-work-loop-pseudo-890844168ef1
+
