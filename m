@@ -1,99 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.62.14
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794599805;
-	b=MCA1/ry+lQU1GcjhL+hibZvxTCPJk0l+rAPziDO0A79u7zAQLAzfAfRCyTY0hxdOi06z
-	 kUaJN4uBtZYFYi+B1v/swX9ZcOqiJEUfCBPaMiYFYMZZOZ4vgPRX9sgg+GC6MJrH8Rdxt
-	 Mc6tYgT+1Gcj772UmnlYYAJMejxm4YcTGiXeoi9BHXQQN5o53Nv8JWWXQbnEkJxAC5cnv
-	 3hLRXXEv/MFRbsvCWP/rwA1eYywXA6qLKvfL/p6KBiqaoHNKg3O2szoaUdDFIZhBmxir2
-	 5XzJtQ3x49TjpU/0ObruOv/bpvKjasPijbLEMEmHTN1tBLprkeuRn1UKRVsaXZraUkQ==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794599805;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:Date:From:To:Cc:
-	 Subject:Message-ID:References:Content-Type:Content-Disposition:
-	 In-Reply-To:X-ClientProxiedBy:MIME-Version:X-MS-PublicTrafficType:
-	 X-MS-TrafficTypeDiagnostic:X-MS-Office365-Filtering-Correlation-Id:
-	 X-MS-Exchange-SenderADCheck:X-MS-Exchange-AntiSpam-Relay:
-	 X-Microsoft-Antispam:X-Microsoft-Antispam-Message-Info:
-	 X-Forefront-Antispam-Report:
-	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
-	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
-	 X-MS-Exchange-CrossTenant-FromEntityHeader:
-	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
-	 X-MS-Exchange-CrossTenant-UserPrincipalName:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=cIFWvmEfID6OzHOehPoUiLjYZvjUuULUz+IitQD9khg=;
-	b=2x7QhVZ5QncCnz/sGggIn0NOHvc+xCw40VPwmxOnUlMVIpghjRs0exwuLk7CiNSMhH/R
-	 4F73Fgc8jQnbnAP9AAXs2BWfF82o/xZog7ZtOb+Y/zoaRH7Iz7fGUMYIYzVX5PAkGaeRM
-	 gkukPAxvmx0WNMG9YFXzaGRicmqPgFJnEsiFZeYFrybXWFQV659t9oCZCypE0BFu2txg3
-	 yEpuzA9A33CamUF5glBj+RH2uRme6KlnyDJB2vHF+cVlbDZrRXZvgf5cACki4jC6G4MyX
-	 wBuuze5kjW//i/vOoVr4v5l9hEpzRd3/ah2+SKj5zagZ45tDO661zzfdu1KvlDEhfOA==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=nvidia.com;
-	spf=fail smtp.mailfrom=nvidia.com;
-	dkim=pass header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=P1kouxgN;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.62.14
-Received: from DM5PR21CU001.outbound.protection.outlook.com (mail-centralusazon11011014.outbound.protection.outlook.com [52.101.62.14])
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=113.46.200.225
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1794622646;
+	b=OG53jzqQ3f9OPJ2c2tR5XejNnQ0BLSWaI6GcV+IEIrq6h0EuXsm7OhyhEeGnTlhrOVeh
+	 3pdI5/KmBbf853tu7cWmRk67RoPU1cytgJGEb+Y8lhmYkgOTh8JXPllb9/fd/yeQv+Gbs
+	 yOQbFgJnwEuA5jLduvwVVDee+rU0MMV2qKT/dj6+h90ogLrfLNvPyUdSaYmgD6TPInLgt
+	 6iN4VUj6WlDkPw7UUSbBjyH1cHbWlEm8R7k8OESWAd6ifU05keeydydP41dfiZgVylgNu
+	 da6CEcs32U9Aixut2/e3UtTepezy3oeVFxhqlSF0jekB3fIDLjZG3XmYxyHQxL0rVNw==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794622646;
+	h=DMARC-Filter:dkim-signature:Received:Received:Received:Subject:To:CC:
+	 References:From:Message-ID:Date:User-Agent:MIME-Version:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:X-Originating-IP:
+	 X-ClientProxiedBy;
+	bh=lamjSy1jct+Y32LWUG/7mqOA0l+lzlvT/xdWWaLZFKQ=;
+	b=N2bc503U/mCw2zrPZsKSPq3WYDTgWGDpRhDOTuWt7pSGYpbLNBUylCXXnJi0m29yAEUJ
+	 uUEjGURasXuJRFllIuEWl6/guO6JdaPUeZal9g2BJP4f9A//zSy0Fdd0oB1bO3JK0sqZu
+	 B5P32BOFhY+y219dLdOCr84Eilm+kPRn44Td1y9OkLhXkWmxoqiZ/DGxPbRKzJ/eQuX3F
+	 yBbLDO10hzrQvRYOFoujp4Fm/gCay+i7aOAa1NxqMWpyAADSwAn2TNpIsO7qSUpHKaXV1
+	 B0EpOYLKKqkfnRZ8egqK0tbZSR5GyFQ+Y0hRgRbQyfJzgMYf/0NT1g09+PTjtOAvtxg==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=huawei.com;
+	spf=pass smtp.mailfrom=huawei.com;
+	dkim=pass header.d=huawei.com header.i=@huawei.com header.a=rsa-sha256 header.s=dkim header.b=dmJo6jxo;
+	arc=none smtp.remote-ip=113.46.200.225
+Received: from canpmsgout10.his.huawei.com (canpmsgout10.his.huawei.com [113.46.200.225])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D66C4606AEA7
-	for <linux-efi@vger.kernel.org>; Fri, 13 Nov 2026 19:56:44 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D66C4606AEA7
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3843A606A327;
+	Sat, 14 Nov 2026 02:17:23 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3843A606A327
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=P1kouxgN
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=CTXUepWh90pdGz0X8W6XFJ45xx+ZuxuRTFdKLbZmo5rxk+hBfGE/JPfW2Mmpptx23ivbEUl0YQLFlAxRzWrRG2tmroJUmEAkb2aqCOjZDrOzjl5Ghpdky2looV3++HmHChvPTD8ic60uJ3HdPG4PjydxzY/TygY8DSaMq+6WVvyXJIER3cPz9+e9Zf/yjP9DTq3Uoj4hf45z5QdiB/NZrXhsi5swVHRxYnp+gitnUnK3OmP3bIZ9uRRf0BI4+dpQmq8sJiwqi9Fl6sEDroTYZrkriJnyogu+tLjqpIW0XY27+KF9lt8ija7WhcYD/xAaiUxEDzmvJhgnhSUreBrPoA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=cIFWvmEfID6OzHOehPoUiLjYZvjUuULUz+IitQD9khg=;
- b=CKaj+gkOrKh4kx5HF+XNyQJqJAS2P/gPF6qd4gRT/OCQI9LBqnmcIDYgXH1c/4K6qbyAZgs5MZNVuL/lgykExDG9cJQBndgHScHbW83YivkEOAxgVTWf1AGyADngK0CXwDKjuuPRAJhO60/GOzWvO+jgypN4QkirVvHkovxyTdE/8XwzsnXT/6Uy3wJzARHPzRd6keySRbPFUpISzPln1nd4OT5JA14SqM0yXvTV5u3fIxT/4xRAi3/DMfSSCgy5LLVoRjvkUBZCEim/eFslWvMJuRPRALzv4HaouKrnLn6tapb0FnNLr8yrxKj6HkbXuw4eObaOcEHIhEJ79+Tnfg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
- dkim=pass header.d=nvidia.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=cIFWvmEfID6OzHOehPoUiLjYZvjUuULUz+IitQD9khg=;
- b=P1kouxgNNCvkthHXt6Xbn9pdUcZudnR6k/Y6/n5cHNgyYywcndBuESgAv8zHJCbqahcnDDN3MmYs9lcfie5fcEH4xjWdezNfygISfLYAil1J8PWvKxdoCGQpUH1nMiW7HZtV4tDJwgYd+a/0kLWuDbU63DEQuDwuFaVw6K6jXxAozDukI5rGGl+Zya8Iq5cctM9c+lmdiA963QQ7MRsqXEJXzE94gq8fpuqe2NFDbiCF+ADfsuSR/fDzVBC03wK029fz3SmL1q+C9+ddOQ3qu5TmK9UJa537P5LgiFqdYIR6ZpkzZEdFqbrdNv/aP/4bvY3p1mrsqD0TJ55FPn1Urg==
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nvidia.com;
-Received: from CHBPR12MB731189.namprd12.prod.outlook.com
- (2603:10b6:610:33d::12) by SA0PR12MB4493.namprd12.prod.outlook.com
- (2603:10b6:806:72::24) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.615.10; Fri, 13 Nov
- 2026 19:51:33 +0000
-Received: from CHBPR12MB731189.namprd12.prod.outlook.com
- ([fe80::b0e5:123d:fe06:e10d]) by CHBPR12MB731189.namprd12.prod.outlook.com
- ([fe80::b0e5:123d:fe06:e10d%6]) with mapi id 15.21.0615.009; Fri, 13 Nov 2026
- 19:51:33 +0000
-Date: Fri, 13 Nov 2026 15:51:32 -0400
-From: Jason Gunthorpe <jgg@nvidia.com>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: Ard Biesheuvel <ardb+git@google.com>, linux-efi@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>,
-	Huacai Chen <chenhuacai@kernel.org>, loongarch@lists.linux.dev,
-	linux-riscv@lists.infradead.org
-Subject: Re: [PATCH v2 04/10] efi/libstub: Capture loaded image information
- in struct efi_image_info
-Message-ID: <20261113195132.GA386258@nvidia.com>
-References: <20261110121731.2728824-12-ardb+git@google.com>
- <20261110121731.2728824-16-ardb+git@google.com>
- <179458262195.3625095.6692761412463057203.b4-review@b4>
- <274609cc-2c17-4bde-bcf3-f309655f0594@app.fastmail.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <274609cc-2c17-4bde-bcf3-f309655f0594@app.fastmail.com>
-X-ClientProxiedBy: YT1PR01CA0105.CANPRD01.PROD.OUTLOOK.COM
- (2603:10b6:b01:2c::14) To CHBPR12MB731189.namprd12.prod.outlook.com
- (2603:10b6:610:33d::12)
+	dkim=pass (1024-bit key, unprotected) header.d=huawei.com header.i=@huawei.com header.a=rsa-sha256 header.s=dkim header.b=dmJo6jxo
+dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
+	c=relaxed/relaxed; q=dns/txt;
+	h=From;
+	bh=lamjSy1jct+Y32LWUG/7mqOA0l+lzlvT/xdWWaLZFKQ=;
+	b=dmJo6jxorxqj/soF5hgiJAk0L/VbZ+b6NQ150G77AKdiKykroxkSgy9jha28sMjYHaadv7xU4
+	gX5qGcCNkavMkbqMIDp0Pr2diskt5hVLJa0+T41ntlJJoc8GUBBS7KeBABGtvyISA72TUzk8pOV
+	JKQ3g1KA+Ky1blIGX4Su+70=
+Received: from mail.maildlp.com (unknown [172.19.163.163])
+	by canpmsgout10.his.huawei.com (SkyGuard) with ESMTPS id 4jRHnX4bKrz1K98l;
+	Sat, 14 Nov 2026 10:17:04 +0800 (CST)
+Received: from whupemo200011.china.huawei.com (unknown [7.152.185.179])
+	by mail.maildlp.com (Postfix) with ESMTPS id 8F8174048B;
+	Sat, 14 Nov 2026 10:17:15 +0800 (CST)
+Received: from [10.174.178.46] (10.174.178.46) by
+ whupemo200011.china.huawei.com (7.152.185.179) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.45; Sat, 14 Nov 2026 10:17:13 +0800
+Subject: Re: [PATCH v3 30/33] ubifs: don't set SB_RDONLY after errors
+To: Christian Brauner <brauner@kernel.org>, <linux-fsdevel@vger.kernel.org>,
+	Jan Kara <jack@suse.com>
+CC: Al Viro <viro@zeniv.linux.org.uk>, <ecryptfs@vger.kernel.org>,
+	<linux-ext4@vger.kernel.org>, <jfs-discussion@lists.sourceforge.net>,
+	<linux-nilfs@vger.kernel.org>, <exfat@lists.linux.dev>, <linux-mm@kvack.org>,
+	<ntfs@lists.linux.dev>, <ocfs2-devel@lists.linux.dev>,
+	<linux-btrfs@vger.kernel.org>, <gfs2@lists.linux.dev>,
+	<linux-efi@vger.kernel.org>, <linux-mtd@lists.infradead.org>,
+	<linux-xfs@vger.kernel.org>
+References: <20261113-work-fs-sb_rdonly-v3-0-0be92bb73709@kernel.org>
+ <20261113-work-fs-sb_rdonly-v3-30-0be92bb73709@kernel.org>
+From: Zhihao Cheng <chengzhihao1@huawei.com>
+Message-ID: <17287026-cccc-f56c-15a3-029b9a2c38c9@huawei.com>
+Date: Sat, 14 Nov 2026 10:17:12 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -103,99 +77,209 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CHBPR12MB731189:EE_|SA0PR12MB4493:EE_
-X-MS-Office365-Filtering-Correlation-Id: 71b9ec4c-0746-4aae-b97a-08df41bf84c4
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|376014|7416014|366016|23010399003|22082099003|18002099003|5023799004|11063799006|56012099006|261021135927099003|10067099003|4143699003|261102123227099003|261026140227099003|261026121527099003|261022105027099003|261028144727099003|261022075727099003|261021121427099003|261022115727099003;
-X-Microsoft-Antispam-Message-Info:
-	UgRON4HSeX0ZK8luz6ff5Q3C7ECMwQyu9n98YjN85FO2f/szpsPuUwdWaM1ry/hazmN+F74Y+4S0qfRAq7JbvfjuVIPOMP9DQ5/HoRJGSnHa7dZ8rArMBGeF8Sd078w4usek0Y3VWmNgWMR4Y3nQcOwJOgqS0Mjq2ZpzSjH335qULLiUYt9+D1SgG396DQOvTqCBwbmJRJu5mEjQoRXS97azQ/Y2LaJmAFL6ItZNaO30f6HkOI9+ALquyh1L6Bh7Ihz6VgDQte1houqaytickDSY1fUlbuNzLXwipiFjOoHebLqYcAvwdfXiHqJt5mzFszOiBCnCsaOsqOFhdgss5fCSf/3yTocvqFtx5nzA2Yl4D12eoRk45NqFcaDD4eX7sqOvzdIBjuiPzxNeylzwiMQmiretzZJYvZ18x0RN7wCIpaLyT/8iQ9dDsmGAxGDxf1gNSJahRBHLKDOclr5Ay3Y2s+VibEVViIfDoRfkmdgRkW2ge4NmgyHpd2uCBMtraiZ7mMniMVNlBuNrXLCOl3gIbE8XLh+aOLA91dKcoHhuZAV6fkp8ViaE8ZQWztVtYoZvCmLvLP4TUnr2dMoAkgcm2bTil122u68Ds3ZrnUCP4PdvD1AIy7edyYCJRZgVzmCAKpp+eJ7FqWgGjvaIl0dwkOQhSMpt7Bmrm0FWVAA=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CHBPR12MB731189.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(7416014)(366016)(23010399003)(22082099003)(18002099003)(5023799004)(11063799006)(56012099006)(261021135927099003)(10067099003)(4143699003)(261102123227099003)(261026140227099003)(261026121527099003)(261022105027099003)(261028144727099003)(261022075727099003)(261021121427099003)(261022115727099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?6/IR1Xz+/Nh1/5FRa3MnwZViXXcfwfw+6RjuvH2bZCfbRMVcFYHq0wyfzyYV?=
- =?us-ascii?Q?dWKrzdmDdeGcefKkdXLFiDMkQ2oI9+1fiORiGnLwu9n3HJXngVsXnkuUpnBk?=
- =?us-ascii?Q?brhASD1QGf4zrAZsLJ15rr7rGx1zN50hzPk/iafv3zPN2h2VWFypS2nA9/GA?=
- =?us-ascii?Q?cA5lW4ZOVqaPZ4Iy6tIWl016cLe0MIfC7i2CZEZLOt3ThntGcIDguU9hcsAm?=
- =?us-ascii?Q?L4TCTQnGNcy1fm40p07S0y+dwoOvi6I3Jf7EkWJF8w6SC/KdKIP0vsM2w05a?=
- =?us-ascii?Q?qgPGTnMd0OJy73ayGoMZoGrmC/5LjPQk7F6eU9QXiXQudIq8/Z7Bv8DF7WSS?=
- =?us-ascii?Q?CPoUu7df2H0K3+KZk6wkYJNUERi28LBAHiijcqVwQLlU706dTc0mDK58uxDI?=
- =?us-ascii?Q?8zeMBa0fR0Y7oogFqRbxH2+mxq719DQplFqWVAnTy81GhzikIEh1+TwNMcVf?=
- =?us-ascii?Q?iMBGQ8PjR+YBIqAEnV8waz2QAaz1rMI1dD+/A2oGCI0hRrjE+xwC4+w+CGGo?=
- =?us-ascii?Q?I6ddooifmlaGMfoHupmqv4rxLlYtpsxw6kaotFm4vf4jdiVxWFcKIl1fhuxK?=
- =?us-ascii?Q?IebfIErgDVCxNVC/fo4qMWYT6O0q2uodjZfaXNSkWqPChGg+FebiivZUUZ4s?=
- =?us-ascii?Q?D/iIGvfvA+zIkJRENFB2j9T1oTmcI5d5j26A21NrCP9S8lBtzWrp/Ob829pN?=
- =?us-ascii?Q?wGFaw1J3bCHc/+CmKeX+v4qgzdMPvOo/DhJEoIFt8u9cscdvE4FzVfUgYOiN?=
- =?us-ascii?Q?5kzGeC/s7xzwRgbqYygqPDYfhtgUFyPN3PBFXL4X5k56bdVU3aK0o1f/t25i?=
- =?us-ascii?Q?tnv3XcyWlcdDd2GcEP+xpRM+KgHjvCgHFCWZZan8cs+BAgi71mRFTmXvUsoT?=
- =?us-ascii?Q?Af4I5MONYd4S+XFQDu3OgN+2o4H2BlnHTRePdcT/N2AMrA76h1pXYo1kYxH6?=
- =?us-ascii?Q?0+YhJJZ5dnq6m7OetdYpJzf2igsIW5CgUQUWjk/ij3/TwxBDyw4b92CxbSqL?=
- =?us-ascii?Q?pudnVWQXe/28Ww2diGsp1q34ICArds+qWxB0iLGP3p6MEOmoye4tCVXpCUyg?=
- =?us-ascii?Q?HrjAybVarRn0M+TDMCHQM8BO1Rqhy/EpdDUR7CBCSMsTIgN0rBY1M8v7k/NO?=
- =?us-ascii?Q?PawNVe/ypJZueK7PIyB5sBN4NqBwZYVB9RMVhiXPg8wL6PdfLqCmUVMXzB1g?=
- =?us-ascii?Q?lFdpJbFN8rUMh0d2l/pDazLsZuqzfSn1Q2+Tv4WqJ3qSfyNsw88FMEXApBjL?=
- =?us-ascii?Q?spxQf54rR3HcbwcffMznAWW7PAf8TdraPCHsoSU4UlQu3AgdaRAI9adnQdh0?=
- =?us-ascii?Q?5nq2Eww5BhCjebsuN0oM9mq5CO8imo0dADjNbEiKHxcdUNLpyNNSpXpc8eAc?=
- =?us-ascii?Q?+yZUxKH6Ebq0B/3LYt0vwBDpkDgIurA67lgh7d/NjqhVGVP+mFUblW15DEaR?=
- =?us-ascii?Q?GlW5wXc5rCWG/8sdks9L5ItdS4EZ6noRH57U06y0vrgZvhN8224oYpHndikG?=
- =?us-ascii?Q?YRjEiTjMuL8BoSNl/FZJ5GKCW4aw30ioKoVpl6WpdC6tQeCsxuaLfSQ6zmsf?=
- =?us-ascii?Q?C9bWyqUmAZmteQ3epsJVJkMpEC6gO8rdVovagdQjqg7ISzzGjZf6OPZDVfbP?=
- =?us-ascii?Q?HeHsFzNvWvXar290iJTTOg/6qB/kDBTQBR/ot7UXj0RwPbytT2OSd1Yxuw7/?=
- =?us-ascii?Q?hZAFhGzGhCiW1slCjFgLQF6lp7bKi4Ow/JAheNRk0AQVphnF?=
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 71b9ec4c-0746-4aae-b97a-08df41bf84c4
-X-MS-Exchange-CrossTenant-AuthSource: CHBPR12MB731189.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Nov 2026 19:51:33.2967
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: JgHtakeya+NEvGlp+eQNqJg29deL0l+6U4wSbaMYMxyy+07oVMYYost5vmWpwE0I
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA0PR12MB4493
+In-Reply-To: <20261113-work-fs-sb_rdonly-v3-30-0be92bb73709@kernel.org>
+Content-Type: text/plain; charset="gbk"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: kwepems100001.china.huawei.com (7.221.188.238) To
+ whupemo200011.china.huawei.com (7.152.185.179)
 
-On Fri, Nov 13, 2026 at 05:15:29PM +0100, Ard Biesheuvel wrote:
+ÔÚ 2026/11/13 19:59, Christian Brauner Ð´µÀ:
+> ubifs_ro_mode() sets c->ro_error and SB_RDONLY from whatever context hit
+> the error, e.g. a failing write, and without holding s_umount. UBIFS
+> can't be frozen but that still races with everyone else changing
+> sb->s_flags. And c->ro_error alone already makes every write fail with
+> EROFS.
 > 
-> On Fri, 13 Nov 2026, at 16:10, Jason Gunthorpe wrote:
-> > You could do the same by passing image_base and image_info everywhere,
-> > but that seems less nice.
-> >
+> So call sb_set_emergency_ro() instead. The background thread can hit
+> the error before SB_BORN but doesn't hold s_umount either. The xattr
+> setters check c->ro_error as well because ecryptfs calls them without
+> write access on the lower mount and they change the inode in memory
+> first.
 > 
-> I'd prefer to handle this by adding another offset, and an API to update
-> it after moving the image. That way, the EFI stub code can still grab the
-> info struct pointer without threading it through the API, while it will
-> always remain valid.
-
-I did draft threading it throughout the API and it was a net
-improvement, IMHO. There wasn't much and it removed __weak function
-shenanigans because info is always available and you can just always
-jump to entry even for zboot.
-
-But yeah, you can adjust the function to return the corrected version
-too.
-
-> > The code could consistently use the offset_to_ptr() macro if the label was
-> > included in the macro?
-> > 
-> >   #define REL_REF(sym)	0: .long	sym - 0b
-> >
-> > It would make the efistub_kernel_ptr() simpler, and the three size
-> > calculations would look like:
-> >
-> > 	return efistub_kernel_ptr(image_info, __inittext_end) - 
-> > 	       efistub_kernel_ptr(image_info, _text);
-> >
+> So far a remount to read-only after an error was refused and a remount
+> to read-write went through and cleared SB_RDONLY again because
+> c->ro_mount was never set. Now going read-only works. Nothing is synced
+> for it in that state and ubifs_remount_ro() skips the write-buffer syncs
+> and the master node like ubifs_put_super() does and only cancels the
+> write-buffer timers. Going read-write after that is refused by the VFS.
 > 
-> Again, probably cleaner to just refer to the copy of the struct once
-> it exists.
+> The flusher still gets to the folios and inodes that were dirty before
+> the error, also after the remount which sets c->ro_mount and frees the
+> write reserve buffer. Every journal write fails with EROFS after an
+> error anyway. So do_writepage() and ubifs_write_inode() drop them
+> without going near the journal. Otherwise reserve_space() trips its
+> !c->ro_mount assert for every folio after the remount.
+> 
+> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+> ---
+>   fs/ubifs/file.c  | 12 ++++++++++++
+>   fs/ubifs/io.c    |  6 +++++-
+>   fs/ubifs/super.c | 40 ++++++++++++++++++++++++++--------------
+>   fs/ubifs/xattr.c |  6 ++++++
+>   4 files changed, 49 insertions(+), 15 deletions(-)
 
-Well, we need pointers, like for entry, so as long as there is some
-way to get them that always works I'm fine.
+Reviewed-by: Zhihao Cheng <chengzhihao1@huawei.com>
+> 
+> diff --git a/fs/ubifs/file.c b/fs/ubifs/file.c
+> index 99dd52715eee9..4eae6c2ae2eea 100644
+> --- a/fs/ubifs/file.c
+> +++ b/fs/ubifs/file.c
+> @@ -898,6 +898,13 @@ static int do_writepage(struct folio *folio, size_t len)
+>   
+>   	folio_start_writeback(folio);
+>   
+> +	/* Nothing gets written after an error, drop the folio. */
+> +	if (unlikely(c->ro_error)) {
+> +		err = -EROFS;
+> +		mapping_set_error(folio->mapping, err);
+> +		goto out;
+> +	}
+> +
+>   	block = folio->index << UBIFS_BLOCKS_PER_PAGE_SHIFT;
+>   	for (;;) {
+>   		blen = min_t(size_t, len, UBIFS_BLOCK_SIZE);
+> @@ -918,6 +925,7 @@ static int do_writepage(struct folio *folio, size_t len)
+>   		ubifs_ro_mode(c, err);
+>   	}
+>   
+> +out:
+>   	ubifs_assert(c, folio->private != NULL);
+>   	if (folio_test_checked(folio))
+>   		release_new_page_budget(c);
+> @@ -997,6 +1005,10 @@ static int ubifs_writepage(struct folio *folio, struct writeback_control *wbc)
+>   		goto out_unlock;
+>   	}
+>   
+> +	/* After an error do_writepage() drops the folio. */
+> +	if (unlikely(c->ro_error))
+> +		return do_writepage(folio, len);
+> +
+>   	spin_lock(&ui->ui_lock);
+>   	synced_i_size = ui->synced_i_size;
+>   	spin_unlock(&ui->ui_lock);
+> diff --git a/fs/ubifs/io.c b/fs/ubifs/io.c
+> index 6c6d682427793..931a88329b5f5 100644
+> --- a/fs/ubifs/io.c
+> +++ b/fs/ubifs/io.c
+> @@ -72,7 +72,11 @@ void ubifs_ro_mode(struct ubifs_info *c, int err)
+>   	if (!c->ro_error) {
+>   		c->ro_error = 1;
+>   		c->no_chk_data_crc = 0;
+> -		c->vfs_sb->s_flags |= SB_RDONLY;
+> +		/*
+> +		 * SB_RDONLY needs s_umount, see sb_set_emergency_ro(). The
+> +		 * background thread runs before SB_BORN already.
+> +		 */
+> +		sb_set_emergency_ro(c->vfs_sb);
+>   		ubifs_warn(c, "switched to read-only mode, error %d", err);
+>   		dump_stack();
+>   	}
+> diff --git a/fs/ubifs/super.c b/fs/ubifs/super.c
+> index 38972786817e7..2d71274e89ad0 100644
+> --- a/fs/ubifs/super.c
+> +++ b/fs/ubifs/super.c
+> @@ -312,6 +312,12 @@ static int ubifs_write_inode(struct inode *inode, struct writeback_control *wbc)
+>   		return 0;
+>   	}
+>   
+> +	/* Nothing gets written after an error, drop the change. */
+> +	if (unlikely(c->ro_error)) {
+> +		err = -EROFS;
+> +		goto out;
+> +	}
+> +
+>   	/*
+>   	 * As an optimization, do not write orphan inodes to the media just
+>   	 * because this is not needed.
+> @@ -327,6 +333,7 @@ static int ubifs_write_inode(struct inode *inode, struct writeback_control *wbc)
+>   			err = dbg_check_inode_size(c, inode, ui->ui_size);
+>   	}
+>   
+> +out:
+>   	ui->dirty = 0;
+>   	mutex_unlock(&ui->ui_mutex);
+>   	ubifs_release_dirty_inode_budget(c, ui);
+> @@ -1839,19 +1846,26 @@ static void ubifs_remount_ro(struct ubifs_info *c)
+>   
+>   	dbg_save_space_info(c);
+>   
+> -	for (i = 0; i < c->jhead_cnt; i++) {
+> -		err = ubifs_wbuf_sync(&c->jheads[i].wbuf);
+> +	/* Like ubifs_put_super(), don't write anything after an error. */
+> +	if (!c->ro_error) {
+> +		for (i = 0; i < c->jhead_cnt; i++) {
+> +			err = ubifs_wbuf_sync(&c->jheads[i].wbuf);
+> +			if (err)
+> +				ubifs_ro_mode(c, err);
+> +		}
+> +
+> +		c->mst_node->flags &= ~cpu_to_le32(UBIFS_MST_DIRTY);
+> +		c->mst_node->flags |= cpu_to_le32(UBIFS_MST_NO_ORPHS);
+> +		c->mst_node->gc_lnum = cpu_to_le32(c->gc_lnum);
+> +		err = ubifs_write_master(c);
+>   		if (err)
+>   			ubifs_ro_mode(c, err);
+> +	} else {
+> +		/* Syncing the write-buffers would have canceled them. */
+> +		for (i = 0; i < c->jhead_cnt; i++)
+> +			hrtimer_cancel(&c->jheads[i].wbuf.timer);
+>   	}
+>   
+> -	c->mst_node->flags &= ~cpu_to_le32(UBIFS_MST_DIRTY);
+> -	c->mst_node->flags |= cpu_to_le32(UBIFS_MST_NO_ORPHS);
+> -	c->mst_node->gc_lnum = cpu_to_le32(c->gc_lnum);
+> -	err = ubifs_write_master(c);
+> -	if (err)
+> -		ubifs_ro_mode(c, err);
+> -
+>   	vfree(c->orph_buf);
+>   	c->orph_buf = NULL;
+>   	kfree(c->write_reserve_buf);
+> @@ -1977,10 +1991,7 @@ static int ubifs_reconfigure(struct fs_context *fc)
+>   		if (err)
+>   			return err;
+>   	} else if (!c->ro_mount && (fc->sb_flags & SB_RDONLY)) {
+> -		if (c->ro_error) {
+> -			ubifs_msg(c, "cannot re-mount R/O due to prior errors");
+> -			return -EROFS;
+> -		}
+> +		/* After an error ubifs_remount_ro() can't write but still works. */
+>   		ubifs_remount_ro(c);
+>   	}
+>   
+> @@ -1994,7 +2005,8 @@ static int ubifs_reconfigure(struct fs_context *fc)
+>   		mutex_unlock(&c->bu_mutex);
+>   	}
+>   
+> -	if (!c->need_recovery)
+> +	/* Only valid without a media failure, see ubifs_put_super(). */
+> +	if (!c->need_recovery && !c->ro_error)
+>   		ubifs_assert(c, c->lst.taken_empty_lebs > 0);
+>   
+>   	return 0;
+> diff --git a/fs/ubifs/xattr.c b/fs/ubifs/xattr.c
+> index 3b0e8a270f594..572f6f3e52ad3 100644
+> --- a/fs/ubifs/xattr.c
+> +++ b/fs/ubifs/xattr.c
+> @@ -260,6 +260,9 @@ int ubifs_xattr_set(struct inode *host, const char *name, const void *value,
+>   	if (check_lock)
+>   		ubifs_assert(c, inode_is_locked(host));
+>   
+> +	if (c->ro_error)
+> +		return -EROFS;
+> +
+>   	if (size > UBIFS_MAX_INO_DATA)
+>   		return -ERANGE;
+>   
+> @@ -564,6 +567,9 @@ static int ubifs_xattr_remove(struct inode *host, const char *name)
+>   
+>   	ubifs_assert(c, inode_is_locked(host));
+>   
+> +	if (c->ro_error)
+> +		return -EROFS;
+> +
+>   	if (fname_len(&nm) > UBIFS_MAX_NLEN)
+>   		return -ENAMETOOLONG;
+>   
+> 
 
-Converting directly from image_info without the image_base argument
-was convenient..
-
-Jason
