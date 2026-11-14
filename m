@@ -1,58 +1,58 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794657805;
-	b=m7VOzfw0D2SFYB5dzx4jWbx+uIHI5fMmJggFq/LhFDinNPkhoB/nV1hiBVlxlxWh8lPk
-	 mmFI6gp9KrFvylnp8qrIQVkhBQKtN6FGWsGaXjvV8Hp7EatkNNJKPn5gA0T/QYsZzlO/V
-	 JJRlkNrgwAVCWARhhE19R29MpefQYusMb6EyCDhdrZfv0MpiG9IF9ObCUnYv3AIQDsgA+
-	 oF6X+rqOspIwB5IbDDk0cLrC5jwclBzb6UckwtzRMCHGA256FPyVljRZ+oGb5DVFqbU0L
-	 DZqTOPlNX7WeSt/+gCv19l4BoslVKInMU5n5VpCRRvfXpFkXiNXbn3L+eoNchHDTtFg==
+	t=1794657809;
+	b=fIVKR0EsZB/vVxt6l2kc3FSTYQluWOdBO9vpV1DG7YCGU+RzfwIJ4Y19I+2L5blUifPE
+	 zNvLN9Yg/mQAz5aeABdKNEgyFKegV/6UdnqnzPn8W++GKaJfGGyD1GcwGCaya3CAd+nZS
+	 EbFh0AcuKilP4T3cxvJVzwIJoas1lLr4MUlM9J6QFJCVuYn2/T1j2luczX7mWb7H0rNvh
+	 gzYoKmqbX7XWHxKOrFbWu7KQSxu44NVLftZyTZ50QBc8h9IfOMW3sLC7gFIcWzMm7z0kW
+	 qe2gq/0MqumAL+RWiRxHgIlPhK+zBThRach3mfbzXeGJeSrFS1BjDsCS8BzbpJJwI+Q==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794657805;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794657809;
 	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
 	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
-	bh=ALzGtljZmngZ99TYML6vyT57I3K5d0MlyVrwhGLF07s=;
-	b=pdpI0fmQ6p/v0LEks4DyWaMb9NqATRkrcBb3iIUi4ZX4iZ0NvkqMZ4bqavI1MQbv5jWR
-	 N3TRmdSYLy/0ThlGx02SK6TnjZ10aRglsmHwAkmDk+AflcFnQaYgC5BNkkM2d6Tq6pgYi
-	 5iCSG7geaJjswwalzLzf+TXoWgMBt58j20ve/k00G3wt66jVK1vGzLZ0rASJRBOjYDKLY
-	 EDyptfMEvGookAZzmGuexaQkJ8sCXphb9rNxevuFbToQqMP7HuG/uDmY29VLdeAfBht1D
-	 XsiHpWvPHH4GfYwnxcKojsdJxeJ+ZoXTcdDCwtjO1Fx0Yr6qwGEU5jsEKAz2vTUUksw==
+	bh=oge5gHl+Ji7nKy/eL+dZMpu8kpivAdHNITu7sKlcjQc=;
+	b=AS2DcPQ1Uf70KGq4fu59gesjBcRHAy5WPkEGOqZcdcw6wcSGnRhoIQvjO2xnLqOBRYIW
+	 Ws+xDaOscO6eDfWtWJWy8OQOA4+D+ZcUYmatf0WW/926J3dmqP6nzaeiHGpyY1h+RShDG
+	 dPnkkI6W3zbGolXEXQTNU4exEpn0kNOaE1+dH9v2TAdCiuykUn2EyOvlWyE0NS5BiMAsR
+	 dZ0voV/3ZNA63aW4FKMWHeFbC8U1C0Sa1phkRDk4p9oPk4mPOYIrO+ea3v+JOO4Mp6LTh
+	 6Q/pU96wnxFnrE9/5IALMBHZBEDv4laWZ3T+WPUnTg2ULMpOy1VSxff5gpGRyW+rbaA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=d8ZTGEn0;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=O5b0v7Xr;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B3F37606A327;
-	Sat, 14 Nov 2026 12:03:25 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CAB3606A337;
+	Sat, 14 Nov 2026 12:03:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=d8ZTGEn0
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B89B21F000C4;
-	Sat, 14 Nov 2026 12:03:24 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=O5b0v7Xr
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8B2781F000C5;
+	Sat, 14 Nov 2026 12:03:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794657805;
-	bh=ALzGtljZmngZ99TYML6vyT57I3K5d0MlyVrwhGLF07s=;
+	s=k20260515; t=1794657809;
+	bh=oge5gHl+Ji7nKy/eL+dZMpu8kpivAdHNITu7sKlcjQc=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=d8ZTGEn0qxni0o2KqxTpTR9WvaZxwMw6wYgcu+OafMRCtiRzDVAXMU7/wZ74rgbDB
-	 1LocND40CPQPdchDfZSgOlZusuV2b2Jm6PmSzxbXe+UtcgCZxhq7Cayx0Jg+WQs+5S
-	 Fgn0yDEfY6VuTU6Kbg6xIhCMSNZtGpQHRSHQT7Ov+hnlN+QHxRE11/pIkaAJwpMSC3
-	 85ZDbU7OiQ6CVDl/omSbOx09QyAE6AQk8ZxkNWDw19sm6FcfmyGeBCn4P7CMz0EUvA
-	 NEqvQjJ0iP60FlMW/wnjotiw8rWjZFrDQALOU/tpxLhx8piKaT0N8cCt57zYhs9fOY
-	 bSV/RrIKt+71g==
-Message-ID: <sashiko-outbox-214456@kernel.org>
+	b=O5b0v7XrzA1WELCmu12+3CEzgi7O2PA8wGWyXzNM6/DMm+jeSwo7oaNtTiwWqL9Sj
+	 3gPK042ci68YlqI+D+3g0OaUg+cutVM9FqYrbRFcuHLaesVhmnq25vU/sNxGRAhl04
+	 lHz0EGke2a+V5t/bAXS+qhZG7iJ4YwHUvUQpE9xRz7XS8V7QPJ0pGzJkjCB4lIFZsl
+	 eTaJfqrZs41T2hNOMdzBWNdHHvd2P8ZNfSec5Wn6PxaFZqKE069wvpqaCaAwQ7Zfef
+	 6SVzrh26YuobiR6IehubHAymqiV5REZJzZb4qBUlYCjtdsY7Rt+Ut+g8VLdhtdgAH+
+	 Ox8ubwhXVfuug==
+Message-ID: <sashiko-outbox-214460@kernel.org>
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v3 05/33] fs: add a generic emergency read-only state
+Subject: Re: [PATCH v3 09/33] fat: don't set SB_RDONLY after filesystem
+ errors
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.com>
-Cc: "Al Viro" <viro@zeniv.linux.org.uk>, linux-ext4@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org, "Jan
- Kara" <jack@suse.cz>, dsterba@suse.cz, tytso@mit.edu, "Mark Fasheh" <mark@fasheh.com>, "Joel
- Becker" <jlbec@evilplan.org>, "Joseph Qi" <joseph.qi@linux.alibaba.com>
-In-Reply-To: <20261113-work-fs-sb_rdonly-v3-5-0be92bb73709@kernel.org>
+Cc: "Al Viro" <viro@zeniv.linux.org.uk>, linux-ext4@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org, linux-mtd@lists.infradead.org, dsterba@suse.cz, tytso@mit.edu, "Mark
+ Fasheh" <mark@fasheh.com>, "Joel Becker" <jlbec@evilplan.org>, "Joseph Qi" <joseph.qi@linux.alibaba.com>
+In-Reply-To: <20261113-work-fs-sb_rdonly-v3-9-0be92bb73709@kernel.org>
 References: <20261113-work-fs-sb_rdonly-v3-0-0be92bb73709@kernel.org>
- <20261113-work-fs-sb_rdonly-v3-5-0be92bb73709@kernel.org>
+ <20261113-work-fs-sb_rdonly-v3-9-0be92bb73709@kernel.org>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Sat, 14 Nov 2026 12:03:24 +0000
+Date: Sat, 14 Nov 2026 12:03:28 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -64,111 +64,108 @@ Precedence: list
 
 Thank you for your contribution! Sashiko AI review found 2 potential
 issues to consider:
-- [Medium] vfs: change_mount_ro_state() skips mnt_make_readonly() on
-  sb_emergency_ro()
-- [Low] quota: do_quotactl() misses sb_emergency_ro() in Q_XQUOTASYNC
-  and Q_SYNC
+- [Medium] fat: fat_free() zeroes i_start on disk when
+  fat_free_clusters() returns -EROFS
+- [Medium] fat: directory modifications proceed after fat__get_entry()
+  sets emergency RO
 --
 
-commit aa167d356b416c1c40da72fb215b9d988cb411bc
+commit 7ce00aaef1e345a2ca01443ccff3c19884d9bcc3
 Author: Christian Brauner <brauner@kernel.org>
 
-fs: add a generic emergency read-only state
+fat: don't set SB_RDONLY after filesystem errors
 
-This commit adds an SB_STATE_EMERGENCY_RO superblock state flag and
-updates VFS paths to reject modifications with -EROFS when a filesystem
-switches to emergency read-only mode without setting SB_RDONLY.
+This commit switches __fat_fs_error() from setting SB_RDONLY on a mounted
+superblock to calling sb_set_emergency_ro(), and adds sb_emergency_ro()
+checks across FAT write, allocation, and state paths.
 
-> diff --git a/fs/namespace.c b/fs/namespace.c
-> index 9f6ec35c7b9cd..55fa09818ef90 100644
-> --- a/fs/namespace.c
-> +++ b/fs/namespace.c
-> @@ -396,7 +396,7 @@ static struct mount *alloc_vfsmnt(const char *name)
->   */
->  bool __mnt_is_readonly(const struct vfsmount *mnt)
->  {
-> -	return (mnt->mnt_flags & MNT_READONLY) || sb_rdonly(mnt->mnt_sb);
-> +	return (mnt->mnt_flags & MNT_READONLY) || sb_rdonly_any(mnt->mnt_sb);
->  }
->  EXPORT_SYMBOL_GPL(__mnt_is_readonly);
+> diff --git a/fs/fat/dir.c b/fs/fat/dir.c
+> index 35bdb62944a2e..553034bcbed40 100644
+> --- a/fs/fat/dir.c
+> +++ b/fs/fat/dir.c
+> @@ -1329,6 +1329,9 @@ int fat_add_entries(struct inode *dir, void *slots,=
+ int nr_slots,
+>  	loff_t pos;
+>  	bool saw_eod;
+> =20
+> +	if (unlikely(sb_emergency_ro(sb)))
+> +		return -EROFS;
+> +
+>  	sinfo->nr_slots =3D nr_slots;
+> =20
+>  	/* First stage: search free directory entries */
 
 [Severity: Medium]
-Does changing __mnt_is_readonly() to check sb_rdonly_any() cause
-change_mount_ro_state() to skip mnt_make_readonly() when sb_emergency_ro()
-is set?
+Can fat_add_entries() and fat_dir_empty() still modify directory buffers
+after a FAT error in fat__get_entry() sets SB_STATE_EMERGENCY_RO?
 
-fs/namespace.c:change_mount_ro_state() {
-	bool readonly_request =3D (mnt_flags & MNT_READONLY);
+In fat__get_entry(), a fat_bmap() error calls fat_fs_error(), sets
+sb_emergency_ro(sb), and returns -1 just like normal EOF.  In
+fat_add_entries(), if the fat_get_entry() loop hits a FAT error on a later
+cluster after collecting some free slots (0 < free_slots < nr_slots), it
+falls through to found:, writes the partial slots into bhs[], fails in
+fat_add_new_entries() -> fat_alloc_clusters() with -EROFS, and then
+overwrites the original slots (including 0x00 end-of-directory markers)
+with DELETED_FLAG in __fat_remove_entries().
 
-	if (readonly_request =3D=3D __mnt_is_readonly(&mnt->mnt))
-		return 0;
+Similarly, in fat_dir_empty(), a -1 return from fat_get_short_entry() after
+a FAT error makes a corrupted non-empty directory appear empty (return 0),
+and because neither fat_dir_empty() nor fat_remove_entries() checks
+sb_emergency_ro(sb), rmdir and rename proceed to delete the directory entry
+on disk after the filesystem has entered emergency read-only mode.
 
-	if (readonly_request)
-		return mnt_make_readonly(mnt);
-    ...
-}
-
-When a read-write mount has open writable files or active writers and the
-filesystem enters SB_STATE_EMERGENCY_RO, a mount(2) call with
-MS_REMOUNT | MS_BIND | MS_RDONLY (do_reconfigure_mnt()) sees
-__mnt_is_readonly() =3D=3D true, skips mnt_make_readonly(), and sets
-MNT_READONLY via set_mount_attributes() without calling
-mnt_hold_writers().  If reconfigure_super() is later called to remount the
-superblock read-only, sb_prepare_remount_readonly() skips mounts that
-already have MNT_READONLY set and transitions the superblock to SB_RDONLY
-while active writers remain on that mount.
+> diff --git a/fs/fat/fatent.c b/fs/fat/fatent.c
+> index 2d10a815a5797..9e4bb0140320f 100644
+> --- a/fs/fat/fatent.c
+> +++ b/fs/fat/fatent.c
 
 [ ... ]
 
-> diff --git a/fs/quota/quota.c b/fs/quota/quota.c
-> index 33bacd7075800..b488fb1f9cc44 100644
-> --- a/fs/quota/quota.c
-> +++ b/fs/quota/quota.c
-> @@ -783,6 +783,19 @@ static int do_quotactl(struct super_block *sb, int t=
-ype, int cmd, qid_t id,
->  	if (ret < 0)
->  		return ret;
+> @@ -620,6 +626,9 @@ int fat_free_clusters(struct inode *inode, int cluste=
+r)
+>  	int i, err, nr_bhs;
+>  	int first_cl =3D cluster, dirty_fsinfo =3D 0;
 > =20
-> +	/* An error made the filesystem read-only. */
-> +	if (sb_emergency_ro(sb)) {
-> +		switch (cmd) {
-> +		case Q_QUOTAON:
-> +		case Q_SETINFO:
-> +		case Q_SETQUOTA:
-> +		case Q_XQUOTAON:
-> +		case Q_XQUOTARM:
-> +		case Q_XSETQLIM:
-> +			return -EROFS;
-> +		}
-> +	}
+> +	if (unlikely(sb_emergency_ro(sb)))
+> +		return -EROFS;
 > +
->  	switch (cmd) {
->  	case Q_QUOTAON:
->  		return quota_quotaon(sb, type, id, path);
+>  	nr_bhs =3D 0;
+>  	fatent_init(&fatent);
+>  	lock_fat(sbi);
 
-[Severity: Low]
-Should Q_XQUOTASYNC and Q_SYNC also be rejected here when
-sb_emergency_ro(sb) is set (and quota_sync_one() guarded by
-!sb_rdonly_any(sb))?
+[Severity: Medium]
+Does returning -EROFS from fat_free_clusters() without guarding fat_free()
+cause fat_free() to zero i_start on disk while leaving the cluster chain
+allocated in the FAT?
 
-In do_quotactl(), Q_XQUOTASYNC still checks sb_rdonly(sb) instead of
-sb_rdonly_any(sb), returning 0 rather than -EROFS in emergency read-only
-mode:
+When cont_write_begin() fails due to a FAT error that sets
+sb_emergency_ro(sb) (for example on a 0-byte file with fallocated clusters,
+or after allocating the first cluster of a multi-cluster write),
+fat_write_begin() calls fat_write_failed() -> fat_truncate_blocks(inode, 0)
+-> fat_free(inode, 0):
 
-fs/quota/quota.c:do_quotactl() {
+fs/fat/file.c:fat_free() {
     ...
-	case Q_XQUOTASYNC:
-		if (sb_rdonly(sb))
-			return -EROFS;
-		/* XFS quotas are fully coherent now, making this call a noop */
-		return 0;
+	if (!skip) {
+		MSDOS_I(inode)->i_start =3D 0;
+		MSDOS_I(inode)->i_logstart =3D 0;
+	}
+	MSDOS_I(inode)->i_attrs |=3D ATTR_ARCH;
+	fat_truncate_time(inode, NULL, FAT_UPDATE_CMTIME);
+	mark_inode_dirty(inode);
     ...
+	inode->i_blocks =3D skip << (MSDOS_SB(sb)->cluster_bits - 9);
+
+	/* Freeing the remained cluster chain */
+	return fat_free_clusters(inode, free_start);
 }
 
-Q_SYNC and quota_sync_one() also call ->quota_sync() directly, relying on
-dquot_quota_sync() rather than do_quotactl() to reject emergency read-only
-superblocks.
+Because fat_free() clears i_start and marks the inode dirty before
+fat_free_clusters() returns -EROFS, and fat_write_inode() stays active in
+emergency read-only mode, writeback writes start =3D 0 to the directory ent=
+ry
+on disk and orphans the allocated clusters in the FAT.
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261113-work-fs-sb=
-_rdonly-v3-0-0be92bb73709@kernel.org?part=3D5
+_rdonly-v3-0-0be92bb73709@kernel.org?part=3D9
