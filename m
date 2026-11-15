@@ -1,65 +1,54 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794743271;
-	b=BdK9H1y+HNRqD/jOpQfiJ8CK50RxEZMCjwgIS48DNkylfGZf+h7yYt+dLR/rohWShFPk
-	 wfY+Vi1XUiR4xQoz/9dl0reIiXKOG5wLW7gkB4jYbbvKAp0onbjRpWAq3h6DDbAxHfbTR
-	 5/PaQlaVaf7TtFwba6zsHiW9KlQbLjzo0EerdKKIi48ZFuJLc3WH+ltRAnMLBo+gAqRpL
-	 ov61lFfeKEVmTbros4bY5hLqTBfdHKhysZz363XUX2UJKA7MroJWDEdJE++rHrOfqDHYG
-	 NlZSY4qxT1OqOgEdTD541oNseZI8+FDCzpXM+gOKg5I+2qmGEiQp5Da0bFa+VHsozfA==
+	t=1794754956;
+	b=NUKhz+nKXipy2P5DcNrpIEwn/Dtp7K+5pzG9KzUPqvZO6eYOJi2TxX4/rIR8yDZOl4lW
+	 HN/oMs+opHi4STcxu21HrHnVkytVk2kVZG0KHPcdaRohBRgOJyKHZ0/Z6sg8W71YG9V+0
+	 aeXiPyx9dSoBY7fBldzXQd5zv75fIRBGo6DwCgeBl2QagQAIvFHNHL1a6fR6kaWQdyaqh
+	 8JdytOsXSU3Wi/9eD2jmG3YNDwgyf9MhOCH2BMNir7M4fE/kQSkSabptCH1G1FbBCwHtD
+	 3fzHtbqz1Yuo21J7Zr7BsiwiNbyj3NsZmQBE8/WxB43wJnUhAc2tw6a3Wab60zvkmKg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794743271;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794754956;
 	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 References:MIME-Version:Content-Type:Content-Disposition:
-	 Content-Transfer-Encoding:In-Reply-To;
-	bh=dUUoDFkPJkBg6tiiX+gwUNqdlWB0vRGU4J1TlhHh7ZE=;
-	b=iuKSIOwNdjXAi2+nKsqu7pIfpzXuLtuj3wXCa1g9MN5BFnFnH+efqOzfUtJXvT2zUGGl
-	 V9IfHEzKQzynFa9Fuo1ssXUF+7C+Eoevg9R/uDVp3b207QzEgfuu6a4+z5JoRhmzh2QN0
-	 9vJY2NJZgqRfrAE94UuSb7lSNUhcz8q8wGqjWRw5n7k7BXCLYZBSkg22ZgvSiHJnnwpNY
-	 2bXzqhTqJYzU82V3hEswRLXZDMXOPwMPocN2bf1yYrFAEINhs1DN1LNIND4gakdX7BwOF
-	 /NBQXI11IeC+qk96wRGrOuIRB815lx2fweUabl5k2cTyNpurMwEGTlfjb0o79097iFQ==
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=Efp2Eh21nAolP2iJ3ysetqCKmVJ4/sRMIDo1th1WXaU=;
+	b=urTWXvR89x+WbqW0sp5Yu1+UpgfRTaWHmywSbTG1/D0UD1mw7iVzOlLmNgu3wlfUSMjz
+	 MPlqh+NEtQPbDWSi/u/LKPPqcCMYgJ9bnOuhFImFcUVfmz0TSOL/+T75Gj6Y/wmYDera9
+	 r3ZJ70LjLoGlyrujZzPjGPGw6j0Z4ZmxZ1DFIHZjedxNSThimjgRLCCkAHANWp3m3Js4C
+	 pF6olUmU0/pGIpQ161DR6RnDlZOvumUcHQlrmYE7tOqkTxgEZSx1bPqC2Q/ZJWcjG7Etf
+	 L61m8834zDvOrp2Q0Y2r6OEaneJuoj8cD9P6kG1PA//gZ6+HQKm1uzHfCD40TW9FSUQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=O5UCROmp;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hb72FLbY;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5C6D606A32E;
-	Sun, 15 Nov 2026 11:47:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with UTF8SMTPS id 07E2A606A31A;
+	Sun, 15 Nov 2026 15:02:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=O5UCROmp
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0FF671F000C4;
-	Sun, 15 Nov 2026 11:47:43 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hb72FLbY
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 10FC41F000C9;
+	Sun, 15 Nov 2026 15:02:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794743270;
-	bh=dUUoDFkPJkBg6tiiX+gwUNqdlWB0vRGU4J1TlhHh7ZE=;
+	s=k20260515; t=1794754955;
+	bh=Efp2Eh21nAolP2iJ3ysetqCKmVJ4/sRMIDo1th1WXaU=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=O5UCROmpYOxPof//EVMXlzhE8CwpBAuLxySuhjVJTwgdWIcUjDEHfxQDjag+uTRua
-	 Z+qDIjnj4mqHBNrUw8Ko1zjkZMcqAeFq8ldvZlzCVbByFB+ptCuml13g6R68XiAcOc
-	 tTmUPUcRTu4mDvyiHtXFi/q4pZoMhhtkVDTdv1WqLRxEzoDBelkcsk5jYXJt2EAUob
-	 xjg6qsjtw4gR2WGGuYhHVN3Y9VjEoACQTHM3FtneMm5yNVilA99bE1xWageT1rHDiS
-	 UNAqlNNFNjgatsQNOofsxEUu3m18tcJw6JldfrHIojxyBAVmlXl979klg5KOmmNJfI
-	 Ivyq26TJMKVYg==
-Date: Sun, 15 Nov 2026 12:47:41 +0100
-From: Christian Brauner <brauner@kernel.org>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Chris Down <chris@chrisdown.name>, linux-fsdevel@vger.kernel.org, 
-	Jann Horn <jannh@google.com>, Chris Mason <mason@kernel.org>, 
-	Josef Bacik <josef@toxicpanda.com>, Christoph Hellwig <hch@lst.de>, linux-block@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-nvme@lists.infradead.org, 
-	Alexander Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>, linux-scsi@vger.kernel.org, 
-	target-devel@vger.kernel.org, driver-core@lists.linux.dev, linux-mm@kvack.org, 
-	bpf@vger.kernel.org, linux-security-module@vger.kernel.org, selinux@vger.kernel.org, 
-	apparmor@lists.ubuntu.com, linux-nfs@vger.kernel.org, netdev@vger.kernel.org, 
-	fuse-devel@lists.linux.dev, linux-efi@vger.kernel.org, xen-devel@lists.xenproject.org, 
-	ocfs2-devel@lists.linux.dev, linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, 
-	linux-usb@vger.kernel.org, linux-erofs@lists.ozlabs.org, linux-kselftest@vger.kernel.org
-Subject: Re: [PATCH RFC v2 33/42] fs: add file_check_backing()
-Message-ID: <20261115-boxen-mundschutz-jacht-0ab871beca58@brauner>
-References: <20261114-work-loop-pseudo-v2-0-98639a2286fb@kernel.org>
- <20261114-work-loop-pseudo-v2-33-98639a2286fb@kernel.org>
- <20261114120557.4bc1eb6e57218cdc@chrisdown.name>
- <CAOQ4uxhGxpBtMZ5kfuzR1tQAewiecoX7UjXQRo91QjJHH9T_Yw@mail.gmail.com>
+	b=hb72FLbYjSIIjPKbvouZiUN9wy1FyIQ6a5Ss4ymLhls4436CguKJIbLmWfoVhU6qr
+	 PoJXxlnzUqGo16dmJY/f4StKe2qJUItk7JsnRM7kaqe6r6mZYEnknbZFJYxH/a9APx
+	 8f1XHYHg1etxngHJ7RKgrVRc4kkCJIFuht9wI51MI8i36WfKFQ1bXJgF1juhhT5Rep
+	 Jqk0ty7nTQEvipre4C4W6VRqE6BgWxxthVIRwn758oc2QB4v3l96n9tFI8Hmn81JqD
+	 VHjTruv1Y+x+uPDVGA7iwTKMm6z/ZqWcHzQc4yQN+aEt2Jto7wVhgv+6jEXbCiz2L9
+	 2DkKT7D5IThyw==
+Date: Sun, 15 Nov 2026 17:02:31 +0200
+From: Jarkko Sakkinen <jarkko@kernel.org>
+To: Matthew Garrett <matthewg@nvidia.com>
+Cc: mjg59@srcf.ucam.org, keyrings@vger.kernel.org,
+	James.Bottomley@hansenpartnership.com,
+	linux-integrity@vger.kernel.org, rafael@kernel.org,
+	linux-pm@vger.kernel.org, linux-efi@vger.kernel.org
+Subject: Re: [RFC] Make hibernation work with lockdown
+Message-ID: <avnJh0nsORR45i4m@kernel.org>
+References: <20261008132532.1155166-1-matthewg@nvidia.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -69,70 +58,243 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/mixed; boundary="qRLgJTZqCtI/Ye0N"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAOQ4uxhGxpBtMZ5kfuzR1tQAewiecoX7UjXQRo91QjJHH9T_Yw@mail.gmail.com>
+In-Reply-To: <20261008132532.1155166-1-matthewg@nvidia.com>
 
-On Sun, Nov 15, 2026 at 12:19:57AM +0100, Amir Goldstein wrote:
-> On Sat, Nov 14, 2026 at 9:06 PM Chris Down <chris@chrisdown.name> wrote:
-> >
-> > Hi Christian,
-> >
-> > Christian Brauner writes:
-> > >+      /* Look through stacking filesystems at the inode with the data. */
-> > >+      if (d_real_inode(file->f_path.dentry)->i_sb->s_iflags & SB_I_PSEUDO)
-> > >+              return -EINVAL;
-> >
-> > This looks good in general, but what the bots said about O_PATH files
-> > here is real. With FMODE_PATH this is reached for a file that was never
-> > opened, so on overlayfs nothing has been through ovl_open() to look up
-> > the lowerdata of a metacopy file yet. ovl_d_real() then does the lookup
-> > itself, and when that fails it hits the WARN(1) at its end and returns
-> > the overlayfs dentry, so the check passes as well.
-> >
-> > Only fuse passes FMODE_PATH, so it takes CAP_SYS_ADMIN to get there, but
-> > it's easy to trigger with that. From a quick test with a metacopy file
-> > whose redirect into a data-only layer points at nothing, registering an
-> > O_PATH fd of it with FUSE_DEV_IOC_BACKING_OPEN gives
-> >
-> >      ovl_d_real(/f, 0): real dentry not found
-> >      WARNING: fs/overlayfs/super.c:79 at ovl_d_real+0xc9/0x210
-> >      [...]
-> >       file_check_backing+0x308/0x5e0
-> >       fuse_backing_new+0x219/0x4a0
-> >       fuse_backing_open+0xe8/0x390
-> >       fuse_dev_ioctl+0x53a/0x7d0
-> >
-> > and the ioctl still succeeds. A normal open of that file fails with
-> > ENOENT, so nothing could have used it as a backing file anyway, but with
-> > panic_on_warn this is now a panic.
-> >
-> > Maybe ovl_d_real() should just stop warning when the lookup fails, now
-> > that it has a caller that isn't trace_uprobe?
-> 
-> Yeh I guess that this needs to be a Fixes for lazy data lookup.
 
-I have a fix for that.
+--qRLgJTZqCtI/Ye0N
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> The correct fix would be to teach all the callers to deal with an error.
+Here's a patch that encapsulates my thoughts.
 
-I've also implemented that. It wasn't that hard and it's also a bug. Not
-a bad one but still.
+Br, Jarkko
 
-> > The check would still pass
-> > for an O_PATH file whose lowerdata couldn't be looked up at that point,
-> > though.
-> 
-> One observation relevant to this patch set is that a datadir layer has no
-> business being a pseudo fs and that can and should be blocked explicitly
-> at overlayfs mount time.
+--qRLgJTZqCtI/Ye0N
+Content-Type: text/x-diff; charset=us-ascii
+Content-Disposition: attachment;
+	filename="0001-tpm-Deny-access-to-the-hibernate-NV-index.patch"
 
-I agree.
+From c9a5b8d99278874bdd79d19bddd1d4a56ad8a38a Mon Sep 17 00:00:00 2001
+From: Jarkko Sakkinen <jarkko@kernel.org>
+Date: Sun, 15 Nov 2026 17:00:47 +0200
+Subject: [PATCH] tpm: Deny access to the hibernate NV index
 
-> The other observation is that fuse_passthrough_open() should probably
-> check the backing_file that was opened for io in addition to checking
-> in fuse_backing_open(), which could have different FMODE and specifically
-> could be FMODE_PATH.
+1. Add the TPM2 command codes mutating the reserved NV index, and describe
+   their target handles.
+2. Replace tpm2_ordinal_duration_map with tpm2_cc_map providing handle
+   indices for the commands mutating NV indices.
+3. Add tpm2_is_user_command() for identifying commands allowed from user
+   space. It will block commands trying to mutate the reserve NV index.
 
-Sounds good.
+NV index should be protected regardless whether hibernate is used or not
+because not doing that introduces unwanted asymmetry.
+
+Co-developed-by: Matthew Garrett <matthewg@nvidia.com>
+Signed-off-by: Matthew Garrett <matthewg@nvidia.com>
+Signed-off-by: Jarkko Sakkinen <jarkko@kernel.org>
+---
+ drivers/char/tpm/tpm-dev-common.c |  4 ++
+ drivers/char/tpm/tpm.h            |  1 +
+ drivers/char/tpm/tpm2-cmd.c       | 96 +++++++++++++++++++++++--------
+ include/linux/tpm.h               |  6 ++
+ include/linux/tpm_command.h       |  9 +++
+ 5 files changed, 91 insertions(+), 25 deletions(-)
+
+diff --git a/drivers/char/tpm/tpm-dev-common.c b/drivers/char/tpm/tpm-dev-common.c
+index ee91f456f975..4394b8f59012 100644
+--- a/drivers/char/tpm/tpm-dev-common.c
++++ b/drivers/char/tpm/tpm-dev-common.c
+@@ -27,6 +27,10 @@ static ssize_t tpm_dev_transmit(struct tpm_chip *chip, struct tpm_space *space,
+ 	struct tpm_header *header = (void *)buf;
+ 	ssize_t ret, len;
+ 
++	if ((chip->flags & TPM_CHIP_FLAG_TPM2) &&
++	    !tpm2_is_user_command(buf, bufsiz))
++		return -EPERM;
++
+ 	if (chip->flags & TPM_CHIP_FLAG_TPM2)
+ 		tpm2_end_auth_session(chip);
+ 
+diff --git a/drivers/char/tpm/tpm.h b/drivers/char/tpm/tpm.h
+index fa554c5ad80b..2b18acaae920 100644
+--- a/drivers/char/tpm/tpm.h
++++ b/drivers/char/tpm/tpm.h
+@@ -107,6 +107,7 @@ static inline void tpm_add_ppi(struct tpm_chip *chip)
+ }
+ #endif
+ 
++bool tpm2_is_user_command(const u8 *buf, size_t bufsiz);
+ int tpm2_get_timeouts(struct tpm_chip *chip);
+ int tpm2_pcr_read(struct tpm_chip *chip, u32 pcr_idx,
+ 		  struct tpm_digest *digest, u16 *digest_size_ptr);
+diff --git a/drivers/char/tpm/tpm2-cmd.c b/drivers/char/tpm/tpm2-cmd.c
+index 4b2bb2ddc321..50c7ada9a4d6 100644
+--- a/drivers/char/tpm/tpm2-cmd.c
++++ b/drivers/char/tpm/tpm2-cmd.c
+@@ -51,29 +51,43 @@ int tpm2_get_timeouts(struct tpm_chip *chip)
+ 	return 0;
+ }
+ 
+-/*
+- * Contains the maximum durations in milliseconds for TPM2 commands.
+- */
++enum tpm2_cc_nv {
++	TPM2_CC_NV_NA = -1, /* not available */
++	TPM2_CC_NV_H0 = 0,
++	TPM2_CC_NV_H1 = 1,
++};
++
++/* Command durations in milliseconds and NV index handle positions. */
+ static const struct {
+-	unsigned long ordinal;
+-	unsigned long duration;
+-} tpm2_ordinal_duration_map[] = {
+-	{TPM2_CC_STARTUP, 750},
+-	{TPM2_CC_SELF_TEST, 3000},
+-	{TPM2_CC_GET_RANDOM, 2000},
+-	{TPM2_CC_SEQUENCE_UPDATE, 750},
+-	{TPM2_CC_SEQUENCE_COMPLETE, 750},
+-	{TPM2_CC_EVENT_SEQUENCE_COMPLETE, 750},
+-	{TPM2_CC_HASH_SEQUENCE_START, 750},
+-	{TPM2_CC_VERIFY_SIGNATURE, 30000},
+-	{TPM2_CC_PCR_EXTEND, 750},
+-	{TPM2_CC_HIERARCHY_CONTROL, 2000},
+-	{TPM2_CC_HIERARCHY_CHANGE_AUTH, 2000},
+-	{TPM2_CC_GET_CAPABILITY, 750},
+-	{TPM2_CC_NV_READ, 2000},
+-	{TPM2_CC_CREATE_PRIMARY, 300000},
+-	{TPM2_CC_CREATE, 300000},
+-	{TPM2_CC_CREATE_LOADED, 300000},
++	u32 cc;
++	u32 duration;
++	enum tpm2_cc_nv nv;
++} tpm2_cc_map[] = {
++	{TPM2_CC_STARTUP, 750, TPM2_CC_NV_NA},
++	{TPM2_CC_SELF_TEST, 3000, TPM2_CC_NV_NA},
++	{TPM2_CC_GET_RANDOM, 2000, TPM2_CC_NV_NA},
++	{TPM2_CC_SEQUENCE_UPDATE, 750, TPM2_CC_NV_NA},
++	{TPM2_CC_SEQUENCE_COMPLETE, 750, TPM2_CC_NV_NA},
++	{TPM2_CC_EVENT_SEQUENCE_COMPLETE, 750, TPM2_CC_NV_NA},
++	{TPM2_CC_HASH_SEQUENCE_START, 750, TPM2_CC_NV_NA},
++	{TPM2_CC_VERIFY_SIGNATURE, 30000, TPM2_CC_NV_NA},
++	{TPM2_CC_PCR_EXTEND, 750, TPM2_CC_NV_NA},
++	{TPM2_CC_HIERARCHY_CONTROL, 2000, TPM2_CC_NV_NA},
++	{TPM2_CC_HIERARCHY_CHANGE_AUTH, 2000, TPM2_CC_NV_NA},
++	{TPM2_CC_GET_CAPABILITY, 750, TPM2_CC_NV_NA},
++	{TPM2_CC_NV_READ, 2000, TPM2_CC_NV_NA},
++	{TPM2_CC_CREATE_PRIMARY, 300000, TPM2_CC_NV_NA},
++	{TPM2_CC_CREATE, 300000, TPM2_CC_NV_NA},
++	{TPM2_CC_CREATE_LOADED, 300000, TPM2_CC_NV_NA},
++	{TPM2_CC_NV_UNDEFINE_SPACE_SPECIAL, TPM2_DURATION_DEFAULT, TPM2_CC_NV_H0},
++	{TPM2_CC_NV_UNDEFINE_SPACE, TPM2_DURATION_DEFAULT, TPM2_CC_NV_H1},
++	{TPM2_CC_NV_INCREMENT, TPM2_DURATION_DEFAULT, TPM2_CC_NV_H1},
++	{TPM2_CC_NV_SET_BITS, TPM2_DURATION_DEFAULT, TPM2_CC_NV_H1},
++	{TPM2_CC_NV_EXTEND, TPM2_DURATION_DEFAULT, TPM2_CC_NV_H1},
++	{TPM2_CC_NV_WRITE, TPM2_DURATION_DEFAULT, TPM2_CC_NV_H1},
++	{TPM2_CC_NV_WRITE_LOCK, TPM2_DURATION_DEFAULT, TPM2_CC_NV_H1},
++	{TPM2_CC_NV_CHANGE_AUTH, TPM2_DURATION_DEFAULT, TPM2_CC_NV_H0},
++	{TPM2_CC_NV_READ_LOCK, TPM2_DURATION_DEFAULT, TPM2_CC_NV_H1},
+ };
+ 
+ /**
+@@ -87,13 +101,45 @@ unsigned long tpm2_calc_ordinal_duration(u32 ordinal)
+ {
+ 	int i;
+ 
+-	for (i = 0; i < ARRAY_SIZE(tpm2_ordinal_duration_map); i++)
+-		if (ordinal == tpm2_ordinal_duration_map[i].ordinal)
+-			return msecs_to_jiffies(tpm2_ordinal_duration_map[i].duration);
++	for (i = 0; i < ARRAY_SIZE(tpm2_cc_map); i++)
++		if (ordinal == tpm2_cc_map[i].cc)
++			return msecs_to_jiffies(tpm2_cc_map[i].duration);
+ 
+ 	return msecs_to_jiffies(TPM2_DURATION_DEFAULT);
+ }
+ 
++/* Check whether a command is permitted through the userspace interface. */
++bool tpm2_is_user_command(const u8 *buf, size_t bufsiz)
++{
++	const struct tpm_header *header = (const void *)buf;
++	size_t len, offset;
++	u32 cc, index;
++	int i;
++
++	if (bufsiz < TPM_HEADER_SIZE)
++		return true;
++
++	len = min_t(size_t, be32_to_cpu(header->length), bufsiz);
++	if (len < TPM_HEADER_SIZE)
++		return true;
++
++	cc = be32_to_cpu(header->ordinal);
++
++	for (i = 0; i < ARRAY_SIZE(tpm2_cc_map); i++) {
++		if (tpm2_cc_map[i].cc != cc || tpm2_cc_map[i].nv == TPM2_CC_NV_NA)
++			continue;
++
++		offset = TPM_HEADER_SIZE + tpm2_cc_map[i].nv * sizeof(u32);
++		if (len < offset + sizeof(u32))
++			return true;
++
++		index = get_unaligned_be32(&buf[offset]);
++		return index != TPM2_KERNEL_NV_INDEX;
++	}
++
++	return true;
++}
++
+ /**
+  * tpm2_pcr_read() - read a PCR value
+  * @chip:	TPM chip to use.
+diff --git a/include/linux/tpm.h b/include/linux/tpm.h
+index 0db277af45c3..2a114c0ffcf9 100644
+--- a/include/linux/tpm.h
++++ b/include/linux/tpm.h
+@@ -178,6 +178,12 @@ static inline enum tpm2_mso_type tpm2_handle_mso(u32 handle)
+ 	return handle >> 24;
+ }
+ 
++/*
++ * Provisional kernel-owned NV index. Userspace is not permitted to undefine
++ * or modify it. The allocation has not yet been finalized.
++ */
++#define TPM2_KERNEL_NV_INDEX	0x014c4853
++
+ #define TPM_VID_INTEL    0x8086
+ #define TPM_VID_WINBOND  0x1050
+ #define TPM_VID_STM      0x104A
+diff --git a/include/linux/tpm_command.h b/include/linux/tpm_command.h
+index 9ea1ee3cbef1..9224e81cb8f2 100644
+--- a/include/linux/tpm_command.h
++++ b/include/linux/tpm_command.h
+@@ -208,14 +208,23 @@ enum tpm2_return_codes {
+ 
+ enum tpm2_command_codes {
+ 	TPM2_CC_FIRST			= 0x011F,
++	TPM2_CC_NV_UNDEFINE_SPACE_SPECIAL = 0x011F,
+ 	TPM2_CC_HIERARCHY_CONTROL	= 0x0121,
++	TPM2_CC_NV_UNDEFINE_SPACE	= 0x0122,
+ 	TPM2_CC_HIERARCHY_CHANGE_AUTH	= 0x0129,
+ 	TPM2_CC_CREATE_PRIMARY		= 0x0131,
++	TPM2_CC_NV_INCREMENT		= 0x0134,
++	TPM2_CC_NV_SET_BITS		= 0x0135,
++	TPM2_CC_NV_EXTEND		= 0x0136,
++	TPM2_CC_NV_WRITE			= 0x0137,
++	TPM2_CC_NV_WRITE_LOCK		= 0x0138,
++	TPM2_CC_NV_CHANGE_AUTH		= 0x013B,
+ 	TPM2_CC_SEQUENCE_COMPLETE	= 0x013E,
+ 	TPM2_CC_SELF_TEST		= 0x0143,
+ 	TPM2_CC_STARTUP			= 0x0144,
+ 	TPM2_CC_SHUTDOWN		= 0x0145,
+ 	TPM2_CC_NV_READ			= 0x014E,
++	TPM2_CC_NV_READ_LOCK		= 0x014F,
+ 	TPM2_CC_CREATE			= 0x0153,
+ 	TPM2_CC_LOAD			= 0x0157,
+ 	TPM2_CC_SEQUENCE_UPDATE		= 0x015C,
+-- 
+2.47.3
+
+
+--qRLgJTZqCtI/Ye0N--
