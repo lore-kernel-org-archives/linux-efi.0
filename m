@@ -1,64 +1,45 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794828509;
-	b=4izs2+urQhyfXGllBeRMI1Yp2GicoTNWRFilGtkB8LxWrJzF8Vw1INThxKtw9KL4yg8b
-	 YiVAB5fSkmymMjrXl26s7kRdjpPC26IXctdE+0JII0MtIjk+XCXIati+TktMLlSqQW7to
-	 kX/PI4T5s1I6oaeQzH0hvhpxAby17vZh52MAXRUAT4rsqi4lxgE7NrrF1JjvGaENg9ZXJ
-	 1EybDRox78WYU/hGOWMtjD0Dfv4JbQ2WPn3nj9AIVye227TMIhGIU3kGIWTG4EjZB4M1Z
-	 oSiSaKjZTYndY91M1qDKqnq0BCzRmvN3pzAgbb9kA7lfbW8pn0oiRfdogjHUX5pGomw==
+	t=1794830416;
+	b=3pOXtaiohbWFqqfdolMaua0GHTdqpjYiER/x4GRoQ0Ml+ilwTmhfjgJpORKPiHRvWdr1
+	 5CGEDJfKsGxzRLKNkv2Tmy8AMNN7sIJGw/+3fynD5cnoQBNTBEld002sEU7UDiKEnONXc
+	 WoOiZZknZ7HtGce9lNYv2ipGlc4hBzzm+7g3MmrRDMapSWvzkKddElBKC1EDUArZ24yry
+	 q/SDED+Cmbj2kmuIJ9tG99FQmBjzg9KVva2FRKcnAhfpUHP9Pm1pYI6dmExBXO9HpQQoL
+	 mqnw17nZElMyKZxgaZVOkEOgPPdI5DRbZLr3VvQZiOoYuJvyP9YjpuHW9pLt/aQ3eRw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794828509;
-	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
-	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
-	bh=RW3Nmjz+GbO91KVwbZw20axMMPWohpmxD8TXxvGg3/8=;
-	b=hnBvGu03zSiAs81by2ANpHZb19jv+DUGMP/aIl6YaFAgnWPz0wpMhoEhLjyZRDxv9NAZ
-	 XlKjsgifWFW3b2BHeKmBMojKktnpZhcLXq/f9AZW7e2i19lxrO5sIJDEPH5cY/E/D31+a
-	 DoR41klwLrJqFNLOL140H8Qk8Gsrc/gU/viJQOtJRMK7uc2aMWBUA/yJZxINMrI+za1bL
-	 0/k4qPcWbmGPAabWMTLSJxQ5H5wMQu3atMziHAUyUbnUXCvFg2OJpjRiAuD6am94HObBc
-	 VXmEYB0AxIZ/cuZxIU+O0wHDQSKFqSVKsVrTQxFn54q1VaVt28YOwQElVyvUH35w6kw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794830416;
+	h=Received:DKIM-Signature:Content-Type:MIME-Version:Message-Id:
+	 In-Reply-To:References:Subject:From:To:Cc:Date;
+	bh=gm216H5g8yPIS0hPFinwHy6mVVrhGulY+53WmPc6rN0=;
+	b=j4HKID0c1b6DHjI+QzTUoWCC53iSNtlphJERwcOxRR79gncah6YO7UDXctyD5LmnONtW
+	 NeP8gadthTSouZ0thJFcxa+Oloj4qV5oZxxBzP+oJIZEk9DiLIUtDMn+uvaBNrRTftygY
+	 V8Y1lgzBSgrHenqYjOpeeh/pQEwTrqq2DmqsBtSk6PrfaxZ3GXcguvcvJjZS/IG289wMd
+	 iAuWJ/7jHgaXAlWDM1AZiG8JU/rpsAbb84MthfwH/sDyrOrtX89ovqqV9xQ9wbHfGRne8
+	 /1NRXTi9nsrfI7ftQ3QtW9hxYt5JmgJQotz7ClizyoAzCOUcM1jTs+TnKOh0FTfOT6w==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=dgaswur9;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hnZy2toz;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2D6F606A330;
-	Mon, 16 Nov 2026 11:28:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA70F606A329;
+	Mon, 16 Nov 2026 12:00:16 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=dgaswur9
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 70E091F000C4;
-	Mon, 16 Nov 2026 11:28:27 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hnZy2toz
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A04FD1F000C4;
+	Mon, 16 Nov 2026 12:00:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794828508;
-	bh=RW3Nmjz+GbO91KVwbZw20axMMPWohpmxD8TXxvGg3/8=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=dgaswur9NKmVb2Cj2LBZvzzO++YPkgo2pM4LudFKJRS+BkMI5ErMhhAJqeDzhVlDv
-	 eCPlnjvzIK+Il93Dk6xH3UrLaJjZsGk3GL/xs8+hSbIxs45r7o6sNqCn1GqDoq24qq
-	 2QUS9uyBVKqILqww7albcp/nEZC5F+Gxqn2u6w+1S/QSyjVgBvEMBaBvy8oC1WrTZV
-	 rcnaX+dbnp5rdl8gyPjgXF2DkHTYsV59wdAhIGeMurQ7N8u+SHTHNYNZNVuKeBPD4z
-	 5O24la+RsvuF8Pvvu97OG2nsodEcHs5Rzt5fUjwVYjICfJDOyrd8HrYrpVXTeV62Oy
-	 fIYgTSktA3yuQ==
-Message-ID: <sashiko-outbox-216927@kernel.org>
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH RFC v3 34/44] selftests/ovl: test data-only layers on
- pseudo filesystems
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Christian Brauner" <brauner@kernel.org>
-Cc: "Jann Horn" <jannh@google.com>, "Chris Mason" <mason@kernel.org>, "Josef
- Bacik" <josef@toxicpanda.com>, "Christoph Hellwig" <hch@lst.de>, linux-nvme@lists.infradead.org, "Alexander
- Viro" <viro@zeniv.linux.org.uk>, "Jan Kara" <jack@suse.cz>, linux-scsi@vger.kernel.org, target-devel@vger.kernel.org, linux-mm@kvack.org, bpf@vger.kernel.org, linux-security-module@vger.kernel.org, selinux@vger.kernel.org, apparmor@lists.ubuntu.com, linux-efi@vger.kernel.org, linux-s390@vger.kernel.org, linux-usb@vger.kernel.org, "Amir
- Goldstein" <amir73il@gmail.com>, "Chuck Lever" <cel@kernel.org>, "Jeff
- Layton" <jlayton@kernel.org>, "Anna Schumaker" <anna@kernel.org>, "Heiko
- Carstens" <hca@linux.ibm.com>, "Vasily Gorbik" <gor@linux.ibm.com>, "Alexander
- Gordeev" <agordeev@linux.ibm.com>, "Christian Borntraeger" <borntraeger@linux.ibm.com>, "Mark
- Fasheh" <mark@fasheh.com>, "Joel Becker" <jlbec@evilplan.org>, "Joseph Qi" <joseph.qi@linux.alibaba.com>
-In-Reply-To: <20261116-work-loop-pseudo-v3-34-8cbbea1cf34f@kernel.org>
-References: <20261116-work-loop-pseudo-v3-0-8cbbea1cf34f@kernel.org>
- <20261116-work-loop-pseudo-v3-34-8cbbea1cf34f@kernel.org>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Mon, 16 Nov 2026 11:28:27 +0000
+	s=k20260515; t=1794830416;
+	bh=gm216H5g8yPIS0hPFinwHy6mVVrhGulY+53WmPc6rN0=;
+	h=In-Reply-To:References:Subject:From:To:Cc:Date;
+	b=hnZy2tozWrqXpWLl+o5+qP9GJB7maIdtKambAdlwVeTUYSiv1MRn2/JyDHmnbWh9z
+	 9WDgZMPWzEFJyZJLu9/wsHqC4IslySPV7y2m6l1l6Pr8NgVibCFxmyKogUiorVMDDs
+	 oSUXCyKp79VfkW+5dB+6SUIEC6UIXRKMD5lFDe0TpDOweWXRS/8hWTozfLGQIQW1P3
+	 PpqAtsruCxsT/ZGQgn4L2ujm+ycdGpwnf6KZ9ATazwCNfMJ3LvW1RLCzk2tHDAf+iS
+	 l45B1JKOto718M05wX+oTkpRye0x56eTuMcf1pJlfnKjWSS9tECKCjPVeZoo9oaT6o
+	 l+RQ5GFUaEe7w==
+Content-Type: multipart/mixed; boundary="===============5220694122544816000=="
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -67,95 +48,67 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
+MIME-Version: 1.0
+Message-Id: <cb28f09c85a473a23f14c9bd6ef135950197c9fbf966c1f7055d791977d29286@mail.kernel.org>
+In-Reply-To: <20261116-work-loop-pseudo-v3-38-8cbbea1cf34f@kernel.org>
+References: <20261116-work-loop-pseudo-v3-38-8cbbea1cf34f@kernel.org>
+Subject: Re: [PATCH RFC v3 38/44] nvmet: refuse files on pseudo filesystems as namespace backing files
+From: bot+bpf-ci@kernel.org
+To: brauner@kernel.org,linux-fsdevel@vger.kernel.org
+Cc: jannh@google.com,mason@kernel.org,josef@toxicpanda.com,hch@lst.de,linux-block@vger.kernel.org,linux-kernel@vger.kernel.org,linux-nvme@lists.infradead.org,viro@zeniv.linux.org.uk,jack@suse.cz,linux-scsi@vger.kernel.org,target-devel@vger.kernel.org,driver-core@lists.linux.dev,linux-mm@kvack.org,bpf@vger.kernel.org,linux-security-module@vger.kernel.org,selinux@vger.kernel.org,apparmor@lists.ubuntu.com,linux-nfs@vger.kernel.org,netdev@vger.kernel.org,fuse-devel@lists.linux.dev,linux-efi@vger.kernel.org,xen-devel@lists.xenproject.org,ocfs2-devel@lists.linux.dev,linux-s390@vger.kernel.org,linuxppc-dev@lists.ozlabs.org,linux-usb@vger.kernel.org,amir73il@gmail.com,linux-erofs@lists.ozlabs.org,linux-kselftest@vger.kernel.org,brauner@kernel.org,chris@chrisdown.name,ast@kernel.org,andrii@kernel.org,daniel@iogearbox.net,martin.lau@kernel.org,eddyz87@gmail.com,yonghong.song@linux.dev,mason@kernel.org,ihor.solodrai@linux.dev
+Date: Mon, 16 Nov 2026 12:00:14 +0000 (UTC)
 
-Thank you for your contribution! Sashiko AI review found 2 potential
-issues to consider:
-- [Low] selftests/ovl: missing prerequisite skips in setup_tmp() and
-  tests
-- [Low] selftests/ovl: duplicated setup_tmp() and datadir test cases
---
+--===============5220694122544816000==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 
-commit 9dfbd53c60eeeb8dceed3a46417fda9ee76bb58b
-Author: Christian Brauner <brauner@kernel.org>
+> nvmet: refuse files on pseudo filesystems as namespace backing files
 
-selftests/ovl: test data-only layers on pseudo filesystems
+TL;DR: The series may not build: file_check_backing() in fs/read_write.c calls
+d_real_data_inode(), which seems undefined anywhere in the tree, so a
+prerequisite patch may be missing.
 
-This commit adds an overlayfs selftest verifying that data-only layers on
-pseudo filesystems (sysfs and procfs) are rejected while tmpfs data-only
-layers and sysfs lower layers remain allowed.
+> diff --git a/drivers/nvme/target/io-cmd-file.c b/drivers/nvme/target/io-cmd-file.c
+> --- a/drivers/nvme/target/io-cmd-file.c
+> +++ b/drivers/nvme/target/io-cmd-file.c
+> @@ -47,10 +47,9 @@ int nvmet_file_ns_enable(struct nvmet_ns *ns)
+>  		return ret;
+>  	}
+>  
+> -	if (!ns->file->f_op->read_iter || !ns->file->f_op->write_iter) {
+> -		ret = -EINVAL;
+> +	ret = file_check_backing(ns->file, FMODE_READ | FMODE_WRITE, S_IFBLK);
+> +	if (ret)
+>  		goto err;
+> -	}
 
-> diff --git a/tools/testing/selftests/filesystems/overlayfs/pseudo_datadir=
-.c b/tools/testing/selftests/filesystems/overlayfs/pseudo_datadir.c
-> new file mode 100644
-> index 0000000000000..3b59fd3e9f5c2
-> --- /dev/null
-> +++ b/tools/testing/selftests/filesystems/overlayfs/pseudo_datadir.c
-> @@ -0,0 +1,131 @@
-[ ... ]
-> +static int setup_tmp(void)
-> +{
-> +	if (unshare(CLONE_NEWNS))
-> +		return -errno;
-> +	if (sys_mount(NULL, "/", NULL, MS_REC | MS_PRIVATE, NULL))
-> +		return -errno;
-> +	if (sys_mount("tmpfs", "/tmp", "tmpfs", 0, NULL))
-> +		return -errno;
-> +	if (mkdir("/tmp/lower", 0755) || mkdir("/tmp/data", 0755) ||
-> +	    mkdir("/tmp/merged", 0755))
-> +		return -errno;
-> +	return 0;
-> +}
+Can this be built?  nvmet_file_ns_enable() now depends on
+file_check_backing() from f66083ed0be9, which does:
 
-[Severity: Low]
-Should these tests invoke SKIP() with a reason string when root privileges
-or kernel overlayfs support are unavailable?
+fs/read_write.c:file_check_backing() {
+    ...
+	/* Look through stacking filesystems at the inode with the data. */
+	real_inode = d_real_data_inode(file->f_path.dentry);
+	if (IS_ERR(real_inode))
+    ...
+}
 
-Running this test without root privileges causes setup_tmp() to fail with
--EPERM on unshare(CLONE_NEWNS), and running on a kernel without
-CONFIG_OVERLAY_FS causes mount_lowerdir() and fsmount_layers() to return
--ENODEV, failing all four tests in make run_tests instead of skipping them.
+d_real_data_inode() is not defined or declared anywhere in the tree, and
+no commit up to the end of the series adds it.  Only d_real_inode() exists
+in include/linux/dcache.h, so fs/read_write.c looks like it fails with an
+implicit function declaration.
 
-[ ... ]
+If d_real_inode() was intended, it does d_inode(d_real(...)) without any
+ERR_PTR handling, so the IS_ERR() check would never trigger the error path
+the f66083ed0be9 commit message describes.
 
-> +TEST(datadir_sysfs)
-> +{
-> +	ASSERT_EQ(setup_tmp(), 0);
-> +
-> +	EXPECT_EQ(mount_lowerdir("/tmp/lower::/sys/kernel"), -EINVAL);
-> +	EXPECT_EQ(fsmount_layers("/tmp/lower", "/sys/kernel", false), -EINVAL);
-> +	EXPECT_EQ(fsmount_layers("/tmp/lower", "/sys/kernel", true), -EINVAL);
-> +}
-> +
-> +TEST(datadir_procfs)
-> +{
-> +	ASSERT_EQ(setup_tmp(), 0);
-> +
-> +	EXPECT_EQ(mount_lowerdir("/tmp/lower::/proc"), -EINVAL);
-> +	EXPECT_EQ(fsmount_layers("/tmp/lower", "/proc", false), -EINVAL);
-> +	EXPECT_EQ(fsmount_layers("/tmp/lower", "/proc", true), -EINVAL);
-> +}
-> +
-> +TEST(datadir_tmpfs)
-> +{
-> +	ASSERT_EQ(setup_tmp(), 0);
-> +
-> +	EXPECT_EQ(mount_lowerdir("/tmp/lower::/tmp/data"), 0);
-> +	EXPECT_EQ(fsmount_layers("/tmp/lower", "/tmp/data", false), 0);
-> +	EXPECT_EQ(fsmount_layers("/tmp/lower", "/tmp/data", true), 0);
-> +}
-> +
-> +TEST(lowerdir_sysfs)
-> +{
-> +	ASSERT_EQ(setup_tmp(), 0);
+Is a prerequisite patch adding d_real_data_inode() missing from the series?
 
-[Severity: Low]
-This isn't a bug, but could setup_tmp() move into a FIXTURE_SETUP() block,
-and could the three datadir_* tests be parameterized with FIXTURE_VARIANT()
-over the path and expected return code to avoid duplicating the setup and
-mount sequence?  Also, since set_layers_via_fds.c already tests lowerdir+
-and datadir+ layer configuration, should these cases live there instead of
-in a new standalone binary?
 
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261116-work-loop-=
-pseudo-v3-0-8cbbea1cf34f@kernel.org?part=3D34
+---
+AI reviewed your patch. Please fix the bug or email reply why it's not a bug.
+See: https://github.com/kernel-patches/vmtest/blob/master/ci/claude/README.md
+
+CI run summary: https://github.com/kernel-patches/bpf/actions/runs/43858134663
+--===============5220694122544816000==--
