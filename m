@@ -1,74 +1,74 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.72
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.71
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794839237;
-	b=q0x+U7RAnt/tshC1tZeDA7pU7bVio337DHGlQHOr0nxHr1yfQ3bUmhAdpHSlCEdRW7us
-	 JHKXwyglrGNC7bFW5UTxk9qmeuHQOznxFqug1Cf1cJzgr6MuTL/7MDEWkTj/XenCUBCu5
-	 VrxJ2OFsTFKVkoMqUDzlSfYLwbSZ/f87JoWqVAQCJelXKTPi15XZXPRAvkr2+B26+WIvL
-	 MKXMy24KLOfMeq0QjXBny9oHmCyU/pSL4uHjx5N8f81TFZo/KX+qMw7sK4+r+2cSc3pnX
-	 XhHb8KWt1eTXYVdffatdmoOkN4EsAP4wPln7R7KEtQsHy0f6sXtfB/Drlex9ZrOHNjw==
+	t=1794839239;
+	b=ZW83klMZiJwGMEHW2dMBlE2Fu9XyrhymDFo/TFotBex9BRscqWKf3f9Zk2e8OypcwmL4
+	 RCpVAsHMRWfWj7OImaD5vqAdalc3Cu9mRakabiAX9MdFomxTxaf5xRqKlUCIGT5cwRTVs
+	 k2Es3MGNjXsvFjL0+jTjPOS0jQ89nJgkVBHbXmJSCmcWdAERvl2jk7OHfP5m+55kFfcDC
+	 zTyGDOj7hbNRQhmsr61Vv6SLbPZ7wAXvT9fHTAsA6P8YllI/PQJMoURNEHQR/lb4AoX1b
+	 gSpNpSlTin4FIYoxTPx7OzJcac/4H5FUNxIxiu9cl9hBr5R8BLswna6sh4NzoilGBhQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794839237;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794839239;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Received:Date:In-Reply-To:Mime-Version:
 	 References:X-Developer-Key:X-Developer-Signature:X-Mailer:Message-ID:
 	 Subject:From:To:Cc:Content-Type;
-	bh=Pus6Zon9bBsFufoopNpQt/nFtp2HWtzZyOc0mElYIXI=;
-	b=yaq17Xl/bVUuTRLgo2hQhu/J/tHDxeW3VdAXWg7X1ul35I7j/mAHhUUrSG6k+DjHA6HT
-	 GcG0T3Le11lG5VOaYHIH6fBhWJcQsqYIQ3a2ofFfj7bSsKisG7TfhCdlbETWW0WmbidFU
-	 mI7PWUFirg9Sdfz/BevgV9wVrq5k3IWx5JIMljj5Gb2pLSp0PYuTxsBXhEO7Ld0+sy0YB
-	 BaBK9haptOruYtP3eFq5tar6OMBmiSJt5kEGYBLUfpb0VnjL9c8Ky9OKwAsj9Sc6lnZdl
-	 kuJxZJ4nu8Ws/QjUOfoJkFVvrTU2yJTMisMxo82ejhGMTSU4jVVDfWd6nnlhh1Ma4Xg==
+	bh=5R2g9UB0W7Cq1TglUi5KIOs/VyvT4iQcIBDMlZHHNJ4=;
+	b=BjI6UMMoxJtj/pQ1RB2xfZUurPIc4KUE92nCgpwHiQgGuxbmR3ArheYfPqcT7ToQhwzt
+	 JESxgLH/4gxHMawqD3n8uZCfLTWkVEcIduUSeVVEhy/2JXGzyWQJjE57VfA1z2Lgba67w
+	 0lxHVJME6e90dGMF4LYt6DV5gZDmAxFTLzV4pRwgwk7xnvm7vJkSluNBh0hVfVH3zXNzS
+	 QMBF0JB2GjgQmABGsO8Lux+F+lXVrV94jfvfXvajHB3z+HSieSICQw5DHjgo30R+sdVzq
+	 O6UmheN7q0pIe1kj6NZ/aOfIj2BelxqTac7Q8/KdgDv3xHD971TZqQh6wTgbGyznEHQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=google.com;
 	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=oJoz5tPx;
-	arc=none smtp.remote-ip=209.85.128.72
-Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com [209.85.128.72])
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=Aw1kPzc6;
+	arc=none smtp.remote-ip=209.85.221.71
+Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com [209.85.221.71])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61E2C606A32C
-	for <linux-efi@vger.kernel.org>; Mon, 16 Nov 2026 14:27:17 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 61E2C606A32C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E79F606A330
+	for <linux-efi@vger.kernel.org>; Mon, 16 Nov 2026 14:27:19 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3E79F606A330
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=oJoz5tPx
-Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-4bb680f0ac4so10913045e9.0
-        for <linux-efi@vger.kernel.org>; Mon, 16 Nov 2026 06:27:17 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=Aw1kPzc6
+Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-48e1d839ddaso2209597f8f.3
+        for <linux-efi@vger.kernel.org>; Mon, 16 Nov 2026 06:27:19 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1794839236; x=1795444036; darn=vger.kernel.org;
+        d=google.com; s=20260707; t=1794839238; x=1795444038; darn=vger.kernel.org;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=Pus6Zon9bBsFufoopNpQt/nFtp2HWtzZyOc0mElYIXI=;
-        b=oJoz5tPxqHdOMB25G27o0DL1P7kfSLRNrIRBCt+MKyI1wkxdXOFLNl+Y2lwFhs8siU
-         +SN26vtYihCQWfZurlNnz272KyPyznq8co5MYErJ38la/1uktH17EDI+ykc6FL+Rg4yk
-         5mSoBTqFIIzjD9lyG+bCCwTZC4nkZrQ51XB7Q7iAq5dSFYyRop09moVvv+RpwbLDcdKt
-         XRIeFo2N7c3By2Iutz/Wt55KsCZpqTM1cd97YdF2qYSyKKvvmZuGv9OwJlWlIBUlXU5T
-         qhPkMk0Lyf+IbVyRpcAg21gsYv075ZRZDC6LIuDTBZS7dIyIXXDJlJIorCVBIH9GRs/p
-         9HdA==
+        bh=5R2g9UB0W7Cq1TglUi5KIOs/VyvT4iQcIBDMlZHHNJ4=;
+        b=Aw1kPzc6P76xO71TVsH17eEyC8uvRJ64z6q0NBZSDrtT79jum/eV0rb9jD391FAlK7
+         chA5j4ORLpt1m9AcdgdSUOhnrvr2hzqFddy4UxT5IobTt9ECpSNghbhQMwwMrPvUGOvX
+         mF+iLxlafn0LP4gJ3XMnx81cGNazVRcgnSZ6TvarznCWU0O/h6c+KcH7nec3NTboUa8d
+         Qs6dqMfNKQI0nDSpeZiEJy7ingOrnnQu64JQwn3xZ48rQVEEvyAJq64+ooUIkGbcGzQi
+         Ud7HeNHa+4uHB0qM9EUfySpQ5KtyY8rrXNb8Iq1qzJY384CotkqhSW5Zg5/trQu9srqa
+         JTCw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794839236; x=1795444036;
+        d=1e100.net; s=20260707; t=1794839238; x=1795444038;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=Pus6Zon9bBsFufoopNpQt/nFtp2HWtzZyOc0mElYIXI=;
-        b=1IJWtqpRolkr88v3PDWuR18urfgmAbFDtAnmy6dGHAA9jPwrJxMASinBqYeOrIFJKp
-         G83bgzwl9w9uGYTnp57gmJE4bC+4IuY4DimwUexBClUJ/cnYh5Vef58Swsf6Hld1T5pX
-         WYOzo9+F0C+mJx5gSLJxP0l+qI6Rxi4Dk+NUqewECuQ3JhHtkmeJraMrDUgcr/hQBvyB
-         6a8ma/y4/Ig/cCR6xPNJaR6cloH/mHojJi3j9bbA1Ltvn6ujGGoCkeBxj23PRETUGr2+
-         /vRGyA0/EgWnh/QxPW/tj5+gZE5+kokInja7v5m+PryXqFfYxlehNmryKPN9bbRd1eS9
-         vHpg==
-X-Gm-Message-State: APuU4Z/5mvrPB5XuLIJj2cLTS0vzfF9yPCizhngoMsYy9NtHm+swWOw5
-	YyImaIq6/5Sl9CJk1TPq+J6I5xQTPe/2h2VAijRCPo2CjkUZ5u9MnwsWDvNB8zW/E60GpG2CBNZ
-	skfwciRmbVc0cWdeEAGp3TuVenMZBT5SE/Xb9DlSu8VAjCRKoQw1ZdPlD+LmVOJJHEpmBN+hcAO
-	GE9o5I5x0lBh4fBngMrfCdaiwxky3lEg==
-X-Received: from wmbjj17.prod.google.com ([2002:a05:600c:6a11:b0:4a3:5d5b:9ad9])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:4f81:b0:4a7:a5db:a93e
- with SMTP id 5b1f17b1804b1-4bb5f3f7efdmr165201905e9.4.1794839235418; Mon, 16
- Nov 2026 06:27:15 -0800 (PST)
-Date: Mon, 16 Nov 2026 15:26:22 +0100
+        bh=5R2g9UB0W7Cq1TglUi5KIOs/VyvT4iQcIBDMlZHHNJ4=;
+        b=ADvjh9QlUuPIoRR8Q7kJ4F0fkrHHNwfGDjH8z5Yr/sTvkwi+QZliZin9gndr0NuvuW
+         fwlZvwrKxanZHhfnLft1MupaZVxEnykVf+aSq6Udcz4N501QYEbNXNV+s3DQdrnVqjmM
+         vOyIkIf65Dk1Oflt6G5pEIKDANLJQu8c4yHtf/+jL3Z1MkFMgMOZqasS9O1l02ZzYvpL
+         MBr+evBIvxL1e0P21GfO3jFdjM79CTCOfflw9J5Fxx46RYk8ACZ3HX6DbFDWEEL51Ij1
+         IvGyyqXOXL9LHzZbOcY3LEg/yM0DXacUT+hP0vz4uFJMmZF7JzrM/x/pnx7ceCRTOQT5
+         xxZg==
+X-Gm-Message-State: APuU4Z8LppHjIJ5U+q5LOLdViIG8ZJgmCs5dXrnb/A7eBlEGyYYyrRWw
+	BzMk9CPH2gdkM9SY4KNUCAkpI9yj9ZAlavIvyebq05wj1KCigrLOzONMuT4L2/asNOzlwD67bTi
+	7aJs3zWXqmMvpE2LIiqyppBHXLEN0pgySOdN5d7aw6rzm67CRrc8ajJZ0eTE2lubWOAAvfckvlh
+	G9PZGuaBaf3PLUuwT7ZWY//QOJJ4tBDw==
+X-Received: from wrok6.prod.google.com ([2002:adf:f286:0:b0:493:d441:be7f])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a5d:584b:0:b0:490:71a7:6f51
+ with SMTP id ffacd0b85a97d-49c72ba6509mr22449676f8f.45.1794839236764; Mon, 16
+ Nov 2026 06:27:16 -0800 (PST)
+Date: Mon, 16 Nov 2026 15:26:23 +0100
 In-Reply-To: <20261116142618.1687025-17-ardb+git@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -81,14 +81,15 @@ Precedence: list
 Mime-Version: 1.0
 References: <20261116142618.1687025-17-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1529; i=ardb@kernel.org;
- h=from:subject; bh=A8MzxjCVv4eM6mkH8sNsgPFkx7gf3UVeNfnQwzNCuhw=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIeu3UH+bU9CjRLa86aIH37lv1jSRj5ac/GX6sgW335eei
- XnJtiS4o5SFQYyLQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAExkww9GhpVnbigaHjHPy5/x
- T+3HCq6Lcfahm4w+9y/uK7/85oP80ccMf0Uu3/pS4j2j8IbsHeN/EQ3LQp32pvoesD+jcquOmev MfjYA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2981; i=ardb@kernel.org;
+ h=from:subject; bh=8ndYJWrl5/5wY4uh6dzMJ+7YlbAJMHVUNmS0W0hi37A=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIeu30MSrTJ27pkw5q/E2uejHnms/n2+SWLfg1plna36U6
+ s4Uyfxi1FHKwiDGxSArpsgiMPvvu52nJ0rVOs+ShZnDygQyhIGLUwAmsquFkeGL/Zr2F/FRRtFF
+ 3L9sW+7N3qJ1/c1Dg9yKmY+eR046/1uJkeHT1Pev7Cpzzr93SnY6G7djx68ll3oyj09f9z0v/fi 9U8cYAA==
 X-Mailer: git-send-email 2.56.0.611.g1030f0b940-goog
-Message-ID: <20261116142618.1687025-20-ardb+git@google.com>
-Subject: [PATCH v3 03/15] riscv: Make _text point to the start of the kernel image
+Message-ID: <20261116142618.1687025-21-ardb+git@google.com>
+Subject: [PATCH v3 04/15] efi/riscv: Rename __init_text_end to __inittext_end
+ like other archs
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Ard Biesheuvel <ardb@kernel.org>, 
@@ -99,45 +100,81 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-On RISC-V, _text currently refers to the start of the .text output
-section, which is placed after the image header (.head.text), and is
-therefore equal to _stext. On other architectures such as arm64, _text
-refers to the start of the image, and is used as such by generic code,
-e.g., to describe the kernel mapping in /proc/kcore and in the ELF
-headers of the vmcore, and by the EFI stub.
+Align RISC-V with arm64, LoongArch and x86, and drop the underscore
+between 'init' and 'text' in the section markers. This allows the value
+to be captured by generic EFI stub code that can be shared between all
+those architectures.
 
-Now that arch/riscv no longer uses _text to refer to the start of the
-kernel code, move it to the start of the image so that it is equal to
-_start, and the distinction between _text and _stext is the same as on
-other architectures.
-
-This also means that the image header is no longer omitted from the
-/proc/kcore and vmcore kernel text mappings. Other users of _text, such
-as kallsyms and ftrace, only use it as a reference point to calculate
-relative offsets, and are not affected by this change.
-
+Reviewed-by: Jason Gunthorpe <jgg@nvidia.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/riscv/kernel/vmlinux.lds.S | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/riscv/include/asm/sections.h         | 2 +-
+ arch/riscv/kernel/image-vars.h            | 2 +-
+ arch/riscv/kernel/vmlinux.lds.S           | 4 ++--
+ drivers/firmware/efi/libstub/riscv-stub.c | 2 +-
+ 4 files changed, 5 insertions(+), 5 deletions(-)
 
+diff --git a/arch/riscv/include/asm/sections.h b/arch/riscv/include/asm/sections.h
+index a393d5035c54..4a882a28f414 100644
+--- a/arch/riscv/include/asm/sections.h
++++ b/arch/riscv/include/asm/sections.h
+@@ -11,7 +11,7 @@
+ extern char _start[];
+ extern char _start_kernel[];
+ extern char __init_data_begin[], __init_data_end[];
+-extern char __init_text_begin[], __init_text_end[];
++extern char __inittext_begin[], __inittext_end[];
+ extern char __alt_start[], __alt_end[];
+ extern char __exittext_begin[], __exittext_end[];
+ 
+diff --git a/arch/riscv/kernel/image-vars.h b/arch/riscv/kernel/image-vars.h
+index 7b44b94f1283..bf703eba3fa5 100644
+--- a/arch/riscv/kernel/image-vars.h
++++ b/arch/riscv/kernel/image-vars.h
+@@ -27,7 +27,7 @@ __efistub__start		= _start;
+ __efistub__start_kernel		= _start_kernel;
+ __efistub__end			= _end;
+ __efistub__edata		= _edata;
+-__efistub___init_text_end	= __init_text_end;
++__efistub___inittext_end	= __inittext_end;
+ #if defined(CONFIG_EFI_EARLYCON) || defined(CONFIG_SYSFB)
+ __efistub_sysfb_primary_display	= sysfb_primary_display;
+ #endif
 diff --git a/arch/riscv/kernel/vmlinux.lds.S b/arch/riscv/kernel/vmlinux.lds.S
-index 1f4f8496941a..9849a3e4d102 100644
+index 9849a3e4d102..ba939c7365b2 100644
 --- a/arch/riscv/kernel/vmlinux.lds.S
 +++ b/arch/riscv/kernel/vmlinux.lds.S
-@@ -28,11 +28,11 @@ SECTIONS
- 	/* Beginning of code and text segment */
- 	. = LOAD_OFFSET;
- 	_start = .;
-+	_text = .;
- 	HEAD_TEXT_SECTION
- 	. = ALIGN(PAGE_SIZE);
+@@ -46,7 +46,7 @@ SECTIONS
  
- 	.text : {
--		_text = .;
- 		_stext = .;
- 		TEXT_TEXT
- 		SCHED_TEXT
+ 	. = ALIGN(SECTION_ALIGN);
+ 	__init_begin = .;
+-	__init_text_begin = .;
++	__inittext_begin = .;
+ 	.init.text : AT(ADDR(.init.text) - LOAD_OFFSET) ALIGN(SECTION_ALIGN) { \
+ 		_sinittext = .;						\
+ 		INIT_TEXT						\
+@@ -72,7 +72,7 @@ SECTIONS
+ 	}
+ 	__exittext_end = .;
+ 
+-	__init_text_end = .;
++	__inittext_end = .;
+ 	. = ALIGN(SECTION_ALIGN);
+ #ifdef CONFIG_EFI
+ 	. = ALIGN(PECOFF_SECTION_ALIGNMENT);
+diff --git a/drivers/firmware/efi/libstub/riscv-stub.c b/drivers/firmware/efi/libstub/riscv-stub.c
+index 725b634c5179..5cbc50a814e1 100644
+--- a/drivers/firmware/efi/libstub/riscv-stub.c
++++ b/drivers/firmware/efi/libstub/riscv-stub.c
+@@ -34,7 +34,7 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 	efi_status_t status;
+ 
+ 	kernel_size = _edata - _start;
+-	kernel_codesize = __init_text_end - _start;
++	kernel_codesize = __inittext_end - _start;
+ 	kernel_memsize = kernel_size + (_end - _edata);
+ 	*image_addr = (unsigned long)_start;
+ 	*reserve_size = kernel_memsize;
 -- 
 2.56.0.611.g1030f0b940-goog
 
