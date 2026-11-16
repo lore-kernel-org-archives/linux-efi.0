@@ -1,73 +1,101 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794857626;
-	b=eK0VRBa6hat2OAkI5YIqk+YTRx+I6XDIo9e1OtxRZsSvbnfdreCXQxxxRUASih260kIq
-	 fZlBkFsia46Pd7BFsachryVEFmW+WwsSlZbqESZp3X3gWubR3rPPI0TZUGHm7gn88p7aN
-	 6abER2pITjcDLIrEeKkXrgs4IM7YwX8uTP22hMDxWvKLTujF68CShVbeWjknVwdSAKpcu
-	 LnUbJYbdxEQImf+YrkuQrCozY8/NPLu8L28ii1X/L60eaSDgP06CMr9SdKtcTBy1MOeNx
-	 gKhiGH1BesqvHYs0agu7bLDnaQ8hYq6XBS9trOILZIXSclh91DLrERv+ZgBpWfZJWMw==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794857626;
-	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
-	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
-	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type:Content-Transfer-Encoding;
-	bh=PVpms2o1EVmRGV9LLOQ7J/09tS82gfik30j3xDX0yg0=;
-	b=NF67DizFSZQFoc1Y7NskKpejtAyv/WJgDy6C7GGyoW+XVxe2GnQChFU7oUX4ct1n32Pq
-	 bSfgfmcGYZePgHbRw8+GLgSO0QR2pP1V3Z9ApsfaphXEELoqxMmDTrztkVksD8eQFpxFj
-	 Wv5krpOkV/dQFwaIscSAO+I1e6y8TFuqeD8WJL8qlimTh+ZftPB8MRpEZJ1QFi8cAtFk2
-	 zRPMvVLnCQJBBIFeIqLr1Er2v2m6oYI3d/79gWHJGa202c4KGf2R4qIfXv02h8Q3AATAh
-	 gFsq2N9IqQJXlN2VKcfM3cv6dupuUm0+nuYozpcsLiZaFKjBYPnwcCTKCDFLxR9kI8w==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=DoF307gz;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.221.52
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1794859451;
+	b=OQdsPshP/hrMiTc6FEfXTN2HHWToXyqrBO+YbNFN9ikqsA0wclHlhwi8qcFJtdV6BMPB
+	 j/oZkbCLN9+kG6wtq/XfrTHoCSm4Fp+GbnQYIKGYuGQhZHay7zXx5uQVLVq7qw4+zDQQ9
+	 CNd0MNcz7m1Laxxq3OfR/HZ2At/soXyHz5g+KxQQAKH8eykNAx8Y3IKSBzY1LRDGUvTct
+	 BtVYxZw9XI9NU2chj4GjG1J5InnqVGgnhFTcnYS3OdH2I0ceNbkyF+fsjHUAEnsw2RUC2
+	 qoIrLilA7A2+MFYd97JA9LLPbiiBxTZc3A+zw6AaAgvLTPg8QQCKlZDp8McnWvZxVVQ==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794859451;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
+	 MIME-Version:References:In-Reply-To:From:Date:X-Gm-Features:
+	 Message-ID:Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
+	bh=FEtpE65JhLGyAYaL/FOW2ebUIws2WwBZ/4Zy8VNXUuw=;
+	b=GQJvC8Hh6ttbliofQvov48iDYi6mSYSx67vxRIdZFhU7UwMDcWpNZ2fDjYQtbr7fFgQN
+	 cP3b288nfF1eXGpyjGFywHAnuHG/KAGxu8LtdgluPIf/23C3gzTQBR8PnyL2I1UpV8wED
+	 QrSfL7oql0zPiPLKEWOiHQezTzFqoficPQVCckGpXUamC0u6fZisEZy0xH3WJ1YkNQhUv
+	 2E0DGZkp515GYayA3bNXwiVjcWcFqByFQgz3g7nE0Qhf6j6mz1+0kWIClJuQJq0eupXQC
+	 AsAWMdDi2jaihgv+xcIZoXO56VbRQmIdmQdpem92RvxrJdAT3EfV9S+ugYog+ju48Jg==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=hnqDx80H;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.221.52
+Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35BD2606A322
-	for <linux-efi@vger.kernel.org>; Mon, 16 Nov 2026 19:33:45 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D21A606A339
+	for <linux-efi@vger.kernel.org>; Mon, 16 Nov 2026 20:04:10 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5D21A606A339
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=DoF307gz
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 00C8F1F000C5;
-	Mon, 16 Nov 2026 19:33:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794857625;
-	bh=PVpms2o1EVmRGV9LLOQ7J/09tS82gfik30j3xDX0yg0=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=DoF307gz5M1yrgDz53bvqPNhfpUVTF3k7asrDIxmNb1O0HXbUjiZWFEehcnyk4L6c
-	 Rc1wxZ2LSw9N2TW6TUgVvJhza3XZ3rODeFFqC+Jz+Ozphc7CGXUGQy8/UGAWXB0sBD
-	 25bT2TJRsJ5ncG7GA/r+r3k/YqFH1Q+H0Kho09e5GrhitgkdrKHhsaM9/5OHjzRVmT
-	 ISUwD/L1QSxCGMpRJuwwXxkIYmbdBDw/c3/m81kKu9fzu4ywocsXu2eOmlSTsonUs5
-	 5FtFYF0xs4kn3X3+DB0dXCkU3P6C6a/L4sxG/uhsLFrNhI83jpRaoKd/WmEBtHLp0k
-	 Afd9xplXmC+EA==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 4D0C5198003A;
-	Mon, 16 Nov 2026 14:33:43 -0500 (EST)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Mon, 16 Nov 2026 14:33:43 -0500
-X-ME-Sender: <xms:lVr7amuD3NuJhkSrpWp3VzZUR3jOpvkWDvXaegYsFvV86bEzMcaazg>
-    <xme:lVr7amTqKIc2VuyaiZwhDWThqZXwXbVRzr7h7UA2s-Hb8lmhPDYVY2qmwdoQD6Of_
-    sXli3_8BsneC929ZGNnqvEVa3T8-phI-ra4Gp3ZkaG0stnPx1zwCJ6A>
-X-ME-Proxy-Cause: dmFkZTEsUjVsRuDkUa7AsdpqUHn/DF5gSGtgp0t8TzPcoTvUuShZj8JJiVDC3OOXEtCV2r
-    HxvjuTO6TDcDBy4GimavF8rjlflLcDYxuACE4bWE8jDIzLK6SKIeI4JBs4haT51OcvNaKx
-    9e+X0NK037q9wSnPrajH28ZKGPxwsGVq7FukXREgnna0dCjjQX7q+MOjOKLt9MoAsVeVOi
-    Jm52s0xdZY71jDkcx8KTwcECX1OQpEaFUqPHUAVdZWlHMaUdAwjh2E4c6P6aeqx2q+U1/N
-    x79WnOCzEspF2JvrVc78i54LZo+ejlLcS7YeDpkJyRkZZpFY9i1JAJXPwzjylm9ORgKtQF
-    /aMbxdJUQWK81aLhl19MdNhjdVB9Q+ACijf9YH1N219JKM1YqIcEv6IwgjxHpwO5GOD2N2
-    siWcWFDKFV+DA6wrBaES/aFDc6a7ieB7Ji2wB3QNEv3hf1xYArHqfbsgc6b2ndSQHiMlNc
-    A9XBKaDJBDkXlVewYP87uORVQgpWsN3fcazwC76qgsJkN3mO/52EohAtJ6BhioFEAOav4u
-    IUImWAFMCtziV2O0XBeGYfnqxojIg4z93Bwv+gA3EfMmnpPdKLHv67BnTSDHALDySWsIZK
-    lzHLeAOzrIOGH+RbDtd9abhxcuC39anQmauxMw7nKt0mBDWfK0srTa80+ErA
-X-ME-Proxy: <xmx:l1r7aqRlQwBrmsGSQoSroK7Eep_8sK5kGLtajL4VxTRLDVji1VAZiQ>
-    <xmx:l1r7arpxGIzlQHI5imELvfpHUUzhULRwoA6c12SbhurpD4Wv8Dsgug>
-    <xmx:l1r7ak2j2I9BdDpP7SYYFsBvWH05IiZYZdJ98OE8_LWw0pOKR20EBg>
-    <xmx:l1r7aq4gIvAKsDs_Jr9kGXhDzNnekzOFgKqq86jNrQPlC_whL6ruDA>
-    <xmx:l1r7aoR3nbTsrOemmnE0wakAmdbT8ugINVyDE11rW1COkcAB4HBeCpug>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 03D94F8008E; Mon, 16 Nov 2026 14:33:41 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=hnqDx80H
+Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-498f5fa5103so1736450f8f.2
+        for <linux-efi@vger.kernel.org>; Mon, 16 Nov 2026 12:04:09 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1794859448; cv=none;
+        d=google.com; s=arc-20260327;
+        b=o/kn4zPYlYqRXDhbMuQ66eJjce9EOJcs2VezSOT1CGW+U+iWncj/A1R8dRd2OLDG3l
+         /iJluGg5s5LdQo0v46G+R7A3UxfDO8rZGvD60xZg/Kd2O6pPMsRFiEPf3Vz7Oqumf+xf
+         ne0IYV4/VEaipe89kBXw2fiwkV6Dkp/tbkuQdhvS1q0SbXRgbGL1JqPAoWcKaz0JkK53
+         T03nsYZjtUABJAuy7pYgxYgiwnTNxabTUbSANSkOvvvkLGpKJqnhMIOSSSXE9WSK+otI
+         Q65OFeXbIdu1tXEZOe/zmcSPe//vZf0BhXugqkFXaA7Bhw2Zk8zSoWP5usL3Q/XBzbjg
+         kNgw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=FEtpE65JhLGyAYaL/FOW2ebUIws2WwBZ/4Zy8VNXUuw=;
+        fh=DbzEQRD5co2jZYE1ljmbezBiBQdTLNeJ0R7pZkvxycw=;
+        b=RzuV/oyrzwUUSyJNDC9Y4HcP6oB6frK+AlJ+l43iV30L+45M4X9LaDSpBmX/IsXDk5
+         fVGa1Fk7NxDTzHbUulJ2dZRA7YaFrDYCEcBeTXtlPkL8e/X/UIrlzKLuCTb92c6fdb8U
+         AQI5N4GZ/lBuvSdijV2fPLccwJgwXxHj6O0VlYoy7YMM8a8oDhl+bl5wQLpmVp4zwVoL
+         DsDf+F/HNuOx4Wdkh6JXBu9QtKkIG6CE/ycdJp6+/Kly9lbEO5p7JUNRgFwBBk5WsmRF
+         utN8AStYri5MGeYrgOU7IpdKXQb5B9gBfrLs2Qz2KijnqrGP3u4smj8xbq/zxKDXrKmG
+         ALPw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20260707; t=1794859448; x=1795464248; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=FEtpE65JhLGyAYaL/FOW2ebUIws2WwBZ/4Zy8VNXUuw=;
+        b=hnqDx80H1BHGMZ+jCw863LQE2wm4hG6wTw//ziQNWkZpZIjdyNNCtFJNcbykSvuJWZ
+         RrqgQGru9l+9Rlw9NCoAO7RXSeH6CHzRwb+h6TsbT77V+vTLtC7o5AslWzWJ8+7yhciq
+         sbJxN7Yoz6y6VYO91QUyEDVlXVHt5e/uzOZriYhKEljZIduQH6pNfhdOY5sHlJFueOxf
+         bN/uTLfuNBjnHaTZ+WukZQS/Wa30tWyiKsfqEPmOKtkcPCgN1gGIeLsa9pfco/3ZvP3P
+         koo3Bb9/+esUnHdHS2hTd5qtXE/k/xctadMJUuU/zchcL0VDKvTRNofZgdIQ6mLOou9W
+         X5rA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1794859448; x=1795464248;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=FEtpE65JhLGyAYaL/FOW2ebUIws2WwBZ/4Zy8VNXUuw=;
+        b=0h+LIOxeKPjURG4ytxUTaBjtU3MRhvG0X1xdKKQXQDyDEQYIBU78hMxquPnaFo8Axz
+         8PBQmZzhvYx9+dykqj9f9ysmmvjZ3xB9YjmemTRTbKAFrrdUBRQnczOn/1+XD4qrqo7h
+         6MJOpQ5y8ZN/fDr2796/CEW0KBfCVGN0kWU0zEoB98BnZLYs6aDpnnpH4oeXP+8WgUvT
+         Z1oc6uq4TSM/ewj8XZEd5wGLjGEqnziobcWv+JA9Qp88dY+vSZ1uX2jrpRjRz1SAp3VA
+         JHlLw/abVmFWpaUy5Ti6owaab8yRmkBmLTFSLo09MLaMue5XQhXWoDKj4eLZda/5tdC0
+         ysnA==
+X-Forwarded-Encrypted: i=1; AL+hErGTHX2ymgm5RAZm6Gk7RrjChe6zJAduIIxMDVGV+RytdOl5dDKTtVxlVyk/Kw6zURxXlfgbPqNhQqk=@vger.kernel.org
+X-Gm-Message-State: APuU4Z88XYVJwiZ4mOq48yLJqOKroFtGSgIAFiHZEiCF9S9gLxPF7meB
+	hzK553+tFu8t9y4DP80vggq69QY7E4fgGxu8yS4cSxWuyYE9C1HbBiHzZfSmSjHDbXOcP1CAL5p
+	t5iUaSwcxZxGkebRZywEtmZltrRnanLg=
+X-Gm-Gg: AZFdTZddZbvHHZ517TDKkZykyB1y0HjycNZdxhbAck9627dUUVPYV3cFRTXOnFUJOLm
+	/TxoUQRvpjHeV1T98iABm/ogv0P2Wynl3ob7LcvBwc781du21qMveu4DBoMDk4NM2/gKLXyVAWE
+	qw1A8r77rr9BKMVxGhtH7M8aZ5V8GN0bhKUhmsE6wp69dIGdvUsTrCvhGdZRqQsnS6ViK7qOtXo
+	mT2r8JiUJo6/gBIIg53jBYt+h8jlkFbW4rnDGt2FergVt3E7FLKh+ikxkbOoeOAa+A8PRONiNPw
+	+KaZtwizjKdXJ5Ecc2mNx4P/xoMdzEdu4MJ9ZPFe67KnTQwq3lQv7SEI9r2XBQel/aEUF87frTt
+	WkYpOdobKsRKZO/m+URdKwtVDHzLPbwHAb/G/yxV6sT8nrDxcKOuhOHIIUdkDK4QmUwyOyRtNoS
+	eOjTUr7fMODEMijehKL1w=
+X-Received: by 2002:a05:6000:4692:b0:491:3fdd:af34 with SMTP id
+ ffacd0b85a97d-49d61c80db3mr13343868f8f.36.1794859448335; Mon, 16 Nov 2026
+ 12:04:08 -0800 (PST)
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -77,103 +105,81 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Date: Mon, 16 Nov 2026 20:33:20 +0100
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Jason Gunthorpe" <jgg@nvidia.com>, "Ard Biesheuvel" <ardb+git@google.com>
-Cc: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- "Paul Walmsley" <pjw@kernel.org>, "Palmer Dabbelt" <palmer@dabbelt.com>,
- "Albert Ou" <aou@eecs.berkeley.edu>, "Huacai Chen" <chenhuacai@kernel.org>,
- loongarch@lists.linux.dev, linux-riscv@lists.infradead.org
-Message-Id: <49bd9e1e-abfb-4dd9-9de5-fe4e94308fd1@app.fastmail.com>
-In-Reply-To: <179485513572.2274641.13924640952978903053.b4-review@b4>
-References: <20261116142618.1687025-17-ardb+git@google.com>
- <20261116142618.1687025-25-ardb+git@google.com>
- <179485513572.2274641.13924640952978903053.b4-review@b4>
-Subject: Re: [PATCH v3 08/15] efi/libstub: arm64: Use struct efi_image_info to access
- image properties
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+References: <20261116-work-loop-pseudo-v3-0-8cbbea1cf34f@kernel.org> <20261116-work-loop-pseudo-v3-9-8cbbea1cf34f@kernel.org>
+In-Reply-To: <20261116-work-loop-pseudo-v3-9-8cbbea1cf34f@kernel.org>
+From: Andrii Nakryiko <andrii.nakryiko@gmail.com>
+Date: Mon, 16 Nov 2026 12:03:57 -0800
+X-Gm-Features: Aa3M54q6P4M0RFDCKQ8HHGNCWJafItTSPdWR1qNwVGtToDAv2VOv8vDfWHzYR6A
+Message-ID: <CAEf4BzbLFVawibuX0wk=8uzy0WZSYHbkgK55d7rqLab2qAM1Fg@mail.gmail.com>
+Subject: Re: [PATCH RFC v3 09/44] bpf: use fc_init_pseudo() for bpffs
+To: Christian Brauner <brauner@kernel.org>
+Cc: linux-fsdevel@vger.kernel.org, Jann Horn <jannh@google.com>, 
+	Chris Mason <mason@kernel.org>, Josef Bacik <josef@toxicpanda.com>, Christoph Hellwig <hch@lst.de>, 
+	linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-nvme@lists.infradead.org, Alexander Viro <viro@zeniv.linux.org.uk>, 
+	Jan Kara <jack@suse.cz>, linux-scsi@vger.kernel.org, target-devel@vger.kernel.org, 
+	driver-core@lists.linux.dev, linux-mm@kvack.org, bpf@vger.kernel.org, 
+	linux-security-module@vger.kernel.org, selinux@vger.kernel.org, 
+	apparmor@lists.ubuntu.com, linux-nfs@vger.kernel.org, netdev@vger.kernel.org, 
+	fuse-devel@lists.linux.dev, linux-efi@vger.kernel.org, 
+	xen-devel@lists.xenproject.org, ocfs2-devel@lists.linux.dev, 
+	linux-s390@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, 
+	linux-usb@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>, 
+	linux-erofs@lists.ozlabs.org, linux-kselftest@vger.kernel.org, 
+	Alexander Mikhalitsyn <alex@amutable.com>, Chris Down <chris@chrisdown.name>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-
-
-On Mon, 16 Nov 2026, at 19:52, Jason Gunthorpe wrote:
->> [ ... 53 lines skipped ... ]
->> @@ -22,23 +21,23 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
->>  				 efi_handle_t image_handle,
->>  				 const struct efi_image_info **image_info)
->>  {
->> -	unsigned long kernel_size, kernel_codesize, kernel_memsize;
->> +	unsigned long kernel_base	= efistub_kernel_base(*image_info);
->> +	unsigned long kernel_size	= efistub_kernel_size(*image_info);
->> +	unsigned long kernel_codesize	= efistub_kernel_codesize(*image_info);
->> +	unsigned long kernel_memsize	= efistub_kernel_memsize(*image_info);
->>  	efi_status_t status;
->>  
->> -	if (image->image_base != _text) {
->> +	if (image->image_base != (void *)kernel_base) {
->>  		efi_err("FIRMWARE BUG: efi_loaded_image_t::image_base has bogus value\n");
->> -		image->image_base = _text;
->> +		image->image_base = (void *)kernel_base;
->>  	}
->>  
->> -	if (!IS_ALIGNED((u64)_text, SEGMENT_ALIGN))
->> +	if (!IS_ALIGNED(kernel_base, SEGMENT_ALIGN))
->>  		efi_err("FIRMWARE BUG: kernel image not aligned on %dk boundary\n",
->>  			SEGMENT_ALIGN >> 10);
->>  
->> -	kernel_size = _edata - _text;
->> -	kernel_codesize = __inittext_end - _text;
->> -	kernel_memsize = kernel_size + (_end - _edata);
->>  	*reserve_size = kernel_memsize;
->> -	*image_addr = (unsigned long)_text;
->> +	*image_addr = kernel_base;
->>  
->>  	status = efi_kaslr_relocate_kernel(image_addr, reserve_addr,
->>  					   reserve_size, kernel_size,
+On Mon, Nov 16, 2026 at 3:21=E2=80=AFAM Christian Brauner <brauner@kernel.o=
+rg> wrote:
 >
-> There is a further consolidation here, the two places that call
-> efi_kaslr_relocate_kernel() get the args from image_info, so we could
-> just pass image_info directly and remove the duplicated extraction and
-> extra parameters.
+> Initialize bpffs as a pseudo filesystem instead of raising
+> SB_I_NOEXEC and SB_I_NODEV by hand. This adds SB_I_PSEUDO.
 >
-> It could then handle the image_info adjustment too instead of open
-> coding it twice.
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> Reviewed-by: Alexander Mikhalitsyn <alex@amutable.com>
+> Reviewed-by: Chris Down <chris@chrisdown.name>
+> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+> ---
+>  kernel/bpf/inode.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
 
-Indeed.
+Acked-by: Andrii Nakryiko <andrii@kernel.org>
 
-> I wonder if riscv should have the segment_align and image_base checks
-> too? Maybe the whole function is just a call to
-> efi_kaslr_relocate_kernel() ?
+> diff --git a/kernel/bpf/inode.c b/kernel/bpf/inode.c
+> index c6f328e4752e1..57cf3775c0766 100644
+> --- a/kernel/bpf/inode.c
+> +++ b/kernel/bpf/inode.c
+> @@ -15,6 +15,7 @@
+>  #include <linux/namei.h>
+>  #include <linux/fs.h>
+>  #include <linux/fs_context.h>
+> +#include <linux/pseudo_fs.h>
+>  #include <linux/fs_parser.h>
+>  #include <linux/kdev_t.h>
+>  #include <linux/filter.h>
+> @@ -1197,8 +1198,6 @@ static int bpf_fill_super(struct super_block *sb, s=
+truct fs_context *fc)
+>         sb->s_magic =3D BPF_FS_MAGIC;
+>         sb->s_op =3D &bpf_super_ops;
+>         sb->s_xattr =3D bpf_fs_xattr_handlers;
+> -       sb->s_iflags |=3D SB_I_NOEXEC;
+> -       sb->s_iflags |=3D SB_I_NODEV;
+>         sb->s_time_gran =3D 1;
 >
-
-IIRC they were added specifically for RedHat's spectacularly buggy
-GRUB fork at the the time, so maybe by now we can just remove those.
-
->> [ ... 9 lines skipped ... ]
->> -asmlinkage void primary_entry(void);
->> -
->> -unsigned long primary_entry_offset(void)
->> -{
->> -	/*
->> -	 * When built as part of the kernel, the EFI stub cannot branch to the
->> -	 * kernel proper via the image header, as the PE/COFF header is
->> -	 * strictly not part of the in-memory presentation of the image, only
->> -	 * of the file representation. So instead, we need to jump to the
->> -	 * actual entrypoint in the .text region of the image.
->> -	 */
->> -	return (char *)primary_entry - _text;
->> -}
+>         inode =3D bpf_get_inode(sb, NULL, S_IFDIR | 0777);
+> @@ -1261,6 +1260,7 @@ static int bpf_init_fs_context(struct fs_context *f=
+c)
+>         opts->delegate_attachs =3D 0;
 >
-> I think this hunk belongs to the previous patch which removed the
-> caller?
+>         fc->s_fs_info =3D opts;
+> +       fc_init_pseudo(fc);
+>         fc->ops =3D &bpf_context_ops;
+>         return 0;
+>  }
 >
-
-Indeed.
-
-> Anyhow, the logic looks fine to me
+> --
+> 2.53.0
 >
-> Reviewed-by: Jason Gunthorpe <jgg@nvidia.com>
 >
-
-Thanks.
