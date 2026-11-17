@@ -1,47 +1,56 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=157.90.84.7
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794929138;
-	b=ts8dxujUQ8I6JWEfgHTrSUI20+j6gmG3HAFUOjAUwoVAUZ18ce4xsWaOppycT/b3S2jI
-	 SbtSnA4hd1gkoRiqzqkYMYHwkDLNIxknIR5XpHaVgqa29EVb9mKt3zETuaUG6h3cF+N5m
-	 TENpxM+EmBVlWU3DVLJFqd2UKnqPxjaZ0olryEtGQBvZx4XcelBPnOrQNuRyLpBajtZtX
-	 11iHfOiq0ImvJtfgLrLgGOM+Z2XSw8zYHUImw4KDvpebtaaBTtPh2T6I4sadvZgQw3EjH
-	 ge5Tw9rcv6+q/Wl9Hm2moGVUu/C2ra44yTLp/EMKSCfT5ZvPSAypmpSpt/eQWX4wK0Q==
+	t=1794941079;
+	b=ZvYXY9gSEUWHLMg7ferkZ6ueyBalgOjRnmbHDQjQ1efZP4EWIoiWF/u44QDMkO0oi6TK
+	 yItdhxpP/RcnOM2v7FJ4twjy8nUi/90KVSIXyfpj3cqXvAoUZzBicR986UkbG/QsHi02V
+	 +4x89tNbH82xCrqVfewCPrTkFgbafUPUglUHOhmmJMiyhuEh9ErQR6jmOeBurvWyUkfQ+
+	 JgLH9OJBSnr5Iw3LFbp8mqUzvcuVJ14uYbHCuwwMmrjYq8EbPEXSns/XpkqTsfuKH+lL7
+	 8V8HFf8F8MCiFhdpuXuWRrfIm2u04X9Jh9HFr37UsxzEKZ9KmURpmZMZAUNijMI8wiw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794929138;
-	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
-	 Subject:To:Cc:References:Content-Language:From:In-Reply-To:
+	a=rsa-sha256; c=relaxed/relaxed; t=1794941079;
+	h=DMARC-Filter:Received:DKIM-Signature:Message-ID:Date:MIME-Version:
+	 User-Agent:Subject:To:Cc:References:Content-Language:From:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=mLpPRRwJinjCyS610srEJx7KpX4KJuB1wBOk4FmMCNg=;
-	b=Ljxr3+VpmINI15YXYkIS40EW1FRhTj0hEGWism8bLzOkZoegS5W+WVKkqNpJU363ZkbT
-	 /rIkwXQVqMhksWph0GDhdvbBVZQoacrxNdn4igm+wj0eqYHkl4Bo0DjRqsn/+6b6Woyas
-	 eSDAijDarI/9RTwa5M/zmxN56t6ZjTRo7yhQQ/IecU3xg6f/vEXanZTz7kUdpmQNxdpBW
-	 wt9CNGEamEunq4aAzFHLAf3ASF7RN3DheEniTpUQOnuTSAA/dNfLnX/QZZuRyVnPIgrds
-	 mvuqOB/2o+mtGATv9b+ui1whmYTlbiqNpmRfy1WGqxJyWYSVUU124Ni0h0Zx1Ke0wUw==
+	bh=0jfqNSE5RORxN5ztSGlpnPPnLjFKbnPWKsd97ROo7v0=;
+	b=HkWkzyR3+AAagdfdBZBiLfzYyVRGhgocOSNC0GJmFVZwPzANUJSQrIqkNPhmsqN3ZaYh
+	 beMJa+M9iFqpacsZhSoTtRyo9yqDeQDCwmLS2g/VnOYhDxsMKtEpkA0vWmQTKPN4zsoj9
+	 D6KZ5KJWQqGG86QrDRh+TndB1MkkAU+cgDRaK86NWwvPryiIlqIGv8KGjkFqIbDjCsuGg
+	 UROqaJi/Xm6qNCt4RViTAaQCdXB92yODJqI7rNZrh/ggYg4Yb0SLYm9UUAvFhlrtTAZNN
+	 +MPHZJE05tvnsKDHP6UIxCycMsnfOQfV+qWm3zFjqpaV9oCIgaLaJEBRJL+J3imuZhA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=iNxzJ0p6;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	dmarc=pass header.from=tuxedocomputers.com;
+	spf=pass smtp.mailfrom=tuxedocomputers.com;
+	dkim=pass header.d=tuxedocomputers.com header.i=@tuxedocomputers.com header.a=rsa-sha256 header.s=default header.b=NAUiZ5bK;
+	arc=none smtp.remote-ip=157.90.84.7
+Received: from mail.tuxedocomputers.com (mail.tuxedocomputers.com [157.90.84.7])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26503606A32C;
-	Tue, 17 Nov 2026 15:25:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BD72606A330;
+	Tue, 17 Nov 2026 18:44:37 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2BD72606A330
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tuxedocomputers.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxedocomputers.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=iNxzJ0p6
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4E2F71F000C4;
-	Tue, 17 Nov 2026 15:25:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794929138;
-	bh=mLpPRRwJinjCyS610srEJx7KpX4KJuB1wBOk4FmMCNg=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=iNxzJ0p6q33rtHMw07jyxEgdwHPdz5eejr1sEWqi9xCD2Bc4mQVnJoYzm1WGPOJoZ
-	 DRL6HpDx1vpbiNEWrl2AhexzG1dNH2Q6KkDTlfAvBa5CyPAcvDTr/WD99mr40wkf8t
-	 KIlpI6W/Yib6/Z9UGdn9DLJd20z9B91KOeLM3B0CtnKeGnvaMQKchT3zLCwLtQJOQ7
-	 PYaIeM0AKmDZolC/t+aj6GZO0IrC4WNs902Ngh+FbYm+spAoOAbywGGBTPAjqegfGu
-	 Npb3+1axe7tYaxOAZgrTTJ3i5KmiwKXXl0PyL5ELQiKXoCZaWXc1Y7+uQ4Mzi5O7j3
-	 ozPtISvowmFDw==
-Message-ID: <ef76e141-491d-44a9-90a6-e9cd54526012@kernel.org>
-Date: Tue, 17 Nov 2026 16:25:32 +0100
+	dkim=pass (1024-bit key, unprotected) header.d=tuxedocomputers.com header.i=@tuxedocomputers.com header.a=rsa-sha256 header.s=default header.b=NAUiZ5bK
+Received: from [10.10.12.8] (business-024-134-105-141.24.134.pools.vodafone-ip.de [24.134.105.141])
+	(Authenticated sender: wse@tuxedocomputers.com)
+	by mail.tuxedocomputers.com (Postfix) with ESMTPSA id B2CEE2FC0057;
+	Tue, 17 Nov 2026 19:44:31 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=tuxedocomputers.com;
+	s=default; t=1794941075;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=0jfqNSE5RORxN5ztSGlpnPPnLjFKbnPWKsd97ROo7v0=;
+	b=NAUiZ5bK4QZ+3axZHETZI+uOyTJKGxPUnGjdDN/RMd1cBUO/XwlOsOmxCvEBgeQZUIdhRP
+	Jc+GSZXRw+EsJFw/gp5MS1s3c9z/9u0OGlQhb8+sP6wxLE2K+auG+AC2QR0q2zEOEXVwC8
+	HI4V3IQBP2uBdhp/Sotec0JLMk1Kk3Y=
+Authentication-Results: mail.tuxedocomputers.com;
+	auth=pass smtp.auth=wse@tuxedocomputers.com smtp.mailfrom=wse@tuxedocomputers.com
+Message-ID: <c6e794c9-bb12-43b5-a289-1b191f9f5a41@tuxedocomputers.com>
+Date: Tue, 17 Nov 2026 19:44:31 +0100
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -52,144 +61,147 @@ List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH RFC 0/6] PSCI-via-EFI to support firmware and kernel
- sharing EL2 for Apple Silicon
-To: Will Deacon <will@kernel.org>
-Cc: Ard Biesheuvel <ardb@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
- Lorenzo Pieralisi <lpieralisi@kernel.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Catalin Marinas <catalin.marinas@arm.com>,
- Sudeep Holla <sudeep.holla@kernel.org>, Janne Grunau <j@jannau.net>,
- Neal Gompa <neal@gompa.dev>, linux-arm-kernel@lists.infradead.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-efi@vger.kernel.org, asahi@lists.linux.dev
-References: <20260708-efi-psci-v1-0-9efb3abf0e4c@kernel.org>
- <9c53cfd7-e193-4441-83ca-7710060225b7@app.fastmail.com>
- <apldL6Ml91GW-tE9@J2N7QTR9R3.cambridge.arm.com>
- <aplk2hHRB7Yw9FWW@willie-the-truck>
- <eb75b82a-8910-4198-b89a-5c8b487c0fd5@app.fastmail.com>
- <cadadedb-1de1-46f0-9bfd-35eb8bdfa85b@kernel.org>
- <avxETlOGyr_WQ2zp@willie-the-truck>
+Subject: Re: [RFT] Change E820 memory map handling
+To: "Mario Limonciello (AMD)" <superm1@kernel.org>,
+ mario.limonciello@amd.com, Florent DELAHAYE <kernelorg@undead.fr>,
+ Michel-Ekimia <contact@ekimia.fr>, Konrad J Hambrick <kjhambrick@gmail.com>,
+ =?UTF-8?Q?Benoit_Gr=C3=A9goire?= <benoitg@coeus.ca>,
+ mumblingdrunkard <mumblingdrunkard@protonmail.com>,
+ Matt Hansen <2lprbe78@duck.com>, Tilman Vaeth <tilman-vaeth@web.de>,
+ Christian Homberg <Christianhomberg@gmail.com>,
+ mccricardo <mcc.ricardo@gmail.com>, bnewell <bnewell@fullaware.com>,
+ =?UTF-8?Q?Bernhard_=C3=9Cbelacker?= <bernhardu@mailbox.org>,
+ Ton Gur <kvantorrr@mail.ru>, Alessandro <sandro.it@gmail.com>,
+ Pedro Rodrigues <pedro.pfxr@gmail.com>, Amaury TC <amaurytc@gmail.com>,
+ crysman <crysman@seznam.cz>, Moataz <Moataz.zakaria@gmail.com>,
+ wilk <j.cubizolles@free.fr>, =?UTF-8?Q?Ilpo_J=C3=A4rvinen?=
+ <ilpo.jarvinen@linux.intel.com>, Bradley Morgan <brads@mainlining.org>,
+ Nikolas Joshua Britton <nbritton@exabit.io>,
+ Doug Calobrisi <doug@calobrisi.com>, Helge Deller <deller@gmx.de>,
+ Rodrigo Vivi <rodrigo.vivi@intel.com>,
+ Alexey Fomenko <alexey.fomenko@intel.com>, Eric Auger
+ <eric.auger@redhat.com>, Maciej Grochowski <Maciej.Grochowski@sony.com>
+Cc: linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-efi@vger.kernel.org
+References: <20261110-superm1-genoa-mess-v1-0-bdcb3a6f2463@kernel.org>
 Content-Language: en-US
-From: Sven Peter <sven@kernel.org>
-In-Reply-To: <avxETlOGyr_WQ2zp@willie-the-truck>
+From: Werner Sembach <wse@tuxedocomputers.com>
+In-Reply-To: <20261110-superm1-genoa-mess-v1-0-bdcb3a6f2463@kernel.org>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
+Hi,
 
+Am 10.11.26 um 19:50 schrieb Mario Limonciello (AMD):
+> Commit 07eab0901ede ("efi/x86: Remove EfiMemoryMappedIO from E820 map")
+> removes every EFI MMIO descriptor of at least 256KB from E820.  This
+> makes host bridge space covered by those descriptors available for PCI
+> BAR allocation and avoids maintaining quirks for every affected system.
+>
+> This helped a number of systems, but caused a regression on AMD Genoa
+> which has a hole that is intentionally in this list and shouldn't be
+> reassigned.
+>
+> Ilpo has produced a patch series[1] that changes the policy for reservations
+> that may actually help this issue.  To validate whether it works we need
+> to test removing the E820 reservation, which has a risk at causing problems
+> with systems.
+>
+> On this RFT I've CCed everyone that I could find a public address for that
+> commented on the original issue that lead to commit 07eab0901ede ("efi/x86:
+> Remove EfiMemoryMappedIO from E820 map").
+>
+> I would like to ask that this branch be tested.
+>
+> https://git.kernel.org/pub/scm/linux/kernel/git/superm1/linux.git/log/?h=superm1/genoa-mess
+>
+> Here is the flow I would like to see:
+>   1. Test 7.4-rc2 (vanilla - no changes please)
+>   2. Test this branch (superm1/genoa-mess)
+>   3. If this branch fails, please revert this commit from the branch and test again.
+>      commit 35c9c60ea8c1c ("Revert "x86/PCI: Add E820 quirks for Clevo NL4XLU and Lenovo Yoga C940"")
+>
+> In all cases please check whether your original issue exists and comment if it does.
+>
+> I would like to know BOTH positive and negative testing with this series so we can have an idea
+> if this approach is viable.
 
-On 17.11.26 13:10, Will Deacon wrote:
-> On Sun, Nov 15, 2026 at 07:38:35PM +0100, Sven Peter wrote:
->>
->>
->> On 03.09.26 15:25, Ard Biesheuvel wrote:
->>> On Thu, 3 Sep 2026, at 14:15, Will Deacon wrote:
->>>> On Thu, Sep 03, 2026 at 12:42:39PM +0100, Mark Rutland wrote:
->>>>> On Thu, Sep 03, 2026 at 01:34:56PM +0200, Ard Biesheuvel wrote:
->>>>>> On Wed, 8 Jul 2026, at 09:15, Sven Peter wrote:
->>>>>>> This series adds a custom EFI table that points to a PSCI entry point
->>>>>>> (plus some other stuff that has to be available before EFI runtime
->>>>>>> services are set up) and adds support for this new conduit to the psci
->>>>>>> code. We can't directly use the normal EFI runtime path because that one
->>>>>>> takes a sleeping lock and we need to be able to call into PSCI from
->>>>>>> atomic context during e.g. cpu bringup or during idle.
->>>>>>> It also adds support for specifying the specific MAIR attributes for EFI
->>>>>>> runtime mappings as defined in the latest UEFI spec since Apple Silicon
->>>>>>> is rather allergic to using Device-nGnRnE vs. Device-nGnRE for its MMIO.
->>>>>
->>>>>>>         dt-bindings: arm: psci: Add EFI conduit
->>>>>>>         arm64/efi: Add and parse custom PSCI EFI configuration table
->>>>>>>         efi: Add EFI_MEMORY_ISA_{MASK,VALID}
->>>>>>>         arm64/efi: Honor EFI_MEMORY_ISA_MASK for Device-nGnRnE vs -nGnRE
->>>>>>>         firmware/psci: Add EFI runtime conduit
->>>>>>>         arm64: dts: apple: t8103: Add PSCI and CPU idle states
->>>>>>>
->>>>>>
->>>>>> I've picked up patches #3 and #4, which are useful in their own right.
->>>>>>
->>>>>> I'm not sure if the arm64 maintainers will want to consider this, but
->>>>>> I think it's a reasonable compromise, as it puts the abstraction in
->>>>>> the right place.
->>>>>
->>>>> Sorry for the late reply; I've been away almost all of August and I'm
->>>>> slowly catching up on things.
->>>>>
->>>>> As with last time this was proposed (in abstract), I am not happy about
->>>>> bodging an EFI conduit into PSCI, given that the manner in which state
->>>>> is managed is completely different from SMCCC.
->>>>>
->>>>> If we need a mechanism for doing hotplug and/or idle without HVC/SMC,
->>>>> that's one thing we can consider. I don't think we should pretend that
->>>>> it is PSCI.
->>>>
->>>> What do you have in mind for an alternative mechanism? I understand your
->>>> objection to this proposal, but at least it keeps the interface fairly
->>>> high-level and avoids opening the flood gates for a bunch of SoC-specific
->>>> idle routines. Are you thinking of extensions to the PSCI spec or
->>>> something else?
->>>>
->>>
->>> I can't speak for Mark, of course, but I could imagine EFI being used as a
->>> conduit to provide a callable set of interfaces (with a rigorously defined
->>> set of constraints such as the ones in this patch, i.e., reentrancy, no FP
->>> or SIMD, not relying on ISA features that the OS needs to know about and
->>> enable, etc).
->>>
->>> There is prior art here in ACPI PRM, which does something similar, and this
->>> also relies on EFI runtime services.
->>>
->>> You'd still need to implement the CPU ops and a cpuidle driver afaict (no
->>> expert here), but at least those would be coded against an interface that
->>> the kernel itself specified, and can be made as generic as we choose to.
->>>
->>> Not saying this is all great, but it might be a worthwhile compromise to
->>> consider.
->>
->> Finally getting back to this series...
->>
->>
->> I'd definitely like to keep mapping the resident firmware using EFI runtime
->> services because otherwise I'd have to duplicate a whole lot of tricky code
->> to do the same thing via some other means (e.g. a device tree nodes that
->> contains all mappings + callbacks) and I just don't see much value in that.
->>
->> I'm happy to just drop the PSCI part though and replace that with a simple
->> and somewhat generic "efi-rt" (or similar) cpuidle driver and make that one
->> have similar requirements like I added for this RFC series and expose bunch
->> of generic callbacks (that will just happen to resemble PSCI functions very
->> much ;)) via a custom EFI table. That would keep PSCI out of all of this but
->> come at the cost of an additional cpuidle driver.
->>
->> I don't think that would open any flood gates for SoC-specific drivers since
->> we could just point them to the generic one and tell them to use that one if
->> they can't do PSCI for some reason.
->>
->>
->> Now before I go off and prototype this: Would this approach be fine in
->> general with you, Mark and Will?
-> 
-> tbh, if the "efi-rt" thing is just PSCI with a different conduit and that
-> conduit is properly documented, then I really don't see the point in keeping
-> it separate. However. I suspect that we probably all have slightly different
-> opinions here which isn't going to help you very much :(
+I noticed that you only removed the quirk from 2 devices: 
+https://git.kernel.org/pub/scm/linux/kernel/git/superm1/linux.git/commit/?h=superm1/genoa-mess&id=35c9c60ea8c1c05631837f4094a09c51f00bec4b
 
-Yeah, well, I agree but I really don't have a strong opinion or any good 
-argument if either "efi-rt" vs "psci-via-efi" is better or worse. I only 
-think both are better than SoC-specific cpuidle and cpu_ops drivers and 
-I have no idea how else we could do this. (We could drop the kernel to 
-EL1 and do "normal" PSCI in EL2 then but that would be much worse than 
-either of those options imho)
+Do you only want these 2 devices tested or for example also the X170KM-G?
 
-And especially with M4+ I'd like to have something that can go upstream 
-because normal wfi loses most general purpose regs there and has to be 
-disabled which is not great.
+Best regards,
 
-I can also just prototype the efi-rt cpuidle+cpu_ops thing and then we 
-can take a look at it as well and see if that's better than what I have 
-in this series if that helps but I'd rather not spend that time if that 
-has no chance of being accepted either.
+Werner
 
-
-Sven
-
+>
+> Link: https://lore.kernel.org/linux-pci/20261106134341.39493-1-ilpo.jarvinen@linux.intel.com/ [1]
+> Cc: Florent DELAHAYE <kernelorg@undead.fr> # Clevo NL4XLU
+> Cc: Michel-Ekimia <contact@ekimia.fr> # Clevo NL51CU2 (not currently quirked)
+> Cc: Konrad J Hambrick <kjhambrick@gmail.com> # Clevo X170KM-G
+> Cc: Werner Sembach <wse@tuxedocomputers.com> # Clevo X170KM-G
+> Cc: Benoit Grégoire <benoitg@coeus.ca> # Lenovo Yoga C940-14IIL
+> Cc: mumblingdrunkard <mumblingdrunkard@protonmail.com> # Lenovo Yoga C940-14IIL
+> Cc: Matt Hansen <2lprbe78@duck.com> # Lenovo IdeaPad 3 15IIL05
+> Cc: Tilman Vaeth <tilman-vaeth@web.de> # Lenovo IdeaPad 5 14IIL05
+> Cc: Christian Homberg <Christianhomberg@gmail.com> # Lenovo IdeaPad 5 14IIL05 (81YH)
+> Cc: mccricardo <mcc.ricardo@gmail.com> # Lenovo IdeaPad 5 14IIL05
+> Cc: bnewell <bnewell@fullaware.com> # Lenovo IdeaPad Slim 7 14IIL05 (82A4)
+> Cc: Bernhard Übelacker <bernhardu@mailbox.org> # Lenovo V15-IIL (82C500JUGE)
+> Cc: Ton Gur <kvantorrr@mail.ru> # Lenovo IdeaPad 3 15IIL05
+> Cc: Alessandro <sandro.it@gmail.com> # Lenovo IdeaPad 3 (exact model not posted)
+> Cc: Pedro Rodrigues <pedro.pfxr@gmail.com> # Lenovo IdeaPad (exact model not posted)
+> Cc: Amaury TC <amaurytc@gmail.com> # Lenovo BS145-15IIL (82HB)
+> Cc: crysman <crysman@seznam.cz> # Acer Spin 5 SP513-54N
+> Cc: Moataz <Moataz.zakaria@gmail.com> # Acer Spin 5 SP513-54N
+> Cc: wilk <j.cubizolles@free.fr> # Acer Spin 5 SP513-54N
+>
+> These are the patches to be tested by checking that branch.
+> ---
+> Ilpo Järvinen (14):
+>        resource: Mark free space assigned
+>        parisc/PCI: Clean up resource debug print & use dynamic debug
+>        PCI: Don't size or assign disabled BARs
+>        PCI: Use __ffs64() for resource_size_t typed align
+>        PCI: Prevent zero align from reaching __ffs64()
+>        linux/log2.h: Add 64-bit roundup/down_pow_of_two_u64() variants
+>        PCI: Derive aligns[] array size in a define
+>        PCI: Honor alignment overrides
+>        PCI: Place resources to either edge of the window
+>        PCI: Separate align/raw size calculation from pbus_size_mem()
+>        PCI: Calculate bridge window with optional sizes from scratch
+>        PCI: Move size/align calculation fully into __pbus_size_mem()
+>        PCI: Fix composite resource sizing
+>        PCI: Add debug printing to window sizing
+>
+> Mario Limonciello (3):
+>        x86/PCI: Add E820 quirks for Clevo NL4XLU and Lenovo Yoga C940
+>        Revert "efi/x86: Remove EfiMemoryMappedIO from E820 map"
+>        Revert "x86/PCI: Add E820 quirks for Clevo NL4XLU and Lenovo Yoga C940"
+>
+>   arch/alpha/kernel/pci.c          |   3 +-
+>   arch/arm/kernel/bios32.c         |   5 +-
+>   arch/m68k/kernel/pcibios.c       |   4 +-
+>   arch/mips/pci/pci-generic.c      |   5 +-
+>   arch/mips/pci/pci-legacy.c       |   5 +-
+>   arch/parisc/kernel/pci.c         |  20 +--
+>   arch/powerpc/kernel/pci-common.c |   5 +-
+>   arch/sh/drivers/pci/pci.c        |   5 +-
+>   arch/x86/pci/i386.c              |   5 +-
+>   arch/x86/platform/efi/efi.c      |  45 -------
+>   arch/xtensa/kernel/pci.c         |   5 +-
+>   drivers/char/agp/intel-gtt.c     |   5 +-
+>   drivers/gpu/drm/i915/i915_gmch.c |   5 +-
+>   drivers/pci/pci.c                |   4 +-
+>   drivers/pci/pci.h                |   6 +
+>   drivers/pci/setup-bus.c          | 263 +++++++++++++++++++++++++--------------
+>   drivers/pci/setup-res.c          | 246 ++++++++++++++++++++++++++++++++----
+>   include/linux/log2.h             |  52 ++++++++
+>   include/linux/pci.h              |  15 ++-
+>   kernel/resource.c                |   3 +-
+>   20 files changed, 510 insertions(+), 196 deletions(-)
+> ---
+> base-commit: 7475ea8b58616b33c04afb976cf0fbaad9dd63fb
+> change-id: 20261110-superm1-genoa-mess-2195512e39e7
+>
