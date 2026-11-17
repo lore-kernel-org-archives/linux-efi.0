@@ -1,123 +1,47 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.210.179
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794924752;
-	b=uxNkoSHeoJBGX5oCkSL5X3kCbcf6lPsVjmcJaGPltmR4VFUYnEPkmrv01o/Phz5H0I1K
-	 Nuhwzvuti2f23rLDFTrMMZ2DsGnm+LFGsVTVf05fvLwMVVbQGX6ruFP3z+PtyV1f+omLB
-	 Y4cZ4OGZK4li6Oi/xXEGhLQUPkMLZ7Mw0/hNlS4SJU7gO0KO+Ad5WXUdTfzc8kC6d3/oi
-	 uoBaaA3iUCfCj5EszhYWB179PCZDHIvRRtS6Uel3ahwi50gbY3u3jLBLN46bK+ZMUqxdg
-	 UOuCBeV3qKL2pURgHWBrGn3AJrUI3Gy2Mercb4fUYwLHJTeSCKFwJP/YQb821UwDOzA==
+	t=1794929138;
+	b=ts8dxujUQ8I6JWEfgHTrSUI20+j6gmG3HAFUOjAUwoVAUZ18ce4xsWaOppycT/b3S2jI
+	 SbtSnA4hd1gkoRiqzqkYMYHwkDLNIxknIR5XpHaVgqa29EVb9mKt3zETuaUG6h3cF+N5m
+	 TENpxM+EmBVlWU3DVLJFqd2UKnqPxjaZ0olryEtGQBvZx4XcelBPnOrQNuRyLpBajtZtX
+	 11iHfOiq0ImvJtfgLrLgGOM+Z2XSw8zYHUImw4KDvpebtaaBTtPh2T6I4sadvZgQw3EjH
+	 ge5Tw9rcv6+q/Wl9Hm2moGVUu/C2ra44yTLp/EMKSCfT5ZvPSAypmpSpt/eQWX4wK0Q==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794924752;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=X97KLM2kc+1MOkKgI4F1FwrxFLI65NOxfbxMj5IVHe8=;
-	b=VvKFQiANCpQK6oKl2cGwMP5gv8zuUDwLS2iqceY2TqfL1L3ZaEXzkzsAGavkujR49bHX
-	 RBzrkWeQhYWcJ92B97JC9EJ97s1vn0JIzUN17/G06+KNkmSkE6ZDw69mIkRhQmwzgG/a6
-	 3N7OKdKlzvCuTOyWJ+c+kWTQl9E1aJHMOB9d/Pi5H8ErycNpQdLxaxcRaOete2VD91Y5m
-	 AA+wW8EWEDUheel2yhhMuvi2vP92OauQyREXT8n630uXkUWrJ8HsDdDXvV4tdAcuF5P9a
-	 1Ra5LFKAjUgV77pAK3cfqFSdsAAYHgyiwVCEUEJdryqI3WHKEZarLtRJJTjrh4ytarw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794929138;
+	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
+	 Subject:To:Cc:References:Content-Language:From:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=mLpPRRwJinjCyS610srEJx7KpX4KJuB1wBOk4FmMCNg=;
+	b=Ljxr3+VpmINI15YXYkIS40EW1FRhTj0hEGWism8bLzOkZoegS5W+WVKkqNpJU363ZkbT
+	 /rIkwXQVqMhksWph0GDhdvbBVZQoacrxNdn4igm+wj0eqYHkl4Bo0DjRqsn/+6b6Woyas
+	 eSDAijDarI/9RTwa5M/zmxN56t6ZjTRo7yhQQ/IecU3xg6f/vEXanZTz7kUdpmQNxdpBW
+	 wt9CNGEamEunq4aAzFHLAf3ASF7RN3DheEniTpUQOnuTSAA/dNfLnX/QZZuRyVnPIgrds
+	 mvuqOB/2o+mtGATv9b+ui1whmYTlbiqNpmRfy1WGqxJyWYSVUU124Ni0h0Zx1Ke0wUw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=exabit.io;
-	spf=none smtp.mailfrom=exabit.io;
-	dkim=pass header.d=exabit-io.20260707.gappssmtp.com header.i=@exabit-io.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=Bo4GSKea;
-	arc=none smtp.remote-ip=209.85.210.179
-Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=iNxzJ0p6;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36290606A8A5
-	for <linux-efi@vger.kernel.org>; Tue, 17 Nov 2026 14:12:31 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 36290606A8A5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=exabit.io
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=exabit.io
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26503606A32C;
+	Tue, 17 Nov 2026 15:25:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=exabit-io.20260707.gappssmtp.com header.i=@exabit-io.20260707.gappssmtp.com header.a=rsa-sha256 header.s=20260707 header.b=Bo4GSKea
-Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-8b6a88e4341so1961472b3a.1
-        for <linux-efi@vger.kernel.org>; Tue, 17 Nov 2026 06:12:31 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=exabit-io.20260707.gappssmtp.com; s=20260707; t=1794924751; x=1795529551; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=X97KLM2kc+1MOkKgI4F1FwrxFLI65NOxfbxMj5IVHe8=;
-        b=Bo4GSKeaMWBcCzBQUj30BiVDaBCBzDsrtg0JghncdHHEJhWe3A8ZjwoR+gn1zHiKzU
-         uwoCRo1HYZ8Vcf3wHIIHfM2fhFHdVDdbI+qRVrYCdx3LunVxsDienj03k2kIVvbQrDmu
-         Yj4ClXAsqfBFFlUd2WJPEMV3cyCf8LqvFsWDpygOochRGDtYOD1o3xKGfx3C5QnltGMs
-         nIaeFzqcVi3Oc7VfmOEKhxI88Xm6rsZxegW1ymQiGD0lWZ9iPky3HDbSVOv1sf1UQfJM
-         PlzC3KhruPsA9KSJw/bYCEp2hwwhcaD93e+Hkpih9RjDTt35IQvgPnYeBJ23lEyrvvjY
-         a+SA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794924751; x=1795529551;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=X97KLM2kc+1MOkKgI4F1FwrxFLI65NOxfbxMj5IVHe8=;
-        b=Rp3hd+vMEf1ol6Vji21jKAv2aiHxetp1fJf3soKbggzw0xLCVCcVu6oWPyjWtMQfd0
-         jQQ5pRzTfnxQmCWgU0BVbbdokdJdCIQkGFKG/iMtn0gKZP7h6bOq+nKCYUTgxLxG3JYo
-         DGwHVR2BShrC2gzvEWL+Mr7d3ejQe4v5fntMn6tbhgD2hkil/RP0B1NiGOO4kARNt7qv
-         WhH0ntHYBeo+BJ8auT19eqFdNPXK/XiCtJy4CRhRwWDFlCLUsvUUV3ySnnIxzMS4iLQ1
-         VjGMpY0UGu8Bf/qxe1FCbwgiNrTr8euEdbkYu1J27esIHDhirAuRvRE/2c/eA24CkuN4
-         x9Mg==
-X-Forwarded-Encrypted: i=1; AL+hErFqE+y9Sk5ipe2DXsfQoMzWbSlmPqPl5Xqk2KoYSXuKRYK2Ks9aVH+mW/9X0Dok+kBtY7T+NqBXHLA=@vger.kernel.org
-X-Gm-Message-State: APuU4Z9OgwbqwiXnrADdIqbsUhnHkhqq+NpVvSpH372t8cq7lTSFXhK3
-	QDqk3tTQzPI/Np3AzMLAnyOxRUCzgF0ATVd+S30Hl0pKKJecGfSZI1iYDXRaGDD5lfQ=
-X-Gm-Gg: AYBFou0bhab6J8Tou8erKpN6u7JJedr8EEw+FhQcspQxUb8dFuhXuXJtv4jhbe77u3t
-	0yIsMX6arIWdkklUNGy8lxggbdo1SUnwq7OLHmdICf/UFYxCB/lzE4oAbdkRTt78k8NCWx/x9mr
-	H8NUNP88YjEHPS68LhKvHmXeO8yuutprGh1aZ2dUH8+qgiQYYy9p5wUrjGPoLzojyGVD9An04B4
-	1pAMJksrh2sJ9QO6M+7eLDMgpbHNEeUJENr0Jcx5g7GsUdcZUJWLvQhGlDaEnkcj1KK478VpH8A
-	bEIt7Kdbeq2b63/7YEAYrtdvjNdHLkj7zqDMhrnpbHkVN8NggLmbHA2UYFagWRFHNtTzXNEXbF4
-	cd4O8y9ZfNykV5KerZAXfAvkAInAHiiGhSPBn/70M3FosOJ/Vt5zmurDJnNN0HoxfyA710bO8j8
-	qe1C0PkjWM5nvoIDJTv8Yr3QvYDwuw19CKiEjZhLdxrOLoBs7sIB8OOvbxNz8i58I9eRQiHixcU
-	nrPr92YHDe/gFAdiySuISkylo2e8Rs+UrIecDH7xfv/cfWwAf+akolWqR8N7iljp3VXRYx1fvfu
-	wEqMBYgrXarQncUFZ6IkPIz7AEhANlWZItFjowdUQGnKITEzEAf3Va02YxVD8jAmEpOma4+wq4w
-	cONkCjeJGE3nshNj7sFK6LR3IzQA3N0Yr3aCLlrT754RHcuvKRhVxI50=
-X-Received: by 2002:a05:6a00:2daa:b0:8b5:b10d:3c0c with SMTP id d2e1a72fcca58-8beaf3a8079mr12420935b3a.0.1794924751156;
-        Tue, 17 Nov 2026 06:12:31 -0800 (PST)
-Received: from macpro2019-01.. (c-24-20-225-94.hsd1.or.comcast.net. [24.20.225.94])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-8bed12a7edbsm5271795b3a.18.2026.11.17.06.12.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 17 Nov 2026 06:12:30 -0800 (PST)
-From: Nikolas Joshua Britton <nbritton@exabit.io>
-To: "Mario Limonciello (AMD)" <superm1@kernel.org>
-Cc: mario.limonciello@amd.com,
-	Florent DELAHAYE <kernelorg@undead.fr>,
-	Michel-Ekimia <contact@ekimia.fr>,
-	Konrad J Hambrick <kjhambrick@gmail.com>,
-	Werner Sembach <wse@tuxedocomputers.com>,
-	=?utf-8?q?Benoit_Gr=C3=A9goire?= <benoitg@coeus.ca>,
-	mumblingdrunkard <mumblingdrunkard@protonmail.com>,
-	Matt Hansen <2lprbe78@duck.com>,
-	Tilman Vaeth <tilman-vaeth@web.de>,
-	Christian Homberg <Christianhomberg@gmail.com>,
-	mccricardo <mcc.ricardo@gmail.com>,
-	bnewell <bnewell@fullaware.com>,
-	=?utf-8?q?Bernhard_=C3=9Cbelacker?= <bernhardu@mailbox.org>,
-	Ton Gur <kvantorrr@mail.ru>,
-	Alessandro <sandro.it@gmail.com>,
-	Pedro Rodrigues <pedro.pfxr@gmail.com>,
-	Amaury TC <amaurytc@gmail.com>,
-	crysman <crysman@seznam.cz>,
-	Moataz <Moataz.zakaria@gmail.com>,
-	wilk <j.cubizolles@free.fr>,
-	=?utf-8?q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
-	Bradley Morgan <brads@mainlining.org>,
-	Doug Calobrisi <doug@calobrisi.com>,
-	Helge Deller <deller@gmx.de>,
-	Rodrigo Vivi <rodrigo.vivi@intel.com>,
-	Alexey Fomenko <alexey.fomenko@intel.com>,
-	Eric Auger <eric.auger@redhat.com>,
-	Maciej Grochowski <Maciej.Grochowski@sony.com>,
-	linux-pci@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-efi@vger.kernel.org
-Subject: Re: [RFT] Change E820 memory map handling
-Date: Tue, 17 Nov 2026 14:12:29 +0000
-Message-ID: <20261117141229.11971-1-nbritton@exabit.io>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20261110-superm1-genoa-mess-v1-0-bdcb3a6f2463@kernel.org>
-References: <20261110-superm1-genoa-mess-v1-0-bdcb3a6f2463@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=iNxzJ0p6
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4E2F71F000C4;
+	Tue, 17 Nov 2026 15:25:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794929138;
+	bh=mLpPRRwJinjCyS610srEJx7KpX4KJuB1wBOk4FmMCNg=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=iNxzJ0p6q33rtHMw07jyxEgdwHPdz5eejr1sEWqi9xCD2Bc4mQVnJoYzm1WGPOJoZ
+	 DRL6HpDx1vpbiNEWrl2AhexzG1dNH2Q6KkDTlfAvBa5CyPAcvDTr/WD99mr40wkf8t
+	 KIlpI6W/Yib6/Z9UGdn9DLJd20z9B91KOeLM3B0CtnKeGnvaMQKchT3zLCwLtQJOQ7
+	 PYaIeM0AKmDZolC/t+aj6GZO0IrC4WNs902Ngh+FbYm+spAoOAbywGGBTPAjqegfGu
+	 Npb3+1axe7tYaxOAZgrTTJ3i5KmiwKXXl0PyL5ELQiKXoCZaWXc1Y7+uQ4Mzi5O7j3
+	 ozPtISvowmFDw==
+Message-ID: <ef76e141-491d-44a9-90a6-e9cd54526012@kernel.org>
+Date: Tue, 17 Nov 2026 16:25:32 +0100
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -127,72 +51,145 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH RFC 0/6] PSCI-via-EFI to support firmware and kernel
+ sharing EL2 for Apple Silicon
+To: Will Deacon <will@kernel.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>, Mark Rutland <mark.rutland@arm.com>,
+ Lorenzo Pieralisi <lpieralisi@kernel.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Catalin Marinas <catalin.marinas@arm.com>,
+ Sudeep Holla <sudeep.holla@kernel.org>, Janne Grunau <j@jannau.net>,
+ Neal Gompa <neal@gompa.dev>, linux-arm-kernel@lists.infradead.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-efi@vger.kernel.org, asahi@lists.linux.dev
+References: <20260708-efi-psci-v1-0-9efb3abf0e4c@kernel.org>
+ <9c53cfd7-e193-4441-83ca-7710060225b7@app.fastmail.com>
+ <apldL6Ml91GW-tE9@J2N7QTR9R3.cambridge.arm.com>
+ <aplk2hHRB7Yw9FWW@willie-the-truck>
+ <eb75b82a-8910-4198-b89a-5c8b487c0fd5@app.fastmail.com>
+ <cadadedb-1de1-46f0-9bfd-35eb8bdfa85b@kernel.org>
+ <avxETlOGyr_WQ2zp@willie-the-truck>
+Content-Language: en-US
+From: Sven Peter <sven@kernel.org>
+In-Reply-To: <avxETlOGyr_WQ2zp@willie-the-truck>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Tue, 10 Nov 2026, Mario Limonciello (AMD) wrote:
-> Here is the flow I would like to see:
->  1. Test 7.4-rc2 (vanilla - no changes please)
->  2. Test this branch (superm1/genoa-mess)
->  3. If this branch fails, please revert this commit from the branch and test again.
->     commit 35c9c60ea8c1c ("Revert "x86/PCI: Add E820 quirks for Clevo NL4XLU and Lenovo Yoga C940"")
->
-> In all cases please check whether your original issue exists and comment if it does.
 
-I tested on the Mac Pro 7,1 from my bridge window report [1]: two Radeon
-Pro Vega II Duo cards, four Vega 20 dies behind two root ports, BAR0
-resized to 32G on every die. Both kernels were built from the same
-.config.
 
-1. v7.4-rc2: the original issue exists. Both root port windows stay at
-   32770M, the second die's branch (08:10.0 and 16:10.0) gets no
-   prefetchable window, and 0e:00.0 and 1c:00.0 are left without BARs:
+On 17.11.26 13:10, Will Deacon wrote:
+> On Sun, Nov 15, 2026 at 07:38:35PM +0100, Sven Peter wrote:
+>>
+>>
+>> On 03.09.26 15:25, Ard Biesheuvel wrote:
+>>> On Thu, 3 Sep 2026, at 14:15, Will Deacon wrote:
+>>>> On Thu, Sep 03, 2026 at 12:42:39PM +0100, Mark Rutland wrote:
+>>>>> On Thu, Sep 03, 2026 at 01:34:56PM +0200, Ard Biesheuvel wrote:
+>>>>>> On Wed, 8 Jul 2026, at 09:15, Sven Peter wrote:
+>>>>>>> This series adds a custom EFI table that points to a PSCI entry point
+>>>>>>> (plus some other stuff that has to be available before EFI runtime
+>>>>>>> services are set up) and adds support for this new conduit to the psci
+>>>>>>> code. We can't directly use the normal EFI runtime path because that one
+>>>>>>> takes a sleeping lock and we need to be able to call into PSCI from
+>>>>>>> atomic context during e.g. cpu bringup or during idle.
+>>>>>>> It also adds support for specifying the specific MAIR attributes for EFI
+>>>>>>> runtime mappings as defined in the latest UEFI spec since Apple Silicon
+>>>>>>> is rather allergic to using Device-nGnRnE vs. Device-nGnRE for its MMIO.
+>>>>>
+>>>>>>>         dt-bindings: arm: psci: Add EFI conduit
+>>>>>>>         arm64/efi: Add and parse custom PSCI EFI configuration table
+>>>>>>>         efi: Add EFI_MEMORY_ISA_{MASK,VALID}
+>>>>>>>         arm64/efi: Honor EFI_MEMORY_ISA_MASK for Device-nGnRnE vs -nGnRE
+>>>>>>>         firmware/psci: Add EFI runtime conduit
+>>>>>>>         arm64: dts: apple: t8103: Add PSCI and CPU idle states
+>>>>>>>
+>>>>>>
+>>>>>> I've picked up patches #3 and #4, which are useful in their own right.
+>>>>>>
+>>>>>> I'm not sure if the arm64 maintainers will want to consider this, but
+>>>>>> I think it's a reasonable compromise, as it puts the abstraction in
+>>>>>> the right place.
+>>>>>
+>>>>> Sorry for the late reply; I've been away almost all of August and I'm
+>>>>> slowly catching up on things.
+>>>>>
+>>>>> As with last time this was proposed (in abstract), I am not happy about
+>>>>> bodging an EFI conduit into PSCI, given that the manner in which state
+>>>>> is managed is completely different from SMCCC.
+>>>>>
+>>>>> If we need a mechanism for doing hotplug and/or idle without HVC/SMC,
+>>>>> that's one thing we can consider. I don't think we should pretend that
+>>>>> it is PSCI.
+>>>>
+>>>> What do you have in mind for an alternative mechanism? I understand your
+>>>> objection to this proposal, but at least it keeps the interface fairly
+>>>> high-level and avoids opening the flood gates for a bunch of SoC-specific
+>>>> idle routines. Are you thinking of extensions to the PSCI spec or
+>>>> something else?
+>>>>
+>>>
+>>> I can't speak for Mark, of course, but I could imagine EFI being used as a
+>>> conduit to provide a callable set of interfaces (with a rigorously defined
+>>> set of constraints such as the ones in this patch, i.e., reentrancy, no FP
+>>> or SIMD, not relying on ISA features that the OS needs to know about and
+>>> enable, etc).
+>>>
+>>> There is prior art here in ACPI PRM, which does something similar, and this
+>>> also relies on EFI runtime services.
+>>>
+>>> You'd still need to implement the CPU ops and a cpuidle driver afaict (no
+>>> expert here), but at least those would be coded against an interface that
+>>> the kernel itself specified, and can be made as generic as we choose to.
+>>>
+>>> Not saying this is all great, but it might be a worthwhile compromise to
+>>> consider.
+>>
+>> Finally getting back to this series...
+>>
+>>
+>> I'd definitely like to keep mapping the resident firmware using EFI runtime
+>> services because otherwise I'd have to duplicate a whole lot of tricky code
+>> to do the same thing via some other means (e.g. a device tree nodes that
+>> contains all mappings + callbacks) and I just don't see much value in that.
+>>
+>> I'm happy to just drop the PSCI part though and replace that with a simple
+>> and somewhat generic "efi-rt" (or similar) cpuidle driver and make that one
+>> have similar requirements like I added for this RFC series and expose bunch
+>> of generic callbacks (that will just happen to resemble PSCI functions very
+>> much ;)) via a custom EFI table. That would keep PSCI out of all of this but
+>> come at the cost of an additional cpuidle driver.
+>>
+>> I don't think that would open any flood gates for SoC-specific drivers since
+>> we could just point them to the generic one and tell them to use that one if
+>> they can't do PSCI for some reason.
+>>
+>>
+>> Now before I go off and prototype this: Would this approach be fine in
+>> general with you, Mark and Will?
+> 
+> tbh, if the "efi-rt" thing is just PSCI with a different conduit and that
+> conduit is properly documented, then I really don't see the point in keeping
+> it separate. However. I suspect that we probably all have slightly different
+> opinions here which isn't going to help you very much :(
 
-  pci 0000:0e:00.0: BAR 0 [mem size 0x800000000 64bit pref]: can't assign; no space
-  pci 0000:0e:00.0: BAR 2 [mem size 0x00200000 64bit pref]: can't assign; no space
+Yeah, well, I agree but I really don't have a strong opinion or any good 
+argument if either "efi-rt" vs "psci-via-efi" is better or worse. I only 
+think both are better than SoC-specific cpuidle and cpu_ops drivers and 
+I have no idea how else we could do this. (We could drop the kernel to 
+EL1 and do "normal" PSCI in EL2 then but that would be much worse than 
+either of those options imho)
 
-2. superm1/genoa-mess (35c9c60ea8c1): the original issue is gone. Every
-   BAR is assigned, both root port windows are 96G, and all four dies
-   get their 32G BAR0. The layout is identical to the one I reported
-   for v5 on v7.2.15 [2]. The first root port:
+And especially with M4+ I'd like to have something that can go upstream 
+because normal wfi loses most general purpose regs there and has to be 
+disabled which is not great.
 
-  pci 0000:06:00.0: bridge window [mem 0x9e800000000-0x9ffffffffff 64bit pref]: assigned
-  pci 0000:07:00.0: bridge window [mem 0x9e800000000-0x9ffffffffff 64bit pref]: assigned
-  pci 0000:08:08.0: bridge window [mem 0x9f7ffe00000-0x9ffffffffff 64bit pref]: assigned
-  pci 0000:08:10.0: bridge window [mem 0x9e800000000-0x9f0001fffff 64bit pref]: assigned
-  pci 0000:0b:00.0: BAR 0 [mem 0x9f800000000-0x9ffffffffff 64bit pref]: assigned
-  pci 0000:0b:00.0: BAR 2 [mem 0x9f7ffe00000-0x9f7ffffffff 64bit pref]: assigned
-  pci 0000:0e:00.0: BAR 0 [mem 0x9e800000000-0x9efffffffff 64bit pref]: assigned
-  pci 0000:0e:00.0: BAR 2 [mem 0x9f000000000-0x9f0001fffff 64bit pref]: assigned
+I can also just prototype the efi-rt cpuidle+cpu_ops thing and then we 
+can take a look at it as well and see if that's better than what I have 
+in this series if that helps but I'd rather not spend that time if that 
+has no chance of being accepted either.
 
-   amdgpu binds all four dies, and compute and peer-to-peer transfers
-   across them work.
 
-3. Not needed, since the branch works.
+Sven
 
-As for E820 itself, 07eab0901ede removes a single descriptor on this
-machine:
-
-  efi: Remove mem126: MMIO range=[0x60000000-0x600fffff] (1MB) from e820 map
-
-That is the first 1MB of ECAM (0x60000000-0x6fffffff), below all host
-bridge windows. On the branch the line is gone and /proc/iomem keeps
-5e000000-600fffff as Reserved. The firmware is dated 2026, so both
-kernels print "PCI: Ignoring E820 reservations for host bridge windows"
-and the restored entry could not clip a window here anyway. Apart from
-the efi/e820 lines and what follows from the BAR assignment (amdgpu
-binding two more dies), the kernel logs of the two boots do not differ.
-
-Also, the boot failure on v7.3 and later that I mentioned in the v5
-thread does not reproduce with v7.4-rc2, so both kernels here are
-plain upstream. It does not reproduce with Ubuntu 26.10's 7.3.0-10
-kernel either, and I have since tested v5 on that kernel as well.
-Unpatched, it shows the original issue (two of the four dies without
-BARs). With the 14 patches applied (they apply without fuzz and need no
-prerequisites on 7.3), all four dies get their BARs with the same
-layout as above, and a multi-hour inference benchmark across the four
-dies showed no regression against our reference runs.
-
-Tested-by: Nikolas Joshua Britton <nbritton@exabit.io>
-
-[1] https://lore.kernel.org/linux-pci/20260903063124.9316-1-nbritton@exabit.io/
-[2] https://lore.kernel.org/linux-pci/20261106152642.23118-1-nbritton@exabit.io/
