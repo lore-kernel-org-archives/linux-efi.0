@@ -1,74 +1,74 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.208.198
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.70
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795026131;
-	b=gSCn3F+NsT1yx7Hys37Yc1Uj1HpcJNHQWWNfF8HvmsrCFrbKYgrqmgVgBAyrktCR4Qgv
-	 JJCXzLLfcDgosoqcl7u+gqVPhsDgtCcnJiwR1M3HVxMscJkY5I6FYzNUf4ZBcvbES07SO
-	 +6976EOUUJs1YEGK5OXecgaRLmhMVajqef0lj2sG6Lv6cOsKR5oqffw/z0uUH+X+8hAj8
-	 hw+iHL9q/L4Ib/zT4w74F1It2eg6RQgzAmJa34mLV7rn5Q61lDmi1PGKRwX/ZLqePAOyV
-	 HK6m4itTZ3/aAKhr3Liph4i0E+H2zk1rzvemyvtBSxVxNQYQAVFsgAuypp3N6nEezZA==
+	t=1795026132;
+	b=NIm6rg4bLfgoQL2crc4RFjUy2k+2Fnts2I0WrAbrP9QJOarPgSW+SrrBbtTy2wuVCUV3
+	 kGccT1mBgrvUh7iDwaK7Wmz7bzFnsA8l6prSNHR8hCn8yNM3h7FN0vQ5AmrE0kR4JgQdE
+	 tOgCnNu+5lLySi7F9LQAWnQmssyOfhVHs2MXJVKB68jptsJFUO349Vb3TqiQ6TqtPWOx1
+	 GR9Yo9Pgg9a8WOKRSFW6BYx2KHhgOvDgGFPeuNimaI0qsf60gqy240FpHcXngIlYdasxK
+	 Fpfw3i6fjSSOoiT+Ty0477zyEK34tzQrbt/eBK7mAgqB/Ko3dSygcikVsuQfNjWGKxA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795026131;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795026132;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Received:Date:In-Reply-To:Mime-Version:
 	 References:X-Developer-Key:X-Developer-Signature:X-Mailer:Message-ID:
 	 Subject:From:To:Cc:Content-Type;
-	bh=/w24HJ5snxMHL69L/+mJ+Lj7pv3WZPo9wKgPL92/NjM=;
-	b=oBH7DaSSQ7kd7GP+nj/kLQ5LJbR4i2TWbvKw7U0ShxL1QeMKweMiuXJQxzdYVo8SnOqZ
-	 BiuwQR6QVlueUj6pN4XIUqAzYQpBIB2HXUyz0Fvtl3OousmKQOvuSfi0JktH3STBWjLdw
-	 erXoTThSiPXsGd6AXDjuip2Vyih9f1cfi4MtAru3kJbpV8EcoOuIaZjKQ2lKlJP/1fD/9
-	 QPbNMcoxx5orj1YsQOztKUIlsfjLmkjPbCsMtwPmxoYfWHs5dYjN5Npl4/t6kEB8/2/wk
-	 bWOSK5KvpgmRbkFkcEBL1ezGkd3PZOqkxsfGCpw6aDwFd9ZYWfjEdeel3PkF4ZK0EFQ==
+	bh=qmGCFG2plXe8vmZtQIJVK4guRF9ed+vUOMzeyrBZ/us=;
+	b=ghKATFklJNWtqg0+AzC50AaW5vz1oFj79uD+zLLpDNUw2ZzmOErI0Nh8sOC1ehWSRxqz
+	 t6JX1V5NYU0crvAQa/9DYYWd8+1DzUfcXKXvmW4bIStNGLefhNIt8tUraq1TE4iyeuX4B
+	 V0gJCUc8DW/OWgOipv9kT0eKTPh7n5YtK+GCtfT9u16RaqKyzQVgKji8vNQS8sewSuQhN
+	 7p75SyKFo//wu8upmbs4bi3oD411LwRW3ztpN0Mk1NtasCkWOAuSzS8tTujDZEV38oh02
+	 CcaJ1zkPoOxn18Hx5ABry///coC0mygf3irhAscwu1BSwnYQCJNVhUJN9fuJJFFb7kg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=google.com;
 	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=m2y0eQ7b;
-	arc=none smtp.remote-ip=209.85.208.198
-Received: from mail-lj1-f198.google.com (mail-lj1-f198.google.com [209.85.208.198])
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b="J/GIaRBZ";
+	arc=none smtp.remote-ip=209.85.221.70
+Received: from mail-wr1-f70.google.com (mail-wr1-f70.google.com [209.85.221.70])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 572EE606A32A
-	for <linux-efi@vger.kernel.org>; Wed, 18 Nov 2026 18:22:10 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 572EE606A32A
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0834606A31C
+	for <linux-efi@vger.kernel.org>; Wed, 18 Nov 2026 18:22:11 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E0834606A31C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=m2y0eQ7b
-Received: by mail-lj1-f198.google.com with SMTP id 38308e7fff4ca-3adfb3ca48bso7057701fa.2
-        for <linux-efi@vger.kernel.org>; Wed, 18 Nov 2026 10:22:10 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=J/GIaRBZ
+Received: by mail-wr1-f70.google.com with SMTP id ffacd0b85a97d-4925ef75fc4so1017648f8f.1
+        for <linux-efi@vger.kernel.org>; Wed, 18 Nov 2026 10:22:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1795026128; x=1795630928; darn=vger.kernel.org;
+        d=google.com; s=20260707; t=1795026130; x=1795630930; darn=vger.kernel.org;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=/w24HJ5snxMHL69L/+mJ+Lj7pv3WZPo9wKgPL92/NjM=;
-        b=m2y0eQ7bX0mEqt69O2PDyvpd+qH0vwTqyJk8vUwtRuMBor07EwffZ2+WwgCO2+P3oU
-         kEzpqlE06jQxbmtJRs8VLGlplTvOFs4qEw0+njsnBy85AYJoQzvM0W6BB0+PoPtGMA4c
-         5XNsLKGRyXFADUwB0kq1UIVVmKBLl4eZ5voqnalrREBkoZp70ZrpaIFF8Vt65Ie+RNI6
-         lnvZt+v49zu1uXn5USKw4CJfhvRZ1jBqQFXJnN0/nrv9mBcSPvlLmEAOG3qLD99BsN4R
-         tRr1sKJYaANZOXze/TK/G9W1j2+186Re/qxoAJmOUizRfSHnTYU2Jxnt1JwK82Mjjr+Y
-         AWfA==
+        bh=qmGCFG2plXe8vmZtQIJVK4guRF9ed+vUOMzeyrBZ/us=;
+        b=J/GIaRBZfggMeIYimCgU7iOAkazn7vKJ5gkyIFr6ENpL0DljAKuhT4wdjBiZOrfIsP
+         TZzxBrvK5GvmNo2AYa35jlw6B/s6pp/J937s6A+PSXGRCu+hjP6wH94W/JegrrA8VyMm
+         ncOJPac4jwQsz9fPN3VsreNZDQwPMjM9Q5wG59zVBK6I9Z+edgng8X5aYMvhdkfa+nyP
+         aWXhJk/9mpqv5zLLrjZb2lybkzHJT2scWFDeDjFu9Tvn9CASEzB+t+69FHThtGswNrI3
+         u3PyMEtR3WjZuiw7+MblK6EKfCH9eimHWHPhxtKONIQ4oS2m00ctrgVtxPwGQ+2pipXN
+         XW4A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795026128; x=1795630928;
+        d=1e100.net; s=20260707; t=1795026130; x=1795630930;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=/w24HJ5snxMHL69L/+mJ+Lj7pv3WZPo9wKgPL92/NjM=;
-        b=wPGGiR95rev4/CrQQj2TSv3dmzD0YF5fe63cyfKZ3tc7yjzVI4+rIAt8O8z+7w2/g+
-         1NOntZgsU7yPboVc2IH2UysDuoPOxa9qC0Yz+yOT4Yjhv7W1JlKLsrmvS9z1L9Yd6GUC
-         pWBwzBThlrkm4CrjS1rByn0Bd2dFh4hKjEaxY8HO6hpIivb9hwhp3zXe0SUD7AC8tgqv
-         QXQqoTjO/HWC9UO3FRZS5One+zC8R+lS9oI3X6TUoCCSJVhpMbzJ1CaFVoEiHnC4ufEP
-         1cPYNe+WdUBdb815ORbNyfIXQRz3mUa0QxlPfLlYhJjIoPZ6bGiFu5cpW4jL/y6IwaQd
-         VTTw==
-X-Gm-Message-State: APuU4Z/Pj10h4CwEmd9TaWWUOJUnJcmgOVZG7ECS3ZhIf+24p7T+llMm
-	qbakNKbbdqijuSqrILwjN6FgsaWHTngxpHGyBtocDaFADmfA8dghpjKBsTwqM16n7FHRIghlMls
-	SwV5ozjztglRHqnX+IEYXtZqChCNUR6maU1A5Ait2JA0UwDhAnVtfRptvv6RjTiYhQDmYEamSeN
-	MQdZkY7ZPfKaMuGpZ9TEpfqaFdY/FsPw==
-X-Received: from ljke10.prod.google.com ([2002:a2e:9e0a:0:b0:3ad:cb6c:2eac])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6512:128e:b0:5c1:57c0:50a
- with SMTP id 2adb3069b0e04-5c1a9a70da2mr1102294e87.6.1795026128043; Wed, 18
- Nov 2026 10:22:08 -0800 (PST)
-Date: Wed, 18 Nov 2026 19:21:18 +0100
+        bh=qmGCFG2plXe8vmZtQIJVK4guRF9ed+vUOMzeyrBZ/us=;
+        b=iA/T0Rogu/I8GwuUs6ZvHPEAFERQBZVgSiPjnWTeqwHbEi0oK9OsS+7QNe2ke4Khrj
+         /WMd46qRYXaEWZL/HsXuPPBqnuvyq4YnjcGLIz/CYci9rAido1sotCz2Z3I15cLfkHHg
+         0xyZOoE2/zwuCHRwhQi0O8NJzkM3mF+CCmCwoCsfEc1ysBQK4XeLOPIEZg5SSIcy5fqv
+         0//+Xg83iFu/fVYtIwH4QhhU16RLiOEZevbjRezJg0turrSmFdzZONUHPiQBtLJ9b28v
+         LsS6XOzhO3gle9zk9FjR1J0LskeP/QP3ZhmWSBSB7WIKrR5DSTg3E9q6gC66z5UUz8wj
+         e05Q==
+X-Gm-Message-State: APuU4Z+p5mvRMRYTbZBhNP3pcYlpadCPYYVoBaxQKmQCZqT/plAIdisR
+	tn6FPO7fmYFhp1ELI7zuXB+qDCoaatbgnpMtwfVNaSMiwGFTfuPNpGtkEpAjTDbvsjVZXJYCjzS
+	7Kt4UQN7/ecN/FRB9mXIdtA7nYc4zpQCvGyTYwvHWXQ5oULudttTGJh8wwl6lVhNIGJMCI4TlCA
+	hgpskqVSjyNFgTnInauGqZwuWaPneXpw==
+X-Received: from wrbgf13.prod.google.com ([2002:a05:6000:27cd:b0:4a3:2183:2372])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a5d:5d01:0:b0:48e:720a:ccaf
+ with SMTP id ffacd0b85a97d-4a63658254amr8068198f8f.5.1795026129990; Wed, 18
+ Nov 2026 10:22:09 -0800 (PST)
+Date: Wed, 18 Nov 2026 19:21:19 +0100
 In-Reply-To: <20261118182105.1633603-21-ardb+git@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -81,14 +81,14 @@ Precedence: list
 Mime-Version: 1.0
 References: <20261118182105.1633603-21-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2668; i=ardb@kernel.org;
- h=from:subject; bh=wNLIXVywodXJ9QBXpbGE8MqPkM5GL227KxQF5YBIKeY=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIevvm8UspUdmNPI807zatFKuZGFOu/OMG3lnPcRsJ5rUJ
- X++mbG6o5SFQYyLQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAExk219GhssVs7fNSPr4JkY6
- 9cIMJd616y69vOvOc1Xs3umnGyxWl+QxMhz7evb0mumaBSbvtE8JXJ+SF/3miIWf0/QjVh27X/6 +xM8GAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=5588; i=ardb@kernel.org;
+ h=from:subject; bh=Vn0Z0SmqUqZ8NK+fY9lRYM6IvhOk/O8WfVQkKgBtwuc=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIevvmyUN51mqr22vUWb9L5EtnXaWMWDLpvq+koynlosUU
+ teePWLVUcrCIMbFICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACbC4Mzwh2PSVYaiuDVeilO2
+ iE3dbZOX8lHQJNg4pOjfs7sck3qZ5zAyvA664Gm3Lvb520dKtdw3z7FNDNvDc/OidOVlr67nsWE veQA=
 X-Mailer: git-send-email 2.56.1.708.g77570a6a1d-goog
-Message-ID: <20261118182105.1633603-33-ardb+git@google.com>
-Subject: [PATCH v4 12/19] efi/libstub: arm64: Use struct efi_image_info to
+Message-ID: <20261118182105.1633603-34-ardb+git@google.com>
+Subject: [PATCH v4 13/19] efi/libstub: loongarch: Use struct efi_image_info to
  access image properties
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
@@ -110,60 +110,142 @@ add new references in a generic manner.
 Reviewed-by: Jason Gunthorpe <jgg@nvidia.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm64/kernel/image-vars.h            | 10 ----------
- drivers/firmware/efi/libstub/arm64-stub.c |  8 +++++---
- 2 files changed, 5 insertions(+), 13 deletions(-)
+ arch/loongarch/kernel/head.S                  |  3 ---
+ arch/loongarch/kernel/image-vars.h            |  6 ------
+ arch/loongarch/kernel/vmlinux.lds.S           |  1 -
+ drivers/firmware/efi/libstub/loongarch-stub.c | 15 ++-------------
+ drivers/firmware/efi/libstub/loongarch-stub.h |  4 ----
+ drivers/firmware/efi/libstub/loongarch.c      | 10 +---------
+ 6 files changed, 3 insertions(+), 36 deletions(-)
 
-diff --git a/arch/arm64/kernel/image-vars.h b/arch/arm64/kernel/image-vars.h
-index 19d602e45523..329d5e214b36 100644
---- a/arch/arm64/kernel/image-vars.h
-+++ b/arch/arm64/kernel/image-vars.h
-@@ -20,8 +20,6 @@
- 	PROVIDE(pisym = sym);		\
- 	ASSERT((sym - KIMAGE_VADDR) < (__bss_start - KIMAGE_VADDR), #msg)
+diff --git a/arch/loongarch/kernel/head.S b/arch/loongarch/kernel/head.S
+index 69c31b0b65c5..93ffedad6aca 100644
+--- a/arch/loongarch/kernel/head.S
++++ b/arch/loongarch/kernel/head.S
+@@ -32,9 +32,6 @@ _head:
+ pe_header:
+ 	__EFI_PE_HEADER
  
--PROVIDE(__efistub_primary_entry		= primary_entry);
+-SYM_DATA(kernel_asize, .long _kernel_asize);
+-SYM_DATA(kernel_fsize, .long _kernel_fsize);
 -
- /*
-  * The EFI stub has its own symbol namespace prefixed by __efistub_, to
-  * isolate it from the kernel proper. The following symbols are legally
-@@ -32,14 +30,6 @@ PROVIDE(__efistub_primary_entry		= primary_entry);
-  * position independent manner
-  */
- PROVIDE(__efistub_caches_clean_inval_pou = __pi_caches_clean_inval_pou);
--
--PROVIDE(__efistub__text			= _text);
--PROVIDE(__efistub__end			= _end);
--PROVIDE(__efistub___inittext_end       	= __inittext_end);
--PROVIDE(__efistub__edata		= _edata);
+ SYM_FUNC_ALIAS(efi_primary_entry, kernel_entry)
+ #endif
+ 
+diff --git a/arch/loongarch/kernel/image-vars.h b/arch/loongarch/kernel/image-vars.h
+index e557ebd46c2b..6ace4993df57 100644
+--- a/arch/loongarch/kernel/image-vars.h
++++ b/arch/loongarch/kernel/image-vars.h
+@@ -8,12 +8,6 @@
+ #ifdef CONFIG_EFI_STUB
+ 
+ __efistub_strcmp		= strcmp;
+-__efistub_kernel_entry		= kernel_entry;
+-__efistub_kernel_asize		= kernel_asize;
+-__efistub_kernel_fsize		= kernel_fsize;
 -#if defined(CONFIG_EFI_EARLYCON) || defined(CONFIG_SYSFB)
--PROVIDE(__efistub_sysfb_primary_display	= sysfb_primary_display);
+-__efistub_sysfb_primary_display	= sysfb_primary_display;
 -#endif
- PROVIDE(__efistub__ctype		= _ctype);
  
- PROVIDE(__pi___memcpy			= __pi_memcpy);
-diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index af38cf73cf01..351fcb4493e1 100644
---- a/drivers/firmware/efi/libstub/arm64-stub.c
-+++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -19,12 +19,14 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ #endif
+ 
+diff --git a/arch/loongarch/kernel/vmlinux.lds.S b/arch/loongarch/kernel/vmlinux.lds.S
+index ce097e25881f..f8723c1ba9a7 100644
+--- a/arch/loongarch/kernel/vmlinux.lds.S
++++ b/arch/loongarch/kernel/vmlinux.lds.S
+@@ -159,7 +159,6 @@ SECTIONS
+ 	/* header symbols */
+ 	_kernel_entry = ABSOLUTE(kernel_entry & PHYSADDR_MASK);
+ 	_kernel_asize = ABSOLUTE(_end - _text);
+-	_kernel_fsize = ABSOLUTE(_edata - _text);
+ 	_kernel_vsize = ABSOLUTE(_end - __initdata_begin);
+ 	_kernel_rsize = ABSOLUTE(_edata - __initdata_begin);
+ #endif
+diff --git a/drivers/firmware/efi/libstub/loongarch-stub.c b/drivers/firmware/efi/libstub/loongarch-stub.c
+index 8f2145bd9ad2..df6749643bb8 100644
+--- a/drivers/firmware/efi/libstub/loongarch-stub.c
++++ b/drivers/firmware/efi/libstub/loongarch-stub.c
+@@ -8,11 +8,6 @@
+ #include <asm/efi.h>
+ #include <asm/addrspace.h>
+ #include "efistub.h"
+-#include "loongarch-stub.h"
+-
+-extern int kernel_asize;
+-extern int kernel_fsize;
+-extern int kernel_entry;
+ 
+ /**
+  * efi_relocate_kernel() - copy memory area
+@@ -100,6 +95,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
  				 efi_handle_t image_handle,
  				 const struct efi_image_info **image_info)
  {
--	if (image->image_base != _text) {
-+	unsigned long kernel_base = efistub_kernel_base(*image_info);
-+
-+	if (image->image_base != (void *)kernel_base) {
- 		efi_err("FIRMWARE BUG: efi_loaded_image_t::image_base has bogus value\n");
--		image->image_base = _text;
-+		image->image_base = (void *)kernel_base;
- 	}
++	int kernel_asize = efistub_kernel_memsize(*image_info);
++	int kernel_fsize = efistub_kernel_size(*image_info);
+ 	efi_status_t status;
+ 	unsigned long kernel_addr = 0;
  
--	if (!IS_ALIGNED((u64)_text, SEGMENT_ALIGN))
-+	if (!IS_ALIGNED(kernel_base, SEGMENT_ALIGN))
- 		efi_err("FIRMWARE BUG: kernel image not aligned on %dk boundary\n",
- 			SEGMENT_ALIGN >> 10);
+@@ -114,11 +111,3 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 	*(unsigned long *)image_info += *image_addr - (unsigned long)image->image_base;
+ 	return status;
+ }
+-
+-unsigned long kernel_entry_address(unsigned long kernel_addr,
+-		efi_loaded_image_t *image)
+-{
+-	unsigned long base = (unsigned long)image->image_base;
+-
+-	return (unsigned long)&kernel_entry - base + kernel_addr;
+-}
+diff --git a/drivers/firmware/efi/libstub/loongarch-stub.h b/drivers/firmware/efi/libstub/loongarch-stub.h
+deleted file mode 100644
+index cd015955a015..000000000000
+--- a/drivers/firmware/efi/libstub/loongarch-stub.h
++++ /dev/null
+@@ -1,4 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0-only */
+-
+-unsigned long kernel_entry_address(unsigned long kernel_addr,
+-		efi_loaded_image_t *image);
+diff --git a/drivers/firmware/efi/libstub/loongarch.c b/drivers/firmware/efi/libstub/loongarch.c
+index 7f21e79384d3..cd19f3b574fd 100644
+--- a/drivers/firmware/efi/libstub/loongarch.c
++++ b/drivers/firmware/efi/libstub/loongarch.c
+@@ -8,7 +8,6 @@
+ #include <asm/efi.h>
+ #include <asm/addrspace.h>
+ #include "efistub.h"
+-#include "loongarch-stub.h"
  
+ typedef void __noreturn (*kernel_entry_t)(bool efi, unsigned long cmdline,
+ 					  unsigned long systab);
+@@ -59,16 +58,9 @@ static efi_status_t exit_boot_func(struct efi_boot_memmap *map, void *priv)
+ 	return EFI_SUCCESS;
+ }
+ 
+-unsigned long __weak kernel_entry_address(unsigned long kernel_addr,
+-		efi_loaded_image_t *image)
+-{
+-	return *(unsigned long *)(kernel_addr + 8) - PHYSADDR(VMLINUX_LOAD_ADDRESS) + kernel_addr;
+-}
+-
+ efi_status_t efi_boot_kernel(void *handle, efi_loaded_image_t *image,
+ 			     const struct efi_image_info *image_info, char *cmdline_ptr)
+ {
+-	unsigned long kernel_addr = efistub_kernel_base(image_info);
+ 	kernel_entry_t real_kernel_entry;
+ 	struct exit_boot_struct priv;
+ 	unsigned long desc_size;
+@@ -99,7 +91,7 @@ efi_status_t efi_boot_kernel(void *handle, efi_loaded_image_t *image,
+ 	csr_write(CSR_DMW2_INIT, LOONGARCH_CSR_DMWIN2);
+ 	csr_write(CSR_DMW3_INIT, LOONGARCH_CSR_DMWIN3);
+ 
+-	real_kernel_entry = (void *)kernel_entry_address(kernel_addr, image);
++	real_kernel_entry = efistub_kernel_entry(image_info);
+ 
+ 	real_kernel_entry(true, (unsigned long)cmdline_ptr,
+ 			  (unsigned long)efi_system_table);
 -- 
 2.56.1.708.g77570a6a1d-goog
 
