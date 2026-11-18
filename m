@@ -1,97 +1,86 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=74.125.82.49
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=113.46.200.216
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794970672;
-	b=kMWTODrqcn/AAPwZcUPoWxM+MNybyptTmwBKSGVyWIyyud81B+R1Zd634VW6GIM17EYk
-	 K1E7W64xij0GxYVKoEvEooXlyX49/0IxhIRPww3P1Ucfx4LfHYggENyGfPoB0My/ZedgE
-	 uaCwZ6urwBD1O1KV+WYAO4oAep7h8skgjKOAxXXtPZrNTIyf1LnfIfQo0TShyoHUY3FyW
-	 AgzYibDZkrrw0A+V/NYGC4ZB40Y5hr3HD2JyMqq1wArA9d48yIEr6NQwohRWVdKlr7iXy
-	 qdmPhPgyQkEjJR++TVRH9xKXvQBTgKOZU2ymbwYPRXUNpWbcNIN7/m4rjFL9STEresQ==
+	t=1794985256;
+	b=FRA1YUcefMGxw+y+9son6LtJm29alcMbRic2S8yR+Ny+zTG/BRDhC1si05GVEm5VSxAv
+	 63zvRcVaP2QE20l1eoJwISvNSyoM8szQK6OomRtNU0FuwPYeIZPbROu0SYtWw1Z25E5G+
+	 jqhFfkiV8StPMCM4cTfjVvVhcKoXwoZ8gmYJJ3FGhy/JVASzazAS2LPJ8VMmbAm7dpT2X
+	 2s755UXV/a06hyCpc6YVyK416LabUZyM87wd9SsGR2GpzuwPgS0qpHHUpig8VYH3Wt11B
+	 QlCXgRQOCe/vbfvn4HP/qhmTbiUxYQykRPASwgJ5KQvha7NExTkY0I5XevaDk0YW4Og==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794970672;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:Message-ID:Subject:To:Cc:In-Reply-To:References:MIME-Version:
-	 Date:Content-Type:Content-Transfer-Encoding;
-	bh=bO2RWsrTZU9/8/kLKqxB4AnDL75UPDOIFIHs0b1+ZVs=;
-	b=q4CLa0lx4HW2BVvZS9BLOyzKUu5x7UK9O0LXStrjc9kKz1cq//qh7vXQo4GgGLwM6MpQ
-	 +mlrtkR3gvC26cGqF81JSbGDM1HeYEXcF7b0wsziPsgv8lny8xGP+2ClZadbXIdKnrPWB
-	 Rm2kf7M36WVV8ztMcief+Mohnegk6Hv0QB+DSMugO88iB8aNrwgRXsIguEWSHwkmwY/M0
-	 lBEINhrBV7uz6Lx7Wz1cJDYUwQBTlKQFtv9RjpCBnTBBasROilb62oS22Mj+AnqJ8bCxd
-	 BQLO0YLlhha+Ez5tv8Lm/CH5SyX5kA95TgoZ17eCeZvnimo7Pd6p+Uo/QjP2WNjb+gQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794985256;
+	h=DMARC-Filter:dkim-signature:Received:Received:Received:Subject:To:CC:
+	 References:From:Message-ID:Date:User-Agent:MIME-Version:In-Reply-To:
+	 Content-Type:Content-Language:Content-Transfer-Encoding:
+	 X-Originating-IP:X-ClientProxiedBy;
+	bh=P7MAWPsIyxJf7EbFe+B6P/kIKs4QOghNXNz4nngxpow=;
+	b=PLxOrYEPAcv0IEKTDmj+kkofVW0R1UTnSe8sun/RJYpQUqEGWsFAZIvB3nfyltxJQ98v
+	 IOMR4xYtTi15oJ7kOYmMGOSQ4QcMagvyc+HiSFYDwLtSxBz9opLJYB+eUD7WAAi6kYfrm
+	 kVulOVDqN2gL/HG71mwy7rja3YwTCOECoClR5gj1DIeLzTpWPkPIIc/BaaPUn5OVC1uyb
+	 tBeGXX4v9ToUWLpJUXWrJoVHnp/U3FQl1QR0gfCPCevW1c3IVUdeTPHWVGBDjH6wm9He6
+	 NBzRiZ6JIJL1cSbgelaznULXLWoXXvqhgQlI396VifNq7s2m2pDTp+RYj/0ikc8pzCQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b="bp2g527/";
-	arc=none smtp.remote-ip=74.125.82.49
-Received: from mail-dl1-f49.google.com (mail-dl1-f49.google.com [74.125.82.49])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dmarc=pass header.from=huawei.com;
+	spf=pass smtp.mailfrom=huawei.com;
+	dkim=pass header.d=huawei.com header.i=@huawei.com header.a=rsa-sha256 header.s=dkim header.b=J7jSSrjT;
+	arc=none smtp.remote-ip=113.46.200.216
+Received: from canpmsgout01.his.huawei.com (canpmsgout01.his.huawei.com [113.46.200.216])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7665A606A33B
-	for <linux-efi@vger.kernel.org>; Wed, 18 Nov 2026 02:57:52 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7665A606A33B
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6D38606A32A;
+	Wed, 18 Nov 2026 07:00:53 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C6D38606A32A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=bp2g527/
-Received: by mail-dl1-f49.google.com with SMTP id a92af1059eb24-1b3beeaf6f9so727769c88.0
-        for <linux-efi@vger.kernel.org>; Tue, 17 Nov 2026 18:57:52 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1794970671; x=1795575471; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:date:mime-version:references
-         :in-reply-to:cc:to:subject:message-id:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=bO2RWsrTZU9/8/kLKqxB4AnDL75UPDOIFIHs0b1+ZVs=;
-        b=bp2g527/ARbDwTJJQ6GrosRpfFohK/WyRrzMxTKTetMG+BYP7QN9BV6t6W0A5ERLEH
-         eI3YKVNWz39t1JQ3DohuDz2PlpJv7YGg3y9b9852AnnC6S/ezbeTWOWZd8dsF5rCAM7i
-         tATIN/lUIAq52xeF5ohr/xtI386yiTqCAlXTSEgSf6h/7NKvNHRRidJ8In3hpIyVhu0g
-         ZSqrGqk61+a6gnvHPxlGXJnxFUW20HhpVoe2APUn2JTUBWCg4LqcVdmENOaQLoMoxFIY
-         bo0kWCm8rCJbDT3hsgv3yl0ZG5A7fZDOgF540hGAbJO9x3ZkjQJTAnizil5FXPmcbmzS
-         Ancw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794970672; x=1795575472;
-        h=content-transfer-encoding:content-type:date:mime-version:references
-         :in-reply-to:cc:to:subject:message-id:from:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=bO2RWsrTZU9/8/kLKqxB4AnDL75UPDOIFIHs0b1+ZVs=;
-        b=B7Zm6V24FhpbUl8ZPsBmCUtAgC5qhIA7O+8aBLQBoZQkk/jW0xjKO17g76faQ6jT6E
-         qs29M9jBZfJCa3Mh52GcP1OeprRzho9LFZIDus3gD59AzDzkwlHuNtq4rg/sX/dT/rwe
-         hektiEijT8QfYkIYCcVkrMY4hInnuenbe1asx8e5aW3eqr3QbwHcajjM82z5500YUg1f
-         YjQD0jmkQVg/lMVP9HvVApk7Gbzb2krJ+wb2hK5ICqek/KwCU0UVnlZxjzBxsqmy0iLM
-         AOH05NBw7dEIb2Cy9IUuatFkAjmkBuIVQZAqmWNuoIcvgQy0ILICz8WWZcu7U9djIPie
-         4QZA==
-X-Forwarded-Encrypted: i=1; AL+hErEiIaCsSDIwYLzE8HJdUi+CG91FuyEKFYQ0zhw7pJQEOPQT1X2FYtstsiNUEAB625pOyZw1Iewi+/M=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+8dr6xp8kkH+lEXlBN+LIZzErGZk5w1zvyxDavjKIUwVNj8+dB
-	wOZm6DtJO8xTgaXTwsoCKAfXjx3yRDTIsWSYK5vp4zs3USpUZESUrl3B
-X-Gm-Gg: AYBFou3xkrkIz9OVVnuvEVd2IY9dtTQhktuhVZKDOyxUrdN2B5o9XkmMASohgYRMmET
-	5csIDKiaRahT2l689rw5IVdXmdcPFBMTQeejb4raCe5YNCDVj80Vax7LIGAAZLcRYkO57qVS/go
-	+BtjC+WXW5ppUpJ6SrNpoKfw16AFey7kVUuv48gJOvg7CYooE6oS3qQGSRqsXqNe/spkph6ErNU
-	sgnmwIROedOFbCexMOhtuPKpP1YvWiaqQU0yxfmOyH40hgjrUPPN0XvPx+EsUiL5iHWj4tI4vtD
-	Dz0k4ey67Z54sSwnX+3sWFpclSf//7gZXH8twKV4uxF90Me5RndBo1B8cFmiuZUAtqh3ItV049Q
-	k9DtCp4SV1+fMoMi9LaExb2Y3VPk2pHQIHZVw3cZuNPjSROH+XJPX5NYMOZtLjkEcKDcTxj91Hz
-	fArITu+L2GopMTv3gFGpw/xaZ3dCo40i246dqhVAp1HfHuqmA/RUsBSHaJxY0l7mxJfr9CY95KT
-	+C7yFMZeoP9Iuk09xeOOE7EAK4P49zwru9nxPiPhs9y/lkvSmoH/z4h+JbHRwM4v5xyDkBsF3S8
-	XI0sWadUf0lg6TRP3lFFqQLK8ZJ5B7xJXJs+5wKDAOxImYbAI4iejqwBQOBt5raTdyWCGX6EIbt
-	SWye4VuP8NesP3Wvq4gIyWDxQ2Xln
-X-Received: by 2002:a05:701b:2718:b0:1b2:6a1d:bf58 with SMTP id a92af1059eb24-1b543d4b410mr1535044c88.38.1794970671342;
-        Tue, 17 Nov 2026 18:57:51 -0800 (PST)
-Received: from [127.0.0.1] (ip68-107-67-45.sd.sd.cox.net. [68.107.67.45])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-1b5446f589esm2621578c88.1.2026.11.17.18.57.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 17 Nov 2026 18:57:50 -0800 (PST)
-From: jasmeet.bhatia.us@gmail.com
-Message-ID: <b66f68b5220ddcadddb41340d3ea3388@gmail.com>
-Subject: Re: [PATCH v1 0/2] efi/tpm: Preserve event log without changing x86
- E820
-To: ilias.apalodimas@linaro.org
-Cc: ardb@kernel.org, rafael@kernel.org, pavel@ucw.cz, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org
-In-Reply-To: <CAC_iWjL9jDsRaU7kEemYfwk292Nxa49cK0Rq=81pC=FWNRDhvg@mail.gmail.com>
-References: <cover.1788259938.git.jasmeet.bhatia.us@gmail.com>
- <a9e23066-aa75-44be-ac3b-9a15f4cf6047@app.fastmail.com>
- <DL6NCV1KQ9F9.6K6XZQCS4AF3@gmail.com>
- <c3ca811b-a6eb-4f4d-bbb2-4feef02e3db2@app.fastmail.com>
- <CAC_iWjL9jDsRaU7kEemYfwk292Nxa49cK0Rq=81pC=FWNRDhvg@mail.gmail.com>
+	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.a=rsa-sha256 header.s=dkim header.b=J7jSSrjT
+dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
+	c=relaxed/relaxed; q=dns/txt;
+	h=From;
+	bh=P7MAWPsIyxJf7EbFe+B6P/kIKs4QOghNXNz4nngxpow=;
+	b=J7jSSrjT45mE5pHwCz2jP6dil7Qtqxs30D1JSCVyUZxDpTWnLABaUARqY/hWeyFvY/IB9XGsp
+	P+tfgFIg8WIVjm1rA89skfheUdG6YkoeqBaYgCDEUNGssDh+oDpRHRydEVFk6/GpGQol0k0xnUJ
+	vFIRtHpdkDpniGa5blvowA4=
+Received: from mail.maildlp.com (unknown [172.19.162.140])
+	by canpmsgout01.his.huawei.com (SkyGuard) with ESMTPS id 4jTstD2f2Yz1T4KR;
+	Wed, 18 Nov 2026 15:00:04 +0800 (CST)
+Received: from whupemk100004.china.huawei.com (unknown [7.152.185.74])
+	by mail.maildlp.com (Postfix) with ESMTPS id E0224203AB;
+	Wed, 18 Nov 2026 15:00:43 +0800 (CST)
+Received: from [10.173.125.21] (10.173.125.21) by
+ whupemk100004.china.huawei.com (7.152.185.74) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.45; Wed, 18 Nov 2026 15:00:40 +0800
+Subject: Re: [PATCH v6 5/7] drivers/base/memory: count the poison a block
+ already holds when creating it
+To: Breno Leitao <leitao@debian.org>
+CC: <linux-efi@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+	<linux-mm@kvack.org>, <linux-cxl@vger.kernel.org>,
+	<driver-core@lists.linux.dev>, <linux-arm-kernel@lists.infradead.org>,
+	<rmikey@meta.com>, <riel@surriel.com>, <harry@kernel.org>,
+	<kernel-team@meta.com>, Ard Biesheuvel <ardb@kernel.org>, Ilias Apalodimas
+	<ilias.apalodimas@linaro.org>, Thomas Gleixner <tglx@kernel.org>, Ingo Molnar
+	<mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen
+	<dave.hansen@linux.intel.com>, <x86@kernel.org>, "H. Peter Anvin"
+	<hpa@zytor.com>, Andrew Morton <akpm@linux-foundation.org>, David Hildenbrand
+	<david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett"
+	<liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport
+	<rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>, Michal Hocko
+	<mhocko@suse.com>, Naoya Horiguchi <nao.horiguchi@gmail.com>, Oscar Salvador
+	<osalvador@suse.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael
+ J. Wysocki" <rafael@kernel.org>, Danilo Krummrich <dakr@kernel.org>, Catalin
+ Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Mark
+ Rutland <mark.rutland@arm.com>, <kas@kernel.org>,
+	<kexec@lists.infradead.org>, Brendan Jackman <brendan.jackman@linux.dev>,
+	Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>,
+	<shakeel.butt@linux.dev>
+References: <20261016-hwpoison-kho-v6-0-f304255147da@debian.org>
+ <20261016-hwpoison-kho-v6-5-f304255147da@debian.org>
+From: Miaohe Lin <linmiaohe@huawei.com>
+Message-ID: <f0f5e60a-819e-68e7-09b2-4080f4716e9e@huawei.com>
+Date: Wed, 18 Nov 2026 15:00:39 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.6.0
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -101,124 +90,98 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Date: Wed, 18 Nov 2026 02:57:49 +0000
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20261016-hwpoison-kho-v6-5-f304255147da@debian.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: kwepems500002.china.huawei.com (7.221.188.17) To
+ whupemk100004.china.huawei.com (7.152.185.74)
 
-Hi Ard and Ilias,
+On 2026/10/16 20:15, Breno Leitao wrote:
+> A frame flagged poisoned before memory_dev_init() runs cannot be counted
+> on its memory block. memblk_nr_poison_inc() divides by sections_per_block,
+> which memory_dev_init() sets, and the block does not exist yet. The block
+> is then created reading zero, however many of its frames are poisoned.
+> 
+> Until now nothing could poison a frame that early. It becomes possible
+> once a kernel flags the frames it inherits from the one that kexeced into
+> it, as it initializes its memmap.
+> 
+> memory_block_online() refuses a block that holds a poisoned frame, and a
+> counter stuck at zero lets one through.
+> 
+> Count what a block holds when it is created at boot. The walk sits behind
+> num_poisoned_pages, so a machine with no poison does not pay for it.
+> 
+> Signed-off-by: Breno Leitao <leitao@debian.org>
+> ---
+>  drivers/base/memory.c | 30 ++++++++++++++++++++++++++++++
+>  1 file changed, 30 insertions(+)
+> 
+> diff --git a/drivers/base/memory.c b/drivers/base/memory.c
+> index 5eead3346f1e32..77481f375c2206 100644
+> --- a/drivers/base/memory.c
+> +++ b/drivers/base/memory.c
+> @@ -220,11 +220,16 @@ int memory_notify(enum memory_block_state state, void *v)
+>  
+>  #if defined(CONFIG_MEMORY_FAILURE) && defined(CONFIG_MEMORY_HOTPLUG)
+>  static unsigned long memblk_nr_poison(struct memory_block *mem);
+> +static void memblk_nr_poison_init(struct memory_block *mem);
+>  #else
+>  static inline unsigned long memblk_nr_poison(struct memory_block *mem)
+>  {
+>  	return 0;
+>  }
+> +
+> +static inline void memblk_nr_poison_init(struct memory_block *mem)
+> +{
+> +}
 
-I wanted to follow up on this discussion after a couple of months.=20
-My bad at being slow, at keep this discussion moving.
+If defined(CONFIG_MEMORY_FAILURE) but CONFIG_MEMORY_HOTPLUG is not defined, memory block
+created at boot time will lose nr_hwpoison count. Is this expected?
 
-Has there been any more considerations with the preferred approach,=20
-regarding the EFI TPM event log reference and kexec?=20
+>  #endif
+>  
+>  /*
+> @@ -807,6 +812,7 @@ static int add_memory_block(unsigned long block_id, int nid, unsigned long state
+>  	mem->state = state;
+>  	mem->nid = nid;
+>  	INIT_LIST_HEAD(&mem->group_next);
+> +	memblk_nr_poison_init(mem);
+>  
+>  #ifndef CONFIG_NUMA
+>  	if (state == MEM_ONLINE)
+> @@ -1251,4 +1257,28 @@ static unsigned long memblk_nr_poison(struct memory_block *mem)
+>  {
+>  	return atomic_long_read(&mem->nr_hwpoison);
+>  }
+> +
+> +/*
+> + * Frames poisoned before the block existed were never counted on it. Count
+> + * them now, or the first unpoison takes the counter below zero.
+> + */
+> +static void memblk_nr_poison_init(struct memory_block *mem)
+> +{
+> +	unsigned long pfn = section_nr_to_pfn(mem->start_section_nr);
+> +	unsigned long end = pfn + PAGES_PER_SECTION * sections_per_block;
+> +	unsigned long nr = 0;
+> +
+> +	/* A hotplugged block is created before its pages are online. */
+> +	if (mem->state != MEM_ONLINE || !atomic_long_read(&num_poisoned_pages))
+> +		return;
+> +
+> +	for (; pfn < end; pfn++) {
+> +		struct page *page = pfn_to_online_page(pfn);
 
-This issue is still relevant to Framework 16 owners and the temporary
-fix has been confirmed to work for other users despite not being a=20
-proper fix to this issue.
+Above comment says the pages of this memory block are not online. So pfn_to_online_page
+here will return the wanted page?
 
-I'm always happy to prepare and test any patches once we decide what=20
-direction we want to move forward towards!
+> +
+> +		if (page && PageHWPoison(page))
+> +			nr++;
 
-I appreciate you time and patience!
+Now that the table is a bitmap with one bit per 2MB of physical memory, would it be more
+appropriate to process it at 2 MB granularity?
 
-Thanks
-
-Jazz
-
-On Mon Sep 7, 2026 at 8:57 AM -07:00, Ilias Apalodimas wrote:
-> Hi Ard,
->=20
-> On Fri, 4 Sept 2026 at 19:39, Ard Biesheuvel <ardb@kernel.org> wrote:
-> >
-> >
-> >
-> > On Fri, 4 Sep 2026, at 17:45, Jasmeet (Jazz) Bhatia wrote:
-> > > On Thu Sep 3, 2026 at 7:18 AM PDT, Ard Biesheuvel wrote:
-> > >> Hi Jazz,
-> > >>
-> > >> On Tue, 1 Sep 2026, at 13:34, Jasmeet (Jazz) Bhatia wrote:
-> > >>> The EFI stub currently allocates the TPM event log as
-> > >>> EFI_ACPI_RECLAIM_MEMORY. On x86, this becomes an ACPI data entry
-> > >>> in the E820 map.
-> > >>>
-> > >>> On a Framework Laptop 16 (AMD Ryzen AI 300 Series), the EFI allocat=
-or
-> > >>> can place this allocation at different physical addresses across bo=
-ots.
-> > >>> Since x86 hibernation validates architecture-specific data from
-> > >>> the firmware E820 map, this causes an otherwise valid hibernation i=
-mage
-> > >>> to be rejected on resume with the following error:
-> > >>>
-> > >>>   Hibernate inconsistent memory map detected!
-> > >>>   PM: hibernation: Image mismatch: architecture specific data
-> > >>>
-> > >>> Allocating the event log as EFI_LOADER_DATA avoids changing the E820
-> > >>> map, but doing that alone would regress the kexec corruption issue =
-fixed
-> > >>> by commit 77d48d39e991 ("efistub/tpm: Use ACPI reclaim memory for e=
-vent
-> > >>> log to avoid corruption").
-> > >>>
-> > >>
-> > >> As I replied in the other thread, I am not convinced preserving the =
-TPM
-> > >> event log across a kexec makes sense to begin with. This is the firm=
-ware's
-> > >> view of the state of the TPM PCRs when it handed over the system to =
-the
-> > >> first OS.
->=20
-> It doesn't make sense imho. The only thing you prove is that you
-> kexeced from a 'previous good OS', but without knowledge of what that
-> OS did before kexecing.
->=20
-> > >>
-> > >> If the first OS boots, loads a kexec kernel and then boots it without
-> > >> measuring any of that into the TPM, the TPM event log will match the
-> > >> TPM state, but this is meaningless because of the missing measuremen=
-ts,
-> > >> and the attestation chain is broken.
-> > >>
-> > >> If the first OS does perform TPM measurements, it would need to reco=
-rd
-> > >> them into a log and pass that on to the kexec'ed in some implementat=
-ion
-> > >> specific way - it cannot use the existing TPM event log for that.
->=20
-> Hrmm, that might be problematic. The EventLog needs to illustrate the
-> state of the TPM PCRs. IOW replaying the EventLog in memory should
-> match the current TPM PCRs. But that also means we'll have to teach
-> kexec how to properly extend the PCRs and update the EventLog.
->=20
-> > >>
-> > >> TL;DR perhaps we should just discard the TPM event log reference from
-> > >> the EFI config tables after consuming it. Or add a special case to t=
-he
-> > >> kexec code to disregard it.
->=20
-> I can't decide what's best here. IIRC we don't expose the final event
-> log config table in systab right? So we won't break any user-space app
-> that depends on it.  We just copy it in
-> /sys/kernel/security/tpm0/binary_bios_measurements. In that case
-> getting rid of it would work.
->=20
-> Cheers
-> /Ilias
->=20
-> > > Ok, honestly that makes a lot of sense I see what you are saying and I
-> > > tend to agree. I'm treating the copied event log at something that
-> > > survives kexec in this patch because of the corruption fix so I'll lo=
-ok
-> > > at dropping that LINUX_EFI_TPM_EVENT_LOG_GUID reference and rewrite t=
-his
-> > > patch. Hopefully, that will avoid that x86 E820 instability as well.
-> > >
-> > > Appreciate the guidance!
-> >
-> > Please don't send any patches yet - I'd like to get some input from oth=
-er
-> > folks as well.
-> >
-
+Thanks.
+.
