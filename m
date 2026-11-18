@@ -1,86 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=113.46.200.218
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794986681;
-	b=WlkAp4b/6dhnvDl28E3QFOw7EshibypQWgESinGV0j9/HERkt9mWf4AaVXDo1OHdmCun
-	 qLyO5EFcs7xR89bFs8YIHwJCQ3Kg2F7Q66Pz5qcqdfuFiW/T08e0KyL6yT5qCxrCbLjc2
-	 9bB21O/9D1PZX5LYgtbfQv/sY4wAmMyh61Ci5/ca+udINHQur+xKDZHb35uw4YIQMbmoT
-	 4RSjLL2BWwU0u2N+5XvNBO0IzyhTUhzQKqTjNb2GNQwqvmFNmh95+yi28gfrNPct6s93y
-	 h3r9+5w2pIpECAofD5PQ70/D0jOVkkHEZvS4R3k7090uJOTRcrMRdX01MD6EEDsmc1A==
+	t=1795001016;
+	b=0UuUhHBKTsIft/yxl7qN4Yx4sXAAi0ybVOLs21wPhR6CPDIRxFq50gWF/MKS4qZ0O0nn
+	 Pj1SbyAhlt7sAmo9oo5qwIByUiAzX8y/Kdun+gwumSZCOng+Az8btBMycD5flWZordI/D
+	 7R1sMVzLZ5/W7QrbhEtWGpPPAFPtpJCKLZNyfsKXqEsDxe6geJzpse2rlcmR+4RBYxsGl
+	 6SSBz6CgCO+Vndjd7wztRxw05NhQEbz4W3lxPtWcrEYg9DDxYOvtx/Ls13i+s8DnvmDoE
+	 HR7rSSm870UtNxFHwhsF7UdgnGswKcfhjqplPFwkgZwqQ8IgvczQLc/zS2rZCoTkjEw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794986681;
-	h=DMARC-Filter:dkim-signature:Received:Received:Received:Subject:To:CC:
-	 References:From:Message-ID:Date:User-Agent:MIME-Version:In-Reply-To:
-	 Content-Type:Content-Language:Content-Transfer-Encoding:
-	 X-Originating-IP:X-ClientProxiedBy;
-	bh=YxfLuSOt8ET85QiZh6OvB/zGAowvN5z/7eyIr5ItJTU=;
-	b=QF56Jz5/PZSIF/8zteb54gQEaWKaFTFqK19tjyJEv82HKzlVdeWsXiTPXoMEU5v3LALp
-	 45uvJfmHiyIZfUrjokcWYpFmx3Z8Z7G1uAEk5KE1+az8haiKLjurkyTKdbXmwsHJWL47Z
-	 R8UgYra0hGM+qpNsOVCivOh8mzwT3sWnvSoIrb01NFe39jAF0CsP6JQh7mYVd5/Rp9C65
-	 jIIV7qsRtGKzEFRUwZQ9SGwB1tAd2ff5QCQMRku19xyrs6sAcnYpB/YiyQ9dfBhZd8Jup
-	 795oCcTyZXJLYS2u1hA20MKmSQDOwzdjNHWS3aML3H03b8n/U+UMwrPGOHyxFd25Cpw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795001016;
+	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
+	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type:Content-Transfer-Encoding;
+	bh=h6c56GT5dZlNnGdRFZuOaR/Ayh1c+jZksN9Ebs1SvYQ=;
+	b=lHaK2CYc/c10Zt9dEQX0cgrUE+3Y0nbqPlLhLH1mptJ/8MXqfoYf3x8hrMY3JlShwSHg
+	 wEt/RSGZhNX/5QS/ljIPk1RxXhJmvduzGEe3+l4V/bWWPVPDirujVrCjk6DQWIwvfTXQF
+	 ktJrehW4DJTS2M0WNB1tbxxyzlKpWlM3wXsNn0oHSjEtbY9ldnzPc+nIXWmd/kM3cscAs
+	 sqvYAxdON7D3W8LNxUnwx4JwtnnFXmt+7uMKch9NJGiix1kGEicAIpZpdg6n82x9P6FFD
+	 ClwMaVQsufNpYyE3RqLs9KeMm3IMj/n72zo/CEtIySL4cPNdMQkQcvx2Z3FAIJZeTdA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=huawei.com;
-	spf=pass smtp.mailfrom=huawei.com;
-	dkim=pass header.d=huawei.com header.i=@huawei.com header.a=rsa-sha256 header.s=dkim header.b=vUvwXW2W;
-	arc=none smtp.remote-ip=113.46.200.218
-Received: from canpmsgout03.his.huawei.com (canpmsgout03.his.huawei.com [113.46.200.218])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=UvR5lEin;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E5FA606A325;
-	Wed, 18 Nov 2026 07:24:39 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3E5FA606A325
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E12F606A320
+	for <linux-efi@vger.kernel.org>; Wed, 18 Nov 2026 11:23:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=huawei.com header.i=@huawei.com header.a=rsa-sha256 header.s=dkim header.b=vUvwXW2W
-dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
-	c=relaxed/relaxed; q=dns/txt;
-	h=From;
-	bh=YxfLuSOt8ET85QiZh6OvB/zGAowvN5z/7eyIr5ItJTU=;
-	b=vUvwXW2WIA+PKi7kpUQn/IdJA3tUeSnR/DAy6nHLaKc51qgaH4uezVDugKTwg71dSQ0iQnYz5
-	7qfqxPWENL8AfnzkCAe0uglj9oduqtAzDO52wcZSeb5b7e7OqW+v6g0PKUzKYgC0I/sddQ8CfqM
-	XuwpFrFNaB2bAcjdpHKAdqo=
-Received: from mail.maildlp.com (unknown [172.19.163.104])
-	by canpmsgout03.his.huawei.com (SkyGuard) with ESMTPS id 4jTtPZ0n3fzpSyt;
-	Wed, 18 Nov 2026 15:23:46 +0800 (CST)
-Received: from whupemk100004.china.huawei.com (unknown [7.152.185.74])
-	by mail.maildlp.com (Postfix) with ESMTPS id D205D4056E;
-	Wed, 18 Nov 2026 15:24:35 +0800 (CST)
-Received: from [10.173.125.21] (10.173.125.21) by
- whupemk100004.china.huawei.com (7.152.185.74) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.45; Wed, 18 Nov 2026 15:24:32 +0800
-Subject: Re: [PATCH v6 7/7] mm/memory-failure: efi: record hardware-poisoned
- frames into the poisoned-memory table
-To: Breno Leitao <leitao@debian.org>
-CC: <linux-efi@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<linux-mm@kvack.org>, <linux-cxl@vger.kernel.org>,
-	<driver-core@lists.linux.dev>, <linux-arm-kernel@lists.infradead.org>,
-	<rmikey@meta.com>, <riel@surriel.com>, <harry@kernel.org>,
-	<kernel-team@meta.com>, Ard Biesheuvel <ardb@kernel.org>, Ilias Apalodimas
-	<ilias.apalodimas@linaro.org>, Thomas Gleixner <tglx@kernel.org>, Ingo Molnar
-	<mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen
-	<dave.hansen@linux.intel.com>, <x86@kernel.org>, "H. Peter Anvin"
-	<hpa@zytor.com>, Andrew Morton <akpm@linux-foundation.org>, David Hildenbrand
-	<david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>, "Liam R. Howlett"
-	<liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport
-	<rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>, Michal Hocko
-	<mhocko@suse.com>, Naoya Horiguchi <nao.horiguchi@gmail.com>, Oscar Salvador
-	<osalvador@suse.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael
- J. Wysocki" <rafael@kernel.org>, Danilo Krummrich <dakr@kernel.org>, Catalin
- Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Mark
- Rutland <mark.rutland@arm.com>, <kas@kernel.org>,
-	<kexec@lists.infradead.org>, Brendan Jackman <brendan.jackman@linux.dev>,
-	Johannes Weiner <hannes@cmpxchg.org>, Zi Yan <ziy@nvidia.com>,
-	<shakeel.butt@linux.dev>
-References: <20261016-hwpoison-kho-v6-0-f304255147da@debian.org>
- <20261016-hwpoison-kho-v6-7-f304255147da@debian.org>
-From: Miaohe Lin <linmiaohe@huawei.com>
-Message-ID: <f04d766b-2942-3627-14b4-dc3c88c899dd@huawei.com>
-Date: Wed, 18 Nov 2026 15:24:31 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.6.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=UvR5lEin
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EC1031F000C4;
+	Wed, 18 Nov 2026 11:23:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795001016;
+	bh=h6c56GT5dZlNnGdRFZuOaR/Ayh1c+jZksN9Ebs1SvYQ=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=UvR5lEinR/ZxBKNvTMqyeIca9oIRlRYm74h0Q+eHeK2wH0g0ZGbw9NlrUiDBDuXRa
+	 UqLbuJVjxYoOetryJCXTVgr6u1UjHth1GXq9Z7yRsxxrXWP4dEzNfCcOCPOCTbty7H
+	 L2cFA6nBFDVxkU8sJpfVun9/bNbA+g/9bgFYTBTUGNv/kaF86vDzU2G672xs0r8XoJ
+	 ebk6cHmf8McidA2XEJ+OAhf86R99NkOvPvr1k9yxqIPZiCC2eR//EVa3M7HPhJGEAT
+	 1MJsAvzYo2ujhMQrFzBHYMDWLazQ8gbFgOrEKO3g+JnjxAVTQ2fm0vX7TH+B80+Y6g
+	 GHNwrTbJz1rDQ==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 1B7F4198003A;
+	Wed, 18 Nov 2026 06:23:34 -0500 (EST)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Wed, 18 Nov 2026 06:23:34 -0500
+X-ME-Sender: <xms:tIr9ahZq1ocmpwxIXhf-F80q3Uqxpfl_nFNfgz_Fky-D8gIOqkC8SA>
+    <xme:tIr9ajPDcTWR7KOSvCXjEwIlgFgnKqkA1FyuWOro1lgXSPZHYIxQiMKCjFD9fuQ66
+    coK_Rs9DxYGrPH8Eyyvlza9o6XW9bGZDs64K7ycYcFeMDe7pwsblQM>
+X-ME-Proxy-Cause: dmFkZTGQ3AIt8NkRlhwKOE2eLriF3euVo9ccg3+yQhNtzKQQDQ+5Y3+pVP1WbG+Z1/jm/m
+    OdOoypG7G2yzbPAnAmvhBZVk8MexoB6VPdpuUc94cvmZ4OUYCqrg/nTCbYWhsGiKU29yLu
+    ZTjc8AxSoKJ2+rnXmW2kfu6GTB5ccVobPoBfmn/zj6p5tp/uKeLn8f06SThNTSxBptz9Tu
+    h3NY/5+5Gl3cyD4mZWe+byhNpgaSKxYCUlVcFRFoUHN9g/RN4lN6t4TcsJQvTjRG/tt9c1
+    e0lTTBn99Fgy5hB8/NrRerA4AwqUoON9QpWPlpOxpa7feHUvFvmtL7TSqPDef9MH7sb8V6
+    CTDFCKAdCwCiCkWcTT0JDFFm2zN9JJmX4pT9bBh+jvVXUkNAdHjpjjaGX5YmgCrMDYWzNM
+    YMY7TMRH/K7PRr5zxW5YjiTu0KrklU2/Bp3G8vTbexb7rBNnW/uTtnX1VQPjD1ula48yP5
+    M1iVExLoD58Sm9RFIVv35757JSzf9rjS+XNVAZ6wxmIAWf8WpYrtHSkBxX2UwCJI2ijSiS
+    KraXsoNvCeK2auoRyrm2LVqvbTE5LIVAd5WY+FSHQ98IbKfPZ0SxMC/xIo9hHF6YWiUWhx
+    KyyV7V4IqBnPkmVJrEB2BFdAL+Z+n0AKDbgUEWjDDUJMlb7Xs0P/mW1GGlYg
+X-ME-Proxy: <xmx:tor9aumJ4c57iawxLzY_XPZWkNUNz59dudMW98kvKLuACKHX5gegdw>
+    <xmx:tor9auxnt-ziUJMO5RtwehssH3ehYOed5lhUYdNWDrevxGe2yvzAdw>
+    <xmx:tor9aoOPPl1KyXkXsTlPgS-my2KkEOJ8m8hxWGFcYWSBcUeMCCVp3Q>
+    <xmx:tor9aioOyMYsWqlWpcEvVR065RjIEMlVn-sphs6kYQq5l8EmEuETTQ>
+    <xmx:tor9apEeYyNfzzLEPqzMCMNAdHsRvKmOOGj2I_38veWoLSsgUk4HrGF1>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 9FF41F8008E; Wed, 18 Nov 2026 06:23:32 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -90,45 +77,47 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-In-Reply-To: <20261016-hwpoison-kho-v6-7-f304255147da@debian.org>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
+Date: Wed, 18 Nov 2026 12:23:12 +0100
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Ard Biesheuvel" <ardb+git@google.com>, x86@kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+ "H . Peter Anvin" <hpa@zytor.com>
+Message-Id: <f15c5920-a624-4758-bd69-221d658d1ffe@app.fastmail.com>
+In-Reply-To: <20261111091843.3621782-2-ardb+git@google.com>
+References: <20261111091843.3621782-2-ardb+git@google.com>
+Subject: Re: [PATCH] x86: Make the 64-bit bzImage always physically relocatable
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: kwepems500001.china.huawei.com (7.221.188.70) To
- whupemk100004.china.huawei.com (7.152.185.74)
 
-On 2026/10/16 20:15, Breno Leitao wrote:
-> When memory_failure() reports the outcome of a hard offline, set the
-> frame's bit in the LINUX_EFI_POISONED_MEMORY bitmap, so that the next
-> kernel reserves its unit.
-> 
-> Hook action_result() ahead of the statistics guard. A hard error on a
-> frame that was soft-offlined earlier comes in as MF_MSG_ALREADY_POISONED,
-> which skips the statistics, but it is a real failure and has to be
-> recorded. MF_MSG_PFN_MAP is left out, as it is not System RAM.
-> 
-> A bit is only ever set, never cleared (for now). Several frames share
-> a bit, and an unpoison cannot tell whether the unit as a whole is good
-> again. That is a known limitation.
-> 
-> The table is mapped with memremap() from an early_initcall rather than
-> through the direct map. On arm64, mem= and the usable memory range of a
-> crash kernel trim memblock, which drops the table's pages from the direct
-> map, and the first recorded error then faults.
-> 
-> Recording is skipped on a host with SME active. The stub writes the table
-> in the clear, so reading it back there needs a decrypted mapping. That is
-> left for a follow up.
-> 
-> memory_failure() has already taken the frame out of this kernel's
-> allocator, so only the cross-kexec record happens here.
-> 
-> Signed-off-by: Breno Leitao <leitao@debian.org>
 
-For memory-failure part:
+On Wed, 11 Nov 2026, at 10:18, Ard Biesheuvel wrote:
+> From: Ard Biesheuvel <ardb@kernel.org>
+>
+> On x86_64, the physical placement of the kernel is independent from its
+> mapping in the 'High Kernel Mapping' range. This means that even a
+> position dependent kernel built without boot-time relocation support can
+> run from any suitably aligned physical address, and there is no need to
+> make this behavior dependent on whether or not the kernel is virtually
+> relocatable.
+>
+> On i386, the situation is different, given that the physical and virtual
+> load offsets must be equal, and so only a relocatable kernel can be
+> loaded at a physical address that deviates from its build-time default.
+>
+> Clarify this in Kconfig and in the code, and advertise the 64-bit
+> bzImage as loadable at any physical offset regardless of whether
+> CONFIG_RELOCATABLE is set. In practice, this makes little difference,
+> given that it defaults to 'y' and is a prerequisite for EFI_STUB and
+> RANDOMIZE_BASE, but it will help with some future refactoring of the
+> relocation code.
+>
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> ---
+>  arch/x86/Kconfig                   | 40 ++++++++++++++++++------------
+>  arch/x86/boot/compressed/head_64.S |  4 ---
+>  arch/x86/boot/compressed/misc.c    |  8 +++---
+>  arch/x86/boot/header.S             |  8 ++----
+>  4 files changed, 29 insertions(+), 31 deletions(-)
+>
 
-Acked-by: Miaohe Lin <linmiaohe@huawei.com>
-
-Thanks.
-.
-
+Ping?
