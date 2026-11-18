@@ -1,74 +1,74 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.70
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.218.72
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795026119;
-	b=1+7uvAXw5Tz2uKgTgCi0VaFXKHLSfjHwJZ8HJvGf4RWN30wMxxGQ7IuH2IBCPov+djaL
-	 sD2mPhtLG9I+ICAFDf8Nej3lddUG62W5biAZeUXX7wqTVN/yU8I8w/CQ3up9mGuSlPRzQ
-	 j8juzRpWWRjalf0f2NYDkaC5h+lm5YbOL7w6AZA6oCwCSGXHnGPYO1QBlVC0N9nZkFTxv
-	 SH04Sw0D/h90pmXUF/nGAMur7oYmg8uQYX9lhoIF1lMPS4HdXp7MiuQQAV+e96SzXyCGh
-	 glwSG9KTHwdU3gKwP2RGTalVyUDhvASU2AZQt+AyMdAQNPRV2vPXwe729DTS7+/TErQ==
+	t=1795026120;
+	b=b3JkopGZ0UFfoiVxlso1V3F0AxV8LJY+80MMxEg/xs5ku28ttQFDuwWkZUvKJqx6QAoj
+	 1FRumY1K+AjjBH7E580D7tgZEMWuJe3jUfKgeEi2yfPcO5bQ256Yay2MAfhr9JXruig+b
+	 ltzA58rt2MhVB/iNIsOVq/VFiAkZ7m82ZixrREltW8Ljkr9Rd35eCIcGzWbSxfoPPw1yn
+	 fpDqVHpD3p0i8cIu2IYjux7tyPDFYGVBYYpWWcetK4PxIS8oW6MWym0g3j3jXjmNYkmwC
+	 XODmNvHOzhjvrBFnlstXnC2ToQHcovspWKURyeJ/BBclemAQ81/CCUk8lBs6967fbJQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795026119;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795026120;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Received:Date:In-Reply-To:Mime-Version:
 	 References:X-Developer-Key:X-Developer-Signature:X-Mailer:Message-ID:
 	 Subject:From:To:Cc:Content-Type;
-	bh=LM4UWhtNaf+31HpscxLGjqcPcYVKjie0R23WUyOHwoM=;
-	b=M+XnpItqzdEyrb+CUATz+sztEN49d8frs2JwQSfWRWOxeSWJ8j4mo3O/o59bst2Mxn1h
-	 fY3gdPm2vejmJWaxhP8OlCs/SNQJeOTiTk6wx4vB7EWDxoJdevKbXS3X8ppYcnrii8a3z
-	 2cOPuCWMYAtWtzseiCmraK537YX1eA2nMaBTnGEY1+cCpWB03kDQH/x9ViGx/B2PZd6sJ
-	 uBklSYcTpUB4G9VYX5BeHS7NkmGofQhX99YUoWvfiSi600984bNHl3KWyE39jcu3NbqAd
-	 Hqs45vk9WAIGRBTN+fizyrktzG54hoMoHSlJZBSctsw6XSR7w8KiYf637ixmq2VNoZA==
+	bh=M1Jz1/QbPHolNpw7hViozPe0OhTh9e6urlvNZ1PN/CE=;
+	b=dkY8y/OT+UBp/1EsWicNvlXg1ua/dFlaxlmf3Dn2sAKRtX1UvQKoQOS5E8TECDr0WMgj
+	 5a3Wc/koSrtAXNOqmAGEgP45TE97Y9K9qTk2PrXxKmkaaLy2iGsqJ7IcO1kRPnxAxxLEj
+	 7e1PHFe5dDhPIIZZQ7Iibnj+BU08BnGIBkyaRLTjODONrvR39DaJHoU8Wvv1uU1Mb3/DO
+	 xoZyUOSsORjqV0y9FQ8kzs+tRvHHVz4IZ2aUVg1Vq2h8XX9K2d8/9Bc9niHImJKzkTagg
+	 RXbiTkljtniwWFWObisUQ30XgdUXc5R+srvavDx91p4sYNAwpa42B5BZmOa1YuVKVLg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=google.com;
 	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=QA9o3Eby;
-	arc=none smtp.remote-ip=209.85.128.70
-Received: from mail-wm1-f70.google.com (mail-wm1-f70.google.com [209.85.128.70])
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=UjYXY9fh;
+	arc=none smtp.remote-ip=209.85.218.72
+Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com [209.85.218.72])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32EBB606A330
-	for <linux-efi@vger.kernel.org>; Wed, 18 Nov 2026 18:21:58 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 32EBB606A330
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38372606A320
+	for <linux-efi@vger.kernel.org>; Wed, 18 Nov 2026 18:22:00 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 38372606A320
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=QA9o3Eby
-Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-4b9fde3044dso9457345e9.0
-        for <linux-efi@vger.kernel.org>; Wed, 18 Nov 2026 10:21:57 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=UjYXY9fh
+Received: by mail-ej1-f72.google.com with SMTP id a640c23a62f3a-c50b170ec5aso45385566b.2
+        for <linux-efi@vger.kernel.org>; Wed, 18 Nov 2026 10:22:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1795026116; x=1795630916; darn=vger.kernel.org;
+        d=google.com; s=20260707; t=1795026119; x=1795630919; darn=vger.kernel.org;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=LM4UWhtNaf+31HpscxLGjqcPcYVKjie0R23WUyOHwoM=;
-        b=QA9o3Ebyd6hEXAjR3MdjDD44yBzYBw82Tt+kFK3B0qP81Unw8w900/Q98MpT27PMUY
-         nxQnF6v9xfJwkyAOLsWcGXnj510vKBulYsTcEUIUYFoe33zPdveIhzT5ll72o0mAL3ID
-         ukY3DJXWooxvOE3wZu0YOQ0Dlb67XKKhlVfuh9DMF0WwHsJWeGEK9knrTtxFni2xa+bn
-         bS7B5BWFej5UAsUKe9JtuHaAOthAuN9BvAbk5NCyGzkXw/xhI43ZoxRMucj9F9cWX8Wa
-         fCShAPvL+GpSnrTZ2h0g4n0p5Ytq/yAu5sJoh0Wdk7k95d7j6ZOgSuwOmibJW1XA/I1z
-         df7g==
+        bh=M1Jz1/QbPHolNpw7hViozPe0OhTh9e6urlvNZ1PN/CE=;
+        b=UjYXY9fhn2lDkzPNFKYIB6nhB02hTGCCLvcwPX0+0F3IVyLJZPgaJ1ZppfBxGEhYZ2
+         ds+u06ofy647PWybogHo87BpWs32E4TxMP+3CQHXgIaFgH77lxxgf5XvXR4V9ho8fP0e
+         VK7yxC62gbwM54Hqk500zFE4Ki1NKsr8pOHUyW5aVsiPin0JW8+FjgvqIKa7sBVGS38I
+         Bq+Zw6Gy+p7bJvc1f8WaM6750FptlQYJ17A6B6UoqbPCtK5hXbADiNDVLgFz3ChAvH44
+         lyNdaDj6h07WV1J0IinHInGEFR1B09C0Pu4alFHRbRpj6vl4hN5cUy/Nzj9gxWiNzwan
+         qU5g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795026116; x=1795630916;
+        d=1e100.net; s=20260707; t=1795026119; x=1795630919;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=LM4UWhtNaf+31HpscxLGjqcPcYVKjie0R23WUyOHwoM=;
-        b=sv8MBiDAm8LZ52xZs2zai1qQJuCUPk8eySNbylPszMCpuZXV6Kvfi1xTNBT3S0xpqY
-         UlytXj7rTvZAyuVuq8i2D0Y+Ioze3SS0DE0epOr/5FD76rXqR+yz8i0z8EiIzKWgcccG
-         dNwZIU6Ue0vGvZ/sOhiIhtNpPlTx2irXhvn8dWdptbSsHHaXebg1XB4xfNY2k+myhPyE
-         eucJNDz10zVq6JqOcYWvZcc+ENe1tNndaHnDJe3iSnHUrT0wSvzKvoMIX6b+9id0F7dJ
-         foWCKisPs2AXv37fmiPv7976lcvwDJUvsI+7sVyeUqbAAGY+M/zcpf3CT62J2Ev4QOy2
-         7A4g==
-X-Gm-Message-State: APuU4Z+aVBhdxZAyMeUz+4NFG9DRNC3sLzmKIJ5QFBWWkBxm3sXDaerW
-	xJnxLZjD1g2vODT2qBrJ3mQBeqV/xBC+TietxByYKpJVarmTqRWAjaFAPU/+aNtPdWn1A7ONxEL
-	Q0ifBC1Gp7OJgI5sbGvkc0C9uajBHKKXstTfqEfHuYibvImroOhleabftS1Y8OEFDuSh1vW/rf6
-	4jk5zJL2hDQi4W1W1cRyIH4adtT5nEvA==
-X-Received: from wmdd13.prod.google.com ([2002:a05:600c:a20d:b0:4a1:fd4d:ad4e])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:1f82:b0:4a6:44b:2593
- with SMTP id 5b1f17b1804b1-4bb7da4a0b5mr67681055e9.29.1795026116240; Wed, 18
- Nov 2026 10:21:56 -0800 (PST)
-Date: Wed, 18 Nov 2026 19:21:12 +0100
+        bh=M1Jz1/QbPHolNpw7hViozPe0OhTh9e6urlvNZ1PN/CE=;
+        b=FyqgeB71YgyF89xzPwO4uDTUOzxP1Vt2K/usurPs6SWRPM3vCZyG5qXOqLeZqI4AFz
+         1D6fGzPHrOI0RVJ+osYGGa04CBdFq1ZNA4rNJ+VcHYcs8BQ6WfEovwTDxPOS38r+5h+X
+         4JCSBTTJ7qG6OjFI/4Yy6TUMr1c63TJChUkCSlxc52VyDYv//ZmAlCt2AXgOPI02vG6y
+         0mCi9qr+3yz27cSusB+HwNuDpEMdV8oPnVbH0zd7idG1lFO4ACuWo88PA7jur1d0DoxE
+         6uixGDxnClyvbi5u5jv5r/y6uJ1JxweR5pN4E7IQn5OGxosg8p/+0tG5JJOUeo6FSwne
+         TW9w==
+X-Gm-Message-State: APuU4Z+c60IWt+Qt+cBeByKpSxkASb4CWbB9NaW7lyayYO7Gw9N19D1s
+	YlOMbvLVGFnaINepSQifhY21ROsruH1iJuOdeGrP8KUBy5y71SxURNIamW8VfLFIMrszSy1fwo+
+	/Z81jZo0EIojwRsbcMW/9YG1+pIr5KvRjmlWqA/2S3tSywm2w9g4LYCyQObMUkqBOXtWDplReNT
+	SRmHxOzJzox4wnsXTzQ56AMruXs1jpMg==
+X-Received: from ejbjo16.prod.google.com ([2002:a17:906:f6d0:b0:c4d:2462:39ce])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a17:907:7f94:b0:c41:4d5:e97c
+ with SMTP id a640c23a62f3a-c510e361646mr311603866b.37.1795026118221; Wed, 18
+ Nov 2026 10:21:58 -0800 (PST)
+Date: Wed, 18 Nov 2026 19:21:13 +0100
 In-Reply-To: <20261118182105.1633603-21-ardb+git@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -81,15 +81,14 @@ Precedence: list
 Mime-Version: 1.0
 References: <20261118182105.1633603-21-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=6981; i=ardb@kernel.org;
- h=from:subject; bh=tY79MuljiH6CJlV+ev4wNhil+QqJwdsIKUw56aBQG+A=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIevvm1lNN8P7zu5v4p15yGKDz8auyrpX/8JO3Jjzc7F76
- 017o5MXOkpZGMS4GGTFFFkEZv99t/P0RKla51myMHNYmUCGMHBxCsBEUgIYGR63qslb1WQ1vd02
- 2zHFaJFdsHRqTosaz6KMYu1kmbOTnjEyrGDhOMqipm5t7P47ZencAkmF7oJ5rN21V9xDhLxCvig zAAA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=6557; i=ardb@kernel.org;
+ h=from:subject; bh=UpOlRDfxgKbTpCknhkTVYs14c9RoP6u0s/Oh13lIEDY=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIevvmzm2ncdETfvsKw8rxd7+8/mufGDvsrVFrJMOrXz+Z
+ dMcgdOLOkpZGMS4GGTFFFkEZv99t/P0RKla51myMHNYmUCGMHBxCsBEFi5hZNibunG1wdlpO5qu
+ r1/meKdsX//eQud1DGdlLrUy3SjRe+jHyDDXbGe7/YmN0aueTz2kd0pxy6GZ7tL56YaJBrPObFj oLsUOAA==
 X-Mailer: git-send-email 2.56.1.708.g77570a6a1d-goog
-Message-ID: <20261118182105.1633603-27-ardb+git@google.com>
-Subject: [PATCH v4 06/19] efi/libstub: arm: Size the decompressed kernel
- allocation precisely
+Message-ID: <20261118182105.1633603-28-ardb+git@google.com>
+Subject: [PATCH v4 07/19] efi/libstub: Avoid reserve_addr/_size in efi_kaslr_relocate_kernel()
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Ard Biesheuvel <ardb@kernel.org>, 
@@ -100,150 +99,153 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-The ARM EFI stub reserves a window for the decompressed kernel, as the
-decompressor writes it to memory without regard for other allocations
-made while running under the firmware. Currently, this window is
-MAX_UNCOMP_KERNEL_SIZE (32 MiB) in size, but it starts 5 pages below the
-kernel's start address, to cover the initial page tables. This leaves
-32 MiB minus 5 pages for the kernel itself, and nothing checks whether
-that is sufficient. Large kernels (e.g., multiplatform builds with debug
-options enabled) can exceed this, in which case the decompressed image
-and its BSS overrun the reservation into memory that the firmware
-regards as free, and which may have been handed out for the FDT, the
-initrd or the EFI memory map.
+Avoid reserve_addr and reserve_size to carry the information about the
+allocated space for the relocated kernel, and instead, use a single
+alloc_size output parameter that is wired to image_size.
 
-So instead, size the window based on the actual memory footprint of the
-kernel: the uncompressed image size, which is stored in the last 4 bytes
-of the compressed payload, plus the size of BSS, which is recorded in
-the zImage tag table, plus the size of the initial page tables, which is
-4 pages, or 5 pages when LPAE is enabled.
-
-While at it, drop the requirement that the window is aligned to a power
-of two that is at least TEXT_OFFSET, which means 4 MiB when TEXT_OFFSET
-is 0x208000 or 0x308000. The only actual requirement is that the
-physical start of the kernel minus TEXT_OFFSET, which becomes
-PHYS_OFFSET, is a multiple of 2 MiB, as required by the phys-to-virt
-patching code. The reason for the larger alignment was that the existing
-logic breaks down when the slack below the kernel exceeds the alignment,
-and so this is fixed by making the additional space that is allocated to
-accommodate the alignment the larger of 2 MiB and the size of the slack.
-This also ensures that PHYS_OFFSET never ends up below the 2 MiB aligned
-block containing the start of the allocation, which only requires DRAM
-to be 2 MiB aligned rather than 4 MiB aligned.
-
-Finally, free the unused parts at either end of the allocation without
-updating alloc_base and alloc_size in place, so that both frees are
-derived directly from the original allocation, and return the reserved
-window to the caller as is.
+While at it, don't use the alloc_size as an in/out parameter, but only
+use it to return the allocated size (and leave it as 0x0 if the image
+is going to execute in place)
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm/include/asm/efi.h                | 15 ++--------
- drivers/firmware/efi/libstub/arm32-stub.c | 31 ++++++++++++--------
- 2 files changed, 20 insertions(+), 26 deletions(-)
+ drivers/firmware/efi/libstub/arm64-stub.c |  3 +-
+ drivers/firmware/efi/libstub/efistub.h    |  3 +-
+ drivers/firmware/efi/libstub/kaslr.c      | 30 +++++++++-----------
+ drivers/firmware/efi/libstub/riscv-stub.c |  4 +--
+ 4 files changed, 17 insertions(+), 23 deletions(-)
 
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index e408399d5f0e..c28508c6e107 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -56,22 +56,11 @@ void efi_virtmap_unload(void);
+diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+index 2c3869356147..fe0deae78e5b 100644
+--- a/drivers/firmware/efi/libstub/arm64-stub.c
++++ b/drivers/firmware/efi/libstub/arm64-stub.c
+@@ -35,10 +35,9 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 	kernel_size = _edata - _text;
+ 	kernel_codesize = __inittext_end - _text;
+ 	kernel_memsize = kernel_size + (_end - _edata);
+-	*reserve_size = kernel_memsize;
+ 	*image_addr = (unsigned long)_text;
  
- /* arch specific definitions used by the stub code */
- 
--/*
-- * A reasonable upper bound for the uncompressed kernel size is 32 MBytes,
-- * so we will reserve that amount of memory. We have no easy way to tell what
-- * the actuall size of code + data the uncompressed kernel will use.
-- * If this is insufficient, the decompressor will relocate itself out of the
-- * way before performing the decompression.
-- */
--#define MAX_UNCOMP_KERNEL_SIZE	SZ_32M
--
- /*
-  * phys-to-virt patching requires that the physical to virtual offset is a
-- * multiple of 2 MiB. However, using an alignment smaller than TEXT_OFFSET
-- * here throws off the memory allocation logic, so let's use the lowest power
-- * of two greater than 2 MiB and greater than TEXT_OFFSET.
-+ * multiple of 2 MiB.
-  */
--#define EFI_PHYS_ALIGN		max(UL(SZ_2M), roundup_pow_of_two(TEXT_OFFSET))
-+#define EFI_PHYS_ALIGN		SZ_2M
- 
- /* on ARM, the initrd should be loaded in a lowmem region */
- static inline unsigned long efi_get_max_initrd_addr(unsigned long image_addr)
-diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
-index 1073dd947516..1ab15d66e709 100644
---- a/drivers/firmware/efi/libstub/arm32-stub.c
-+++ b/drivers/firmware/efi/libstub/arm32-stub.c
-@@ -76,6 +76,12 @@ void efi_handle_post_ebs_state(void)
- 		      &efi_entry_state->sctlr_after_ebs);
+-	return efi_kaslr_relocate_kernel(image_addr, reserve_addr, reserve_size,
++	return efi_kaslr_relocate_kernel(image_addr, image_size,
+ 					 kernel_size, kernel_codesize, kernel_memsize,
+ 					 efi_kaslr_get_phys_seed(image_handle));
  }
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index f5eec8c12894..5c10815d9172 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -1244,8 +1244,7 @@ const u8 *__efi_get_smbios_string(const struct efi_smbios_record *record,
+ void efi_remap_image(unsigned long image_base, unsigned alloc_size,
+ 		     unsigned long code_size);
+ efi_status_t efi_kaslr_relocate_kernel(unsigned long *image_addr,
+-				       unsigned long *reserve_addr,
+-				       unsigned long *reserve_size,
++				       unsigned long *alloc_size,
+ 				       unsigned long kernel_size,
+ 				       unsigned long kernel_codesize,
+ 				       unsigned long kernel_memsize,
+diff --git a/drivers/firmware/efi/libstub/kaslr.c b/drivers/firmware/efi/libstub/kaslr.c
+index b34e4599f0f6..49b05d0c0003 100644
+--- a/drivers/firmware/efi/libstub/kaslr.c
++++ b/drivers/firmware/efi/libstub/kaslr.c
+@@ -82,9 +82,8 @@ static bool check_image_region(u64 base, u64 size)
  
-+/* last unaligned u32 in the image carries the uncompressed size */
-+extern u32 input_data_end[] __aligned(1);
-+
-+/* entry #3 in the zimage magic table carries the kernel's BSS size */
-+extern u32 zimage_magic_table[] asm("_table_start");
-+
- efi_status_t handle_kernel_image(unsigned long *image_addr,
- 				 unsigned long *image_size,
- 				 unsigned long *reserve_addr,
-@@ -83,18 +89,22 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 				 efi_loaded_image_t *image,
- 				 efi_handle_t image_handle)
+ /**
+  * efi_kaslr_relocate_kernel() - Relocate the kernel (random if KASLR enabled)
+- * @image_addr:		Pointer to the current kernel location
+- * @reserve_addr:	Pointer to the relocated kernel location
+- * @reserve_size:	Size of the relocated kernel
++ * @image_addr:		Pointer to variable carrying the image base address
++ * @alloc_size:		Pointer to variable carrying the allocated size
+  * @kernel_size:	Size of the text + data
+  * @kernel_codesize:	Size of the text
+  * @kernel_memsize:	Size of the text + data + bss
+@@ -97,13 +96,13 @@ static bool check_image_region(u64 base, u64 size)
+  * Return:	status code, EFI_SUCCESS if relocation is successful
+  */
+ efi_status_t efi_kaslr_relocate_kernel(unsigned long *image_addr,
+-				       unsigned long *reserve_addr,
+-				       unsigned long *reserve_size,
++				       unsigned long *alloc_size,
+ 				       unsigned long kernel_size,
+ 				       unsigned long kernel_codesize,
+ 				       unsigned long kernel_memsize,
+ 				       u32 phys_seed)
  {
--	const int slack = TEXT_OFFSET - 5 * PAGE_SIZE;
--	int alloc_size = MAX_UNCOMP_KERNEL_SIZE + EFI_PHYS_ALIGN;
-+	unsigned long kernel_memsize = input_data_end[-1] + zimage_magic_table[3];
-+	const int pgdir_size = (4 + IS_ENABLED(CONFIG_ARM_LPAE)) * PAGE_SIZE;
-+	int alloc_size = pgdir_size + ALIGN(kernel_memsize, EFI_PAGE_SIZE);
-+	const int slack = TEXT_OFFSET - pgdir_size;
-+	const unsigned long margin = max(EFI_PHYS_ALIGN, slack);
- 	unsigned long alloc_base, kernel_base;
++	unsigned long kernel_base = *image_addr;
  	efi_status_t status;
+ 	u64 min_kimg_align = efi_get_kimg_min_align();
  
- 	/*
- 	 * Allocate space for the decompressed kernel as low as possible.
--	 * The region should be 16 MiB aligned, but the first 'slack' bytes
-+	 * The region should be 2 MiB aligned, but the first 'slack' bytes
- 	 * are not used by Linux, so we allow those to be occupied by the
- 	 * firmware.
- 	 */
--	status = efi_low_alloc_above(alloc_size, EFI_PAGE_SIZE, &alloc_base, 0x0);
-+	status = efi_low_alloc_above(alloc_size + margin, EFI_PAGE_SIZE,
-+				     &alloc_base, 0x0);
- 	if (status != EFI_SUCCESS) {
- 		efi_err("Unable to allocate memory for uncompressed kernel.\n");
- 		return status;
-@@ -103,7 +113,7 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	if ((alloc_base % EFI_PHYS_ALIGN) > slack) {
- 		/*
- 		 * More than 'slack' bytes are already occupied at the base of
--		 * the allocation, so we need to advance to the next 16 MiB block.
-+		 * the allocation, so we need to advance to the next 2 MiB block.
+@@ -112,8 +111,8 @@ efi_status_t efi_kaslr_relocate_kernel(unsigned long *image_addr,
+ 		 * If KASLR is enabled, and we have some randomness available,
+ 		 * locate the kernel at a randomized offset in physical memory.
  		 */
- 		kernel_base = round_up(alloc_base, EFI_PHYS_ALIGN);
- 		efi_info("Free memory starts at 0x%lx, setting kernel_base to 0x%lx\n",
-@@ -113,16 +123,11 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+-		status = efi_random_alloc(*reserve_size, min_kimg_align,
+-					  reserve_addr, phys_seed,
++		status = efi_random_alloc(kernel_memsize, min_kimg_align,
++					  image_addr, phys_seed,
+ 					  EFI_LOADER_CODE, 0, EFI_ALLOC_LIMIT);
+ 		if (status != EFI_SUCCESS)
+ 			efi_warn("efi_random_alloc() failed: 0x%lx\n", status);
+@@ -122,33 +121,32 @@ efi_status_t efi_kaslr_relocate_kernel(unsigned long *image_addr,
  	}
  
- 	*reserve_addr = kernel_base + slack;
--	*reserve_size = MAX_UNCOMP_KERNEL_SIZE;
-+	*reserve_size = alloc_size;
+ 	if (status != EFI_SUCCESS) {
+-		if (!check_image_region(*image_addr, kernel_memsize)) {
++		if (!check_image_region(kernel_base, kernel_memsize)) {
+ 			efi_err("FIRMWARE BUG: Image BSS overlaps adjacent EFI memory region\n");
+-		} else if (IS_ALIGNED(*image_addr, min_kimg_align) &&
+-			   (*image_addr + kernel_memsize) < EFI_ALLOC_LIMIT) {
++		} else if (IS_ALIGNED(kernel_base, min_kimg_align) &&
++			   (kernel_base + kernel_memsize) < EFI_ALLOC_LIMIT) {
+ 			/*
+ 			 * Just execute from wherever we were loaded by the
+ 			 * UEFI PE/COFF loader if the placement is suitable.
+ 			 */
+-			*reserve_size = 0;
+ 			return EFI_SUCCESS;
+ 		}
  
- 	/* now free the parts that we will not use */
--	if (*reserve_addr > alloc_base) {
--		efi_bs_call(free_pages, alloc_base,
--			    (*reserve_addr - alloc_base) / EFI_PAGE_SIZE);
--		alloc_size -= *reserve_addr - alloc_base;
--	}
--	efi_bs_call(free_pages, *reserve_addr + MAX_UNCOMP_KERNEL_SIZE,
--		    (alloc_size - MAX_UNCOMP_KERNEL_SIZE) / EFI_PAGE_SIZE);
-+	efi_free(*reserve_addr - alloc_base, alloc_base);	/* no-op if 0 */
-+	efi_free(alloc_base + margin - *reserve_addr, *reserve_addr + alloc_size);
+-		status = efi_allocate_pages_aligned(*reserve_size, reserve_addr,
++		status = efi_allocate_pages_aligned(kernel_memsize, image_addr,
+ 						    ULONG_MAX, min_kimg_align,
+ 						    EFI_LOADER_CODE);
  
- 	*image_addr = kernel_base + TEXT_OFFSET;
- 	*image_size = 0;
+ 		if (status != EFI_SUCCESS) {
+ 			efi_err("Failed to relocate kernel\n");
+-			*reserve_size = 0;
+ 			return status;
+ 		}
+ 	}
+ 
+-	memcpy((void *)*reserve_addr, (void *)*image_addr, kernel_size);
+-	*image_addr = *reserve_addr;
++	memcpy((void *)*image_addr, (void *)kernel_base, kernel_size);
++	*alloc_size = kernel_memsize;
++
+ 	efi_icache_sync(*image_addr, *image_addr + kernel_codesize);
+-	efi_remap_image(*image_addr, *reserve_size, kernel_codesize);
++	efi_remap_image(*image_addr, kernel_memsize, kernel_codesize);
+ 
+ 	return status;
+ }
+diff --git a/drivers/firmware/efi/libstub/riscv-stub.c b/drivers/firmware/efi/libstub/riscv-stub.c
+index 5cbc50a814e1..d0fc04d21b56 100644
+--- a/drivers/firmware/efi/libstub/riscv-stub.c
++++ b/drivers/firmware/efi/libstub/riscv-stub.c
+@@ -37,10 +37,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 	kernel_codesize = __inittext_end - _start;
+ 	kernel_memsize = kernel_size + (_end - _edata);
+ 	*image_addr = (unsigned long)_start;
+-	*reserve_size = kernel_memsize;
+ 
+-	status = efi_kaslr_relocate_kernel(image_addr,
+-					   reserve_addr, reserve_size,
++	status = efi_kaslr_relocate_kernel(image_addr, image_size,
+ 					   kernel_size, kernel_codesize, kernel_memsize,
+ 					   efi_kaslr_get_phys_seed(image_handle));
+ 	if (status != EFI_SUCCESS)
 -- 
 2.56.1.708.g77570a6a1d-goog
 
