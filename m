@@ -1,59 +1,73 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795096669;
-	b=xJf0XgzHXI65xZqky9vFlbcVRCGHwO12J/A57kU9AUWfNxp1ad1MuiPvGQ9vmY72/IvU
-	 J889v8Ngg8ZItm3yG+yyvSlvRb4SRet4pMUd8YtzinamCV3WYqIxYADRqr7AC/V2a8Pas
-	 4YabhumiHxO3NCO4krkVPb+q9cq9Io5lp4eomt1zp/mMBTkoqyvujMSSG8mu5PPfGgD+v
-	 PuHBdd8nbIkjPylNBq4GQ5FP3b/Irsj1NC+5pmUtBepvF/2+i4bbjkDRH6OTqLrA4Ow9N
-	 lVe94j+GBEqKDcq7qM1QmzZchY9C2tlzz6/0ZQpiSQpSGSDJEy6RmhMSWbET111LJUw==
+	t=1795102707;
+	b=eLm3xl7rK1WjjaIa2aDPhVH0jg/VDhLtHbs0dYFoXEBJD9fRiQQw9k0Z0PZ07tS6z9iz
+	 FXwefMX0B473MUki8MFW9q04JL82l8nqFAz+rJCS53Szgd5gXNZxWr4EaonEX0G7L6sXZ
+	 ipcJHp+6Rke5J0HxKY++d+MYeFVhiGL04PrtpA/FeGFfAECO6cGAe/m8hR0eeabO1JfmS
+	 MzahVNVjxzG1MlqvieWSZbsVZjKIru5ZcJa/X2gSHNsuc1K6ukzjDrnDmga2igV2LXEc1
+	 wFpEC9KXPFNZV+K5WR5Q7Jxmz3EuCgyGmi2/TBB2mSEjwJiyzdYTsqCCm5KJwIaCuMA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795096669;
-	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
-	bh=S0tdVInouOdohOf3y3ROcnEUNe5cSySDwSAP8SJS+UY=;
-	b=TFMRX4wXP0V9hIDaTC/JLFZQot8fe8dar9aAxb8P3ip01HF1SisBcR8P2O/5AZjJ935v
-	 iwSeMZJgRbxEn46fFBwOijN4YpoAoI/xjyhko8S33A9IHccbP0rNbKqzV0l46duvj95Ic
-	 NMt/p/HGaLpNWZERs7ZP4l9OGsln5yzkvs8ud0QxCOMK/rQ2DBgIW60Jp91QQj5va4CiO
-	 YtH6QyliquaJzky6XETdRlnt/Xu8wqpaLX/XHmlyPX2kXimas9he6+5+4X+x/cpor2e5J
-	 czYvqgYdL9V/qQFrbpAgbmQnIACHx9INYzz0geslJVm2lCbdShUaZXkLcKUVjN/n4Yw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795102707;
+	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
+	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type:Content-Transfer-Encoding;
+	bh=WGQr9homvcBDDaDNFjGaP7bjHcrXtaqxHaJKTI0quEg=;
+	b=YLXzy0wp17oDfvFiS45c9u/QxLcwSZlElIzprl6zYOgcTsgr9+DeHhBKX0RwlpEKL8LZ
+	 /SX9izmYgZr17VvvjxA2G8I9zzj8frAO7TehcQnMDIwZdkjFI31MAdCT9S6JoIRXMadcU
+	 mhev9Gpd8HGirhUnTK0bhuKdsgTpmuetlwfybSIPGN9h5S4TwfUzg0btq8gFAHg2NMxCk
+	 LzfHAnDyYIjzr891OiZUwWodz175K9zevjdLYtb66V0fVacR1b+RZzyr2OkLkiyuXnIlx
+	 q811I78FrJqXq8VLqo6fO5n75ZYBBBkDZQite8r9mde93laoV97JqMlNPnoiSxXIWng==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=VTG05IaB;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=nWGDqYNC;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 937EF606A336;
-	Thu, 19 Nov 2026 13:57:49 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6C4D60A2607;
+	Thu, 19 Nov 2026 15:38:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=VTG05IaB
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 988861F000C5;
-	Thu, 19 Nov 2026 13:57:45 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=nWGDqYNC
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 76E8A1F000C9;
+	Thu, 19 Nov 2026 15:38:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795096669;
-	bh=S0tdVInouOdohOf3y3ROcnEUNe5cSySDwSAP8SJS+UY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=VTG05IaBXiNOGB/UkOhNVLsvEyO1G3aax/eBEIJw9xXmsKjV6/n5DSpfuj9mDebv0
-	 dxQVA8CW32RvLNpK2dEueLPZLmwmldzvE6lEigS0dfr82/2clgcwsYzgQBftx7n14t
-	 pbkqPDWlSLY+b0qLHIXigaWQfBwFn5QV20gw6/J3TXcfgjDRllgZ8v1Se5REO1upH9
-	 GFuzBvRUejwpN3SyhXUHRLhLasaMVZrK1kcwxHs1LbSQfdhUOHC+EsjL0cgvsGIpdE
-	 oMB9nZu68h8x5RA3aHlOhrW6mARVPeFPsWOZ1zYHYR8jvwCzmIl0Qw/RmBzdvT/oCG
-	 WJaj1eJ7ISgsw==
-Date: Thu, 19 Nov 2026 14:57:43 +0100
-From: Christian Brauner <brauner@kernel.org>
-To: Vincent Mailhol <mailhol@kernel.org>
-Cc: Jens Axboe <axboe@kernel.dk>, Davidlohr Bueso <dave@stgolabs.net>, 
-	Alexander Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>, linux-kernel@vger.kernel.org, 
-	linux-block@vger.kernel.org, linux-efi@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
-	Dave Hansen <dave.hansen@intel.com>, James Bottomley <James.Bottomley@hansenpartnership.com>, 
-	Helge Deller <deller@gmx.de>, Matthew Wilcox <willy@infradead.org>, 
-	Jonathan Corbet <corbet@lwn.net>, Shuah Khan <skhan@linuxfoundation.org>, 
-	Randy Dunlap <rdunlap@infradead.org>, linux-doc@vger.kernel.org
-Subject: Re: [PATCH v3 0/7] init: discoverable root partitions
-Message-ID: <20261119-grauhaarig-wachleute-rockkonzert-696e45cdc27d@brauner>
-References: <20261102-discoverable-root_partitions-v3-0-27f04b69b7ab@kernel.org>
- <20261110-fachlehrer-anhaften-unkenntlich-86fc48b56f8f@brauner>
- <182e7cc2-43cd-4858-99ca-5f243e2c9eb5@kernel.org>
+	s=k20260515; t=1795102707;
+	bh=WGQr9homvcBDDaDNFjGaP7bjHcrXtaqxHaJKTI0quEg=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=nWGDqYNCGgY6EsYektk0F3ocquHXbRy1fnBV1cjg2r5M/i1bmrbziHyQsCLWESUdJ
+	 opBWD9W5X5P5mOOl4X7/vqsOz5egFXFqJAoPrL4wF2t4goJ4HyOW0XVMH95ZFst1+K
+	 zMl6ZnTfRZ3zlTPlIVDjv/wCnHDmdeEMZiGZi3Oz2oDcuTE9oVH8vy/+c97AqyrB06
+	 qfAK6S6U9Kmd9ZtWqMyHpCYtStkgZRJhpi9hovItWRr9tH5NJJXztFH0dK+aOhgXFI
+	 5abk/OIW6k2WsjCfCEqMkNRBGtntyyVmO0X4Bua4NEszIh6DdRYDzmfJ3kdQhFCz/+
+	 HsHGJtTPB/JZg==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id BDA09198003A;
+	Thu, 19 Nov 2026 10:38:24 -0500 (EST)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Thu, 19 Nov 2026 10:38:24 -0500
+X-ME-Sender: <xms:7Rf_ahjoSDHuY-li6z80mwYOQLNJTGQf1s9UH2cE69IDojYofOJwPg>
+    <xme:7Rf_ag02Px5PS4iBvm_FnNjsIZ6ZtHQjpcHB8i3JsRRyvwbq0U9FF8ofWY68gj4vd
+    ihV1_A3F1imUG4RxW7k_Qc7xhu6BK1y-71x4MxdUuBj2ooChhuX7UHh>
+X-ME-Proxy-Cause: dmFkZTFjUXYloFjoDllRlpZzwX+Mr2aQT9ODXP8XGqHiLINShhj92g8SnoXLjarMGxqFOO
+    oMDZM9EMatC8AGeg/TSMAdaFkP0NJsv1RNjS5Z5wWE7XSkhmx4jF+oLRVh3mFvSxwbe+xk
+    nU298dZTxAa+bh/zAwbQbFPI3xyGDOOUS+385VVsVL1+gnA2mILXuFwfM0DajlGwagkkBS
+    u27MEZWc8i8uC/2bF9euzQlyo4MLEJN8OuSZrtvxdRVK1sYclzWbHdRfR72lilcXQx0dLz
+    i3W7h3MPidwET8W+CEXkC+RoWeLCGzPYlagVwS2A5U3Y11yanQZV1s6/vZkWj53tyOy2AD
+    pzA9vLhqXXaM9bjhj4TJ+RCvFGC+1d+/mxLqU4jENV6V9cg2cbVPnjK017AVB0ZjBJVpr3
+    s6siunXhUGx205Yl44urUhkqQpwryhaQ70MGhoa6F+xWX5jg7c8biylL5yT1OMtAuJGuqr
+    MwQHxiAoZwbrPftISKaf60cnPvn9tGs3EH+fVmm7/OTXfIjBXcfKM2Nm7amnjiiHF8O+nt
+    od6D2ndZV4Tg8t2DNQYZ07MeZfFHqEw2FGpeLs+MY2H7cWkgrlHEGVW6tk8MNmtCZI2VbU
+    zrEFfeiZRVlvNisMmkmYFY6hsVs+/dc+sZkZ36SJx+rOx3TOi3fFB/o/OTfw
+X-ME-Proxy: <xmx:8Bf_ailq9KZsUJBEpXUEZIDn32ElvnIruMtxjDCpKznCpT1ZTkVThA>
+    <xmx:8Bf_akG8_SUQdfXtfWLssOzQRlbG3JFU89ndf_BfWHbWgGdCiKq6Vw>
+    <xmx:8Bf_amEpQKt3967seOdLahbvyYJbpHiNLFsWPrFIeR0LP7WwCukBZw>
+    <xmx:8Bf_as3jiR3CjL8AoEsqrCL3Ad7TrusWoiXyrbNpceBqdUwceNWKtg>
+    <xmx:8Bf_aofDdp_XnT9_bucLRcIiGEv1YKmTwbaVBT6hJMDgjrNll8blkGpU>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id BEF05F80093; Thu, 19 Nov 2026 10:38:21 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -63,31 +77,157 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <182e7cc2-43cd-4858-99ca-5f243e2c9eb5@kernel.org>
+Date: Thu, 19 Nov 2026 16:38:00 +0100
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Sven Peter" <sven@kernel.org>, "Will Deacon" <will@kernel.org>
+Cc: "Mark Rutland" <mark.rutland@arm.com>,
+ "Lorenzo Pieralisi" <lpieralisi@kernel.org>, "Rob Herring" <robh@kernel.org>,
+ "Krzysztof Kozlowski" <krzk+dt@kernel.org>,
+ "Conor Dooley" <conor+dt@kernel.org>,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "Catalin Marinas" <catalin.marinas@arm.com>,
+ "Sudeep Holla" <sudeep.holla@kernel.org>, "Janne Grunau" <j@jannau.net>,
+ "Neal Gompa" <neal@gompa.dev>, linux-arm-kernel@lists.infradead.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-efi@vger.kernel.org, asahi@lists.linux.dev
+Message-Id: <a1b18224-4171-4702-acb2-cef994dd9921@app.fastmail.com>
+In-Reply-To: <ef76e141-491d-44a9-90a6-e9cd54526012@kernel.org>
+References: <20260708-efi-psci-v1-0-9efb3abf0e4c@kernel.org>
+ <9c53cfd7-e193-4441-83ca-7710060225b7@app.fastmail.com>
+ <apldL6Ml91GW-tE9@J2N7QTR9R3.cambridge.arm.com>
+ <aplk2hHRB7Yw9FWW@willie-the-truck>
+ <eb75b82a-8910-4198-b89a-5c8b487c0fd5@app.fastmail.com>
+ <cadadedb-1de1-46f0-9bfd-35eb8bdfa85b@kernel.org>
+ <avxETlOGyr_WQ2zp@willie-the-truck>
+ <ef76e141-491d-44a9-90a6-e9cd54526012@kernel.org>
+Subject: Re: [PATCH RFC 0/6] PSCI-via-EFI to support firmware and kernel sharing EL2
+ for Apple Silicon
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-On Wed, Nov 11, 2026 at 04:24:35PM +0100, Vincent Mailhol wrote:
-> I would appreciate hearing whether these use cases and the limited
-> scope address your concerns.
 
-I don't think they do. The scope was never the problem. DPS is userspace
-policy and a subset of it in the kernel is still policy in the kernel.
-It seems just wrong.
 
->   This is useful for booting a kernel manually, for example from the edk2
->   file browser, or recovering from a lost or corrupted bootloader
->   configuration without having to supply the correct root= argument or
->   load an initrd from the bootloader shell. Finally, it allows systems
->   that otherwise need no initrd to discover their root partition through
->   DPS without introducing an early userspace environment solely for that
->   lookup.
+On Tue, 17 Nov 2026, at 16:25, Sven Peter wrote:
+> On 17.11.26 13:10, Will Deacon wrote:
+>> On Sun, Nov 15, 2026 at 07:38:35PM +0100, Sven Peter wrote:
+>>>
+>>>
+>>> On 03.09.26 15:25, Ard Biesheuvel wrote:
+>>>> On Thu, 3 Sep 2026, at 14:15, Will Deacon wrote:
+>>>>> On Thu, Sep 03, 2026 at 12:42:39PM +0100, Mark Rutland wrote:
+>>>>>> On Thu, Sep 03, 2026 at 01:34:56PM +0200, Ard Biesheuvel wrote:
+>>>>>>> On Wed, 8 Jul 2026, at 09:15, Sven Peter wrote:
+>>>>>>>> This series adds a custom EFI table that points to a PSCI entry point
+>>>>>>>> (plus some other stuff that has to be available before EFI runtime
+>>>>>>>> services are set up) and adds support for this new conduit to the psci
+>>>>>>>> code. We can't directly use the normal EFI runtime path because that one
+>>>>>>>> takes a sleeping lock and we need to be able to call into PSCI from
+>>>>>>>> atomic context during e.g. cpu bringup or during idle.
+>>>>>>>> It also adds support for specifying the specific MAIR attributes for EFI
+>>>>>>>> runtime mappings as defined in the latest UEFI spec since Apple Silicon
+>>>>>>>> is rather allergic to using Device-nGnRnE vs. Device-nGnRE for its MMIO.
+>>>>>>
+>>>>>>>>         dt-bindings: arm: psci: Add EFI conduit
+>>>>>>>>         arm64/efi: Add and parse custom PSCI EFI configuration table
+>>>>>>>>         efi: Add EFI_MEMORY_ISA_{MASK,VALID}
+>>>>>>>>         arm64/efi: Honor EFI_MEMORY_ISA_MASK for Device-nGnRnE vs -nGnRE
+>>>>>>>>         firmware/psci: Add EFI runtime conduit
+>>>>>>>>         arm64: dts: apple: t8103: Add PSCI and CPU idle states
+>>>>>>>>
+>>>>>>>
+>>>>>>> I've picked up patches #3 and #4, which are useful in their own right.
+>>>>>>>
+>>>>>>> I'm not sure if the arm64 maintainers will want to consider this, but
+>>>>>>> I think it's a reasonable compromise, as it puts the abstraction in
+>>>>>>> the right place.
+>>>>>>
+>>>>>> Sorry for the late reply; I've been away almost all of August and I'm
+>>>>>> slowly catching up on things.
+>>>>>>
+>>>>>> As with last time this was proposed (in abstract), I am not happy about
+>>>>>> bodging an EFI conduit into PSCI, given that the manner in which state
+>>>>>> is managed is completely different from SMCCC.
+>>>>>>
+>>>>>> If we need a mechanism for doing hotplug and/or idle without HVC/SMC,
+>>>>>> that's one thing we can consider. I don't think we should pretend that
+>>>>>> it is PSCI.
+>>>>>
+>>>>> What do you have in mind for an alternative mechanism? I understand your
+>>>>> objection to this proposal, but at least it keeps the interface fairly
+>>>>> high-level and avoids opening the flood gates for a bunch of SoC-specific
+>>>>> idle routines. Are you thinking of extensions to the PSCI spec or
+>>>>> something else?
+>>>>>
+>>>>
+>>>> I can't speak for Mark, of course, but I could imagine EFI being used as a
+>>>> conduit to provide a callable set of interfaces (with a rigorously defined
+>>>> set of constraints such as the ones in this patch, i.e., reentrancy, no FP
+>>>> or SIMD, not relying on ISA features that the OS needs to know about and
+>>>> enable, etc).
+>>>>
+>>>> There is prior art here in ACPI PRM, which does something similar, and this
+>>>> also relies on EFI runtime services.
+>>>>
+>>>> You'd still need to implement the CPU ops and a cpuidle driver afaict (no
+>>>> expert here), but at least those would be coded against an interface that
+>>>> the kernel itself specified, and can be made as generic as we choose to.
+>>>>
+>>>> Not saying this is all great, but it might be a worthwhile compromise to
+>>>> consider.
+>>>
+>>> Finally getting back to this series...
+>>>
+>>>
+>>> I'd definitely like to keep mapping the resident firmware using EFI runtime
+>>> services because otherwise I'd have to duplicate a whole lot of tricky code
+>>> to do the same thing via some other means (e.g. a device tree nodes that
+>>> contains all mappings + callbacks) and I just don't see much value in that.
+>>>
+>>> I'm happy to just drop the PSCI part though and replace that with a simple
+>>> and somewhat generic "efi-rt" (or similar) cpuidle driver and make that one
+>>> have similar requirements like I added for this RFC series and expose bunch
+>>> of generic callbacks (that will just happen to resemble PSCI functions very
+>>> much ;)) via a custom EFI table. That would keep PSCI out of all of this but
+>>> come at the cost of an additional cpuidle driver.
+>>>
+>>> I don't think that would open any flood gates for SoC-specific drivers since
+>>> we could just point them to the generic one and tell them to use that one if
+>>> they can't do PSCI for some reason.
+>>>
+>>>
+>>> Now before I go off and prototype this: Would this approach be fine in
+>>> general with you, Mark and Will?
+>> 
+>> tbh, if the "efi-rt" thing is just PSCI with a different conduit and that
+>> conduit is properly documented, then I really don't see the point in keeping
+>> it separate. However. I suspect that we probably all have slightly different
+>> opinions here which isn't going to help you very much :(
+>
+> Yeah, well, I agree but I really don't have a strong opinion or any good 
+> argument if either "efi-rt" vs "psci-via-efi" is better or worse. I only 
+> think both are better than SoC-specific cpuidle and cpu_ops drivers and 
+> I have no idea how else we could do this. (We could drop the kernel to 
+> EL1 and do "normal" PSCI in EL2 then but that would be much worse than 
+> either of those options imho)
+>
 
-The kernel can already find the root partition without an initrd though?
-For example, via root=PARTUUID= and root=PARTLABEL=.
+I agree with Mark that implementing a pseudo-PSCI that can never quite
+comply with everything in the PSCI spec is probably not a great idea
+unless we actually need it.
 
-And if you want to pick something in the edk2 file browser and have it
-boot then pick a UKI. It carries its command line and its initrd in the
-PE binary so there's nothing to type and no second file to find. And
-that initrd can do DPS just fine. Everything beyond that is bootloader
-or early userspace policy.
+> And especially with M4+ I'd like to have something that can go upstream 
+> because normal wfi loses most general purpose regs there and has to be 
+> disabled which is not great.
+>
+> I can also just prototype the efi-rt cpuidle+cpu_ops thing and then we 
+> can take a look at it as well and see if that's better than what I have 
+> in this series if that helps but I'd rather not spend that time if that 
+> has no chance of being accepted either.
+>
+
+I think a consistent approach for both secondary bringup (+teardown?) and
+cpuidle that is based on the same efi-runtime layer is perfectly acceptable,
+and allows us to define it as narrowly as we can, rather than having to
+consider what shared code might assume once it sees enable-method=psci on
+a CPU, or a PSCI conduit (SMCCC detection, mitigations, etc etc)
+
