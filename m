@@ -1,66 +1,55 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=111.22.67.139
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795162551;
-	b=5NxnxwMi9pXZI5sJ4LgQcE/SeDqXEV5bT6GDgDn8YoCHFXTQvDdB5grdzeXyPK5nhlON
-	 31gj+PXw4IOW+FwxLPNLcewaKaSShDBT/iKDkUcvoS5MychHUK4uiDV5V8nS//KmKszaW
-	 BpEuUFI2CeQnwRwntKTsSnANnhwSSbBRHhcW5Z3VGqHzSo0k3PlCPMfJF+cjZEhS0KAkZ
-	 8xyZHXA4Cfco77pZmynPamJvwgHGo0DggJ6WHoZ4Gaskw/PkxlSuEwza9ls/Vs7+BbEgt
-	 sf1OYYWV/qeWQnDjo1ayTPWJwlS1LBGPX6SxUAZ4ixYz/hCQkt5a/q2bZjSsXhpngpg==
+	t=1795162817;
+	b=ZB9YXA4vthlauEip25RHPhiTJL/xvLaT6tZ8RQEeXEaSxgPHXgrL0mDdiDzHTFFy+gIO
+	 2gIclBHRR/ePGh83V/pMyAzyjxiVu5Ip0gAMZmmYcOo0PZ27u2b4xnoe5pMZdyaDuY83q
+	 D0T98ozdT3iLDZpf/GV0fYbH0RJbs+8M8s/TkpnEq8I2iF6KfeMzeijIy51ivzEtifUQy
+	 E1Ne2VHeUuwN++ngmMDfYrtizscPf2W5m3J0lSaWmQQf0ml0FZ4yPoMm5MZ3M3yyrelta
+	 asAcL4OWjnpSZmGonbBmyIi3DkO/7t+FE1D8HdasCp06+io9wSjz9rTZL2Z59ah5BQg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795162551;
-	h=DMARC-Filter:DKIM-Signature:X-RM-TagInfo:X-RM-SPAM-FLAG:Received:
-	 X-RM-TRANSID:X-RM-TagInfo:X-RM-SPAM-FLAG:Received:X-RM-TRANSID:From:
-	 To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=cdMIn3d++fXbCyR18l4vxstb3vbUjNZ9OLHJAK0SFoU=;
-	b=jmYa5ADU7QdAY/5HClg81s8C06jUEemSxcCEG3FeIjoQMed5RR/EK8yIFsxMyJLiqyIK
-	 w+WP+MuGjMM24742+1kNuou5i94rJsw4h0ShySbReiHbUrOeYc39tbFcWvzO8/XQ3xnXA
-	 OrAuVbunTIhu5yrPp6MJ7K/McTPm+8wxtdNOdPACDUq2l/0/sBfMzED41SQpBn4xdZYCm
-	 EBfZJocOfYIAAr3Hfrs6jMPh9NElWN7nnlvTBrzQ44K9cEmZ2HcM0hTbxyJlX7Yo+oYQT
-	 0OgibDpecH/3GJzVbeBteQ0HaTV8CZup1nh3nEf09d7+IpNr3+6tQDkMN1gM7belWLA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795162817;
+	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
+	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
+	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
+	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
+	bh=YrezAQ7e02vT8+Swx+rmAAedFzytCEs8zwyhSyPMrmg=;
+	b=a/TFbIGG5Hnm7HK+U0GaZYXuLsYZ9AaTr7DHqJ1AVFofkpHNCjxH4ntkv1NOAgoC/std
+	 3jGNNfENKQQvQHFKdEHCRLVm/xrsl0SaPCBpy0m7+4nRK9IUPTha+sURgeEcQudAruuya
+	 PBFp3GaUQszlsAVm6RHmBwFiee5xy8b/EzZb8EtKcHOEwSUwX+u6T29JsMPDI+PR97f7t
+	 IJoGV2B7UxMMDbyHPYengWLuOHtLR6uxoh5rqhzQn3FOkZK5LACswNrKq5EwKBBzhAwIY
+	 tJ7PWm7nAAOkDTRr1hg1oRpHvv2ecUzDFicThs1ebRJ9SxqEC2V/p5gmk7d/15MmtOQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=cmss.chinamobile.com;
-	spf=pass smtp.mailfrom=cmss.chinamobile.com;
-	dkim=pass header.d=cmss.chinamobile.com header.i=@cmss.chinamobile.com header.a=rsa-sha256 header.s=default header.b=TS6htP1O;
-	arc=none smtp.remote-ip=111.22.67.139
-Received: from cmccmta6.chinamobile.com (cmccmta6.chinamobile.com [111.22.67.139])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 78804606A320;
-	Fri, 20 Nov 2026 08:15:49 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 78804606A320
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=cmss.chinamobile.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cmss.chinamobile.com
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=fGSf2Yiy;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E576606A339
+	for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 08:20:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=cmss.chinamobile.com header.i=@cmss.chinamobile.com header.a=rsa-sha256 header.s=default header.b=TS6htP1O
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=cmss.chinamobile.com; s=default; l=0;
-	h=from:subject:message-id:to:cc:mime-version;
-	bh=47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=;
-	b=TS6htP1O+h6H4bGmlR9b1Azg3kn6oP/NH9vinjx85xFFlL83ElYD7duGtpmiaRezh9rh63uujSB+M
-	 fCIgKX55E4uTo5uKQi/VMyf8KSZ4NSaTLmgle/LExQDBTqlb89AwQnbDfXIVLMd/UipeIrhcatb6lH
-	 4JiD8R8/bTOJKOQY=
-X-RM-TagInfo: emlType=0                                       
-X-RM-SPAM-FLAG:00000000
-Received:from spf.mail.chinamobile.com (unknown[10.188.0.87])
-	by rmmx-syy-dmz-app09-12009 (RichMail) with SMTP id 2ee96b0001af7cd-2c214;
-	Fri, 20 Nov 2026 16:15:46 +0800 (CST)
-X-RM-TRANSID:2ee96b0001af7cd-2c214
-X-RM-TagInfo: emlType=0                                       
-X-RM-SPAM-FLAG:00000000
-Received:from desktop-eb75daa8a6be458c-20260816004526035 (unknown[10.55.1.72])
-	by rmsmtp-syy-appsvr01-12001 (RichMail) with SMTP id 2ee16b0001b0515-1d423;
-	Fri, 20 Nov 2026 16:15:46 +0800 (CST)
-X-RM-TRANSID:2ee16b0001b0515-1d423
-From: Zhang Chujun <zhangchujun@cmss.chinamobile.com>
-To: Ard Biesheuvel <ardb@kernel.org>,
-	Jeremy Kerr <jk@ozlabs.org>
-Cc: linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Kohei Enju <kohei@enjuk.jp>,
-	zhangchujun <zhangchujun@cmss.chinamobile.com>
-Subject: [PATCH] efivarfs: fix off-by-one in efivar_validate() variable name matching
-Date: Fri, 20 Nov 2026 16:15:40 +0800
-Message-ID: <20261120081540.1870-1-zhangchujun@cmss.chinamobile.com>
-X-Mailer: git-send-email 2.50.1.windows.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=fGSf2Yiy
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0B5431F000D0
+	for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 08:20:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795162817;
+	bh=YrezAQ7e02vT8+Swx+rmAAedFzytCEs8zwyhSyPMrmg=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc;
+	b=fGSf2Yiy+uc/qp81wK0iTU5kiKISZ5xng2yOJ0qfzp/x7fM5F3xnlDjRHwK8nv7rF
+	 v13YU104O6c0yC4YigW0XT8hH7RXSrLkOkBcofghiJIDZzjUHBrhuAZHqMyGunZqKz
+	 nmvDy4pvhhxNlIf9YYMfKSAQVtv2y0Kqtd0Mug9TBBrTi1PGolQlDmLwLsO/NtQsv+
+	 eerHGkSer9N63JJ0XOa91S3jwLjFIPn7JgAqjMM0gjW3kCcK4ELht1UGsG8Aeme/Zo
+	 jfioXx2ZErAxlO/wfuh0zLwzf2B8oHZ8OPj1BqAbdcmpXVbIpAbKOjSJOx2cVZKujM
+	 MBoXYqyDVoaQA==
+Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-6b8b20b2538so763567a12.3
+        for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 00:20:16 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AL+hErE6XpN9m1uSi1Dz3qRxdcHya6eacxX03vP+PUybWcZo1xUj34dD0fie/y8uy5m9bPMs+vcIHSSpdnM=@vger.kernel.org
+X-Gm-Message-State: APuU4Z/8axaUc5l9V4xJtg8LgpxnDNukLW0l6QQL7kBQLDxiTvTL3Opm
+	gm5N2EXPbJqodQP8vogwm/pjg9jPuOmoagcdsmiIE9ydCOl56vh5hZTzNiyLu5vtBb1r0uf1eP6
+	cFWHkFKBy8QhlxqJLPmIEJPDRLQr5Fzc=
+X-Received: by 2002:a05:6402:3608:b0:6b8:77ad:62e8 with SMTP id
+ 4fb4d7f45d1cf-6ba37ee17c3mr1286897a12.44.1795162815520; Fri, 20 Nov 2026
+ 00:20:15 -0800 (PST)
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -70,37 +59,63 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20261029172956.20791-1-dongtai.guo@linux.dev> <20261029172956.20791-4-dongtai.guo@linux.dev>
+In-Reply-To: <20261029172956.20791-4-dongtai.guo@linux.dev>
+From: Huacai Chen <chenhuacai@kernel.org>
+Date: Fri, 20 Nov 2026 16:20:06 +0800
+X-Gmail-Original-Message-ID: <CAAhV-H4A8gYGEMkbPk6MEkjLtdEe4OFwBUkERvdpXjiXfriuZw@mail.gmail.com>
+X-Gm-Features: AclHuK-h6bybNetTU_MMXuMJwO3eew7bSt_laDSgKQt1od1cbyCQa8XfhqZT6Vs
+Message-ID: <CAAhV-H4A8gYGEMkbPk6MEkjLtdEe4OFwBUkERvdpXjiXfriuZw@mail.gmail.com>
+Subject: Re: [PATCH v6 3/8] kho: Include linux/mm.h in kho_block.c
+To: George Guo <dongtai.guo@linux.dev>
+Cc: rppt@kernel.org, pasha.tatashin@soleen.com, pratyush@kernel.org, 
+	ardb@kernel.org, shuah@kernel.org, ilias.apalodimas@linaro.org, 
+	akpm@linux-foundation.org, baoquan.he@linux.dev, ruirui.yang@linux.dev, 
+	guodongtai@kylinos.cn, kernel@xen0n.name, graf@amazon.com, 
+	liukexin@kylinos.cn, loongarch@lists.linux.dev, linux-kernel@vger.kernel.org, 
+	kexec@lists.infradead.org, linux-mm@kvack.org, 
+	linux-kselftest@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: zhangchujun <zhangchujun@cmss.chinamobile.com>
+I have applied this one as a preparation for others.
 
-efivar_validate() passes utf8_size + 1 to variable_matches(),
-including the terminating NUL in the name length. However,
-variable_matches() expects the number of non-NUL characters.
+Huacai
 
-As a result, exact-name entries in variable_validate[] fail to
-match, causing some variables to use the wrong validator or
-bypass their intended validation.
-
-Fixes: 630ba0cc7a6d ("efi: Fix out-of-bounds read in variable_matches()")
-Cc: stable@vger.kernel.org
-Signed-off-by: zhangchujun <zhangchujun@cmss.chinamobile.com>
-
-diff --git a/fs/efivarfs/vars.c b/fs/efivarfs/vars.c
-index 6833c3d24b54..9f18bf48615c 100644
---- a/fs/efivarfs/vars.c
-+++ b/fs/efivarfs/vars.c
-@@ -274,7 +274,7 @@ efivar_validate(efi_guid_t vendor, efi_char16_t *var_name, u8 *data,
- 		if (efi_guidcmp(vendor, variable_validate[i].vendor))
- 			continue;
- 
--		if (variable_matches(utf8_name, utf8_size+1, name, &match)) {
-+		if (variable_matches(utf8_name, utf8_size, name, &match)) {
- 			if (variable_validate[i].validate == NULL)
- 				break;
- 			kfree(utf8_name);
--- 
-2.50.1.windows.1
-
-
-
+On Fri, Oct 30, 2026 at 1:30=E2=80=AFAM George Guo <dongtai.guo@linux.dev> =
+wrote:
+>
+> From: George Guo <guodongtai@kylinos.cn>
+>
+> kho_block.c calls virt_to_phys() and phys_to_virt(). With CONFIG_KFENCE=
+=3Dy,
+> the LoongArch implementations use offset_in_page() and page_address(),
+> which are provided by <linux/mm.h>.
+>
+> Include <linux/mm.h> explicitly to avoid implicit-declaration build
+> errors for these helpers.
+>
+> Co-developed-by: Kexin Liu <liukexin@kylinos.cn>
+> Signed-off-by: Kexin Liu <liukexin@kylinos.cn>
+> Signed-off-by: George Guo <guodongtai@kylinos.cn>
+> ---
+>  kernel/liveupdate/kho_block.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/kernel/liveupdate/kho_block.c b/kernel/liveupdate/kho_block.=
+c
+> index 0d2a342ef422..0d56891b2f4c 100644
+> --- a/kernel/liveupdate/kho_block.c
+> +++ b/kernel/liveupdate/kho_block.c
+> @@ -25,6 +25,7 @@
+>  #include <linux/kho/abi/block.h>
+>  #include <linux/kho_block.h>
+>  #include <linux/slab.h>
+> +#include <linux/mm.h>
+>
+>  /*
+>   * Safeguard limit for the number of serialization blocks. This is used =
+to
+> --
+> 2.53.0
+>
