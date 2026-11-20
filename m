@@ -1,55 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.218.69
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795162817;
-	b=ZB9YXA4vthlauEip25RHPhiTJL/xvLaT6tZ8RQEeXEaSxgPHXgrL0mDdiDzHTFFy+gIO
-	 2gIclBHRR/ePGh83V/pMyAzyjxiVu5Ip0gAMZmmYcOo0PZ27u2b4xnoe5pMZdyaDuY83q
-	 D0T98ozdT3iLDZpf/GV0fYbH0RJbs+8M8s/TkpnEq8I2iF6KfeMzeijIy51ivzEtifUQy
-	 E1Ne2VHeUuwN++ngmMDfYrtizscPf2W5m3J0lSaWmQQf0ml0FZ4yPoMm5MZ3M3yyrelta
-	 asAcL4OWjnpSZmGonbBmyIi3DkO/7t+FE1D8HdasCp06+io9wSjz9rTZL2Z59ah5BQg==
+	t=1795180715;
+	b=MPvu6Sdsm9uEdExHWZE0S9UiQBFTzEtXAxKMFfuj2WSUMQghuF9H4QO3iz5h60Oe7Mn3
+	 rln+v1FoIGhiIoyVHMb66mDg5rvShAfKTZEDEECbUDLhZq7HxGRlB34dywDn+Mc+czpzG
+	 4dfn/djd/RRn+AICsWJNHBKvY6xsIo5qYna75MZvN618ZOqIUDW0cByWXIV3tZLrssbW7
+	 0/MD2DTSnzJFSuysKuBB91sYjJrHE9K1OCPnMKqWXO1AqjiAxP51WvE9UqgPwLHqSBUBH
+	 wudPu8PCdEktOuqth0X6jpXdOQ02nDOpb43oPu0ZPTqm0532aSPwV9yNxXajrR8rYtw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795162817;
-	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
-	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
-	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
-	bh=YrezAQ7e02vT8+Swx+rmAAedFzytCEs8zwyhSyPMrmg=;
-	b=a/TFbIGG5Hnm7HK+U0GaZYXuLsYZ9AaTr7DHqJ1AVFofkpHNCjxH4ntkv1NOAgoC/std
-	 3jGNNfENKQQvQHFKdEHCRLVm/xrsl0SaPCBpy0m7+4nRK9IUPTha+sURgeEcQudAruuya
-	 PBFp3GaUQszlsAVm6RHmBwFiee5xy8b/EzZb8EtKcHOEwSUwX+u6T29JsMPDI+PR97f7t
-	 IJoGV2B7UxMMDbyHPYengWLuOHtLR6uxoh5rqhzQn3FOkZK5LACswNrKq5EwKBBzhAwIY
-	 tJ7PWm7nAAOkDTRr1hg1oRpHvv2ecUzDFicThs1ebRJ9SxqEC2V/p5gmk7d/15MmtOQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795180715;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Received:Date:Mime-Version:X-Developer-Key:
+	 X-Developer-Signature:X-Mailer:Message-ID:Subject:From:To:Cc:
+	 Content-Type;
+	bh=wVClh5ANnMKPlZ9DxvStfeC7z+NugTM+O6khnh3HAHQ=;
+	b=JQVQ0OyU54aLWhYuZ8gk6GyWoKUlbhIMw7oDTX0RLQlSQ8oG4LfD3NuuupjP9vneyvA1
+	 l1tfZ9K8IgdeaHAQZxlVAUFwADk2BOyJ0bluP0ggNdb6A94E7vBucWH+XP5arLQ8wQZkX
+	 UhgXFR2TqdW25O7TWJ6I+BrPUEFy6MrgOzotmpybwlgqzNU8zI/r4hx3av0LhOj0caZnw
+	 /V1WyDX70CXOUQIoDhK+Zqq2g3Q7jY/9vkAFmG/F/7XMTROkonhJyIbFn09HocYkfty4d
+	 YWZKmR5L/ALBFFB3KJRy5kSDS5Ro2RXRYzzRTDMoTN32BwBp3t0dY0QXWJl4VMdE+hw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=fGSf2Yiy;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	dmarc=pass header.from=google.com;
+	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=InojRyHL;
+	arc=none smtp.remote-ip=209.85.218.69
+Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com [209.85.218.69])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E576606A339
-	for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 08:20:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 68964606A320
+	for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 13:18:35 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 68964606A320
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=fGSf2Yiy
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0B5431F000D0
-	for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 08:20:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795162817;
-	bh=YrezAQ7e02vT8+Swx+rmAAedFzytCEs8zwyhSyPMrmg=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=fGSf2Yiy+uc/qp81wK0iTU5kiKISZ5xng2yOJ0qfzp/x7fM5F3xnlDjRHwK8nv7rF
-	 v13YU104O6c0yC4YigW0XT8hH7RXSrLkOkBcofghiJIDZzjUHBrhuAZHqMyGunZqKz
-	 nmvDy4pvhhxNlIf9YYMfKSAQVtv2y0Kqtd0Mug9TBBrTi1PGolQlDmLwLsO/NtQsv+
-	 eerHGkSer9N63JJ0XOa91S3jwLjFIPn7JgAqjMM0gjW3kCcK4ELht1UGsG8Aeme/Zo
-	 jfioXx2ZErAxlO/wfuh0zLwzf2B8oHZ8OPj1BqAbdcmpXVbIpAbKOjSJOx2cVZKujM
-	 MBoXYqyDVoaQA==
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-6b8b20b2538so763567a12.3
-        for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 00:20:16 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AL+hErE6XpN9m1uSi1Dz3qRxdcHya6eacxX03vP+PUybWcZo1xUj34dD0fie/y8uy5m9bPMs+vcIHSSpdnM=@vger.kernel.org
-X-Gm-Message-State: APuU4Z/8axaUc5l9V4xJtg8LgpxnDNukLW0l6QQL7kBQLDxiTvTL3Opm
-	gm5N2EXPbJqodQP8vogwm/pjg9jPuOmoagcdsmiIE9ydCOl56vh5hZTzNiyLu5vtBb1r0uf1eP6
-	cFWHkFKBy8QhlxqJLPmIEJPDRLQr5Fzc=
-X-Received: by 2002:a05:6402:3608:b0:6b8:77ad:62e8 with SMTP id
- 4fb4d7f45d1cf-6ba37ee17c3mr1286897a12.44.1795162815520; Fri, 20 Nov 2026
- 00:20:15 -0800 (PST)
+	dkim=pass (2048-bit key, unprotected) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=InojRyHL
+Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-c50713860c0so89282466b.0
+        for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 05:18:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20260707; t=1795180714; x=1795785514; darn=vger.kernel.org;
+        h=content-type:cc:to:from:subject:message-id:mime-version:date:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=wVClh5ANnMKPlZ9DxvStfeC7z+NugTM+O6khnh3HAHQ=;
+        b=InojRyHLlXLyIPwumbbGOnr8OzFU+M2FRu8O8SrC1STBgOGeoZfTxSeKelxbTkRUrO
+         ja4ZR7K731HyD12KrsL3ojYzuzUXhkLs2fZbsP4Ts1BQzvutdwY+LiXSbuNngbusk2dr
+         2eO5cZrCqnfD+X2+Ut/NAjCoZjYsFYFXrlT37hmxKLDLPItQMx3+02emvekK4UFJri1U
+         +NP+mxW0ZX1BfnvlQwjZIXOemMam+e/Kxwv8fy8rmwCIppg4/g7Nx23ERAAblAJluaNW
+         +Ad/SzTRVu7luwZ030gRt0Q8FtnqkppivFkIq6EERizDJN3fEM7lqgPrWZwOyFViexxk
+         5WTw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1795180714; x=1795785514;
+        h=content-type:cc:to:from:subject:message-id:mime-version:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=wVClh5ANnMKPlZ9DxvStfeC7z+NugTM+O6khnh3HAHQ=;
+        b=cHspKKIz11HsyU3yKXEaR1w7ZsIbmUG+UW55SVm05QY6ywv0YIOsAAmOQkYU9I6O/T
+         7q5QhaPjNENQqzA0t+N/o34DfrpZxu3u2Jc2YeR9BP2sbb3NrPBxnzFZCqC/6yPLO/5I
+         kx0ujMQcS6k9yZ2d55Rc6SDs0TUQRnQfZOKVSqNFHn7N7owXNiGdJvLvcVLZcecVnW6Z
+         7WpN+sGrpUq72H9CvsltDWJn4qczP573bc5gp4jw4JF/Y4JBkeMRxML1qdDGBVUjpyFr
+         1qer/y3wV1fYeif7VUQzBnZ15JB/kzEgzjNbkF73H+nN7J2GEpCMMCJw5v47l91CEKXi
+         7hOw==
+X-Gm-Message-State: APuU4Z9aRWVNgFvd5Wb3rlc6WihEMi7ZB1eXh4YBwgUxKiS1QYqO8IDA
+	jJeyOknFAkbZcBwtEaWZ2YEYpD9mawRwSy2SRFOA8ssM7z5NP75irHOpWUFnXHyuNjNV4ogFSmg
+	06WY8MNboHU3/WxHmO6H25JBlbyrlmEcenFgjTSqtA5dUrBAcU8FzGBnv66KgxqNnsgQjHqTVz2
+	1XGMYxc7A4npENfDQ9rX6KiGlh3wYeJg==
+X-Received: from wrxo9.prod.google.com ([2002:a05:6000:109:b0:49e:4855:28f6])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a17:906:1955:b0:c40:4848:f7fa
+ with SMTP id a640c23a62f3a-c513ab1dc62mr226576666b.44.1795180713244; Fri, 20
+ Nov 2026 05:18:33 -0800 (PST)
+Date: Fri, 20 Nov 2026 14:18:28 +0100
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -58,64 +76,41 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-MIME-Version: 1.0
-References: <20261029172956.20791-1-dongtai.guo@linux.dev> <20261029172956.20791-4-dongtai.guo@linux.dev>
-In-Reply-To: <20261029172956.20791-4-dongtai.guo@linux.dev>
-From: Huacai Chen <chenhuacai@kernel.org>
-Date: Fri, 20 Nov 2026 16:20:06 +0800
-X-Gmail-Original-Message-ID: <CAAhV-H4A8gYGEMkbPk6MEkjLtdEe4OFwBUkERvdpXjiXfriuZw@mail.gmail.com>
-X-Gm-Features: AclHuK-h6bybNetTU_MMXuMJwO3eew7bSt_laDSgKQt1od1cbyCQa8XfhqZT6Vs
-Message-ID: <CAAhV-H4A8gYGEMkbPk6MEkjLtdEe4OFwBUkERvdpXjiXfriuZw@mail.gmail.com>
-Subject: Re: [PATCH v6 3/8] kho: Include linux/mm.h in kho_block.c
-To: George Guo <dongtai.guo@linux.dev>
-Cc: rppt@kernel.org, pasha.tatashin@soleen.com, pratyush@kernel.org, 
-	ardb@kernel.org, shuah@kernel.org, ilias.apalodimas@linaro.org, 
-	akpm@linux-foundation.org, baoquan.he@linux.dev, ruirui.yang@linux.dev, 
-	guodongtai@kylinos.cn, kernel@xen0n.name, graf@amazon.com, 
-	liukexin@kylinos.cn, loongarch@lists.linux.dev, linux-kernel@vger.kernel.org, 
-	kexec@lists.infradead.org, linux-mm@kvack.org, 
-	linux-kselftest@vger.kernel.org, linux-efi@vger.kernel.org
+Mime-Version: 1.0
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+X-Developer-Signature: v=1; a=openpgp-sha256; l=646; i=ardb@kernel.org;
+ h=from:subject; bh=GVrbkC+j1VoGFDvIdrcZ8jz0pSXyM9mulPtDX4O8t9w=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIZvBY3FX57YDE075dzjZ2vZeFlnBlXm64cgS21fhCZZpv
+ w/FPl7ZUcrCIMbFICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACYScpWRofXkTOWwhozXPT/i
+ b0U7XIq/rxKsfP3ztOrLUjNPRkW9UWBkWPvmtbe31vwZto9un6q873HxmvOGwm2CjGyWv+yN46u X8wMA
+X-Mailer: git-send-email 2.56.1.750.gf70dc682cf-goog
+Message-ID: <20261120131827.480055-4-ardb+git@google.com>
+Subject: [PATCH 0/2] efi: Fix pstore runtime en/disable
+From: Ard Biesheuvel <ardb+git@google.com>
+To: linux-efi@vger.kernel.org
+Cc: Ard Biesheuvel <ardb@kernel.org>, Kees Cook <kees@kernel.org>, 
+	"Guilherme G. Piccoli" <gpiccoli@igalia.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-I have applied this one as a preparation for others.
+From: Ard Biesheuvel <ardb@kernel.org>
 
-Huacai
+Fix buggy use of /sys/mode/efi-pstore/params to control the module at
+runtime
 
-On Fri, Oct 30, 2026 at 1:30=E2=80=AFAM George Guo <dongtai.guo@linux.dev> =
-wrote:
->
-> From: George Guo <guodongtai@kylinos.cn>
->
-> kho_block.c calls virt_to_phys() and phys_to_virt(). With CONFIG_KFENCE=
-=3Dy,
-> the LoongArch implementations use offset_in_page() and page_address(),
-> which are provided by <linux/mm.h>.
->
-> Include <linux/mm.h> explicitly to avoid implicit-declaration build
-> errors for these helpers.
->
-> Co-developed-by: Kexin Liu <liukexin@kylinos.cn>
-> Signed-off-by: Kexin Liu <liukexin@kylinos.cn>
-> Signed-off-by: George Guo <guodongtai@kylinos.cn>
-> ---
->  kernel/liveupdate/kho_block.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/kernel/liveupdate/kho_block.c b/kernel/liveupdate/kho_block.=
-c
-> index 0d2a342ef422..0d56891b2f4c 100644
-> --- a/kernel/liveupdate/kho_block.c
-> +++ b/kernel/liveupdate/kho_block.c
-> @@ -25,6 +25,7 @@
->  #include <linux/kho/abi/block.h>
->  #include <linux/kho_block.h>
->  #include <linux/slab.h>
-> +#include <linux/mm.h>
->
->  /*
->   * Safeguard limit for the number of serialization blocks. This is used =
-to
-> --
-> 2.53.0
->
+Cc: Kees Cook <kees@kernel.org>
+Cc: "Guilherme G. Piccoli" <gpiccoli@igalia.com>
+Link: https://lore.kernel.org/all/20260906235838.2928815-1-gpiccoli@igalia.com/
+
+Ard Biesheuvel (2):
+  efi: pstore: Make pstore_disable parameter read-only again
+  efi: pstore: Convert into a platform driver for 'efivars'
+
+ drivers/firmware/efi/efi-pstore.c | 84 ++++++++++----------
+ drivers/firmware/efi/efi.c        |  3 +-
+ 2 files changed, 46 insertions(+), 41 deletions(-)
+
+
+base-commit: 6628e7d4c6b25c8d18f1345e3a20d21829aae7e4
+-- 
+2.56.1.750.gf70dc682cf-goog
+
