@@ -1,73 +1,47 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.70
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795184488;
-	b=upoc7VTKrgjgJC3A79rKfRahFo8C70q37g+IEZqkZWSKavbX9Z3XHkcVCosQpckWvWto
-	 hgBC94Js9pT17pO1cL1YmAPv7Y1Mp/h7lBT4wzLT68eKxVpOiCd/M5DbBU1B4DZV1u6pE
-	 rxoQpltJU37BHSNG2YGur+rS2wuUyWwPxCofANRsBB6zhVJrPXfkgBtZSJMpj/8eFpCZR
-	 XWwU2OdbDXAPSwAjF49RoANO/gnv1LXDqBhJ5b5wUe/LkJ8tBdkdwSRI+2Uj5ukZtXk5F
-	 pu0XDqgKq04LlUt1uVuUK+YqkBwWTSiLxzKiF43YnNe2DGeVURP5YP7EiuUAFeExBCA==
+	t=1795191379;
+	b=z0D2J15zjCIMEvfuZBo8RF9YM7gGll9rPwE+m5avj0FAtzOxE48EtmEiS9aurevYXiCF
+	 fGJx2mcPc6EWSCx4tsXei/lkNKNuE7PpJdL/1npEYJK3qtfPQ+PnYu19B1d/gTl+LV7za
+	 NfZUM6fZj5+jRYCgJiayN9TBmVq72lcD0Xmbfti9AFXlHf50gt8wPtJTkIHFj8NYIWjl0
+	 ujsO4E3CIUanfJyg851le83ctozO5NIVRLXbNij+6/5UK0ddcczHlgohgIz4vRO4l2139
+	 Dt40UqUXmDV1qNP1VviayT1F8t3PvppNFDnEGW5qg4wPAyCJNrmp23kzyy05/sg+aDQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795184488;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Received:Date:Mime-Version:X-Developer-Key:
-	 X-Developer-Signature:X-Mailer:Message-ID:Subject:From:To:Cc:
-	 Content-Type;
-	bh=ITiUSrkcHo3/vrwpGUwRiKCqGxMl4l0M0GrgljGxK/4=;
-	b=h94OhWHu0SBlYmGUQ8cmAP6ffAa+Hm7RVKROdg3p6MWx2xP3XaRvj9V9AIwwlaqK2IM+
-	 rc0WHnGrGMterGPRgTAl1m46ZsC+Hq2nLGSvCUbvDWYfC3dk/wx/3cwWPxN6jOks9Xlhe
-	 MIbIVKBvnfYjQwgEw2ylEhDHxUmbGOHvdOL9UPOmV6xn7pfyWx+Fud/4nWSfVxu41gIRF
-	 iUrt85Hlbl9vvggfliVknhITt8PjA9UOoOvKX4VfKdoNadXrrhS0c0vWHbK1CWDV/hCFh
-	 lkS/DG5Xfl0KGNDvDzpfTa1w61h55JEZ6vh7zNMYvAWhOkCDGziCatRIfR3SeN9nC4A==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795191379;
+	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
+	 Subject:To:Cc:References:Content-Language:From:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=ufkrJtwpBnz6WPMTAKwab4l3d1SzDvPyFYqyMLcrdh0=;
+	b=L3QmyqecA72tcRH1RHh1CA/lG2OBoQiowOymuDM/SqO4RqSjjGfE/QjxLe29XchkYVsY
+	 XejpuKLugtVyvwiKFlYKbiKF6znmXoGzVOHTCLrnl2ufL53Jj5lqISSFzA2uxrruHtis2
+	 VOOO4VnIhdpRUSAPZRErBJfpfZFeAZVEOc9ACZ0qT5FRa319FwmEeakoa0T6Pbw3xD1hq
+	 YFP3tcDds7jQNcLuikp/TuT5X9ZHcviibJBYEMiKoxv3VlrfW7GZzfiYHltmicR7G64Tb
+	 H36VcLbChgzLVw4vHRwDdwITgPtA4ZRLP4XkbLS3CMT1c/or2qrdSDlHyxuV33QHl2g==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=google.com;
-	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=gg02twkJ;
-	arc=none smtp.remote-ip=209.85.128.70
-Received: from mail-wm1-f70.google.com (mail-wm1-f70.google.com [209.85.128.70])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=dFvHyXyV;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C80E606A32A
-	for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 14:21:28 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4C80E606A32A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65013606A32A;
+	Fri, 20 Nov 2026 16:16:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=gg02twkJ
-Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-4b9fde3044dso6798855e9.0
-        for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 06:21:28 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1795184487; x=1795789287; darn=vger.kernel.org;
-        h=content-type:cc:to:from:subject:message-id:mime-version:date:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=ITiUSrkcHo3/vrwpGUwRiKCqGxMl4l0M0GrgljGxK/4=;
-        b=gg02twkJEF7vnUZTtQcPdhpL0gvAH5oU800rqFvya0mb2K56/lW3eWvV+stZGMgGmU
-         fUfdgYTWvAVdGEm1j+NEYiVj7jIsj3fdKKhaTLQUSXzpap6J8LqDXNtu227xO60ORLPo
-         hgmuUdS9KEZJZ4sQoKWOFzDf305pKqtET5JBk6EcDXTqQhuuqyJZrq8ccI1c2UO1VJMu
-         vTA8yU+8Thhy2nX9iJPtU6t14tf7l6wgDYtLH6RM9BUGFDSdvAoaNIulkgRlGXFpPfsy
-         FXbjsKiIA7//aRxGI8DB8Co+c10HlQAkLk0+pdNZYf7mSqFCmcsIOGHNpeQDxeeZNvYh
-         dinA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795184487; x=1795789287;
-        h=content-type:cc:to:from:subject:message-id:mime-version:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=ITiUSrkcHo3/vrwpGUwRiKCqGxMl4l0M0GrgljGxK/4=;
-        b=cWlc1bcPxuO5mTtlKFPO476rgGa5/S7U9MupN5oPs5b32kzgI7AvvcWM1Nwuu5GNEr
-         1HzR4wVWk5fesTLZUSOVdQlYonAYuFluUPRMTn5UaXgrbq4yd4HO7eK6YuaxQjUJwgME
-         z+MiHJRIuzxoO153WRy9hx+bDfh43ky9zYEKroXkk+d9psG1g3lYrHIn6l4RnMVBne70
-         fj2TyzndHmQUKVUo83LlgB6sx/3qqeWb3lGll1hRsF5uAj5V5ZqxXsZy+BpK37rl5l7E
-         6oLXGxaxMyqW/rfezGC5jFFAYbpTlaBOl4agpsMRILZGHNOCs/okFk9fftsGUNWY4mYQ
-         zMVA==
-X-Gm-Message-State: APuU4Z8567uGQ4mc3qBtAZ+7FH1leJ/wyP9SJRG5YRUo4Cdf6gvJFKyf
-	WEPpPGKsW/DDvtKcnwWltcrpnE/8bmHYThLym2jbW7J//NYNjLi6NLZrtSiMIAFQHvBQR8c2Upo
-	htx7rvhHb3+KwSin6KEQj/lOO5y1C1kp6xVsrP4EJy6DYTeAravJGEaBFC+hAF1GjtOemLPQfdF
-	5xs1upSEAgIEpBJcg2jarUrGxOPjqIlw==
-X-Received: from wmol4.prod.google.com ([2002:a05:600c:47c4:b0:4a2:655:296e])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:6708:b0:4ba:7e6:53d6
- with SMTP id 5b1f17b1804b1-4bb88940848mr62322595e9.33.1795184486289; Fri, 20
- Nov 2026 06:21:26 -0800 (PST)
-Date: Fri, 20 Nov 2026 15:21:24 +0100
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=dFvHyXyV
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 054D01F000CF;
+	Fri, 20 Nov 2026 16:16:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795191378;
+	bh=ufkrJtwpBnz6WPMTAKwab4l3d1SzDvPyFYqyMLcrdh0=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=dFvHyXyVfCYjJ7NGMnBGAqmFCpcmUE94vICjEkzBBZoW/GMfsILWHwMTtiuJI1dZR
+	 isbdUdY2VdAjzDG9uOuj3HvrSFais+CocjccNOVwLZRv4W5ikc+GRT4v+Fx8NdqWKr
+	 ZyxCUZJwx62l8JwkMmsTJRdoDyRAYUklPkgCUjc0vcfaQmkZGX7zdu73B4j7pKlt9w
+	 g12fUi9O3FgrMF6IzDZZ0QywB+0HnVHqTSchls1fGpNhgm5tGk871tvM0ulpNBvy1x
+	 VvNSDoA5BvpXMpyONoBdWe1qJLOqoJGSzHqSYgnpGAyU4vXMxP3P+LXZxSsJ99YNir
+	 xqWdZ+uG5iH2A==
+Message-ID: <2bd84c5a-221e-4da0-bc08-93096b293395@kernel.org>
+Date: Fri, 20 Nov 2026 17:16:13 +0100
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -76,70 +50,172 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-Mime-Version: 1.0
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1872; i=ardb@kernel.org;
- h=from:subject; bh=X3o9Rmm7jx01kMITf0sPisYNfYMNsUTwItzuQQ7OsyU=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIZshPPlBlfXFQ9kW09YuOKl2dvuLpIz2Bfx5jAVLbl86F
- Bxy70NGRykLgxgXg6yYIovA7L/vdp6eKFXrPEsWZg4rE8gQBi5OAZhIJBsjw85VT855FniemFxQ
- f6STSe3HinPZPe92Z9xc5fR35kqVCVcZfrMmftN6W3k+9LHuJ4UDv1PusBnHS16u4fTd1BAb7/P zEBMA
-X-Mailer: git-send-email 2.56.1.750.gf70dc682cf-goog
-Message-ID: <20261120142123.1125683-2-ardb+git@google.com>
-Subject: [PATCH] efi: Don't destroy runtime workqueue on efisubsys_init() failure
-From: Ard Biesheuvel <ardb+git@google.com>
-To: linux-efi@vger.kernel.org
-Cc: Ard Biesheuvel <ardb@kernel.org>, stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH RFC 0/6] PSCI-via-EFI to support firmware and kernel
+ sharing EL2 for Apple Silicon
+To: Ard Biesheuvel <ardb@kernel.org>, Will Deacon <will@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>,
+ Lorenzo Pieralisi <lpieralisi@kernel.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Catalin Marinas <catalin.marinas@arm.com>,
+ Sudeep Holla <sudeep.holla@kernel.org>, Janne Grunau <j@jannau.net>,
+ Neal Gompa <neal@gompa.dev>, linux-arm-kernel@lists.infradead.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-efi@vger.kernel.org, asahi@lists.linux.dev
+References: <20260708-efi-psci-v1-0-9efb3abf0e4c@kernel.org>
+ <9c53cfd7-e193-4441-83ca-7710060225b7@app.fastmail.com>
+ <apldL6Ml91GW-tE9@J2N7QTR9R3.cambridge.arm.com>
+ <aplk2hHRB7Yw9FWW@willie-the-truck>
+ <eb75b82a-8910-4198-b89a-5c8b487c0fd5@app.fastmail.com>
+ <cadadedb-1de1-46f0-9bfd-35eb8bdfa85b@kernel.org>
+ <avxETlOGyr_WQ2zp@willie-the-truck>
+ <ef76e141-491d-44a9-90a6-e9cd54526012@kernel.org>
+ <a1b18224-4171-4702-acb2-cef994dd9921@app.fastmail.com>
+Content-Language: en-US
+From: Sven Peter <sven@kernel.org>
+In-Reply-To: <a1b18224-4171-4702-acb2-cef994dd9921@app.fastmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-From: Ard Biesheuvel <ardb@kernel.org>
 
-Commit 98086df8b70c ("efi: add missed destroy_workqueue when
-efisubsys_init fails") added a destroy_workqueue(efi_rts_wq) call to the
-error cleanup path of efisubsys_init() without clearing
-EFI_RUNTIME_SERVICES in efi.flags, leaving __efi_queue_work() passing a
-freed workqueue pointer to queue_work() on any subsequent runtime
-service call (for instance via the rtc-efi device registered right
-before efi_kobj is created).
 
-Furthermore, since commit 13c6da02e767 ("efi: Allocate runtime workqueue
-before ACPI init"), efi_rts_wq is no longer allocated by
-efisubsys_init() at all, as efipostcore_init() allocates it earlier for
-consumers such as ACPI PRM that do not depend on /sys/firmware/efi.
+On 19.11.26 16:38, Ard Biesheuvel wrote:
+> 
+> 
+> On Tue, 17 Nov 2026, at 16:25, Sven Peter wrote:
+>> On 17.11.26 13:10, Will Deacon wrote:
+>>> On Sun, Nov 15, 2026 at 07:38:35PM +0100, Sven Peter wrote:
+>>>>
+>>>>
+>>>> On 03.09.26 15:25, Ard Biesheuvel wrote:
+>>>>> On Thu, 3 Sep 2026, at 14:15, Will Deacon wrote:
+>>>>>> On Thu, Sep 03, 2026 at 12:42:39PM +0100, Mark Rutland wrote:
+>>>>>>> On Thu, Sep 03, 2026 at 01:34:56PM +0200, Ard Biesheuvel wrote:
+>>>>>>>> On Wed, 8 Jul 2026, at 09:15, Sven Peter wrote:
+>>>>>>>>> This series adds a custom EFI table that points to a PSCI entry point
+>>>>>>>>> (plus some other stuff that has to be available before EFI runtime
+>>>>>>>>> services are set up) and adds support for this new conduit to the psci
+>>>>>>>>> code. We can't directly use the normal EFI runtime path because that one
+>>>>>>>>> takes a sleeping lock and we need to be able to call into PSCI from
+>>>>>>>>> atomic context during e.g. cpu bringup or during idle.
+>>>>>>>>> It also adds support for specifying the specific MAIR attributes for EFI
+>>>>>>>>> runtime mappings as defined in the latest UEFI spec since Apple Silicon
+>>>>>>>>> is rather allergic to using Device-nGnRnE vs. Device-nGnRE for its MMIO.
+>>>>>>>
+>>>>>>>>>          dt-bindings: arm: psci: Add EFI conduit
+>>>>>>>>>          arm64/efi: Add and parse custom PSCI EFI configuration table
+>>>>>>>>>          efi: Add EFI_MEMORY_ISA_{MASK,VALID}
+>>>>>>>>>          arm64/efi: Honor EFI_MEMORY_ISA_MASK for Device-nGnRnE vs -nGnRE
+>>>>>>>>>          firmware/psci: Add EFI runtime conduit
+>>>>>>>>>          arm64: dts: apple: t8103: Add PSCI and CPU idle states
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> I've picked up patches #3 and #4, which are useful in their own right.
+>>>>>>>>
+>>>>>>>> I'm not sure if the arm64 maintainers will want to consider this, but
+>>>>>>>> I think it's a reasonable compromise, as it puts the abstraction in
+>>>>>>>> the right place.
+>>>>>>>
+>>>>>>> Sorry for the late reply; I've been away almost all of August and I'm
+>>>>>>> slowly catching up on things.
+>>>>>>>
+>>>>>>> As with last time this was proposed (in abstract), I am not happy about
+>>>>>>> bodging an EFI conduit into PSCI, given that the manner in which state
+>>>>>>> is managed is completely different from SMCCC.
+>>>>>>>
+>>>>>>> If we need a mechanism for doing hotplug and/or idle without HVC/SMC,
+>>>>>>> that's one thing we can consider. I don't think we should pretend that
+>>>>>>> it is PSCI.
+>>>>>>
+>>>>>> What do you have in mind for an alternative mechanism? I understand your
+>>>>>> objection to this proposal, but at least it keeps the interface fairly
+>>>>>> high-level and avoids opening the flood gates for a bunch of SoC-specific
+>>>>>> idle routines. Are you thinking of extensions to the PSCI spec or
+>>>>>> something else?
+>>>>>>
+>>>>>
+>>>>> I can't speak for Mark, of course, but I could imagine EFI being used as a
+>>>>> conduit to provide a callable set of interfaces (with a rigorously defined
+>>>>> set of constraints such as the ones in this patch, i.e., reentrancy, no FP
+>>>>> or SIMD, not relying on ISA features that the OS needs to know about and
+>>>>> enable, etc).
+>>>>>
+>>>>> There is prior art here in ACPI PRM, which does something similar, and this
+>>>>> also relies on EFI runtime services.
+>>>>>
+>>>>> You'd still need to implement the CPU ops and a cpuidle driver afaict (no
+>>>>> expert here), but at least those would be coded against an interface that
+>>>>> the kernel itself specified, and can be made as generic as we choose to.
+>>>>>
+>>>>> Not saying this is all great, but it might be a worthwhile compromise to
+>>>>> consider.
+>>>>
+>>>> Finally getting back to this series...
+>>>>
+>>>>
+>>>> I'd definitely like to keep mapping the resident firmware using EFI runtime
+>>>> services because otherwise I'd have to duplicate a whole lot of tricky code
+>>>> to do the same thing via some other means (e.g. a device tree nodes that
+>>>> contains all mappings + callbacks) and I just don't see much value in that.
+>>>>
+>>>> I'm happy to just drop the PSCI part though and replace that with a simple
+>>>> and somewhat generic "efi-rt" (or similar) cpuidle driver and make that one
+>>>> have similar requirements like I added for this RFC series and expose bunch
+>>>> of generic callbacks (that will just happen to resemble PSCI functions very
+>>>> much ;)) via a custom EFI table. That would keep PSCI out of all of this but
+>>>> come at the cost of an additional cpuidle driver.
+>>>>
+>>>> I don't think that would open any flood gates for SoC-specific drivers since
+>>>> we could just point them to the generic one and tell them to use that one if
+>>>> they can't do PSCI for some reason.
+>>>>
+>>>>
+>>>> Now before I go off and prototype this: Would this approach be fine in
+>>>> general with you, Mark and Will?
+>>>
+>>> tbh, if the "efi-rt" thing is just PSCI with a different conduit and that
+>>> conduit is properly documented, then I really don't see the point in keeping
+>>> it separate. However. I suspect that we probably all have slightly different
+>>> opinions here which isn't going to help you very much :(
+>>
+>> Yeah, well, I agree but I really don't have a strong opinion or any good
+>> argument if either "efi-rt" vs "psci-via-efi" is better or worse. I only
+>> think both are better than SoC-specific cpuidle and cpu_ops drivers and
+>> I have no idea how else we could do this. (We could drop the kernel to
+>> EL1 and do "normal" PSCI in EL2 then but that would be much worse than
+>> either of those options imho)
+>>
+> 
+> I agree with Mark that implementing a pseudo-PSCI that can never quite
+> comply with everything in the PSCI spec is probably not a great idea
+> unless we actually need it.
+> 
+>> And especially with M4+ I'd like to have something that can go upstream
+>> because normal wfi loses most general purpose regs there and has to be
+>> disabled which is not great.
+>>
+>> I can also just prototype the efi-rt cpuidle+cpu_ops thing and then we
+>> can take a look at it as well and see if that's better than what I have
+>> in this series if that helps but I'd rather not spend that time if that
+>> has no chance of being accepted either.
+>>
+> 
+> I think a consistent approach for both secondary bringup (+teardown?) and
+> cpuidle that is based on the same efi-runtime layer is perfectly acceptable,
+> and allows us to define it as narrowly as we can, rather than having to
+> consider what shared code might assume once it sees enable-method=psci on
+> a CPU, or a PSCI conduit (SMCCC detection, mitigations, etc etc)
 
-Drop the bogus destroy_workqueue() cleanup from efisubsys_init().
 
-Fixes: 98086df8b70c ("efi: add missed destroy_workqueue when efisubsys_init fails")
-Fixes: 13c6da02e767 ("efi: Allocate runtime workqueue before ACPI init")
-Cc: stable@vger.kernel.org
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/firmware/efi/efi.c | 6 +-----
- 1 file changed, 1 insertion(+), 5 deletions(-)
+True, that's a very good point.
+At least for Apple SoCs I don't need anything nearly as complex as what 
+PSCI provides. I think all that's required is cpu_on, maybe cpu_off, and 
+cpu_enter_idle plus a bunch of static values (number of cpus, available 
+idle states, etc.). Let me think this over and maybe come up with a 
+simple proof of concept then.
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 9bc22de0d67e..40b423f85e06 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -466,8 +466,7 @@ static int __init efisubsys_init(void)
- 	efi_kobj = kobject_create_and_add("efi", firmware_kobj);
- 	if (!efi_kobj) {
- 		pr_err("efi: Firmware registration failed.\n");
--		error = -ENOMEM;
--		goto err_destroy_wq;
-+		return -ENOMEM;
- 	}
- 
- 	if (IS_ENABLED(CONFIG_PREEMPT_RT) && efi.runtime_supported_mask) {
-@@ -525,9 +524,6 @@ static int __init efisubsys_init(void)
- err_put:
- 	kobject_put(efi_kobj);
- 	efi_kobj = NULL;
--err_destroy_wq:
--	if (efi_rts_wq)
--		destroy_workqueue(efi_rts_wq);
- 
- 	return error;
- }
--- 
-2.56.1.750.gf70dc682cf-goog
+
+Sven
 
