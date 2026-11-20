@@ -1,11 +1,11 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=40.93.194.28
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
 	t=1795197136;
-	b=5Sux6P0aUqf3b1AvVVWjgeIh/iCEjpMHbvYzWba5+ZQ4uvB/sGtEmky8cDlgo6OYrraA
-	 2u6TDrTlqNkE157aLepQBwtCi1lbFemEpORJ98p6akVlKMlKsfcrlJ9CL1CkgCfy9oMhu
-	 HLJXeC1eGIrEbh3XG9dnJ2m6zQVPyaOecmf6tas+XOYY/23wgbjMy512Ch+pGu8SS3lBq
-	 D9Bjj5SydovtS46a7C/MpL+Ql320XhDd0V840OVTZ6rpg4p121ObOao5Zcx3bqgIYUL/t
-	 fx4fidYJuv/uqzL6uyXaFB2SVXEptrfX8G1qqJ43ZJLotuKnepaa93ta5kW+yj9QRCA==
+	b=nxhcKAeGBiVLJS5nJgBVd3QQgjxOEOl8pkC/M0s8qZYRdI19f2xSv4wwhKYGuk4YnWsE
+	 xlJFpxhZsW3FArqQeP+4hzIax/4jyG+iuY+mXynmZnF2bgAQQ1BDyQ4GM4m7Bn7HSjKqB
+	 uIGEUoOPH3ZnnP5udVaBD+h95YkFtnP8FNyMB8NmalOcKieYyXp4fbeyuPS5quMTBfCLZ
+	 yrxRDWF3n1qm/AzCl0jX5kLY/yiM9In6ggg5vmaMc+cAuaGeck/hwpauCntbszw/JLkGL
+	 s9QDmpJ5olQvuzIFmMOGGL3HGm3tKUpFj3C7fv9I2yjvnPGjmLnYDjYkfngp7GFswpQ==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1795197136;
 	h=DMARC-Filter:DKIM-Signature:Received:Received:From:To:Cc:Subject:
@@ -24,43 +24,43 @@ ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
 	 X-MS-Exchange-CrossTenant-UserPrincipalName:
 	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=N5DrrFP3GY0rn0msucravho/pzUgwwp1zcKHDpuhFDw=;
-	b=ZcoWTeaR2kCvfqraa973pD8VNcVqyjg+3mL1v1vh5Cp+NQCgE/si/5+PXVmiW4Acq0/0
-	 87AdXtKizExwRDa0XCzHwOVjt3LMCpMnoi3OZip304OCjSXsHzldXTTOfdC32Sv68wLR/
-	 DDIoCJpsv95v8NwBDhvm0Uc+Wt+j03UFjepvmeGU/eHRXKRqTSbN5dp+u6/Mr2Nip0JMp
-	 cDsPpx9AQPNkRLus5hJcCPYmAuIWryZfukcq1M4+bvkk50CG2/cSxdjFhTppXpi6FnbQl
-	 LxhyIQ2pmXHCXZnxRgOZ2BnV536kSBu+qVgt7JD20/N5THwh2EoAE+3Ai7mNjQAABng==
+	bh=Nn7kfqCB9pIznGEV0Zeheg4GgiwKrk5E/nEKF/NdviA=;
+	b=24AprAqtEs6zJtFB0KKVT2pc/YpvDvoAI5n8iWOIz8PyPPT0OCPjk4nht7ad00EmrBBX
+	 uLzLKzSFbakfiO83VBJSIUPs9zrl0cKKncnwOr+ktv5gip3LmWBV/J2Ud0yTTlQHetD8Q
+	 oOAQLxdoQrUdBqawUTlmZzwBvOIr6duK9k6yhurh5YHmgDG1ukSWyug7ZGOpBYTxZCquO
+	 TWXytSXYPE33uz9KowRbPuZjqnIHd7ztLi5i+yozIAGoYGw+eUPTbrHMew5gZ0+R3yafQ
+	 C+DpZb+R1LxnF1XDUqTfzzTd4T3i7ALCSeLOJ7YAwpOag9NRRstRE8snBbwMJ7p17dQ==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=nvidia.com;
 	spf=fail smtp.mailfrom=nvidia.com;
-	dkim=pass header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=bEYI5EwW;
+	dkim=pass header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=LfAKGZvJ;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=40.93.194.28
 Received: from SN4PR0501CU005.outbound.protection.outlook.com (mail-southcentralusazon11011028.outbound.protection.outlook.com [40.93.194.28])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96046606A32A;
-	Fri, 20 Nov 2026 17:52:15 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 96046606A32A
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 643B3606A33E;
+	Fri, 20 Nov 2026 17:52:16 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 643B3606A33E
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=bEYI5EwW
+	dkim=pass (2048-bit key, unprotected) header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=LfAKGZvJ
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=UNWA+3Jla7BwiX8DSjgogRYnNNuywf+5KzJ0CimKYnekEZtkUNFv0ea9wKuOIT0iHo9OvSK1IMGl4zlUUkz7/TLoyoy0wPhakt2KIMm/6fs5EgRGbRlP2fmVA/5wMGIX0VTx16v8wJzGfWJorZ+qDsw9vk1uuH0U7h7jI4BGP0RBcdskbyxoYZeN+1tiyLooq9OpINNiygazsuxh0/nhdLOUko/eLpYsr8T3wWvmEM9yJZ7fyyR1bvTXjzABMEB0W0eKB2BMgW81D5nk1VZvm+VheIARSuUvY6x8SA5XFR7zGF9lHvqO2Jev1JNJyfTeY5NTHsiCIRoyTGoNMb6w4g==
+ b=RO/1L4CCmMKSmrueJBGxUIw8pB1wfSX3RbVqVPm9KlXtr9lEsJs46GxOqWT6PisFbrbscpvul3uixabG/4HinMhOhqNZnSAAvgXBb+OaM3OUFB0jakGUvtB1FlvRw8jgzLyqb2QUca+73kaOkbsowroWYPaPm//bZahs2w6Ws2V3SqmocSqN6qWdSU7YvV4Io/6dIKdfE7vK6ymfJt2bsrc8P4Fhw73BXXKiJ6kUt5O8NiKm1IOaL89dm1mRnhpMbWD5o3EPj2YRPq1CrHXtFlvV3ThONSAb9bWY1LzqmTNl6djY0/kWzg8brT5oQWSUdQIw0rAgu5TUqx35kE72mQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=N5DrrFP3GY0rn0msucravho/pzUgwwp1zcKHDpuhFDw=;
- b=wYKUJqvzQmjVg345ECRZQM1hx33N9aQ+07JCmH28WtHVWUgKO1i76/kJEgzR/wIIIGnJXIrpMr5OX7vmPzcIPG1poQTDZUjgn9Jp20bTAINi4rzfAUApbe6L7VrmdfxkQrfEIkosK8YnD2o0AwMumsvYDPlLGiRaK4rAvdwZUfRhr4ftsA9iUDTr43XYT/vm0k6EqZgbrPlZOkBfa9hsQbRk61yvFho3SUrl1eHSsu/aMedOMzLJlzE3ngq0M+wu2dZ4wkRoqzWOZskJWHYHih+fzdb+ZL44qu9eMAacGn2elbnzhPajKKF4L8YwEH066Icp+tjZIXOhXiH5RboDjw==
+ bh=Nn7kfqCB9pIznGEV0Zeheg4GgiwKrk5E/nEKF/NdviA=;
+ b=O+aG9kRgDJq3x9B7Tobm0yAFarxppYonmz47m73sQRUsylnN9p/dxqCREIojoDEVwkgAjx2h5D3KQJX0qoZufbcAEz1Rhf5097sVhUYK5e405v5kJtAyRomdlSbo5r736SdH759idsR0pDiKbxtK0LZaf6taPixg5ii67UBCkZn0cKiGsLYm5J93dwy7PQHjg6hNtRKGN7iDM5cC5L2vMvl4Wmis92cMEccbG5a8zJaXdJyUXgsn96JYK+8xmJ/YwqSP1S4bIdeHwtTk7kCp9BAJZYnkc0Txu4b91ES22WXMGyPErXka/T89GMP/eDWneY+owwuo9JF7kEgDof+CtA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
  dkim=pass header.d=nvidia.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=N5DrrFP3GY0rn0msucravho/pzUgwwp1zcKHDpuhFDw=;
- b=bEYI5EwWtqvt5SwMfThVf2V10tDD/4YXSRG8RNF7ZkjS+Mh4Elt+1qcVBa3ZyF4ZiwZ1AFVOb2hOgL3R3O+DbWH6eOuNXWUi0rDwkk9niHzVzxXyQeg/9ToVMod1xaUrjR8zkYtvRpByppiinbJeOoYB+/qHNty6cOXtXfg+kqsH+h9Z0lHDuorq4oDOFJT8uJJCiYHeXZ1ACbEMcOg4SYTAkheQNkclQJw3cZPmHdhgPulwhnUZcJ9Y+PBBnVOKbjGzF2qykgnJJX7GsKN2tXaMUpt28DqtPMhxEOTw07Jep0iN3Tw7p94KdUOrpLIOkaQ0JbeBFkGshoc4fYvvaQ==
+ bh=Nn7kfqCB9pIznGEV0Zeheg4GgiwKrk5E/nEKF/NdviA=;
+ b=LfAKGZvJhy4pnYSTIu5jL21lbYAaRgr2u4vahuCcIqCnoA61CkaJRmffNIiF+9cfLJWB2/qMwoC8JzyJi96FmAcVLyWd8KBlHCgqVihchh8nrWNCnyW7M9JiNuaqkBwJ6SvyxydUrYxvH3EQ+haq+FnbQPud2tCtONRfONh/8w6mjiZudyAZbH1MDdYxNUMfU4zu/lRwg73yUdd0nA/3nVzxtoczxERcH4DfRjCQ558MXVyp22saBTXLsL/mqdC3zPAyyClobft1Hz2b2quXE0Yy0Li7QbxkFQ5Tj/sYGUTDeKCrdWcCpmogCpMYoypVOHP83lkql9AFVHdGJBLn6g==
 Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=nvidia.com;
 Received: from CHBPR12MB731189.namprd12.prod.outlook.com
@@ -99,15 +99,15 @@ Cc: Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>,
 	patches@lists.linux.dev,
 	=?utf-8?q?Piotr_Kr=C3=B3l?= <piotr.krol@3mdeb.com>,
 	Ross Philipson <ross.philipson@gmail.com>
-Subject: [PATCH v3 02/11] efi/libstub: Use free_addr/size as the arg to handle_kernel_image
-Date: Fri, 20 Nov 2026 13:51:55 -0400
-Message-ID: <2-v3-22d1a1eb7d2e+17de-arm64_drtm_jgg@nvidia.com>
+Subject: [PATCH v3 01/11] efi/libstub: Add generic arch callbacks for DRTM
+Date: Fri, 20 Nov 2026 13:51:54 -0400
+Message-ID: <1-v3-22d1a1eb7d2e+17de-arm64_drtm_jgg@nvidia.com>
 In-Reply-To: <0-v3-22d1a1eb7d2e+17de-arm64_drtm_jgg@nvidia.com>
 References:
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: IA1P220CA0002.NAMP220.PROD.OUTLOOK.COM
- (2603:10b6:208:461::8) To CHBPR12MB731189.namprd12.prod.outlook.com
+X-ClientProxiedBy: IA1P220CA0004.NAMP220.PROD.OUTLOOK.COM
+ (2603:10b6:208:461::10) To CHBPR12MB731189.namprd12.prod.outlook.com
  (2603:10b6:610:33d::12)
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -120,365 +120,361 @@ Precedence: list
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: CHBPR12MB731189:EE_|IA1PR12MB6329:EE_
-X-MS-Office365-Filtering-Correlation-Id: e1be3501-8468-4412-51a7-08df472efdda
+X-MS-Office365-Filtering-Correlation-Id: aca2aa29-88eb-4fba-b7b5-08df472efdd2
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|23010399003|7416014|376014|1800799024|366016|18002099003|6133799003|22082099003|261009223027099003|11063799006|261022115727099003|56012099006|921020|261026135527099003|261102123227099003|261028144727099003|261026140227099003|261021133027099003|261026121527099003|261022113327099003|261021121427099003|261021123027099003|261022105027099003|261022075727099003|261026130827099003|261021130227099003|261021135927099003|10067099003;
+	BCL:0;ARA:13230040|23010399003|7416014|376014|1800799024|366016|18002099003|6133799003|22082099003|261009223027099003|3023799007|11063799006|261022115727099003|56012099006|921020|261102123227099003|261028144727099003|261026140227099003|261026121527099003|261021121427099003|261021123027099003|261022105027099003|261022075727099003|10067099003;
 X-Microsoft-Antispam-Message-Info:
-	vZUxI33gdgPXs/cprGmgMR5E3GvjiUsJOoyv7BhrO2aWyWz7PyPltnU6IIrkV2uzYs1sYRQNy+iIWyYTFRitSVIdVeNn7vavtTs5VFkTUTePuyunkM46VJ1fm0juk2zpInCvHt3GHzwpDFTBR6J+Ysb4e0s8vXYpPu0ZyanslitMFRRAv37qpKPQmzcUoYvQhVJUht1JqOGcBq2ys4eoelwR8MZvMQzBYjkQ1pxFxv1M89sSgcLO+wnXtH57ITCmPbsobrEPH5j4T1CKIT6BMepvfS7fqK0e7qPUIqrOjU4UNqgkNSgICyoxBLrx7WyygAfMa+Npi7QH1FZ1G5wTTTCnO+nuSj/CPvKxCKdN1tsz5gk8J6VyUb7zUJO9RFSMsFUof0ihHdz/y+1kFG2A9zJ00KWz0dvXnZ/aGcgEso/CQEUhzYsnnZdyFnYqTtrsudgCCnu4AH8lULj19+hwwGZ/KlHeQOjDJomAnNdH+vgnzb4JlVB/I8vC2fJsTOhTdMLllFjBvNkXRgt5EJAakpMmik4DVVklQgISRZP8ERdC9IOxeQnzW3a+iiKbpZ927zrfXVIVJCtj9evCx4EEVm8v1mA1uQpZPW4lshhpb57IPRP3Z8wjCmkiDefpAJZcM7gkk/g5ElliQ0M6swx8ZT5NNfk2tsrEs3WyYWCTxcuHDEc9Y3MNRuzzVqjKG+VdNw2X/OUh0NW//YGzQr1zNQ==
+	jJeowo0qM17S2fZAQHJBCEBQLlW9dPFBHk5PS+M5JE9lEl+3Ef3Bx1qPw6vEaIe86dUHlXw67HFpzljUXe6cLSanhawKD7n+G8obDTMnS0gkS8zBKcLUPBaqIUgTpppwCkuFWb8/TERyAaEsmXPoOM7Y0tTWSa7XGPZ4pSyQebRAqM0SoPRrmBYEnheP4C2rxEcSznUTD6D4xKLqqPje0ewff0+GRV3OlUxznwopH4jY0l++qvrLIcy1JbNO9ML/5LDM8oGxnMybAplYa02MusiYyY6odUAm4zJb98O1oXy3OVh6kCBs7GPssNTNHpFfKxd/n1p4n2RuySWuST929SODh6V3CXdMThQFxBcb/Z24Jah+URXas1Og8gr4lZuf+jN0dRbUvtlAQx4MtEDTQc1DLTEhf5rgCgOUq4MbyezWbQkbJ11H+5LpM2oPTKSyz+coug92QK78S8+wUfO/LF7ak+iw+Tg9f3agg7qQ0wNCtF3cdYdFJCMDYJ3C1D92tzLDmiwYtAruyZNrBXdPMq2Jo8d0+DUGCsfqoX0mFV7GXWeCHr+y2AAqMDPzdTT2IvMZG+GJY6HsYxeOhTQzIrhZyt5FONvEdDXm00iSux0GT9F22SYb78oi2LxM0vwTYlescdmZCrIyA5KcREEW0wD6MDT6A8Z4/3Ia6LpSL2Wfc8EEFRDcLRNd9JcZXgnvt+/HlnSkbJ+tL1I1jInr0A==
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CHBPR12MB731189.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(7416014)(376014)(1800799024)(366016)(18002099003)(6133799003)(22082099003)(261009223027099003)(11063799006)(261022115727099003)(56012099006)(921020)(261026135527099003)(261102123227099003)(261028144727099003)(261026140227099003)(261021133027099003)(261026121527099003)(261022113327099003)(261021121427099003)(261021123027099003)(261022105027099003)(261022075727099003)(261026130827099003)(261021130227099003)(261021135927099003)(10067099003);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CHBPR12MB731189.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(7416014)(376014)(1800799024)(366016)(18002099003)(6133799003)(22082099003)(261009223027099003)(3023799007)(11063799006)(261022115727099003)(56012099006)(921020)(261102123227099003)(261028144727099003)(261026140227099003)(261026121527099003)(261021121427099003)(261021123027099003)(261022105027099003)(261022075727099003)(10067099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?KBhRIqwEtqvfcyn97uHMOarNSYCfPI2vnJZHNbbkil/5wnZW/T2Z15czMXE+?=
- =?us-ascii?Q?4oTd1Ul1t/5mmudMwUD4sYREJVSTwwn985JKOjKaMU0bOaOslROdMn6lwec/?=
- =?us-ascii?Q?djfMXTOMTJR82C50h7ClMuV6YMfyy4O1O/LR2TiT4FlqIZX2jBQ0bIjJ0Ztg?=
- =?us-ascii?Q?zIgGBMeWmGkReYzT3X6Fcr+H3XhfFl9rE8aMQe5tUvwjqeIMPOUwCAqUOHni?=
- =?us-ascii?Q?dV5cHjPBxkbdiVGO7F1PCnIbjLioMAhD/Az40DYArapiwiTlcakTnAtJoe56?=
- =?us-ascii?Q?hpZLxJ5/DoPJqM8T4e8GD5FIX5/MYq94+7+FtGpDSCkXCWjvhX+1Y6EE/j87?=
- =?us-ascii?Q?HF5ZWPbnuyouiSkHUGctkb+SJSpVbH3k7zFUiHCxjxbj6CXt2jcpN7SgCO1E?=
- =?us-ascii?Q?zx7kBQoi8vL9xpKX1L3T5Lwqccy5bzGi8zIyBT21E1MiblCWAZVPjW9VrlMV?=
- =?us-ascii?Q?z7gsY3d5ImaTpaUqN1+98ULcZLIuHrqT3ovQojM7LNvbjPGjzzVDR3xfdkAo?=
- =?us-ascii?Q?KyuGrpN+f+h0wo33W2E0QGYtNObBARSJvmj9XO9vxlTRnjkjkpp+zbXb4rCo?=
- =?us-ascii?Q?c+hptdUYrTNxOj/Z1xWqj606EemBtOH2W1sFRR+yiboa4aG0Bw/jbAnbmthm?=
- =?us-ascii?Q?Jg4To+mXp5COG/BDO9c5T4vu3dngyWcWkQePrKMacJI3A//mS513vHGqcdSM?=
- =?us-ascii?Q?iuXkYrHPap72HS2pMxEX/JKEV24Y9aJE02azLaox/m2cC/qJg5kZ3+WNoa7h?=
- =?us-ascii?Q?zSbtEEBYbnpDx0ZG8/UsbKLScy0mhSC+jn4N6fO+OaNEH/SuFTQJgkg8csx1?=
- =?us-ascii?Q?06qeIGpUJ4/JNb9N1dRlc8dCZJLOgelC6Z5FR70pJbw4joDLbzVOAy3jVB9F?=
- =?us-ascii?Q?JfyZBGeUDD67wKGmybEqdFYPnlZEIlGCbTxKmo7aM6nxcsohrHu073aGIX4R?=
- =?us-ascii?Q?BF5VvIZb+vhtfSqIg0EYZ7B59RykzKOaWsgJNlYaG3F3kXcZ80jwDQ06YjHX?=
- =?us-ascii?Q?6/rlHA1OoYjHj1QhSqp3FCACKgk2U6Zu786sfaikALnyMqM8kn+PLN8sNZuY?=
- =?us-ascii?Q?IOgS2H+6k4gG+785mmY4e63zrr6+UdkZVUDIzpwx/5mNfQ97Q7JYAQRTfufK?=
- =?us-ascii?Q?m1zwlTgaPn1bb4Ackyo3BCts0h0/B0tNCntlcqfplsxQjA7wtgFpMv/CgV2M?=
- =?us-ascii?Q?7ClfXiRaxqCY9gz1L94vzcZhMLKUawFloLYSn8HMyaOPjodf/J75R4aMw09/?=
- =?us-ascii?Q?MvV7/qbmN4mxTxjqi5tkJDdf3Pek5q+TH2GVIXX2jwIDYlwVh+OI6610MvOI?=
- =?us-ascii?Q?BfcU+herMRzf7Y+lbmsHiyfMBsfaPlnSQhAyJxrbbW++o25A/u5YQffR2JDv?=
- =?us-ascii?Q?1Fjsys6wufLZCnfZ7/kaZldp6tuCp/5XsuFjEMvKi4lwnXWZv/WW4ADuf0eL?=
- =?us-ascii?Q?8Qxzh6hoUo6TGA5vjWF92tKe/UqfQW3Eutx+DXA3nN6W7PCdIszdb2GiIeGR?=
- =?us-ascii?Q?tiXK+fNpz+i+7ebs4IUPUoq6DmqZBc4LNK+FoXN8qmY9Si3qneGFgi+P5TY9?=
- =?us-ascii?Q?4USF5oBQAAVaXD2Q4uZsLa0f9diyiKqNxewso14ll35mTiuT+1d171gG6TvQ?=
- =?us-ascii?Q?TIiad47tvBwSAMsFz5h+ts708B2mgJmo5cMy/M5hOsWolb/KAluirB9HdCoJ?=
- =?us-ascii?Q?d7URBmY+/yuK4X/r8xYaDS/mrjhlaspyc7yUb55BaB/ZcKTD?=
+	=?us-ascii?Q?SUdvt9YGYuqH1jicc4ifXi3ZaPlIcuMMmFID/iY8rCewLdqrheO+KAayjRtS?=
+ =?us-ascii?Q?H3Ru459GBH+RvcBzbpjI4tYuTuwXZMNUuecjRY+1ub+yTEPViFSbpcpJCN4H?=
+ =?us-ascii?Q?NC++R8hP3o9FssVvPeXzjtVjJcmWOjtzy52yftDmFmWj/R/RmuAwgxKALcAN?=
+ =?us-ascii?Q?/jxXz3Q+Ed3Kv1WiPN8AbiYbOO/86gj8mVPfFSfMDZ25+2ttrVl08DZ08IOS?=
+ =?us-ascii?Q?LFLApNK5KgKkA/YMhoNEI5j8X++rqQwwXwdyQoNu1+jGxrcgJdjQVeCJ6Drd?=
+ =?us-ascii?Q?3Sj0386GAi2D3cdJFN2eeJnEAdMnWaxwc23NchGFm+FqcvtG4iEf1quZlHsA?=
+ =?us-ascii?Q?ovZ5nu0c4pcDWexSS94gLfxbfPdfVKsd5JVZs7k/2IYTDo3PWxVLxq8UNpkD?=
+ =?us-ascii?Q?2TckiSPlgItJNxHQJ1rJzCmtNU2Zv/8f0NK1tJekB+64zh6E3yrjPntJbuKr?=
+ =?us-ascii?Q?WuLAKOXUz/R5LyAMgRLbp6kzD4L6OQH68NZUs+0jIwwc5N0hGpREaTNctuG5?=
+ =?us-ascii?Q?ZBXXp5pLK9ykYD4I50RV+cpxRwk/iRgUzC1YUp2kTCUE1L/Qh0EIC2ULUu63?=
+ =?us-ascii?Q?rKzP/uLym4rKjKszB7CTK/svrV4rQP5lEEUxZxJKmo3DFjNbsdycu0MwehQj?=
+ =?us-ascii?Q?jV+WV+oxeHHUQSWbXCYY9EDCzWsSigijUdQEGVy1ceI9tLhys9bpPOPQcM+6?=
+ =?us-ascii?Q?SLwyBJX7ccx0kS70C3tHFBkc6zeVwWBmyckDAJwvjpuIFckacCZRrEcDoS1f?=
+ =?us-ascii?Q?tNKjTjirNhPvbkKvbskp5joKf0DXDSAgBB6adXZlvrytxq2epu39fHZ/AzC7?=
+ =?us-ascii?Q?tIgirSrBPq3bQ9Y3paofPAFBUO3zqyh1WwWD9lu0uD/COdJ2WQS4KAYbu40S?=
+ =?us-ascii?Q?tfwmAvRrVcoE/R6+HSqB+/39NgBGawvsabi7m4BMZ4p2LlYjRuLby3u+4dAD?=
+ =?us-ascii?Q?4uCamNI0SVLWcVtFLMaN/6pmXEZL1d8ZO8uDJGFE2eXSHitmeBZYZXwGacvh?=
+ =?us-ascii?Q?ItNSo5t36rqd/MX7Ct9bbqxLPkjxNp0QOyrhKb/aVT94VL6fQe/LW6oJP4v+?=
+ =?us-ascii?Q?iyJbaKSDu2/D5XgeIlbnGebjwboH+LRuc8sq2AHG0lJtmACP4RiTRywMiOCk?=
+ =?us-ascii?Q?iZhbLbtEV1zfgXJXJfkZZBaraRkiPqcQQOx825If0W3JD/f9H4o0lmF7llmc?=
+ =?us-ascii?Q?7J3iUWkKAtRJhUtCi5DAqSvMuWlzl0NuCJ0goPHIPrD/WRTavZTGQAziUyxj?=
+ =?us-ascii?Q?5aupNQUtosIN649A6hk4Cw364k/Gq3CidwjU1G47UZ+uGalwIvikXVTfmshh?=
+ =?us-ascii?Q?yA1IkE9Dj08xPC8a/JfD7IslhbrZyokTq0l8l+PMrRbqtaGQb/I3jlVwhZgU?=
+ =?us-ascii?Q?o1GPaEClw6rtB1Dq7c+LilAApkoyNfcv1oSJRadsIYuRACj8ejgznIyP1v8B?=
+ =?us-ascii?Q?kQJLrWBqC8DJqlHDEbvKgBOPu3ajcIH4FGck4m6zAL3fXtWJbuMF3eCbGJvy?=
+ =?us-ascii?Q?8e8FrGQQVkNE3X6aFmKVoI0UgN1hHqehAFwz+WL2NoL4+A+AmoHku8mq8FEa?=
+ =?us-ascii?Q?dI/9Kko8gEqYYdu1AGctjuhbNt8izFR3Ve4Uvsh3icjLqxERnLfsBo/hqRjw?=
+ =?us-ascii?Q?cAVaoj7uimFvGrBtYuV8/LPIQTCY18HoXSkYGyRiNRezEIW+vBmRzW7EH1iW?=
+ =?us-ascii?Q?0ilAxwFSAZyBI62wT0bfN/NaFtt6UakqHu7j6T2eAja+5Deo?=
 X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: e1be3501-8468-4412-51a7-08df472efdda
+X-MS-Exchange-CrossTenant-Network-Message-Id: aca2aa29-88eb-4fba-b7b5-08df472efdd2
 X-MS-Exchange-CrossTenant-AuthSource: CHBPR12MB731189.namprd12.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Nov 2026 17:52:06.5321
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Nov 2026 17:52:06.5165
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: t8hIUdYsuzHhv5l0UEOX7r/xu8j5Ao42UjiG1lDLaydNh4+yEG0SVXCC136LJ5m0
+X-MS-Exchange-CrossTenant-UserPrincipalName: Vu23uNy4VP6X88oqW06w9SnCsj+4m/2cJWXTxyCEvLL1xdQzSrDor4oOeD6551AF
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA1PR12MB6329
 
-The only use for these values is to trigger a memory free if the boot is
-aborted by efi_pe_entry(), make it clear through the call chain.
+If the architecture supports an EFI stub launched version of DRTM, it
+can select the kconfig and provide the hooks under its architecture
+build.
 
-This cleanly allows them to be used to describe something that is not the
-image in the next patch.
+Have the common code parse a drtm=enforce|auto|off kernel command line
+parameter to set the boot behavior. Support commas in the args list since
+there will be more options here down the road.
 
-Reorganize efi_kaslr_relocate_kernel() with a efi_kaslr_copy_kernel()
-helper as clang isn't able to grok the original control flow once
-image_addr is only set by allocation.
+efi_drtm_prepare() is called before doing any decompression or image
+relocation. It should figure out if DRTM is supported, policy-permitted,
+and how much memory efi_drtm_get_extra_size() should return.
 
+The image handling is revised to allocate extra_size at the end of
+the normal image. The architecture can use this to store any
+information needed for the DRTM flow. It is always contiguous with
+Image, which is a requirement of ARM's specification.
+
+efi_drtm_prepare_launch() is called while still in EFI boot services after
+Image is fully prepared in its final location.
+
+efi_drtm_launch() is called after exiting boot services and must
+jump into the kernel through the DRTM flow. If it returns, then the
+normal launch is tried (auto mode).
+
+The extra_size is allocated directly after the Image. Handle the
+trivial zboot flow now, and vmlinux in the following patch.
+
+Reviewed-by: Jonathan Cameron <jonathan.cameron@oss.qualcomm.com>
 Signed-off-by: Jason Gunthorpe <jgg@nvidia.com>
 ---
- drivers/firmware/efi/libstub/arm32-stub.c     |  8 +-
- drivers/firmware/efi/libstub/arm64-stub.c     |  6 +-
- drivers/firmware/efi/libstub/efi-stub-entry.c |  8 +-
- drivers/firmware/efi/libstub/efistub.h        |  8 +-
- drivers/firmware/efi/libstub/kaslr.c          | 88 +++++++++++--------
- drivers/firmware/efi/libstub/loongarch-stub.c | 10 +--
- drivers/firmware/efi/libstub/riscv-stub.c     |  6 +-
- 7 files changed, 73 insertions(+), 61 deletions(-)
+ .../admin-guide/kernel-parameters.txt         | 12 ++++++
+ drivers/firmware/efi/Kconfig                  | 30 ++++++++++++++
+ drivers/firmware/efi/libstub/efi-stub-entry.c |  4 ++
+ .../firmware/efi/libstub/efi-stub-helper.c    | 34 ++++++++++++++++
+ drivers/firmware/efi/libstub/efistub.h        | 39 +++++++++++++++++++
+ drivers/firmware/efi/libstub/fdt.c            |  8 +++-
+ drivers/firmware/efi/libstub/zboot.c          | 15 ++++---
+ 7 files changed, 136 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
-index 89e48ac0b7cbbe..b4c843e7f6b8fd 100644
---- a/drivers/firmware/efi/libstub/arm32-stub.c
-+++ b/drivers/firmware/efi/libstub/arm32-stub.c
-@@ -125,8 +125,8 @@ extern u32 zimage_magic_table[] asm("_table_start");
+diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+index 0b3c140babd944..4c95e36dd8c94b 100644
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -1377,6 +1377,18 @@ Kernel parameters
+ 			data set with no connector name will be used for
+ 			any connectors not explicitly specified.
  
- struct efi_image_info efistub_image_info = {};
++	drtm=		[EFI,EARLY]
++			Format: { "off" | "auto" | "enforce" }
++			Control the EFI stub Dynamic Root of Trust for
++			Measurement (DRTM) launch policy.
++			off: do not attempt a DRTM launch.
++			auto: attempt a DRTM launch when supported, but fall
++			back to a normal boot if preparation or launch fails.
++			enforce: require a DRTM launch and refuse to fall back
++			to a normal boot if preparation or launch fails.
++			The default is selected by the EFI_STUB_DRTM_DEFAULT_*
++			configuration options.
++
+ 	dscc4.setup=	[NET]
  
--efi_status_t handle_kernel_image(unsigned long *image_addr,
--				 unsigned long *image_size,
-+efi_status_t handle_kernel_image(unsigned long *free_addr,
-+				 unsigned long *free_size,
- 				 efi_loaded_image_t *image,
- 				 efi_handle_t image_handle,
- 				 const struct efi_image_info **image_info)
-@@ -173,8 +173,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	efi_free(kernel_base - alloc_base, alloc_base);	/* no-op if 0 */
- 	efi_free(alloc_base + margin - kernel_base, kernel_base + alloc_size);
+ 	dt_cpu_ftrs=	[PPC,EARLY]
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 29e0729299f5bd..6806bcd6a52420 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -72,6 +72,36 @@ config EFI_RUNTIME_WRAPPERS
+ config EFI_GENERIC_STUB
+ 	bool
  
--	*image_addr = kernel_base;
--	*image_size = alloc_size;
-+	*free_addr = kernel_base;
-+	*free_size = alloc_size;
- 
- 	return EFI_SUCCESS;
- }
-diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index 351fcb4493e19b..e0adc4de0beac3 100644
---- a/drivers/firmware/efi/libstub/arm64-stub.c
-+++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -13,8 +13,8 @@
- 
- #include "efistub.h"
- 
--efi_status_t handle_kernel_image(unsigned long *image_addr,
--				 unsigned long *image_size,
-+efi_status_t handle_kernel_image(unsigned long *free_addr,
-+				 unsigned long *free_size,
- 				 efi_loaded_image_t *image,
- 				 efi_handle_t image_handle,
- 				 const struct efi_image_info **image_info)
-@@ -30,7 +30,7 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 		efi_err("FIRMWARE BUG: kernel image not aligned on %dk boundary\n",
- 			SEGMENT_ALIGN >> 10);
- 
--	return efi_kaslr_relocate_kernel(image_addr, image_size, image_info,
-+	return efi_kaslr_relocate_kernel(free_addr, free_size, image_info,
- 					 efi_kaslr_get_phys_seed(image_handle));
- }
- 
++config EFI_STUB_DRTM
++	bool
++
++choice
++	prompt "Default DRTM launch policy"
++	depends on EFI_STUB_DRTM
++	default EFI_STUB_DRTM_DEFAULT_OFF
++	help
++	  Select the DRTM policy used when no drtm= option is present on the
++	  kernel command line. The command-line option overrides this default.
++
++config EFI_STUB_DRTM_DEFAULT_OFF
++	bool "Off"
++	help
++	  Do not attempt a DRTM launch unless it is requested explicitly.
++
++config EFI_STUB_DRTM_DEFAULT_AUTO
++	bool "Automatic with fallback"
++	help
++	  Attempt a DRTM launch when the firmware supports it, but fall back to
++	  normal boot if preparation or a returnable launch attempt fails.
++
++config EFI_STUB_DRTM_DEFAULT_ENFORCE
++	bool "Enforce"
++	help
++	  Require a DRTM launch and refuse normal-boot fallback if preparation
++	  or a returnable launch attempt fails.
++
++endchoice
++
+ config EFI_ZBOOT
+ 	bool "Enable the generic EFI decompressor"
+ 	depends on EFI_GENERIC_STUB && !ARM
 diff --git a/drivers/firmware/efi/libstub/efi-stub-entry.c b/drivers/firmware/efi/libstub/efi-stub-entry.c
-index fd272d07737371..7febed273c8c08 100644
+index dcf4442a16b078..fd272d07737371 100644
 --- a/drivers/firmware/efi/libstub/efi-stub-entry.c
 +++ b/drivers/firmware/efi/libstub/efi-stub-entry.c
-@@ -21,8 +21,8 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 	const struct efi_image_info *image_info = &efistub_image_info;
- 	efi_loaded_image_t *image;
- 	efi_status_t status;
--	unsigned long image_addr;
--	unsigned long image_size = 0;
-+	unsigned long free_addr;
-+	unsigned long free_size = 0;
+@@ -47,6 +47,10 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 	if (status != EFI_SUCCESS)
+ 		return status;
  
- 	WRITE_ONCE(efi_system_table, systab);
- 
-@@ -53,7 +53,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 
++	status = efi_drtm_prepare();
++	if (status != EFI_SUCCESS)
++		return status;
++
  	efi_info("Booting Linux Kernel...\n");
  
--	status = handle_kernel_image(&image_addr, &image_size,
-+	status = handle_kernel_image(&free_addr, &free_size,
- 				     image, handle, &image_info);
- 	if (status != EFI_SUCCESS) {
- 		efi_err("Failed to relocate kernel\n");
-@@ -62,7 +62,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 	status = handle_kernel_image(&image_addr, &image_size,
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index e50deec9968658..2840b589653fe8 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -28,6 +28,37 @@ static bool efi_disable_pci_dma = IS_ENABLED(CONFIG_EFI_DISABLE_PCI_DMA);
  
- 	status = efi_stub_common(handle, image, image_info, cmdline_ptr);
+ int efi_mem_encrypt;
  
--	efi_free(image_size, image_addr);
-+	efi_free(free_size, free_addr);
- 
- 	return status;
- }
++#ifdef CONFIG_EFI_STUB_DRTM
++enum efi_drtm_policy efi_drtm_policy =
++	IS_ENABLED(CONFIG_EFI_STUB_DRTM_DEFAULT_ENFORCE) ? EFI_DRTM_ENFORCE :
++	IS_ENABLED(CONFIG_EFI_STUB_DRTM_DEFAULT_AUTO) ? EFI_DRTM_AUTO :
++	EFI_DRTM_OFF;
++
++static void efi_drtm_parse_options(char *options)
++{
++	char *keyword;
++
++	while (options) {
++		keyword = options;
++		while (*options && *options != ',')
++			options++;
++		if (*options)
++			*options++ = '\0';
++		else
++			options = NULL;
++
++		if (!strcmp(keyword, "off"))
++			efi_drtm_policy = EFI_DRTM_OFF;
++		else if (!strcmp(keyword, "auto"))
++			efi_drtm_policy = EFI_DRTM_AUTO;
++		else if (!strcmp(keyword, "enforce"))
++			efi_drtm_policy = EFI_DRTM_ENFORCE;
++	}
++}
++#else
++static void efi_drtm_parse_options(char *options) {}
++#endif
++
+ bool __pure __efi_soft_reserve_enabled(void)
+ {
+ 	return !efi_nosoftreserve;
+@@ -90,6 +121,9 @@ efi_status_t efi_parse_options(char const *cmdline)
+ 				efi_mem_encrypt = 1;
+ 			else if (parse_option_str(val, "off"))
+ 				efi_mem_encrypt = -1;
++		} else if (IS_ENABLED(CONFIG_EFI_STUB_DRTM) &&
++			   !strcmp(param, "drtm") && val) {
++			efi_drtm_parse_options(val);
+ 		} else if (!strcmp(param, "efi") && val) {
+ 			efi_nochunk = parse_option_str(val, "nochunk");
+ 			efi_novamap |= parse_option_str(val, "novamap");
 diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 80b9558f9f689a..e404f29693c51c 100644
+index df3f88f4786b82..80b9558f9f689a 100644
 --- a/drivers/firmware/efi/libstub/efistub.h
 +++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -1187,8 +1187,8 @@ struct efi_image_info {
-  * must be reserved. On failure it is required to free all
-  * all allocations it has made.
-  */
--efi_status_t handle_kernel_image(unsigned long *image_addr,
--				 unsigned long *image_size,
-+efi_status_t handle_kernel_image(unsigned long *free_addr,
-+				 unsigned long *free_size,
- 				 efi_loaded_image_t *image,
- 				 efi_handle_t image_handle,
- 				 const struct efi_image_info **image_info);
-@@ -1331,8 +1331,8 @@ const u8 *__efi_get_smbios_string(const struct efi_smbios_record *record,
+@@ -1077,6 +1077,45 @@ efi_status_t check_platform_features(void);
  
- efi_status_t efi_remap_image(unsigned long image_base, unsigned alloc_size,
- 			     unsigned long code_size);
--efi_status_t efi_kaslr_relocate_kernel(unsigned long *image_addr,
--				       unsigned long *alloc_size,
-+efi_status_t efi_kaslr_relocate_kernel(unsigned long *free_addr,
-+				       unsigned long *free_size,
- 				       const struct efi_image_info **image_info,
- 				       u32 phys_seed);
- u32 efi_kaslr_get_phys_seed(efi_handle_t image_handle);
-diff --git a/drivers/firmware/efi/libstub/kaslr.c b/drivers/firmware/efi/libstub/kaslr.c
-index 7cf68a6123946a..2f1f3e19583def 100644
---- a/drivers/firmware/efi/libstub/kaslr.c
-+++ b/drivers/firmware/efi/libstub/kaslr.c
-@@ -80,10 +80,30 @@ static bool check_image_region(u64 base, u64 size)
- 	return false;
- }
+ void *get_efi_config_table(efi_guid_t guid);
  
-+static void efi_kaslr_copy_kernel(unsigned long image_addr,
-+				  unsigned long *free_addr,
-+				  unsigned long *free_size,
-+				  const struct efi_image_info **image_info)
++struct efi_image_info;
++
++enum efi_drtm_policy {
++	EFI_DRTM_OFF,
++	EFI_DRTM_AUTO,
++	EFI_DRTM_ENFORCE,
++};
++
++#ifdef CONFIG_EFI_STUB_DRTM
++extern enum efi_drtm_policy efi_drtm_policy;
++efi_status_t efi_drtm_prepare(void);
++unsigned long efi_drtm_get_extra_size(void);
++efi_status_t efi_drtm_prepare_launch(const struct efi_image_info *image_info,
++				     unsigned long fdt_addr);
++void efi_drtm_launch(void);
++#else
++enum {efi_drtm_policy = EFI_DRTM_OFF};
++static inline efi_status_t efi_drtm_prepare(void)
 +{
-+	unsigned long kernel_base	= efistub_kernel_base(*image_info);
-+	unsigned long kernel_size	= efistub_kernel_size(*image_info);
-+	unsigned long kernel_codesize	= efistub_kernel_codesize(*image_info);
-+	unsigned long kernel_memsize	= efistub_kernel_memsize(*image_info);
-+
-+	memcpy((void *)image_addr, (void *)kernel_base, kernel_size);
-+	*free_addr = image_addr;
-+	*free_size = kernel_memsize;
-+
-+	efi_icache_sync(image_addr, image_addr + kernel_codesize);
-+	efi_remap_image(image_addr, kernel_memsize, kernel_codesize);
-+
-+	*(unsigned long *)image_info += image_addr - kernel_base;
++	return EFI_SUCCESS;
 +}
 +
- /**
-  * efi_kaslr_relocate_kernel() - Relocate the kernel (random if KASLR enabled)
-- * @image_addr:		Pointer to variable carrying the image base address
-- * @alloc_size:		Pointer to variable carrying the allocated size
-+ * @free_addr:		Pointer to variable carrying the address to free
-+ * @free_size:		Pointer to variable carrying the size to free
-  * @image_info:		Pointer to struct efi_image_info pointer
-  * @phys_seed:		Random seed used for the relocation
-  *
-@@ -93,16 +113,15 @@ static bool check_image_region(u64 base, u64 size)
-  *
-  * Return:	status code, EFI_SUCCESS if relocation is successful
-  */
--efi_status_t efi_kaslr_relocate_kernel(unsigned long *image_addr,
--				       unsigned long *alloc_size,
-+efi_status_t efi_kaslr_relocate_kernel(unsigned long *free_addr,
-+				       unsigned long *free_size,
- 				       const struct efi_image_info **image_info,
- 				       u32 phys_seed)
- {
- 	unsigned long kernel_base	= efistub_kernel_base(*image_info);
--	unsigned long kernel_size	= efistub_kernel_size(*image_info);
--	unsigned long kernel_codesize	= efistub_kernel_codesize(*image_info);
- 	unsigned long kernel_memsize	= efistub_kernel_memsize(*image_info);
- 	u64 min_kimg_align		= efi_get_kimg_min_align();
-+	unsigned long image_addr;
- 	efi_status_t status;
++static inline unsigned long efi_drtm_get_extra_size(void)
++{
++	return 0;
++}
++
++static inline efi_status_t
++efi_drtm_prepare_launch(const struct efi_image_info *image_info,
++			unsigned long fdt_addr)
++{
++	return EFI_SUCCESS;
++}
++
++static inline void efi_drtm_launch(void)
++{
++}
++#endif
++
+ void efi_char16_puts(efi_char16_t *);
  
- 	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE) && phys_seed != 0) {
-@@ -111,43 +130,36 @@ efi_status_t efi_kaslr_relocate_kernel(unsigned long *image_addr,
- 		 * locate the kernel at a randomized offset in physical memory.
- 		 */
- 		status = efi_random_alloc(kernel_memsize, min_kimg_align,
--					  image_addr, phys_seed,
-+					  &image_addr, phys_seed,
- 					  EFI_LOADER_CODE, 0, EFI_ALLOC_LIMIT);
--		if (status != EFI_SUCCESS)
--			efi_warn("efi_random_alloc() failed: 0x%lx\n", status);
--	} else {
--		status = EFI_OUT_OF_RESOURCES;
--	}
--
--	if (status != EFI_SUCCESS) {
--		if (!check_image_region(kernel_base, kernel_memsize)) {
--			efi_err("FIRMWARE BUG: Image BSS overlaps adjacent EFI memory region\n");
--		} else if (IS_ALIGNED(kernel_base, min_kimg_align) &&
--			   (kernel_base + kernel_memsize) < EFI_ALLOC_LIMIT) {
--			/*
--			 * Just execute from wherever we were loaded by the
--			 * UEFI PE/COFF loader if the placement is suitable.
--			 */
-+		if (status == EFI_SUCCESS) {
-+			efi_kaslr_copy_kernel(image_addr, free_addr, free_size,
-+					      image_info);
- 			return EFI_SUCCESS;
- 		}
--
--		status = efi_allocate_pages_aligned(kernel_memsize, image_addr,
--						    ULONG_MAX, min_kimg_align,
--						    EFI_LOADER_CODE);
--
--		if (status != EFI_SUCCESS) {
--			efi_err("Failed to relocate kernel\n");
--			return status;
--		}
-+		efi_warn("efi_random_alloc() failed: 0x%lx\n", status);
+ int efi_vsnprintf(efi_char16_t *buf, size_t size, const char *fmt, va_list ap,
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 09e9e5bc831e8b..d39455d38a911a 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -223,6 +223,7 @@ static
+ efi_status_t allocate_new_fdt_and_exit_boot(void *handle,
+ 					    efi_loaded_image_t *image,
+ 					    unsigned long *new_fdt_addr,
++					    const struct efi_image_info *image_info,
+ 					    char *cmdline_ptr)
+ {
+ 	unsigned long desc_size;
+@@ -289,6 +290,10 @@ efi_status_t allocate_new_fdt_and_exit_boot(void *handle,
+ 		goto fail_free_new_fdt;
  	}
  
--	memcpy((void *)*image_addr, (void *)kernel_base, kernel_size);
--	*alloc_size = kernel_memsize;
-+	/* Try to use the image in place */
-+	if (!check_image_region(kernel_base, kernel_memsize)) {
-+		efi_err("FIRMWARE BUG: Image BSS overlaps adjacent EFI memory region\n");
-+	} else if (IS_ALIGNED(kernel_base, min_kimg_align) &&
-+		   (kernel_base + kernel_memsize) < EFI_ALLOC_LIMIT) {
-+		/*
-+		 * Just execute from wherever we were loaded by the UEFI PE/COFF
-+		 * loader if the placement is suitable.
-+		 */
-+		return EFI_SUCCESS;
-+	}
++	status = efi_drtm_prepare_launch(image_info, *new_fdt_addr);
++	if (status != EFI_SUCCESS)
++		goto fail_free_new_fdt;
++
+ 	priv.new_fdt_addr = (void *)*new_fdt_addr;
  
--	efi_icache_sync(*image_addr, *image_addr + kernel_codesize);
--	efi_remap_image(*image_addr, kernel_memsize, kernel_codesize);
-+	status = efi_allocate_pages_aligned(kernel_memsize, &image_addr,
-+					    ULONG_MAX, min_kimg_align,
-+					    EFI_LOADER_CODE);
-+	if (status != EFI_SUCCESS) {
-+		efi_err("Failed to relocate kernel\n");
-+		return status;
-+	}
- 
--	*(unsigned long *)image_info += *image_addr - kernel_base;
--
--	return status;
-+	efi_kaslr_copy_kernel(image_addr, free_addr, free_size, image_info);
-+	return EFI_SUCCESS;
- }
-diff --git a/drivers/firmware/efi/libstub/loongarch-stub.c b/drivers/firmware/efi/libstub/loongarch-stub.c
-index df6749643bb8bd..d8886b9c74099d 100644
---- a/drivers/firmware/efi/libstub/loongarch-stub.c
-+++ b/drivers/firmware/efi/libstub/loongarch-stub.c
-@@ -89,8 +89,8 @@ efi_status_t efi_relocate_kernel(unsigned long *image_addr,
- 	return status;
- }
- 
--efi_status_t handle_kernel_image(unsigned long *image_addr,
--				 unsigned long *image_size,
-+efi_status_t handle_kernel_image(unsigned long *free_addr,
-+				 unsigned long *free_size,
- 				 efi_loaded_image_t *image,
- 				 efi_handle_t image_handle,
- 				 const struct efi_image_info **image_info)
-@@ -105,9 +105,9 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	status = efi_relocate_kernel(&kernel_addr, kernel_fsize, kernel_asize,
- 		     EFI_KIMG_PREFERRED_ADDRESS, efi_get_kimg_min_align(), 0x0);
- 
--	*image_addr = kernel_addr;
--	*image_size = kernel_asize;
-+	*free_addr = kernel_addr;
-+	*free_size = kernel_asize;
- 
--	*(unsigned long *)image_info += *image_addr - (unsigned long)image->image_base;
-+	*(unsigned long *)image_info += kernel_addr - (unsigned long)image->image_base;
- 	return status;
- }
-diff --git a/drivers/firmware/efi/libstub/riscv-stub.c b/drivers/firmware/efi/libstub/riscv-stub.c
-index 8cd0cd9b00486c..45a345c1701ffa 100644
---- a/drivers/firmware/efi/libstub/riscv-stub.c
-+++ b/drivers/firmware/efi/libstub/riscv-stub.c
-@@ -10,15 +10,15 @@
- 
- #include "efistub.h"
- 
--efi_status_t handle_kernel_image(unsigned long *image_addr,
--				 unsigned long *image_size,
-+efi_status_t handle_kernel_image(unsigned long *free_addr,
-+				 unsigned long *free_size,
- 				 efi_loaded_image_t *image,
- 				 efi_handle_t image_handle,
- 				 const struct efi_image_info **image_info)
- {
+ 	status = efi_exit_boot_services(handle, &priv, exit_boot_func);
+@@ -351,7 +356,7 @@ efi_status_t efi_boot_kernel(void *handle, efi_loaded_image_t *image,
  	efi_status_t status;
  
--	status = efi_kaslr_relocate_kernel(image_addr, image_size, image_info,
-+	status = efi_kaslr_relocate_kernel(free_addr, free_size, image_info,
- 					   efi_kaslr_get_phys_seed(image_handle));
+ 	status = allocate_new_fdt_and_exit_boot(handle, image, &fdt_addr,
+-						cmdline_ptr);
++						image_info, cmdline_ptr);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_err("Failed to update FDT and exit boot services\n");
+ 		return status;
+@@ -360,6 +365,7 @@ efi_status_t efi_boot_kernel(void *handle, efi_loaded_image_t *image,
+ 	if (IS_ENABLED(CONFIG_ARM))
+ 		efi_handle_post_ebs_state();
+ 
++	efi_drtm_launch();
+ 	efi_enter_kernel(image_info, fdt_addr, fdt_totalsize((void *)fdt_addr));
+ 	/* not reached */
+ }
+diff --git a/drivers/firmware/efi/libstub/zboot.c b/drivers/firmware/efi/libstub/zboot.c
+index 4089a29068caae..69962a8f094caf 100644
+--- a/drivers/firmware/efi/libstub/zboot.c
++++ b/drivers/firmware/efi/libstub/zboot.c
+@@ -50,7 +50,7 @@ efi_zboot_entry(efi_handle_t handle, efi_system_table_t *systab)
+ {
+ 	static efi_guid_t loaded_image_guid = LOADED_IMAGE_PROTOCOL_GUID;
+ 	char *cmdline_ptr __free(efi_pool) = NULL;
+-	unsigned long image_base, alloc_size;
++	unsigned long image_base, image_size, alloc_size;
+ 	efi_loaded_image_t *image;
+ 	efi_status_t status;
+ 
+@@ -67,12 +67,17 @@ efi_zboot_entry(efi_handle_t handle, efi_system_table_t *systab)
  	if (status != EFI_SUCCESS)
- 		efi_err("Failed to relocate kernel\n");
+ 		return status;
+ 
+-	efi_info("Decompressing Linux Kernel...\n");
+-
+-	status = efi_zboot_decompress_init(&alloc_size);
++	status = efi_drtm_prepare();
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
++	efi_info("Decompressing Linux Kernel...\n");
++
++	status = efi_zboot_decompress_init(&image_size);
++	if (status != EFI_SUCCESS)
++		return status;
++	alloc_size = image_size + efi_drtm_get_extra_size();
++
+ 	 // If the architecture has a preferred address for the image,
+ 	 // try that first.
+ 	image_base = alloc_preferred_address(alloc_size);
+@@ -107,7 +112,7 @@ efi_zboot_entry(efi_handle_t handle, efi_system_table_t *systab)
+ 	}
+ 
+ 	// Decompress the payload into the newly allocated buffer
+-	status = efi_zboot_decompress((void *)image_base, alloc_size);
++	status = efi_zboot_decompress((void *)image_base, image_size);
+ 	if (status != EFI_SUCCESS)
+ 		goto error;
+ 
 -- 
 2.43.0
 
