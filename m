@@ -1,47 +1,97 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795191379;
-	b=z0D2J15zjCIMEvfuZBo8RF9YM7gGll9rPwE+m5avj0FAtzOxE48EtmEiS9aurevYXiCF
-	 fGJx2mcPc6EWSCx4tsXei/lkNKNuE7PpJdL/1npEYJK3qtfPQ+PnYu19B1d/gTl+LV7za
-	 NfZUM6fZj5+jRYCgJiayN9TBmVq72lcD0Xmbfti9AFXlHf50gt8wPtJTkIHFj8NYIWjl0
-	 ujsO4E3CIUanfJyg851le83ctozO5NIVRLXbNij+6/5UK0ddcczHlgohgIz4vRO4l2139
-	 Dt40UqUXmDV1qNP1VviayT1F8t3PvppNFDnEGW5qg4wPAyCJNrmp23kzyy05/sg+aDQ==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795191379;
-	h=Received:DKIM-Signature:Message-ID:Date:MIME-Version:User-Agent:
-	 Subject:To:Cc:References:Content-Language:From:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding;
-	bh=ufkrJtwpBnz6WPMTAKwab4l3d1SzDvPyFYqyMLcrdh0=;
-	b=L3QmyqecA72tcRH1RHh1CA/lG2OBoQiowOymuDM/SqO4RqSjjGfE/QjxLe29XchkYVsY
-	 XejpuKLugtVyvwiKFlYKbiKF6znmXoGzVOHTCLrnl2ufL53Jj5lqISSFzA2uxrruHtis2
-	 VOOO4VnIhdpRUSAPZRErBJfpfZFeAZVEOc9ACZ0qT5FRa319FwmEeakoa0T6Pbw3xD1hq
-	 YFP3tcDds7jQNcLuikp/TuT5X9ZHcviibJBYEMiKoxv3VlrfW7GZzfiYHltmicR7G64Tb
-	 H36VcLbChgzLVw4vHRwDdwITgPtA4ZRLP4XkbLS3CMT1c/or2qrdSDlHyxuV33QHl2g==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=dFvHyXyV;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=40.93.196.48
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1795195774;
+	b=IPP9/lw7qON8AhWBldQWI3st0WLaH1HjV4AQotjzjfE7nCr5r0tqQP9HJ6bHC7be2sf1
+	 gHx0oW7x2SuRfHAnuC0wk9GaiWqpaceA7UJmPsw8tAMza5+xuFe+zCYl+4orUq4blqNFX
+	 FbxjHlZs61y/z6YIPYfTBHAFDNg1h/iUKVK2E+DzvT2vTJg7JIAlKn1U60sV4FStbWClT
+	 FTUSio/Z9pM3rI7vUV19wWnxbds6qvnI9Os5qLYTqa2nC3FSOq0MhTVs/mB0IUKW1u4/k
+	 ATRHc/hVU90xOpEnG698/7YvL1n8sJwy9cIIRyTWw3AvmNDVqwExPc9BEunb1UrdwSg==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795195774;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:Content-Type:
+	 Content-Transfer-Encoding:Subject:From:To:Cc:In-Reply-To:References:
+	 Date:Message-Id:X-Mailer:X-ClientProxiedBy:MIME-Version:
+	 X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
+	 X-MS-Office365-Filtering-Correlation-Id:X-MS-Exchange-SenderADCheck:
+	 X-MS-Exchange-AntiSpam-Relay:X-Microsoft-Antispam:
+	 X-Microsoft-Antispam-Message-Info:X-Forefront-Antispam-Report:
+	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
+	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
+	 X-MS-Exchange-CrossTenant-Network-Message-Id:
+	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
+	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
+	 X-MS-Exchange-CrossTenant-FromEntityHeader:
+	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
+	 X-MS-Exchange-CrossTenant-UserPrincipalName:
+	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
+	bh=fbsi1moS3AYFu6VpvnD9001Sbto95TscF9TXzH3pjFw=;
+	b=KUeK7k+YaEoZ9pRHFfkGLgfo6/64aXhi0YeCfuTUcqb2UTJmn/nP0rm2Ul9bWSuupqy+
+	 lBqTdGjl0iXorKbeUX7R9LinHOgtKYeGW53L10onZCdqgaHHDMZZD98KejqeuulJjPUcf
+	 PAIeyDDzxNAGCwDqaRjxMG52Irwj8Q/X16yWUgU07PSh3q99LJp+BCR47QFYGPeRC7kO7
+	 YkgqOoZQ65fHML5uiItm7k7Ujssxo8gLnhAnckVWoj2H9+xt/Xj82NHyuPt+ZQ5xy74fz
+	 XFbugb3upDbh/ctMVissOW0zaOngPkPk2W2770Te3zvSWDr0UqwxVRcVaBHzrmNPgrQ==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=nvidia.com;
+	spf=fail smtp.mailfrom=nvidia.com;
+	dkim=pass header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b="FDfoaW/Y";
+	arc=pass header.oldest-pass=0 smtp.remote-ip=40.93.196.48
+Received: from SA9PR02CU001.outbound.protection.outlook.com (mail-southcentralusazon11013048.outbound.protection.outlook.com [40.93.196.48])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65013606A32A;
-	Fri, 20 Nov 2026 16:16:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4914460A260C
+	for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 17:29:33 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4914460A260C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=dFvHyXyV
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 054D01F000CF;
-	Fri, 20 Nov 2026 16:16:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795191378;
-	bh=ufkrJtwpBnz6WPMTAKwab4l3d1SzDvPyFYqyMLcrdh0=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=dFvHyXyVfCYjJ7NGMnBGAqmFCpcmUE94vICjEkzBBZoW/GMfsILWHwMTtiuJI1dZR
-	 isbdUdY2VdAjzDG9uOuj3HvrSFais+CocjccNOVwLZRv4W5ikc+GRT4v+Fx8NdqWKr
-	 ZyxCUZJwx62l8JwkMmsTJRdoDyRAYUklPkgCUjc0vcfaQmkZGX7zdu73B4j7pKlt9w
-	 g12fUi9O3FgrMF6IzDZZ0QywB+0HnVHqTSchls1fGpNhgm5tGk871tvM0ulpNBvy1x
-	 VvNSDoA5BvpXMpyONoBdWe1qJLOqoJGSzHqSYgnpGAyU4vXMxP3P+LXZxSsJ99YNir
-	 xqWdZ+uG5iH2A==
-Message-ID: <2bd84c5a-221e-4da0-bc08-93096b293395@kernel.org>
-Date: Fri, 20 Nov 2026 17:16:13 +0100
+	dkim=pass (2048-bit key, unprotected) header.d=Nvidia.com header.i=@Nvidia.com header.a=rsa-sha256 header.s=selector2 header.b=FDfoaW/Y
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=QEtkVPcukGKbhKBjS0hBTadjYe6TTjfYmTzxKpdfUKRFG3Hsl4IHt49L20dsCCmTxZ6A7uJ50V8ErYIypBXG+uwUolv8gwxHXd05hBBvEufStPZw+XtY2mVOXOZ8bIFWELj0mA/r44qJIe7iRs8UWaVtC2/trbJf0avBx79nKtjsjQHeStdyXSdRSsuhQZoFXwRByF9UZ6BDfy0GhXbJOToyHVoNCOn4dRlDnYxn98PSEVdpBuU551E2QfO5+lOYLPIEZ7oouG/UKno/cqS6/GmJPxKXVWr8XJ6qJBeGmPhz3kSpqg5NeYo1Q5S5AnmnaGwpE3YeLrUR280purxtGw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=fbsi1moS3AYFu6VpvnD9001Sbto95TscF9TXzH3pjFw=;
+ b=y4In0T5YGwrZCne0AQpZuU5Evi23dz5BHMLaAGtGlPrdcden/g62KZkgNW8rW055JyUPggHjlvyWSD4/l2hI6RsxRMEfmVtYZTlUNrR/ZoN1PHF//DlZ1CUTTHFpg5YpSsCCyF04vQ36Qvgorhe61fay0AgOpv1VGvpe8oAizRxkbBjJYDWMopPjxb1IKah+xtrnCQcU8Q2fCm+tz6RjCDMrJXZGyCnM43myH1f98FpzNtpgmbIb8k88VKEbCWVHSnGPwZi706BztKKt7mGrFNUo0WwVX/LiB3+IvxHM1cSVglIAKKFBzP4kO7+3yNsLqz4CqAmmES16ijhVm9anJw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
+ dkim=pass header.d=nvidia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=fbsi1moS3AYFu6VpvnD9001Sbto95TscF9TXzH3pjFw=;
+ b=FDfoaW/YB2KFjgzVWxAQVOtKpvY/O/fZ5XkSJVhlH7qgFjDjPC6w+fLdpExjBz3ZodcrjA+sl8MFbNFGeun2HfL9VTMX/aiveS56EbyRYp5oIc4zPh1Io8AJErzlYDa1L/6ShNi6ddH9YYAP38Z0Bd3zHkVkqdlDrCCYBjqOn/7CkLSeMGdXa/Q8ny8BXwpumsv4BaSK8oyjBcXH7epeYd4tH4sfGG/BaQmdEhJ6XOFRvEmxMHqfxTOOhEN7/wi747FrGnG4bJCMht0z72zqU26iBiVDQ+n6YpxsOUJhfGxHJFlo9EJ9hUMxokiLw9rQeFV2/ptGoXZ9pAG+VM3srg==
+Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nvidia.com;
+Received: from CHBPR12MB731189.namprd12.prod.outlook.com
+ (2603:10b6:610:33d::12) by SJ1PR12MB6099.namprd12.prod.outlook.com
+ (2603:10b6:a03:45e::13) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.615.10; Fri, 20 Nov
+ 2026 17:29:27 +0000
+Received: from CHBPR12MB731189.namprd12.prod.outlook.com
+ ([fe80::b0e5:123d:fe06:e10d]) by CHBPR12MB731189.namprd12.prod.outlook.com
+ ([fe80::b0e5:123d:fe06:e10d%6]) with mapi id 15.21.0639.010; Fri, 20 Nov 2026
+ 17:29:27 +0000
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v4 10/19] efi/libstub: arm: Simplify
+ handle_kernel_image()
+From: Jason Gunthorpe <jgg@nvidia.com>
+To: Ard Biesheuvel <ardb+git@google.com>
+Cc: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ Ard Biesheuvel <ardb@kernel.org>, Jason Gunthorpe <jgg@nvidia.com>, 
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+ Albert Ou <aou@eecs.berkeley.edu>, Huacai Chen <chenhuacai@kernel.org>, 
+ loongarch@lists.linux.dev, linux-riscv@lists.infradead.org
+In-Reply-To: <20261118182105.1633603-31-ardb+git@google.com>
+References: <20261118182105.1633603-21-ardb+git@google.com>
+ <20261118182105.1633603-31-ardb+git@google.com>
+Date: Fri, 20 Nov 2026 13:29:22 -0400
+Message-Id: <179519576290.392094.16129574021379744569.b4-review@b4>
+X-Mailer: b4 0.17-dev
+X-ClientProxiedBy: MN2PR07CA0020.namprd07.prod.outlook.com
+ (2603:10b6:208:1a0::30) To CHBPR12MB731189.namprd12.prod.outlook.com
+ (2603:10b6:610:33d::12)
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -51,171 +101,85 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH RFC 0/6] PSCI-via-EFI to support firmware and kernel
- sharing EL2 for Apple Silicon
-To: Ard Biesheuvel <ardb@kernel.org>, Will Deacon <will@kernel.org>
-Cc: Mark Rutland <mark.rutland@arm.com>,
- Lorenzo Pieralisi <lpieralisi@kernel.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- Catalin Marinas <catalin.marinas@arm.com>,
- Sudeep Holla <sudeep.holla@kernel.org>, Janne Grunau <j@jannau.net>,
- Neal Gompa <neal@gompa.dev>, linux-arm-kernel@lists.infradead.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-efi@vger.kernel.org, asahi@lists.linux.dev
-References: <20260708-efi-psci-v1-0-9efb3abf0e4c@kernel.org>
- <9c53cfd7-e193-4441-83ca-7710060225b7@app.fastmail.com>
- <apldL6Ml91GW-tE9@J2N7QTR9R3.cambridge.arm.com>
- <aplk2hHRB7Yw9FWW@willie-the-truck>
- <eb75b82a-8910-4198-b89a-5c8b487c0fd5@app.fastmail.com>
- <cadadedb-1de1-46f0-9bfd-35eb8bdfa85b@kernel.org>
- <avxETlOGyr_WQ2zp@willie-the-truck>
- <ef76e141-491d-44a9-90a6-e9cd54526012@kernel.org>
- <a1b18224-4171-4702-acb2-cef994dd9921@app.fastmail.com>
-Content-Language: en-US
-From: Sven Peter <sven@kernel.org>
-In-Reply-To: <a1b18224-4171-4702-acb2-cef994dd9921@app.fastmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CHBPR12MB731189:EE_|SJ1PR12MB6099:EE_
+X-MS-Office365-Filtering-Correlation-Id: 1839ebba-2178-4b0c-136e-08df472bd3cf
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|1800799024|366016|23010399003|7416014|376014|18002099003|22082099003|3023799007|4143699003|261022105027099003|11063799006|261102123227099003|261026140227099003|261028144727099003|261022075727099003|261021121427099003|261022115727099003|261009223027099003|56012099006|10067099003;
+X-Microsoft-Antispam-Message-Info:
+	hbdy+MhTOWRVurZEau6eBXD/K9ZlBdi8geofoO6kgJWKFUq0KyFKHzIoNF0ysTi1Mp3+TM/+78zy0vwMSw5svoNChEkxaR16BpihKZbCc55oBsgw8GzBLnKQmwBNG7N6iN2q0JDlBNfDm4H/gI28v3BuEQln8t7LZfUkVmVCf4TeOgjTupTqNDRfl+hcXXaCncDO5ydvPfYbiXUDoW4Bmptgcz2Ytzz5zPc0gbYtpvpJ1iIIZ1MvyuXze+DsKEnW3ReonIJjMqQHWOiI53LpMGVwSDiX/twfbOPi1W+qLzqbysEoB3YtHFmIa/1E1vT3o63k2cDIbLKB4QWPkjohdQ7uuVb6+gIY28i9SpwmEUM4sdy9MXrURh+pySR4LXEdjlPB+XQ2f9fF1kjwWZX3p9NDI1qAlCFpV0rA95QFobpkv+uWt9RC6Hbf1Nu24ZWdnVu/gsS51XsEjdtRkhWVbzQvOkC2XEVgpNYBVrGiKL11shYKALvuropg1LzAjgAkxCkJ0trxtafhQ+7ec/NOP17FsigX9DwdSbl0uxyUX/wsV6ZYnVFkjruxr4b5uGitWrxi0J+e6I0qGjJghAa0I4sYAzSszdOJdRTQ2DVw3o79Ma+bUG9sEF9hv0FsSmUo5GeLRdztzHGIHrJ+p7SRLJaRVFw6b61f3SAtLYEmKUY=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CHBPR12MB731189.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(23010399003)(7416014)(376014)(18002099003)(22082099003)(3023799007)(4143699003)(261022105027099003)(11063799006)(261102123227099003)(261026140227099003)(261028144727099003)(261022075727099003)(261021121427099003)(261022115727099003)(261009223027099003)(56012099006)(10067099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?Q2NaYVVPNjM5UXY0dnVaSE1OUHNXWG5jOEN1bi9mVTFEUDBzY0YrYlFGY01Y?=
+ =?utf-8?B?SEdQa3RTZ1ZrYlRZY2IvWVFJZDlobVpoMTJsSThtQmN5RjFLR0RybTJvMndY?=
+ =?utf-8?B?c1d2RXFhSzAvazArZmhRUFM1dHVoRDUrZUxFQlZHNE1kQlQzWE5HTFhKMkhZ?=
+ =?utf-8?B?bEM3aDkxdXV3TUg5V3RGRmtsajNISFlzOTByTzBQOUlwdmg1eEtxOVhveXEr?=
+ =?utf-8?B?RXBBQkNMZ1EyZ1hycWF4VDgzbVZNMTd2ZlU4VkErUDQxQWpJMS9oWUtDVVZa?=
+ =?utf-8?B?ZUplVjZFT21vYVJscDROQWJ1VDJTV2VnOVBJOGlCelgwK1MrVjh4cGZuTnNa?=
+ =?utf-8?B?a04zSlNqT0dGV0w0eTZpZjVoTTJ1RTYwU3lTR1l1WGwyalBSMjJZN2RGZzhR?=
+ =?utf-8?B?WWc0OXJpZk1tQ2ViRmZXMnc4QWlpY3RidWNXbHJFRU5Dc2s5V0ZWUXh0ZmdR?=
+ =?utf-8?B?TVZaWmpEcWdwaXJJZVR6U3A1azYwdElBaUtFeDdsSERKTFMyRkUzek1uTmNM?=
+ =?utf-8?B?WjliRnZYZUFHT1BGMU1zOTdPamFueWU3RHYwTkxhZHJNV01keGpvMEZ5ZEI0?=
+ =?utf-8?B?Y0FKQjVLclNBOVZTdDYwRUIydGpTc3dhV0NGNnVrQVFiZi9LV3p5a1ZxWUpx?=
+ =?utf-8?B?QWpRZU1kZXo1SW53U0phaUpkWGFOU2tuVHFKRkVVQnJ3L2IzRm1WZmlGbFUx?=
+ =?utf-8?B?OTNYSloyMTdWbE1kaEdNNFIzbU5vWXZCZVMyVHhWUEN4K3MrejFydVUySTM1?=
+ =?utf-8?B?N2N4ajk4MkZ2bXJMUzNLK1pOOEpPb2prNjh5MVM5T3AxWGNxVUdTT3pqLzFR?=
+ =?utf-8?B?TlFLeTlMNURpMHRCVzNlcGcrUlBmOVh5cG1lalVTWVFhZWpOTDcrKzNEb0ZR?=
+ =?utf-8?B?K3ZubmZJdWNFVThZWDlYa3Bja2trNlFzczA2MFdMdk9keVNSSjVTd2lBVFFL?=
+ =?utf-8?B?T2V5MGhSNkJqenZVcmhZajlsUDYrWUYwK2twNUtkUloyMnNSVDJtWmc5WnA2?=
+ =?utf-8?B?dEUrVWxXbVpIa1I5WGdXeDV5V0Yramx2cFNuVTJwWFY1eC9iSnQ3ajV4YzdM?=
+ =?utf-8?B?NWc2VmN1QzFDV05CZGdvb2krRWZIZFpXblM2NndURnF3WkpLVVk0TmRJZk9J?=
+ =?utf-8?B?OU12ck01NDFwcHU2L0FoNWt2ekR4V2YzVnllYmRickpnNUY1ZjRxVFpyVVdk?=
+ =?utf-8?B?QTkzRnUydDZRZXZqT0RFWE94QjNhL1o5NHRDaWtoSVo2aDdPMmdBZFMyb0JE?=
+ =?utf-8?B?VDdqM3NNZ1FaK0FkT0xqcm5McmpXeUhQOEZyZ25CdkxodjMvS0p6cDVscGRm?=
+ =?utf-8?B?RjJUelc4MVhMb1FyV0F6c2tRN1RaMzZjTFZ3WXg1U2FhRmdaWjROcHBtbXBM?=
+ =?utf-8?B?YUlrd2Q3c0tyWEpjTkM1VmZjdVo1N21IaWE2VFExTjhoM3ZjUHRtZm0vT0Jy?=
+ =?utf-8?B?dXlNU1lwc1VKSzZ4NS9CNFR1REkrZnYreUpCOHN6eDhHKzNTMERzZGxjMDZx?=
+ =?utf-8?B?N3dBN2VJbmhhZCt3dEpaY2FPM3RZMi94MkVoQWFKV3RoVTdKY0d5d3BjczRI?=
+ =?utf-8?B?UW1sV0J5Ykg2TEkybVlNY3UwS3RFaEhDZzhndTNBSU5IU2x4c25xOWlkSUxM?=
+ =?utf-8?B?STM4VmhoYXBNcW1SQk1qYmV4a3l6N21NcDBqUDZUL0RMQzY0RnJIVjVPdlRZ?=
+ =?utf-8?B?cmg0VE5JN012K3YxVWJLd2VDMVdDbFRXaE5OVDZkK2FFYjI0Yy9xcHoyQk9x?=
+ =?utf-8?B?UFUvT2VSTk9ZMWFPN2loL1ZNNFF6WVFMQWMxQlFpRVhuUFdQZDdGbmo0amNx?=
+ =?utf-8?B?OWhpSjZiWDdNQ2Jkd2hPZks2QUdta1BMUG1CSVFLMXRpZDVnZjAvVUtFNExp?=
+ =?utf-8?B?YnJ6QkNxNmVhQmdBQVpKMGhDZ2t2ZGFPcFpkL2NLc1VnWisyWHBkNW9VaVJ3?=
+ =?utf-8?B?TVdQN0RVNHIvb0JaWnhEYTNUTWtYbkxDaWFSVEJwbk15ZWF4Z3AwY0tJcDBN?=
+ =?utf-8?B?eVlsT2VueStuV2FZY1RlSEhPU09NUTJYZ3dDSUJObnQwRXBUSVl6ZzRTRFRy?=
+ =?utf-8?B?QXdwM0JhN2E1VStRZXZIWjQzSVdyTk03QTFqZE1hWjJrNjhiTm9iYUNobzd1?=
+ =?utf-8?B?WmVhU2xpNGxyRHpxak1LaTJGczlIdmFkdlo1Vm9ldGF4Qk9jc0RTVmFNQmxt?=
+ =?utf-8?B?QTBTeFo3STVwMTgxM3RlcWZaYm5yMzFkNm1DQ3NYaXNNY1FaK0UzUksxSlFE?=
+ =?utf-8?B?YWV6cXY5dU5teXhnclkza3dkby9CRDI0Njl4RFM2Ry9jYXRMM21TcHdVSHBq?=
+ =?utf-8?Q?pkyHj2RVGaN4Tdirkd?=
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 1839ebba-2178-4b0c-136e-08df472bd3cf
+X-MS-Exchange-CrossTenant-AuthSource: CHBPR12MB731189.namprd12.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Nov 2026 17:29:27.3752
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: V6Kfb7EtQONr31M61P5niNWW1EaA1PHccliqrp6zhLKJsQsLUU6UIgszAW0uTHRs
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ1PR12MB6099
 
-
-
-On 19.11.26 16:38, Ard Biesheuvel wrote:
+On Wed, 18 Nov 2026 19:21:16 +0100, Ard Biesheuvel <ardb+git@google.com> wrote:
+> Now that ARM moved to efi_image_info for obtaining the base of the
+> decompressed kernel image in efi_enter_kernel(), it no longer needs to
+> distinguish between the image address (which might point into an
+> unrelated allocation below the decompressed image) and the reservation
+> address (which is what can be freed upon an error).
 > 
+> So use image_addr/image_size rather than reserve_addr/reserve_size in
+> handle_kernel_image() to return the base and size of the allocated
+> region to the caller. This will allow those parameters to be dropped
+> entirely from the prototype in a subsequent patch.
 > 
-> On Tue, 17 Nov 2026, at 16:25, Sven Peter wrote:
->> On 17.11.26 13:10, Will Deacon wrote:
->>> On Sun, Nov 15, 2026 at 07:38:35PM +0100, Sven Peter wrote:
->>>>
->>>>
->>>> On 03.09.26 15:25, Ard Biesheuvel wrote:
->>>>> On Thu, 3 Sep 2026, at 14:15, Will Deacon wrote:
->>>>>> On Thu, Sep 03, 2026 at 12:42:39PM +0100, Mark Rutland wrote:
->>>>>>> On Thu, Sep 03, 2026 at 01:34:56PM +0200, Ard Biesheuvel wrote:
->>>>>>>> On Wed, 8 Jul 2026, at 09:15, Sven Peter wrote:
->>>>>>>>> This series adds a custom EFI table that points to a PSCI entry point
->>>>>>>>> (plus some other stuff that has to be available before EFI runtime
->>>>>>>>> services are set up) and adds support for this new conduit to the psci
->>>>>>>>> code. We can't directly use the normal EFI runtime path because that one
->>>>>>>>> takes a sleeping lock and we need to be able to call into PSCI from
->>>>>>>>> atomic context during e.g. cpu bringup or during idle.
->>>>>>>>> It also adds support for specifying the specific MAIR attributes for EFI
->>>>>>>>> runtime mappings as defined in the latest UEFI spec since Apple Silicon
->>>>>>>>> is rather allergic to using Device-nGnRnE vs. Device-nGnRE for its MMIO.
->>>>>>>
->>>>>>>>>          dt-bindings: arm: psci: Add EFI conduit
->>>>>>>>>          arm64/efi: Add and parse custom PSCI EFI configuration table
->>>>>>>>>          efi: Add EFI_MEMORY_ISA_{MASK,VALID}
->>>>>>>>>          arm64/efi: Honor EFI_MEMORY_ISA_MASK for Device-nGnRnE vs -nGnRE
->>>>>>>>>          firmware/psci: Add EFI runtime conduit
->>>>>>>>>          arm64: dts: apple: t8103: Add PSCI and CPU idle states
->>>>>>>>>
->>>>>>>>
->>>>>>>> I've picked up patches #3 and #4, which are useful in their own right.
->>>>>>>>
->>>>>>>> I'm not sure if the arm64 maintainers will want to consider this, but
->>>>>>>> I think it's a reasonable compromise, as it puts the abstraction in
->>>>>>>> the right place.
->>>>>>>
->>>>>>> Sorry for the late reply; I've been away almost all of August and I'm
->>>>>>> slowly catching up on things.
->>>>>>>
->>>>>>> As with last time this was proposed (in abstract), I am not happy about
->>>>>>> bodging an EFI conduit into PSCI, given that the manner in which state
->>>>>>> is managed is completely different from SMCCC.
->>>>>>>
->>>>>>> If we need a mechanism for doing hotplug and/or idle without HVC/SMC,
->>>>>>> that's one thing we can consider. I don't think we should pretend that
->>>>>>> it is PSCI.
->>>>>>
->>>>>> What do you have in mind for an alternative mechanism? I understand your
->>>>>> objection to this proposal, but at least it keeps the interface fairly
->>>>>> high-level and avoids opening the flood gates for a bunch of SoC-specific
->>>>>> idle routines. Are you thinking of extensions to the PSCI spec or
->>>>>> something else?
->>>>>>
->>>>>
->>>>> I can't speak for Mark, of course, but I could imagine EFI being used as a
->>>>> conduit to provide a callable set of interfaces (with a rigorously defined
->>>>> set of constraints such as the ones in this patch, i.e., reentrancy, no FP
->>>>> or SIMD, not relying on ISA features that the OS needs to know about and
->>>>> enable, etc).
->>>>>
->>>>> There is prior art here in ACPI PRM, which does something similar, and this
->>>>> also relies on EFI runtime services.
->>>>>
->>>>> You'd still need to implement the CPU ops and a cpuidle driver afaict (no
->>>>> expert here), but at least those would be coded against an interface that
->>>>> the kernel itself specified, and can be made as generic as we choose to.
->>>>>
->>>>> Not saying this is all great, but it might be a worthwhile compromise to
->>>>> consider.
->>>>
->>>> Finally getting back to this series...
->>>>
->>>>
->>>> I'd definitely like to keep mapping the resident firmware using EFI runtime
->>>> services because otherwise I'd have to duplicate a whole lot of tricky code
->>>> to do the same thing via some other means (e.g. a device tree nodes that
->>>> contains all mappings + callbacks) and I just don't see much value in that.
->>>>
->>>> I'm happy to just drop the PSCI part though and replace that with a simple
->>>> and somewhat generic "efi-rt" (or similar) cpuidle driver and make that one
->>>> have similar requirements like I added for this RFC series and expose bunch
->>>> of generic callbacks (that will just happen to resemble PSCI functions very
->>>> much ;)) via a custom EFI table. That would keep PSCI out of all of this but
->>>> come at the cost of an additional cpuidle driver.
->>>>
->>>> I don't think that would open any flood gates for SoC-specific drivers since
->>>> we could just point them to the generic one and tell them to use that one if
->>>> they can't do PSCI for some reason.
->>>>
->>>>
->>>> Now before I go off and prototype this: Would this approach be fine in
->>>> general with you, Mark and Will?
->>>
->>> tbh, if the "efi-rt" thing is just PSCI with a different conduit and that
->>> conduit is properly documented, then I really don't see the point in keeping
->>> it separate. However. I suspect that we probably all have slightly different
->>> opinions here which isn't going to help you very much :(
->>
->> Yeah, well, I agree but I really don't have a strong opinion or any good
->> argument if either "efi-rt" vs "psci-via-efi" is better or worse. I only
->> think both are better than SoC-specific cpuidle and cpu_ops drivers and
->> I have no idea how else we could do this. (We could drop the kernel to
->> EL1 and do "normal" PSCI in EL2 then but that would be much worse than
->> either of those options imho)
->>
-> 
-> I agree with Mark that implementing a pseudo-PSCI that can never quite
-> comply with everything in the PSCI spec is probably not a great idea
-> unless we actually need it.
-> 
->> And especially with M4+ I'd like to have something that can go upstream
->> because normal wfi loses most general purpose regs there and has to be
->> disabled which is not great.
->>
->> I can also just prototype the efi-rt cpuidle+cpu_ops thing and then we
->> can take a look at it as well and see if that's better than what I have
->> in this series if that helps but I'd rather not spend that time if that
->> has no chance of being accepted either.
->>
-> 
-> I think a consistent approach for both secondary bringup (+teardown?) and
-> cpuidle that is based on the same efi-runtime layer is perfectly acceptable,
-> and allows us to define it as narrowly as we can, rather than having to
-> consider what shared code might assume once it sees enable-method=psci on
-> a CPU, or a PSCI conduit (SMCCC detection, mitigations, etc etc)
+> [...]
 
+Reviewed-by: Jason Gunthorpe <jgg@nvidia.com>
 
-True, that's a very good point.
-At least for Apple SoCs I don't need anything nearly as complex as what 
-PSCI provides. I think all that's required is cpu_on, maybe cpu_off, and 
-cpu_enter_idle plus a bunch of static values (number of cpus, available 
-idle states, etc.). Let me think this over and maybe come up with a 
-simple proof of concept then.
-
-
-Sven
-
+-- 
+Jason
