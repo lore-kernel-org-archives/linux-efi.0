@@ -1,73 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795217667;
-	b=njlhdtqDDNMC2pucjM/Obb4X5D9zEZ6c9fK0AHP5r6NvkQseqd5QkjaUrUgHaben5/FR
-	 gvKd4QrMfd+xflOxTAxgwm8pY+MTAUSmTEmoC6e5aoz7gHL080qi/aXkcGpoQqepAFQ+L
-	 fthpykl6wEQxmwfFyr6idaWLVGQIGhrfnv6FS75o3hMaEZxPh3uT9CHkg+lNk91iFXPac
-	 TEjfAUb5f0xGyB8iy+8BaOTtqbuVEhPAlk9cUTNgZqBb2NDR6ozZuImDRvZoee8/6rRfY
-	 SV4OHuO5ZjCZubZ97S11+K1nV47a0utqLfmZLAEgK8xG0Qb/GO1GZBAinrWfwHRMyGA==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795217667;
-	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
-	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
-	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type:Content-Transfer-Encoding;
-	bh=d5UxhRENKrjN2WqdptUK5eL7RckbgwjJ8al7suyNLmw=;
-	b=yoJAF739B0fASqhfQ6qTblNnb8VmSYtyrC56VO0F9fAcNK7u4kYpznRjHutD1P3Nh0N8
-	 WoRNu/kxX6jU2pJJJgoWVmNwwIJGOYovyLK//nXAYMIQ0BiFzTxeyfs0c1fcFxTbwXsrY
-	 YcJpdzZl6nwEu+VOAVvKpfCSTT5qnEsfU/TvTn493wFHaU+QzA9AkSki87zljnZaUlhBU
-	 8OMwWo0P78I/nqPj2TIstv2OpAr6OrUrwGlMD0ct0vpJ19ZgSH5nr+GNQveI8XylE5yfK
-	 xk4OIuiZ8YCPDF3ImcBfjarOXrEuk/apPXJIltOI8e8fm4enM5wapAW1MY3Mb0xDajQ==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="kPrgk4/c";
-	arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1795257498;
+	b=ScdUG5nWesDVe9k3H7mUEzBjAkOowp5y1eY0knkfBFvABYMZ/gU8Bqm/CS+B69AIUJSZ
+	 DquHpixnx8P25D5yNW4ld7KG1t5AsNyC3p/OA6EC//0paM1xiceeKlXqVz/lAdkQZKbD7
+	 r5n344bhhV5lY3tBfwpeS9aPYtrBzVIj58aT6hGirpp7W34NRMkYbXoxU5FL+GEocYlk2
+	 0J5NUAIIKS/esolbj1YGRGjzjEFshvwQ9f9hbvTlq9+goFUT2B3tlAvw0tA0d10IY5C70
+	 2SmgF8fJ1+VbQqQkiRaYeRL1aBlvwcxOm03P/oIPEgKTUaBdXJ4kUjzS4pLCNZ27d5Q==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795257498;
+	h=Received:DKIM-Signature:Received:From:Subject:Date:Message-Id:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-B4-Tracking:
+	 X-Change-ID:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:
+	 X-Endpoint-Received:X-Original-From:Reply-To;
+	bh=WEuXb2RE8zSTJ0DUvVgVg41JYrBzTwV6rSqVaKBxb4I=;
+	b=4jDiIncBjQin2Sc+6xFbGGYxfCDz3HS4ZFS7IZznbcCJ116eluimwyQEAHYHj8rwCrOL
+	 /dbs0HYqAGrbWrKDhtA/lpG5zJVu4Af2PaikLxsgj49/RWEECG8GI5c9M84xnpoSl7ADQ
+	 J5cQKjOD8AdrAA/e19QGl6p5s/auMVbQ3m+TKQPFvf7dVM59fMjXvpB4rq71yD9Hk+w31
+	 PtCghdxRRoSA2ovWVjo7bIUd+svvtRx5X/e6COy2dRUQQxd+lbAbg/rdNibG8DQvijIoC
+	 nJcP0An4ibAi7D2mbDW6QJNOE+hNa+w49148lOSxWSmM+L7xtoLWDK/6ye5ymY14z2g==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Kop1P+bj;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9A36606A684
-	for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2026 23:34:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 988D7606A320;
+	Sat, 21 Nov 2026 10:38:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=kPrgk4/c
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 62B661F000C6;
-	Fri, 20 Nov 2026 23:34:25 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Kop1P+bj
+Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
+ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
+	t=1795257498;
+	b=zSzrvqgiNHtOz5gtXa077U7MaFHVl4lh1Lh/Mi4xqpquPMrsz0XupNWGBHHck+cdecBW
+	 wSdinURyuZR0862A8LcaOBn8/9HEkSzARvqGxkpaeFyBzEHs6i8aKZO49wX2t588DR7WK
+	 xHZKUG5PTT6amXesY+CsngVQTYnec628eu3QGuVFPYIW4DXjuy5b1dihTAuys2kTHT71U
+	 ctXnBEOmey09OqbGRFMeKFi27/aeaGRQTZNsbYinLBboOOhC7TuRCpcqxbD4MrudocCku
+	 lmWfbl5ESAO/9JuvKwMv3lma0xU+Wkz11t4kZCiHtFa0np910DdH5LJ97hpTTzvijvg==
+ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
+	c=relaxed/relaxed; t=1795257498;
+	h=DKIM-Signature:Received:From:Subject:Date:Message-Id:MIME-Version:
+	 Content-Type:Content-Transfer-Encoding:X-B4-Tracking:X-Change-ID:To:
+	 Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To;
+	bh=WEuXb2RE8zSTJ0DUvVgVg41JYrBzTwV6rSqVaKBxb4I=;
+	b=QrhtKyGCWCww0KqHJzNErAauQdC6wJOeC+ZTsXigKBcggSmQm+kjdivYvrkIVlI3pjUx
+	 9AxcwenBB3y0tTRGQfb9A5r8cUvScZVRXNxa5DxTFWf9zou++1QTsdYSafZbolwZ3znB8
+	 0IJQ1JtvBpBOX0Rg9ljVuNjnVQftqG4hURlmVFYfOiFjPZyuz4j8+5E1eLBEMGSSErkiu
+	 LuXIKWiz/bbJ1Dp+337OGlOuDlhIvI34ROxWlx0/8w/iRFhHTpvaNu3ryEsMu6KDBGnoR
+	 QShlM24rfdiQv+XrRpCIr1dwDKRByM7AnI9H3qmG1kcY7Q7FK/6sBBGg7ogmt/32W5Q==
+ARC-Authentication-Results: i=1; smtp.kernel.org; 
+	arc=none smtp.remote-ip=100.80.115.77
+Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	(No client certificate requested)
+	by smtp.kernel.org (Postfix) with ESMTPS id 906361F000C0;
+	Sat, 21 Nov 2026 10:38:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795217666;
-	bh=d5UxhRENKrjN2WqdptUK5eL7RckbgwjJ8al7suyNLmw=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=kPrgk4/c9iGM7d9omUE7JaPkkuE4JeyTzm9y0r1D5O/JrECRYDQvPeP1BbMl8ciqk
-	 8TCLIMZGVUGGgg4QuP4XMgmo64/zsUkKTewyF0A2dy1ssZ2HTqiGrd3V6r2Y+C2C7I
-	 II/c0bF/VPCB/WbMMGSil6/nXU52M405WuoIaqVEJSLej7Ao1pCEB/0REFefZ5zH+d
-	 ZdYPcwP5GVJDVYWxFd8iCyg9f/WwmGSjr+mrhKQDaHQB46TTVxXNvtPQXW8gdEA1tJ
-	 3ed6bbLji/Tj4a6Ya8zgXPxTltDkg/nd+mS2SxxhMpjX/gEKMICeT/nXycy2mTnNc6
-	 DBzTCnMfxQLfg==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 93458198003A;
-	Fri, 20 Nov 2026 18:34:23 -0500 (EST)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Fri, 20 Nov 2026 18:34:23 -0500
-X-ME-Sender: <xms:-tgAa40WMd_EPWFNg07JZwyPJcDR9Hl4neZG2sZ60S43JjZakvJQFw>
-    <xme:-tgAa94btA2FcjGmKSDp7fs53-xd9zJUgeojcI1BpmZaQ8Kz0eLzPAdMkS9qQ_7FU
-    OZr59jIhg8MHlYyQnwbZeEYlF7PpV4Vxlr8KoLe3U5t0r5NWyCYNKk>
-X-ME-Proxy-Cause: dmFkZTFL9seTInIL2hUW1OvhO1WNW9/yDQMQ3sNpaBykWH23VqJykrvUISWN+rBSHQ+5bq
-    /JQwHxFYPIkL2Xu86dfOWtqtRPVNB/qIKe2+3mjFHHflxOdiuobuj78Hw/FMM8RVcs5xMb
-    dS/DET/rxsPx6SEKm1JZ2K/buPZvqwh9FNjgcHALkKy/XLVkevo5sDDIARq2Z//kZnp9CA
-    rSEoHmeWmhoezQror9Ty81ka79pfF/gOgXmZ1GkKqAi2/yxezmh6ijdV1UEGYFqsznmeWL
-    g6Y1Onmgdfw7a6cltPUu6V6KYEQymMJvNVprAPmF42FlCo/F4k4Y9IbQe/ue2Z+ZHcN6bR
-    AVBfQNgkF9KQh6PxBWA+qfee9aUYQOqptwYa8VjqHfwnjVYok5TV5bLTBLvGn0rIl/+57i
-    WO2CFNlMLurWUHycX9pn9FDh03suHQbu/a60gn8A1Unl1x/x+0E2LPeaCXK7ov30TPL9HY
-    o2ezFIxHQHCXTJI7edwpEegWtCs0Eg73XGWZUHhg6NY3KaNTAF6vI4OBcklGStE1NtEpHe
-    N3vHrVedPTfuvnZlHDtl4lFSJEfm8EUJI7Pvrs07l9xMCrxgGBfUi29jmIbjOM3Gg8ZgCg
-    sI/r+DEJkCrbUJ/3Cs8u1BxQF8UUwcuBBDKvKM9/eCBqk19JS3CGIDZU1VMg
-X-ME-Proxy: <xmx:_9gAa8qH40BxQBQvJaXjFARB-PhdRsMar2JTklrPA3z4SJQHVTmxBQ>
-    <xmx:_9gAa3xjvPAkaVp2Sku5NRZNcCLQid1uQn0F3mHKuHRTI4Ze8YW5dw>
-    <xmx:_9gAa4fNmE8P0lI-MJYK8bBx9g6OJsEHDExPpHD4o_STbil2bs93ag>
-    <xmx:_9gAa7et2LQJdchwIic0GV_SClr-FVPrJ93hKkhrIDg8-j26-Wdt_A>
-    <xmx:_9gAaya0K8B0H7iHsoh_BofrwBklH8I5ogjHkW64OyKf3gN1PHCDP1na>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id CDCA4F80093; Fri, 20 Nov 2026 18:34:18 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=k20260515; t=1795257498;
+	bh=WEuXb2RE8zSTJ0DUvVgVg41JYrBzTwV6rSqVaKBxb4I=;
+	h=From:Subject:Date:To:Cc:Reply-To;
+	b=Kop1P+bjVy7M9sxkyQ8mtfKddSzXXWIlPQmdnKZtKXoWov5MGWZcnx7nWj5fEAd/+
+	 obHSPxMSv1iJ0Y5LgBglK4GpVKZ3uNMcaPnXXGKMNBnAGGGLo7cagOn4GsdW/U4bgy
+	 V4zHp0VEwbwogQR+0XcRVJNLb0p7rMkpP+gGlCb+jLgbyqO5MRR/HTnLi6OiO3XvW9
+	 wTWyoek4ZIOklPG7nBfe+GnsvWHYQwRJjvMyMiAZdZkNDmSirnib+eT11Nw1oPymeu
+	 P+owkKt+OftDXSk/KNs+KZW65Y7rCtVxzqM7CIXIB7qJbum2yps8txr8j59QewgEq1
+	 Q1EADrQV5jVBA==
+Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
+	by lkml.kernel.org (Postfix) with ESMTP id E66CC4BBCB;
+	Sat, 21 Nov 2026 10:38:16 +0000 (UTC)
+From: Han Gao via B4 Relay <devnull+gaohan.iscas.ac.cn@kernel.org>
+Subject: [PATCH 0/2] riscv/clk: sophgo: Fix EFI RTC on Milk-V Pioneer
+Date: Sat, 21 Nov 2026 18:38:06 +0800
+Message-Id: <20261121-b4-sg2042-efi-rtc-v1-0-19898b8ad497@iscas.ac.cn>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -77,41 +83,67 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Date: Sat, 21 Nov 2026 00:33:58 +0100
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Jason Gunthorpe" <jgg@nvidia.com>, "Alexandre Ghiti" <alex@ghiti.fr>,
- "Albert Ou" <aou@eecs.berkeley.edu>,
- "Catalin Marinas" <catalin.marinas@arm.com>,
- "Jonathan Corbet" <corbet@lwn.net>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- "Justin Stitt" <justinstitt@google.com>,
- linux-arm-kernel@lists.infradead.org, linux-doc@vger.kernel.org,
- linux-efi@vger.kernel.org, linux-riscv@lists.infradead.org,
- llvm@lists.linux.dev, "Mark Rutland" <mark.rutland@arm.com>,
- "Bill Wendling" <morbo@google.com>, "Nathan Chancellor" <nathan@kernel.org>,
- "Nick Desaulniers" <ndesaulniers@google.com>,
- "Palmer Dabbelt" <palmer@dabbelt.com>, "Paul Walmsley" <pjw@kernel.org>,
- "Randy Dunlap" <rdunlap@infradead.org>,
- "Shuah Khan" <skhan@linuxfoundation.org>, "Will Deacon" <will@kernel.org>
-Cc: "Jonathan Cameron" <jonathan.cameron@oss.qualcomm.com>,
- linux-integrity@vger.kernel.org, patches@lists.linux.dev,
- =?UTF-8?Q?Piotr_Kr=C3=B3l?= <piotr.krol@3mdeb.com>,
- "Ross Philipson" <ross.philipson@gmail.com>
-Message-Id: <243c6d70-7c81-4ad3-9a67-eb8cfbf454d9@app.fastmail.com>
-In-Reply-To: <3-v3-22d1a1eb7d2e+17de-arm64_drtm_jgg@nvidia.com>
-References: <3-v3-22d1a1eb7d2e+17de-arm64_drtm_jgg@nvidia.com>
-Subject: Re: [PATCH v3 03/11] efi/libstub: Have efi_kaslr_relocate_kernel() handle
- extra_size
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMMQ6DMAyF4asgz7UUm9CBq1QdSDDUDGkV06oSy
+ t0JMH56ev8GJlnFoG82yPJT03eqoFsD8TWkWVDHamDHdyImDB5tZucZZVLMa0TxY8fMHbWDQP1
+ 9cl3+Z/PxvGzfsEhcjxCUsgNqcxa+dQAAAA==
+X-Change-ID: 20261121-b4-sg2042-efi-rtc-e4d5222513ae
+To: Ard Biesheuvel <ardb@kernel.org>, 
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+ Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, 
+ Atish Patra <atish.patra@linux.dev>, Stephen Boyd <sboyd@kernel.org>, 
+ Brian Masney <bmasney+clk@redhat.com>, 
+ Jerome Brunet <jbrunet+clk@baylibre.com>, Chen Wang <chen.wang@linux.dev>, 
+ Inochi Amaoto <inochiama@gmail.com>
+Cc: Han Gao <rabenda.cn@gmail.com>, linux-efi@vger.kernel.org, 
+ linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org, 
+ linux-clk@vger.kernel.org, sophgo@lists.linux.dev, 
+ Han Gao <gaohan@iscas.ac.cn>
+X-Mailer: b4 0.16.0
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1795257496; l=1142;
+ i=gaohan@iscas.ac.cn; s=20261021; h=from:subject:message-id;
+ bh=dT/cAMPkqhwiO+NmtZDAeUI+RgA0LLjV2VMwVQoEOVE=;
+ b=FC7ThTXl38Ss0fnSg/4mwqUL1JUFP/nRR5YZZ9Bk32T3DV7XgF8zFNlDBS/VV/IdQ2NT1jZvE
+ atOl+cn9WM9D1k1MLLRh6y5Gr2yM/TK/lvJwVM1CPf6X/Q5pk/UR3TE
+X-Developer-Key: i=gaohan@iscas.ac.cn; a=ed25519;
+ pk=J8WHEK3filS86QaCaIHDGafqhxKyQ4K7+vFgRirTIiY=
+X-Endpoint-Received: by B4 Relay for gaohan@iscas.ac.cn/20261021 with
+ auth_id=1262
+X-Original-From: Han Gao <gaohan@iscas.ac.cn>
+Reply-To: gaohan@iscas.ac.cn
 
-Hi Jason,
+Pioneer firmware can take over the DS1307 on I2C0 and expose it through
+EFI runtime services, so Linux uses rtc-efi. I2C0 is then marked
+"reserved" in the device tree.
 
-On Fri, 20 Nov 2026, at 18:51, Jason Gunthorpe wrote:
-> extra_size is additional memory required that must be immediately after
-> the image.
->
+Two things break GetTime() in that setup:
 
-Given how extra BSS memory is essentially free at boot, is there no way
-we can establish a worst case upper bound for this memory, and just add
-it to the image unconditionally for DRTM capable kernels?
+- RISC-V maps EFI runtime MMIO as normal memory, and firmware takes a
+  load access fault on the clock controller. Patch 1 maps it as I/O.
+
+- I2C0 shares a clock gate with the other I2C controllers. Once Linux
+  runtime-suspends them, the gate goes off and GetTime() returns
+  EFI_NOT_READY. Patch 2 keeps gates used by reserved devices on.
+
+Tested on Milk-V Pioneer.
+
+Signed-off-by: Han Gao <gaohan@iscas.ac.cn>
+---
+Han Gao (2):
+      riscv: efi: Map runtime MMIO with device attributes
+      clk: sophgo: sg2042-clkgen: Keep gates of reserved devices enabled
+
+ arch/riscv/kernel/efi.c                |  2 +-
+ drivers/clk/sophgo/clk-sg2042-clkgen.c | 38 +++++++++++++++++++++++++++++++++-
+ 2 files changed, 38 insertions(+), 2 deletions(-)
+---
+base-commit: aebb7274476403040d582c61478df8f4a7bf9cd3
+change-id: 20261121-b4-sg2042-efi-rtc-e4d5222513ae
+
+Best regards,
+--  
+Han Gao <gaohan@iscas.ac.cn>
+
+
