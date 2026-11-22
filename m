@@ -1,74 +1,74 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=74.125.82.197
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=74.125.82.199
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795391962;
-	b=q3HAubWsg+2pz2ahkMza7iEbcCnRxcrq5P8d286vlbyHQeBR7WzlP6iEIv4j7D97/Nsf
-	 2+eOpcPjKM26JAZwd+LF2mmuPntR8NA0xBjeKCBTytkMwfGxnm4HmeJa55Csbuc3GZSRp
-	 DdfX3aADyxGMt9vyJZW7UPLqGEzAZbXzXrgS+rOSuG/Y0JB8bQh/C9wubcWoGKV5L0JGo
-	 3MALKSvNq6S4BMqmp+pwHz+pnNnI5W8iz0MpRQPpVjmnaG/F2jXNo5+crshLTFEosGTlB
-	 BngXCf9ZDmjiDoM0NkCuf9WHq7W5KBO93SxAceVWKDQvY8iQhfPKv0z18w8UR/6yj/Q==
+	t=1795391967;
+	b=ZPU++4s+gycy0ATr8hEpJ1Wk58ZNQOlrR+cUeyulIUserPloI6qy7Qqd+9AKJLz/VeM+
+	 WH8P1SyFMET8dxY/ZKtJw+JvDqer5wTeYn8PIsHgHphiyIVR0b2gdD6gFRuFrJml5rzl5
+	 Ahm7nx2aIaYnD6OfKVSjWZTxa40drJJQnQgi4HefJJWn3+KrDhdd48dCbJg7xnwJRYWao
+	 yDNGuFPeU1hAtwBDQBtCNrHzotq7GsLx97V3O+2M9VfuqnN3i2jjqb5Wo9U8xb1IiL1NX
+	 AGc6XkHj8YtQ4C0ovTFMo9AKau2fW39EvTCDI4B4icqYg3FYKU7QjbFcBCL55Dtd/TQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795391962;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795391967;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Received:Date:In-Reply-To:
 	 Mime-Version:References:X-Mailer:Message-ID:Subject:From:To:Cc:
 	 Content-Type;
-	bh=KyZ9uJ626I12Njxv0j4mlzZ8UPtaacK9Ww2cyWkY9Po=;
-	b=ghEhknNCWTDXMC5ZRwmIUDbPkQs05ATqHBwcaxruHUQj6BgX9E5RrSDuq5UqG0vwT3pU
-	 v+4YQQZcdEuO6KjT/EHip/LVnO/TroSdK13oJqr7x74ZUzjtifmLFnGTFXi7xsHj/F2vA
-	 /E1B/mHgvSl9goFkt/ZwvtglGoK3JJ4toAuR6UZkLx7ssInsA7GvZ/4UXhP/4gzoiECtQ
-	 eEQJrtg4bGzbVimR/lpZSwW5SPfz/FHrV9zKesTXZKGHFD7w5m09Mn43WUO0u1ea4YaPh
-	 KmxoOqiG6kqooez4hwFBLFo9xg1GAPi6Zc6/tEC9QgyJOZ6CScCX35dnT1RxhrXfQ7Q==
+	bh=6YYhm9IxKJacmBRPk1BwBojwdCvDw+zld1+t11skAg0=;
+	b=MOjg8/aONsO/RvZ6m60V3plTLin0ZIDV6Oul6+UbalNic8vZNjxE3ECcgD2jEvVL2vdG
+	 K13Lz/s+ShR9q0Q2THkDd53T+DimV6k6mc0ZNxqvUkC73YwtNWt2Wh7z8RKxvnRIHDISn
+	 BpB4ceI8Pyvsnsok23BQ/MM8KJfRIoVNnGIW21ht9epoPx+JMtc2ABcFQFTB/pe4v5PK+
+	 qX7RKsIS4H3LFgDMsEMHW4MWzJh2Kc8Afn3nDYZtFa+vmLtcHth3eneZ4YObgooewigW4
+	 q4SUttCgt76aysXspzYau1NeKaJLVes8CKeNjxWir3VgHjBMgDzs6bO4X4+j1Fk8fJA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=google.com;
 	spf=pass smtp.mailfrom=flex--irogers.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b="LVhW0/AA";
-	arc=none smtp.remote-ip=74.125.82.197
-Received: from mail-dy1-f197.google.com (mail-dy1-f197.google.com [74.125.82.197])
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=lMjtMZth;
+	arc=none smtp.remote-ip=74.125.82.199
+Received: from mail-dy1-f199.google.com (mail-dy1-f199.google.com [74.125.82.199])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0793D606A333
-	for <linux-efi@vger.kernel.org>; Sun, 22 Nov 2026 23:59:22 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0793D606A333
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33486606A6B9
+	for <linux-efi@vger.kernel.org>; Sun, 22 Nov 2026 23:59:26 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 33486606A6B9
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--irogers.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=LVhW0/AA
-Received: by mail-dy1-f197.google.com with SMTP id 5a478bee46e88-382af5cfc58so8160889eec.0
-        for <linux-efi@vger.kernel.org>; Sun, 22 Nov 2026 15:59:22 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=lMjtMZth
+Received: by mail-dy1-f199.google.com with SMTP id 5a478bee46e88-33c35f5ca6cso3831033eec.1
+        for <linux-efi@vger.kernel.org>; Sun, 22 Nov 2026 15:59:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1795391961; x=1795996761; darn=vger.kernel.org;
+        d=google.com; s=20260707; t=1795391965; x=1795996765; darn=vger.kernel.org;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=KyZ9uJ626I12Njxv0j4mlzZ8UPtaacK9Ww2cyWkY9Po=;
-        b=LVhW0/AANVxJAQwT6mhQoaTJ2b9TFO1WVD5TUQ0TUHNDjNjhsCNBVG9ohXjOFBwV5X
-         1NPByY2mhKcyn3qfYG9ZhxoKBf5JqCibeh7B0hgeAXDx+f9fP/MgJNlns9prztlQhTbn
-         0dVFZ0v9fAd5hqxIOPlrd91juN5zVCtbrTnz5OeD/7JVFHFlFwEEKEKnoFOIRhjP+BVD
-         eWmnoZsfx03MbEDJruouN6gSntbjYHdazetxMUkMx0hF/7Q8IwXeiBDpxquNyltJep5B
-         7iz30w3a5cpeGODgTzpi+g3bgGz+GeCec/FkBe1DK4LXzgYas7weIQjhPXGpqntRbu3y
-         xyJg==
+        bh=6YYhm9IxKJacmBRPk1BwBojwdCvDw+zld1+t11skAg0=;
+        b=lMjtMZthZUXpKfPu5kZBCNp7gCDCM6UH/QcNlg9HxpmrR6mKVVBMNgQz2treNcuJXs
+         Ld1fELdksbMZfOmGDYHRDv4YIwHxhdR3DxL4m0rSJdJF7kdNtxNOOsi24GUXXZ8WLFld
+         5dA9UXX+mPu/9toRKZKIBQJUe5wzI6aWLvXx0Vam3k7GbMhTlZkcekzMl7WR4P8yAyRI
+         FZHLcwVTLLOyNaHvB2691/eUnlZqoyPlLbrdzYJ1gQjrVOsuZHigVUOn1VCGUmTTHDsq
+         w2g2qLFgFRDEnzyQSBKOw60U+UluUX0I+QKYDb4Fx0/a9wWJBYRZXlEr5Mkb8AauB2x5
+         INCw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795391961; x=1795996761;
+        d=1e100.net; s=20260707; t=1795391965; x=1795996765;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=KyZ9uJ626I12Njxv0j4mlzZ8UPtaacK9Ww2cyWkY9Po=;
-        b=Acbf27PZSBvElh4xv8qfk14OSo24K33oXaEDs2QI5NvI38LavkUyJhI8XP+IJue/IH
-         BThmqgQ/quGpNzxWm9wnUcdgCUe5Ap+bmxq0FbG/2sMdidGUDRvj6Nx1ALZrU2gFa+h2
-         VyNQIUDYx/30abFgrmZrk65erFLGzqoJMJ1keMONJVWxG3BjHjKN45N65ugOJg/JWwNg
-         iGhqe2r0QUNRuYrnTfsSMJdAh7e7+tRpv3opxQ3SqGmPi/6rx7uM9e+x9e46mCSu8hcf
-         nvsB1h0BrmoXTtmb7aeZAs3oMel7TVpbtb0uSmZMyEkKKTLF3z1cG7DPOWgnzMSfu+vy
-         rngw==
-X-Forwarded-Encrypted: i=1; AL+hErFVICEW3x24D/6yLHhvglKPoKJVHhk/ralVSNRAG9ptmzIUrj4YI8Q0Psfay90ouM/lWlMxYVmCBrY=@vger.kernel.org
-X-Gm-Message-State: APuU4Z+fpAY/6bbiwgR8Q7Tci+Jyv9XNxa2pcoBSnChmnDCdJEdAZreW
-	IwGOfcrC0QgbSjA/un7XuNj++VYtT/gj0P8yrC9Dum16HRaGAadRBUVFGLMCJeFG3u1osEEJBdc
-	7FmQc/OZ+Ug==
-X-Received: from dycqw15-n1.prod.google.com ([2002:a05:7300:c00f:10b0:36f:5688:8a11])
- (user=irogers job=prod-delivery.src-stubby-dispatcher) by 2002:a05:7301:700a:b0:384:988d:6ec2
- with SMTP id 5a478bee46e88-3856f6524acmr11225588eec.33.1795391960856; Sun, 22
- Nov 2026 15:59:20 -0800 (PST)
-Date: Sun, 22 Nov 2026 15:57:56 -0800
+        bh=6YYhm9IxKJacmBRPk1BwBojwdCvDw+zld1+t11skAg0=;
+        b=Hodg4UwFNxT4ZONjmkyqbdhzoAxwz0erx3CH7hhOHqPX+sPQsESBruBUat5162RYdx
+         YWmIeRNHq02HI60xkzZrfa6F7NlvF1meren+G2SQba3auUyAFtyXtrHhVR6YkctjLXQT
+         SszU6yZ49nAtsJyeo/mGQffVeTo8X0aouH36zhKyciX4t9EK+0GymDkIkOkuKIOyp7ag
+         DsTjCXDNzt9LlFfAPGam39wfhdfMjepoyJr50Zcz1+CzgDwnasiMCDvjk++/bR20/qYM
+         QyhMI0QCzHJS0BRJDFtp1Qil94U5UMIGwFJsklfGH4EGZ5oPsTYBxdpcKUgiXhsezwAu
+         OzsA==
+X-Forwarded-Encrypted: i=1; AL+hErFr/XuPonSdlCBIQzG6BKAtz8prlw70TMeukM2lsG1IpIgf3x4P8z0wAjRvaBJdbinbs/oWBzUTkMQ=@vger.kernel.org
+X-Gm-Message-State: APuU4Z9ffrSL4KAVFAa9Hy1RxNdpbHyj0aIlFqpWDhUGdUIpses+S+SJ
+	XeIOawxbDlkNM22hn4KCNj6CzPx5HrmUhu2X1EbmVUTBHhoZuChfA/8xKM30I+DmTU/WF8gsoRQ
+	nS/bH/LW7ow==
+X-Received: from dybqo16.prod.google.com ([2002:a05:7301:6790:b0:36a:de0:d28a])
+ (user=irogers job=prod-delivery.src-stubby-dispatcher) by 2002:a05:7300:6da7:b0:384:5885:2f81
+ with SMTP id 5a478bee46e88-3856c0c7c05mr14446912eec.5.1795391964567; Sun, 22
+ Nov 2026 15:59:24 -0800 (PST)
+Date: Sun, 22 Nov 2026 15:57:57 -0800
 In-Reply-To: <20261122235757.3456048-1-irogers@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -81,9 +81,9 @@ Precedence: list
 Mime-Version: 1.0
 References: <20261122235757.3456048-1-irogers@google.com>
 X-Mailer: git-send-email 2.56.1.750.gf70dc682cf-goog
-Message-ID: <20261122235757.3456048-11-irogers@google.com>
-Subject: [RFC PATCH v1 10/11] selftests/perf_events: Add Minimal DWARF CFI
- deferred user unwind test
+Message-ID: <20261122235757.3456048-12-irogers@google.com>
+Subject: [RFC PATCH v1 11/11] scripts: Add eh_frame_min.py .eh_frame coverage
+ and size analyzer
 From: Ian Rogers <irogers@google.com>
 To: linux-kernel@vger.kernel.org, linux-trace-kernel@vger.kernel.org, 
 	linux-arch@vger.kernel.org
@@ -103,502 +103,973 @@ Cc: jpoimboe@kernel.org, rostedt@goodmis.org, peterz@infradead.org,
 	dylanbhatch@google.com, Ian Rogers <irogers@google.com>
 Content-Type: text/plain; charset="UTF-8"
 
-Add a multi-architecture kselftest (unwind_user_cfi) under
-tools/testing/selftests/perf_events/ exercising deferred user-space
-callchain unwinding (PERF_RECORD_CALLCHAIN_DEFERRED) compiled with
--O2 -fomit-frame-pointer -fasynchronous-unwind-tables across:
- 1. Standard SP-based frames with the architectural frame-pointer
-    register (%rbp / x29 / s0) explicitly clobbered
- 2. Dynamic alloca() VLA FP-based frames (DW_CFA_def_cfa_register)
- 3. 64-byte stack-realigned frames (DRAP on x86-64)
- 4. Shrink-wrapped early-return functions (remember_state/restore_state)
- 5. Anonymous RX JIT-style frame-pointer stubs lacking .eh_frame_hdr,
-    exercising per-frame CFI -> FP -> CFI -> FP -> CFI fallback and
-    negative VMA caching in find_user_eh_frame_hdr()
+Add an optional standalone developer inspection script
+(scripts/eh_frame_min.py, not invoked by Kbuild) to analyze ELF32/ELF64
+relocatable objects (.o, .ko), vmlinux images, user-space executables,
+and shared libraries across x86_64, i386, arm64, arm, and riscv.
+
+It reports .text / .eh_frame / .eh_frame_hdr / .sframe / .orc_unwind
+section sizes, simulated minified .eh_frame savings, Minimal DWARF FDE
+coverage (and breakdown of any unsupported opcodes), kept FP/RA vs.
+ignored GPR register rules, maximum DW_CFA_remember_state depth, and top
+DWARF CFA opcode counts.
+
+Example usage:
+  $ ./scripts/eh_frame_min.py vmlinux
+  $ ./scripts/eh_frame_min.py mm/vmscan.o kernel/fork.o
+  $ ./scripts/eh_frame_min.py /bin/bash /lib/x86_64-linux-gnu/libc.so.6
+  $ ./scripts/eh_frame_min.py --minify /tmp/eh_frame.min mm/vmscan.o
 
 Signed-off-by: Ian Rogers <irogers@google.com>
 ---
- .../testing/selftests/perf_events/.gitignore  |   1 +
- tools/testing/selftests/perf_events/Makefile  |   4 +-
- .../selftests/perf_events/unwind_user_cfi.c   | 447 ++++++++++++++++++
- 3 files changed, 451 insertions(+), 1 deletion(-)
- create mode 100644 tools/testing/selftests/perf_events/unwind_user_cfi.c
+ scripts/eh_frame_min.py | 938 ++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 938 insertions(+)
+ create mode 100755 scripts/eh_frame_min.py
 
-diff --git a/tools/testing/selftests/perf_events/.gitignore b/tools/testing/selftests/perf_events/.gitignore
-index 4931b3b6bbd3..4567b6563646 100644
---- a/tools/testing/selftests/perf_events/.gitignore
-+++ b/tools/testing/selftests/perf_events/.gitignore
-@@ -3,3 +3,4 @@ sigtrap_threads
- remove_on_exec
- watermark_signal
- mmap
-+unwind_user_cfi
-diff --git a/tools/testing/selftests/perf_events/Makefile b/tools/testing/selftests/perf_events/Makefile
-index 2e5d85770dfe..6a3a774544e8 100644
---- a/tools/testing/selftests/perf_events/Makefile
-+++ b/tools/testing/selftests/perf_events/Makefile
-@@ -2,5 +2,7 @@
- CFLAGS += -Wl,-no-as-needed -Wall $(KHDR_INCLUDES)
- LDFLAGS += -lpthread
- 
--TEST_GEN_PROGS := sigtrap_threads remove_on_exec watermark_signal mmap
-+TEST_GEN_PROGS := sigtrap_threads remove_on_exec watermark_signal mmap unwind_user_cfi
- include ../lib.mk
-+
-+$(OUTPUT)/unwind_user_cfi: CFLAGS += $(TOOLS_INCLUDES) -O2 -fomit-frame-pointer -fasynchronous-unwind-tables
-diff --git a/tools/testing/selftests/perf_events/unwind_user_cfi.c b/tools/testing/selftests/perf_events/unwind_user_cfi.c
-new file mode 100644
-index 000000000000..3f9fb8500824
+diff --git a/scripts/eh_frame_min.py b/scripts/eh_frame_min.py
+new file mode 100755
+index 000000000000..6a64563a7c40
 --- /dev/null
-+++ b/tools/testing/selftests/perf_events/unwind_user_cfi.c
-@@ -0,0 +1,447 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * unwind_user_cfi.c - Multi-arch selftest for Minimal DWARF CFI user unwinding.
-+ *
-+ * Verifies that deferred user-space stack unwinding (PERF_RECORD_CALLCHAIN_DEFERRED)
-+ * accurately walks user callchains compiled with -fomit-frame-pointer across:
-+ *   1. Standard SP-based frames with the frame-pointer register (%rbp / x29 / s0)
-+ *      explicitly clobbered to defeat FP unwinding
-+ *   2. Dynamic alloca()/VLA FP-based frames (DW_CFA_def_cfa_register)
-+ *   3. 64-byte aligned stack-realigned frames (DRAP on x86-64)
-+ *   4. Multi-return shrink-wrapped epilogue functions (remember/restore_state)
-+ *   5. Anonymous RX JIT-style frame-pointer stubs lacking .eh_frame_hdr,
-+ *      verifying per-frame CFI -> FP -> CFI -> FP -> CFI hybrid fallback and
-+ *      negative VMA caching in find_user_eh_frame_hdr()
-+ */
++++ b/scripts/eh_frame_min.py
+@@ -0,0 +1,938 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-2.0-only OR MIT
++"""
++Offline ELF .eh_frame / Minimal DWARF CFA coverage and size analyzer.
 +
-+#define _GNU_SOURCE
-+#include <alloca.h>
-+#include <errno.h>
-+#include <inttypes.h>
-+#include <linux/perf_event.h>
-+#include <stdbool.h>
-+#include <stdint.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/ioctl.h>
-+#include <sys/mman.h>
-+#include <sys/syscall.h>
-+#include <time.h>
-+#include <unistd.h>
++Note: This script is a standalone developer/benchmarking inspection tool and
++is NOT invoked during Kbuild (which uses the standalone C host tool in
++scripts/min_eh_frame.c when CONFIG_UNWINDER_DWARF_CFI_MINIFY=y).
 +
-+#include "../kselftest.h"
-+#undef __always_inline
-+#undef __attribute_const__
-+#undef __must_check
-+#undef __printf
-+#include "../../../../include/linux/compiler_attributes.h"
++It parses ELF32/ELF64 relocatable objects (.o, .ko), vmlinux images, user
++executables, and shared libraries across x86_64, i386, arm64, arm, and riscv,
++reporting:
++  - .text, .eh_frame, .eh_frame_hdr, .sframe, and .orc_unwind section sizes
++  - Simulated minified .eh_frame + .eh_frame_hdr sizes and byte savings
++  - Minimal DWARF CFA FDE coverage (supported vs. unsupported FDEs & reasons)
++  - Kept FP/RA register rules vs. ignored general-purpose register spill ops
++  - Maximum DW_CFA_remember_state nesting depth and top DWARF CFA opcodes
 +
-+#ifndef PERF_RECORD_CALLCHAIN_DEFERRED
-+#define PERF_RECORD_CALLCHAIN_DEFERRED 22
-+#endif
++Example usage (from the kernel tree root, invoke via ./scripts/eh_frame_min*):
++  1. Analyze a built vmlinux image (with or without build-time minification):
++       $ eh_frame_min.py vmlinux
 +
-+struct perf_record_deferred {
-+	struct perf_event_header header;
-+	uint64_t cookie;
-+	uint64_t nr;
-+	uint64_t ips[];
-+};
++  2. Compare multiple kernel objects, loadable modules, or cross-arch builds:
++       $ eh_frame_min.py mm/vmscan.o kernel/fork.o fs/ext4/inode.o
++       $ eh_frame_min.py build_arm64/vmlinux build_riscv/vmlinux
 +
-+/*
-+ * Tiny architecture-specific machine-code stubs for:
-+ *   int jit_stub(int (*fn)(int), int arg);
-+ *
-+ * Mapped into an anonymous PROT_READ | PROT_EXEC VMA without an ELF header or
-+ * PT_GNU_EH_FRAME segment. Each stub establishes a standard architectural
-+ * frame-pointer record before calling fn(arg), forcing unwind_user_next() to
-+ * fall back from UNWIND_USER_TYPE_CFI to UNWIND_USER_TYPE_FP on the JIT frames
-+ * and resume UNWIND_USER_TYPE_CFI on the surrounding -fomit-frame-pointer C
-+ * frames.
-+ */
-+#if defined(__x86_64__)
-+#define HAVE_JIT_FP_STUB 1
-+static const uint8_t jit_stub_code[] = {
-+	0xf3, 0x0f, 0x1e, 0xfa,		/* endbr64 */
-+	0x55,				/* push   %rbp */
-+	0x48, 0x89, 0xe5,		/* mov    %rsp, %rbp */
-+	0x48, 0x89, 0xf8,		/* mov    %rdi, %rax */
-+	0x89, 0xf7,			/* mov    %esi, %edi */
-+	0xff, 0xd0,			/* call   *%rax */
-+	0x5d,				/* pop    %rbp */
-+	0xc3,				/* ret */
-+};
-+#elif defined(__i386__)
-+#define HAVE_JIT_FP_STUB 1
-+static const uint8_t jit_stub_code[] = {
-+	0xf3, 0x0f, 0x1e, 0xfb,		/* endbr32 */
-+	0x55,				/* push   %ebp */
-+	0x89, 0xe5,			/* mov    %esp, %ebp */
-+	0x83, 0xec, 0x04,		/* sub    $4, %esp */
-+	0xff, 0x75, 0x0c,		/* pushl  12(%ebp) */
-+	0xff, 0x55, 0x08,		/* call   *8(%ebp) */
-+	0x83, 0xc4, 0x08,		/* add    $8, %esp */
-+	0x5d,				/* pop    %ebp */
-+	0xc3,				/* ret */
-+};
-+#elif defined(__aarch64__)
-+#define HAVE_JIT_FP_STUB 1
-+static const uint32_t jit_stub_code[] = {
-+	0xd503245fU,			/* bti    c */
-+	0xa9bf7bfdU,			/* stp    x29, x30, [sp, #-16]! */
-+	0x910003fdU,			/* mov    x29, sp */
-+	0xaa0003e9U,			/* mov    x9, x0 */
-+	0x2a0103e0U,			/* mov    w0, w1 */
-+	0xd63f0120U,			/* blr    x9 */
-+	0xa8c17bfdU,			/* ldp    x29, x30, [sp], #16 */
-+	0xd65f03c0U,			/* ret */
-+};
-+#elif defined(__riscv) && __riscv_xlen == 64
-+#define HAVE_JIT_FP_STUB 1
-+static const uint32_t jit_stub_code[] = {
-+	0xff010113U,			/* addi   sp, sp, -16 */
-+	0x00813023U,			/* sd     s0, 0(sp) */
-+	0x00113423U,			/* sd     ra, 8(sp) */
-+	0x01010413U,			/* addi   s0, sp, 16 */
-+	0x00050313U,			/* mv     t1, a0 */
-+	0x00058513U,			/* mv     a0, a1 */
-+	0x000300e7U,			/* jalr   ra, 0(t1) */
-+	0x00813083U,			/* ld     ra, 8(sp) */
-+	0x00013403U,			/* ld     s0, 0(sp) */
-+	0x01010113U,			/* addi   sp, sp, 16 */
-+	0x00008067U,			/* ret */
-+};
-+#else
-+#define HAVE_JIT_FP_STUB 0
-+#endif
++  3. Analyze existing user-space binaries and shared libraries:
++       $ eh_frame_min.py /bin/bash /lib/x86_64-linux-gnu/libc.so.6
 +
-+static int (*g_jit_fn)(int (*fn)(int), int arg);
++  4. Emit a standalone minified .eh_frame section blob for differential tests:
++       $ eh_frame_min.py --minify /tmp/eh_frame.min mm/vmscan.o
 +
-+static uintptr_t expect_ip_leaf;
-+static uintptr_t expect_ip_shrink;
-+static uintptr_t expect_ip_jit;
-+static uintptr_t expect_ip_bridge;
-+static uintptr_t expect_ip_drap;
-+static uintptr_t expect_ip_vla;
-+static uintptr_t expect_ip_clobber;
-+static uintptr_t expect_ip_main;
++Example output:
++  === build_arm64/vmlinux (arm64) ===
++    .text size              : 18,500,228 B
++    Original .eh_frame      :  2,294,092 B  (1 CIEs, 69,765 FDEs)
++    Original .eh_frame_hdr  :    558,132 B  (combined: 2,852,224 B)
++    Minified .eh_frame      :  2,285,920 B  (1 CIEs, -0.4% vs .eh_frame)
++    Minified + .eh_frame_hdr:  2,844,052 B  (-0.3% combined)
++    FDE bytecode payload    :  1,108,067 B -> 953,348 B (avg 13.7 B/FDE)
++    .sframe section         :  2,938,460 B
++    Minimal DWARF coverage  : 69,765 / 69,765 FDEs (100.00%)
++    Register ops kept/skip  : 125,630 kept (FP/RA), 0 ignored (other GPRs/args)
++    Max remember_state depth: 1
++"""
 +
-+static __always_inline uintptr_t caller_return_ip(void)
-+{
-+	return (uintptr_t)__builtin_extract_return_addr(__builtin_return_address(0));
++import argparse
++import os
++import struct
++import sys
++from collections import Counter
++
++# DWARF register numbers per ELF e_machine (drap = transient stack-realign scratch regs)
++ARCH_REGS = {
++    62: {"name": "x86_64", "sp": 7, "fp": 6, "ra": 16, "drap": {1, 2, 5, 10, 13}},  # EM_X86_64
++    3:  {"name": "i386",   "sp": 4, "fp": 5, "ra": 8,  "drap": {1, 2}},              # EM_386
++    40: {"name": "arm",    "sp": 13, "fp": 11, "ra": 14, "drap": set()},             # EM_ARM
++    183: {"name": "arm64", "sp": 31, "fp": 29, "ra": 30, "drap": set()},             # EM_AARCH64
++    243: {"name": "riscv", "sp": 2, "fp": 8, "ra": 1, "drap": set()},                # EM_RISCV
 +}
 +
-+static long sys_perf_event_open(struct perf_event_attr *attr, pid_t pid,
-+				int cpu, int group_fd, unsigned long flags)
-+{
-+	return syscall(__NR_perf_event_open, attr, pid, cpu, group_fd, flags);
++DW_CFA_nop                          = 0x00
++DW_CFA_set_loc                      = 0x01
++DW_CFA_advance_loc1                 = 0x02
++DW_CFA_advance_loc2                 = 0x03
++DW_CFA_advance_loc4                 = 0x04
++DW_CFA_offset_extended              = 0x05
++DW_CFA_restore_extended             = 0x06
++DW_CFA_undefined                    = 0x07
++DW_CFA_same_value                   = 0x08
++DW_CFA_register                     = 0x09
++DW_CFA_remember_state               = 0x0a
++DW_CFA_restore_state                = 0x0b
++DW_CFA_def_cfa                      = 0x0c
++DW_CFA_def_cfa_register             = 0x0d
++DW_CFA_def_cfa_offset               = 0x0e
++DW_CFA_def_cfa_expression           = 0x0f
++DW_CFA_expression                   = 0x10
++DW_CFA_offset_extended_sf           = 0x11
++DW_CFA_def_cfa_sf                   = 0x12
++DW_CFA_def_cfa_offset_sf            = 0x13
++DW_CFA_val_offset                   = 0x14
++DW_CFA_val_offset_sf                = 0x15
++DW_CFA_val_expression               = 0x16
++DW_CFA_AARCH64_negate_ra_state      = 0x2d
++DW_CFA_GNU_args_size                = 0x2e
++DW_CFA_GNU_negative_offset_extended = 0x2f
++
++OPCODE_NAMES = {
++    0x00: "DW_CFA_nop",
++    0x01: "DW_CFA_set_loc",
++    0x02: "DW_CFA_advance_loc1",
++    0x03: "DW_CFA_advance_loc2",
++    0x04: "DW_CFA_advance_loc4",
++    0x05: "DW_CFA_offset_extended",
++    0x06: "DW_CFA_restore_extended",
++    0x07: "DW_CFA_undefined",
++    0x08: "DW_CFA_same_value",
++    0x09: "DW_CFA_register",
++    0x0a: "DW_CFA_remember_state",
++    0x0b: "DW_CFA_restore_state",
++    0x0c: "DW_CFA_def_cfa",
++    0x0d: "DW_CFA_def_cfa_register",
++    0x0e: "DW_CFA_def_cfa_offset",
++    0x0f: "DW_CFA_def_cfa_expression",
++    0x10: "DW_CFA_expression",
++    0x11: "DW_CFA_offset_extended_sf",
++    0x12: "DW_CFA_def_cfa_sf",
++    0x13: "DW_CFA_def_cfa_offset_sf",
++    0x14: "DW_CFA_val_offset",
++    0x15: "DW_CFA_val_offset_sf",
++    0x16: "DW_CFA_val_expression",
++    0x2d: "DW_CFA_negate_ra_state/window_save",
++    0x2e: "DW_CFA_GNU_args_size",
++    0x2f: "DW_CFA_GNU_negative_offset_extended",
 +}
 +
-+noinline __noclone
-+static void cfi_do_nanosleep(const struct timespec *ts)
-+{
-+	expect_ip_leaf = caller_return_ip();
-+	asm volatile("" ::: "memory");
-+	nanosleep(ts, /*rem=*/NULL);
-+	asm volatile("" ::: "memory");
-+}
++DW_EH_PE_omit     = 0xff
++DW_EH_PE_absptr   = 0x00
++DW_EH_PE_uleb128  = 0x01
++DW_EH_PE_udata2   = 0x02
++DW_EH_PE_udata4   = 0x03
++DW_EH_PE_udata8   = 0x04
++DW_EH_PE_sleb128  = 0x09
++DW_EH_PE_sdata2   = 0x0a
++DW_EH_PE_sdata4   = 0x0b
++DW_EH_PE_sdata8   = 0x0c
++DW_EH_PE_pcrel    = 0x10
++DW_EH_PE_indirect = 0x80
 +
-+noinline __noclone
-+static void cfi_leaf_sleep(void)
-+{
-+	struct timespec ts = { .tv_sec = 0, .tv_nsec = 1000 * 1000 };
 +
-+	expect_ip_shrink = caller_return_ip();
-+	asm volatile("" ::: "memory");
-+	cfi_do_nanosleep(&ts);
-+	asm volatile("" ::: "memory");
-+}
++def read_uleb128(buf, pos, end):
++    val = 0
++    shift = 0
++    while pos < end:
++        b = buf[pos]
++        pos += 1
++        val |= (b & 0x7f) << shift
++        if not (b & 0x80):
++            return val, pos
++        shift += 7
++        if shift > 63:
++            raise ValueError("ULEB128 overflow")
++    raise ValueError("Truncated ULEB128")
 +
-+/* 4. Shrink-wrapped early-return epilogue before main call */
-+noinline __noclone
-+static int cfi_shrink_wrap(int mode)
-+{
-+	expect_ip_jit = caller_return_ip();
-+	if (mode < 0)
-+		return -1;
 +
-+	{
-+		char pad[32];
++def read_sleb128(buf, pos, end):
++    val = 0
++    shift = 0
++    while pos < end:
++        b = buf[pos]
++        pos += 1
++        val |= (b & 0x7f) << shift
++        shift += 7
++        if not (b & 0x80):
++            if b & 0x40:
++                val |= -(1 << shift)
++            return val, pos
++        if shift > 63:
++            raise ValueError("SLEB128 overflow")
++    raise ValueError("Truncated SLEB128")
 +
-+		memset(pad, mode, sizeof(pad));
-+		asm volatile("" : "+m"(pad) :: "memory");
-+		cfi_leaf_sleep();
-+		return pad[0];
-+	}
-+}
 +
-+/*
-+ * 5. Hybrid CFI -> FP -> CFI -> FP -> CFI bridge:
-+ *    cfi_pre_jit -> jit_stub #1 -> cfi_jit_bridge -> cfi_mid_jit ->
-+ *    jit_stub #2 -> cfi_shrink_wrap
-+ *
-+ * Invoking the anonymous RX JIT stub twice with -fomit-frame-pointer C frames
-+ * in between exercises both per-frame CFI<->FP transitions and negative VMA
-+ * cache insertion + hit in find_user_eh_frame_hdr().
-+ */
-+noinline __noclone
-+static int cfi_mid_jit(int x)
-+{
-+	char pad[32];
-+	int res;
++def encode_uleb128(val):
++    if val < 0:
++        raise ValueError("Negative ULEB128")
++    out = bytearray()
++    while True:
++        b = val & 0x7f
++        val >>= 7
++        if val:
++            b |= 0x80
++        out.append(b)
++        if not val:
++            break
++    return bytes(out)
 +
-+	expect_ip_bridge = caller_return_ip();
-+	memset(pad, x + 5, sizeof(pad));
-+	asm volatile("" : "+m"(pad) :: "memory");
-+	res = g_jit_fn ? g_jit_fn(cfi_shrink_wrap, x) : cfi_shrink_wrap(x);
-+	asm volatile("" : "+m"(pad) :: "memory");
-+	return res + pad[0];
-+}
 +
-+noinline __noclone
-+static int cfi_jit_bridge(int x)
-+{
-+	char pad[32];
-+	int res;
++def encode_sleb128(val):
++    out = bytearray()
++    more = True
++    while more:
++        b = val & 0x7f
++        val >>= 7
++        if (val == 0 and not (b & 0x40)) or (val == -1 and (b & 0x40)):
++            more = False
++        else:
++            b |= 0x80
++        out.append(b)
++    return bytes(out)
 +
-+	memset(pad, x + 7, sizeof(pad));
-+	asm volatile("" : "+m"(pad) :: "memory");
-+	res = cfi_mid_jit(x);
-+	asm volatile("" : "+m"(pad) :: "memory");
-+	return res + pad[0];
-+}
 +
-+noinline __noclone
-+static int cfi_pre_jit(int x)
-+{
-+	char pad[32];
-+	int res;
++def encoded_ptr_size(enc, addr_size):
++    if enc == DW_EH_PE_omit:
++        return 0
++    fmt = enc & 0x0f
++    if fmt == DW_EH_PE_absptr:
++        return addr_size
++    if fmt in (DW_EH_PE_udata2, DW_EH_PE_sdata2):
++        return 2
++    if fmt in (DW_EH_PE_udata4, DW_EH_PE_sdata4):
++        return 4
++    if fmt in (DW_EH_PE_udata8, DW_EH_PE_sdata8):
++        return 8
++    return None
 +
-+	expect_ip_drap = caller_return_ip();
-+	memset(pad, x + 9, sizeof(pad));
-+	asm volatile("" : "+m"(pad) :: "memory");
-+	res = g_jit_fn ? g_jit_fn(cfi_jit_bridge, x) : cfi_jit_bridge(x);
-+	asm volatile("" : "+m"(pad) :: "memory");
-+	return res + pad[0];
-+}
 +
-+/* 3. 64-byte aligned local buffer forcing stack realignment (DRAP on x86-64) */
-+noinline __noclone
-+static int cfi_drap_realigned(int x)
-+{
-+	uint8_t __aligned(64) aligned_buf[128];
++def read_encoded_ptr(buf, pos, end, enc, addr_size, sec_vaddr):
++    if enc == DW_EH_PE_omit:
++        return 0, pos
++    orig_pos = pos
++    fmt = enc & 0x0f
++    if fmt == DW_EH_PE_absptr:
++        fmt_str = "<Q" if addr_size == 8 else "<I"
++        val = struct.unpack_from(fmt_str, buf, pos)[0]
++        pos += addr_size
++    elif fmt == DW_EH_PE_udata2:
++        val = struct.unpack_from("<H", buf, pos)[0]
++        pos += 2
++    elif fmt == DW_EH_PE_sdata2:
++        val = struct.unpack_from("<h", buf, pos)[0]
++        pos += 2
++    elif fmt == DW_EH_PE_udata4:
++        val = struct.unpack_from("<I", buf, pos)[0]
++        pos += 4
++    elif fmt == DW_EH_PE_sdata4:
++        val = struct.unpack_from("<i", buf, pos)[0]
++        pos += 4
++    elif fmt == DW_EH_PE_udata8:
++        val = struct.unpack_from("<Q", buf, pos)[0]
++        pos += 8
++    elif fmt == DW_EH_PE_sdata8:
++        val = struct.unpack_from("<q", buf, pos)[0]
++        pos += 8
++    elif fmt == DW_EH_PE_uleb128:
++        val, pos = read_uleb128(buf, pos, end)
++    elif fmt == DW_EH_PE_sleb128:
++        val, pos = read_sleb128(buf, pos, end)
++    else:
++        raise ValueError(f"Unsupported pointer format 0x{enc:02x}")
 +
-+	expect_ip_vla = caller_return_ip();
-+	memset(aligned_buf, x + 3, sizeof(aligned_buf));
-+	asm volatile("" : "+m"(aligned_buf) :: "memory");
-+	return cfi_pre_jit(x) + aligned_buf[0];
-+}
++    adj = enc & 0x70
++    if adj == DW_EH_PE_pcrel:
++        val = (sec_vaddr + orig_pos + val) & ((1 << (addr_size * 8)) - 1)
++    elif adj != 0x00:
++        raise ValueError(f"Unsupported pointer adjustment 0x{enc:02x}")
++    return val, pos
 +
-+/* 2. Dynamic VLA / alloca() forcing FP-based CFA (DW_CFA_def_cfa_register) */
-+noinline __noclone
-+static int cfi_vla_fp_frame(int n)
-+{
-+	size_t sz;
-+	char *dyn;
 +
-+	expect_ip_clobber = caller_return_ip();
-+	asm volatile("" : "+r"(n));
-+	sz = (size_t)((n & 0x3f) + 32);
-+	dyn = alloca(sz);
++def parse_elf_sections(data):
++    if data[:4] != b"\x7fELF":
++        raise ValueError("Not an ELF file")
++    ei_class = data[4]
++    ei_data = data[5]
++    if ei_data != 1:
++        raise ValueError("Only little-endian ELF supported")
++    if ei_class == 2:
++        addr_size = 8
++        _, e_machine, _, _, _, e_shoff, _, _, _, _, e_shentsize, e_shnum, e_shstrndx = (
++            struct.unpack_from("<HHIQQQIHHHHHH", data, 16)
++        )
++        sh_fmt = "<IIQQQQIIQQ"
++    elif ei_class == 1:
++        addr_size = 4
++        _, e_machine, _, _, _, e_shoff, _, _, _, _, e_shentsize, e_shnum, e_shstrndx = (
++            struct.unpack_from("<HHIIIIIHHHHHH", data, 16)
++        )
++        sh_fmt = "<IIIIIIIIII"
++    else:
++        raise ValueError(f"Unknown ELF class {ei_class}")
 +
-+	memset(dyn, n, sz);
-+	asm volatile("" : "+m"(*(char (*)[32])dyn) :: "memory");
-+	return cfi_drap_realigned(n + dyn[0]);
-+}
++    sections = {}
++    if e_shoff == 0:
++        raise ValueError("ELF has no section headers")
 +
-+/* 1. SP-based frame with FP (%rbp / x29 / s0) clobbered to defeat FP unwinding */
-+noinline __noclone
-+static int cfi_clobber_fp(int x)
-+{
-+#if defined(__x86_64__)
-+	register long bad_fp asm("rbp") = 0x13579bdfL + x;
-+#elif defined(__aarch64__)
-+	register long bad_fp asm("x29") = 0x13579bdfL + x;
-+#elif defined(__riscv)
-+	register long bad_fp asm("s0") = 0x13579bdfL + x;
-+#else
-+	long bad_fp = 0x13579bdfL + x;
-+#endif
-+	char pad[48];
++    if e_shnum == 0 or e_shstrndx == 0xffff:
++        sh0 = struct.unpack_from(sh_fmt, data, e_shoff)
++        if e_shnum == 0:
++            e_shnum = sh0[5]
++        if e_shstrndx == 0xffff:
++            e_shstrndx = sh0[6]
 +
-+	expect_ip_main = caller_return_ip();
-+	asm volatile("" : "+r"(x));
-+	memset(pad, x, sizeof(pad));
-+	asm volatile("" : "+r"(bad_fp), "+m"(pad) :: "memory");
-+	return cfi_vla_fp_frame(x + 1) ^ (int)bad_fp ^ pad[1];
-+}
++    if e_shnum == 0 or e_shstrndx >= e_shnum:
++        raise ValueError("ELF has invalid section header counts")
 +
-+int main(void)
-+{
-+	struct perf_event_attr attr;
-+	struct perf_event_mmap_page *mpage;
-+	size_t page_sz = (size_t)sysconf(_SC_PAGESIZE);
-+	size_t mmap_len = (1 + 16) * page_sz;
-+	void *jit_page = MAP_FAILED;
-+	uint8_t *ring;
-+	uint64_t head, tail;
-+	bool got_deferred = false;
-+	bool saw_leaf = false, saw_shrink = false, saw_jit = false;
-+	bool saw_bridge = false, saw_drap = false, saw_vla = false;
-+	bool saw_clobber = false, saw_main = false;
-+	bool saw_full_chain = false;
-+	int fd, arg = 1;
++    shdrs = []
++    for i in range(e_shnum):
++        off = e_shoff + i * e_shentsize
++        shdrs.append(struct.unpack_from(sh_fmt, data, off))
 +
-+	ksft_print_header();
-+	ksft_set_plan(1);
++    shstr_off = shdrs[e_shstrndx][4]
++    shstr_sz = shdrs[e_shstrndx][5]
++    shstrtab = data[shstr_off : shstr_off + shstr_sz]
 +
-+#if !defined(__x86_64__) && !defined(__i386__) && !defined(__aarch64__) && \
-+	!defined(__arm__) && !defined(__riscv)
-+	ksft_test_result_skip("Architecture lacks Minimal DWARF CFI user unwind support\n");
-+	ksft_finished();
-+#endif
++    for sh in shdrs:
++        sh_name_idx = sh[0]
++        sh_type = sh[1]
++        sh_addr = sh[3]
++        sh_offset = sh[4]
++        sh_size = sh[5]
++        end_idx = shstrtab.find(b"\x00", sh_name_idx)
++        name = shstrtab[sh_name_idx:end_idx].decode("utf-8", errors="replace")
++        # SHT_NOBITS == 8
++        sec_bytes = b"" if sh_type == 8 else data[sh_offset : sh_offset + sh_size]
++        if name in sections:
++            # Accumulate sizes for multi-section objects (e.g. .text.*)
++            prev_addr, prev_sz, prev_b = sections[name]
++            sections[name] = (prev_addr, prev_sz + sh_size, prev_b)
++        else:
++            sections[name] = (sh_addr, sh_size, sec_bytes)
 +
-+#if HAVE_JIT_FP_STUB
-+	jit_page = mmap(/*addr=*/NULL, page_sz, PROT_READ | PROT_WRITE,
-+			MAP_PRIVATE | MAP_ANONYMOUS, /*fd=*/-1, /*offset=*/0);
-+	if (jit_page != MAP_FAILED) {
-+		memcpy(jit_page, jit_stub_code, sizeof(jit_stub_code));
-+		if (mprotect(jit_page, page_sz, PROT_READ | PROT_EXEC) == 0) {
-+			__builtin___clear_cache((char *)jit_page,
-+						(char *)jit_page + sizeof(jit_stub_code));
-+			g_jit_fn = (int (*)(int (*)(int), int))jit_page;
-+		} else {
-+			ksft_print_msg("W^X JIT mprotect unavailable (%s); skipping JIT stub\n",
-+				       strerror(errno));
-+			munmap(jit_page, page_sz);
-+			jit_page = MAP_FAILED;
-+		}
-+	}
-+#endif
++    return e_machine, addr_size, sections
 +
-+	memset(&attr, 0, sizeof(attr));
-+	attr.type = PERF_TYPE_SOFTWARE;
-+	attr.size = sizeof(attr);
-+	attr.config = PERF_COUNT_SW_CONTEXT_SWITCHES;
-+	attr.sample_period = 1;
-+	attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_CALLCHAIN;
-+	attr.disabled = 1;
-+	attr.defer_callchain = 1;
-+	attr.defer_output = 1;
 +
-+	fd = (int)sys_perf_event_open(&attr, /*pid=*/0, /*cpu=*/-1,
-+				      /*group_fd=*/-1, /*flags=*/0);
-+	if (fd < 0) {
-+		if (jit_page != MAP_FAILED)
-+			munmap(jit_page, page_sz);
-+		if (errno == EACCES || errno == EPERM || errno == EINVAL) {
-+			ksft_test_result_skip("perf_event_open(defer_callchain) unavailable: %s\n",
-+					      strerror(errno));
-+			ksft_finished();
-+		}
-+		ksft_exit_fail_msg("perf_event_open failed: %s\n", strerror(errno));
-+	}
++def parse_cie(buf, entry_off, body_off, entry_end, addr_size, sec_vaddr):
++    pos = body_off
++    version = buf[pos]
++    pos += 1
++    nul = buf.find(b"\x00", pos, entry_end)
++    if nul < 0:
++        raise ValueError("Unterminated CIE augmentation string")
++    aug = buf[pos:nul].decode("ascii", errors="replace")
++    pos = nul + 1
 +
-+	mpage = mmap(/*addr=*/NULL, mmap_len, PROT_READ | PROT_WRITE,
-+		     MAP_SHARED, fd, /*offset=*/0);
-+	if (mpage == MAP_FAILED) {
-+		if (jit_page != MAP_FAILED)
-+			munmap(jit_page, page_sz);
-+		close(fd);
-+		ksft_exit_fail_msg("mmap failed: %s\n", strerror(errno));
-+	}
++    if version == 4:
++        addr_size = buf[pos]
++        seg_size = buf[pos + 1]
++        pos += 2
++        if seg_size != 0:
++            raise ValueError("Non-zero segment selector size")
 +
-+	ioctl(fd, PERF_EVENT_IOC_RESET, 0);
-+	ioctl(fd, PERF_EVENT_IOC_ENABLE, 0);
++    code_align, pos = read_uleb128(buf, pos, entry_end)
++    data_align, pos = read_sleb128(buf, pos, entry_end)
++    if version == 1:
++        ra_reg = buf[pos]
++        pos += 1
++    else:
++        ra_reg, pos = read_uleb128(buf, pos, entry_end)
 +
-+	asm volatile("" : "+r"(arg));
-+	cfi_clobber_fp(arg);
++    fde_enc = DW_EH_PE_absptr
++    lsda_enc = DW_EH_PE_omit
++    has_z = False
++    is_signal = False
++    has_indirect = False
 +
-+	ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
++    if aug.startswith("z"):
++        has_z = True
++        aug_len, pos = read_uleb128(buf, pos, entry_end)
++        aug_end = pos + aug_len
++        ap = pos
++        for ch in aug[1:]:
++            if ch == "L":
++                lsda_enc = buf[ap]
++                if lsda_enc != DW_EH_PE_omit and (lsda_enc & DW_EH_PE_indirect):
++                    has_indirect = True
++                ap += 1
++            elif ch == "P":
++                p_enc = buf[ap]
++                ap += 1
++                if p_enc & DW_EH_PE_indirect:
++                    has_indirect = True
++                _, ap = read_encoded_ptr(buf, ap, aug_end, p_enc & ~DW_EH_PE_indirect, addr_size, sec_vaddr)
++            elif ch == "R":
++                fde_enc = buf[ap]
++                if fde_enc & DW_EH_PE_indirect:
++                    has_indirect = True
++                ap += 1
++            elif ch == "S":
++                is_signal = True
++            elif ch == "B":
++                # BTI / PAC key on arm64
++                pass
++            else:
++                raise ValueError(f"Unknown CIE augmentation '{ch}' in '{aug}'")
++        pos = aug_end
++    elif aug != "":
++        raise ValueError(f"Unsupported non-z CIE augmentation '{aug}'")
 +
-+	ring = (uint8_t *)mpage + page_sz;
-+	head = __atomic_load_n(&mpage->data_head, __ATOMIC_ACQUIRE);
-+	tail = mpage->data_tail;
++    return {
++        "offset": entry_off,
++        "version": version,
++        "aug": aug,
++        "addr_size": addr_size,
++        "code_align": code_align,
++        "data_align": data_align,
++        "ra_reg": ra_reg,
++        "fde_enc": fde_enc,
++        "lsda_enc": lsda_enc,
++        "has_z": has_z,
++        "is_signal": is_signal,
++        "has_indirect_fde": bool(fde_enc & DW_EH_PE_indirect),
++        "insns": bytes(buf[pos:entry_end]),
++    }
 +
-+	while (tail < head) {
-+		size_t mask = 16 * page_sz - 1;
-+		struct perf_event_header *hdr =
-+			(struct perf_event_header *)(ring + (tail & mask));
 +
-+		if (hdr->type == PERF_RECORD_CALLCHAIN_DEFERRED) {
-+			struct perf_record_deferred *rec = (void *)hdr;
-+			bool c_leaf = false, c_shrink = false, c_bridge = false;
-+			bool c_drap = false, c_vla = false, c_clobber = false;
-+			bool c_main = false, c_jit_ok = false;
-+			unsigned int c_jit_hits = 0;
++def decode_and_minify_insns(insns, cie, arch, init_row=None, is_cie=False):
++    """
++    Decode CFI instructions, validate against Minimal DWARF subset, and emit
++    minified instructions keeping only PC advances and {CFA(SP|FP), FP, RA}.
++    """
++    sp_reg = arch["sp"]
++    fp_reg = arch["fp"]
++    ra_reg = cie["ra_reg"]
++    tracked_regs = {fp_reg, ra_reg}
 +
-+			got_deferred = true;
-+			for (uint64_t i = 0; i < rec->nr; i++) {
-+				uintptr_t ip = (uintptr_t)rec->ips[i];
++    pos = 0
++    end = len(insns)
++    op_counts = Counter()
++    ignored_reg_ops = 0
++    kept_reg_ops = 0
++    max_state_depth = 0
++    reasons = []
 +
-+				if (ip == expect_ip_leaf)
-+					c_leaf = true;
-+				else if (ip == expect_ip_shrink)
-+					c_shrink = true;
-+				else if (ip == expect_ip_jit)
-+					c_jit_hits++;
-+				else if (ip == expect_ip_bridge)
-+					c_bridge = true;
-+				else if (ip == expect_ip_drap)
-+					c_drap = true;
-+				else if (ip == expect_ip_vla)
-+					c_vla = true;
-+				else if (ip == expect_ip_clobber)
-+					c_clobber = true;
-+				else if (ip == expect_ip_main)
-+					c_main = true;
-+			}
++    if init_row is None:
++        row = {
++            "cfa_reg": None,
++            "cfa_off": 0,
++            "fp": ("same", 0),
++            "ra": ("same", 0),
++            "ra_signed": False,
++        }
++    else:
++        row = dict(init_row)
 +
-+#if HAVE_JIT_FP_STUB
-+			if (g_jit_fn) {
-+				uintptr_t jb = (uintptr_t)jit_page;
++    cie_base_row = dict(row)
++    state_stack = []
 +
-+				c_jit_ok = expect_ip_jit >= jb &&
-+					   expect_ip_jit < jb + sizeof(jit_stub_code) &&
-+					   c_jit_hits >= 2;
-+			} else {
-+				c_jit_ok = c_jit_hits >= 1;
-+			}
-+#else
-+			c_jit_ok = c_jit_hits >= 1;
-+#endif
-+			saw_leaf |= c_leaf;
-+			saw_shrink |= c_shrink;
-+			saw_jit |= c_jit_ok;
-+			saw_bridge |= c_bridge;
-+			saw_drap |= c_drap;
-+			saw_vla |= c_vla;
-+			saw_clobber |= c_clobber;
-+			saw_main |= c_main;
++    # Stream of abstract events: ("adv", delta_units) or ("op", raw_bytes, new_row_snapshot)
++    events = []
++    pending_adv = 0
 +
-+			if (c_leaf && c_shrink && c_jit_ok && c_bridge &&
-+			    c_drap && c_vla && c_clobber && c_main)
-+				saw_full_chain = true;
-+		}
-+		tail += hdr->size;
-+	}
++    def emit_op(raw_bytes):
++        nonlocal pending_adv
++        if pending_adv > 0 and not is_cie:
++            events.append(("adv", pending_adv))
++            pending_adv = 0
++        events.append(("op", raw_bytes))
 +
-+	munmap(mpage, mmap_len);
-+	if (jit_page != MAP_FAILED)
-+		munmap(jit_page, page_sz);
-+	close(fd);
++    while pos < end:
++        op = insns[pos]
++        pos += 1
++        hi = op & 0xc0
++        lo = op & 0x3f
 +
-+	if (!got_deferred) {
-+		ksft_test_result_skip("No PERF_RECORD_CALLCHAIN_DEFERRED records\n");
-+		ksft_finished();
-+	}
++        if hi == 0x40:
++            op_counts["DW_CFA_advance_loc"] += 1
++            pending_adv += lo
++            continue
++        if hi == 0x80:
++            op_counts["DW_CFA_offset"] += 1
++            reg = lo
++            uoff, pos = read_uleb128(insns, pos, end)
++            off = uoff * cie["data_align"]
++            if reg in tracked_regs:
++                kept_reg_ops += 1
++                key = "fp" if reg == fp_reg else "ra"
++                if row[key] != ("off", off):
++                    row[key] = ("off", off)
++                    emit_op(bytes([0x80 | reg]) + encode_uleb128(uoff))
++            else:
++                ignored_reg_ops += 1
++            continue
++        if hi == 0xc0:
++            op_counts["DW_CFA_restore"] += 1
++            reg = lo
++            if reg in tracked_regs:
++                kept_reg_ops += 1
++                key = "fp" if reg == fp_reg else "ra"
++                if row[key] != cie_base_row[key]:
++                    row[key] = cie_base_row[key]
++                    emit_op(bytes([0xc0 | reg]))
++            else:
++                ignored_reg_ops += 1
++            continue
 +
-+	ksft_print_msg("def=%d ok=%d leaf=%d shr=%d jit=%d br=%d drap=%d vla=%d fp=%d entry=%d\n",
-+		       got_deferred, saw_full_chain, saw_leaf, saw_shrink,
-+		       saw_jit, saw_bridge, saw_drap, saw_vla, saw_clobber,
-+		       saw_main);
++        name = OPCODE_NAMES.get(op, f"DW_CFA_unknown_0x{op:02x}")
++        op_counts[name] += 1
 +
-+	ksft_test_result(saw_full_chain,
-+			 "unwind_user Minimal DWARF CFI across SP, VLA, DRAP, shrink-wrap, and hybrid JIT FP frames\n");
-+	ksft_finished();
-+}
++        if op == DW_CFA_nop:
++            continue
++        elif op == DW_CFA_advance_loc1:
++            pending_adv += insns[pos]
++            pos += 1
++        elif op == DW_CFA_advance_loc2:
++            pending_adv += struct.unpack_from("<H", insns, pos)[0]
++            pos += 2
++        elif op == DW_CFA_advance_loc4:
++            pending_adv += struct.unpack_from("<I", insns, pos)[0]
++            pos += 4
++        elif op == DW_CFA_def_cfa:
++            reg, pos = read_uleb128(insns, pos, end)
++            uoff, pos = read_uleb128(insns, pos, end)
++            if reg not in (sp_reg, fp_reg) and reg not in arch["drap"]:
++                reasons.append(f"def_cfa non-SP/FP reg={reg}")
++            if row["cfa_reg"] != reg or row["cfa_off"] != uoff:
++                row["cfa_reg"] = reg
++                row["cfa_off"] = uoff
++                emit_op(bytes([DW_CFA_def_cfa]) + encode_uleb128(reg) + encode_uleb128(uoff))
++        elif op == DW_CFA_def_cfa_sf:
++            reg, pos = read_uleb128(insns, pos, end)
++            soff, pos = read_sleb128(insns, pos, end)
++            off = soff * cie["data_align"]
++            if reg not in (sp_reg, fp_reg) and reg not in arch["drap"]:
++                reasons.append(f"def_cfa_sf non-SP/FP reg={reg}")
++            if row["cfa_reg"] != reg or row["cfa_off"] != off:
++                row["cfa_reg"] = reg
++                row["cfa_off"] = off
++                emit_op(bytes([DW_CFA_def_cfa_sf]) + encode_uleb128(reg) + encode_sleb128(soff))
++        elif op == DW_CFA_def_cfa_register:
++            reg, pos = read_uleb128(insns, pos, end)
++            if not isinstance(row["cfa_reg"], int):
++                reasons.append("def_cfa_register without reg+off CFA")
++            if reg not in (sp_reg, fp_reg) and reg not in arch["drap"]:
++                reasons.append(f"def_cfa_register non-SP/FP reg={reg}")
++            if row["cfa_reg"] != reg:
++                row["cfa_reg"] = reg
++                emit_op(bytes([DW_CFA_def_cfa_register]) + encode_uleb128(reg))
++        elif op == DW_CFA_def_cfa_offset:
++            uoff, pos = read_uleb128(insns, pos, end)
++            if not isinstance(row["cfa_reg"], int):
++                reasons.append("def_cfa_offset without reg+off CFA")
++            if row["cfa_off"] != uoff:
++                row["cfa_off"] = uoff
++                emit_op(bytes([DW_CFA_def_cfa_offset]) + encode_uleb128(uoff))
++        elif op == DW_CFA_def_cfa_offset_sf:
++            soff, pos = read_sleb128(insns, pos, end)
++            off = soff * cie["data_align"]
++            if not isinstance(row["cfa_reg"], int):
++                reasons.append("def_cfa_offset_sf without reg+off CFA")
++            if row["cfa_off"] != off:
++                row["cfa_off"] = off
++                emit_op(bytes([DW_CFA_def_cfa_offset_sf]) + encode_sleb128(soff))
++        elif op == DW_CFA_offset_extended:
++            reg, pos = read_uleb128(insns, pos, end)
++            uoff, pos = read_uleb128(insns, pos, end)
++            off = uoff * cie["data_align"]
++            if reg in tracked_regs:
++                kept_reg_ops += 1
++                key = "fp" if reg == fp_reg else "ra"
++                if row[key] != ("off", off):
++                    row[key] = ("off", off)
++                    raw = (bytes([0x80 | reg]) + encode_uleb128(uoff) if reg < 64
++                           else bytes([DW_CFA_offset_extended]) + encode_uleb128(reg) + encode_uleb128(uoff))
++                    emit_op(raw)
++            else:
++                ignored_reg_ops += 1
++        elif op == DW_CFA_offset_extended_sf:
++            reg, pos = read_uleb128(insns, pos, end)
++            soff, pos = read_sleb128(insns, pos, end)
++            off = soff * cie["data_align"]
++            if reg in tracked_regs:
++                kept_reg_ops += 1
++                key = "fp" if reg == fp_reg else "ra"
++                if row[key] != ("off", off):
++                    row[key] = ("off", off)
++                    emit_op(bytes([DW_CFA_offset_extended_sf]) + encode_uleb128(reg) + encode_sleb128(soff))
++            else:
++                ignored_reg_ops += 1
++        elif op == DW_CFA_GNU_negative_offset_extended:
++            reg, pos = read_uleb128(insns, pos, end)
++            uoff, pos = read_uleb128(insns, pos, end)
++            off = -uoff * cie["data_align"]
++            if reg in tracked_regs:
++                kept_reg_ops += 1
++                key = "fp" if reg == fp_reg else "ra"
++                if row[key] != ("off", off):
++                    row[key] = ("off", off)
++                    emit_op(bytes([DW_CFA_GNU_negative_offset_extended]) +
++                            encode_uleb128(reg) + encode_uleb128(uoff))
++            else:
++                ignored_reg_ops += 1
++        elif op == DW_CFA_restore_extended:
++            reg, pos = read_uleb128(insns, pos, end)
++            if reg in tracked_regs:
++                kept_reg_ops += 1
++                key = "fp" if reg == fp_reg else "ra"
++                if row[key] != cie_base_row[key]:
++                    row[key] = cie_base_row[key]
++                    raw = bytes([0xc0 | reg]) if reg < 64 else bytes([DW_CFA_restore_extended]) + encode_uleb128(reg)
++                    emit_op(raw)
++            else:
++                ignored_reg_ops += 1
++        elif op == DW_CFA_undefined:
++            reg, pos = read_uleb128(insns, pos, end)
++            if reg in tracked_regs:
++                kept_reg_ops += 1
++                key = "fp" if reg == fp_reg else "ra"
++                row[key] = ("undef", 0)
++                emit_op(bytes([DW_CFA_undefined]) + encode_uleb128(reg))
++            else:
++                ignored_reg_ops += 1
++        elif op == DW_CFA_same_value:
++            reg, pos = read_uleb128(insns, pos, end)
++            if reg in tracked_regs:
++                kept_reg_ops += 1
++                key = "fp" if reg == fp_reg else "ra"
++                row[key] = ("same", 0)
++                emit_op(bytes([DW_CFA_same_value]) + encode_uleb128(reg))
++            else:
++                ignored_reg_ops += 1
++        elif op == DW_CFA_remember_state:
++            emit_op(bytes([DW_CFA_remember_state]))
++            state_stack.append((dict(row), len(events) - 1))
++            max_state_depth = max(max_state_depth, len(state_stack))
++            if len(state_stack) > 4:
++                reasons.append(f"remember_state depth={len(state_stack)} > 4")
++        elif op == DW_CFA_restore_state:
++            if not state_stack:
++                reasons.append("unmatched restore_state")
++            else:
++                saved_row, rem_idx = state_stack.pop()
++                if saved_row != row:
++                    row = saved_row
++                    emit_op(bytes([DW_CFA_restore_state]))
++                else:
++                    # Nothing in {CFA, FP, RA} changed inside remember/restore!
++                    # If remember_state is only followed by adv, elide the pair.
++                    elided = False
++                    if rem_idx < len(events) and events[rem_idx] == ("op", bytes([DW_CFA_remember_state])):
++                        if all(ev[0] == "adv" for ev in events[rem_idx + 1:]):
++                            extra_adv = sum(ev[1] for ev in events[rem_idx + 1:])
++                            del events[rem_idx:]
++                            pending_adv += extra_adv
++                            elided = True
++                    if not elided:
++                        emit_op(bytes([DW_CFA_restore_state]))
++        elif op == DW_CFA_GNU_args_size:
++            _, pos = read_uleb128(insns, pos, end)
++            ignored_reg_ops += 1
++        elif op == DW_CFA_AARCH64_negate_ra_state and arch["name"] == "arm64":
++            row["ra_signed"] = not row["ra_signed"]
++            emit_op(bytes([DW_CFA_AARCH64_negate_ra_state]))
++        elif op == DW_CFA_def_cfa_expression:
++            expr_len, pos = read_uleb128(insns, pos, end)
++            expr = insns[pos : pos + expr_len]
++            pos += expr_len
++            # Fixed DRAP / sigframe pattern: DW_OP_breg(FP|SP) <sleb128>, DW_OP_deref
++            if (len(expr) >= 3 and expr[-1] == 0x06 and
++                expr[0] in (0x70 + fp_reg, 0x70 + sp_reg)):
++                soff, epos = read_sleb128(expr, 1, len(expr) - 1)
++                if epos == len(expr) - 1:
++                    kind = "fp_indirect" if expr[0] == (0x70 + fp_reg) else "sp_indirect"
++                    row["cfa_reg"] = (kind,)
++                    row["cfa_off"] = soff
++                    emit_op(bytes([DW_CFA_def_cfa_expression]) + encode_uleb128(len(expr)) + expr)
++                    continue
++            reasons.append(name)
++        elif op in (DW_CFA_expression, DW_CFA_val_expression):
++            reg, pos = read_uleb128(insns, pos, end)
++            expr_len, pos = read_uleb128(insns, pos, end)
++            expr = insns[pos : pos + expr_len]
++            pos += expr_len
++            if reg == sp_reg:
++                if (op == DW_CFA_expression and len(expr) >= 2 and
++                    expr[0] == (0x70 + sp_reg) and row["cfa_reg"] == ("sp_indirect",)):
++                    soff, epos = read_sleb128(expr, 1, len(expr))
++                    if epos == len(expr) and soff == row["cfa_off"]:
++                        ignored_reg_ops += 1
++                        continue
++                reasons.append(f"{name} r{reg}")
++                continue
++            if reg not in tracked_regs:
++                ignored_reg_ops += 1
++                continue
++            # Fixed DRAP / sigframe save pattern: DW_CFA_expression(FP|RA, DW_OP_breg(FP|SP) <sleb128>)
++            if (op == DW_CFA_expression and len(expr) >= 2 and
++                expr[0] in (0x70 + fp_reg, 0x70 + sp_reg)):
++                soff, epos = read_sleb128(expr, 1, len(expr))
++                if epos == len(expr) and (reg == fp_reg or expr[0] == (0x70 + sp_reg)):
++                    kept_reg_ops += 1
++                    rule = "fp_off" if expr[0] == (0x70 + fp_reg) else "sp_off"
++                    row["fp" if reg == fp_reg else "ra"] = (rule, soff)
++                    emit_op(bytes([DW_CFA_expression]) + encode_uleb128(reg) +
++                            encode_uleb128(len(expr)) + expr)
++                    continue
++            reasons.append(f"{name} r{reg}")
++        elif op == DW_CFA_register:
++            r1, pos = read_uleb128(insns, pos, end)
++            r2, pos = read_uleb128(insns, pos, end)
++            if r1 in tracked_regs or r1 == sp_reg:
++                reasons.append(f"DW_CFA_register r{r1}->r{r2}")
++            else:
++                ignored_reg_ops += 1
++        elif op == DW_CFA_val_offset:
++            r1, pos = read_uleb128(insns, pos, end)
++            _, pos = read_uleb128(insns, pos, end)
++            if r1 in tracked_regs or r1 == sp_reg:
++                reasons.append(f"DW_CFA_val_offset r{r1}")
++            else:
++                ignored_reg_ops += 1
++        elif op == DW_CFA_val_offset_sf:
++            r1, pos = read_uleb128(insns, pos, end)
++            _, pos = read_sleb128(insns, pos, end)
++            if r1 in tracked_regs or r1 == sp_reg:
++                reasons.append(f"DW_CFA_val_offset_sf r{r1}")
++            else:
++                ignored_reg_ops += 1
++        elif op == DW_CFA_set_loc:
++            _, pos = read_encoded_ptr(insns, pos, end, cie["fde_enc"], cie["addr_size"], 0)
++            reasons.append("DW_CFA_set_loc")
++        else:
++            reasons.append(name)
++            break
++
++    # Coalesce consecutive ("adv", d) events and drop trailing ("adv", d)
++    while events and events[-1][0] == "adv":
++        events.pop()
++
++    min_bytes = bytearray()
++    acc_adv = 0
++    for kind, payload in events:
++        if kind == "adv":
++            acc_adv += payload
++        else:
++            if acc_adv > 0:
++                if acc_adv <= 0x3f:
++                    min_bytes.append(0x40 | acc_adv)
++                elif acc_adv <= 0xff:
++                    min_bytes.extend([DW_CFA_advance_loc1, acc_adv])
++                elif acc_adv <= 0xffff:
++                    min_bytes.append(DW_CFA_advance_loc2)
++                    min_bytes.extend(struct.pack("<H", acc_adv))
++                else:
++                    min_bytes.append(DW_CFA_advance_loc4)
++                    min_bytes.extend(struct.pack("<I", acc_adv))
++                acc_adv = 0
++            min_bytes.extend(payload)
++
++    return {
++        "row": row,
++        "min_insns": bytes(min_bytes),
++        "op_counts": op_counts,
++        "ignored_reg_ops": ignored_reg_ops,
++        "kept_reg_ops": kept_reg_ops,
++        "max_state_depth": max_state_depth,
++        "unsupported_reasons": reasons,
++    }
++
++
++def build_minimal_cie_bytes(cie, min_cie_insns, align=4):
++    aug = b"zRS\x00" if cie["is_signal"] else b"zR\x00"
++    fde_enc = DW_EH_PE_pcrel | DW_EH_PE_sdata4
++    body = bytearray()
++    body.append(1)  # CIE version 1
++    body.extend(aug)
++    body.extend(encode_uleb128(cie["code_align"]))
++    body.extend(encode_sleb128(cie["data_align"]))
++    body.append(cie["ra_reg"])
++    body.append(1)  # augmentation data length = 1 ('R')
++    body.append(fde_enc)
++    body.extend(min_cie_insns)
++    # Total record is 4 (length) + 4 (CIE_id=0) + len(body), pad to align
++    rem = (8 + len(body)) % align
++    if rem:
++        body.extend(b"\x00" * (align - rem))
++    return struct.pack("<II", 4 + len(body), 0) + bytes(body)
++
++
++def build_minimal_fde_bytes(min_fde_insns, cie_offset_from_here, init_loc_rel=0, pc_range=0, align=4):
++    body = bytearray()
++    body.extend(struct.pack("<iI", init_loc_rel, pc_range))
++    body.append(0)  # zR augmentation data length = 0
++    body.extend(min_fde_insns)
++    rem = (8 + len(body)) % align
++    if rem:
++        body.extend(b"\x00" * (align - rem))
++    return struct.pack("<II", 4 + len(body), cie_offset_from_here) + bytes(body)
++
++
++def analyze_elf(path, out_min_path=None):
++    with open(path, "rb") as f:
++        data = f.read()
++
++    e_machine, addr_size, sections = parse_elf_sections(data)
++    if e_machine not in ARCH_REGS:
++        raise ValueError(f"Unsupported ELF e_machine={e_machine}")
++    arch = ARCH_REGS[e_machine]
++
++    if ".eh_frame" not in sections:
++        print(f"{path}: no .eh_frame section found")
++        return
++
++    eh_vaddr, eh_size, eh_buf = sections[".eh_frame"]
++    eh_hdr_size = sections.get(".eh_frame_hdr", (0, 0, b""))[1]
++    sframe_size = sections.get(".sframe", (0, 0, b""))[1]
++    orc_size = (sections.get(".orc_unwind", (0, 0, b""))[1] +
++                sections.get(".orc_unwind_ip", (0, 0, b""))[1])
++    text_size = sum(sz for name, (_, sz, _) in sections.items() if name.startswith(".text") or name in (".init.text", ".exit.text"))
++
++    cies = {}
++    cie_init_rows = {}
++    min_eh_stream = bytearray()
++    min_cie_offsets = {}
++
++    total_cies = 0
++    total_fdes = 0
++    supported_fdes = 0
++    unsupported_fdes = 0
++    unsupported_breakdown = Counter()
++    total_op_counts = Counter()
++    total_orig_insn_bytes = 0
++    total_min_insn_bytes = 0
++    total_ignored_ops = 0
++    total_kept_ops = 0
++    max_depth_seen = 0
++
++    pos = 0
++    end = len(eh_buf)
++    while pos + 4 <= end:
++        length = struct.unpack_from("<I", eh_buf, pos)[0]
++        entry_off = pos
++        pos += 4
++        if length == 0:
++            break
++        if length == 0xffffffff:
++            length = struct.unpack_from("<Q", eh_buf, pos)[0]
++            pos += 8
++        entry_end = pos + length
++        cie_id = struct.unpack_from("<I", eh_buf, pos)[0]
++
++        if cie_id == 0:
++            total_cies += 1
++            cie = parse_cie(eh_buf, entry_off, pos + 4, entry_end, addr_size, eh_vaddr)
++            res = decode_and_minify_insns(cie["insns"], cie, arch, is_cie=True)
++            cie["unsupported_reasons"] = list(res["unsupported_reasons"])
++            cies[entry_off] = cie
++            cie_init_rows[entry_off] = res["row"]
++            total_op_counts.update(res["op_counts"])
++
++            cie_key = (cie["code_align"], cie["data_align"], cie["ra_reg"], cie["is_signal"], res["min_insns"])
++            if not cie["unsupported_reasons"] and not cie["has_indirect_fde"] and cie_key not in min_cie_offsets:
++                min_cie_offsets[cie_key] = len(min_eh_stream)
++                min_eh_stream.extend(build_minimal_cie_bytes(cie, res["min_insns"], align=4))
++            cie["min_key"] = cie_key
++        else:
++            total_fdes += 1
++            cie_off = pos - cie_id
++            cie = cies[cie_off]
++            fpos = pos + 4
++            init_loc, fpos = read_encoded_ptr(eh_buf, fpos, entry_end, cie["fde_enc"], addr_size, eh_vaddr)
++            range_enc = cie["fde_enc"] & 0x0f
++            pc_range, fpos = read_encoded_ptr(eh_buf, fpos, entry_end, range_enc, addr_size, 0)
++            if cie["has_z"]:
++                aug_len, fpos = read_uleb128(eh_buf, fpos, entry_end)
++                fpos += aug_len
++            fde_insns = eh_buf[fpos:entry_end]
++            total_orig_insn_bytes += len(fde_insns)
++
++            res = decode_and_minify_insns(fde_insns, cie, arch, init_row=cie_init_rows[cie_off])
++            total_op_counts.update(res["op_counts"])
++            total_min_insn_bytes += len(res["min_insns"])
++            total_ignored_ops += res["ignored_reg_ops"]
++            total_kept_ops += res["kept_reg_ops"]
++            max_depth_seen = max(max_depth_seen, res["max_state_depth"])
++
++            reasons = list(cie["unsupported_reasons"]) + list(res["unsupported_reasons"])
++            if cie["has_indirect_fde"]:
++                reasons.append("indirect_fde_encoding")
++
++            if not reasons:
++                supported_fdes += 1
++                min_cie_off = min_cie_offsets[cie["min_key"]]
++                fde_id_pos = len(min_eh_stream) + 4
++                init_rel = (init_loc - (eh_vaddr + len(min_eh_stream) + 8)) if eh_vaddr else 0
++                if not (-0x80000000 <= init_rel <= 0x7fffffff):
++                    init_rel = 0
++                min_eh_stream.extend(
++                    build_minimal_fde_bytes(res["min_insns"], fde_id_pos - min_cie_off, init_rel, pc_range, align=4)
++                )
++            else:
++                unsupported_fdes += 1
++                for r in set(reasons):
++                    unsupported_breakdown[r] += 1
++
++        pos = entry_end
++
++    min_eh_stream.extend(b"\x00\x00\x00\x00")  # terminator
++    min_eh_hdr_size = 12 + supported_fdes * 8
++
++    if out_min_path:
++        with open(out_min_path, "wb") as outf:
++            outf.write(min_eh_stream)
++
++    pct_cov = (100.0 * supported_fdes / total_fdes) if total_fdes else 100.0
++    orig_total = eh_size + eh_hdr_size
++    min_total = len(min_eh_stream) + min_eh_hdr_size
++    savings_pct = (100.0 * (1.0 - len(min_eh_stream) / eh_size)) if eh_size else 0.0
++    total_savings_pct = (100.0 * (1.0 - min_total / orig_total)) if orig_total else 0.0
++
++    print(f"=== {path} ({arch['name']}) ===")
++    print(f"  .text size              : {text_size:10,d} B")
++    print(f"  Original .eh_frame      : {eh_size:10,d} B  ({total_cies} CIEs, {total_fdes:,d} FDEs)")
++    print(f"  Original .eh_frame_hdr  : {eh_hdr_size:10,d} B  (combined: {orig_total:,d} B)")
++    print(f"  Minified .eh_frame      : {len(min_eh_stream):10,d} B  ({len(min_cie_offsets)} CIEs, -{savings_pct:.1f}% vs .eh_frame)")
++    print(f"  Minified + .eh_frame_hdr: {min_total:10,d} B  (-{total_savings_pct:.1f}% combined)")
++    print(f"  FDE bytecode payload    : {total_orig_insn_bytes:10,d} B -> {total_min_insn_bytes:,d} B "
++          f"(avg {total_min_insn_bytes / max(supported_fdes, 1):.1f} B/FDE)")
++    if sframe_size:
++        print(f"  .sframe section         : {sframe_size:10,d} B")
++    if orc_size:
++        print(f"  .orc_unwind + _ip       : {orc_size:10,d} B")
++    print(f"  Minimal DWARF coverage  : {supported_fdes:,d} / {total_fdes:,d} FDEs ({pct_cov:.2f}%)")
++    print(f"  Register ops kept/skip  : {total_kept_ops:,d} kept (FP/RA), {total_ignored_ops:,d} ignored (other GPRs/args)")
++    print(f"  Max remember_state depth: {max_depth_seen}")
++    if unsupported_breakdown:
++        print("  Unsupported FDE reasons :")
++        for r, cnt in unsupported_breakdown.most_common():
++            print(f"    - {r}: {cnt}")
++    print("  Top DWARF CFA opcodes   :")
++    for op_name, cnt in total_op_counts.most_common(10):
++        print(f"    - {op_name:34s}: {cnt:8,d}")
++    print()
++
++
++def main():
++    epilog = (
++        "Examples:\n"
++        "  %(prog)s vmlinux\n"
++        "  %(prog)s mm/vmscan.o kernel/fork.o\n"
++        "  %(prog)s /bin/bash /lib/x86_64-linux-gnu/libc.so.6\n"
++        "  %(prog)s --minify /tmp/eh_frame.min mm/vmscan.o\n"
++    )
++    ap = argparse.ArgumentParser(
++        description="Analyze ELF .eh_frame coverage and size for Minimal DWARF CFI",
++        epilog=epilog,
++        formatter_class=argparse.RawDescriptionHelpFormatter,
++    )
++    ap.add_argument("files", nargs="+", help="ELF files (.o, .ko, vmlinux, DSO, executable) to analyze")
++    ap.add_argument("--minify", metavar="OUT", help="Write minified .eh_frame binary for the first file")
++    args = ap.parse_args()
++
++    for idx, path in enumerate(args.files):
++        out_p = args.minify if idx == 0 else None
++        analyze_elf(path, out_min_path=out_p)
++
++
++if __name__ == "__main__":
++    main()
 -- 
 2.56.1.750.gf70dc682cf-goog
 
