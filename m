@@ -1,74 +1,74 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=74.125.82.198
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=74.125.82.70
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795391929;
-	b=BILYXHpG4cHCMUSR4ugyUGxU0qA+gz6zK33mOcXA89dsNoTrGVwZsUhOpHx0YXNyKMvh
-	 zplqQq5htTh+JAegmO/9w32MMR4ummyUYRO9Tvz9SvDd4ihOWh5njxxiGwze2HIgTrWWH
-	 HKo7t8fdV/Nu3F/sIrSY2zK0D+hL8Y697xeEkxQTvo7nsI/YaLi7olEgBAbCgZqtVPCCY
-	 rc8NVMGjpwF7Sncf14SPqDMh7l6b/01zDwf00XBqWmRJYbn5VQXLR396WXLeuNBnZTWtT
-	 LC33rG9WWy+bBRX6EWLqh+Zvy6jfRdksdXa3k0FWi1QHu0QP/dHxcdTyokuK6wwwEJA==
+	t=1795391936;
+	b=ah/SVkGHAld8dgsAJ33SFaaaKB4/MeN1wkv/95S7rGITZN1Gd2dcYUWe10coYTTG4Dqp
+	 K+FXdXCCBPmpK8a8LBbaXXu083XPuf8eO4+0e00stncHNCX9E4HoUWnfMarCFfr1zKtXk
+	 j3QI8dD4YoxhyAF2CPaKi7I7zn5mFC8YyQ5T3Ga0BOn6OW3+PXDG0qbTF+OMzSJRJqobP
+	 pmVWgeGPWKXxrQl2yE45Mat/kedc37cv4tBFkZXROUgChkrDkeJVHQ+5rtxEid9plsb1+
+	 IVl9IPOJl1wEgoOgojWkuiCGBRbm6lLix0OLasM0QvW8EC1Go0Dxugmvk6+m31apPhA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795391929;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795391936;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Received:Date:In-Reply-To:
 	 Mime-Version:References:X-Mailer:Message-ID:Subject:From:To:Cc:
 	 Content-Type;
-	bh=4mT2SQ+MNehWDiqnlnYwhVOekOJqOh8dA7p91MHzWoA=;
-	b=rxN8pY4d5I5Hzf53q9ovNa3gy0ZXorPAqW45daBnTqG8/XdMqLQY/zYrJuACqnU64mAi
-	 kp8SZpQmCifUOzgfc0OPkLhqbeUxCTzrD5jiBUdn7LAHtKcTOqM1UAynVcvpxCV2yOcmT
-	 csK5UHnTEnHeTKHJdzmQh43xNWeWdh8C8nYmYGBYDehKcsYmuv+Lt9vHRiWqrAkUbEHZr
-	 tW5/QVtTzKWbvFGAAdPqRMUM+tHRtXeGz/PFQ4TB2ApGVAgv/h6Yxo3ekV8GRgfMQyvZj
-	 BO5MyfGzA55VxKNr+4qwHx+pQiKGOz87gM6f5JiuVkO46p3zjIq7UjJD2zLipeUVyGQ==
+	bh=09hczlEa/IAKtpVREuSn8p6rY2QTIPxFA39wXK+BQFk=;
+	b=SQfpJVwts2glXYdlPJF38T8ojRGyjnhbg5bkiZQdd4FItw579FgIidINPunurNfoNywe
+	 XbR8jePq4FEXn/gsspdlqMaMjimrNI4zWpXQakfLGoaEIzweWsjBVQSXcrnMSenlUq4H8
+	 ItQcZ5wqmJDHh7SRbxo/3h5OuLJZ7//lxzzrCGtq8OrVDPK0po+Wua8rdwvBp2WedPZSN
+	 YNUuL0aw3NU/z6U0LXWmbP+DQ4cyiUGgtg2KfmEjXfc6ptWTnnIt76onm2Ueiuy1+t9si
+	 +Y6HcTjwLYjOnjv0y7FqIKyZW5k+1GUfZ299aeKR8dMxdEMvbFUNjaBMglX3Dw6UjLw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=google.com;
 	spf=pass smtp.mailfrom=flex--irogers.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b="MYFXm/VW";
-	arc=none smtp.remote-ip=74.125.82.198
-Received: from mail-dy1-f198.google.com (mail-dy1-f198.google.com [74.125.82.198])
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=akvPhLI3;
+	arc=none smtp.remote-ip=74.125.82.70
+Received: from mail-dl1-f70.google.com (mail-dl1-f70.google.com [74.125.82.70])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A589A606A698
-	for <linux-efi@vger.kernel.org>; Sun, 22 Nov 2026 23:58:47 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A589A606A698
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5101A606A330
+	for <linux-efi@vger.kernel.org>; Sun, 22 Nov 2026 23:58:55 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5101A606A330
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--irogers.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=MYFXm/VW
-Received: by mail-dy1-f198.google.com with SMTP id 5a478bee46e88-370230d93efso9007015eec.1
-        for <linux-efi@vger.kernel.org>; Sun, 22 Nov 2026 15:58:47 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=akvPhLI3
+Received: by mail-dl1-f70.google.com with SMTP id a92af1059eb24-1b55f4f3bb8so1228653c88.0
+        for <linux-efi@vger.kernel.org>; Sun, 22 Nov 2026 15:58:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1795391927; x=1795996727; darn=vger.kernel.org;
+        d=google.com; s=20260707; t=1795391935; x=1795996735; darn=vger.kernel.org;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=4mT2SQ+MNehWDiqnlnYwhVOekOJqOh8dA7p91MHzWoA=;
-        b=MYFXm/VWbeUhDkuo6k4TT/Ls/e4JI6F1hNY1IlojpFaNx8BvQzbEoFL0e1bNpMzZ+N
-         43ehMMmDvzGLFy9Fkvt3Tmx+heb3Y29m5zAbgaKsVv8sF0YkSIX0NOQ1rHdeeoQBZl5n
-         nZC243kNIxNiVOcgBHbUs1IVfrVjBbZxNFnvCiXZhawRJvmy9s32ZI9LlgVUFWXffEGw
-         Di+HnZpHs6sFJwXLfc+5UDkHrasxT0ja5Vi0+qA9RiRuUkBAooRzu90Veq+hph7/eiQt
-         Ay72piHQ6I8yNuMMnPFxLvyplh723mTitv+z5aEc9v5ckiVBOesXNMsHjiB3XqaKT3Jh
-         xF0A==
+        bh=09hczlEa/IAKtpVREuSn8p6rY2QTIPxFA39wXK+BQFk=;
+        b=akvPhLI3MDu6r3MjwvL1+tyGas0zv4SH0oMOw5l97vVzCJrh/Cm8uiwwPwxwkCCsa+
+         uiuqlVk8BdavZl8XvysGxtJ+Bz2sZPtfPNAiZubxJb28xNphk/P2qWV7UKrldBtFDkA/
+         BAYeH01Toy8SF4y7Rqip0UZnST6S/rAANmA6+KiSqCH1nS45xTRquaCX2uCXpyLwT8Yp
+         TYRhwnzrw5ootHNCFu/Cd8ya/MfsErSxHkzRSSvi4JVYXynOBjg+E2OjTrihsRkGtbqJ
+         r1bFqh2xANaES9OsOGqlj3VDPIn5IaPfxgPBGNwqd52FD2QCIaVooBZ3+gKZEB9sjFUH
+         0Vuw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795391927; x=1795996727;
+        d=1e100.net; s=20260707; t=1795391935; x=1795996735;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=4mT2SQ+MNehWDiqnlnYwhVOekOJqOh8dA7p91MHzWoA=;
-        b=0IA5Wazc2LRf1Nx1spLnbUhmd5spWA1fUnkrqwJXFYeCajcUndPvUUMX4G0C7R/E8Q
-         L8hSw7uuiuZ7us1SBd6YFnJ2MKBYY9BULM8mdZi9yP4+q4IGpXbrRLjj9fy0zraN82ks
-         P07VhPUyDbw6dKLxJr6xHHDKRvHGmCfhFKQUsb28q8WMA2NYgeE1RMK/UrXCYp+8zy+U
-         g81/TifNqvo1ylsDZesYDFMRPsfnePdi67C/OU2lX+8jNmvqiReH1KSerbWorQz63okp
-         Liz43gwuNQNmJbTcFRe37r/t9ZCDrFVRbD2IGQhit2bc7reGFyhVaX5APP44jlgB5lew
-         CezQ==
-X-Forwarded-Encrypted: i=1; AL+hErGQkuC61Qjt+AbgHqGtbCISD3CwS5Zmj/NN4oxHWxz9viajTxfcCPbhwhjMapd2FtUpzJLOFLfIW9A=@vger.kernel.org
-X-Gm-Message-State: APuU4Z9sqzIq+Dd+hayFYFdqSFeGDb7itdFU/Nc2GKaPipB/7p3O98jZ
-	N56Vrrqr/zcXx5MjYTZUmVh2RFVwnL/W7GB3YgqsfF2o8vAbgif2cu/yJrOmfdXcpk1r/mw3Nvr
-	oEkp5bBgn0g==
-X-Received: from dybut8.prod.google.com ([2002:a05:7301:e0c8:b0:36a:1f25:64f4])
- (user=irogers job=prod-delivery.src-stubby-dispatcher) by 2002:a05:7301:618f:20b0:386:ad3b:a48a
- with SMTP id 5a478bee46e88-386ad3ba7cfmr2073567eec.5.1795391926282; Sun, 22
- Nov 2026 15:58:46 -0800 (PST)
-Date: Sun, 22 Nov 2026 15:57:48 -0800
+        bh=09hczlEa/IAKtpVREuSn8p6rY2QTIPxFA39wXK+BQFk=;
+        b=E55FX/ZCwZ8/9a+1p5Y3A8wmf3H0yfw1cGxQGwbBJC3xJAeHZx9iRYCycII0/stb8p
+         6hJa4bM/oMQmlXAcsq+2uSQY4cBu2PgFK9tXn0HXMDuWCe9mOqQRbf6UJK7ZEz8x/v9g
+         cYSxrLBXPulg76foNe4GaY0YDrMSWja58d+Go0cfRR0LjQD7tiN0HcAnnl1kawlR2lHE
+         74ZYVYrccY/sNy4iqfjJ/3hW44FMIdY6eqnyxtAE2mWu7NL4kEqyzyZ86F5kDiHfhMgz
+         /g2FdEqHUPYBJcl0U7Mf3tPdLV4eakGYr3xhOFRDpp/CCsuB6dwNSjqz70i/OjZDnZvy
+         u/OA==
+X-Forwarded-Encrypted: i=1; AL+hErH7SocuSFA2hzN6gdkhSFIdVEEcWiHLu0RHRfwuBtt2iARQ8i3n4JI4CeCnqCB9LhsbsLSoOUqsHiQ=@vger.kernel.org
+X-Gm-Message-State: APuU4Z9DMYsKNxLaBEok64aKFsNdpVJ5cyut+ZrPlp2dDVcwHCcwgE6I
+	Wp42uw+Z7JCZ1tXfdnumg43/XURviYz7I9Jf58KGxZJ0ow8nCfTP2Ea4k4H2jub8dZD2MkiARs8
+	sSLGCvKK4Sw==
+X-Received: from dlgw20-n2.prod.google.com ([2002:a05:701a:cc94:20b0:1b5:75d1:3c1e])
+ (user=irogers job=prod-delivery.src-stubby-dispatcher) by 2002:a05:7022:3d14:b0:151:6e80:baa9
+ with SMTP id a92af1059eb24-1b55687f17dmr15324404c88.12.1795391933906; Sun, 22
+ Nov 2026 15:58:53 -0800 (PST)
+Date: Sun, 22 Nov 2026 15:57:49 -0800
 In-Reply-To: <20261122235757.3456048-1-irogers@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -81,9 +81,8 @@ Precedence: list
 Mime-Version: 1.0
 References: <20261122235757.3456048-1-irogers@google.com>
 X-Mailer: git-send-email 2.56.1.750.gf70dc682cf-goog
-Message-ID: <20261122235757.3456048-3-irogers@google.com>
-Subject: [RFC PATCH v1 02/11] unwind_user: Support Minimal DWARF CFI
- user-space unwinding
+Message-ID: <20261122235757.3456048-4-irogers@google.com>
+Subject: [RFC PATCH v1 03/11] scripts, unwind: Add build-time .eh_frame minifier
 From: Ian Rogers <irogers@google.com>
 To: linux-kernel@vger.kernel.org, linux-trace-kernel@vger.kernel.org, 
 	linux-arch@vger.kernel.org
@@ -103,1051 +102,1944 @@ Cc: jpoimboe@kernel.org, rostedt@goodmis.org, peterz@infradead.org,
 	dylanbhatch@google.com, Ian Rogers <irogers@google.com>
 Content-Type: text/plain; charset="UTF-8"
 
-Extend the generic user-space unwinder (kernel/unwind/user.c) with
-UNWIND_USER_TYPE_CFI (CONFIG_HAVE_UNWIND_USER_CFI), resolving ELF
-PT_GNU_EH_FRAME headers across executable VMAs in kernel/unwind/user_cfi.c
-and enabling 64-bit and 32-bit compat user unwinding on x86.
+Add a standalone C build-time ELF relocatable (.o) .eh_frame minifier
+(scripts/min_eh_frame.c, enabled by CONFIG_UNWINDER_DWARF_CFI_MINIFY)
+supporting x86-64, ARM64, and RISC-V with zero external library or
+scripting dependencies.
 
-Key design details:
- - Find the executable VMA and its base ELF mapping (vm_pgoff == 0)
-   under mmap_read_lock_killable(), then drop mmap_read_lock() before
-   issuing any faultable copy_from_user() reads.
- - Cache VMA -> PT_GNU_EH_FRAME lookups (including negative lookups for
-   anonymous/JIT VMAs so unwind_user_next() falls back per frame to FP)
-   in a 4-slot per-walk cache on struct unwind_user_state.
- - Fence non-masked access_ok() checks in get_user_word() with
-   barrier_nospec() so chained cfa_indirect user stack loads cannot
-   speculatively dereference kernel addresses on architectures without
-   branchless uaccess pointer masking.
- - Provide overridable unwind_user_frame_pointer() and
-   unwind_user_sigreturn() hooks alongside unwind_user_link_register()
-   and unwind_user_strip_pac(), and allow up to UNWIND_USER_MAX_SIGNALS
-   signal frames per walk to switch stacks (supporting SA_ONSTACK
-   alternate signal stacks and signal trampolines without leading NOPs).
- - Support link-register leaf frames (ra_from_reg when state->ra_valid
-   is true, clearing ra_valid after the first step so subsequent frames
-   enforce strict cfa > sp progression), DRAP/sigframe indirect CFA
-   rules, and clean bottom-of-stack termination on DW_CFA_undefined or
-   zero RA.
+During Kbuild compilation (C, Rust, and post-LTO composite objects),
+scripts/min_eh_frame rewrites .eh_frame (both SHT_PROGBITS and
+SHT_X86_64_UNWIND) in place to:
+ - Strip callee-saved GPR spill/restore opcodes (%rbx/%r12-%r15 on
+   x86-64, x19-x28 on ARM64, s1-s11 on RISC-V) and DW_CFA_GNU_args_size
+   while preserving CFA, FP, RA, shrink-wrap state-stack, DRAP, and
+   ARM64 DW_CFA_AARCH64_negate_ra_state (0x2d) transitions.
+ - Normalize CIEs and coalesce consecutive unrelocated PC-advance
+   instructions while remapping sorted .rela.eh_frame relocations
+   (including RISC-V R_RISCV_SET6/SUB6 and ADD32/SUB32 relaxation pairs).
+
+Across full vmlinux builds on x86-64 (69,958 FDEs), ARM64 (69,765 FDEs),
+and RISC-V (55,296 FDEs), minification achieves 100.00% FDE coverage and
+reduces .eh_frame size 18%-28% below SFrame v3 (.sframe).
 
 Signed-off-by: Ian Rogers <irogers@google.com>
 ---
- arch/Kconfig                       |   5 +
- arch/x86/Kconfig                   |   1 +
- arch/x86/include/asm/unwind_user.h |  47 ++++
- include/linux/unwind_user.h        |  78 ++++++
- include/linux/unwind_user_types.h  |  92 ++++++-
- kernel/unwind/Makefile             |   1 +
- kernel/unwind/user.c               | 155 +++++++++++-
- kernel/unwind/user_cfi.c           | 378 +++++++++++++++++++++++++++++
- 8 files changed, 740 insertions(+), 17 deletions(-)
- create mode 100644 kernel/unwind/user_cfi.c
+ arch/Kconfig               |   10 +
+ rust/Makefile              |    4 +-
+ scripts/Makefile           |    1 +
+ scripts/Makefile.build     |   12 +-
+ scripts/Makefile.lib       |   13 +-
+ scripts/Makefile.vmlinux_o |    8 +-
+ scripts/min_eh_frame.c     | 1719 ++++++++++++++++++++++++++++++++++++
+ 7 files changed, 1761 insertions(+), 6 deletions(-)
+ create mode 100644 scripts/min_eh_frame.c
 
 diff --git a/arch/Kconfig b/arch/Kconfig
-index 03399120aa8f..340a7ecbfc68 100644
+index 340a7ecbfc68..6509265065e1 100644
 --- a/arch/Kconfig
 +++ b/arch/Kconfig
-@@ -523,6 +523,11 @@ config HAVE_UNWIND_USER_FP
- 	bool
+@@ -528,6 +528,16 @@ config HAVE_UNWIND_USER_CFI
  	select UNWIND_USER
+ 	select UNWIND_DWARF_CFI
  
-+config HAVE_UNWIND_USER_CFI
-+	bool
-+	select UNWIND_USER
-+	select UNWIND_DWARF_CFI
++config UNWINDER_DWARF_CFI_MINIFY
++	bool "Minify .eh_frame tables at build time"
++	depends on UNWINDER_DWARF_CFI
++	default y
++	help
++	  Strip unneeded callee-saved register opcodes and coalesce PC-advance
++	  bytecodes in .eh_frame sections at build time, reducing kernel unwind
++	  table memory usage while ensuring only Minimal DWARF CFA bytecodes
++	  remain in vmlinux and modules.
 +
  config HAVE_PERF_REGS
  	bool
  	help
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 58dce0b66179..c8096cf66c38 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -300,6 +300,7 @@ config X86
- 	select HAVE_SYSCALL_TRACEPOINTS
- 	select HAVE_UACCESS_VALIDATION		if HAVE_OBJTOOL
- 	select HAVE_UNSTABLE_SCHED_CLOCK
-+	select HAVE_UNWIND_USER_CFI		if X86_64
- 	select HAVE_UNWIND_USER_FP		if X86_64
- 	select HAVE_USER_RETURN_NOTIFIER
- 	select VDSO_GETRANDOM			if X86_64
-diff --git a/arch/x86/include/asm/unwind_user.h b/arch/x86/include/asm/unwind_user.h
-index 6e469044e4de..1a6be08968c3 100644
---- a/arch/x86/include/asm/unwind_user.h
-+++ b/arch/x86/include/asm/unwind_user.h
-@@ -4,9 +4,17 @@
+diff --git a/rust/Makefile b/rust/Makefile
+index 0165626decbe..1238b4ac661d 100644
+--- a/rust/Makefile
++++ b/rust/Makefile
+@@ -668,7 +668,8 @@ quiet_cmd_rustc_library = $(if $(skip_clippy),RUSTC,$(RUSTC_OR_CLIPPY_QUIET)) L
+ 		$(CC_FLAGS_RUST_INLINE_HELPERS) -Wno-override-module -c $(patsubst %.o,%.m.bc,$@) -o $@ \
+ 		$(cmd_ld_single)) \
+ 	$(if $(rustc_objcopy),;$(OBJCOPY) $(rustc_objcopy) $@) \
+-	$(cmd_objtool)
++	$(cmd_objtool) \
++	$(cmd_min_eh_frame)
  
- #ifdef CONFIG_UNWIND_USER
+ rust-analyzer:
+ 	$(Q)MAKEFLAGS= $(srctree)/scripts/generate_rust_analyzer.py \
+@@ -721,6 +722,7 @@ endif
+ define rule_rustc_library
+ 	$(call cmd_and_fixdep,rustc_library)
+ 	$(call cmd,gen_objtooldep)
++	$(call cmd,gen_min_eh_framedep)
+ 	$(call cmd,gendwarfksyms)
+ endef
  
-+#include <linux/unwind_dwarf_cfi.h>
- #include <asm/ptrace.h>
- #include <asm/uprobes.h>
+diff --git a/scripts/Makefile b/scripts/Makefile
+index d7fbb7ca098b..c392610b65dd 100644
+--- a/scripts/Makefile
++++ b/scripts/Makefile
+@@ -12,6 +12,7 @@ hostprogs-always-$(CONFIG_SYSTEM_EXTRA_CERTIFICATE)	+= insert-sys-cert
+ hostprogs-always-$(CONFIG_RUST_KERNEL_DOCTESTS)		+= rustdoc_test_builder
+ hostprogs-always-$(CONFIG_RUST_KERNEL_DOCTESTS)		+= rustdoc_test_gen
+ hostprogs-always-$(CONFIG_TRACEPOINTS)			+= tracepoint-update
++hostprogs-always-$(CONFIG_UNWINDER_DWARF_CFI_MINIFY)	+= min_eh_frame
  
-+/**
-+ * unwind_user_word_size() - Return the user-space word size in bytes on x86
-+ * @regs: User-mode register state.
-+ *
-+ * Return: 8 for 64-bit user mode, 4 for 32-bit IA-32/compat mode, or 0 for
-+ * VM86 mode stacks which cannot be unwound.
-+ */
- static inline int unwind_user_word_size(struct pt_regs *regs)
- {
- 	/* We can't unwind VM86 stacks */
-@@ -15,22 +23,61 @@ static inline int unwind_user_word_size(struct pt_regs *regs)
- 	return user_64bit_mode(regs) ? 8 : 4;
- }
+ kallsyms-objs := kallsyms.o kallsyms-sysmap.o elf-parse.o
+ sorttable-objs := sorttable.o elf-parse.o
+diff --git a/scripts/Makefile.build b/scripts/Makefile.build
+index 6127feb970c6..ced0f630f566 100644
+--- a/scripts/Makefile.build
++++ b/scripts/Makefile.build
+@@ -281,6 +281,10 @@ ifdef CONFIG_OBJTOOL
+ $(obj)/%.o: private objtool-enabled = $(if $(is-standard-object),$(if $(delay-objtool),$(is-single-obj-m),y))
+ endif
  
-+/**
-+ * unwind_user_cfi_arch() - Populate x86/x86-64 DWARF register numbers
-+ * @ws: User word size in bytes (8 for x86-64, 4 for i386).
-+ * @arch: Output DWARF CFI architecture descriptor.
-+ *
-+ * Return: true if @ws is 4 or 8, false otherwise.
-+ */
-+static inline bool unwind_user_cfi_arch(unsigned int ws,
-+					struct dwarf_cfi_arch *arch)
-+{
-+	if (ws == 8) {
-+		*arch = (struct dwarf_cfi_arch){
-+			.ws	= 8,
-+			.sp_reg	= 7,	/* %rsp */
-+			.fp_reg	= 6,	/* %rbp */
-+			.ra_reg	= 16,	/* %rip */
-+		};
-+		return true;
-+	}
-+	if (ws == 4) {
-+		*arch = (struct dwarf_cfi_arch){
-+			.ws	= 4,
-+			.sp_reg	= 4,	/* %esp */
-+			.fp_reg	= 5,	/* %ebp */
-+			.ra_reg	= 8,	/* %eip */
-+		};
-+		return true;
-+	}
-+	return false;
-+}
++ifdef CONFIG_UNWINDER_DWARF_CFI_MINIFY
++$(obj)/%.o: private min-eh-frame-enabled = $(if $(filter-out scripts/mod/empty.o,$@),$(is-standard-object))
++endif
 +
- #endif /* CONFIG_UNWIND_USER */
+ ifneq ($(findstring 1, $(KBUILD_EXTRA_WARN)),)
+ cmd_warn_shared_object = $(if $(word 2, $(modname-multi)),$(warning $(kbuild-file): $*.o is added to multiple modules: $(modname-multi)))
+ endif
+@@ -371,11 +375,13 @@ quiet_cmd_rustc_o_rs = $(RUSTC_OR_CLIPPY_QUIET) $(quiet_modtag) $@
+ 		$(CC) $(CLANG_FLAGS) $(filter-out $(CC_FLAGS_LTO),$(KBUILD_CFLAGS)) \
+ 		$(CC_FLAGS_RUST_INLINE_HELPERS) -Wno-override-module -c $(patsubst %.o,%.m.bc,$@) -o $@ \
+ 		$(cmd_ld_single)) \
+-	$(cmd_objtool)
++	$(cmd_objtool) \
++	$(cmd_min_eh_frame)
  
- #ifdef CONFIG_HAVE_UNWIND_USER_FP
+ define rule_rustc_o_rs
+ 	$(call cmd_and_fixdep,rustc_o_rs)
+ 	$(call cmd,gen_objtooldep)
++	$(call cmd,gen_min_eh_framedep)
+ endef
  
-+/* Standard x86 frame record: {saved_bp, ret_addr} at [bp, bp + 2 * ws). */
- #define ARCH_INIT_USER_FP_FRAME(ws)			\
- 	.cfa_off	=  2*(ws),			\
- 	.ra_off		= -1*(ws),			\
- 	.fp_off		= -2*(ws),			\
- 	.use_fp		= true,
+ $(obj)/%.o: $(obj)/%.rs FORCE
+@@ -518,14 +524,16 @@ $(obj)/lib.a: $(lib-y) FORCE
+ 	$(call if_changed,ar)
  
-+/* At function entry before push %rbp: return address is at [sp, sp + ws). */
- #define ARCH_INIT_USER_FP_ENTRY_FRAME(ws)		\
- 	.cfa_off	=  1*(ws),			\
- 	.ra_off		= -1*(ws),			\
- 	.fp_off		= 0,				\
- 	.use_fp		= false,
+ quiet_cmd_ld_multi_m = LD [M]  $@
+-      cmd_ld_multi_m = $(LD) $(ld_flags) -r -o $@ @$< $(cmd_objtool)
++      cmd_ld_multi_m = $(LD) $(ld_flags) -r -o $@ @$< $(cmd_objtool) $(cmd_min_eh_frame)
  
-+/**
-+ * unwind_user_at_function_start() - Check if @regs is at a function entry point
-+ * @regs: User-mode register state.
+ define rule_ld_multi_m
+ 	$(call cmd_and_savecmd,ld_multi_m)
+ 	$(call cmd,gen_objtooldep)
++	$(call cmd,gen_min_eh_framedep)
+ endef
+ 
+ $(multi-obj-m): private objtool-enabled := $(delay-objtool)
++$(multi-obj-m): private min-eh-frame-enabled := $(CONFIG_LTO_CLANG)
+ $(multi-obj-m): private part-of-module := y
+ $(multi-obj-m): %.o: %.mod FORCE
+ 	$(call if_changed_rule,ld_multi_m)
+diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
+index 19e96b30a122..b27bcd50daf7 100644
+--- a/scripts/Makefile.lib
++++ b/scripts/Makefile.lib
+@@ -222,6 +222,12 @@ objtool-enabled := y
+ 
+ endif # CONFIG_OBJTOOL
+ 
++ifdef CONFIG_UNWINDER_DWARF_CFI_MINIFY
++min_eh_frame := $(objtree)/scripts/min_eh_frame
++cmd_min_eh_frame = $(if $(min-eh-frame-enabled), ; $(min_eh_frame) $@)
++cmd_gen_min_eh_framedep = $(if $(min-eh-frame-enabled), { echo ; echo '$@: $$(wildcard $(min_eh_frame))' ; } >> $(dot-target).cmd)
++endif
++
+ # Useful for describing the dependency of composite objects
+ # Usage:
+ #   $(call multi_depend, multi_used_targets, suffix_to_remove, suffix_to_add)
+@@ -265,7 +271,8 @@ endif
+ quiet_cmd_cc_o_c = CC $(quiet_modtag)  $@
+       cmd_cc_o_c = $(CC) $(c_flags) -c -o $@ $< \
+ 		$(cmd_ld_single) \
+-		$(cmd_objtool)
++		$(cmd_objtool) \
++		$(cmd_min_eh_frame)
+ 
+ define rule_cc_o_c
+ 	$(call cmd_and_fixdep,cc_o_c)
+@@ -273,17 +280,19 @@ define rule_cc_o_c
+ 	$(call cmd,checksrc)
+ 	$(call cmd,checkdoc)
+ 	$(call cmd,gen_objtooldep)
++	$(call cmd,gen_min_eh_framedep)
+ 	$(call cmd,gen_symversions_c)
+ 	$(call cmd,record_mcount)
+ 	$(call cmd,warn_shared_object)
+ endef
+ 
+ quiet_cmd_as_o_S = AS $(quiet_modtag)  $@
+-      cmd_as_o_S = $(CC) $(a_flags) -c -o $@ $< $(cmd_objtool)
++      cmd_as_o_S = $(CC) $(a_flags) -c -o $@ $< $(cmd_objtool) $(cmd_min_eh_frame)
+ 
+ define rule_as_o_S
+ 	$(call cmd_and_fixdep,as_o_S)
+ 	$(call cmd,gen_objtooldep)
++	$(call cmd,gen_min_eh_framedep)
+ 	$(call cmd,gen_symversions_S)
+ 	$(call cmd,warn_shared_object)
+ endef
+diff --git a/scripts/Makefile.vmlinux_o b/scripts/Makefile.vmlinux_o
+index 0b37bd5dc3a4..160d43fbb393 100644
+--- a/scripts/Makefile.vmlinux_o
++++ b/scripts/Makefile.vmlinux_o
+@@ -52,6 +52,10 @@ vmlinux-objtool-args-$(if $(KLP_SYMIDS),y)		+= --klp-symids
+ 
+ objtool-args = $(vmlinux-objtool-args-y) --link
+ 
++ifdef CONFIG_UNWINDER_DWARF_CFI_MINIFY
++min-eh-frame-enabled := $(CONFIG_LTO_CLANG)
++endif
++
+ # Link of vmlinux.o used for section mismatch analysis
+ # ---------------------------------------------------------------------------
+ 
+@@ -64,13 +68,15 @@ quiet_cmd_ld_vmlinux.o = LD      $@
+ 	$(addprefix -T , $(initcalls-lds)) \
+ 	--whole-archive vmlinux.a --no-whole-archive \
+ 	--start-group $(KBUILD_VMLINUX_LIBS) --end-group \
+-	$(cmd_objtool)
++	$(cmd_objtool) \
++	$(cmd_min_eh_frame)
+ 
+ cmd_check_function_names = $(srctree)/scripts/check-function-names.sh $@
+ 
+ define rule_ld_vmlinux.o
+ 	$(call cmd_and_savecmd,ld_vmlinux.o)
+ 	$(call cmd,gen_objtooldep)
++	$(call cmd,gen_min_eh_framedep)
+ 	$(call cmd,check_function_names)
+ endef
+ 
+diff --git a/scripts/min_eh_frame.c b/scripts/min_eh_frame.c
+new file mode 100644
+index 000000000000..4138a2f69dcd
+--- /dev/null
++++ b/scripts/min_eh_frame.c
+@@ -0,0 +1,1719 @@
++// SPDX-License-Identifier: GPL-2.0-only OR MIT
++/*
++ * min_eh_frame.c - Build-time .eh_frame minifier for Minimal DWARF CFI.
 + *
-+ * Return: true if stopped on an entry uprobe before the frame prologue ran.
++ * Rewrites ET_REL (.o) .eh_frame and .rela.eh_frame sections in place so only
++ * Minimal DWARF CFA bytecodes remain:
++ *  - Strips general-purpose register spills/restores (keeping only SP, FP, RA)
++ *  - Strips DW_CFA_GNU_args_size and redundant remember_state/restore_state
++ *  - Coalesces adjacent DW_CFA_advance_loc* instructions and drops trailing
++ *    PC-advance instructions after the last state transition
++ *  - Drops FDEs (and their relocations) that use unsupported DWARF expressions
 + */
- static inline bool unwind_user_at_function_start(struct pt_regs *regs)
- {
- 	return is_uprobe_at_func_entry(regs);
-diff --git a/include/linux/unwind_user.h b/include/linux/unwind_user.h
-index 64618618febd..dcd87012ab82 100644
---- a/include/linux/unwind_user.h
-+++ b/include/linux/unwind_user.h
-@@ -16,6 +16,12 @@
- #endif
- 
- #ifndef unwind_user_at_function_start
-+/**
-+ * unwind_user_at_function_start() - Default stub for function-entry detection
-+ * @regs: User-mode register state.
-+ *
-+ * Return: false when the architecture does not override entry detection.
-+ */
- static inline bool unwind_user_at_function_start(struct pt_regs *regs)
- {
- 	return false;
-@@ -23,6 +29,78 @@ static inline bool unwind_user_at_function_start(struct pt_regs *regs)
- #define unwind_user_at_function_start unwind_user_at_function_start
- #endif
- 
-+#ifndef unwind_user_frame_pointer
-+/**
-+ * unwind_user_frame_pointer() - Default helper returning @regs's frame pointer
-+ * @regs: User-mode register state.
-+ *
-+ * Return: Architectural user frame pointer from frame_pointer(@regs).
-+ */
-+static inline unsigned long unwind_user_frame_pointer(struct pt_regs *regs)
-+{
-+	return frame_pointer(regs);
-+}
-+#define unwind_user_frame_pointer unwind_user_frame_pointer
++
++#include <elf.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <limits.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <unistd.h>
++
++#define DW_CFA_nop				0x00
++#define DW_CFA_set_loc				0x01
++#define DW_CFA_advance_loc1			0x02
++#define DW_CFA_advance_loc2			0x03
++#define DW_CFA_advance_loc4			0x04
++#define DW_CFA_offset_extended			0x05
++#define DW_CFA_restore_extended			0x06
++#define DW_CFA_undefined			0x07
++#define DW_CFA_same_value			0x08
++#define DW_CFA_register				0x09
++#define DW_CFA_remember_state			0x0a
++#define DW_CFA_restore_state			0x0b
++#define DW_CFA_def_cfa				0x0c
++#define DW_CFA_def_cfa_register			0x0d
++#define DW_CFA_def_cfa_offset			0x0e
++#define DW_CFA_def_cfa_expression		0x0f
++#define DW_CFA_expression			0x10
++#define DW_CFA_offset_extended_sf		0x11
++#define DW_CFA_def_cfa_sf			0x12
++#define DW_CFA_def_cfa_offset_sf		0x13
++#define DW_CFA_val_offset			0x14
++#define DW_CFA_val_offset_sf			0x15
++#define DW_CFA_val_expression			0x16
++#define DW_CFA_AARCH64_negate_ra_state		0x2d
++#define DW_CFA_GNU_args_size			0x2e
++#define DW_CFA_GNU_negative_offset_extended	0x2f
++
++#ifndef EM_RISCV
++#define EM_RISCV				243
 +#endif
 +
-+#ifndef unwind_user_link_register
-+/**
-+ * unwind_user_link_register() - Default stub for architectures without an LR
-+ * @regs: User-mode register state.
-+ * @ra: Unused output link register pointer.
-+ *
-+ * Return: false on architectures where calls push the return address on stack.
-+ */
-+static inline bool unwind_user_link_register(struct pt_regs *regs,
-+					     unsigned long *ra)
-+{
-+	return false;
-+}
-+#define unwind_user_link_register unwind_user_link_register
++#ifndef SHT_X86_64_UNWIND
++#define SHT_X86_64_UNWIND			0x70000001U
 +#endif
 +
-+#ifndef unwind_user_strip_pac
-+/**
-+ * unwind_user_strip_pac() - Default no-op PAC stripping helper
-+ * @ip: Recovered user instruction pointer.
-+ * @ra_signed: Whether CFI marked the return address as PAC-signed.
-+ *
-+ * Return: @ip unchanged on architectures without pointer authentication.
-+ */
-+static inline unsigned long unwind_user_strip_pac(unsigned long ip,
-+						  bool ra_signed)
-+{
-+	return ip;
-+}
-+#define unwind_user_strip_pac unwind_user_strip_pac
-+#endif
++#define DW_OP_deref				0x06
++#define DW_OP_breg0				0x70
 +
-+#ifndef unwind_user_sigreturn
-+/**
-+ * unwind_user_sigreturn() - Default stub for arch signal-trampoline unwinding
-+ * @state: Current user unwind state.
-+ *
-+ * Return: false on architectures whose signal trampolines unwind via CFI/FP.
-+ */
-+static inline bool unwind_user_sigreturn(struct unwind_user_state *state)
-+{
-+	return false;
-+}
-+#define unwind_user_sigreturn unwind_user_sigreturn
-+#endif
++#define DW_EH_PE_omit				0xff
++#define DW_EH_PE_FORM				0x0f
++#define DW_EH_PE_absptr				0x00
++#define DW_EH_PE_udata2				0x02
++#define DW_EH_PE_udata4				0x03
++#define DW_EH_PE_udata8				0x04
++#define DW_EH_PE_sdata2				0x0a
++#define DW_EH_PE_sdata4				0x0b
++#define DW_EH_PE_sdata8				0x0c
++#define DW_EH_PE_indirect			0x80
 +
-+#ifdef CONFIG_HAVE_UNWIND_USER_CFI
-+int unwind_user_next_cfi(struct unwind_user_state *state,
-+			 struct unwind_user_frame *out_frame, bool *out_signal);
-+#else
-+static inline int unwind_user_next_cfi(struct unwind_user_state *state,
-+				       struct unwind_user_frame *out_frame,
-+				       bool *out_signal)
-+{
-+	return -EINVAL;
-+}
-+#endif
++/* Target architecture DWARF register numbers for SP, FP, and RA. */
++struct arch_cfg {
++	uint8_t addr_size;
++	uint8_t sp_reg;
++	uint8_t fp_reg;
++	uint8_t ra_reg;
++};
 +
- int unwind_user(struct unwind_stacktrace *trace, unsigned int max_entries);
- 
- #endif /* _LINUX_UNWIND_USER_H */
-diff --git a/include/linux/unwind_user_types.h b/include/linux/unwind_user_types.h
-index 412729a269bc..9d00315dbbb9 100644
---- a/include/linux/unwind_user_types.h
-+++ b/include/linux/unwind_user_types.h
-@@ -4,41 +4,123 @@
- 
- #include <linux/types.h>
- 
--/*
-- * Unwind types, listed in priority order: lower numbers are attempted first if
-- * available.
-+/**
-+ * enum unwind_user_type_bits - Priority bit indices for user-space unwinders
-+ * @UNWIND_USER_TYPE_CFI_BIT: Bit index for Minimal DWARF CFI (.eh_frame_hdr).
-+ * @UNWIND_USER_TYPE_FP_BIT: Bit index for architectural frame-pointer chains.
-+ * @NR_UNWIND_USER_TYPE_BITS: Total number of user-space unwind method bits.
-+ *
-+ * Listed in priority order: lower bit indices are attempted first on each
-+ * frame when enabled in &unwind_user_state.available_types.
-  */
- enum unwind_user_type_bits {
--	UNWIND_USER_TYPE_FP_BIT =		0,
-+	UNWIND_USER_TYPE_CFI_BIT =		0,
-+	UNWIND_USER_TYPE_FP_BIT =		1,
- 
- 	NR_UNWIND_USER_TYPE_BITS,
- };
- 
-+/**
-+ * enum unwind_user_type - Bitmask values identifying a user-space unwind method
-+ * @UNWIND_USER_TYPE_NONE: No active unwind method (initial or terminal state).
-+ * @UNWIND_USER_TYPE_CFI: Unwind using Minimal DWARF CFI via PT_GNU_EH_FRAME.
-+ * @UNWIND_USER_TYPE_FP: Unwind using architectural frame-pointer records.
-+ */
- enum unwind_user_type {
--	/* Type "none" for the start of stack walk iteration. */
- 	UNWIND_USER_TYPE_NONE =			0,
-+	UNWIND_USER_TYPE_CFI =			BIT(UNWIND_USER_TYPE_CFI_BIT),
- 	UNWIND_USER_TYPE_FP =			BIT(UNWIND_USER_TYPE_FP_BIT),
- };
- 
-+/**
-+ * struct unwind_stacktrace - Captured user-space callchain buffer
-+ * @nr: Number of instruction pointers stored in @entries.
-+ * @entries: Caller-allocated array of user instruction pointers.
-+ */
- struct unwind_stacktrace {
- 	unsigned int	nr;
- 	unsigned long	*entries;
- };
- 
-+/**
-+ * struct unwind_user_frame - Evaluated unwind rule for stepping one user frame
-+ * @cfa_off: Byte offset added to FP (when @use_fp is true) or SP to form CFA.
-+ * @ra_off: Byte offset from CFA (or SP when @ra_from_sp is true) to saved RA.
-+ * @fp_off: Byte offset from CFA, FP, or SP to saved caller FP (0 if unchanged,
-+ *          unless @fp_from_fp or @fp_from_sp is set).
-+ * @use_fp: True if the CFA base register is FP rather than SP.
-+ * @cfa_indirect: True if the computed CFA address must be dereferenced once in
-+ *                user memory (DRAP or signal trampoline frame).
-+ * @fp_from_fp: True if saved FP is located at *(state->fp + @fp_off).
-+ * @fp_from_sp: True if saved FP is located at *(old_sp + @fp_off).
-+ * @ra_from_sp: True if saved RA is located at *(old_sp + @ra_off).
-+ * @ra_from_reg: True if RA is still in @state->ra rather than on the stack.
-+ * @ra_signed: True if the recovered RA carries an AArch64 PAC signature.
-+ */
- struct unwind_user_frame {
- 	s32 cfa_off;
- 	s32 ra_off;
- 	s32 fp_off;
- 	bool use_fp;
-+	bool cfa_indirect;
-+	bool fp_from_fp;
-+	bool fp_from_sp;
-+	bool ra_from_sp;
-+	bool ra_from_reg;
++/* Abstract Minimal DWARF unwind row tracked while filtering CFA opcodes. */
++struct min_row {
++	int32_t cfa_off;
++	int32_t fp_off;
++	int32_t ra_off;
++	uint8_t cfa_kind; /* 0=undef, 1=reg, 2=fp_indirect, 3=sp_indirect */
++	uint8_t cfa_reg;
++	uint8_t fp_rule;  /* 0=same, 1=cfa_off, 2=fp_off, 3=undef, 4=sp_off */
++	uint8_t ra_rule;  /* 0=same, 1=cfa_off, 3=undef, 4=sp_off */
 +	bool ra_signed;
 +};
 +
-+/**
-+ * struct unwind_user_cfi_cache - Per-walk cache entry mapping a VMA to EH_FRAME
-+ * @vma_start: Start virtual address of the cached executable VMA.
-+ * @vma_end: End virtual address (exclusive) of the cached executable VMA.
-+ * @eh_hdr_uaddr: User virtual address of PT_GNU_EH_FRAME (0 for negative cache
-+ *                entries when an executable VMA has no PT_GNU_EH_FRAME).
-+ * @eh_hdr_size: Size in bytes of the PT_GNU_EH_FRAME segment.
-+ * @valid: True if this cache slot holds a populated entry.
-+ */
-+struct unwind_user_cfi_cache {
-+	unsigned long	vma_start;
-+	unsigned long	vma_end;
-+	unsigned long	eh_hdr_uaddr;
-+	size_t		eh_hdr_size;
-+	bool		valid;
- };
- 
-+#define UNWIND_USER_MAX_SIGNALS	4U
++/* Parsed CIE metadata and its rewritten offset in the minified .eh_frame. */
++struct cie_info {
++	size_t old_off;
++	size_t new_off;
++	uint32_t code_align;
++	int32_t data_align;
++	uint8_t ra_reg;
++	uint8_t fde_enc;
++	bool has_z;
++	bool is_signal;
++	struct min_row init_row;
++};
 +
-+/**
-+ * struct unwind_user_state - Iteration state for a user-space stack walk
-+ * @ip: Current frame's user instruction pointer.
-+ * @sp: Current frame's user stack pointer.
-+ * @fp: Current frame's user frame pointer.
-+ * @ra: Link register value for leaf/topmost frames when @ra_valid is true.
-+ * @ws: User word size in bytes (4 for compat 32-bit tasks, 8 for 64-bit tasks).
-+ * @current_type: Unwind method used for the current step.
-+ * @available_types: Bitmask of &enum unwind_user_type methods available.
-+ * @cfi_cache_next: Round-robin replacement cursor into @cfi_cache.
-+ * @cfi_cache: Small per-walk cache of executable VMA PT_GNU_EH_FRAME lookups.
-+ * @nr_signals: Number of signal frames unwound so far during this walk.
-+ * @ra_valid: True if @ra holds a live link register value for this frame.
-+ * @signal: True if the current frame was entered from a signal trampoline, so
-+ *          @ip points directly at the interrupted instruction rather than
-+ *          immediately after a call instruction.
-+ * @topmost: True when unwinding the innermost interrupted user frame.
-+ * @done: True once the stack walk has reached the bottom or terminated.
++/*
++ * Buffered output event emitted by minify_insns(). Adjacent non-relocated
++ * PC-advance events are coalesced before serialization, whereas relocated
++ * DW_CFA_advance_loc* instructions (e.g. RISC-V R_RISCV_ADD/SUB pairs) are
++ * preserved verbatim with their original byte offsets recorded for relocation
++ * remapping.
 + */
- struct unwind_user_state {
- 	unsigned long				ip;
- 	unsigned long				sp;
- 	unsigned long				fp;
-+	unsigned long				ra;
- 	unsigned int				ws;
- 	enum unwind_user_type			current_type;
- 	unsigned int				available_types;
-+	unsigned int				cfi_cache_next;
-+	struct unwind_user_cfi_cache		cfi_cache[4];
-+	unsigned int				nr_signals;
-+	bool					ra_valid;
-+	bool					signal;
- 	bool					topmost;
- 	bool					done;
- };
-diff --git a/kernel/unwind/Makefile b/kernel/unwind/Makefile
-index 73a1ccc2ad77..954083868790 100644
---- a/kernel/unwind/Makefile
-+++ b/kernel/unwind/Makefile
-@@ -9,4 +9,5 @@ KCOV_INSTRUMENT_dwarf_cfi.o := n
- 
- obj-$(CONFIG_UNWIND_DWARF_CFI)		+= dwarf_cfi.o
- obj-$(CONFIG_UNWIND_USER)		+= user.o deferred.o
-+obj-$(CONFIG_HAVE_UNWIND_USER_CFI)	+= user_cfi.o
- obj-$(CONFIG_UNWIND_DWARF_CFI_KUNIT_TEST) += dwarf_cfi_kunit.o
-diff --git a/kernel/unwind/user.c b/kernel/unwind/user.c
-index 90ab3c1a205e..1f1cb6c83cf0 100644
---- a/kernel/unwind/user.c
-+++ b/kernel/unwind/user.c
-@@ -1,8 +1,9 @@
- // SPDX-License-Identifier: GPL-2.0
- /*
--* Generic interfaces for unwinding user space
--*/
-+ * Generic interfaces for unwinding user space.
-+ */
- #include <linux/kernel.h>
-+#include <linux/nospec.h>
- #include <linux/sched.h>
- #include <linux/sched/task_stack.h>
- #include <linux/unwind_user.h>
-@@ -11,14 +12,38 @@
- #define for_each_user_frame(state) \
- 	for (unwind_user_start(state); !(state)->done; unwind_user_next(state))
- 
-+/**
-+ * get_user_word() - Read a native or compat-sized word from the user stack
-+ * @word: Output zero-extended word value.
-+ * @base: Base user virtual address.
-+ * @off: Signed byte offset from @base.
-+ * @ws: Word size in bytes (4 for compat 32-bit tasks, sizeof(long) otherwise).
-+ *
-+ * Return: 0 on success, or -EFAULT if the user memory access faults.
-+ */
- static inline int
- get_user_word(unsigned long *word, unsigned long base, int off, unsigned int ws)
- {
- 	unsigned long __user *addr = (void __user *)base + off;
++struct out_event {
++	bool is_adv;
++	bool has_reloc;
++	uint32_t adv;
++	size_t orig_off;
++	size_t new_off;
++	uint8_t bytes[16];
++	size_t len;
++};
 +
-+	/*
-+	 * On architectures whose get_user() uses a conditional access_ok()
-+	 * branch rather than branchless address masking, fence bad access_ok()
-+	 * speculation so chained cfa_indirect stack reads cannot transiently
-+	 * dereference kernel addresses.
-+	 */
-+	if (!can_do_masked_user_access()) {
-+		if (!access_ok(addr, ws)) {
-+			*word = 0;
-+			return -EFAULT;
++/* Mapping from an input relocated CFA instruction span to its new offset. */
++struct reloc_map {
++	size_t orig_off;
++	size_t len;
++	size_t new_off;
++};
++
++/* Wrapper preserving original .rela.eh_frame order across r_offset sorting. */
++struct indexed_rela {
++	Elf64_Rela rela;
++	size_t orig_idx;
++};
++
++/* Monotonic mapping anchor from an input .eh_frame span to output .eh_frame. */
++struct eh_anchor {
++	size_t old_off;
++	size_t len;
++	size_t new_off;
++};
++
++/* Sorted list of .eh_frame anchors for updating section-local symbols/relocs. */
++struct anchor_list {
++	struct eh_anchor *data;
++	size_t len;
++	size_t cap;
++};
++
++/* Growable output byte buffer. */
++struct byte_buf {
++	uint8_t *data;
++	size_t len;
++	size_t cap;
++};
++
++static void buf_append(struct byte_buf *b, const void *src, size_t n)
++{
++	if (!n)
++		return;
++	if (b->len + n > b->cap) {
++		size_t ncap = b->cap ? b->cap * 2 : 4096;
++
++		while (ncap < b->len + n)
++			ncap *= 2;
++		b->data = realloc(b->data, ncap);
++		if (!b->data) {
++			perror("realloc");
++			exit(1);
 +		}
-+		barrier_nospec();
++		b->cap = ncap;
 +	}
- #ifdef CONFIG_COMPAT
- 	if (ws == sizeof(int)) {
- 		unsigned int data;
- 		int ret = get_user(data, (unsigned int __user *)addr);
++	memcpy(b->data + b->len, src, n);
++	b->len += n;
++}
 +
- 		*word = data;
- 		return ret;
- 	}
-@@ -26,45 +51,97 @@ get_user_word(unsigned long *word, unsigned long base, int off, unsigned int ws)
- 	return get_user(*word, addr);
- }
- 
-+/**
-+ * unwind_user_next_common() - Apply an evaluated &struct unwind_user_frame rule
-+ * @state: Current user unwind state to advance to the caller frame.
-+ * @frame: Frame CFA, RA, and FP recovery rule.
-+ * @signal: True if @frame unwinds a signal trampoline (allowing bounded stack
-+ *          switching across alternate signal stacks).
-+ *
-+ * Computes the caller's CFA, validates alignment and monotonic stack progress,
-+ * reads and strips PAC bits from the return address, optionally recovers the
-+ * saved frame pointer, and updates @state.
-+ *
-+ * Return: 0 on success, -ENOENT if the recovered return address is 0 (marking
-+ * @state->done), or -EINVAL on invalid alignment, stack regression, or fault.
-+ */
- static int unwind_user_next_common(struct unwind_user_state *state,
--				   const struct unwind_user_frame *frame)
-+				   const struct unwind_user_frame *frame,
-+				   bool signal)
- {
-+	unsigned long old_sp = state->sp;
- 	unsigned long cfa, fp, ra;
- 
-+	if (signal && state->nr_signals >= UNWIND_USER_MAX_SIGNALS)
-+		return -EINVAL;
++static void buf_append_u8(struct byte_buf *b, uint8_t v)
++{
++	buf_append(b, &v, 1);
++}
 +
- 	/* Get the Canonical Frame Address (CFA) */
- 	if (frame->use_fp) {
--		if (state->fp < state->sp)
-+		if (!signal && state->fp < state->sp)
- 			return -EINVAL;
- 		cfa = state->fp;
- 	} else {
- 		cfa = state->sp;
- 	}
- 	cfa += frame->cfa_off;
-+	if (frame->cfa_indirect && get_user_word(&cfa, cfa, /*off=*/0, state->ws))
-+		return -EINVAL;
- 
- 	/* Make sure that stack is not going in wrong direction */
--	if (cfa <= state->sp)
-+	if (frame->ra_from_reg) {
-+		if (!state->ra_valid || (!signal && cfa < state->sp))
-+			return -EINVAL;
-+	} else if (!signal && cfa <= state->sp) {
- 		return -EINVAL;
++static uint16_t get_le16(const uint8_t *p)
++{
++	return (uint16_t)p[0] | ((uint16_t)p[1] << 8);
++}
++
++static uint32_t get_le32(const uint8_t *p)
++{
++	return (uint32_t)p[0] | ((uint32_t)p[1] << 8) |
++	       ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
++}
++
++static void put_le16(uint8_t *p, uint16_t v)
++{
++	p[0] = (uint8_t)v;
++	p[1] = (uint8_t)(v >> 8);
++}
++
++static void put_le32(uint8_t *p, uint32_t v)
++{
++	p[0] = (uint8_t)v;
++	p[1] = (uint8_t)(v >> 8);
++	p[2] = (uint8_t)(v >> 16);
++	p[3] = (uint8_t)(v >> 24);
++}
++
++static int read_uleb128(const uint8_t *buf, size_t *pos, size_t end, uint32_t *out)
++{
++	uint32_t val = 0;
++	unsigned int shift = 0;
++
++	while (*pos < end) {
++		uint8_t b = buf[(*pos)++];
++
++		if (shift == 28 && ((b & 0x7f) > 0x0f || (b & 0x80)))
++			return -1;
++		val |= (uint32_t)(b & 0x7f) << shift;
++		if (!(b & 0x80)) {
++			*out = val;
++			return 0;
++		}
++		shift += 7;
 +	}
- 
- 	/* Make sure that the address is word aligned */
- 	if (cfa & (state->ws - 1))
- 		return -EINVAL;
- 
- 	/* Get the Return Address (RA) */
--	if (get_user_word(&ra, cfa, frame->ra_off, state->ws))
-+	if (frame->ra_from_reg) {
-+		ra = state->ra;
-+	} else if (get_user_word(&ra, frame->ra_from_sp ? old_sp : cfa,
-+				 frame->ra_off, state->ws)) {
- 		return -EINVAL;
++	return -1;
++}
++
++static int read_sleb128(const uint8_t *buf, size_t *pos, size_t end, int32_t *out)
++{
++	uint32_t val = 0;
++	unsigned int shift = 0;
++
++	while (*pos < end) {
++		uint8_t b = buf[(*pos)++];
++
++		if (shift == 28) {
++			uint8_t top = b & 0x78;
++
++			if ((b & 0x80) || (top != 0x00 && top != 0x78))
++				return -1;
++		}
++		val |= (uint32_t)(b & 0x7f) << shift;
++		shift += 7;
++		if (!(b & 0x80)) {
++			if (shift < 32 && (b & 0x40))
++				val |= ~0U << shift;
++			*out = (int32_t)val;
++			return 0;
++		}
 +	}
-+	ra = unwind_user_strip_pac(ra, frame->ra_signed);
-+	if (!ra) {
-+		state->done = true;
-+		return -ENOENT;
++	return -1;
++}
++
++static size_t encode_uleb128(uint32_t val, uint8_t *out)
++{
++	size_t n = 0;
++
++	do {
++		uint8_t b = val & 0x7f;
++
++		val >>= 7;
++		if (val)
++			b |= 0x80;
++		out[n++] = b;
++	} while (val);
++	return n;
++}
++
++static size_t encode_sleb128(int32_t val, uint8_t *out)
++{
++	size_t n = 0;
++	bool more = true;
++
++	while (more) {
++		uint8_t b = val & 0x7f;
++
++		val >>= 7;
++		if ((val == 0 && !(b & 0x40)) || (val == -1 && (b & 0x40)))
++			more = false;
++		else
++			b |= 0x80;
++		out[n++] = b;
 +	}
- 
- 	/* Get the Frame Pointer (FP) */
--	if (frame->fp_off && get_user_word(&fp, cfa, frame->fp_off, state->ws))
--		return -EINVAL;
-+	if (frame->fp_from_fp) {
-+		if (get_user_word(&fp, state->fp, frame->fp_off, state->ws))
-+			return -EINVAL;
-+	} else if (frame->fp_from_sp) {
-+		if (get_user_word(&fp, old_sp, frame->fp_off, state->ws))
-+			return -EINVAL;
-+	} else if (frame->fp_off) {
-+		if (get_user_word(&fp, cfa, frame->fp_off, state->ws))
-+			return -EINVAL;
-+	}
- 
- 	state->ip = ra;
- 	state->sp = cfa;
--	if (frame->fp_off)
-+	if (frame->fp_from_fp || frame->fp_from_sp || frame->fp_off)
- 		state->fp = fp;
-+	if (signal)
-+		state->nr_signals++;
-+	state->signal = signal;
-+	state->ra_valid = false;
- 	state->topmost = false;
- 	return 0;
- }
- 
-+/**
-+ * unwind_user_next_fp() - Step one user frame using architectural frame records
-+ * @state: Current user unwind state.
-+ *
-+ * Return: 0 on success, or a negative errno from unwind_user_next_common().
-+ */
- static int unwind_user_next_fp(struct unwind_user_state *state)
- {
- 	struct pt_regs *regs = task_pt_regs(current);
-@@ -73,15 +150,28 @@ static int unwind_user_next_fp(struct unwind_user_state *state)
- 		const struct unwind_user_frame fp_entry_frame = {
- 			ARCH_INIT_USER_FP_ENTRY_FRAME(state->ws)
- 		};
--		return unwind_user_next_common(state, &fp_entry_frame);
-+		return unwind_user_next_common(state, &fp_entry_frame,
-+					       /*signal=*/false);
- 	}
- 
- 	const struct unwind_user_frame fp_frame = {
- 		ARCH_INIT_USER_FP_FRAME(state->ws)
- 	};
--	return unwind_user_next_common(state, &fp_frame);
-+	return unwind_user_next_common(state, &fp_frame, /*signal=*/false);
- }
- 
-+/**
-+ * unwind_user_next() - Advance @state to the next outer user-space stack frame
-+ * @state: Current user unwind state.
-+ *
-+ * Checks architectural signal-trampoline unwinding first, then attempts each
-+ * enabled method in @state->available_types in priority order (Minimal DWARF
-+ * CFI first, falling back per frame to frame pointers when an executable
-+ * mapping such as JIT code lacks .eh_frame_hdr).
-+ *
-+ * Return: 0 on success, or -EINVAL when no unwind method succeeds or the walk
-+ * has reached the bottom of the stack (setting @state->done).
-+ */
- static int unwind_user_next(struct unwind_user_state *state)
- {
- 	unsigned long iter_mask = state->available_types;
-@@ -90,11 +180,28 @@ static int unwind_user_next(struct unwind_user_state *state)
- 	if (state->done)
- 		return -EINVAL;
- 
-+	if (state->nr_signals < UNWIND_USER_MAX_SIGNALS &&
-+	    unwind_user_sigreturn(state)) {
-+		state->nr_signals++;
++	return n;
++}
++
++static int ptr_enc_size(uint8_t enc, uint8_t addr_size)
++{
++	if (enc == DW_EH_PE_omit)
 +		return 0;
++	switch (enc & DW_EH_PE_FORM) {
++	case DW_EH_PE_absptr:
++		return addr_size;
++	case DW_EH_PE_udata2:
++	case DW_EH_PE_sdata2:
++		return 2;
++	case DW_EH_PE_udata4:
++	case DW_EH_PE_sdata4:
++		return 4;
++	case DW_EH_PE_udata8:
++	case DW_EH_PE_sdata8:
++		return 8;
++	default:
++		return -1;
 +	}
++}
 +
- 	for_each_set_bit(bit, &iter_mask, NR_UNWIND_USER_TYPE_BITS) {
- 		enum unwind_user_type type = BIT(bit);
- 
- 		state->current_type = type;
- 		switch (type) {
-+		case UNWIND_USER_TYPE_CFI: {
-+			struct unwind_user_frame frame;
-+			bool signal = false;
++static bool rows_equal(const struct min_row *a, const struct min_row *b)
++{
++	if (a->cfa_kind != b->cfa_kind || a->cfa_off != b->cfa_off ||
++	    a->fp_rule != b->fp_rule || a->ra_rule != b->ra_rule ||
++	    a->ra_signed != b->ra_signed)
++		return false;
++	if (a->cfa_kind == 1 && a->cfa_reg != b->cfa_reg)
++		return false;
++	if ((a->fp_rule == 1 || a->fp_rule == 2 || a->fp_rule == 4) &&
++	    a->fp_off != b->fp_off)
++		return false;
++	if ((a->ra_rule == 1 || a->ra_rule == 4) &&
++	    a->ra_off != b->ra_off)
++		return false;
++	return true;
++}
 +
-+			if (!unwind_user_next_cfi(state, &frame, &signal) &&
-+			    !unwind_user_next_common(state, &frame, signal))
-+				return 0;
-+			if (state->done)
-+				break;
++static int mul_s32(int64_t a, int64_t b, int32_t *out)
++{
++	int64_t prod = a * b;
++
++	if (prod < INT32_MIN || prod > INT32_MAX)
++		return -1;
++	*out = (int32_t)prod;
++	return 0;
++}
++
++static int add_adv_u32(uint32_t *acc, uint32_t delta)
++{
++	if (UINT32_MAX - *acc < delta)
++		return -1;
++	*acc += delta;
++	return 0;
++}
++
++static bool has_reloc_in_range(const Elf64_Rela *relas, size_t nrelas,
++			       size_t lo, size_t hi)
++{
++	for (size_t i = 0; i < nrelas; i++) {
++		if (relas[i].r_offset >= lo && relas[i].r_offset < hi)
++			return true;
++	}
++	return false;
++}
++
++static void flush_adv_bytes(struct byte_buf *out_bytes, uint32_t *acc)
++{
++	uint8_t abuf[5];
++	uint32_t v = *acc;
++
++	if (!v)
++		return;
++	if (v <= 0x3f) {
++		abuf[0] = 0x40 | (uint8_t)v;
++		buf_append(out_bytes, abuf, 1);
++	} else if (v <= 0xff) {
++		abuf[0] = DW_CFA_advance_loc1;
++		abuf[1] = (uint8_t)v;
++		buf_append(out_bytes, abuf, 2);
++	} else if (v <= 0xffff) {
++		abuf[0] = DW_CFA_advance_loc2;
++		put_le16(abuf + 1, (uint16_t)v);
++		buf_append(out_bytes, abuf, 3);
++	} else {
++		abuf[0] = DW_CFA_advance_loc4;
++		put_le32(abuf + 1, v);
++		buf_append(out_bytes, abuf, 5);
++	}
++	*acc = 0;
++}
++
++/*
++ * Filter a CIE or FDE instruction stream down to Minimal DWARF CFA opcodes:
++ *  - Drop untracked GPR spills/restores, DW_CFA_nop, and DW_CFA_GNU_args_size
++ *  - Elide redundant state transitions and empty remember_state/restore_state
++ *  - Coalesce non-relocated DW_CFA_advance_loc* ops into minimal encodings and
++ *    drop trailing PC advances after the final state change
++ *  - Return -1 if an FDE uses opcodes or DWARF expressions outside the Minimal
++ *    DWARF subset so the caller can drop that FDE cleanly.
++ */
++static int minify_insns(const uint8_t *insns, size_t end, size_t insns_eh_off,
++			const Elf64_Rela *insn_relas, size_t n_insn_relas,
++			const struct cie_info *cie, const struct arch_cfg *arch,
++			bool is_cie, struct min_row *io_row,
++			struct byte_buf *out_bytes,
++			struct reloc_map **out_rmaps, size_t *out_nrmaps)
++{
++	size_t cap = end + 16;
++	struct out_event *evs = calloc(cap, sizeof(*evs));
++	size_t nev = 0;
++	uint32_t pending_adv = 0;
++	struct min_row row = *io_row;
++	struct min_row cie_base = *io_row;
++	struct {
++		struct min_row saved;
++		size_t ev_idx;
++	} stack[4];
++	unsigned int sp = 0;
++	size_t pos = 0;
++	int ret = -1;
++
++	if (!evs)
++		return -1;
++
++#define EMIT_OP(raw_ptr, raw_len) do {					\
++	if (pending_adv > 0 && !is_cie) {				\
++		evs[nev].is_adv = true;					\
++		evs[nev].adv = pending_adv;				\
++		nev++;							\
++		pending_adv = 0;					\
++	}								\
++	evs[nev].is_adv = false;					\
++	evs[nev].len = (raw_len);					\
++	memcpy(evs[nev].bytes, (raw_ptr), (raw_len));			\
++	nev++;								\
++} while (0)
++
++#define EMIT_REL_ADV(op_pos, op_len) do {				\
++	if (pending_adv > 0 && !is_cie) {				\
++		evs[nev].is_adv = true;					\
++		evs[nev].adv = pending_adv;				\
++		nev++;							\
++		pending_adv = 0;					\
++	}								\
++	evs[nev].is_adv = true;						\
++	evs[nev].has_reloc = true;					\
++	evs[nev].orig_off = insns_eh_off + (op_pos);			\
++	evs[nev].len = (op_len);					\
++	memcpy(evs[nev].bytes, insns + (op_pos), (op_len));		\
++	nev++;								\
++} while (0)
++
++	while (pos < end) {
++		size_t op_start = pos;
++		uint8_t op = insns[pos++];
++		uint8_t hi = op & 0xc0;
++		uint8_t lo = op & 0x3f;
++		uint8_t tmp[16];
++		size_t tn;
++		uint32_t reg, uval;
++		int32_t sval;
++
++		if (nev + 2 >= cap) {
++			struct out_event *nevs;
++
++			cap *= 2;
++			nevs = realloc(evs, cap * sizeof(*evs));
++			if (!nevs)
++				goto out;
++			evs = nevs;
++		}
++
++		if (hi == 0x40) {
++			if (!is_cie && n_insn_relas &&
++			    has_reloc_in_range(insn_relas, n_insn_relas,
++					       insns_eh_off + op_start,
++					       insns_eh_off + pos)) {
++				EMIT_REL_ADV(op_start, 1);
++				continue;
++			}
++			if (add_adv_u32(&pending_adv, lo))
++				goto out;
 +			continue;
 +		}
- 		case UNWIND_USER_TYPE_FP:
- 			if (!unwind_user_next_fp(state))
- 				return 0;
-@@ -112,6 +219,16 @@ static int unwind_user_next(struct unwind_user_state *state)
- 	return -EINVAL;
- }
- 
-+/**
-+ * unwind_user_start() - Initialize user-space stack unwinding from current task
-+ * @state: Unwind state structure to initialize.
-+ *
-+ * Populates @state from task_pt_regs(current) if the current task is a user
-+ * task with valid user-mode registers.
-+ *
-+ * Return: 0 on success, or -EINVAL if current is a kernel thread, not in user
-+ * mode, or running in an unsupported execution mode (e.g. x86 VM86).
-+ */
- static int unwind_user_start(struct unwind_user_state *state)
- {
- 	struct pt_regs *regs = task_pt_regs(current);
-@@ -123,12 +240,15 @@ static int unwind_user_start(struct unwind_user_state *state)
- 		return -EINVAL;
- 	}
- 
-+	if (IS_ENABLED(CONFIG_HAVE_UNWIND_USER_CFI))
-+		state->available_types |= UNWIND_USER_TYPE_CFI;
- 	if (IS_ENABLED(CONFIG_HAVE_UNWIND_USER_FP))
- 		state->available_types |= UNWIND_USER_TYPE_FP;
- 
- 	state->ip = instruction_pointer(regs);
- 	state->sp = user_stack_pointer(regs);
--	state->fp = frame_pointer(regs);
-+	state->fp = unwind_user_frame_pointer(regs);
-+	state->ra_valid = unwind_user_link_register(regs, &state->ra);
- 	state->ws = unwind_user_word_size(regs);
- 	if (!state->ws) {
- 		state->done = true;
-@@ -139,6 +259,17 @@ static int unwind_user_start(struct unwind_user_state *state)
- 	return 0;
- }
- 
-+/**
-+ * unwind_user() - Capture a user-space stack trace for the current task
-+ * @trace: Output stack trace descriptor with caller-allocated @trace->entries.
-+ * @max_entries: Maximum number of instruction pointers to store in @trace.
-+ *
-+ * Must be called in sleepable task context (e.g. syscall return / task_work
-+ * deferred unwinding) because user stack and ELF .eh_frame_hdr reads may fault.
-+ *
-+ * Return: 0 on success (including 0 entries for kernel threads), or -EINVAL if
-+ * @max_entries is 0.
-+ */
- int unwind_user(struct unwind_stacktrace *trace, unsigned int max_entries)
- {
- 	struct unwind_user_state state;
-diff --git a/kernel/unwind/user_cfi.c b/kernel/unwind/user_cfi.c
-new file mode 100644
-index 000000000000..f3abd58eacd3
---- /dev/null
-+++ b/kernel/unwind/user_cfi.c
-@@ -0,0 +1,378 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * User-space Minimal DWARF CFI unwinding via ELF PT_GNU_EH_FRAME.
-+ */
++		if (hi == 0x80) {
++			if (read_uleb128(insns, &pos, end, &uval))
++				goto out;
++			if (lo == arch->fp_reg || lo == cie->ra_reg) {
++				int32_t off;
 +
-+#include <linux/elf.h>
-+#include <linux/errno.h>
-+#include <linux/kernel.h>
-+#include <linux/mm.h>
-+#include <linux/mmap_lock.h>
-+#include <linux/sched.h>
-+#include <linux/uaccess.h>
-+#include <linux/unwind_dwarf_cfi.h>
-+#include <linux/unwind_user.h>
++				if (mul_s32(uval, cie->data_align, &off))
++					goto out;
 +
-+#define USER_CFI_MAX_PHDRS	64U
-+#define USER_CFI_MAX_VMA_STEPS	8U
-+
-+/**
-+ * parse_user_elf64_eh_hdr() - Locate PT_GNU_EH_FRAME in a 64-bit user ELF image
-+ * @elf_base: User virtual address of the mapped ELF64 header (file offset 0).
-+ * @hdr_uaddr: Output user virtual address of the PT_GNU_EH_FRAME segment.
-+ * @hdr_size: Output size in bytes of the PT_GNU_EH_FRAME segment.
-+ *
-+ * Reads the 64-bit ELF header and up to %USER_CFI_MAX_PHDRS program headers
-+ * from user memory, computes the mapping load bias from the file-offset-0
-+ * PT_LOAD segment, and resolves the runtime address of PT_GNU_EH_FRAME.
-+ * Must be called without holding mmap_lock because copy_from_user() may fault.
-+ *
-+ * Return: 0 on success, -ENOENT if no non-empty PT_GNU_EH_FRAME or base
-+ * PT_LOAD segment exists, -EINVAL if the ELF header is invalid, or -EFAULT on
-+ * an unmapped user read.
-+ */
-+static int parse_user_elf64_eh_hdr(unsigned long elf_base,
-+				   unsigned long *hdr_uaddr, size_t *hdr_size)
-+{
-+	Elf64_Ehdr ehdr;
-+	unsigned long load_bias = 0;
-+	bool have_load0 = false, have_eh = false;
-+	Elf64_Addr eh_vaddr = 0;
-+	Elf64_Xword eh_memsz = 0;
-+	unsigned int i;
-+
-+	if (copy_from_user(&ehdr, (const void __user *)elf_base, sizeof(ehdr)))
-+		return -EFAULT;
-+
-+	if (memcmp(ehdr.e_ident, ELFMAG, SELFMAG) != 0 ||
-+	    ehdr.e_ident[EI_CLASS] != ELFCLASS64 ||
-+	    ehdr.e_phentsize != sizeof(Elf64_Phdr) ||
-+	    !ehdr.e_phnum || ehdr.e_phnum > USER_CFI_MAX_PHDRS)
-+		return -EINVAL;
-+
-+	for (i = 0; i < ehdr.e_phnum; i++) {
-+		Elf64_Phdr phdr;
-+		unsigned long p_addr = elf_base + ehdr.e_phoff +
-+				       (size_t)i * sizeof(phdr);
-+
-+		if (copy_from_user(&phdr, (const void __user *)p_addr, sizeof(phdr)))
-+			return -EFAULT;
-+
-+		if (phdr.p_type == PT_LOAD && !have_load0 && phdr.p_offset == 0) {
-+			load_bias = elf_base - ALIGN_DOWN(phdr.p_vaddr, PAGE_SIZE);
-+			have_load0 = true;
-+		} else if (phdr.p_type == PT_GNU_EH_FRAME) {
-+			eh_vaddr = phdr.p_vaddr;
-+			eh_memsz = phdr.p_memsz;
-+			have_eh = true;
++				if (lo == arch->fp_reg &&
++				    (row.fp_rule != 1 || row.fp_off != off)) {
++					row.fp_rule = 1;
++					row.fp_off = off;
++					tmp[0] = 0x80 | lo;
++					tn = 1 + encode_uleb128(uval, tmp + 1);
++					EMIT_OP(tmp, tn);
++				} else if (lo == cie->ra_reg &&
++					   (row.ra_rule != 1 || row.ra_off != off)) {
++					row.ra_rule = 1;
++					row.ra_off = off;
++					tmp[0] = 0x80 | lo;
++					tn = 1 + encode_uleb128(uval, tmp + 1);
++					EMIT_OP(tmp, tn);
++				}
++			}
++			continue;
 +		}
-+	}
-+
-+	if (!have_load0 || !have_eh || !eh_memsz)
-+		return -ENOENT;
-+
-+	*hdr_uaddr = load_bias + eh_vaddr;
-+	*hdr_size = (size_t)eh_memsz;
-+	return 0;
-+}
-+
-+/**
-+ * parse_user_elf32_eh_hdr() - Locate PT_GNU_EH_FRAME in a 32-bit user ELF image
-+ * @elf_base: User virtual address of the mapped ELF32 header (file offset 0).
-+ * @hdr_uaddr: Output user virtual address of the PT_GNU_EH_FRAME segment.
-+ * @hdr_size: Output size in bytes of the PT_GNU_EH_FRAME segment.
-+ *
-+ * 32-bit compat counterpart to parse_user_elf64_eh_hdr(). Must be called
-+ * without holding mmap_lock.
-+ *
-+ * Return: 0 on success, -ENOENT if no non-empty PT_GNU_EH_FRAME or base
-+ * PT_LOAD segment exists, -EINVAL if the ELF header is invalid, or -EFAULT on
-+ * an unmapped user read.
-+ */
-+static int parse_user_elf32_eh_hdr(unsigned long elf_base,
-+				   unsigned long *hdr_uaddr, size_t *hdr_size)
-+{
-+	Elf32_Ehdr ehdr;
-+	unsigned long load_bias = 0;
-+	bool have_load0 = false, have_eh = false;
-+	Elf32_Addr eh_vaddr = 0;
-+	Elf32_Word eh_memsz = 0;
-+	unsigned int i;
-+
-+	if (copy_from_user(&ehdr, (const void __user *)elf_base, sizeof(ehdr)))
-+		return -EFAULT;
-+
-+	if (memcmp(ehdr.e_ident, ELFMAG, SELFMAG) != 0 ||
-+	    ehdr.e_ident[EI_CLASS] != ELFCLASS32 ||
-+	    ehdr.e_phentsize != sizeof(Elf32_Phdr) ||
-+	    !ehdr.e_phnum || ehdr.e_phnum > USER_CFI_MAX_PHDRS)
-+		return -EINVAL;
-+
-+	for (i = 0; i < ehdr.e_phnum; i++) {
-+		Elf32_Phdr phdr;
-+		unsigned long p_addr = elf_base + ehdr.e_phoff +
-+				       (size_t)i * sizeof(phdr);
-+
-+		if (copy_from_user(&phdr, (const void __user *)p_addr, sizeof(phdr)))
-+			return -EFAULT;
-+
-+		if (phdr.p_type == PT_LOAD && !have_load0 && phdr.p_offset == 0) {
-+			load_bias = elf_base - ALIGN_DOWN((unsigned long)phdr.p_vaddr,
-+							  PAGE_SIZE);
-+			have_load0 = true;
-+		} else if (phdr.p_type == PT_GNU_EH_FRAME) {
-+			eh_vaddr = phdr.p_vaddr;
-+			eh_memsz = phdr.p_memsz;
-+			have_eh = true;
++		if (hi == 0xc0) {
++			if (lo == arch->fp_reg &&
++			    (row.fp_rule != cie_base.fp_rule ||
++			     ((cie_base.fp_rule == 1 || cie_base.fp_rule == 2 ||
++			       cie_base.fp_rule == 4) &&
++			      row.fp_off != cie_base.fp_off))) {
++				row.fp_rule = cie_base.fp_rule;
++				row.fp_off = cie_base.fp_off;
++				tmp[0] = 0xc0 | lo;
++				EMIT_OP(tmp, 1);
++			} else if (lo == cie->ra_reg &&
++				   (row.ra_rule != cie_base.ra_rule ||
++				    ((cie_base.ra_rule == 1 ||
++				      cie_base.ra_rule == 4) &&
++				     row.ra_off != cie_base.ra_off))) {
++				row.ra_rule = cie_base.ra_rule;
++				row.ra_off = cie_base.ra_off;
++				tmp[0] = 0xc0 | lo;
++				EMIT_OP(tmp, 1);
++			}
++			continue;
 +		}
-+	}
 +
-+	if (!have_load0 || !have_eh || !eh_memsz)
-+		return -ENOENT;
-+
-+	*hdr_uaddr = load_bias + eh_vaddr;
-+	*hdr_size = (size_t)eh_memsz;
-+	return 0;
-+}
-+
-+/**
-+ * lookup_vma_elf_base_locked() - Find the ELF base mapping for an executable IP
-+ * @mm: Address space of the current user task (mmap_lock held for read).
-+ * @ip: User instruction pointer to resolve.
-+ * @vma_start: Output start address of the executable VMA containing @ip.
-+ * @vma_end: Output end address of the executable VMA containing @ip (left
-+ *           unchanged if @ip does not lie in an executable VMA).
-+ * @elf_base: Output start address of the file-offset-0 ELF header mapping.
-+ *
-+ * Modern linkers (-z separate-code) often place the ELF header in a preceding
-+ * read-only VMA at vm_pgoff == 0 while mapping .text into a separate VM_EXEC
-+ * VMA with vm_pgoff > 0. Walk up to %USER_CFI_MAX_VMA_STEPS preceding VMAs
-+ * backed by the same file to locate the vm_pgoff == 0 mapping, while also
-+ * supporting single-VMA binaries and special mappings such as [vdso].
-+ *
-+ * Return: true if an ELF base mapping was found and stored in *@elf_base,
-+ * false otherwise.
-+ */
-+static bool lookup_vma_elf_base_locked(struct mm_struct *mm, unsigned long ip,
-+				       unsigned long *vma_start,
-+				       unsigned long *vma_end,
-+				       unsigned long *elf_base)
-+{
-+	struct vm_area_struct *vma = vma_lookup(mm, ip);
-+	struct vm_area_struct *prev;
-+	struct file *target_file;
-+	unsigned int steps = 0;
-+
-+	if (!vma || !(vma->vm_flags & VM_EXEC))
-+		return false;
-+
-+	*vma_start = vma->vm_start;
-+	*vma_end = vma->vm_end;
-+
-+	if (vma_is_anonymous(vma) || !vma->vm_file) {
-+		if (vma->vm_pgoff == 0) {
-+			/* Special mappings such as [vdso] */
-+			*elf_base = vma->vm_start;
-+			return true;
-+		}
-+		return false;
-+	}
-+
-+	if (vma->vm_pgoff == 0) {
-+		*elf_base = vma->vm_start;
-+		return true;
-+	}
-+
-+	target_file = vma->vm_file;
-+	{
-+		VMA_ITERATOR(vmi, mm, vma->vm_start);
-+
-+		while (steps++ < USER_CFI_MAX_VMA_STEPS &&
-+		       (prev = vma_prev(&vmi)) != NULL) {
-+			if (vma_is_anonymous(prev) || prev->vm_file != target_file)
++		switch (op) {
++		case DW_CFA_nop:
++			break;
++		case DW_CFA_advance_loc1:
++			if (pos + 1 > end)
++				goto out;
++			pos += 1;
++			if (!is_cie && n_insn_relas &&
++			    has_reloc_in_range(insn_relas, n_insn_relas,
++					       insns_eh_off + op_start,
++					       insns_eh_off + pos)) {
++				EMIT_REL_ADV(op_start, 2);
 +				break;
-+			if (prev->vm_pgoff == 0) {
-+				*elf_base = prev->vm_start;
-+				return true;
++			}
++			if (add_adv_u32(&pending_adv, insns[op_start + 1]))
++				goto out;
++			break;
++		case DW_CFA_advance_loc2:
++			if (pos + 2 > end)
++				goto out;
++			pos += 2;
++			if (!is_cie && n_insn_relas &&
++			    has_reloc_in_range(insn_relas, n_insn_relas,
++					       insns_eh_off + op_start,
++					       insns_eh_off + pos)) {
++				EMIT_REL_ADV(op_start, 3);
++				break;
++			}
++			if (add_adv_u32(&pending_adv, get_le16(insns + op_start + 1)))
++				goto out;
++			break;
++		case DW_CFA_advance_loc4:
++			if (pos + 4 > end)
++				goto out;
++			pos += 4;
++			if (!is_cie && n_insn_relas &&
++			    has_reloc_in_range(insn_relas, n_insn_relas,
++					       insns_eh_off + op_start,
++					       insns_eh_off + pos)) {
++				EMIT_REL_ADV(op_start, 5);
++				break;
++			}
++			if (add_adv_u32(&pending_adv, get_le32(insns + op_start + 1)))
++				goto out;
++			break;
++		case DW_CFA_def_cfa:
++			if (read_uleb128(insns, &pos, end, &reg) ||
++			    read_uleb128(insns, &pos, end, &uval) ||
++			    reg > 255 || uval > INT32_MAX)
++				goto out;
++			if (row.cfa_kind != 1 || row.cfa_reg != reg ||
++			    row.cfa_off != (int32_t)uval) {
++				row.cfa_kind = 1;
++				row.cfa_reg = (uint8_t)reg;
++				row.cfa_off = (int32_t)uval;
++				tmp[0] = DW_CFA_def_cfa;
++				tn = 1 + encode_uleb128(reg, tmp + 1);
++				tn += encode_uleb128(uval, tmp + tn);
++				EMIT_OP(tmp, tn);
++			}
++			break;
++		case DW_CFA_def_cfa_sf:
++			if (read_uleb128(insns, &pos, end, &reg) ||
++			    read_sleb128(insns, &pos, end, &sval) || reg > 255 ||
++			    mul_s32(sval, cie->data_align, &row.cfa_off))
++				goto out;
++			row.cfa_kind = 1;
++			row.cfa_reg = (uint8_t)reg;
++			tmp[0] = DW_CFA_def_cfa_sf;
++			tn = 1 + encode_uleb128(reg, tmp + 1);
++			tn += encode_sleb128(sval, tmp + tn);
++			EMIT_OP(tmp, tn);
++			break;
++		case DW_CFA_def_cfa_register:
++			if (row.cfa_kind != 1 ||
++			    read_uleb128(insns, &pos, end, &reg) || reg > 255)
++				goto out;
++			if (row.cfa_reg != reg) {
++				row.cfa_reg = (uint8_t)reg;
++				tmp[0] = DW_CFA_def_cfa_register;
++				tn = 1 + encode_uleb128(reg, tmp + 1);
++				EMIT_OP(tmp, tn);
++			}
++			break;
++		case DW_CFA_def_cfa_offset:
++			if (row.cfa_kind != 1 ||
++			    read_uleb128(insns, &pos, end, &uval) ||
++			    uval > INT32_MAX)
++				goto out;
++			if (row.cfa_off != (int32_t)uval) {
++				row.cfa_off = (int32_t)uval;
++				tmp[0] = DW_CFA_def_cfa_offset;
++				tn = 1 + encode_uleb128(uval, tmp + 1);
++				EMIT_OP(tmp, tn);
++			}
++			break;
++		case DW_CFA_def_cfa_offset_sf:
++			if (row.cfa_kind != 1 ||
++			    read_sleb128(insns, &pos, end, &sval) ||
++			    mul_s32(sval, cie->data_align, &row.cfa_off))
++				goto out;
++			tmp[0] = DW_CFA_def_cfa_offset_sf;
++			tn = 1 + encode_sleb128(sval, tmp + 1);
++			EMIT_OP(tmp, tn);
++			break;
++		case DW_CFA_offset_extended:
++			if (read_uleb128(insns, &pos, end, &reg) ||
++			    read_uleb128(insns, &pos, end, &uval))
++				goto out;
++			if (reg == arch->fp_reg || reg == cie->ra_reg) {
++				int32_t off;
++
++				if (mul_s32(uval, cie->data_align, &off))
++					goto out;
++
++				if (reg == arch->fp_reg) {
++					row.fp_rule = 1;
++					row.fp_off = off;
++				} else {
++					row.ra_rule = 1;
++					row.ra_off = off;
++				}
++				tmp[0] = DW_CFA_offset_extended;
++				tn = 1 + encode_uleb128(reg, tmp + 1);
++				tn += encode_uleb128(uval, tmp + tn);
++				EMIT_OP(tmp, tn);
++			}
++			break;
++		case DW_CFA_offset_extended_sf:
++			if (read_uleb128(insns, &pos, end, &reg) ||
++			    read_sleb128(insns, &pos, end, &sval))
++				goto out;
++			if (reg == arch->fp_reg || reg == cie->ra_reg) {
++				int32_t off;
++
++				if (mul_s32(sval, cie->data_align, &off))
++					goto out;
++
++				if (reg == arch->fp_reg) {
++					row.fp_rule = 1;
++					row.fp_off = off;
++				} else {
++					row.ra_rule = 1;
++					row.ra_off = off;
++				}
++				tmp[0] = DW_CFA_offset_extended_sf;
++				tn = 1 + encode_uleb128(reg, tmp + 1);
++				tn += encode_sleb128(sval, tmp + tn);
++				EMIT_OP(tmp, tn);
++			}
++			break;
++		case DW_CFA_GNU_negative_offset_extended:
++			if (read_uleb128(insns, &pos, end, &reg) ||
++			    read_uleb128(insns, &pos, end, &uval))
++				goto out;
++			if (reg == arch->fp_reg || reg == cie->ra_reg) {
++				int32_t off;
++
++				if (mul_s32(-(int64_t)uval, cie->data_align, &off))
++					goto out;
++
++				if (reg == arch->fp_reg) {
++					row.fp_rule = 1;
++					row.fp_off = off;
++				} else {
++					row.ra_rule = 1;
++					row.ra_off = off;
++				}
++				tmp[0] = DW_CFA_GNU_negative_offset_extended;
++				tn = 1 + encode_uleb128(reg, tmp + 1);
++				tn += encode_uleb128(uval, tmp + tn);
++				EMIT_OP(tmp, tn);
++			}
++			break;
++		case DW_CFA_restore_extended:
++			if (read_uleb128(insns, &pos, end, &reg))
++				goto out;
++			if (reg == arch->fp_reg) {
++				row.fp_rule = cie_base.fp_rule;
++				row.fp_off = cie_base.fp_off;
++				tmp[0] = DW_CFA_restore_extended;
++				tn = 1 + encode_uleb128(reg, tmp + 1);
++				EMIT_OP(tmp, tn);
++			} else if (reg == cie->ra_reg) {
++				row.ra_rule = cie_base.ra_rule;
++				row.ra_off = cie_base.ra_off;
++				tmp[0] = DW_CFA_restore_extended;
++				tn = 1 + encode_uleb128(reg, tmp + 1);
++				EMIT_OP(tmp, tn);
++			}
++			break;
++		case DW_CFA_undefined:
++			if (read_uleb128(insns, &pos, end, &reg))
++				goto out;
++			if (reg == arch->fp_reg || reg == cie->ra_reg) {
++				if (reg == arch->fp_reg) {
++					row.fp_rule = 3;
++					row.fp_off = 0;
++				} else {
++					row.ra_rule = 3;
++					row.ra_off = 0;
++				}
++				tmp[0] = DW_CFA_undefined;
++				tn = 1 + encode_uleb128(reg, tmp + 1);
++				EMIT_OP(tmp, tn);
++			}
++			break;
++		case DW_CFA_same_value:
++			if (read_uleb128(insns, &pos, end, &reg))
++				goto out;
++			if (reg == arch->fp_reg || reg == cie->ra_reg) {
++				if (reg == arch->fp_reg) {
++					row.fp_rule = 0;
++					row.fp_off = 0;
++				} else {
++					row.ra_rule = 0;
++					row.ra_off = 0;
++				}
++				tmp[0] = DW_CFA_same_value;
++				tn = 1 + encode_uleb128(reg, tmp + 1);
++				EMIT_OP(tmp, tn);
++			}
++			break;
++		case DW_CFA_remember_state:
++			if (sp >= 4)
++				goto out;
++			tmp[0] = DW_CFA_remember_state;
++			EMIT_OP(tmp, 1);
++			stack[sp].saved = row;
++			stack[sp].ev_idx = nev - 1;
++			sp++;
++			break;
++		case DW_CFA_restore_state:
++			if (!sp)
++				goto out;
++			sp--;
++			if (!rows_equal(&stack[sp].saved, &row)) {
++				row = stack[sp].saved;
++				tmp[0] = DW_CFA_restore_state;
++				EMIT_OP(tmp, 1);
++			} else {
++				/*
++				 * Elide dead remember_state..restore_state if
++				 * no minimal ops occurred inside.
++				 */
++				size_t ridx = stack[sp].ev_idx;
++				bool only_adv = true;
++				uint32_t extra = 0;
++
++				for (size_t k = ridx + 1; k < nev; k++) {
++					if (!evs[k].is_adv || evs[k].has_reloc) {
++						only_adv = false;
++						break;
++					}
++					if (add_adv_u32(&extra, evs[k].adv))
++						goto out;
++				}
++				if (only_adv) {
++					if (add_adv_u32(&pending_adv, extra))
++						goto out;
++					nev = ridx;
++				} else {
++					tmp[0] = DW_CFA_restore_state;
++					EMIT_OP(tmp, 1);
++				}
++			}
++			break;
++		case DW_CFA_AARCH64_negate_ra_state:
++			if (arch->ra_reg != 30)
++				goto out;
++			row.ra_signed = !row.ra_signed;
++			tmp[0] = DW_CFA_AARCH64_negate_ra_state;
++			EMIT_OP(tmp, 1);
++			break;
++		case DW_CFA_GNU_args_size:
++			if (read_uleb128(insns, &pos, end, &uval))
++				goto out;
++			break;
++		case DW_CFA_register:
++		case DW_CFA_val_offset:
++			if (read_uleb128(insns, &pos, end, &reg) ||
++			    read_uleb128(insns, &pos, end, &uval))
++				goto out;
++			if (reg == arch->sp_reg || reg == arch->fp_reg ||
++			    reg == cie->ra_reg)
++				goto out;
++			break;
++		case DW_CFA_val_offset_sf:
++			if (read_uleb128(insns, &pos, end, &reg) ||
++			    read_sleb128(insns, &pos, end, &sval))
++				goto out;
++			if (reg == arch->sp_reg || reg == arch->fp_reg ||
++			    reg == cie->ra_reg)
++				goto out;
++			break;
++		case DW_CFA_def_cfa_expression: {
++			size_t epos = 1;
++
++			if (read_uleb128(insns, &pos, end, &uval) ||
++			    uval > end - pos || uval < 3 || uval > 7)
++				goto out;
++			if ((insns[pos] != (uint8_t)(DW_OP_breg0 + arch->fp_reg) &&
++			     insns[pos] != (uint8_t)(DW_OP_breg0 + arch->sp_reg)) ||
++			    insns[pos + uval - 1] != DW_OP_deref ||
++			    read_sleb128(insns + pos, &epos, uval - 1, &sval) ||
++			    epos != uval - 1)
++				goto out;
++			row.cfa_kind = (insns[pos] == (uint8_t)(DW_OP_breg0 + arch->fp_reg)) ?
++				       2 : 3;
++			row.cfa_reg = 0;
++			row.cfa_off = sval;
++			tmp[0] = DW_CFA_def_cfa_expression;
++			tn = 1 + encode_uleb128(uval, tmp + 1);
++			memcpy(tmp + tn, insns + pos, uval);
++			tn += uval;
++			pos += uval;
++			EMIT_OP(tmp, tn);
++			break;
++		}
++		case DW_CFA_expression: {
++			size_t epos = 1;
++
++			if (read_uleb128(insns, &pos, end, &reg) ||
++			    read_uleb128(insns, &pos, end, &uval) ||
++			    uval > end - pos)
++				goto out;
++			if (reg == arch->fp_reg || reg == cie->ra_reg) {
++				uint8_t fp_op = DW_OP_breg0 + arch->fp_reg;
++				uint8_t sp_op = DW_OP_breg0 + arch->sp_reg;
++				uint8_t b0 = insns[pos];
++
++				if (uval < 2 || uval > 6 ||
++				    (b0 != fp_op && b0 != sp_op) ||
++				    (reg == cie->ra_reg && b0 != sp_op) ||
++				    read_sleb128(insns + pos, &epos, uval, &sval) ||
++				    epos != uval)
++					goto out;
++				if (reg == arch->fp_reg) {
++					row.fp_rule = (b0 == fp_op) ? 2 : 4;
++					row.fp_off = sval;
++				} else {
++					row.ra_rule = 4;
++					row.ra_off = sval;
++				}
++				tmp[0] = DW_CFA_expression;
++				tn = 1 + encode_uleb128(reg, tmp + 1);
++				tn += encode_uleb128(uval, tmp + tn);
++				memcpy(tmp + tn, insns + pos, uval);
++				tn += uval;
++				pos += uval;
++				EMIT_OP(tmp, tn);
++			} else if (reg == arch->sp_reg) {
++				if (uval < 2 || uval > 6 || row.cfa_kind != 3 ||
++				    insns[pos] != (uint8_t)(DW_OP_breg0 + arch->sp_reg) ||
++				    read_sleb128(insns + pos, &epos, uval, &sval) ||
++				    epos != uval || sval != row.cfa_off)
++					goto out;
++				pos += uval;
++			} else {
++				pos += uval;
++			}
++			break;
++		}
++		case DW_CFA_val_expression:
++			if (read_uleb128(insns, &pos, end, &reg) ||
++			    read_uleb128(insns, &pos, end, &uval) ||
++			    pos + uval > end)
++				goto out;
++			if (reg == arch->sp_reg || reg == arch->fp_reg ||
++			    reg == cie->ra_reg)
++				goto out;
++			pos += uval;
++			break;
++		default:
++			goto out;
++		}
++	}
++
++	/* Drop trailing advance_loc instructions */
++	while (nev > 0 && evs[nev - 1].is_adv)
++		nev--;
++
++	{
++		uint32_t acc = 0;
++		size_t nrm = 0;
++
++		for (size_t i = 0; i < nev; i++) {
++			if (evs[i].is_adv && !evs[i].has_reloc) {
++				if (add_adv_u32(&acc, evs[i].adv))
++					goto out;
++			} else {
++				flush_adv_bytes(out_bytes, &acc);
++				evs[i].new_off = out_bytes->len;
++				if (evs[i].has_reloc)
++					nrm++;
++				buf_append(out_bytes, evs[i].bytes, evs[i].len);
++			}
++		}
++
++		if (nrm && out_rmaps && out_nrmaps) {
++			struct reloc_map *rm = calloc(nrm, sizeof(*rm));
++			size_t idx = 0;
++
++			if (!rm)
++				goto out;
++			for (size_t i = 0; i < nev; i++) {
++				if (!evs[i].has_reloc)
++					continue;
++				rm[idx].orig_off = evs[i].orig_off;
++				rm[idx].len = evs[i].len;
++				rm[idx].new_off = evs[i].new_off;
++				idx++;
++			}
++			*out_rmaps = rm;
++			*out_nrmaps = nrm;
++		}
++	}
++
++	*io_row = row;
++	ret = 0;
++out:
++#undef EMIT_REL_ADV
++#undef EMIT_OP
++	free(evs);
++	return ret;
++}
++
++static int anchor_add(struct anchor_list *al, size_t old_off, size_t len,
++		      size_t new_off)
++{
++	if (al->len == al->cap) {
++		size_t ncap = al->cap ? al->cap * 2 : 128;
++		struct eh_anchor *nd = realloc(al->data, ncap * sizeof(*nd));
++
++		if (!nd)
++			return -1;
++		al->data = nd;
++		al->cap = ncap;
++	}
++	al->data[al->len++] = (struct eh_anchor){ old_off, len, new_off };
++	return 0;
++}
++
++static int anchor_find_exact(const struct anchor_list *al, size_t old_off,
++			     size_t *out_new_off)
++{
++	size_t lo = 0, hi = al->len;
++
++	while (lo < hi) {
++		size_t mid = lo + (hi - lo) / 2;
++
++		if (al->data[mid].old_off <= old_off)
++			lo = mid + 1;
++		else
++			hi = mid;
++	}
++	if (!lo)
++		return -1;
++	lo--;
++	if (old_off == al->data[lo].old_off ||
++	    old_off - al->data[lo].old_off < al->data[lo].len) {
++		*out_new_off = al->data[lo].new_off +
++			       (old_off - al->data[lo].old_off);
++		return 0;
++	}
++	return -1;
++}
++
++static size_t anchor_clamp_map(const struct anchor_list *al, size_t old_off,
++			       size_t max_new)
++{
++	size_t mapped = 0;
++
++	if (anchor_find_exact(al, old_off, &mapped) == 0)
++		return mapped <= max_new ? mapped : max_new;
++
++	for (size_t i = al->len; i-- > 0;) {
++		if (al->data[i].old_off <= old_off) {
++			size_t end_new = al->data[i].new_off + al->data[i].len;
++
++			return end_new <= max_new ? end_new : max_new;
++		}
++	}
++	return 0;
++}
++
++static bool sym_is_in_eh_frame(const Elf64_Sym *sym, size_t sym_i,
++			       uint32_t eh_idx, const uint32_t *shndx_tab,
++			       size_t nshndx)
++{
++	if (sym->st_shndx == SHN_XINDEX)
++		return shndx_tab && sym_i < nshndx && shndx_tab[sym_i] == eh_idx;
++	if (sym->st_shndx >= SHN_LORESERVE)
++		return false;
++	return sym->st_shndx == eh_idx;
++}
++
++static int cmp_rela_off(const void *a, const void *b)
++{
++	const struct indexed_rela *ra = a;
++	const struct indexed_rela *rb = b;
++
++	if (ra->rela.r_offset != rb->rela.r_offset)
++		return (ra->rela.r_offset > rb->rela.r_offset) -
++		       (ra->rela.r_offset < rb->rela.r_offset);
++	return (ra->orig_idx > rb->orig_idx) - (ra->orig_idx < rb->orig_idx);
++}
++
++static size_t lower_bound_rela(const Elf64_Rela *relas, size_t nrelas, size_t off)
++{
++	size_t lo = 0, hi = nrelas;
++
++	while (lo < hi) {
++		size_t mid = lo + (hi - lo) / 2;
++
++		if (relas[mid].r_offset < off)
++			lo = mid + 1;
++		else
++			hi = mid;
++	}
++	return lo;
++}
++
++static int remap_fde_relocs(const Elf64_Rela *loc_relas, size_t n_loc_relas,
++			    size_t max_out_relas, size_t loc_off,
++			    size_t new_fde_off,
++			    const Elf64_Rela *insn_relas, size_t n_insn_relas,
++			    const struct reloc_map *rmaps, size_t nrmaps,
++			    size_t new_insns_base,
++			    Elf64_Rela *out_relas, size_t *out_nrelas)
++{
++	for (size_t r = 0; r < n_loc_relas; r++) {
++		if (*out_nrelas >= max_out_relas)
++			return -1;
++		out_relas[*out_nrelas] = loc_relas[r];
++		out_relas[(*out_nrelas)++].r_offset =
++			new_fde_off + 8 + (loc_relas[r].r_offset - loc_off);
++	}
++
++	for (size_t m = 0; m < nrmaps; m++) {
++		size_t lo = rmaps[m].orig_off;
++		size_t hi = lo + rmaps[m].len;
++
++		for (size_t r = 0; r < n_insn_relas; r++) {
++			if (insn_relas[r].r_offset < lo ||
++			    insn_relas[r].r_offset >= hi)
++				continue;
++			if (*out_nrelas >= max_out_relas)
++				return -1;
++			out_relas[*out_nrelas] = insn_relas[r];
++			out_relas[(*out_nrelas)++].r_offset =
++				new_insns_base + rmaps[m].new_off +
++				(insn_relas[r].r_offset - lo);
++		}
++	}
++	return 0;
++}
++
++static int parse_cie_record(const uint8_t *eh_in, size_t p, size_t rec_end,
++			    const struct arch_cfg *arch, struct cie_info *cie,
++			    size_t *out_insns_off)
++{
++	uint8_t ver;
++	const char *aug;
++	size_t aug_len_str;
++	uint32_t ra_col;
++
++	if (p >= rec_end)
++		return -1;
++	ver = eh_in[p++];
++	aug = (const char *)(eh_in + p);
++	aug_len_str = strnlen(aug, rec_end - p);
++	if (p + aug_len_str >= rec_end)
++		return -1;
++	p += aug_len_str + 1;
++	if (ver == 4) {
++		if (p + 2 > rec_end)
++			return -1;
++		p += 2;
++	}
++	if (read_uleb128(eh_in, &p, rec_end, &cie->code_align) ||
++	    read_sleb128(eh_in, &p, rec_end, &cie->data_align))
++		return -1;
++	if (ver == 1) {
++		if (p >= rec_end)
++			return -1;
++		ra_col = eh_in[p++];
++	} else if (read_uleb128(eh_in, &p, rec_end, &ra_col)) {
++		return -1;
++	}
++	cie->ra_reg = (uint8_t)ra_col;
++	cie->fde_enc = DW_EH_PE_absptr;
++
++	if (aug[0] == 'z') {
++		uint32_t alen;
++		size_t aend;
++
++		cie->has_z = true;
++		if (read_uleb128(eh_in, &p, rec_end, &alen) ||
++		    alen > rec_end - p)
++			return -1;
++		aend = p + alen;
++		for (size_t k = 1; aug[k]; k++) {
++			uint8_t penc;
++			int psz;
++
++			if (aug[k] == 'R') {
++				if (p >= aend)
++					return -1;
++				cie->fde_enc = eh_in[p++];
++				if (cie->fde_enc & DW_EH_PE_indirect)
++					return -1;
++			} else if (aug[k] == 'L') {
++				if (p >= aend)
++					return -1;
++				p++;
++			} else if (aug[k] == 'P') {
++				if (p >= aend)
++					return -1;
++				penc = eh_in[p++];
++				psz = ptr_enc_size(penc & ~DW_EH_PE_indirect,
++						   arch->addr_size);
++				if (psz < 0 || (size_t)psz > aend - p)
++					return -1;
++				p += (size_t)psz;
++			} else if (aug[k] == 'S') {
++				cie->is_signal = true;
++			} else if (aug[k] != 'B') {
++				return -1;
++			}
++		}
++		p = aend;
++	} else if (aug[0] != '\0') {
++		return -1;
++	}
++
++	*out_insns_off = p;
++	return 0;
++}
++
++/*
++ * Rewrite a 64-bit little-endian ET_REL object's .eh_frame and .rela.eh_frame
++ * sections in place. Objects with unexpected formats or external relocations
++ * into .eh_frame are left untouched (returning 0) so the build never breaks on
++ * unusual hand-crafted assembly objects.
++ */
++static int process_elf64(uint8_t *map, size_t file_size)
++{
++	Elf64_Ehdr *ehdr = (Elf64_Ehdr *)map;
++	Elf64_Shdr *shdrs;
++	uint32_t shnum, shstrndx;
++	const char *shstrtab;
++	Elf64_Shdr *eh_shdr = NULL, *rela_shdr = NULL, *sym_shdr = NULL;
++	uint32_t eh_idx = 0, sym_idx = 0;
++	Elf64_Sym *syms = NULL;
++	size_t nsyms = 0, nshndx = 0;
++	const uint32_t *shndx_tab = NULL;
++	struct arch_cfg arch;
++	const uint8_t *eh_in;
++	size_t eh_in_len;
++	Elf64_Rela *sorted_relas = NULL;
++	size_t nrelas = 0, out_nrelas = 0;
++	Elf64_Rela *out_relas = NULL;
++	struct cie_info *cies = NULL;
++	size_t ncies = 0, cies_cap = 0;
++	struct anchor_list anchors = {};
++	struct byte_buf out_eh = {};
++	size_t last_len_pos = 0;
++	bool have_last_rec = false;
++	size_t pos = 0;
++
++	if (ehdr->e_type != ET_REL)
++		return 0;
++
++	if (ehdr->e_machine == EM_X86_64)
++		arch = (struct arch_cfg){ 8, 7, 6, 16 };
++	else if (ehdr->e_machine == EM_AARCH64)
++		arch = (struct arch_cfg){ 8, 31, 29, 30 };
++	else if (ehdr->e_machine == EM_RISCV)
++		arch = (struct arch_cfg){ 8, 2, 8, 1 };
++	else
++		return 0;
++
++	if (!ehdr->e_shoff || (ehdr->e_shoff & 7) ||
++	    ehdr->e_shoff > file_size ||
++	    file_size - ehdr->e_shoff < sizeof(Elf64_Shdr))
++		return 0;
++	if (ehdr->e_shentsize != sizeof(Elf64_Shdr))
++		return -1;
++
++	shdrs = (Elf64_Shdr *)(map + ehdr->e_shoff);
++	shnum = ehdr->e_shnum ? ehdr->e_shnum : (uint32_t)shdrs[0].sh_size;
++	if (!shnum ||
++	    (size_t)shnum > (file_size - ehdr->e_shoff) / sizeof(Elf64_Shdr))
++		return -1;
++	shstrndx = (ehdr->e_shstrndx != SHN_XINDEX) ?
++		   ehdr->e_shstrndx : shdrs[0].sh_link;
++
++	if (!shstrndx || shstrndx >= shnum ||
++	    shdrs[shstrndx].sh_offset > file_size ||
++	    shdrs[shstrndx].sh_size == 0 ||
++	    shdrs[shstrndx].sh_size > file_size - shdrs[shstrndx].sh_offset)
++		return -1;
++	shstrtab = (const char *)(map + shdrs[shstrndx].sh_offset);
++
++	for (uint32_t i = 1; i < shnum; i++) {
++		size_t shstr_size = shdrs[shstrndx].sh_size;
++		uint32_t nm_off = shdrs[i].sh_name;
++
++		if ((shdrs[i].sh_type == SHT_PROGBITS ||
++		     shdrs[i].sh_type == SHT_X86_64_UNWIND) &&
++		    nm_off < shstr_size &&
++		    shstr_size - nm_off >= sizeof(".eh_frame") &&
++		    memcmp(shstrtab + nm_off, ".eh_frame",
++			   sizeof(".eh_frame")) == 0) {
++			eh_shdr = &shdrs[i];
++			eh_idx = i;
++			break;
++		}
++	}
++
++	if (!eh_shdr || eh_shdr->sh_size == 0)
++		return 0;
++	if (eh_shdr->sh_offset > file_size ||
++	    eh_shdr->sh_size > file_size - eh_shdr->sh_offset ||
++	    eh_shdr->sh_addralign > 16 ||
++	    (eh_shdr->sh_addralign & (eh_shdr->sh_addralign - 1)) != 0)
++		return -1;
++
++	for (uint32_t i = 1; i < shnum; i++) {
++		if (shdrs[i].sh_type == SHT_RELA && shdrs[i].sh_info == eh_idx) {
++			rela_shdr = &shdrs[i];
++			break;
++		}
++	}
++
++	if (rela_shdr && rela_shdr->sh_link > 0 && rela_shdr->sh_link < shnum &&
++	    shdrs[rela_shdr->sh_link].sh_type == SHT_SYMTAB) {
++		sym_idx = rela_shdr->sh_link;
++		sym_shdr = &shdrs[sym_idx];
++	} else {
++		for (uint32_t i = 1; i < shnum; i++) {
++			if (shdrs[i].sh_type == SHT_SYMTAB) {
++				sym_idx = i;
++				sym_shdr = &shdrs[i];
++				break;
 +			}
 +		}
 +	}
 +
-+	return false;
-+}
++	if (sym_shdr && sym_shdr->sh_size > 0) {
++		if ((sym_shdr->sh_offset & 7) ||
++		    sym_shdr->sh_offset > file_size ||
++		    sym_shdr->sh_size > file_size - sym_shdr->sh_offset ||
++		    sym_shdr->sh_entsize != sizeof(Elf64_Sym) ||
++		    (sym_shdr->sh_size % sizeof(Elf64_Sym)) != 0)
++			return -1;
++		syms = (Elf64_Sym *)(map + sym_shdr->sh_offset);
++		nsyms = sym_shdr->sh_size / sizeof(Elf64_Sym);
 +
-+/**
-+ * find_user_eh_frame_hdr() - Resolve PT_GNU_EH_FRAME for a user IP with caching
-+ * @state: User unwind walk state holding the per-walk VMA cache.
-+ * @ip: Lookup instruction pointer in current->mm.
-+ * @out_hdr_uaddr: Output user virtual address of .eh_frame_hdr.
-+ * @out_hdr_size: Output size in bytes of .eh_frame_hdr.
-+ *
-+ * Consults @state->cfi_cache before taking mmap_read_lock_killable(). Negative
-+ * lookups for executable VMAs lacking ELF headers or PT_GNU_EH_FRAME (such as
-+ * JIT regions) are also cached with eh_hdr_uaddr == 0 to avoid repeated lock
-+ * acquisitions during a stack walk.
-+ *
-+ * Return: 0 on success, -ENOENT if no PT_GNU_EH_FRAME covers @ip's VMA,
-+ * -EINTR if killed while waiting for mmap_lock, -EFAULT on user copy fault, or
-+ * -EINVAL if current->mm is absent or @state->ws is unsupported.
-+ */
-+static int find_user_eh_frame_hdr(struct unwind_user_state *state,
-+				  unsigned long ip,
-+				  unsigned long *out_hdr_uaddr,
-+				  size_t *out_hdr_size)
-+{
-+	struct mm_struct *mm = current->mm;
-+	unsigned long vma_start = 0, vma_end = 0, elf_base = 0;
-+	bool found_base;
-+	unsigned int i, slot;
-+	int err;
++		for (uint32_t i = 1; i < shnum; i++) {
++			if (shdrs[i].sh_type == SHT_SYMTAB_SHNDX &&
++			    shdrs[i].sh_link == sym_idx) {
++				if ((shdrs[i].sh_offset & 3) ||
++				    shdrs[i].sh_offset > file_size ||
++				    shdrs[i].sh_size > file_size - shdrs[i].sh_offset ||
++				    shdrs[i].sh_entsize != sizeof(uint32_t) ||
++				    shdrs[i].sh_size != nsyms * sizeof(uint32_t))
++					return -1;
++				shndx_tab = (const uint32_t *)(map + shdrs[i].sh_offset);
++				nshndx = nsyms;
++				break;
++			}
++		}
 +
-+	if (!mm)
-+		return -EINVAL;
++		/*
++		 * Bail out cleanly if any other relocation section references
++		 * symbols inside .eh_frame.
++		 */
++		for (uint32_t i = 1; i < shnum; i++) {
++			const Elf64_Rela *other;
++			size_t nother;
 +
-+	/* Check per-walk VMA cache first */
-+	for (i = 0; i < ARRAY_SIZE(state->cfi_cache); i++) {
-+		const struct unwind_user_cfi_cache *c = &state->cfi_cache[i];
++			if (&shdrs[i] == rela_shdr || shdrs[i].sh_type != SHT_RELA ||
++			    shdrs[i].sh_link != sym_idx || shdrs[i].sh_size == 0)
++				continue;
++			if ((shdrs[i].sh_offset & 7) ||
++			    shdrs[i].sh_offset > file_size ||
++			    shdrs[i].sh_size > file_size - shdrs[i].sh_offset ||
++			    shdrs[i].sh_entsize != sizeof(Elf64_Rela) ||
++			    (shdrs[i].sh_size % sizeof(Elf64_Rela)) != 0)
++				return -1;
++			other = (const Elf64_Rela *)(map + shdrs[i].sh_offset);
++			nother = shdrs[i].sh_size / sizeof(Elf64_Rela);
++			for (size_t r = 0; r < nother; r++) {
++				uint32_t si = ELF64_R_SYM(other[r].r_info);
 +
-+		if (c->valid && ip >= c->vma_start && ip < c->vma_end) {
-+			if (!c->eh_hdr_uaddr)
-+				return -ENOENT;
-+			*out_hdr_uaddr = c->eh_hdr_uaddr;
-+			*out_hdr_size = c->eh_hdr_size;
-+			return 0;
++				if (si < nsyms &&
++				    sym_is_in_eh_frame(&syms[si], si, eh_idx,
++						       shndx_tab, nshndx))
++					return 0;
++			}
 +		}
 +	}
 +
++	eh_in = map + eh_shdr->sh_offset;
++	eh_in_len = eh_shdr->sh_size;
++	if (rela_shdr && rela_shdr->sh_size > 0) {
++		struct indexed_rela *idx_relas;
++		const Elf64_Rela *raw_relas;
++
++		if ((rela_shdr->sh_offset & 7) ||
++		    rela_shdr->sh_offset > file_size ||
++		    rela_shdr->sh_size > file_size - rela_shdr->sh_offset ||
++		    rela_shdr->sh_entsize != sizeof(Elf64_Rela) ||
++		    (rela_shdr->sh_size % sizeof(Elf64_Rela)) != 0)
++			return -1;
++		nrelas = rela_shdr->sh_size / sizeof(Elf64_Rela);
++		idx_relas = malloc(nrelas * sizeof(*idx_relas));
++		sorted_relas = malloc(nrelas * sizeof(Elf64_Rela));
++		out_relas = calloc(nrelas, sizeof(Elf64_Rela));
++		if (!idx_relas || !sorted_relas || !out_relas) {
++			free(idx_relas);
++			free(sorted_relas);
++			free(out_relas);
++			return -1;
++		}
++		raw_relas = (const Elf64_Rela *)(map + rela_shdr->sh_offset);
++		for (size_t i = 0; i < nrelas; i++) {
++			idx_relas[i].rela = raw_relas[i];
++			idx_relas[i].orig_idx = i;
++		}
++		qsort(idx_relas, nrelas, sizeof(*idx_relas), cmp_rela_off);
++		for (size_t i = 0; i < nrelas; i++)
++			sorted_relas[i] = idx_relas[i].rela;
++		free(idx_relas);
++	}
++
++	if (anchor_add(&anchors, /*old_off=*/0, /*len=*/0, /*new_off=*/0))
++		goto bail;
++
++	while (pos + 4 <= eh_in_len) {
++		uint32_t len = get_le32(eh_in + pos);
++		size_t rec_start = pos;
++		size_t rec_end, p;
++		uint32_t cie_id;
++
++		if (len == 0)
++			break;
++		if (len <= 4 || len == 0xffffffffU ||
++		    len > eh_in_len - pos - 4) {
++			free(anchors.data);
++			free(cies);
++			free(sorted_relas);
++			free(out_eh.data);
++			free(out_relas);
++			return -1;
++		}
++		rec_end = pos + 4 + len;
++		cie_id = get_le32(eh_in + pos + 4);
++		p = pos + 8;
++
++		if (cie_id == 0) {
++			struct cie_info cie = {};
++			struct byte_buf min_cie_insns = {};
++			struct byte_buf cie_rec = {};
++			const char *out_aug;
++			uint8_t tmp[16];
++			size_t tn;
++
++			if (parse_cie_record(eh_in, p, rec_end, &arch, &cie, &p))
++				goto bail;
++			if (ncies >= cies_cap) {
++				size_t ncap = cies_cap ? cies_cap * 2 : 64;
++				struct cie_info *ncies_arr;
++
++				ncies_arr = realloc(cies, ncap * sizeof(*cies));
++				if (!ncies_arr)
++					goto bail;
++				cies = ncies_arr;
++				cies_cap = ncap;
++			}
++
++			cie.old_off = rec_start;
++			cie.new_off = out_eh.len;
++			if (minify_insns(eh_in + p, rec_end - p, p,
++					 /*insn_relas=*/NULL,
++					 /*n_insn_relas=*/0, &cie, &arch,
++					 /*is_cie=*/true, &cie.init_row,
++					 &min_cie_insns, /*out_rmaps=*/NULL,
++					 /*out_nrmaps=*/NULL)) {
++				free(min_cie_insns.data);
++				goto bail;
++			}
++
++			/* Emit normalized compact CIE (version 1, "zR" or "zRS") */
++			out_aug = cie.is_signal ? "zRS" : "zR";
++			if (cie.fde_enc == DW_EH_PE_absptr && !cie.has_z)
++				out_aug = "";
++
++			put_le32(tmp, 0);
++			put_le32(tmp + 4, 0);
++			buf_append(&cie_rec, tmp, 8);
++			buf_append_u8(&cie_rec, 1);
++			buf_append(&cie_rec, out_aug, strlen(out_aug) + 1);
++			tn = encode_uleb128(cie.code_align, tmp);
++			buf_append(&cie_rec, tmp, tn);
++			tn = encode_sleb128(cie.data_align, tmp);
++			buf_append(&cie_rec, tmp, tn);
++			buf_append_u8(&cie_rec, cie.ra_reg);
++			if (out_aug[0] == 'z') {
++				buf_append_u8(&cie_rec, 1);
++				buf_append_u8(&cie_rec, cie.fde_enc);
++			}
++			buf_append(&cie_rec, min_cie_insns.data, min_cie_insns.len);
++			while (cie_rec.len & 3)
++				buf_append_u8(&cie_rec, DW_CFA_nop);
++			put_le32(cie_rec.data, (uint32_t)(cie_rec.len - 4));
++
++			last_len_pos = out_eh.len;
++			have_last_rec = true;
++			if (anchor_add(&anchors, rec_start, /*len=*/8,
++				       cie.new_off)) {
++				free(min_cie_insns.data);
++				free(cie_rec.data);
++				goto bail;
++			}
++			buf_append(&out_eh, cie_rec.data, cie_rec.len);
++
++			cies[ncies++] = cie;
++			free(min_cie_insns.data);
++			free(cie_rec.data);
++		} else {
++			size_t old_cie_off;
++			const struct cie_info *cie = NULL;
++			int ptr_sz;
++			size_t loc_off, fde_insns_off;
++			struct min_row fde_row;
++			struct byte_buf min_fde_insns = {};
++			struct byte_buf fde_rec = {};
++			size_t new_fde_off;
++			uint8_t hdr8[8];
++			struct reloc_map *rmaps = NULL;
++			size_t nrmaps = 0;
++			const Elf64_Rela *loc_relas = NULL, *insn_relas = NULL;
++			size_t n_loc_relas = 0, n_insn_relas = 0;
++
++			if (cie_id > rec_start + 4)
++				goto bail;
++			old_cie_off = (rec_start + 4) - cie_id;
++			for (size_t k = ncies; k-- > 0;) {
++				if (cies[k].old_off == old_cie_off) {
++					cie = &cies[k];
++					break;
++				}
++			}
++			if (!cie)
++				goto bail;
++
++			ptr_sz = ptr_enc_size(cie->fde_enc, arch.addr_size);
++			if (ptr_sz <= 0 || p + 2 * (size_t)ptr_sz > rec_end)
++				goto bail;
++			loc_off = p;
++			p += 2 * (size_t)ptr_sz;
++
++			if (cie->has_z) {
++				uint32_t alen;
++
++				if (read_uleb128(eh_in, &p, rec_end, &alen) ||
++				    p + alen > rec_end)
++					goto bail;
++				p += alen;
++			}
++			fde_insns_off = p;
++			fde_row = cie->init_row;
++
++			if (nrelas) {
++				size_t l_lo = lower_bound_rela(sorted_relas,
++							       nrelas, loc_off);
++				size_t l_hi = lower_bound_rela(sorted_relas,
++							       nrelas,
++							       loc_off + 2 * (size_t)ptr_sz);
++				size_t i_lo = lower_bound_rela(sorted_relas,
++							       nrelas,
++							       fde_insns_off);
++				size_t i_hi = lower_bound_rela(sorted_relas,
++							       nrelas, rec_end);
++
++				loc_relas = sorted_relas + l_lo;
++				n_loc_relas = l_hi - l_lo;
++				insn_relas = sorted_relas + i_lo;
++				n_insn_relas = i_hi - i_lo;
++			}
++
++			if (minify_insns(eh_in + fde_insns_off,
++					 rec_end - fde_insns_off,
++					 fde_insns_off, insn_relas,
++					 n_insn_relas, cie, &arch,
++					 /*is_cie=*/false, &fde_row,
++					 &min_fde_insns, &rmaps,
++					 &nrmaps) == 0) {
++				size_t new_insns_base;
++
++				new_fde_off = out_eh.len;
++				put_le32(hdr8, 0);
++				put_le32(hdr8 + 4,
++					 (uint32_t)((new_fde_off + 4) - cie->new_off));
++				buf_append(&fde_rec, hdr8, 8);
++				buf_append(&fde_rec, eh_in + loc_off,
++					   2 * (size_t)ptr_sz);
++				if (cie->has_z || cie->is_signal ||
++				    cie->fde_enc != DW_EH_PE_absptr)
++					buf_append_u8(&fde_rec, 0);
++				new_insns_base = new_fde_off + fde_rec.len;
++				buf_append(&fde_rec, min_fde_insns.data,
++					   min_fde_insns.len);
++				while (fde_rec.len & 3)
++					buf_append_u8(&fde_rec, DW_CFA_nop);
++				put_le32(fde_rec.data,
++					 (uint32_t)(fde_rec.len - 4));
++
++				if (remap_fde_relocs(loc_relas, n_loc_relas,
++						     nrelas, loc_off,
++						     new_fde_off, insn_relas,
++						     n_insn_relas, rmaps,
++						     nrmaps, new_insns_base,
++						     out_relas, &out_nrelas)) {
++					free(rmaps);
++					free(min_fde_insns.data);
++					free(fde_rec.data);
++					goto bail;
++				}
++
++				if (anchor_add(&anchors, rec_start,
++					       8 + 2 * (size_t)ptr_sz,
++					       new_fde_off) ||
++				    anchor_add(&anchors, fde_insns_off,
++					       /*len=*/0, new_insns_base)) {
++					free(rmaps);
++					free(min_fde_insns.data);
++					free(fde_rec.data);
++					goto bail;
++				}
++				for (size_t m = 0; m < nrmaps; m++) {
++					if (anchor_add(&anchors,
++						       rmaps[m].orig_off,
++						       rmaps[m].len,
++						       new_insns_base + rmaps[m].new_off)) {
++						free(rmaps);
++						free(min_fde_insns.data);
++						free(fde_rec.data);
++						goto bail;
++					}
++				}
++
++				last_len_pos = out_eh.len;
++				have_last_rec = true;
++				buf_append(&out_eh, fde_rec.data, fde_rec.len);
++			}
++			free(rmaps);
++			/* Unsupported FDEs are cleanly dropped along with their relocs */
++			free(min_fde_insns.data);
++			free(fde_rec.data);
++		}
++
++		pos = rec_end;
++	}
++
++	/* Pad final record with DW_CFA_nop to section alignment (8 bytes) */
++	if (have_last_rec && eh_shdr->sh_addralign > 4) {
++		size_t align = eh_shdr->sh_addralign;
++
++		while (out_eh.len & (align - 1))
++			buf_append_u8(&out_eh, DW_CFA_nop);
++		put_le32(out_eh.data + last_len_pos,
++			 (uint32_t)(out_eh.len - last_len_pos - 4));
++	}
++
++	if (anchor_add(&anchors, pos, /*len=*/0, out_eh.len) ||
++	    anchor_add(&anchors, eh_in_len, /*len=*/0, out_eh.len))
++		goto bail;
++
 +	/*
-+	 * Resolve the executable VMA and its base ELF mapping (pgoff == 0)
-+	 * under mmap_read_lock, then drop mmap_read_lock BEFORE any faultable
-+	 * copy_from_user() calls.
++	 * Update any .rela.eh_frame relocations whose target symbol resides in
++	 * .eh_frame (e.g. R_RISCV_SUB32 subtracting FDE initial_location).
 +	 */
-+	if (mmap_read_lock_killable(mm))
-+		return -EINTR;
++	for (size_t r = 0; r < out_nrelas; r++) {
++		uint32_t si = ELF64_R_SYM(out_relas[r].r_info);
++		int64_t old_target;
++		size_t new_target, new_sym_val;
 +
-+	found_base = lookup_vma_elf_base_locked(mm, ip, &vma_start, &vma_end,
-+						&elf_base);
-+	mmap_read_unlock(mm);
++		if (!si)
++			continue;
++		if (!syms || si >= nsyms)
++			goto bail;
++		if (!sym_is_in_eh_frame(&syms[si], si, eh_idx, shndx_tab, nshndx))
++			continue;
 +
-+	if (!vma_end)
-+		return -ENOENT;
++		old_target = (int64_t)syms[si].st_value + out_relas[r].r_addend;
++		if (old_target <= 0 || (uint64_t)old_target > eh_in_len ||
++		    anchor_find_exact(&anchors, (size_t)old_target, &new_target))
++			goto bail;
 +
-+	slot = state->cfi_cache_next++ % ARRAY_SIZE(state->cfi_cache);
-+	state->cfi_cache[slot].vma_start = vma_start;
-+	state->cfi_cache[slot].vma_end = vma_end;
-+	state->cfi_cache[slot].eh_hdr_uaddr = 0;
-+	state->cfi_cache[slot].eh_hdr_size = 0;
-+	state->cfi_cache[slot].valid = true;
++		if (ELF64_ST_TYPE(syms[si].st_info) == STT_SECTION) {
++			out_relas[r].r_addend = (int64_t)new_target -
++						(int64_t)syms[si].st_value;
++		} else {
++			if (syms[si].st_value > eh_in_len ||
++			    anchor_find_exact(&anchors, (size_t)syms[si].st_value,
++					      &new_sym_val))
++				goto bail;
++			out_relas[r].r_addend = (int64_t)new_target -
++						(int64_t)new_sym_val;
++		}
++	}
 +
-+	if (!found_base)
-+		return -ENOENT;
++	if (have_last_rec && out_eh.data && out_eh.len <= eh_in_len) {
++		if (syms) {
++			for (size_t s = 1; s < nsyms; s++) {
++				if (!sym_is_in_eh_frame(&syms[s], s, eh_idx,
++							shndx_tab, nshndx) ||
++				    ELF64_ST_TYPE(syms[s].st_info) == STT_SECTION)
++					continue;
++				syms[s].st_value = anchor_clamp_map(&anchors,
++						(size_t)syms[s].st_value,
++						out_eh.len);
++			}
++		}
++		memcpy(map + eh_shdr->sh_offset, out_eh.data, out_eh.len);
++		eh_shdr->sh_size = out_eh.len;
++		if (rela_shdr && out_relas) {
++			memcpy(map + rela_shdr->sh_offset, out_relas,
++			       out_nrelas * sizeof(Elf64_Rela));
++			rela_shdr->sh_size = out_nrelas * sizeof(Elf64_Rela);
++		}
++	}
 +
-+	if (state->ws == 8)
-+		err = parse_user_elf64_eh_hdr(elf_base, out_hdr_uaddr, out_hdr_size);
-+	else if (state->ws == 4)
-+		err = parse_user_elf32_eh_hdr(elf_base, out_hdr_uaddr, out_hdr_size);
-+	else
-+		return -EINVAL;
++	free(anchors.data);
++	free(cies);
++	free(sorted_relas);
++	free(out_eh.data);
++	free(out_relas);
++	return 0;
 +
-+	if (err)
-+		return err;
-+
-+	state->cfi_cache[slot].eh_hdr_uaddr = *out_hdr_uaddr;
-+	state->cfi_cache[slot].eh_hdr_size = *out_hdr_size;
++bail:
++	/* Leave unusual/hand-crafted .eh_frame untouched rather than failing build */
++	free(anchors.data);
++	free(cies);
++	free(sorted_relas);
++	free(out_eh.data);
++	free(out_relas);
 +	return 0;
 +}
 +
-+/**
-+ * unwind_user_next_cfi() - Compute the Minimal DWARF CFI frame rule for @state
-+ * @state: Current user-space unwind state (may set @state->done on bottom).
-+ * @out_frame: Output frame recovery rule for unwind_user_next_common().
-+ * @out_signal: Set to true if the evaluated FDE represents a signal frame.
-+ *
-+ * Looks up the user binary's PT_GNU_EH_FRAME table, evaluates the Minimal
-+ * DWARF CFI bytecode at @state->ip (or @state->ip - 1 for normal call return
-+ * addresses), and translates the resulting &struct dwarf_cfi_row into a
-+ * &struct unwind_user_frame.
-+ *
-+ * Return: 0 on success, -ENOENT if no FDE covers @state->ip or if
-+ * DW_CFA_undefined marks the bottom of the stack (setting @state->done), or a
-+ * negative errno (-EINVAL, -EFAULT, -EOVERFLOW, -EINTR) on failure.
-+ */
-+int unwind_user_next_cfi(struct unwind_user_state *state,
-+			 struct unwind_user_frame *out_frame, bool *out_signal)
++int main(int argc, char **argv)
 +{
-+	struct dwarf_cfi_arch arch;
-+	struct dwarf_cfi_row row;
-+	unsigned long lookup_ip, hdr_uaddr;
-+	size_t hdr_size;
-+	int err;
++	for (int i = 1; i < argc; i++) {
++		const char *path = argv[i];
++		struct stat st;
++		uint8_t *map;
++		int fd, rc = 0;
 +
-+	if (!unwind_user_cfi_arch(state->ws, &arch))
-+		return -EINVAL;
++		fd = open(path, O_RDWR);
++		if (fd < 0) {
++			perror(path);
++			return 1;
++		}
++		if (fstat(fd, &st) < 0) {
++			perror("fstat");
++			close(fd);
++			return 1;
++		}
++		if ((size_t)st.st_size < sizeof(Elf64_Ehdr)) {
++			close(fd);
++			continue;
++		}
++		map = mmap(/*addr=*/NULL, (size_t)st.st_size,
++			   PROT_READ | PROT_WRITE, MAP_SHARED, fd,
++			   /*offset=*/0);
++		if (map == MAP_FAILED) {
++			perror("mmap");
++			close(fd);
++			return 1;
++		}
++		if (memcmp(map, ELFMAG, SELFMAG) == 0 &&
++		    map[EI_DATA] == ELFDATA2LSB &&
++		    map[EI_CLASS] == ELFCLASS64)
++			rc = process_elf64(map, (size_t)st.st_size);
 +
-+	lookup_ip = (state->topmost || state->signal) ? state->ip : state->ip - 1;
-+
-+	err = find_user_eh_frame_hdr(state, lookup_ip, &hdr_uaddr, &hdr_size);
-+	if (!err)
-+		err = dwarf_cfi_unwind_user_eh_frame_hdr(hdr_uaddr, hdr_size,
-+							 lookup_ip, &arch, &row);
-+	if (err == -ENOENT && lookup_ip != state->ip) {
-+		/*
-+		 * A signal trampoline without a leading NOP has state->ip at
-+		 * the exact start of its FDE, where state->ip - 1 misses.
-+		 */
-+		err = find_user_eh_frame_hdr(state, state->ip, &hdr_uaddr,
-+					     &hdr_size);
-+		if (!err)
-+			err = dwarf_cfi_unwind_user_eh_frame_hdr(hdr_uaddr,
-+								 hdr_size,
-+								 state->ip,
-+								 &arch, &row);
-+		if (!err && !row.signal)
-+			err = -ENOENT;
++		munmap(map, (size_t)st.st_size);
++		close(fd);
++		if (rc)
++			return 1;
 +	}
-+	if (err)
-+		return err;
-+
-+	/* Explicit DW_CFA_undefined on RA marks bottom of stack (_start/clone) */
-+	if (row.ra_rule == DWARF_CFI_RULE_UNDEFINED) {
-+		state->done = true;
-+		return -ENOENT;
-+	}
-+
-+	if (row.cfa_base != DWARF_CFI_BASE_SP &&
-+	    row.cfa_base != DWARF_CFI_BASE_FP &&
-+	    row.cfa_base != DWARF_CFI_BASE_FP_INDIRECT &&
-+	    row.cfa_base != DWARF_CFI_BASE_SP_INDIRECT)
-+		return -EINVAL;
-+	if (row.ra_rule == DWARF_CFI_RULE_SAME) {
-+		if (!state->ra_valid)
-+			return -EINVAL;
-+	} else if (row.ra_rule != DWARF_CFI_RULE_OFFSET &&
-+		   row.ra_rule != DWARF_CFI_RULE_SP_OFFSET) {
-+		return -EINVAL;
-+	}
-+
-+	memset(out_frame, 0, sizeof(*out_frame));
-+	out_frame->use_fp = (row.cfa_base == DWARF_CFI_BASE_FP ||
-+			     row.cfa_base == DWARF_CFI_BASE_FP_INDIRECT);
-+	out_frame->cfa_indirect = (row.cfa_base == DWARF_CFI_BASE_FP_INDIRECT ||
-+				   row.cfa_base == DWARF_CFI_BASE_SP_INDIRECT);
-+	out_frame->cfa_off = row.cfa_off;
-+	out_frame->ra_from_reg = (row.ra_rule == DWARF_CFI_RULE_SAME);
-+	out_frame->ra_from_sp = (row.ra_rule == DWARF_CFI_RULE_SP_OFFSET);
-+	out_frame->ra_signed = row.ra_signed;
-+	out_frame->ra_off = row.ra_off;
-+	if (row.fp_rule == DWARF_CFI_RULE_OFFSET) {
-+		out_frame->fp_off = row.fp_off;
-+	} else if (row.fp_rule == DWARF_CFI_RULE_FP_OFFSET) {
-+		out_frame->fp_from_fp = true;
-+		out_frame->fp_off = row.fp_off;
-+	} else if (row.fp_rule == DWARF_CFI_RULE_SP_OFFSET) {
-+		out_frame->fp_from_sp = true;
-+		out_frame->fp_off = row.fp_off;
-+	}
-+	*out_signal = row.signal;
 +	return 0;
 +}
 -- 
