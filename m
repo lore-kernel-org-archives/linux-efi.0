@@ -1,74 +1,74 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.72
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.208.69
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1795426961;
-	b=woK9tIFqcsAUI2RbF4iJ1ealGO5DkgbfBgVMJX07I1+w9h4uUUL2/J9D2ZJYxicvhMpA
-	 dPQ3lsB75xWLi+WC4CCJkHLkgxi49NZ4UEJs0pV5WfvAJ22gErxcF5+J6tjfxOOIU7OtI
-	 u5W7NZuZFVtuscLMqI09AP6hffyfoRfmNCdG3sU4VlNvfmhuMDfiFhvvXNcYy5ytmZmLI
-	 H4bTrYqm9kqSTcNLfpX/ydDMu3HBJ+Pkeghopi8mHZd7ZEqK+o4HncFy2cs+8F8XwKSJm
-	 rEPxNlkRsi/eMHJjmNUjymyAJv0bXAS1Iy0NAkrrce/e6dPM8FKlF8Pvlmcz5nbFlbA==
+	b=MruD9GyOftcAEErZZc41Kw31IhlBzW2TdA66TmTXRDry+TjDIZwuvE5rORJgJBhhrQ+x
+	 pPuu1kEit/ul4W8rtL6D1KvBeo0HYzrVXk+2vBvuWnwS5kheg20Xubx2hQsgBSfoneg2e
+	 rACXKVXOZixb3frU21FrE7BYe2nrN2oSRJJb+4kNoB4fOVjfKBJ9VPTF9kXw8CuKQxp9m
+	 Z+xAiJ5klWHdg5rozTE0+aOWs1gIAI/n23W0wZ0PLAwQLCYDXpWTZ2MkheMxGOm3/aCKF
+	 PPqiSSymr+Yx6ve3YYWazJgi8w5mqN7Tzr4BTbYSTnm+tMlycq0ZSL4BgYnnZ+qf5pw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1795426961;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Received:Date:In-Reply-To:Mime-Version:
 	 References:X-Developer-Key:X-Developer-Signature:X-Mailer:Message-ID:
 	 Subject:From:To:Cc:Content-Type;
-	bh=YT2Upu+y3WXJ7gG+mJi7voHOi2XmZ7UXv9rZxPK3v+o=;
-	b=H3PRCyBb56v6eYXrV3S0vm658I/x5R4JsdI8f2O3RKCY1mykk87afgNgyUas9hOTnVMy
-	 Sy12CYO3EOe3vk8F+ctcUARBiZO2Bn25fNIARpXj9JrRCDeAGWelEELSSdB1tr0LCORzV
-	 BnThGk6D1EmLBBrpTFXP/3fGa0HtknIRCtq/SBWHaiQmime9OnGTrRQq4SFR1KijQ7v1Y
-	 x392rFOwpAL5T7jm21+7HE8q3gXFSLk0uDDB5Ixg3Ta1IK1VYXMn3NYhPiDfZ5hqc+EKO
-	 PT4vPdrM+QqY0IKJkDHx/GPr7STSC97LjSt4OdLejfESDIx5MwPsMXbBOZYK38WKN4w==
+	bh=m0G/OIDphCmJ+9PUfV8KKg0ofQUhcoNHIFrdri+NSHI=;
+	b=UIMuA7sY01Cb3duNt2L3Hf28MJrgzmZdKN2+BV/Z4hnujrvEZU1XbQiQ7g2AFVadZFOP
+	 miWlv7Lm31WMxz6xEZcJP33dqhpgWAviib4y46bQJm/uKlotGynJVwgOdMWn+bVk741GM
+	 3SwAU9miz4MS7gHYCqSraKyDIZCerG5/qI3aA73x50iyDVptDjrkkdK4F6EuRz2otltCU
+	 xblN8XLN6Iu8kzRmQsfulpbfTOXrqIQsvLYiPqw/A7ALJ6dmi5d+jW8gEjxKVOFp5vGki
+	 mDyN2rpHmilvUCYkjlYkcfbBzfdDVwwkTtW69vt65jqwYVt2aXMTPNtovAWeLpvjsug==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=google.com;
 	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=MKrkETQx;
-	arc=none smtp.remote-ip=209.85.221.72
-Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com [209.85.221.72])
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=dXJtODMx;
+	arc=none smtp.remote-ip=209.85.208.69
+Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com [209.85.208.69])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EDB25606A31E
-	for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 09:42:40 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org EDB25606A31E
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C172A606A31F
+	for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 09:42:39 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C172A606A31F
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=MKrkETQx
-Received: by mail-wr1-f72.google.com with SMTP id ffacd0b85a97d-48e0389d6f9so1800341f8f.1
-        for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 01:42:40 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=dXJtODMx
+Received: by mail-ed1-f69.google.com with SMTP id 4fb4d7f45d1cf-6b5654ad27fso2138119a12.1
+        for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 01:42:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1795426959; x=1796031759; darn=vger.kernel.org;
+        d=google.com; s=20260707; t=1795426958; x=1796031758; darn=vger.kernel.org;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=YT2Upu+y3WXJ7gG+mJi7voHOi2XmZ7UXv9rZxPK3v+o=;
-        b=MKrkETQxAkTRKuAQDLIc1u1TBKp2XsG7x8Tc+Q2sYYSy+CBVLDHN9skq9WNKFHYn7s
-         u8o4EHZLF2IB0I38vX5qh83mQAVatVr9j//vtSHTxvAKQlpA+A3GxLPEPinax1xOPkNO
-         M2FKjQiGtHPO+Zvg+f5q4uvOlFjmBpgiFgFBxkTE0C8lQ1ltJwkIRzm/DcnBvC7+otVD
-         /lOeYKWJ5LA5Cf7G6OkopgmmsOaUPhaViW+BGZ0DwVohxs9N+zLmcIi7yiTY4gMXyPpm
-         /ZdVYvUq4sQWxptOHDijUxbZYTAXWt2BvJ1ZvSgCdI/fXRq7ogzoZEq32Uf+GfxnGuSQ
-         Gt/Q==
+        bh=m0G/OIDphCmJ+9PUfV8KKg0ofQUhcoNHIFrdri+NSHI=;
+        b=dXJtODMxsrWN16EsV6DpStGuxx9Kv/XzGQJsqZQD0hrjC++OXV3Em64yKb/qwQOkmm
+         BR1iF79ZqJVknaI47e6oYgIXMgFUlFvsd/BCb34/7URAhnQmdcADEJc08INJDtCSVAx2
+         NabJZZv/copqXCD7k5/wnMxVSEj4NeDmmX1THwcM6oBu83jqBuSNVOtp/zyhEqkyhS8d
+         GFWgE7REskcsZDVlFBPU0wIJt0nHjpsj5I8C3mpPQdZYQfr3Ihp4/dxuXAQEj9EnFlNn
+         yrfXn5qhfNrKsQEfjaJeVjiCZEkwQXm7dC50A9P3WZQi03plDIzTadIq0JV0L66gStCh
+         1m4w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795426959; x=1796031759;
+        d=1e100.net; s=20260707; t=1795426958; x=1796031758;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=YT2Upu+y3WXJ7gG+mJi7voHOi2XmZ7UXv9rZxPK3v+o=;
-        b=LK3ZnRbMkms2s2eysYvHV4Pu/iZ93kt/jzSU7tUacOhKcTqmcLuCP0tnNSdh4cvNQ5
-         JgV5Lhry9gDy7/Rq1UrK5hQ84yUBy/e8Ji4gCfJNHn6OcKuxiwvvHdczDblKtVMUG7F2
-         VMD6Qwsn4/8ofwM3KEFkDLSWZ9C8K5E0SWslJR1K/psoyeEUhGLBYjjJtiDhbM0g9+rf
-         EE706UFE6HNb57gcCJS3RZ8LEiYWRe33mXP3AWxQDCudIhD+Oh8gUE3epzeReJzsa6kk
-         4QmvqSgF7F3Sov6XIyHyJbHBfQPBUNz0UHaPd0n1s4Xb8jfOFTphF9BXw9+Fj4HqciFb
-         Y6fw==
-X-Gm-Message-State: APuU4Z+oqMEjWcOD2dQm/jM1ZAPY6m9CvzypWXeRqHMbBllGckPpkcXH
-	+zR03j18DE0ETo7W9Vh6ezVTxHuzkqxg0BEp0XDwZVD0Sv4toLWwWP3hEI/z71OdKYpa6QTztMF
-	nyRWyGkfSiKjjrnJCo2JTQs/ghaixK3psTJ0T5Dc9hPFEZ5ANWIehitSSHFfthgWaQhT33L0Hqw
-	GDl62UL1UhtNA0pNA6QsFNWtn6p0mH3A==
-X-Received: from wrxc11.prod.google.com ([2002:a05:6000:104b:b0:4a7:85c3:7bf9])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:4812:b0:491:a219:8506
- with SMTP id ffacd0b85a97d-4abb55183dbmr21022935f8f.48.1795426959038; Mon, 23
- Nov 2026 01:42:39 -0800 (PST)
-Date: Mon, 23 Nov 2026 10:42:31 +0100
+        bh=m0G/OIDphCmJ+9PUfV8KKg0ofQUhcoNHIFrdri+NSHI=;
+        b=UgoKxI7EWcnjTVMMkY02lAyhm2vK96TzRvQmM8ylYCZcI+BZg9OHGBIYYPV9t+ESQp
+         Ou3o3ue9HqLDGvezBNyPdwkUfY0yEdm4bb09TIPQ6zMV4Y9c7VH8Rb0YxA32yZWci2oQ
+         RZVWgoPirzV7bT2WftYSQzSMIwaKzO08GwgzQ9Skf6coLbCVUWLWt7cSDVGODczVCj/D
+         SPp9SzWkbvn2Gzzmff2Sm9gOZNYGw/U4U8SNQlWk6ZMskFYjwQq/52bc6V+ukrCsai2J
+         hf3BUcEMufHOAmb1CZnwS8+KwqV/ooS1Sg/E455aOXQd6GmAlkjwUeZl8Zv2IOHeC6sj
+         042A==
+X-Gm-Message-State: APuU4Z+ynuvff/h02kMuhxsODDhuy4AupsHEzDeoBgqyPRGxbrA4I0sS
+	23nmf16+evkWYjhyxQW0/4Q+adMGdJEtk3LzsEAyWl1PD4TBk6CBBdyj3o13FF2PQWVMwwZbiXb
+	o+pgjUpMMEVrlkv+kE2+ie+nJUHA3aJBjX3xPeoaUxCnHP8W/8etmaKXCgXWTdK/wtAZC0s/QDA
+	pyLgMA7gucn4P3JKCa/WRi+ghn0pYOQw==
+X-Received: from edtg7.prod.google.com ([2002:aa7:c847:0:b0:6b8:98f6:dcc5])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6402:3645:b0:6b8:7ec0:7506
+ with SMTP id 4fb4d7f45d1cf-6ba37e95796mr7149951a12.25.1795426957704; Mon, 23
+ Nov 2026 01:42:37 -0800 (PST)
+Date: Mon, 23 Nov 2026 10:42:30 +0100
 In-Reply-To: <20261123094228.466164-4-ardb+git@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -81,14 +81,15 @@ Precedence: list
 Mime-Version: 1.0
 References: <20261123094228.466164-4-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3914; i=ardb@kernel.org;
- h=from:subject; bh=oselDBCI6TvXzU0e6mg4IV26t5y2uI06DwAwp+7rg30=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIZuFqyOAtzX8558rszl2mC/mdT6duMlh8sqiitM7G1pns
- uy752vVUcrCIMbFICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACZyUpGRYdLUR0Uefns52URl
- D9zex1dkHs6qeV9JyD+R0TpQUf3kIob/1bHdfA0d9utZa9z79+/5EFPw6yJ/r+MH/S39stfzZtn wAQA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=6238; i=ardb@kernel.org;
+ h=from:subject; bh=2K1xzHHDca/Q7/XhQnLx7OcNRqjzifvQ9zWs6mpo5F4=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIZuFq33uPTZN5yZFV67ihz9t5jhwdc/uXtvlE+Qr66twu
+ T09Y1NHKQuDGBeDrJgii8Dsv+92np4oVes8SxZmDisTyBAGLk4BmEgNO8P/RH/jv/ntX32MY8+G
+ 3ku5/cBWetVHoefP76Tu3fVmc3OLHsNfAf24ayK+wc0BIZ02J1ifF5SuqzffkbMqfJ7nEdYcgRI GAA==
 X-Mailer: git-send-email 2.56.1.750.gf70dc682cf-goog
-Message-ID: <20261123094228.466164-6-ardb+git@google.com>
-Subject: [PATCH 2/2] efi/tpm: Allocate the event log from EFI loader data again
+Message-ID: <20261123094228.466164-5-ardb+git@google.com>
+Subject: [PATCH 1/2] x86/efi: Disregard the INITRD and MEMATTR config tables
+ after kexec
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
 Cc: Ard Biesheuvel <ardb@kernel.org>, "Jasmeet (Jazz) Bhatia" <jasmeet.bhatia.us@gmail.com>
@@ -96,82 +97,133 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-The EFI stub currently allocates the TPM event log as
-EFI_ACPI_RECLAIM_MEMORY. On x86, this becomes an ACPI data entry
-in the E820 map.
+When the EFI stub loads the initrd itself, it describes its location and
+size to the core kernel via a LINUX_EFI_INITRD_MEDIA_GUID configuration
+table, which is allocated from EFI loader data, just like the initrd.
+On x86, the stub passes the same information via boot_params as well,
+which takes precedence, but the core kernel will fall back to the INITRD
+config table if boot_params does not describe an initrd.
 
-On a Framework Laptop 16 (AMD Ryzen AI 300 Series), the EFI allocator
-can place this allocation at different physical addresses across boots.
-Since x86 hibernation validates architecture-specific data from
-the firmware E820 map, this causes an otherwise valid hibernation image
-to be rejected on resume with the following error:
+The EFI configuration table array is passed on to kexec'd kernels as-is,
+and so a kexec'd kernel that is booted without an initrd will pick up
+the INITRD config table that was installed during the original boot, and
+use the initrd it describes, which no longer exists at that point.
 
-  Hibernate inconsistent memory map detected!
-  PM: hibernation: Image mismatch: architecture specific data
+Commit 6e62d1c6f2c7 ("efi: Wipe INITRD config table from memory after
+consumption") mitigated this by wiping the base and size fields of the
+table once it has been consumed. However, the memory holding the table
+is released to the page allocator as well, and so it may have been
+reused by the time the kexec occurs, in which case the kexec'd kernel
+will interpret whatever happens to be stored there as the base and size
+of the initrd, e.g.,
 
-Allocating the event log as EFI_LOADER_DATA avoids changing the E820
-map, but doing that alone would regress the kexec corruption issue fixed
-by commit 77d48d39e991 ("efistub/tpm: Use ACPI reclaim memory for event
-log to avoid corruption"): the E820 map that kexec passes on to the next
-kernel describes EFI loader data as ordinary RAM, and so the event log
-may get clobbered before the next kernel gets around to reserving it.
+  [    0.000000] efi: ... INITRD=0x7c41cc18 ...
+  [    0.000000] RAMDISK: [mem 0x9090909090909090-0xd1e7d1e68aaeafff]
+  [    0.000000] Kernel panic - not syncing: Cannot find place for new RAMDISK of size 4708303772963442675
 
-So use the x86 implementation of efi_config_table_is_usable() to
-disregard the TPM event log table after kexec, just like the INITRD
-table, and go back to allocating it as EFI_LOADER_DATA. This is simpler
-than preserving the event log across kexec, e.g., by installing the
-memreserve table on x86 and using efi_mem_reserve_persistent(), and the
-utility of the event log after kexec is questionable to begin with.
+Crash kernels will find the stale table as well, and wipe it again, i.e.,
+write to the memory of the crashed kernel that they are supposed to
+capture.
 
-This also protects kexec'd kernels from a clobbered event log if the
-previous kernel predates the change above, and allocated the table from
-EFI loader data as well. The kexec issue was specific to x86, so other
-architectures can use EFI loader data as before.
+Both kexec_file_load() and kexec-tools pass a SETUP_EFI setup_data entry
+to the next kernel when EFI is enabled, which the x86 EFI code already
+relies on to detect that it was booted via kexec. Such kernels are
+entered directly, bypassing the EFI stub, and so any INITRD config table
+they encounter is necessarily stale. So wire up
+efi_config_table_is_usable() for x86, and use it to disregard the INITRD
+config table when a SETUP_EFI setup_data entry is present.
 
-Fixes: 77d48d39e991 ("efistub/tpm: Use ACPI reclaim memory for event log to avoid corruption")
+While at it, use the same mechanism to disregard the Memory Attributes
+table after kexec, which is currently achieved by overwriting its address
+in the firmware's config table array with EFI_INVALID_TABLE_ADDR in
+efi_reuse_config(). This only happens on 64-bit firmware, and only if
+the SETUP_EFI entry carries the address of an SMBIOS table, which
+kexec-tools does not provide on systems that only expose an SMBIOS3
+entry point. In that case, the kexec'd kernel will parse the table, which
+may be stale as well, given that EDK2 based firmware allocates it from
+EFI boot services data, which is released to the page allocator after
+boot too, e.g.,
+
+  [    0.000000] efi: memattr: Unexpected EFI Memory Attributes table version -1958647317
+
+Fixes: f4dc7fffa987 ("efi: libstub: unify initrd loading between architectures")
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/platform/efi/efi.c        | 6 ++++++
- drivers/firmware/efi/libstub/tpm.c | 2 +-
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ arch/x86/platform/efi/efi.c    | 26 ++++++++++++++++++++++++++
+ arch/x86/platform/efi/quirks.c |  4 ----
+ include/linux/efi.h            |  3 +++
+ 3 files changed, 29 insertions(+), 4 deletions(-)
 
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index c2817c7415ce..db1b179db0a5 100644
+index 5eb96c17883e..c2817c7415ce 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -442,6 +442,11 @@ static int __init efi_systab_init(unsigned long phys)
-  *   data, which is released to the page allocator once the kernel is up and
-  *   running, and so the table is stale by the time kexec boots the next kernel.
-  *
-+ * - The TPM event log table is installed by the EFI stub too, and allocated
-+ *   from EFI loader data as well. It is reserved by the kernel, but the E820
-+ *   memory map that kexec passes on describes it as ordinary RAM, and so it
-+ *   may get clobbered before the next kernel gets around to reserving it.
-+ *
-  * - The Memory Attributes table may reside in EFI boot services data, which is
-  *   released to the page allocator as well. Even if it is still intact, the
-  *   sanity check in efi_memattr_init() may fail spuriously, given that only
-@@ -455,6 +460,7 @@ bool __init x86_efi_config_table_is_usable(const efi_guid_t *guid,
- 		return true;
- 
- 	return efi_guidcmp(*guid, LINUX_EFI_INITRD_MEDIA_GUID) &&
-+	       efi_guidcmp(*guid, LINUX_EFI_TPM_EVENT_LOG_GUID) &&
- 	       efi_guidcmp(*guid, EFI_MEMORY_ATTRIBUTES_TABLE_GUID);
+@@ -432,6 +432,32 @@ static int __init efi_systab_init(unsigned long phys)
+ 	return 0;
  }
  
-diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
-index 73f001114732..b8183bfdbaa3 100644
---- a/drivers/firmware/efi/libstub/tpm.c
-+++ b/drivers/firmware/efi/libstub/tpm.c
-@@ -96,7 +96,7 @@ static void efi_retrieve_tcg2_eventlog(int version, efi_physical_addr_t log_loca
++/*
++ * kexec passes the firmware's config table array on to the next kernel as-is,
++ * but some of the tables it describes must be disregarded when booting via
++ * kexec, which is indicated by the presence of a SETUP_EFI setup_data entry:
++ *
++ * - The INITRD table is installed by the EFI stub to describe the initrd that
++ *   it loaded. Both the table and the initrd are allocated from EFI loader
++ *   data, which is released to the page allocator once the kernel is up and
++ *   running, and so the table is stale by the time kexec boots the next kernel.
++ *
++ * - The Memory Attributes table may reside in EFI boot services data, which is
++ *   released to the page allocator as well. Even if it is still intact, the
++ *   sanity check in efi_memattr_init() may fail spuriously, given that only
++ *   the runtime regions of the EFI memory map are passed on via kexec. Applying
++ *   the permissions it describes is not critical, so just ignore it.
++ */
++bool __init x86_efi_config_table_is_usable(const efi_guid_t *guid,
++					   unsigned long table)
++{
++	if (!efi_setup)
++		return true;
++
++	return efi_guidcmp(*guid, LINUX_EFI_INITRD_MEDIA_GUID) &&
++	       efi_guidcmp(*guid, EFI_MEMORY_ATTRIBUTES_TABLE_GUID);
++}
++
+ static int __init efi_config_init(const efi_config_table_type_t *arch_tables)
+ {
+ 	void *config_tables;
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 02c56a02eb9b..d6d34dfa19e6 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -611,10 +611,6 @@ int __init efi_reuse_config(u64 tables, int nr_tables)
+ 		if (!efi_guidcmp(guid, SMBIOS_TABLE_GUID))
+ 			((efi_config_table_64_t *)p)->table = data->smbios;
+ 
+-		/* Do not bother to play with mem attr table across kexec */
+-		if (!efi_guidcmp(guid, EFI_MEMORY_ATTRIBUTES_TABLE_GUID))
+-			((efi_config_table_64_t *)p)->table = EFI_INVALID_TABLE_ADDR;
+-
+ 		p += sz;
  	}
+ 	early_memunmap(tablep, nr_tables * sz);
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index cc1df1577d5f..1bdb4639acef 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1355,10 +1355,13 @@ struct linux_efi_initrd {
+ #define EFI_SECRET_TABLE_HEADER_GUID	EFI_GUID(0x1e74f542, 0x71dd, 0x4d66,  0x96, 0x3e, 0xef, 0x42, 0x87, 0xff, 0x17, 0x3b)
  
- 	/* Allocate space for the logs and copy them. */
--	status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
-+	status = efi_bs_call(allocate_pool, EFI_LOADER_DATA,
- 			     sizeof(*log_tbl) + log_size, (void **)&log_tbl);
+ bool xen_efi_config_table_is_usable(const efi_guid_t *guid, unsigned long table);
++bool x86_efi_config_table_is_usable(const efi_guid_t *guid, unsigned long table);
  
- 	if (status != EFI_SUCCESS) {
+ static __always_inline
+ bool efi_config_table_is_usable(const efi_guid_t *guid, unsigned long table)
+ {
++	if (IS_ENABLED(CONFIG_X86) && !x86_efi_config_table_is_usable(guid, table))
++		return false;
+ 	if (!IS_ENABLED(CONFIG_XEN_EFI))
+ 		return true;
+ 	return xen_efi_config_table_is_usable(guid, table);
 -- 
 2.56.1.750.gf70dc682cf-goog
 
