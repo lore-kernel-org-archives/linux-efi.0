@@ -1,92 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=74.125.82.53
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795439138;
-	b=EYbw5DdVsnlqEWo5FQDwAnBg3WyceyymNtHVMeUImhWrvyGvXRcvtBoJ5n8Iy9+NwVmT
-	 jdVj4QaUj7E+aJL6MFaOHuT6mUik40jbymrHyCZTpeXZ1znVrk6ww7E4Qw9Q3jWYu5UXP
-	 gMNzb/pnBjXpZjtatzKoObXtefSinT4rZV+KfwX+lhfBPLpRnVKBS12yd9XRCC5A49BbW
-	 St6O//dzRYtx05QL6hSNcAXMAliM5EbT+C6yZynG/bEZP26sVExvbRQdV/0Fkk7+0zOeW
-	 bEga+t1qE+daqEhW2YHrTkaCmCDdG+bXCNBvVG7s6r+GfOL1v3/ojHOklKQKomsovqA==
+	t=1795445588;
+	b=zOdl4HYYVT0IQauWi+MHSgaGYj2m76VEa17gqb9VfZnBFBKa2RC8DqnnTG7Q+5qe7JCx
+	 fPUVaDegheeSNkm+QbqzuqVpRTGXLI38zOk4HTMMNDHRQeQZKA2WDbvnIQ3H0rRIQILAG
+	 /UD0oSR7xpBm5t7y7fTHcPB6IGLIx2zFBJqlO4bzWiVjuEjeU1Kgwor89K72A/u1/BqvQ
+	 sxDN7bB6A0WCieFBWcK2pLYAw643IpcHrxaLBJvv7EiC6qO5Lh4+k/NLGjh8v6E8GCTkG
+	 UrbL8PFTj6v7v0rNzhTQJVIvNcdBhAPdUBLtDhJBqdWrkJYJyNLgls6J1YqKWtW0YqA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795439138;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:Message-ID:
-	 Subject:To:Cc:In-Reply-To:References:MIME-Version:Date:Content-Type:
-	 Content-Transfer-Encoding;
-	bh=1bHuhh2uAVUu3FM0LF1RB62M3IsC+d8Z+EU7PPZwqno=;
-	b=QSzNLan8k1BIiPRJCp7Il71S61NbfPPwqR842fc1QVO+cwF6roPqw5nUugk5Ssh67O/d
-	 3Le74f494iyrB+6xvOAOks4doLtzsUv6CsphrNZZz58opyt8kECrl316Ef5GGlaLapAiu
-	 tpcu/oOORFdQV5MQa6sAMQWA3oLrIoEHKCpXXNoNRMnyEL9WxQOBKE3K7lmbI6ryajw3E
-	 42zs15UMmp6jOd93J2elTV89qAl9f8cVnujjHB3Ur+mThLRsFu/HWlnqvYEDse3ge86C+
-	 2c4ZWw1fvpqeqsroVuoNlAkXMmZBJU2j942IsazCfieMpN9cytsKBiIcSg2f9hun+OQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795445588;
+	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
+	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type:Content-Transfer-Encoding;
+	bh=Y3UAiBv26yNrSECYQZNbEZMUMcL7HPyi8uxH4eCNkJY=;
+	b=cEa2wSNOnUHgwsxoY97eR/XhIuotmnJ0KKuB9hABqqkDTvgyBsC7PF/CgFQ4VpBCzOvq
+	 ufGt9/XjZBJSHIN8fpHmmjwMPXRwKkUSjA80eo/eIMAjWZWl30aj7XO9tkMf987Q2uoTu
+	 PRso4dbQILp4g5fgwWkZVjyH8kl8KzkaBmirwfGO9pihhaOaA77uJoVBfav/J+5eyBbID
+	 hENT5RvLXzAPz4gZ8j9yamLkk+4MD9zWdXdbfterxGRkDHXLPc91Q/6/TpCZtrtYzfBB+
+	 EN+9N1ADc9Uccs+Wh4/0xxQbUVlR9VOcK9KYjosaD3N7MEyLrGqyf2QcWO8QlBVIwMw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=SWviKd04;
-	arc=none smtp.remote-ip=74.125.82.53
-Received: from mail-dl1-f53.google.com (mail-dl1-f53.google.com [74.125.82.53])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mkdW4pbn;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91B2C606A31A
-	for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 13:05:37 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 91B2C606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8873606A31A
+	for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 14:53:08 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=SWviKd04
-Received: by mail-dl1-f53.google.com with SMTP id a92af1059eb24-1b563e32936so149287c88.1
-        for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 05:05:37 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1795439137; x=1796043937; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:date:mime-version:references
-         :in-reply-to:cc:to:subject:message-id:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=1bHuhh2uAVUu3FM0LF1RB62M3IsC+d8Z+EU7PPZwqno=;
-        b=SWviKd04PJM3ZF50Nym+v5r6rPiQVQMBFld61+q6xufVROjSGxWbfrwb9rfWeFInmh
-         0CQwyz2zfOkDGBIFC5BLblPDRzKb6zT+SmCJX4THjp3NSXAQEr7Z6njySsTnzxlfagvD
-         tRS+imCcGf61CgNLh+XcZghh0+yQ5FvbZnpRQTjQrhMs3ATTL6nsWuxF6fkuqFnyqcYc
-         qm0LEhDe9Vp3xoNIVXcLjTR8xrUs2PWKJTrhLuyo+fgF7iPNeUivhlKpDYtYlX0BngmT
-         jdFLwAQloqSrMlN3Viahkfs33ClfnB/VMMsbPSj8ARSYn69JN39FRrzzYMDZhLoSLTnk
-         SYPQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795439137; x=1796043937;
-        h=content-transfer-encoding:content-type:date:mime-version:references
-         :in-reply-to:cc:to:subject:message-id:from:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=1bHuhh2uAVUu3FM0LF1RB62M3IsC+d8Z+EU7PPZwqno=;
-        b=FQK2geWo3i0yXj4kmMfWwe1XGQQPbOcBhnYoZa4Kio9oSp3egbEXz315cxWvSrSWsP
-         JkNpYgz8/lbTkU/d0R19AZkCSs/i5wtL03+KvtuCgkg24UlyZbmOw0YJ9GakbQ7HNF/c
-         Oi745Zzgn82DqQMuC+a5MA98dla3Ci9T09xMWxBB3qtkaA/aaTZsDA6vUnatECN1EEKs
-         VpRLHzIhapWJrrZ1DrH/5WStKjxnVcPy2NKWbTVhwrpPKULqzJ+dQNG3W3MvA2agzqXd
-         GGyq3xX2hZLmmRtVpIL/IWo4R6x8pNMeHQh8YS4mNywRz4a2KSmNgrxCLQYEpg4hq/sL
-         NDGA==
-X-Gm-Message-State: APuU4Z9WBGC+cT18rD6Hqi+9GQblJKFSTDjLIf+UrBlUQBfJsxvTz63Y
-	7/dn8kYkEqoE3sBUfIlg0+YlIseJK59yP/6gUZ3eYoF8H0UuD734EfP2YEo3Nsfd
-X-Gm-Gg: AZFdTZc3jRnBYiHdW4Vpmn8aJsjD9nH/mJT0PljOgqVhdRmd9MRjtLkXQq3eUO5J8YT
-	Q+qh3ygBryZNRwMM4O6bxrp7+8heWuYbpLSjzcmESDbC+qgScr99TQ3jlvzcNzEQtJjwc+qWS/Y
-	XHi3A6/y2aJShZSEdU5MXlde3PCFUlUGKrYzYo5omDobF4+CLZ5tCWW3dydjeeuQkl4IJH1AKFb
-	tGHiQ9vQ+Hzo1Hd7eF3G2fYF4XgDabmKRcR00NCgvIcAkWD1F9f5PINhPnBIDVPL8dkkKKd3JzU
-	jZZoXtsliyzTkkps4jRibtmNp1+nqPG82df7nekd+Bm0wjNYIqpcITflTe2jIO5vkMj7Y2E4Zcq
-	g7K8O6mL4mp95AepPW0fjZVmbasfQr99GTlZ4vPylg7PRztqRukNcKzs/CDrmWyNSKSxJJUUqIK
-	+VTHt3sAAibsUhSiRZpTvN/b9AquFlF+4qixCvtzTxxOZwMiokBTqGsK2skySJxDp0g26Fin7Oc
-	cfPTYq0SWbgB2x7+uoEEIDsLn+syfeMWUH0CppFaJNJOxP4K0COiDnUj7kbEXtJFPwjmO4g4DM2
-	5j6ezaKAGWNl5NEe/Fq9QSTsF0qGDy20W1GzYnEys25szintpV9YGiHH5Fv0EtdOegHvsA0UjKp
-	lCcMPxVXnGKvjfvjMIKflQiDKgUML
-X-Received: by 2002:a05:701b:291b:b0:1b5:3878:a9d2 with SMTP id a92af1059eb24-1b5568e950amr9846972c88.20.1795439136572;
-        Mon, 23 Nov 2026 05:05:36 -0800 (PST)
-Received: from [127.0.0.1] (ip68-107-67-45.sd.sd.cox.net. [68.107.67.45])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-1b5567ff27bsm30856311c88.6.2026.11.23.05.05.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Nov 2026 05:05:35 -0800 (PST)
-From: jasmeet.bhatia.us@gmail.com
-Message-ID: <f3a4f1245736cbff8152a46fb60fe984@gmail.com>
-Subject: Re: [PATCH 0/2] x86/efi: Disregard stale EFI config tables after
- kexec
-To: ardb+git@google.com
-Cc: linux-efi@vger.kernel.org
-In-Reply-To: <20261123094228.466164-4-ardb+git@google.com>
-References: <20261123094228.466164-4-ardb+git@google.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mkdW4pbn
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1A0B31F000C6;
+	Mon, 23 Nov 2026 14:53:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795445588;
+	bh=Y3UAiBv26yNrSECYQZNbEZMUMcL7HPyi8uxH4eCNkJY=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=mkdW4pbntZ3BT3VmzWq3IAQ9I6JLBaAuqK1JsITmIrsL5eTXH6+RYBc9WniSGP1gQ
+	 qcYTZcmFsi64NH7avowVwCL/i2RDN+w2V5HQNVgxEpUuRvcNJH5CufqxPKXOoHIStH
+	 NfmSgcAe0NuUu2eKESpxSHr0yH4fOjwMx5G8yGWgiIiYFTlrwAFOUjUVYybMBZSAM0
+	 BnJRkNmBXhXcsmYWCGIqD9k30BZf5XwYcxD/sRjdFbzFObRBkkr8gO6HtMKhBdeYI7
+	 6sUrC9BXgOpzdItXoCrGKH6EMON4NhYPBkVWvB7pn2Jcpe9/W4yTp5bSMAvDaQTUpg
+	 M5YnsxRFu27pg==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 6B165198003A;
+	Mon, 23 Nov 2026 09:53:05 -0500 (EST)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Mon, 23 Nov 2026 09:53:05 -0500
+X-ME-Sender: <xms:TlMEa2ozJj8ItmpzSXPdFsXFslchd8T3j3fPzg-uOfi_kMOXjfwIpA>
+    <xme:TlMEa_fzu2LIdaY8l2JJT91ZJe7IEdJM_rQR0fcjT2lPLxTdVg2-YcAdBydN4uE5p
+    CAdo9I1MlRiJ4gdrGMfq38hCfTXLEH6Siz825g3K44pS-r2NHET6Af_>
+X-ME-Proxy-Cause: dmFkZTEewuPfbqgwdpsEvLIHAOywqATfEwpQe1EWawCpTqgNDsOOIqXhp/6WgJ6VsQ5cgH
+    uDUcfDchAzO7ZxVv7hOpvM1uuAkGmoa05dw80LsEIKBF/6sp6Ffs7JF6VNRdIm/JlonDR7
+    U0g+3XQLpva2S7VXNe6V64ro+op8FWKdp4TeisIWYhIFy9/DGW/fQqaaoluStg31otRUCO
+    GVRB3uvq6XKpKxBdU8FwsGDgwIbK9jr8LmbfZn9bWIhYSwkYic8fS58JYDnRJo6JeUxnwz
+    u+4Zp3Y8fsiCc+wHOdN5rCAVK9AUWRLqIM68yHfo850i8tnSNLBl23924cBMRlSkCuPgHe
+    4pz6MKePvM0GCw1jrWiakJ3P96ytvPTyi47zUolPFBnFGgOVWjrusG2phiuHEgXPoSXTG8
+    sz1r/uacWm6eGoLk4BmNAnuQER4pTSHFoBNuMvWZXZs1DmNqkjahM2nair4/sHepn1Td2T
+    PRKloo974wwgKWmWUvgHwPONOwCvHgDwUH6NBqqLNm/iFwify4+qmTPL5xWeQJ/+VE5Ixh
+    TFS+M26Oxxh07aCMBQ4kMh9D7GTRNXGhWXGbm0IMLTbbN2KlsUCKaM9rnIlCdcJBg1TsyB
+    BoVSBzVtzzldeBs3ZEgd8UbEniMEu7Xsci+7CYHlSYPTWfmfkGPUlM3MKraQ
+X-ME-Proxy: <xmx:UVMEa4PtmmTpx1rwnX9jg1XYfkIf3K60LcBN0Fm0nK3H-TXnfZsGWQ>
+    <xmx:UVMEa62lA40nFwrIVV4vpqPWnDwmK1_Y4HIIfGFMPF-VvGk8xJ7MMA>
+    <xmx:UVMEa8QTruJjJMHfyTIKYnDhMhqq031UJ6JOpYv3ekhvNX171_kg1w>
+    <xmx:UVMEa1ntwdewc2nRTtJKjpN02_qQiOResxAjosEGKfWajj1uKFEm0A>
+    <xmx:UVMEa1M-Ld2ThFONY1IKeXnnTib1jPtZK5Af_m8JiZvbW1E81c6DFc59>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id D4D5BF80093; Mon, 23 Nov 2026 09:53:02 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -96,40 +77,164 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Date: Mon, 23 Nov 2026 13:05:35 +0000
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Date: Mon, 23 Nov 2026 15:52:42 +0100
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Ard Biesheuvel" <ardb+git@google.com>, linux-efi@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, "Jason Gunthorpe" <jgg@nvidia.com>,
+ "Paul Walmsley" <pjw@kernel.org>, "Palmer Dabbelt" <palmer@dabbelt.com>,
+ "Albert Ou" <aou@eecs.berkeley.edu>, "Huacai Chen" <chenhuacai@kernel.org>,
+ loongarch@lists.linux.dev, linux-riscv@lists.infradead.org
+Message-Id: <c7de6586-917b-4fab-be8f-f8cfef6ee3fa@app.fastmail.com>
+In-Reply-To: <20261118182105.1633603-21-ardb+git@google.com>
+References: <20261118182105.1633603-21-ardb+git@google.com>
+Subject: Re: [PATCH v4 00/19] efi: Expose loaded image properties via info struct
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-Hi Ard,
 
-On Mon Nov 23, 2026 at 1:42 AM -08:00, Ard Biesheuvel wrote:
-> [...]
-> Patch #1 wires up efi_config_table_is_usable() for x86, and uses it to
-> disregard the INITRD and Memory Attributes tables when booting via kexec.
-> This fixes a panic when kexec'ing without an initrd, and supersedes the
-> existing handling of the Memory Attributes table, which does not cover
-> all cases.
->=20
-> Patch #2 does the same for the TPM event log table, so that the EFI stub
-> can allocate it as EFI loader data again without regressing kexec.
-> [...]
+On Wed, 18 Nov 2026, at 19:21, Ard Biesheuvel wrote:
+> From: Ard Biesheuvel <ardb@kernel.org>
+>
+> Clean up the arm64 build script and linker hacks that zboot uses to
+> obtain properties of the loaded image (which it cannot access directly
+> via a relative reference like the ordinary EFI stub).
+>
+> Instead, define a generic struct efi_image_info, and expose its offset
+> in the loaded image in a similar manner, but without relying on explicit
+> linker script exports.
+>
+> Populate the struct with section markers that all architecture use for
+> loading the kernel image at boot, so that all the linker exports can be
+> dropped for them.
+>
+> Changes since v3:
+> - Populate efi_image_info for ARM correctly
+> - Fix a pre-existing issue in the ARM allocation logic
+> - Simplify the prototype of handle_kernel_image()
+> - Pass image_info pointer down to efi_kaslr_relocate_kernel() and
+>   simplify the callers
+> - Align RISC-V's __inittext_end correctly so it can be remapped.
+> - Add some more acks from Jason
+>
+> Changes since v2:
+> - Add some additional fixes for RISC-V, which deviates from other
+>   architectures wrt its section markers. These patches have been sent
+>   out separately as well [0] as they will likely be taken through the
+>   RISC-V tree.
+> - Pass an efi_image_pointer to efi_stub_common() that points to the
+>   version inside the loaded image, so that its relative references
+>   accurately describe vmlinux in memory before boot.
+> - Avoid weak linkage hacks to derive the kernel entrypoint, and instead,
+>   always use the entrypoint passed via efi_image_info
+> - Use efi_image_info for sysfb_display_info so that efifb earlycon works
+>   much earlier on zboot
+> - Drop changes related to the previous bullet that are now no longer
+>   needed
+> - Add acks from Jason
+>
+> Changes since v1:
+> - drop arm64 image header changes
+> - move efi_image_info out of __efistub_ scope so it can access vmlinux
+>   symbols directly
+> - implement in a generic manner for all architectures that support zboot
+> - address Sashiko comments
+>
+> [0] https://lore.kernel.org/all/20261111164345.4059964-5-ardb+git@google.com/
+>
+> Cc: Jason Gunthorpe <jgg@nvidia.com>
+> Cc: Paul Walmsley <pjw@kernel.org>
+> Cc: Palmer Dabbelt <palmer@dabbelt.com>
+> Cc: Albert Ou <aou@eecs.berkeley.edu>
+> Cc: Huacai Chen <chenhuacai@kernel.org>
+> Cc: loongarch@lists.linux.dev
+> Cc: linux-riscv@lists.infradead.org
+> Link: 
+> https://lore.kernel.org/all/0-v2-989a18390eb1+486-arm64_drtm_jgg@nvidia.com/
+>
+> Ard Biesheuvel (19):
+>   efi/zboot: arm64: Add missing barrier after cache maintenance
+>   riscv: Use _stext not _text to denote the start of kernel code
+>   riscv: Make _text point to the start of the kernel image
+>   efi/riscv: Rename __init_text_end to __inittext_end like other archs
 
-I've tested both patches on my Framework Laptop 16 (AMD Ryzen AI 300)
-running Linux 7.4-rc4, and the results look good!
 
-- Hibernation: 4/4 successful platform hibernation/resume cycles with=20
-both EFI patches applied. The original inconsistent E820 memory map=20
-error no longer occurs, and the saved sessions restore correctly.
+Ping to the RISC-V maintainers: I'd like to incorporate these RISC-V
+changes for the next cycle using a stable shared branch.
 
-- kexec: Successfully booted into the patched kernel using systemctl=20
-kexec. The kernel correctly marked the inherited MEMATTR, INITRD, and=20
-TPMEventLog EFI configuration tables as unusable and booted normally.=20
-The results suggest that both patches are working as intended on my=20
-hardware.
+I'd like to queue up this series this week. I'll put the RISC-V changes
+on a separate branch so I'll be able to swap in another one later, if
+needed.
 
-Tested-by: Jasmeet (Jazz) Bhatia <jasmeet.bhatia.us@gmail.com>
+Thanks,
 
-Thanks again for preparing these fixes!
-
-Jazz=0D
-
+>   efi/libstub: Avoid _end section marker in library code
+>   efi/libstub: arm: Size the decompressed kernel allocation precisely
+>   efi/libstub: Avoid reserve_addr/_size in efi_kaslr_relocate_kernel()
+>   efi/libstub: Capture loaded image information in struct efi_image_info
+>   efi/libstub: Pass kernel entrypoint down to efi_enter_kernel()
+>   efi/libstub: arm: Simplify handle_kernel_image()
+>   efi/libstub: Drop reserve_addr/_size params from handle_kernel_image()
+>   efi/libstub: arm64: Use struct efi_image_info to access image
+>     properties
+>   efi/libstub: loongarch: Use struct efi_image_info to access image
+>     properties
+>   efi/libstub: riscv: Use struct efi_image_info to access image
+>     properties
+>   efi/libstub: Make efi_remap_image() return efi_status_t
+>   efi/zboot: Disentangle efi_remap_image() from efi_cache_sync_image()
+>   efi/libstub: arm64: Drop zboot code_size hack
+>   efi: Make config table based primary display handover ARM-only again
+>   Revert "efi: earlycon: Reprobe after parsing config tables"
+>
+>  arch/arm/boot/compressed/head.S                      |  3 +-
+>  arch/arm/include/asm/efi.h                           | 15 +---
+>  arch/arm/kernel/efi.c                                | 27 ++++++
+>  arch/arm64/boot/Makefile                             |  3 -
+>  arch/arm64/include/asm/efi.h                         |  2 -
+>  arch/arm64/kernel/efi-header.S                       |  2 +
+>  arch/arm64/kernel/image-vars.h                       | 14 ---
+>  arch/loongarch/kernel/efi.c                          | 20 +----
+>  arch/loongarch/kernel/head.S                         |  4 +-
+>  arch/loongarch/kernel/image-vars.h                   |  6 --
+>  arch/loongarch/kernel/vmlinux.lds.S                  |  1 -
+>  arch/riscv/include/asm/efi.h                         |  2 -
+>  arch/riscv/include/asm/sections.h                    |  2 +-
+>  arch/riscv/kernel/head.S                             |  1 +
+>  arch/riscv/kernel/image-vars.h                       |  8 --
+>  arch/riscv/kernel/setup.c                            |  2 +-
+>  arch/riscv/kernel/vmlinux.lds.S                      |  6 +-
+>  drivers/firmware/efi/earlycon.c                      | 16 +---
+>  drivers/firmware/efi/efi-init.c                      | 24 +-----
+>  drivers/firmware/efi/efi.c                           |  5 --
+>  drivers/firmware/efi/libstub/Makefile                |  3 +-
+>  drivers/firmware/efi/libstub/Makefile.zboot          | 11 ++-
+>  drivers/firmware/efi/libstub/arm32-stub.c            | 90 +++++++++++++++-----
+>  drivers/firmware/efi/libstub/arm64-stub.c            | 37 ++------
+>  drivers/firmware/efi/libstub/arm64.c                 | 23 +----
+>  drivers/firmware/efi/libstub/efi-stub-entry.c        | 33 +------
+>  drivers/firmware/efi/libstub/efi-stub-helper.c       | 15 ++--
+>  drivers/firmware/efi/libstub/efi-stub.c              | 26 ++++--
+>  drivers/firmware/efi/libstub/efistub.h               | 84 +++++++++++++-----
+>  drivers/firmware/efi/libstub/fdt.c                   |  5 +-
+>  drivers/firmware/efi/libstub/image_info.S            | 19 +++++
+>  drivers/firmware/efi/libstub/kaslr.c                 | 45 +++++-----
+>  drivers/firmware/efi/libstub/loongarch-stub.c        | 21 ++---
+>  drivers/firmware/efi/libstub/loongarch-stub.h        |  4 -
+>  drivers/firmware/efi/libstub/loongarch.c             | 11 +--
+>  drivers/firmware/efi/libstub/primary_display.c       | 56 ------------
+>  drivers/firmware/efi/libstub/riscv-stub.c            | 29 +------
+>  drivers/firmware/efi/libstub/riscv.c                 | 16 +---
+>  drivers/firmware/efi/libstub/zboot-decompress-gzip.c |  2 -
+>  drivers/firmware/efi/libstub/zboot-decompress-zstd.c |  2 -
+>  drivers/firmware/efi/libstub/zboot.c                 | 28 +++++-
+>  drivers/firmware/efi/libstub/zboot.lds               |  6 +-
+>  include/linux/efi.h                                  |  1 -
+>  43 files changed, 324 insertions(+), 406 deletions(-)
+>  create mode 100644 drivers/firmware/efi/libstub/image_info.S
+>  delete mode 100644 drivers/firmware/efi/libstub/loongarch-stub.h
+>  delete mode 100644 drivers/firmware/efi/libstub/primary_display.c
+>
+>
+> base-commit: 6628e7d4c6b25c8d18f1345e3a20d21829aae7e4
+> -- 
+> 2.56.1.708.g77570a6a1d-goog
