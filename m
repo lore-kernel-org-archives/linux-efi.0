@@ -1,45 +1,45 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795394417;
-	b=bxfYx54XYSzTwkFpHnPLCWKVZKmcltYBV84E1Ktw1IMrPEcXLkr/j/rp9shbUaATVz3H
-	 bkvpMtg9BedH47jAUJ8yMiCePylqfZPs+OWHNFM4ewblzoD8zSTUwMBaGpvDHvGpCistT
-	 ublBo4I/2kVqkT+AoehW4Q4DM2S+ZY+KO6aw+FmJ7C3ZEfR2nqWK3sMRtqmKqdxaVN0Sr
-	 eup+JOPhea1tXNb7e+IJxanoP7X98J+dOp8/KejdPvFoOxiUQYS4sPXfBEf5gkgafRfit
-	 Zn0WDHgnupfogG+ufC9rJ4sjSpxM59yZH8XDOXJEXlYWHwujZt8wI9CYS6X7nXCWPWQ==
+	t=1795394423;
+	b=ESMgCN9ZZgoS4z/OCBgyB3HS9Dkn7roBbXCGgoe35Ibe/HG6SZuPVQGQcYN+HLWXOWnE
+	 BlN2W1ci7YBloCUWrCri8VV/P4lOrVx6MzF5C3/5EfV1VD6rrRRgqgwLvxzQAAwweQO0t
+	 q6XK9/AJrTD0FmL22vCSnv9ppblFPPYLQkP0IUuOkg1DlJuQ7wy0rKARDKluK8uygEFAj
+	 O/jqyJQo2jtXL+Gt7ZFswjgaFYFQ4psrUMrvUYDuICjV2cgRBegfDL25fMFzVAZykVUv/
+	 oj+ugR6cUM/To8iCfZzTqaSaVsRjlnOZhsmA3HCh4U0J+1tRgJpk+NLP7gHZvEnABag==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795394417;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795394423;
 	h=Received:DKIM-Signature:Content-Type:MIME-Version:Message-Id:
 	 In-Reply-To:References:Subject:From:To:Cc:Date;
-	bh=7l+dD/W+BgV5YgI2G/09krvBCEN+4VhBdym5+PJEAjA=;
-	b=dV89DLpZ5UU51csQ131FNHKmSgKcjhZOjF0P2+li77JtqyMD74KzUEMElUWamI9EVaLV
-	 q5KC08xp8JUvf3uD9x6cfEMet8vPXYi3Km9AnaOHjk37PHAWRFrF2EFZrKB7vMVeD1xkh
-	 YoiCBfohxTylXvMYzfaffDhTpGYaYefawK6afjHdSsXD/U6N89MBCDnMbR97PhbTkEgs7
-	 5MRlq3ODIv1zhfASSDaDG6CqiiEuegS+PVFKOphvAOqH3mKB51gFGuswgyb9cgs3Atgoq
-	 qurTPUX5rwABIwjCLZ8WKSKNa65OixJIaAM/QLNOfZOht2DhFxihY0aCE6Lu74iQA9g==
+	bh=vvX7FxyAeqZ8LNbdDutoA2XUQbgC5esuzUM1lgllSu8=;
+	b=YE3q5Ur8dEZQAySLUOJAL7cF4qRjQCHPo7aZ4GN5OzZKWfqFJEAuXmuK/8+es0R33drn
+	 d1+OvY8aAVA89uZHBkRGt56937QL5QSUgyH1FtZjAGkCTkHizfLtvugVBdz1R2AtsEztE
+	 Qe+slYZuR4bCpxJeJ51mrYqFU+Pe5Z0lP4jfAfTEBs1XNZMdZmSXS/61PktMo+cZbKWuG
+	 3AdTu4Dy5nuJa+YGc6ySxKTOH3i8NO4Ilz82hay4rUGHNnn29p8sUnbPP496L37tWzetA
+	 qkLsbWxPPRlYlsNx9ZMGtj2klur/qGU/xrXdapNYzMjtiYoPmfmTU8sKuu9w+kO8GTw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="P+PR/x1I";
+	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=JXEHzbfF;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 111DC606A337;
-	Mon, 23 Nov 2026 00:40:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 405D5606A69A;
+	Mon, 23 Nov 2026 00:40:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=P+PR/x1I
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 203561F0157D;
-	Mon, 23 Nov 2026 00:40:12 +0000 (UTC)
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=JXEHzbfF
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 67FBE1F000CF;
+	Mon, 23 Nov 2026 00:40:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795394416;
-	bh=7l+dD/W+BgV5YgI2G/09krvBCEN+4VhBdym5+PJEAjA=;
+	s=k20260515; t=1795394422;
+	bh=vvX7FxyAeqZ8LNbdDutoA2XUQbgC5esuzUM1lgllSu8=;
 	h=In-Reply-To:References:Subject:From:To:Cc:Date;
-	b=P+PR/x1Ic0FMmBINkGnzjlhVNTqrgdSr6ODVINX+75rWP5OpP9BGalwwv3/d9VNSA
-	 CQSh4D/rjj+1M78cLXWFTLgo0IhKgin2cw7xejAJ/2t5KFGRNF0veGEbH542pRDqUm
-	 081AAu0XpDF+e5fpQJVItumdlwggjHlPCpjJwOHGu7cry04g4HGn7tU9Swacdn41GB
-	 Y1u78LgnGiCs2JXBPJJ6DoB/CVl7rRrSn3dd+KNGu/KGrW9eYuN6hbyMTOarrxji+v
-	 gh4lB1GtH/zgNAbIL2J0RQ98Af1tfequRK2bprfqw4IGS2+elLrOMQuxA6i0eMc9fn
-	 hTY8CIZMbclgw==
-Content-Type: multipart/mixed; boundary="===============0669259821457419272=="
+	b=JXEHzbfF8FivyAPYlaHLt/sjbu+sMiIjeW4J+JAcZF6DHPGHnSyZEpAWSwINg/QtG
+	 qMvwlT/dWevDFNZE3EmB0+EkujzNQv14fIUwxBlg1u97hvPQJwRQnnmknUtnGSLqKp
+	 +w5Um1rJbFy/7SBBmUFzG6PI0EN+0XZSOaBoPzsvzRgHkXsEq4GgASFguFoLMWjWp8
+	 pki1qgTUTfJ2n1dkykh8Sx93oxX6Z8qzQ4/xFm3kvMlIB6UOQ+FNx+6SDa9dAoC1g2
+	 a4qmqFwXmDraqu/60o0Pgvn+4KIPfMe0B0GUm210pl1FgrO0ZXdh5vy5fgaMO4wlqy
+	 O+/vKLTVv+O+A==
+Content-Type: multipart/mixed; boundary="===============5817084910596839964=="
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -49,97 +49,134 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Message-Id: <3ae6b586116787e3221428028ac62cb6cd4fc70ba1740a541f515f78bb2c8ce0@mail.kernel.org>
-In-Reply-To: <20261122235757.3456048-11-irogers@google.com>
-References: <20261122235757.3456048-11-irogers@google.com>
-Subject: Re: [RFC PATCH v1 10/11] selftests/perf_events: Add Minimal DWARF CFI deferred user unwind test
+Message-Id: <7e1d3d4067c817a0ae6137044406af1138613ce289199ca065c65fc6d611f990@mail.kernel.org>
+In-Reply-To: <20261122235757.3456048-4-irogers@google.com>
+References: <20261122235757.3456048-4-irogers@google.com>
+Subject: Re: [RFC PATCH v1 03/11] scripts, unwind: Add build-time .eh_frame minifier
 From: bot+bpf-ci@kernel.org
 To: irogers@google.com,linux-kernel@vger.kernel.org,linux-trace-kernel@vger.kernel.org,linux-arch@vger.kernel.org
 Cc: jpoimboe@kernel.org,rostedt@goodmis.org,peterz@infradead.org,mingo@redhat.com,tglx@kernel.org,bp@alien8.de,dave.hansen@linux.intel.com,x86@kernel.org,catalin.marinas@arm.com,will@kernel.org,mark.rutland@arm.com,linux-arm-kernel@lists.infradead.org,pjw@kernel.org,palmer@dabbelt.com,aou@eecs.berkeley.edu,alex@ghiti.fr,linux-riscv@lists.infradead.org,acme@kernel.org,namhyung@kernel.org,linux-perf-users@vger.kernel.org,mhiramat@kernel.org,ast@kernel.org,daniel@iogearbox.net,andrii@kernel.org,bpf@vger.kernel.org,nathan@kernel.org,nsc@kernel.org,linux-kbuild@vger.kernel.org,ojeda@kernel.org,rust-for-linux@vger.kernel.org,ardb@kernel.org,linux-efi@vger.kernel.org,maz@kernel.org,oupton@kernel.org,kvmarm@lists.linux.dev,shuah@kernel.org,linux-kselftest@vger.kernel.org,indu.bhagat@oracle.com,jremus@linux.ibm.com,wnliu@google.com,dylanbhatch@google.com,irogers@google.com,ast@kernel.org,andrii@kernel.org,daniel@iogearbox.net,martin.lau@kernel.org,eddyz87@gmail.com,yonghong.song@linux.dev,mas
  on@kernel.org,ihor.solodrai@linux.dev
-Date: Mon, 23 Nov 2026 00:40:12 +0000 (UTC)
+Date: Mon, 23 Nov 2026 00:40:18 +0000 (UTC)
 
---===============0669259821457419272==
+--===============5817084910596839964==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
 
-> selftests/perf_events: Add Minimal DWARF CFI deferred user unwind test
+> scripts, unwind: Add build-time .eh_frame minifier
 
 TL;DR:
-- Selftest may report false "not ok" for 32-bit ARM builds on arm64 COMPAT
-  kernels, since __arm__ is listed as supported (unverified)
-- Redundant PERF_RECORD_CALLCHAIN_DEFERRED #ifndef (nit)
+- On big-endian build hosts, min_eh_frame may silently skip minifying every
+  object, so the size reduction is lost
+- Kconfig depends on UNWINDER_DWARF_CFI, which is defined only later in the
+  series
+- min_eh_frame is missing from scripts/.gitignore
 
-> diff --git a/tools/testing/selftests/perf_events/unwind_user_cfi.c b/tools/testing/selftests/perf_events/unwind_user_cfi.c
+> diff --git a/arch/Kconfig b/arch/Kconfig
+> --- a/arch/Kconfig
+> +++ b/arch/Kconfig
+> @@ -528,6 +528,16 @@ config HAVE_UNWIND_USER_CFI
+>  	select UNWIND_USER
+>  	select UNWIND_DWARF_CFI
+>
+> +config UNWINDER_DWARF_CFI_MINIFY
+> +	bool "Minify .eh_frame tables at build time"
+> +	depends on UNWINDER_DWARF_CFI
+
+A subsystem pattern flags this as potentially concerning: a depends on
+naming a symbol that no Kconfig file defines.
+
+UNWINDER_DWARF_CFI is not defined anywhere at this commit, so this option
+evaluates to n on every architecture.  That leaves the hostprogs-always
+entry in scripts/Makefile, the cmd_min_eh_frame hooks in Makefile.lib,
+Makefile.build, Makefile.vmlinux_o and rust/Makefile, and
+scripts/min_eh_frame.c itself unreachable here, so the results quoted in
+the commit message cannot be reproduced from this commit.
+
+The symbol is defined later in the series, in 6cf5792e969e ("x86/unwind:
+Add Minimal DWARF CFI kernel unwinder"), efdfa5f38673 ("arm64/unwind: Add
+Minimal DWARF CFI kernel unwinder") and 90a680847a32 ("riscv/unwind: Add
+Minimal DWARF CFI kernel unwinder"), so this looks like a forward
+reference rather than a misspelling, and bisection is not broken.
+
+Would it make sense to reorder the series so the unwinder Kconfig symbol
+comes before its consumers?
+
+> +	default y
+> +	help
+> +	  Strip unneeded callee-saved register opcodes and coalesce PC-advance
+> +	  bytecodes in .eh_frame sections at build time, reducing kernel unwind
+> +	  table memory usage while ensuring only Minimal DWARF CFA bytecodes
+> +	  remain in vmlinux and modules.
+
+[ ... ]
+
+> diff --git a/scripts/Makefile b/scripts/Makefile
+> --- a/scripts/Makefile
+> +++ b/scripts/Makefile
+> @@ -12,6 +12,7 @@ hostprogs-always-$(CONFIG_SYSTEM_EXTRA_CERTIFICATE)	+= insert-sys-cert
+>  hostprogs-always-$(CONFIG_RUST_KERNEL_DOCTESTS)		+= rustdoc_test_builder
+>  hostprogs-always-$(CONFIG_RUST_KERNEL_DOCTESTS)		+= rustdoc_test_gen
+>  hostprogs-always-$(CONFIG_TRACEPOINTS)			+= tracepoint-update
+> +hostprogs-always-$(CONFIG_UNWINDER_DWARF_CFI_MINIFY)	+= min_eh_frame
+
+Should /min_eh_frame be added to scripts/.gitignore?
+
+Every other host program built here has an entry there (/kallsyms,
+/sorttable, /tracepoint-update, /insert-sys-cert, and so on), and
+git check-ignore -v scripts/min_eh_frame matches no rule.  After an in-tree
+build with the option enabled, the binary shows up as untracked and could be
+picked up by git add -A.  No later commit in the series adds the entry.
+
+[ ... ]
+
+> diff --git a/scripts/min_eh_frame.c b/scripts/min_eh_frame.c
 > new file mode 100644
 > --- /dev/null
-> +++ b/tools/testing/selftests/perf_events/unwind_user_cfi.c
+> +++ b/scripts/min_eh_frame.c
 
 [ ... ]
 
-> +#include "../../../../include/linux/compiler_attributes.h"
-> +
-> +#ifndef PERF_RECORD_CALLCHAIN_DEFERRED
-> +#define PERF_RECORD_CALLCHAIN_DEFERRED 22
-> +#endif
-
-this isn't a bug, but PERF_RECORD_CALLCHAIN_DEFERRED is an enumerator of
-enum perf_event_type, not a preprocessor macro, so the #ifndef is always
-true.
-
-The defer_callchain and defer_output attr fields used later in main() come
-from the same uapi change as the enumerator, so any header that compiles
-this file already has it.
-
-Could this #ifndef/#define fallback be dropped?
+> +int main(int argc, char **argv)
+> +{
 
 [ ... ]
 
-> +#if !defined(__x86_64__) && !defined(__i386__) && !defined(__aarch64__) && \
-> +	!defined(__arm__) && !defined(__riscv)
-> +	ksft_test_result_skip("Architecture lacks Minimal DWARF CFI user unwind support\n");
-> +	ksft_finished();
-> +#endif
+> +		if (memcmp(map, ELFMAG, SELFMAG) == 0 &&
+> +		    map[EI_DATA] == ELFDATA2LSB &&
+> +		    map[EI_CLASS] == ELFCLASS64)
+> +			rc = process_elf64(map, (size_t)st.st_size);
 
-A subsystem pattern flags this as potentially concerning: exiting with a
-status other than KSFT_SKIP when a feature is missing makes run_one()
-record "not ok".
+main() checks that the target object is little-endian, but not the byte
+order of the host the tool runs on.  process_elf64() then reads and writes
+the ELF header, section header, symbol and Elf64_Rela fields as native
+structs, and only the .eh_frame payload goes through get_le32()/put_le32().
 
-Is __arm__ correct in this list of supported architectures?
+On a big-endian build host cross-compiling an x86_64, arm64 or riscv64
+kernel, the first check in process_elf64() sees the bytes 01 00 of e_type
+as 0x0100:
 
-The kernel CFI user unwinder finds unwind data only through
-PT_GNU_EH_FRAME.  parse_user_elf32_eh_hdr() returns -ENOENT without it:
+    if (ehdr->e_type != ET_REL)
+        return 0;
 
-    if (!have_load0 || !have_eh || !eh_memsz)
-        return -ENOENT;
+Won't every object then be silently left unminified while the build still
+succeeds?  CONFIG_UNWINDER_DWARF_CFI_MINIFY is default y and its help text
+says only Minimal DWARF CFA bytecodes remain in vmlinux and modules, but on
+such a host nothing is stripped, coalesced or dropped, and nothing reports
+it.
 
-As far as I know, arm-linux-gnueabi(hf) toolchains emit ARM EHABI tables
-(.ARM.exidx) rather than .eh_frame, so a normal AArch32 binary would have
-no PT_GNU_EH_FRAME.  I did not have an ARM cross compiler to confirm this.
+Other ELF host tools in scripts/ handle this: scripts/elf-parse.c picks
+rle/rbe accessors from EI_DATA, and scripts/mod/modpost.c applies
+TO_NATIVE() to the ELF header fields.
 
-On a native arm32 kernel, arch/arm does not select HAVE_UNWIND_USER_FP or
-HAVE_UNWIND_USER_CFI, so no deferred record arrives and the test reaches
-its "No PERF_RECORD_CALLCHAIN_DEFERRED records" skip.
+The resulting kernel should still work, since kernel/unwind/dwarf_cfi.c
+parses unminified CIEs and FDEs, but the documented size reduction would
+not apply.
 
-On an arm64 kernel with CONFIG_COMPAT, deferred records are produced since
-unwind_user_cfi_arch() accepts ws == 4.  Each frame gets -ENOENT from
-unwind_user_next_cfi(), and unwind_user_next() falls back to
-unwind_user_next_fp(), which expects APCS frames at compat_fp (r11).  A
--fomit-frame-pointer build does not have those.
-
-The record then stops after one or two entries and saw_full_chain stays
-false:
-
-    ksft_test_result(saw_full_chain, "unwind_user Minimal DWARF CFI across ...\n");
-    ksft_finished();
-
-ksft_finished() exits with KSFT_FAIL, so a 32-bit ARM build run on an
-arm64 COMPAT kernel reports "not ok" because of an unsupported unwind
-format rather than a kernel regression.
-
-Should __arm__ be dropped from the supported list so the existing skip
-runs, or should the test skip when the binary has no PT_GNU_EH_FRAME?
+Could this either fail the build with a message when the host is not
+little-endian, or read the ELF header, section, symbol and rela fields
+through le16/le32/le64 accessors as elf-parse.c does?
 
 
 ---
@@ -147,4 +184,4 @@ AI reviewed your patch. Please fix the bug or email reply why it's not a bug.
 See: https://github.com/kernel-patches/vmtest/blob/master/ci/claude/README.md
 
 CI run summary: https://github.com/kernel-patches/bpf/actions/runs/45087188604
---===============0669259821457419272==--
+--===============5817084910596839964==--
