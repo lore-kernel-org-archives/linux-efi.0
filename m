@@ -1,45 +1,95 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.42
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795395418;
-	b=MjdS9M9d+mR3aFIyKGnmAnquUgQxocTrEiiz9KhL1Wkij3jyaKBIW6+iqTpLDFFHnthG
-	 A27mDAJLdXC2KNQLEHuGbQMHrP8HN3HZiCM7+38dKCpJS2XN4iEE7jKJWR2io/ogD7zol
-	 kzttsHV0TPk46jBshZVrKJIT4hCA/o83ARqS2Kkkgt0ITKwwppF1Goh/DNHaOXvOhhxDs
-	 T/OoNiPtU/5xuLpiX4QzSPyA7XMLwoQddMVtOr8a2M1QkqvrObbF3khCYHiUm0zsIOTbR
-	 H4Tf9VH79GwBtDLfhPk0ItiR/PWJTwzF3QnYvO/BVE9XIz0bgb42tfAcT7pkZMOpz4w==
+	t=1795424654;
+	b=uD4O8gehbtHCOATx9YpB/JEKkoTRtcsBLQMdM2eomSoNvMW3mJZf4AWz3UnTsynPcryl
+	 T1jsMAUW/7LJHGmLOBq+lq8Zjn6jFecyf0w9lDUyEkus5d/Ehbg4ywpWdKxgVdAAJr7AF
+	 Tn2v9WD09CSuV5fa+BgdoX/b5dA2T+voaUwufiShdZT116hOldmahCNE60evaokBGw9Lk
+	 bcosn3dgmQJ6Y/nlybu+VYOcF674bqym2vCVyFRNrR6JCJH10alOysuEoz9epV+hKl24p
+	 n8CSlj17yG7FZLYESy6Cv8Ia+YdsWL4ayAsLn+WfIey13EjMdnrACCZkZ3+uyjDaUWA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795395418;
-	h=Received:DKIM-Signature:Content-Type:MIME-Version:Message-Id:
-	 In-Reply-To:References:Subject:From:To:Cc:Date;
-	bh=KA+34nbUB7XMJi78mwUnZXOmvWf/xqj1Zhx5rlyn5JE=;
-	b=l+hBIR5RMDqVq/0jYfzhfkbQLXiymteT22e65PI+3XxmQ6J9nYJO5wTpVHo9mannWkAe
-	 WWcMeWN0O+aF/Eyg3AO++joRuBrgi/VWXX+yhz6QVX//8KRtYQhFCPylhMiYfUFAPEsaL
-	 XpaztUNKuSViTmIYFjYSwhNEmFFkcN0TItHYsu8A31pX3LCK1Jez9/eNZV1tqJUCoVDu9
-	 X9Ow8Y1Bz7d4JAcSW4h0RJ7t7lyROtrYqz8PdlrSx6h3GANorStWHMOl6Ue8O9LOEoSIy
-	 wrgWganVsp0hZXLOBs9mNwgqav9+ZckA86H4+KjdHV79Z2rXPJsMsgZag2mPt9kQgdw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795424654;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:Date:From:To:Cc:
+	 Subject:Message-ID:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=ubH/wDYbw7Fd9wr/tfPO5iv8DCgxe5KvwjuUYrTL8XQ=;
+	b=l9nkJG22VQURaoc1KexW5Yi/70Uw1Vs9N8HtiKhjm3mPM1J7lGvKtGaE9nJfAonQLZfe
+	 RBCxasguiKoPMOTA5mWXO3xs893tolUSxvhYcNsojFOA8z34AGr2xww+/WsGeUYGOiRHb
+	 Eyg4d3J+Q6Ov3SHbZ4wo3TAN73/GFTgOd9cm8ljLm0fTKIe79aTcXkg2fyQAxbhqSO5el
+	 BkQvhUkhl05uZ2KQwgDQxvboNrtz8ubTooaPaH5NwERnqKuiOZ84uTl7iZDp4zQLfjevs
+	 nyXri3qIwe7j8c3+OjukxdCWLuhrfNAVTMNXT++zxVB9gXboaTomOTQhMp6ImHFMeEQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Wwd4xK3u;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	dmarc=pass header.from=baylibre.com;
+	spf=pass smtp.mailfrom=baylibre.com;
+	dkim=pass header.d=baylibre.com header.i=@baylibre.com header.a=rsa-sha256 header.s=google header.b=IlrFfHDW;
+	arc=none smtp.remote-ip=209.85.128.42
+Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BAD5606A31A;
-	Mon, 23 Nov 2026 00:56:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D719606A31A
+	for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 09:04:13 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8D719606A31A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Wwd4xK3u
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2317B1F000D0;
-	Mon, 23 Nov 2026 00:56:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795395418;
-	bh=KA+34nbUB7XMJi78mwUnZXOmvWf/xqj1Zhx5rlyn5JE=;
-	h=In-Reply-To:References:Subject:From:To:Cc:Date;
-	b=Wwd4xK3ubjWx19oPCMp9zWlFrE8juKoWZFCxK/5NkekvdxK/qa51b1bI863dR+Jr0
-	 hNY6ijfHa2GZJbWR8L8ohbm82ZIb9vGJLPfnKs0uxlhMz89ds16bo4bjfo7nZzZIvm
-	 CqZ9VBAyrw25Uq0Hnrd96UoU6t7L6WYhpxkClU+iV+3FdDtheHJs0/CcfA5ywqMRip
-	 JknvBJjAGgj29NOZsa/IIqFVqtnBbpCQEJpo98T/sTgLbY88wLRq256Er7gXFaEoa0
-	 3RryNB9N+JudV0I8P2nR949MUFqU+sE/kBpxBYOfmJkfdc0PIREHhrXnQ3vPafsL9R
-	 16I8CrkXe55Eg==
-Content-Type: multipart/mixed; boundary="===============3299975069991723205=="
+	dkim=pass (2048-bit key) header.d=baylibre.com header.i=@baylibre.com header.a=rsa-sha256 header.s=google header.b=IlrFfHDW
+Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-4bb77a462c6so30148455e9.1
+        for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 01:04:13 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre.com; s=google; t=1795424652; x=1796029452; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:content-type:mime-version
+         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=ubH/wDYbw7Fd9wr/tfPO5iv8DCgxe5KvwjuUYrTL8XQ=;
+        b=IlrFfHDWSp8DLfWGlviLzyh6Dn82uiSv3Ls0lwA2HBdpDjlOggL2ye9u/dEY8oBOnq
+         RsEc+n3QVP8uIRgR81y78v9ZfFm/ZbcoLkJBhOxFvIk1EFIOucNBbapJTBwn3H2QFx5E
+         +hi4hBG2xn1dzRaajJaXzUBjHTgwfrGZyvVPG9nxNBkhsmI6dnhVnRbCbTmZDysgjH4z
+         F+MOyE62sUXvyIT3NcOFuOLDFI2q/UHt6cKea7j79RM4mNALPK+vnEEUaU5iU+H+b/aA
+         iRhbNRoenxctcIJULCbKqtBbGIzPim3toyj8v5bv5V0xKGaidzhF0s1/Bqrz5lLhkPLI
+         OO/w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1795424652; x=1796029452;
+        h=in-reply-to:content-disposition:content-type:mime-version
+         :references:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=ubH/wDYbw7Fd9wr/tfPO5iv8DCgxe5KvwjuUYrTL8XQ=;
+        b=ovkjfGOQ+b7ni9tcMbJY7pstrpvTr5ibw7yLW+hiW2aczXsDQSzvMCc4oAZp3brCi5
+         clI9EpuwUmX2ISymKcq9Eic9x46bKs1ykRrfdHMb7aFrtAzhEmkWyBcPIvqNtCwMxxwj
+         mMdn9ckxo0tMN3LLKCsFXMpQ76C4GHgQtI/pArAv/zrl/tUqwjTgkZshqQKlKDDB49q9
+         Fp35mHN+VXi/yiQ8IXtpXDyx3T8YpoGePeQ8BjsDxMaAJtXwUDRDVHRQXgnVsvKWRkQb
+         BDDV5O23NKl1q8xFkmRjf0YBipgHwjbDkQQ4jSedSQfurCiXcPv0hLu8gKOQRSgM/9K/
+         nr9g==
+X-Gm-Message-State: APuU4Z+WUMfaiqNxao916sDfxRhxv7kIv3/wdCPCNQEfaYFQoRYr129f
+	SFVsoVQR//8gHYKgghzNWfJVe9KiGxFq08SlqFsWOXy0XDtD8PGufJXarA3gDkE/oDD75nnS4cv
+	o5wLg
+X-Gm-Gg: AZFdTZcUMfHduwYtwbJ04R4zzNPkvgAJVbv1JNEdQC/ezpg18qfPScTXyBfritMALtA
+	i0cV6zGGLbMr+vLmskXHShyeMPZGgVe5WJ3YLy4HzTjCyt5zJmA3l8FKJrKWWc5qrKi8eSxT5cM
+	e94gGmxqJXHuiDoxchDUAZ/r8kC+QP1aXY5/lzrt8lRdLxngjzKQoXZmwGbOo710rg+RZvrlBIU
+	SmC2WlVYnnpg9PDoXBXE/otzPDz+oBFFLFEND77swdqDb11icDRbeWvJKiAA5MhkiLhOPJXr+tH
+	MKKYKXs00T5iF1DUAgHFWWaN+Z/XDSwO4r/yoSas+fwh9DUsrIvd88mA3eRBAnsY5s0lIE2068l
+	Y3n1jDXkMgoXMZoO2i0A/KHeJcZ+nrzo8Q899Q3fdwuuVkf7UfF3tq8d4Jbbi87WnUSteaa/Ds+
+	/mVfZvcw0y1ivkQd5DoRo+wa2ysDkfkrd6DcFkHWnTmZYoKgOjCDcWO3OCu+hWHFKWNy3nX312z
+	62Sr8hRZn4rPgm9yfpe55co4OGNAHdzI29u42rkm7GPGmp8/Q1DfDYKQ5OrGLasplDngMXr4T0l
+	N9Y2Udf7FAXEN7Ih5Tvqttzajlv4dtVtTc14urx3iDojeqGLZ0pQtkF5nvzmN+gGxeXNImDlwYh
+	Esa+daKrNxs6v/MvE
+X-Received: by 2002:a05:600c:154c:b0:4bb:6a78:7c42 with SMTP id 5b1f17b1804b1-4bb887c3428mr229477635e9.1.1795424651910;
+        Mon, 23 Nov 2026 01:04:11 -0800 (PST)
+Received: from localhost (p200300f65f19a90438645cebc2ee104e.dip0.t-ipconnect.de. [2003:f6:5f19:a904:3864:5ceb:c2ee:104e])
+        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-4bb88442995sm341689635e9.2.2026.11.23.01.04.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Nov 2026 01:04:11 -0800 (PST)
+Date: Mon, 23 Nov 2026 10:04:10 +0100
+From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
+To: Ard Biesheuvel <ardb+git@google.com>
+Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, 
+	Kees Cook <kees@kernel.org>, "Guilherme G. Piccoli" <gpiccoli@igalia.com>
+Subject: Re: [PATCH 2/2] efi: pstore: Convert into a platform driver for
+ 'efivars'
+Message-ID: <awQAaoPBSeaTC17N@monoceros>
+References: <20261120131827.480055-4-ardb+git@google.com>
+ <20261120131827.480055-6-ardb+git@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -49,208 +99,113 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Message-Id: <446a1b870b63e07c6456e140f4fc260d09bd33cbc94fe9dbed4126be9c1e9844@mail.kernel.org>
-In-Reply-To: <20261122235757.3456048-10-irogers@google.com>
-References: <20261122235757.3456048-10-irogers@google.com>
-Subject: Re: [RFC PATCH v1 09/11] riscv/unwind: Add Minimal DWARF CFI kernel unwinder
-From: bot+bpf-ci@kernel.org
-To: irogers@google.com,linux-kernel@vger.kernel.org,linux-trace-kernel@vger.kernel.org,linux-arch@vger.kernel.org
-Cc: jpoimboe@kernel.org,rostedt@goodmis.org,peterz@infradead.org,mingo@redhat.com,tglx@kernel.org,bp@alien8.de,dave.hansen@linux.intel.com,x86@kernel.org,catalin.marinas@arm.com,will@kernel.org,mark.rutland@arm.com,linux-arm-kernel@lists.infradead.org,pjw@kernel.org,palmer@dabbelt.com,aou@eecs.berkeley.edu,alex@ghiti.fr,linux-riscv@lists.infradead.org,acme@kernel.org,namhyung@kernel.org,linux-perf-users@vger.kernel.org,mhiramat@kernel.org,ast@kernel.org,daniel@iogearbox.net,andrii@kernel.org,bpf@vger.kernel.org,nathan@kernel.org,nsc@kernel.org,linux-kbuild@vger.kernel.org,ojeda@kernel.org,rust-for-linux@vger.kernel.org,ardb@kernel.org,linux-efi@vger.kernel.org,maz@kernel.org,oupton@kernel.org,kvmarm@lists.linux.dev,shuah@kernel.org,linux-kselftest@vger.kernel.org,indu.bhagat@oracle.com,jremus@linux.ibm.com,wnliu@google.com,dylanbhatch@google.com,irogers@google.com,ast@kernel.org,andrii@kernel.org,daniel@iogearbox.net,martin.lau@kernel.org,eddyz87@gmail.com,yonghong.song@linux.dev,mas
- on@kernel.org,ihor.solodrai@linux.dev
-Date: Mon, 23 Nov 2026 00:56:54 +0000 (UTC)
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="wxeycgg7tzr5ea3w"
+Content-Disposition: inline
+In-Reply-To: <20261120131827.480055-6-ardb+git@google.com>
 
---===============3299975069991723205==
-Content-Type: text/plain; charset="us-ascii"
+
+--wxeycgg7tzr5ea3w
+Content-Type: text/plain; protected-headers=v1; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [PATCH 2/2] efi: pstore: Convert into a platform driver for
+ 'efivars'
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
 
-> riscv/unwind: Add Minimal DWARF CFI kernel unwinder
+Hello Ard,
 
-TL;DR:
-- struct mod_arch_specific may be redefined (build error) with
-  CONFIG_MODULES=n
-- Stack walk may stop at IRQ stack top, losing frames
-- return_address(n) may be off by one frame (unverified)
-- fprobe comment nit
+On Fri, Nov 20, 2026 at 02:18:30PM +0100, Ard Biesheuvel wrote:
+> diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi=
+-pstore.c
+> index 19a7e4fe5b52..44571fa1dd88 100644
+> --- a/drivers/firmware/efi/efi-pstore.c
+> +++ b/drivers/firmware/efi/efi-pstore.c
+> @@ -1,7 +1,9 @@
+>  // SPDX-License-Identifier: GPL-2.0+
+> =20
+>  #include <linux/efi.h>
+> +#include <linux/mod_devicetable.h>
 
-> diff --git a/arch/riscv/include/asm/module.h b/arch/riscv/include/asm/module.h
-> --- a/arch/riscv/include/asm/module.h
-> +++ b/arch/riscv/include/asm/module.h
+please don't add new users for <linux/mod_devicetable.h>.
+<linux/platform_device.h> already provides platform_device_id without
+introducing a big number of unneeded build dependencies.
 
-[ ... ]
+>  #include <linux/module.h>
+> +#include <linux/platform_device.h>
+>  #include <linux/pstore.h>
+>  #include <linux/slab.h>
+>  #include <linux/ucs2_string.h>
+> @@ -251,29 +258,53 @@ static __init int efivars_pstore_init(void)
+> =20
+>  	efi_pstore_info.bufsize =3D record_size;
+> =20
+> -	if (pstore_register(&efi_pstore_info)) {
+> +	ret =3D pstore_register(&efi_pstore_info);
+> +	if (ret) {
+>  		kfree(efi_pstore_info.buf);
+>  		efi_pstore_info.buf =3D NULL;
+>  		efi_pstore_info.bufsize =3D 0;
+> +		return ret;
+>  	}
+> =20
+>  	return 0;
 
-> +#if defined(CONFIG_MODULE_SECTIONS) || defined(CONFIG_UNWINDER_DWARF_CFI)
->  struct mod_arch_specific {
-> +#ifdef CONFIG_MODULE_SECTIONS
->  	struct mod_section got;
->  	struct mod_section plt;
->  	struct mod_section got_plt;
-> +#endif
-> +#ifdef CONFIG_UNWINDER_DWARF_CFI
-> +	struct mod_dwarf_cfi_index __rcu *dwarf_cfi_index;
-> +#endif
->  };
-> +#endif
+this can be simplified:
 
-Can this define struct mod_arch_specific twice when CONFIG_MODULES=n?
+ 		kfree(efi_pstore_info.buf);
+ 		efi_pstore_info.buf =3D NULL;
+ 		efi_pstore_info.bufsize =3D 0;
+-		return ret;
+ 	}
+=20
+-	return 0;
++	return ret;
 
-UNWINDER_DWARF_CFI only does 'select HAVE_MOD_ARCH_SPECIFIC if MODULES', and
-MODULE_SECTIONS is selected by RELOCATABLE only 'if MODULES'.  With
-CONFIG_MODULES=n and CONFIG_UNWINDER_DWARF_CFI=y, CONFIG_HAVE_MOD_ARCH_SPECIFIC
-is unset, so include/asm-generic/module.h (included first) already provides:
+(though I think it's subjective if you like that or not.)
 
-	#ifndef CONFIG_HAVE_MOD_ARCH_SPECIFIC
-	struct mod_arch_specific
-	{
-	};
-	#endif
+>  }
+> =20
+> -static __exit void efivars_pstore_exit(void)
+> +static void efi_pstore_remove(struct platform_device *pdev)
+>  {
+> -	if (!efi_pstore_info.bufsize)
+> -		return;
+> -
+>  	pstore_unregister(&efi_pstore_info);
+>  	kfree(efi_pstore_info.buf);
+>  	efi_pstore_info.buf =3D NULL;
+>  	efi_pstore_info.bufsize =3D 0;
+>  }
+> =20
+> +static const struct platform_device_id efi_pstore_ids[] =3D {
+> +	{ "efivars", 0 },
 
-include/linux/module.h includes <asm/module.h> even with CONFIG_MODULES=n, so
-the block above would then fail with a redefinition of struct
-mod_arch_specific.
+Please don't initialize .driver_data unless you use it. Also ideally use
+a designated initializer:
 
-Before this patch, MODULE_SECTIONS guarded the struct and also selected
-HAVE_MOD_ARCH_SPECIFIC, so the two always agreed.
+	{ .name =3D "efivars" },
 
-Would guarding the struct with CONFIG_HAVE_MOD_ARCH_SPECIFIC, adding
-'&& defined(CONFIG_MODULES)' to the UNWINDER_DWARF_CFI half of the condition,
-or selecting HAVE_MOD_ARCH_SPECIFIC unconditionally from UNWINDER_DWARF_CFI
-be better?
+> +	{ }
+> +};
+> +MODULE_DEVICE_TABLE(platform, efi_pstore_ids);
 
-> diff --git a/arch/riscv/kernel/probes/rethook_trampoline.S b/arch/riscv/kernel/probes/rethook_trampoline.S
-> --- a/arch/riscv/kernel/probes/rethook_trampoline.S
-> +++ b/arch/riscv/kernel/probes/rethook_trampoline.S
+Best regards
+Uwe
 
-[ ... ]
+--wxeycgg7tzr5ea3w
+Content-Type: application/pgp-signature; name="signature.asc"
 
-> +/*
-> + * Under CONFIG_UNWINDER_DWARF_CFI, PT_EPC(sp) is seeded with
-> + * &arch_rethook_trampoline before rethook_trampoline_handler() overwrites
-> + * regs->epc with the restored caller PC prior to running rethook handlers,
-> + * enabling reliable CFI unwinding across kretprobe and fprobe return hooks.
-> + */
->  SYM_CODE_START(arch_rethook_trampoline)
+-----BEGIN PGP SIGNATURE-----
 
-This isn't a bug, but does fprobe use rethook in this tree?
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmsEAYgACgkQj4D7WH0S
+/k6cLwf/dm3ffrYv1p4IBxfa49Dkl2V+aqhKCf8DnX7DoAvRrIF+VN8MDJRXsPpZ
+xUoI4Ib/e8HcJtWapt93x6HixNhhyJu+ER7R7XUr4Zv0nXQLx5hVBW+I1lEU0jm5
+m5KU6kmVIpFOqonZkZTFybsarZxohCMjbFMtbULtrSfMyEoU45We6xZswM69CcJA
+OvKrqfe3La8GQ0zcw0Su1m6uU/47tvgego6qiM2FxlRnWmZfol7fpxKLzbhkrbDS
+T3K+HlNjsuoGFIl4LJUl18bvae0aQNAJlsHzX3RGO4HR/UnCodY4NdN8y3rnCCrT
+RgCwA9T8hHJiqp8CDhVuy2qP30khdA==
+=aonc
+-----END PGP SIGNATURE-----
 
-FPROBE selects FUNCTION_GRAPH_TRACER and kernel/trace/fprobe.c has no rethook
-references; the only rethook_hook() caller is pre_handler_kretprobe() in
-kernel/kprobes.c.  So fprobe exits run through return_to_handler() in
-mcount.S rather than arch_rethook_trampoline().
-
-Should the comment mention only kretprobes, or point fprobe readers at
-return_to_handler?
-
-> diff --git a/arch/riscv/kernel/stacktrace.c b/arch/riscv/kernel/stacktrace.c
-> --- a/arch/riscv/kernel/stacktrace.c
-> +++ b/arch/riscv/kernel/stacktrace.c
-
-[ ... ]
-
-> +		if ((sp & (sizeof(long) - 1)) ||
-> +		    !riscv_stack_bounds(task, sp, /*size=*/0, &cur_low,
-> +					&cur_high))
-> +			return -EINVAL;
-
-Can this reject a valid sp at the top of the IRQ stack?
-
-The CFA check only rejects values above the top:
-
-	if ((cfa & (sizeof(long) - 1)) || cfa < cur_low || cfa > cur_high)
-
-and the call_on_irq_stack() transition accepts the top:
-
-	sp <= irq_low + IRQ_STACK_SIZE &&
-
-but riscv_stack_bounds(task, sp, /*size=*/0, ...) only matches when
-'addr < high'.
-
-When the walker reaches the function that call_on_irq_stack() called while it
-is still at its entry, sp is irq_stack_ptr + IRQ_STACK_SIZE, and the walk
-returns -EINVAL before it can use the entry row.
-
-One way to reach it:
-
-local_bh_enable()
-  do_softirq()
-    do_softirq_own_stack()
-      call_on_irq_stack(NULL, ___do_softirq)
-
-If an ftrace callback on ___do_softirq takes a stack trace (func_stack_trace,
-or an fprobe event with a stacktrace trigger), the ftrace_caller branch sets
-sp to the IRQ stack top, and riscv_stack_bounds() then matches none of the
-task, IRQ or overflow stacks.  The same happens for walks starting from
-ftrace_partial_regs() pt_regs where regs->sp is the top, for example
-fprobe/kprobe_multi BPF programs calling bpf_get_stackid()
--> perf_callchain_kernel() -> walk_stackframe(NULL, regs).  It also happens to
-__do_softirq() when ___do_softirq() tail-calls it.
-
-The trace then stops at ___do_softirq and loses call_on_irq_stack(),
-do_softirq_own_stack() and every frame on the task stack.  There is no
-memory-safety impact, and the old frame-pointer unwinder could not cross the
-IRQ stack either, but this defeats the call_on_irq_stack() transition support
-the commit message describes.
-
-Should riscv_stack_bounds() accept addr == high when size == 0, or should the
-IRQ stack top be special-cased here?
-
-[ ... ]
-
-> +noinline void notrace walk_stackframe(struct task_struct *task,
-> +				      struct pt_regs *regs,
-> +				      bool (*fn)(void *, unsigned long),
-> +				      void *arg)
-> +{
-> +	walk_stackframe_cfi(task, regs, fn, arg, /*require_reliable=*/false);
-> +}
-
-Does return_address(n) now return an address one frame too far up with
-CONFIG_UNWINDER_DWARF_CFI=y?
-
-return_address() in arch/riscv/kernel/return_address.c does:
-
-	data.level = level + 3;
-	...
-	arch_stack_walk(save_return_addr, &data, current, NULL);
-
-The three skipped entries are arch_stack_walk, return_address and the caller
-of return_address, which assumes arch_stack_walk() has its own frame.  That
-held because CONFIG_FRAME_POINTER builds pass -fno-optimize-sibling-calls
-(top-level Makefile).  This patch makes FRAME_POINTER unavailable under
-UNWINDER_DWARF_CFI and adds -fomit-frame-pointer, so sibling-call
-optimisation is back on at -O2.
-
-arch_stack_walk() is a single forwarding call:
-
-	noinline noinstr void arch_stack_walk(stack_trace_consume_fn consume_entry,
-					      void *cookie,
-					      struct task_struct *task,
-					      struct pt_regs *regs)
-	{
-		walk_stackframe(task, regs, consume_entry, cookie);
-	}
-
-which is a candidate for 'tail walk_stackframe', leaving no frame of its own.
-The walk would then report return_address, F, G, H instead of arch_stack_walk,
-return_address, F, G, so return_address(n) yields __builtin_return_address(n+1)
-of F.
-
-That affects get_lock_parent_ip() (current->preempt_disable_ip, shown as
-"Preemption disabled at:") and the preemptirq tracepoints and the
-irqsoff/preemptoff tracers that use CALLER_ADDR1.  s390, which also unwinds
-without frame pointers, adds CFLAGS_stacktrace.o += -fno-optimize-sibling-calls
-in arch/s390/kernel/Makefile for this reason.
-
-I haven't verified this by compiling for RISC-V, so it is inferred from the
-compiler rules and the s390 precedent.  Would adding -fno-optimize-sibling-calls
-for stacktrace.o under UNWINDER_DWARF_CFI, having arch_stack_walk() call an
-always-inline walker directly, or adjusting the skip count in return_address()
-be appropriate?
-
-
----
-AI reviewed your patch. Please fix the bug or email reply why it's not a bug.
-See: https://github.com/kernel-patches/vmtest/blob/master/ci/claude/README.md
-
-CI run summary: https://github.com/kernel-patches/bpf/actions/runs/45087188604
---===============3299975069991723205==--
+--wxeycgg7tzr5ea3w--
