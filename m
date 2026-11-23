@@ -1,73 +1,92 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.72
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=74.125.82.53
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795436656;
-	b=oI2P4EyEi16mCWJZ3ZtmLK/CpICKntKk3D2fBnm4cxic8US3apUY3P3Jz6mE+qCXSiqR
-	 PvCawDZQ60VIxn8qkDc6+7cw5liVdrYicTcFKMgvKzSWVVyyVbQThkgsTqt7z4lMD8pvk
-	 kfS3NLRFZ1ctm7OTBJV5cAURwPVKoMoXxClQuMDbRcVihJT7T0d1CsOnA8rHbUNLp5cyZ
-	 krJbflJoH6GEwM4sjkRc849UWowDmgf1Zq0j5eePnRkyIVGRKh9f5YFb3/i2+J4tnK95J
-	 lOL/CASerU851cNkDo8rimry9yib7VyqMCzai1gEPYgJOGr9lxRpysYBR0Bq7Qod5QA==
+	t=1795439138;
+	b=EYbw5DdVsnlqEWo5FQDwAnBg3WyceyymNtHVMeUImhWrvyGvXRcvtBoJ5n8Iy9+NwVmT
+	 jdVj4QaUj7E+aJL6MFaOHuT6mUik40jbymrHyCZTpeXZ1znVrk6ww7E4Qw9Q3jWYu5UXP
+	 gMNzb/pnBjXpZjtatzKoObXtefSinT4rZV+KfwX+lhfBPLpRnVKBS12yd9XRCC5A49BbW
+	 St6O//dzRYtx05QL6hSNcAXMAliM5EbT+C6yZynG/bEZP26sVExvbRQdV/0Fkk7+0zOeW
+	 bEga+t1qE+daqEhW2YHrTkaCmCDdG+bXCNBvVG7s6r+GfOL1v3/ojHOklKQKomsovqA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795436656;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795439138;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Received:Date:Mime-Version:X-Developer-Key:
-	 X-Developer-Signature:X-Mailer:Message-ID:Subject:From:To:Cc:
-	 Content-Type;
-	bh=vvFYMhcipZRfHLtib7yUjESVcO3O52Y/OdaCRiNT46k=;
-	b=g/fMblqWeHSYU0dAgY9BPejOe9riK4hkPLSLDSJXh5toWSTvrntzIJ8M4eP4cBt3MChf
-	 FJcbkhn0s/oWcGU9Yp49veefvzh1K4YOuX6Jdxxm1b14tVmTERBgtwipLyY23EMWGViOx
-	 Q/CLEQMKBY0r6IsF9Dj+CDjf29AM3IX6hs6W5tKM6CaG5PjKkuMwBbbPEVwixF29UMcZV
-	 2RCSfic8xVuoXn0cFApxPsT0ALpy8QlC4NhDkWrV2cKknXScMwAjqVmZCt9vFxrSQz/+T
-	 MlD0F7V3p4D9QgYrBDEB73+uLeTgA8hpfgJxuoIJKjVNr/5FqikAV3++JstMzFodXTg==
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:Message-ID:
+	 Subject:To:Cc:In-Reply-To:References:MIME-Version:Date:Content-Type:
+	 Content-Transfer-Encoding;
+	bh=1bHuhh2uAVUu3FM0LF1RB62M3IsC+d8Z+EU7PPZwqno=;
+	b=QSzNLan8k1BIiPRJCp7Il71S61NbfPPwqR842fc1QVO+cwF6roPqw5nUugk5Ssh67O/d
+	 3Le74f494iyrB+6xvOAOks4doLtzsUv6CsphrNZZz58opyt8kECrl316Ef5GGlaLapAiu
+	 tpcu/oOORFdQV5MQa6sAMQWA3oLrIoEHKCpXXNoNRMnyEL9WxQOBKE3K7lmbI6ryajw3E
+	 42zs15UMmp6jOd93J2elTV89qAl9f8cVnujjHB3Ur+mThLRsFu/HWlnqvYEDse3ge86C+
+	 2c4ZWw1fvpqeqsroVuoNlAkXMmZBJU2j942IsazCfieMpN9cytsKBiIcSg2f9hun+OQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=google.com;
-	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=biMgNKNT;
-	arc=none smtp.remote-ip=209.85.128.72
-Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com [209.85.128.72])
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=SWviKd04;
+	arc=none smtp.remote-ip=74.125.82.53
+Received: from mail-dl1-f53.google.com (mail-dl1-f53.google.com [74.125.82.53])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF2A3606A31E
-	for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 12:24:15 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org AF2A3606A31E
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91B2C606A31A
+	for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 13:05:37 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 91B2C606A31A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=biMgNKNT
-Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-4a359b714f8so19504165e9.2
-        for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 04:24:15 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=SWviKd04
+Received: by mail-dl1-f53.google.com with SMTP id a92af1059eb24-1b563e32936so149287c88.1
+        for <linux-efi@vger.kernel.org>; Mon, 23 Nov 2026 05:05:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1795436654; x=1796041454; darn=vger.kernel.org;
-        h=content-type:cc:to:from:subject:message-id:mime-version:date:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=vvFYMhcipZRfHLtib7yUjESVcO3O52Y/OdaCRiNT46k=;
-        b=biMgNKNTUUBFU46AoSIrrp3hDdfJCCW7+ml5wp1IjYnZgAOomZyBgdhJ6OQYrnhiqh
-         3WOYkJz/7D7fYOsOme1Sxf0cjNujGwLoRXBASNFVQjp3JALSdqz/QKe5b3FRmz+o8qQF
-         y/V52hnkfiXcbA4f3fmyPRn/FzujAnQgLSCFFTrQZG8VL0ZrgUBw+9dyLByXFAvuTXfY
-         ynbYQONsl3RPZ2op6IvOEH7afXrfJfIJMAnGiwS7Af1q6zjAju7Oh/TSsaG9JzgkyJxe
-         Q1yJjy4EKxuPpZdmh+hlYGvKVlZaRk+XjWvG80utK1a+SkIj5RN9qIDBrfCFmEmLXpae
-         q/Yg==
+        d=gmail.com; s=20260707; t=1795439137; x=1796043937; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:date:mime-version:references
+         :in-reply-to:cc:to:subject:message-id:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=1bHuhh2uAVUu3FM0LF1RB62M3IsC+d8Z+EU7PPZwqno=;
+        b=SWviKd04PJM3ZF50Nym+v5r6rPiQVQMBFld61+q6xufVROjSGxWbfrwb9rfWeFInmh
+         0CQwyz2zfOkDGBIFC5BLblPDRzKb6zT+SmCJX4THjp3NSXAQEr7Z6njySsTnzxlfagvD
+         tRS+imCcGf61CgNLh+XcZghh0+yQ5FvbZnpRQTjQrhMs3ATTL6nsWuxF6fkuqFnyqcYc
+         qm0LEhDe9Vp3xoNIVXcLjTR8xrUs2PWKJTrhLuyo+fgF7iPNeUivhlKpDYtYlX0BngmT
+         jdFLwAQloqSrMlN3Viahkfs33ClfnB/VMMsbPSj8ARSYn69JN39FRrzzYMDZhLoSLTnk
+         SYPQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795436654; x=1796041454;
-        h=content-type:cc:to:from:subject:message-id:mime-version:date
+        d=1e100.net; s=20260707; t=1795439137; x=1796043937;
+        h=content-transfer-encoding:content-type:date:mime-version:references
+         :in-reply-to:cc:to:subject:message-id:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=vvFYMhcipZRfHLtib7yUjESVcO3O52Y/OdaCRiNT46k=;
-        b=b7t+pSFNisfWw4yqhALLafSfqKS3P7tEgwMQ61G1IVmIrMWcc8rjvZ9EVSWZufi7SH
-         n95Tk2kxNIg0v1TXQVdBvtJGWNwdDFMifr9p12o/rGXSdKAflYvayk8LgYiK8tf86ida
-         bHVcxYiUl/cvBfLAlIQmOahwbA94LdIM4ydaoW9IndZnvzdhM6kVTHdsvou/T8U8544Y
-         JyrGoNqXiTqocjUUuzTPY5G9qrsuy7nVWnvFDBNtbhJTpJ1DD+sKlujyJ0LAcDxchs0Z
-         3LW0cE6/tWVDUP7PsQk3DkUYQlY76UZc592Z4u+RIuzhcvqAgcGWow1wsnz7wySiJkPj
-         IKTA==
-X-Gm-Message-State: APuU4Z8bqLVJgCY8ZQQQ/UjwUNa8rWGOOR+AMlGQDmBQstjKAW7p8mis
-	7QOR2dB0ZCBO4ZnuUWL5uw9J/gigiRhnV8HxLQmkAHFBS2tF/+/h8oMHvwYoRu4PO397zpSpbj6
-	/i4CQmYAc8UhI8Zl3SRV242k5xK/lKgltS2DM4aso+mld+suyp5CCcTA0siEHh24tGYqtRLsfdY
-	uoOHcWtogjetSdLD5/Q3fb5T364Akl2A==
-X-Received: from wmog17.prod.google.com ([2002:a05:600c:3111:b0:4b2:3c81:ca])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:3113:b0:4bb:693e:4c8e
- with SMTP id 5b1f17b1804b1-4bb88816a53mr249467885e9.21.1795436653451; Mon, 23
- Nov 2026 04:24:13 -0800 (PST)
-Date: Mon, 23 Nov 2026 13:24:10 +0100
+        bh=1bHuhh2uAVUu3FM0LF1RB62M3IsC+d8Z+EU7PPZwqno=;
+        b=FQK2geWo3i0yXj4kmMfWwe1XGQQPbOcBhnYoZa4Kio9oSp3egbEXz315cxWvSrSWsP
+         JkNpYgz8/lbTkU/d0R19AZkCSs/i5wtL03+KvtuCgkg24UlyZbmOw0YJ9GakbQ7HNF/c
+         Oi745Zzgn82DqQMuC+a5MA98dla3Ci9T09xMWxBB3qtkaA/aaTZsDA6vUnatECN1EEKs
+         VpRLHzIhapWJrrZ1DrH/5WStKjxnVcPy2NKWbTVhwrpPKULqzJ+dQNG3W3MvA2agzqXd
+         GGyq3xX2hZLmmRtVpIL/IWo4R6x8pNMeHQh8YS4mNywRz4a2KSmNgrxCLQYEpg4hq/sL
+         NDGA==
+X-Gm-Message-State: APuU4Z9WBGC+cT18rD6Hqi+9GQblJKFSTDjLIf+UrBlUQBfJsxvTz63Y
+	7/dn8kYkEqoE3sBUfIlg0+YlIseJK59yP/6gUZ3eYoF8H0UuD734EfP2YEo3Nsfd
+X-Gm-Gg: AZFdTZc3jRnBYiHdW4Vpmn8aJsjD9nH/mJT0PljOgqVhdRmd9MRjtLkXQq3eUO5J8YT
+	Q+qh3ygBryZNRwMM4O6bxrp7+8heWuYbpLSjzcmESDbC+qgScr99TQ3jlvzcNzEQtJjwc+qWS/Y
+	XHi3A6/y2aJShZSEdU5MXlde3PCFUlUGKrYzYo5omDobF4+CLZ5tCWW3dydjeeuQkl4IJH1AKFb
+	tGHiQ9vQ+Hzo1Hd7eF3G2fYF4XgDabmKRcR00NCgvIcAkWD1F9f5PINhPnBIDVPL8dkkKKd3JzU
+	jZZoXtsliyzTkkps4jRibtmNp1+nqPG82df7nekd+Bm0wjNYIqpcITflTe2jIO5vkMj7Y2E4Zcq
+	g7K8O6mL4mp95AepPW0fjZVmbasfQr99GTlZ4vPylg7PRztqRukNcKzs/CDrmWyNSKSxJJUUqIK
+	+VTHt3sAAibsUhSiRZpTvN/b9AquFlF+4qixCvtzTxxOZwMiokBTqGsK2skySJxDp0g26Fin7Oc
+	cfPTYq0SWbgB2x7+uoEEIDsLn+syfeMWUH0CppFaJNJOxP4K0COiDnUj7kbEXtJFPwjmO4g4DM2
+	5j6ezaKAGWNl5NEe/Fq9QSTsF0qGDy20W1GzYnEys25szintpV9YGiHH5Fv0EtdOegHvsA0UjKp
+	lCcMPxVXnGKvjfvjMIKflQiDKgUML
+X-Received: by 2002:a05:701b:291b:b0:1b5:3878:a9d2 with SMTP id a92af1059eb24-1b5568e950amr9846972c88.20.1795439136572;
+        Mon, 23 Nov 2026 05:05:36 -0800 (PST)
+Received: from [127.0.0.1] (ip68-107-67-45.sd.sd.cox.net. [68.107.67.45])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-1b5567ff27bsm30856311c88.6.2026.11.23.05.05.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Nov 2026 05:05:35 -0800 (PST)
+From: jasmeet.bhatia.us@gmail.com
+Message-ID: <f3a4f1245736cbff8152a46fb60fe984@gmail.com>
+Subject: Re: [PATCH 0/2] x86/efi: Disregard stale EFI config tables after
+ kexec
+To: ardb+git@google.com
+Cc: linux-efi@vger.kernel.org
+In-Reply-To: <20261123094228.466164-4-ardb+git@google.com>
+References: <20261123094228.466164-4-ardb+git@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -76,99 +95,41 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-Mime-Version: 1.0
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3002; i=ardb@kernel.org;
- h=from:subject; bh=ADX6/7qiHXaaP4T7APWmqHlT/XNvSonvZES5AEK83ig=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIZvFIKtyI9PElyrRlhfNdCtybes9ZzfMWPL0TKj/D9N7b
- x6Wr/HuKGVhEONikBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABPZO4WR4fzpt00f+/w233Lf
- YF/yl8NGZ9Yqwye3Wt81uJ1SzHe4UsrwTy1zYYL0Xu/rNq8zmArj7fw/P+S4vn75zcINHPJH/lR 84wMA
-X-Mailer: git-send-email 2.56.1.750.gf70dc682cf-goog
-Message-ID: <20261123122409.1096621-2-ardb+git@google.com>
-Subject: [PATCH] efi: Avoid weak references to arch-specific objects
-From: Ard Biesheuvel <ardb+git@google.com>
-To: linux-efi@vger.kernel.org
-Cc: Ard Biesheuvel <ardb@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+MIME-Version: 1.0
+Date: Mon, 23 Nov 2026 13:05:35 +0000
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-From: Ard Biesheuvel <ardb@kernel.org>
+Hi Ard,
 
-There are two cases where generic EFI code in the kernel proper uses
-weak references to refer to data objects that an architecture might not
-define at all.
+On Mon Nov 23, 2026 at 1:42 AM -08:00, Ard Biesheuvel wrote:
+> [...]
+> Patch #1 wires up efi_config_table_is_usable() for x86, and uses it to
+> disregard the INITRD and Memory Attributes tables when booting via kexec.
+> This fixes a panic when kexec'ing without an initrd, and supersedes the
+> existing handling of the Memory Attributes table, which does not cover
+> all cases.
+>=20
+> Patch #2 does the same for the TPM event log table, so that the EFI stub
+> can allocate it as EFI loader data again without regressing kexec.
+> [...]
 
-Unlike weak definitions, which guarantee that a definition will
-ultimately exist, and where the weak attribute only decides which one
-takes precedence, weak references are permitted to remain unsatisfied.
-Given that PC relative symbol references in relocatable code cannot
-reliably produce NULL, this forces the compiler to use a GOT slot when
-the access is from code.
+I've tested both patches on my Framework Laptop 16 (AMD Ryzen AI 300)
+running Linux 7.4-rc4, and the results look good!
 
-For data references (i.e., statically initialized global pointer
-variables), it forces the use of a 24 byte RELA entry rather than a
-single RELR bit for similar reasons.
+- Hibernation: 4/4 successful platform hibernation/resume cycles with=20
+both EFI patches applied. The original inconsistent E820 memory map=20
+error no longer occurs, and the saved sessions restore correctly.
 
-Given that in both cases, only a single architecture does define the
-symbols, and this is unlikely to change going forward, just replace the
-weak references with Kconfig #ifdefs.
+- kexec: Successfully booted into the patched kernel using systemctl=20
+kexec. The kernel correctly marked the inherited MEMATTR, INITRD, and=20
+TPMEventLog EFI configuration tables as unusable and booted normally.=20
+The results suggest that both patches are working as intended on my=20
+hardware.
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/firmware/efi/efi-init.c | 5 +++--
- drivers/firmware/efi/efi.c      | 8 +++++---
- 2 files changed, 8 insertions(+), 5 deletions(-)
+Tested-by: Jasmeet (Jazz) Bhatia <jasmeet.bhatia.us@gmail.com>
 
-diff --git a/drivers/firmware/efi/efi-init.c b/drivers/firmware/efi/efi-init.c
-index 9f09b0d2daa0..58acb5d25adf 100644
---- a/drivers/firmware/efi/efi-init.c
-+++ b/drivers/firmware/efi/efi-init.c
-@@ -54,7 +54,7 @@ static phys_addr_t __init efi_to_phys(unsigned long addr)
- 	return addr;
- }
- 
--extern __weak const efi_config_table_type_t efi_arch_tables[];
-+extern const efi_config_table_type_t efi_arch_tables[];
- 
- /*
-  * x86 defines its own instance of sysfb_primary_display and uses
-@@ -123,7 +123,8 @@ static int __init uefi_init(u64 efi_system_table)
- 		goto out;
- 	}
- 	retval = efi_config_parse_tables(config_tables, systab->nr_tables,
--					 efi_arch_tables);
-+					 IS_ENABLED(CONFIG_ARM) ? efi_arch_tables
-+								: NULL);
- 
- 	early_memunmap(config_tables, table_size);
- out:
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 9bc22de0d67e..9d73aa5ebf92 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -157,18 +157,20 @@ static ssize_t fw_platform_size_show(struct kobject *kobj,
- 	return sysfs_emit(buf, "%d\n", efi_enabled(EFI_64BIT) ? 64 : 32);
- }
- 
--extern __weak const struct kobj_attribute efi_attr_fw_vendor;
--extern __weak const struct kobj_attribute efi_attr_runtime;
--extern __weak const struct kobj_attribute efi_attr_config_table;
-+extern const struct kobj_attribute efi_attr_fw_vendor;
-+extern const struct kobj_attribute efi_attr_runtime;
-+extern const struct kobj_attribute efi_attr_config_table;
- static const struct kobj_attribute efi_attr_fw_platform_size =
- 	__KOBJ_ATTR_RO(fw_platform_size);
- 
- static const struct attribute *const efi_subsys_attrs[] = {
- 	&efi_attr_systab.attr,
- 	&efi_attr_fw_platform_size.attr,
-+#ifdef CONFIG_X86
- 	&efi_attr_fw_vendor.attr,
- 	&efi_attr_runtime.attr,
- 	&efi_attr_config_table.attr,
-+#endif
- 	NULL,
- };
- 
--- 
-2.56.1.750.gf70dc682cf-goog
+Thanks again for preparing these fixes!
+
+Jazz=0D
 
