@@ -1,73 +1,108 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795520447;
-	b=r6iaUY98vMBFwkLHvCv0Pg8Su7RgUQj8FHiYjoYGd2S5dsp4/ZA5SzF4fvAyQD1S0WzW
-	 H5zXnoZvwIVEbTigMsbbUyoowXUDO23shz/SPmxlGLxCF9+krAEUHaFZFMODYu02naB//
-	 3Vshi2GRgd8VL1zkMC3AvWidkSGnFsMbvEN89S9KXILJF2WqCN0yXHgSCGknBg9awH12U
-	 /g4RxqkF6irZQAGgVqWK7POUubn+EFZ+9cSyEMcuDM1mNDdlhIW06xAFtbRzUh/aR2ynP
-	 NGNf4x5j0b/A7cVt18I6hL72YqOLbBlXzfJN8eVxi8i6hRJ6JnjAKFPnDmeEpKuxPOg==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795520447;
-	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
-	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
-	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type:Content-Transfer-Encoding;
-	bh=YNKB+l0kbHZ2LFgYHq1tz3KLItdS3YCyjSFJuwPFLv0=;
-	b=jKz+WLPmGOdXSLHsEPCJSRsfMr9ByaTjYAeNZT40FBXX8ZtAtHfInsIa28KpA4BKVX1u
-	 ClAh6OVyyi4srGCcSJje0yaAxFTi8TVEe8wi+eCMFFHvFtj9KuX87vWp7YVNci55UkoC5
-	 joS+p5AFf7tHNqR/ZvkNQy0q7GoBAlG6YNIAXhlshjyXc418nB2zqyc6ElcWyDEtH1Qhq
-	 Hc8vwAi7LzAbrtEfkzA46PhOHoZKkfKRCoZNKMLv+B68V9lBRS3u7ldYQKJv3bqaUWHHK
-	 nCgMJeftr4ByPsmeQyQob5ghJUTuZCMypNAqehRRBdyerYlkyTOAtm1SYf0uGSzwx2g==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="jR/lzkyZ";
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=40.107.209.9
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1795527167;
+	b=RhvJ5CnWo21nnXLQYp/JSMdUsfMVZD4bzYCbWaIUYh3oVBtXVgkoT1/PRnW8LWvEwfSm
+	 jXYM6Pb5M0onb5WJG2UCUmyL1uoLSnEOMbA2fRAZaPw6Ni/oOkkznwLyHExAt0IkxI4dS
+	 SiVuBusqHbLanpKoCiTdWm+zzLGKL7H/TqWzJTaD+t28A4kYnhygDRoU2S7S+NZTsAw/X
+	 0tO2LsfqgpgNx6gNuJ00lvX2smGAFSiCjNE0BF9BLAJzeVGMUWAewDfq9+LSGNg6O22d/
+	 OICjFaTg/zG4enTZM0nSzTvrhecOi7j6JQjwVScTSa+xppaRH4rR72qLaf37Ob+gWug==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795527167;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:
+	 X-MS-Exchange-Authentication-Results:Received-SPF:Received:Received:
+	 Received:From:To:CC:Subject:Date:Message-ID:X-Mailer:MIME-Version:
+	 Content-Transfer-Encoding:Content-Type:X-EOPAttributedMessage:
+	 X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
+	 X-MS-Office365-Filtering-Correlation-Id:X-MS-Exchange-SenderADCheck:
+	 X-MS-Exchange-AntiSpam-Relay:X-Microsoft-Antispam:
+	 X-Microsoft-Antispam-Message-Info:X-Forefront-Antispam-Report:
+	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
+	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
+	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
+	 X-MS-Exchange-CrossTenant-Network-Message-Id:
+	 X-MS-Exchange-CrossTenant-Id:
+	 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp:
+	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
+	 X-MS-Exchange-CrossTenant-FromEntityHeader:
+	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
+	bh=dofZdROUMZPu7dFW3u4qdC+7Fdjz/G7X4RZlyzhURoo=;
+	b=OjDS9zqvHI5bs+YKqXByFsSskUdDUPT7Ek3qxNtBxtcIGW0HHyNDzrXzN66zz54nrxNh
+	 m9aq4tmTaVy2Mfk8CKEOXnEooM16an6YM62sloRrqC+1bSYnwsTrKbV4ZLPcjcSLOL1XX
+	 SMCn/BRc5QsGdeoP23Kvy01MGr3xvsV+WFdKb2WMiUzAeD8d/XIqAx+svZUBv2oN+oWus
+	 hhZI0yJiJ9V1Ji8UbyjsvCZVmdsYq13HfpsbxwyKRxS70gi3n5SWtrEiOZzPbnV73b3jW
+	 e4ic7LctPk2D+cCUZvmweVGW7i5VpLm+YCreSv+Gr8gifEMtLNhYg6+ToPIgeoz88Zg==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=amd.com;
+	spf=fail smtp.mailfrom=amd.com;
+	dkim=pass header.d=amd.com header.i=@amd.com header.a=rsa-sha256 header.s=selector1 header.b=TP7ACaWA;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=40.107.209.9
+Received: from PH8PR06CU001.outbound.protection.outlook.com (mail-westus3azon11012009.outbound.protection.outlook.com [40.107.209.9])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65D7E606A31E
-	for <linux-efi@vger.kernel.org>; Tue, 24 Nov 2026 11:40:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E5A0606A31E;
+	Tue, 24 Nov 2026 13:32:46 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3E5A0606A31E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=jR/lzkyZ
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 646CF1F000CA;
-	Tue, 24 Nov 2026 11:40:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795520446;
-	bh=YNKB+l0kbHZ2LFgYHq1tz3KLItdS3YCyjSFJuwPFLv0=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=jR/lzkyZZmACx/v76B7zTq8021rtRZEPH8IatdI8Evsqn02v2vXGWErvPQroop9gR
-	 pyzY637KL9lg04ThK5rtnc02cqDCiD3L37zpItf7lI4e4Q1D58DxJS5X5wGZLucaHO
-	 zqOpE9mMHxsTBZeFjP1kinJrKWHwm9hFI2158OPOyDItw9VqwoxVVtl7SrLfHTMUCv
-	 7JkvN6DGppJU10Qp5qQPzzPaUL8FseIqGWmHS2ond30U0u7NZ5Z8LsKZJbcHYhK4in
-	 z1QRletKrcfIpG6e6wrE16Z9R5U/o5IgunbF+Vv8yO+UW34Yq+VWRARMp5t1p07RhI
-	 M5VjjK4UO/AkA==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id CB8041980047;
-	Tue, 24 Nov 2026 06:40:44 -0500 (EST)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Tue, 24 Nov 2026 06:40:44 -0500
-X-ME-Sender: <xms:u3cFa2WZAvaq-MEvL7K33-JMO8R2L3mYuau5n5hO2SMrNJWVXCfjFg>
-    <xme:u3cFa9bhlu9ODSrVznatnlU66U-X0sdpA7b4RyfQSL4FyGhJh5d3MrwfKWl-EX0HA
-    sXHlxQXvPDbgWoMy0fZq-dC9FFEENqFl2QrJ5Iv48L6_VfwgqhbPvA>
-X-ME-Proxy-Cause: dmFkZTEMmXa45SeVrzxdc8lVdrKvq22c5nOCVcabUq5/b3DwR+SZOjCmU5hPlCMvPbD/jG
-    xGX/zl+7UgdvrJtoEo2C2qX4tYzFehBttg3Q8pP42dTF1E6KmxXWfoidEoMJMsjro+itt4
-    Dvv+paoMENJtR1YVe1RrOmxWDJu+Dos+BL3NJB36HHYZEWQoPEfd2f0f49jDOmEwPJ5GWP
-    HzPV+D0S+5nz6CFwdVCwYRZ08IiLIvurA8XdTqHAWDn2e2iTnwalYGGrM/GMJlp2i9czsj
-    82jckTGxIKmWMZZoZjXotXZ30EwOrPwkcptldPdi9BERQbuh3XwGbk+bNvIevBmPzeESm8
-    kL3uHHbFpDKe/Qyr9qP7Bsd7LDWIe7a+gt6ZL+4J6xE+91VqGzmNCe+jrMdd0SKXcfAiWb
-    PqwEqqVTb6q1ZRikefhsevZPrtcPGrWz6A43HiI7rzNIufnWqEW8dIGgqU3jjStfzPjTkj
-    WU7PzjcqaagORtAW2YwEJSIS0dnpDAvF41+ytAJwUBRUeY9kHDr+exsb+ShZdtXPPwsW6v
-    8O2uGG7oshIGaqwGKOpm++TsqBweO19oaOIEGOmOLONzIR9NcfhwgfT6qGw/s2lNNEKdlN
-    G2lBH9CJHUyFnqUPatunvuFiUz83ZcNPj/ACHVAuvCdQddxAX9yskvkuzOTw
-X-ME-Proxy: <xmx:vHcFa14LWtxuoXQSCXztkRGKGGXPr9Fhc0nRNZECL5mHK6cj9eTvcg>
-    <xmx:vHcFa1JPA7ZCqMHIN6AcbZ9wj1llof3hXNUNdIwzaBx1q0zmqFfZeA>
-    <xmx:vHcFa-tNiJ8O6EcYswXmUD32CLau-OR3Dc-qYFb1N917WyGLFFE52Q>
-    <xmx:vHcFa0K9XZBHP6EtZCT73GFUDk43H4P62P4pZq7syHLXwfgabnpgwA>
-    <xmx:vHcFa3-1f6wVJb3kq-WjMyorYBzmD6N_8sGUlMyiB6J2AJI-tp0_LE-4>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 75E98F80093; Tue, 24 Nov 2026 06:40:43 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (1024-bit key, unprotected) header.d=amd.com header.i=@amd.com header.a=rsa-sha256 header.s=selector1 header.b=TP7ACaWA
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=LeKvpDJ0/6Gnq29D7ZT12l0fjAHIHX1XVCozu9DBSweXKLU9pjpncc4C9fgharkns0smbvHZgNEuUaPS3OOdIqDSiZZF65UNgPDYW14A37EIisvfE/p1Te7zvb0qKSCO5A0BGlWRMV2Nm0Lfgv1Imrbk0IyurjyCYwCEKfXv4o1h2TDS445NYjIsBWDD1FHuoCNKScGYHby8KEn+svKPRcMIYikiIdyygJoPoGztZcL8KpCPWs5iWK5Zu6H2SJepxiA2og9MzR4kU+Izg5s4pZpIkLjOzQrhdl3p4xTyc6a9BJ6ckSFNP81TL7bR4kA+97UasFEUUNrR3WOiTvNB2g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=dofZdROUMZPu7dFW3u4qdC+7Fdjz/G7X4RZlyzhURoo=;
+ b=h8ceNq5eOMw7aQ36Dsv8FANh6roC1haUA4SWjmVGdcCULCPahrXMuhvsnc6/S3qo4w/w2vMDgp7jz1431TOxPOnmxVTH31GhZCf4xQAsVpiOuE+DxqJ1Z0NbldbqQ1dYR/6eMuK0lDbotgvj1FAEXes7dMCxuKf5wXE+NBttiA4+C4cmwBCytTtZlhVo4/xqJlBSenU7W2ETw4TFACEjxcMIsgzgqiASgycbFONORwCa2r8JVyqWfdUzy5YtTT+01k/Mbof9MHEd+i5FV6mdttMR2X/rDXPe1eTQO59kdka4tSWki1ydY9FfCaGYggBruXwtYvjZwkA1gGDPCWaC/w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=dofZdROUMZPu7dFW3u4qdC+7Fdjz/G7X4RZlyzhURoo=;
+ b=TP7ACaWA8tS06brQJ83Eh9dOmiZO3opdhZE33sMacn9x/Dvem/4kUSJ7AtwqDscsTTDOlOasIVLKINlXBZg3k309cMSGeldLKBu9RDJGXf2Cva2B9kEUjAeryHuYbGWG3hVS6GanjXhiJjmINHLqNYe23fyWc+dbe+MFP3qd948=
+Received: from BN9P220CA0012.NAMP220.PROD.OUTLOOK.COM (2603:10b6:408:13e::17)
+ by CH3PR12MB8307.namprd12.prod.outlook.com (2603:10b6:610:12f::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.639.14; Tue, 24 Nov
+ 2026 13:32:43 +0000
+Received: from BN1PEPF00018546.namprd05.prod.outlook.com
+ (2603:10b6:408:13e:cafe::6f) by BN9P220CA0012.outlook.office365.com
+ (2603:10b6:408:13e::17) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.21.592.13 via Frontend Transport; Tue,
+ 24 Nov 2026 13:32:43 +0000
+X-MS-Exchange-Authentication-Results: mx.microsoft.com 1; spf=pass (sender IP
+ is 165.204.84.17) smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=satlexmb07.amd.com; pr=C
+Received: from satlexmb07.amd.com (165.204.84.17) by
+ BN1PEPF00018546.mail.protection.outlook.com (10.167.248.5) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.21.662.3 via Frontend Transport; Tue, 24 Nov 2026 13:32:42 +0000
+Received: from satlexmb08.amd.com (10.181.42.217) by satlexmb07.amd.com
+ (10.181.42.216) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.57; Tue, 24 Nov
+ 2026 07:32:42 -0600
+Received: from pankaj-M75q.amd.com (10.180.168.240) by satlexmb08.amd.com
+ (10.181.42.217) with Microsoft SMTP Server id 15.2.2562.57 via Frontend
+ Transport; Tue, 24 Nov 2026 07:32:41 -0600
+From: Pankaj Gupta <pankaj.gupta@amd.com>
+To: Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
+	<x86@kernel.org>
+CC: "H . Peter Anvin" <hpa@zytor.com>, Tom Lendacky <thomas.lendacky@amd.com>,
+	Ard Biesheuvel <ardb@kernel.org>, Kiryl Shutsemau <kas@kernel.org>, "Ilias
+ Apalodimas" <ilias.apalodimas@linaro.org>, <linux-kernel@vger.kernel.org>,
+	Mike Rapoport <rppt@kernel.org>, <linux-mm@kvack.org>,
+	<linux-efi@vger.kernel.org>, <Pankaj.gupta.linux@gmail.com>, Pankaj Gupta
+	<pankaj.gupta@amd.com>
+Subject: [PATCH RFC 0/3] x86/e820: Ignore memmap= and mem= in confidential guests
+Date: Tue, 24 Nov 2026 07:32:38 -0600
+Message-ID: <20261124133241.221719-1-pankaj.gupta@amd.com>
+X-Mailer: git-send-email 2.34.1
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -77,111 +112,68 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Date: Tue, 24 Nov 2026 12:40:23 +0100
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Nicolas Brainez" <nicolas@brainez.net>
-Cc: "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
- "Lukas Wunner" <lukas@wunner.de>, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Message-Id: <756a713a-dfc8-420b-8c70-76828e2b0bf6@app.fastmail.com>
-In-Reply-To: <20260928072832.25399-1-nicolas@brainez.net>
-References: <20260928072832.25399-1-nicolas@brainez.net>
-Subject: Re: [PATCH] efistub/x86: Fix the size type of the Apple properties protocol
+Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BN1PEPF00018546:EE_|CH3PR12MB8307:EE_
+X-MS-Office365-Filtering-Correlation-Id: 96d9d5ba-4e80-4047-f5bb-08df4a2f6ad8
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|23010399003|36860700016|1800799024|82310400026|376014|7416014|261026121527099003|261022075727099003|261102123227099003|261021121427099003|10067099003|11063799006|56012099006|18002099003|6133799003;
+X-Microsoft-Antispam-Message-Info:
+	Iv/nkqYAZBvwK5QFN7x05U2QMx7FIW4ZGKoaXWL49Rf7ui4mDGte40cY9wShD2wDRKXFZMwjRAw7+3h3Xv4LI1SNExSTKYU5gF5Fp/t4iqgUvsWxOdvq90gOjkbrE2nQv8/n3eGD2A178v1X7O1ofgw5ctJqs01T4NRmW8+z0Wgw4RplmGGWfbHLxnk2ik+iNsaeE/Ajittg8PE9WT1Ammo13BulS9pLd7WAwcS8fjIUcloHiYQ3mxOFEjcXO6JgoXAEG10qbbEdsPp6zyZN32tiSkWl+EcZWgm9U6PqNQ+p15JFo5N2lLjsrszFpovd04Uyw5kGfxOd3SII3LmNuaV/rFG0Q2W0RjVPKWue03kJHj5C64CqwdTsL1/KXahM5KWflxCmCgZ2OSBffseH0xP601tffAjI5gTzWIy7TftBzIEBY9nvOurIaeyuddevxdXo+OiHYd/J3nVJdgfPlhfMDorNO6dG9ghRNV2b5xI85Le6W9tcDrP2h34xsePudXBuKHqBMmjU49XOwnE4klheDdN07bspDkiv9Iv6CEf6/rVBRKH3tabKXNHW+tXDdQnVUWFnVS5rNtr3vUY+Vagql1F2XTPXxreqVFeKPZpdiFEY0VKhJqynSsdjMvZfj6nsVXhzjJixVmnU7zUm0s9jciezudi/Ngerdgl29FE=
+X-Forefront-Antispam-Report:
+	CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:satlexmb07.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(23010399003)(36860700016)(1800799024)(82310400026)(376014)(7416014)(261026121527099003)(261022075727099003)(261102123227099003)(261021121427099003)(10067099003)(11063799006)(56012099006)(18002099003)(6133799003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	IhBXbntBtOPPZuLsGCYS40b/KkOLYPbVBf0rN8t2sF+ShJU/dN9/WU3FPCKaVKc+yPX8L0FKYlws6gPk5i2KdFnanUNLSqbudnQwUTYx4T73fMt3Ywe75j7Y+2UBQNPwbCBhz9sQDl90QUwrFlzeqC13Gi/valGdEttmiPr1GGSngc8xAzfxuzmUm6qn975u/RumjWev4I0fPfUmtX2TngOK1DKvwDzRFGDKaIyHdYWFlnBfVydzXL+UxUcEhdjr9pUtwIHSz7qrgvUiGmMUzUcoTykH4it4EsHmoTjWqK/gt0LrdFbn+INcu2yBomcFm4IO84J7DMRIB0RrM072W07vJ7geLMTeLqXOIRRQxoP2wI2UVFsFtt5EWQY+ReSdn9Wk3CpqTnRz4CRhAtElWhtFtMwU3ET0LBV9Vo3X/TCE0RAVHAA8Zf/QFQ3FauoU
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Nov 2026 13:32:42.5915
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 96d9d5ba-4e80-4047-f5bb-08df4a2f6ad8
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[satlexmb07.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	BN1PEPF00018546.namprd05.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH3PR12MB8307
 
+In a confidential guest (SEV-SNP, TDX) the EFI stub builds the unaccepted
+memory bitmap before the command line is parsed. memmap= and mem= edit
+e820_table only afterwards.
 
+accept_memory() accepts whole 2 MiB units. A memmap= hole that is not
+unit-aligned is touched when its unit is accepted. On SEV-SNP this faults
+early in boot and crashes the guest (e.g. memmap=1M$0x1ffe00000), because
+PVALIDATE needs the page mapped and the hole is not. TDX works on
+physical addresses, so the hole is accepted and the options work there
+today. The same option therefore behaves differently per vendor.
 
-On Mon, 28 Sep 2026, at 09:28, Nicolas Brainez wrote:
-> The size argument of the get(), set() and get_all() methods of the
-> Apple device properties protocol is a UINTN, not a u32. The reverse
-> engineered declaration added by commit 58c5475aba67 ("x86/efi: Retrieve
-> and assign Apple device properties") uses u32, and
-> retrieve_apple_device_properties() passes the address of a u32 on the
-> stack to get_all(). 64-bit Apple firmware writes 8 bytes through that
-> pointer, so the upper half of the store lands on whatever the compiler
-> placed next to the variable. OpenCore's
-> Include/Apple/Protocol/DevicePathPropertyDatabase.h declares the same
-> methods with UINTN, and a u32 canary placed right after the u32 size
-> is zeroed by both get_all() calls on a Mac mini 2018 (Macmini8,1).
->
-> With clang and CONFIG_EFI_MIXED=n, the neighbour is the protocol
-> pointer p: the first get_all() call zeroes its low half, the second
-> call jumps through the corrupted pointer, and the machine powers off
-> before printing anything. A GCC build leaves padding in that slot, and
-> a clang build with CONFIG_EFI_MIXED=y places the setup_data pointer
-> there; neither crashes, so the bug went unnoticed since 2016. Talos
-> Linux, which builds its kernel with clang, reported it on several Mac
-> generations.
->
-> Declare the size as unsigned long, as the stub does for every other
-> UINTN. No mixed mode argument mapping is needed: 32-bit firmware
-> writes the low 32 bits of the zero-initialised value, and the upper
-> half stays zero across both calls.
->
-> Tested on a Macmini8,1 with v6.18.51, clang 22.1.8 and LLD,
-> CONFIG_EFI_MIXED=n, booted as EFI/BOOT/BOOTX64.EFI: the machine powers
-> off without the patch and boots with it. Builds with clang and GCC,
-> with and without CONFIG_EFI_MIXED. Mixed mode was not boot tested (no
-> 32-bit EFI Mac at hand).
->
-> Claude Code assisted with reading the disassembly, writing the debug
-> patches and drafting this changelog; the tests ran on the hardware
-> above.
->
-> Fixes: 58c5475aba67 ("x86/efi: Retrieve and assign Apple device properties")
-> Cc: stable@vger.kernel.org
-> Cc: Lukas Wunner <lukas@wunner.de>
-> Link: https://github.com/siderolabs/talos/issues/13231
-> Link: https://github.com/siderolabs/talos/issues/13579
-> Assisted-by: LLM
-> Signed-off-by: Nicolas Brainez <nicolas@brainez.net>
-> ---
->  drivers/firmware/efi/libstub/efistub.h  | 8 +++++---
->  drivers/firmware/efi/libstub/x86-stub.c | 2 +-
->  2 files changed, 6 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/firmware/efi/libstub/efistub.h 
-> b/drivers/firmware/efi/libstub/efistub.h
-> index fd91fc15e..1002c17a8 100644
-> --- a/drivers/firmware/efi/libstub/efistub.h
-> +++ b/drivers/firmware/efi/libstub/efistub.h
-> @@ -838,15 +838,17 @@ union apple_properties_protocol {
->  		unsigned long version;
->  		efi_status_t (__efiapi *get)(apple_properties_protocol_t *,
->  					     struct efi_dev_path *,
-> -					     efi_char16_t *, void *, u32 *);
-> +					     efi_char16_t *, void *,
-> +					     unsigned long *);
->  		efi_status_t (__efiapi *set)(apple_properties_protocol_t *,
->  					     struct efi_dev_path *,
-> -					     efi_char16_t *, void *, u32);
-> +					     efi_char16_t *, void *,
-> +					     unsigned long);
->  		efi_status_t (__efiapi *del)(apple_properties_protocol_t *,
->  					     struct efi_dev_path *,
->  					     efi_char16_t *);
->  		efi_status_t (__efiapi *get_all)(apple_properties_protocol_t *,
-> -						 void *buffer, u32 *);
-> +						 void *buffer, unsigned long *);
->  	};
->  	struct {
->  		u32 version;
-> diff --git a/drivers/firmware/efi/libstub/x86-stub.c 
-> b/drivers/firmware/efi/libstub/x86-stub.c
-> index cef32e2c8..87e142cae 100644
-> --- a/drivers/firmware/efi/libstub/x86-stub.c
-> +++ b/drivers/firmware/efi/libstub/x86-stub.c
-> @@ -158,7 +158,7 @@ static void retrieve_apple_device_properties(struct 
-> boot_params *boot_params)
->  	efi_guid_t guid = APPLE_PROPERTIES_PROTOCOL_GUID;
->  	struct setup_data *data, *new;
->  	efi_status_t status;
-> -	u32 size = 0;
-> +	unsigned long size = 0;
->  	apple_properties_protocol_t *p;
-> 
->  	status = efi_bs_call(locate_protocol, &guid, NULL, (void **)&p);
+This replaces my earlier fix [1][2], following review feedback from Ard
+Biesheuvel and Kiryl Shutsemau: the firmware's view of memory must match
+the OS, and a bitmap unit cannot be half accepted. Instead of making the
+bitmap follow memmap= and mem=, ignore them in confidential guests.
 
-Queued up as a fix - thanks!
+Patch 1 warns and ignores memmap= in confidential guests.
+Patch 2 keeps memmap= in a kdump kernel (elfcorehdr= on the command
+        line), as ignoring it would let the kdump kernel use the memory
+        of the crashed kernel.
+Patch 3 does the same for mem=.
+
+[1] https://lore.kernel.org/all/20261102113127.161823-1-pankaj.gupta@amd.com/
+[2] https://lore.kernel.org/all/20261113105554.199912-1-pankaj.gupta@amd.com/
+
+Pankaj Gupta (3):
+  x86/e820: Ignore memmap= in confidential guests
+  x86/e820: Allow memmap= in a kdump kernel in confidential guests
+  x86/e820: Ignore mem= in confidential guests
+
+ arch/x86/kernel/e820.c | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+-- 
+2.34.1
 
