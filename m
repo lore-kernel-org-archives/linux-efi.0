@@ -1,74 +1,74 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.71
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.69
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795541877;
-	b=nxq3WqCyMy+tH05seYTo/x6KMU+HyyQlhbfwluwdq7WcNAMaNw3gadY7B4VpWyqxuPTW
-	 KAiZbehUAzSF1kZIaRr7gWUdY6kQugjnJDvpupXibaXE1CDD3yfCEwf+3cgU058G1X7Q8
-	 5UO2PAzxJJ4+7jCd0yt4in4HlGpQvvHtrz4oWOgRma060Fts5BA8A/LXsrIURiZ+Uijpd
-	 vcwBzYfwg4gybdKh1CBAL+Ra+NwB3QqESnbkbw0l6QiqpejmiYpRueGyQwa/Ytr8BFEkQ
-	 EWrcGHt1v9dF3Rk6O19L1hwI13aMoDxX/Kl7dYJWHqvDb+GuyqGYx3UTKnGB59Ipo8Q==
+	t=1795541879;
+	b=kVv2K0Ghov7HWMezIaimcmT4tD5faXyxXQUqd81uRaVPiGnVwB6Kn7nRCVnp2w/1e5Xw
+	 zKmphTc8igm5c1JltyZNQoOLESv4c+b/0CSycIzSDeUv0xRXDyzPTfOukycynduv6lAtg
+	 uSy1NXhS8/T3755pWP7poOiqviObBfZnpcgJ0w9iqAg73Um6pMbYI4ZJSGAm0EcVaC2Vk
+	 fdHwgWbEvjYT/P85W3duYGDBR8dTZw8z4hDbCQKbY4CH+ABe0U8RpqJdVsVsHwNoGNVzi
+	 fMi0k4NuVoEeyeLXXFbHANCAQ8afl3uO37cWQM4N2PeM/e5vR3/8s8y4366XS0V4W7A==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795541877;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795541879;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Received:Date:In-Reply-To:Mime-Version:
 	 References:X-Developer-Key:X-Developer-Signature:X-Mailer:Message-ID:
 	 Subject:From:To:Cc:Content-Type;
-	bh=lr8eROeYqOwVYDYKaKs4dok8lqJtCln9w99IrPpRWrY=;
-	b=uj5BYbo+9qB4IFFVz0SK0kLhkumP+Dcm3I33xcwBqfSExePN/m7oYIhovkmngsIk3kW3
-	 OSFTaMEVStdGfRqlVp9RwGQwOC3LSWsAMaLJ4AgEH11mUElCTflwF1RV5NwcqU7bLizlA
-	 KjPFzaLKLKe7TTsfkA0oeZw7Wzt1iKdvqUlbsjzVv10saU7oypmwDNnhDB2gS2yyUaL6S
-	 KknG5oA5aZN1NJH2cKPcmOaWSeNHjB9FJNC1moNVrcLFUOl9ZxvawY3awnIYJwe3HP8GD
-	 ICWt6qxfnwylGDPrzQpIKNcOGrhoiWttpOheTthNQ9/207kqjjHt34ttJraI7sJu2Og==
+	bh=wlJLIbvVcosGzM9lxx3HqjKGxylleodTsPDn21EHK6Q=;
+	b=FaqwHTTEkIRKjE+WL3sdDDlIV6h67xOTiaKuOaI/Anlpv1cy2WPhcXhZc41RqwkQssHu
+	 qB4FxSrFDTsYWl/J/1ctxjcAnhV6O1aTUym2LQkNrK2I7+FxrTctpSxYHjXpuYbCRtFlh
+	 JFUekTjmoSk1C+HH3wN6pUm0WCunZhk/J47JTim7zwngy26ziPfPfrbzFve01EELHtSK3
+	 WdHfE43LdJyiUDAKW8TPMCwtgYfys8GtIQtDTrtlrntlATYq4zzbsRNoCPGRdvDTqwtUo
+	 2OdQ+1O86GBi07ZFhTwHJgOMCxLSi7mLJhM7UE9W5bv7UBpelver2nOAPlJA6/tYklw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=google.com;
 	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=jKh8Gq+P;
-	arc=none smtp.remote-ip=209.85.128.71
-Received: from mail-wm1-f71.google.com (mail-wm1-f71.google.com [209.85.128.71])
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=SKwWPlAo;
+	arc=none smtp.remote-ip=209.85.128.69
+Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com [209.85.128.69])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7DDA6606A323
-	for <linux-efi@vger.kernel.org>; Tue, 24 Nov 2026 17:37:57 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7DDA6606A323
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2E0A606A321
+	for <linux-efi@vger.kernel.org>; Tue, 24 Nov 2026 17:37:58 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C2E0A606A321
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=jKh8Gq+P
-Received: by mail-wm1-f71.google.com with SMTP id 5b1f17b1804b1-4a16dc2323cso17335995e9.3
-        for <linux-efi@vger.kernel.org>; Tue, 24 Nov 2026 09:37:57 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=SKwWPlAo
+Received: by mail-wm1-f69.google.com with SMTP id 5b1f17b1804b1-4ba078f26f4so34740975e9.2
+        for <linux-efi@vger.kernel.org>; Tue, 24 Nov 2026 09:37:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1795541876; x=1796146676; darn=vger.kernel.org;
+        d=google.com; s=20260707; t=1795541877; x=1796146677; darn=vger.kernel.org;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=lr8eROeYqOwVYDYKaKs4dok8lqJtCln9w99IrPpRWrY=;
-        b=jKh8Gq+P/AaKNhplNkIOvENYy5oA8gA6ZkVHBgI/hUhhooDfz58syc2fuVZRUOkVHW
-         Z5hKCcZYsuxYfeewPKn/N79iPVqw6PZmM6fKib44ubvN/zHLUr/eNDOkW3ZQSh1SF+Ei
-         4++gastOFZ4oYJnmqfqkIJsbZpW8QV+TK70EtUdngiiQ86o/rAYbDIq4f74xMWlypjd7
-         PoN5L0EGT1p3s+uIJS5o1Gqcs9XLkZM47qRlVoj0g0xRgH7Lb9OBPgJg9MBYoSwcoY5K
-         GPRvmjURJzTjcaZ6OIyzXFC3c2un/Fh2U1vMML7bW/w/PWzFMl31mXSioiObEBEnVKaN
-         qN4g==
+        bh=wlJLIbvVcosGzM9lxx3HqjKGxylleodTsPDn21EHK6Q=;
+        b=SKwWPlAoPfyaRWQhlsYxiQwhYXjsCHN2RGs2pweae6d827b9sz/rBsu56DRsTKpz+h
+         p3LjjrV0Vtl0kzgBoRMaZQ8M0wqw1JujdhLSGEkULa5WaCSIt4PJJnvSfUIWoLaP04CT
+         lA6XQmnZPGLzE4rsLlxNpqW+cTSOsbGQLCDuht00oyWmXm3S6AJcDYRo4QI7p5HaeJBC
+         f7R0mGVdDZ+WgsKprmGORgrzXL3ep4wo7iqc2LWYsr8zARhxSrNpCCupCyfrZF5cYkwv
+         9rF2/aY67eGo0JI1sqWT78hD1+XpQyeZlARC1vOsVXpl0YBUu1m4tld7d3A7So2ainTz
+         CQ5g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795541876; x=1796146676;
+        d=1e100.net; s=20260707; t=1795541877; x=1796146677;
         h=content-type:cc:to:from:subject:message-id:references:mime-version
          :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=lr8eROeYqOwVYDYKaKs4dok8lqJtCln9w99IrPpRWrY=;
-        b=eSAgx8Dp6KrWoE97ENyUKPG7kZHiWQdDTHbT+xKnO8jMWhXB4M/VIBJ+MsKHaxBs1T
-         V2ISzOd1Jequ9B76Vf6NkEmenkyHnrybnT537zcussKPGhRsYGleMNBnKXtXeWXoMtKj
-         ZtlinaD+LDIn1l6BJ0+8qK2rF1IyEBbszrw1Hcs8KJft/rq46sHthCGIbF8UbuttfSv7
-         vrE3eOtWRaDATJyK/MewrYze1U4CJeW364DPUE04uWu+iONHXmee+h4QnB0AbISrDn7P
-         RO/UDhNaLFe8pvo1W6s7s8FSyIhY2/V4yeiBxkdWCvbcB98fwN0qvTX5YA7n1dioTF0c
-         Eg5w==
-X-Gm-Message-State: APuU4Z+bY+7xGVZ/4Se06oKo5VruCwt0j3p+wWiCto8/47HggV4vk0D7
-	FgUDrKe2CgcK2TeA6IKt4lGvUv+7URgaQYi0P4HnnKVwXXSnWHVd0gVZQetF31JvryDoTLig7PY
-	3Oammk0FYPTDQIgkB+fpTPn7SsicjJhiJguLmiFertYE9fMEfIYpHp7rrsHgzQkQYpJWC5fU9W4
-	A0TDHL+ZeYC/Xq39WPymLBt6qhMND3xA==
-X-Received: from wmg25.prod.google.com ([2002:a05:600c:22d9:b0:4b6:4096:72ad])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:4f4a:b0:4bb:6752:8413
- with SMTP id 5b1f17b1804b1-4bb8880015bmr354089625e9.8.1795541875757; Tue, 24
- Nov 2026 09:37:55 -0800 (PST)
-Date: Tue, 24 Nov 2026 18:28:11 +0100
+        bh=wlJLIbvVcosGzM9lxx3HqjKGxylleodTsPDn21EHK6Q=;
+        b=dlH7WDyHldsDCa3gxKg5S7+AZAHUkY+BcWbCEDPFs2cAw2eewl7jAUWgApqcLGfx0m
+         xqxThe0iGqgLmjMPiZC54p6Se2tAIJiKr+lBLm+QPZHjYh3OgsJx1t2PKq2E1A0/7Dlw
+         +vgFcj5q+nWg/janWwsPzdJzbXnck2qsT7m10zcOecZ4Mf6nBAN1xNJO7L/+jy0oQNBD
+         D8oZAc1YdBS5BYlpclbJPFH9e2rKJqqY2wfM5bpvlNGZpExtBdVzo9f82QZTMgk2OXNZ
+         ylzVZAFebjS2gmLThLtsQR2ml8H6UmWq1uZdqRkGAWLZmgUXobS8Di8Iuyj2hUitgNg4
+         cj2g==
+X-Gm-Message-State: APuU4Z8eFjWdJG+4gtb07xvGPywORTJxuzyfJ+y3ZhsfsXH5fvhnuIex
+	3ebUMbIZLvTXOISGYTIv+gnUEPNGngKW4gChU2LDPfuuM4MUPoaNMoXFJb0Hh7OOJFKDgxbBP42
+	Xv35E8jHJ9SQDydWm0qt1cCs8IECQlvbrTqEpBUMoa1O5GaEyrhM6CyteG72hzEw73o2wz4pZKL
+	+/VCRhtlTt2xDE1EVc2AXpFPQtsSE1WA==
+X-Received: from wmbjj10.prod.google.com ([2002:a05:600c:6a0a:b0:4a1:8915:6ed2])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:1911:b0:4ba:38a9:85e3
+ with SMTP id 5b1f17b1804b1-4bb8880eecbmr345896045e9.12.1795541876987; Tue, 24
+ Nov 2026 09:37:56 -0800 (PST)
+Date: Tue, 24 Nov 2026 18:28:12 +0100
 In-Reply-To: <20261124172811.2580784-7-ardb+git@google.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -81,14 +81,14 @@ Precedence: list
 Mime-Version: 1.0
 References: <20261124172811.2580784-7-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3707; i=ardb@kernel.org;
- h=from:subject; bh=WAeSq122zmRN6UBtMnHF67HzqKFqId87iOExF570bmk=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIZv1pF7ZsZUMFnbhvKsE7JdZ+Yt1ztwxpbvr+gLGUx0XM
- 1aViHF1lLIwiHExyIopsgjM/vtu5+mJUrXOs2Rh5rAygQxh4OIUgImcW8XIsHDvvUObHv3xK/jO
- GZy5qexqyqyjy+J/sTguEFnk47dfroHhn1LC3gO93Omu9YEJNglTWaTYbaQsI/jTTPeIJjQzvuh jBQA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1552; i=ardb@kernel.org;
+ h=from:subject; bh=D+Jviff9cT9FNqN1EwWc3W/lQSGks8VjCMt8OB9ThaI=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIZv1pL5iZ63SQ/3ODwHf5pZnNtT7uyYxu8Z9rr1rsbv7D
+ ddT94COUhYGMS4GWTFFFoHZf9/tPD1RqtZ5lizMHFYmkCEMXJwCMJEPfAz/AyXYPhrmsXwLSefa
+ fy6decIcgRimlMLDam9+JRsw19yIZfhnavpo08PqxZOuPVE4uq23apMGr/SO799XKGi21Zb2619 mBQA=
 X-Mailer: git-send-email 2.56.1.831.g720f3f5937-goog
-Message-ID: <20261124172811.2580784-8-ardb+git@google.com>
-Subject: [PATCH v2 1/5] efi: pstore: Make pstore_disable parameter read-only again
+Message-ID: <20261124172811.2580784-9-ardb+git@google.com>
+Subject: [PATCH v2 2/5] efi: efivars: Don't dereference NULL __efivars in efivar_lock()
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-efi@vger.kernel.org
 Cc: Ard Biesheuvel <ardb@kernel.org>, Kees Cook <kees@kernel.org>, 
@@ -98,108 +98,48 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-Commit a28655c330ab ("efi: pstore: Allow dynamic initialization based on
-module parameter") wired up a kernel_param_ops::set callback for
-pstore_disable that invokes efivars_pstore_init() directly.
+efivar_lock() and efivar_trylock() check __efivars->ops after taking
+efivars_lock, but __efivars itself is NULL whenever no efivars
+implementation is registered.
 
-Because parse_args() runs before module initialization (and before
-mm_core_init() during early boot when built-in), calling
-efivars_pstore_init() from the parameter setter is fundamentally broken:
+That happens at runtime, not only before efivars is set up. For example,
+tee_stmm_efi_probe() unregisters the generic efivars ops before
+registering its own, and qcom_uefisecapp_remove() and gsmi_exit()
+unregister efivars outright. A concurrent or subsequent efivarfs
+access, or a write from a pstore backend that is still registered, then
+dereferences a NULL pointer instead of failing with -ENODEV.
 
- - Loading efi-pstore as a module with pstore_disable=N initializes and
-   registers efi_pstore_info during parse_args(), and then runs
-   efivars_pstore_init() a second time from do_init_module(), leaking
-   the first buffer, failing pstore_register() with -EBUSY, and zeroing
-   efi_pstore_info.buf/bufsize while leaving efi_pstore_info registered
-   with pstore.
- - If load_module() fails after parse_args() (e.g., due to a subsequent
-   unknown parameter), the module is freed without calling module_exit,
-   leaving pstore with a dangling backend pointer.
- - Passing pstore_disable=N before record_size=<N> initializes the
-   buffer using the default record_size before record_size is parsed.
+Check __efivars itself as well as __efivars->ops.
 
-Module parameters are meant for boot/load-time configuration rather than
-runtime driver state control via sysfs. Revert the dynamic parameter
-callback changes and tighten the sysfs permissions of pstore_disable from
-0644 to 0444 (matching record_size) so it is no longer misleadingly
-writable at runtime.
-
-Fixes: a28655c330ab ("efi: pstore: Allow dynamic initialization based on module parameter")
+Fixes: 472831d4c4b2 ("efi: vars: Add thin wrapper around EFI get/set variable interface")
 Cc: stable@vger.kernel.org
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/efi-pstore.c | 39 +++-----------------
- 1 file changed, 6 insertions(+), 33 deletions(-)
+ drivers/firmware/efi/vars.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-index a5db3534f0a6..19a7e4fe5b52 100644
---- a/drivers/firmware/efi/efi-pstore.c
-+++ b/drivers/firmware/efi/efi-pstore.c
-@@ -19,37 +19,10 @@ MODULE_PARM_DESC(record_size, "size of each pstore UEFI var (in bytes, min/defau
- 	 EFI_VARIABLE_BOOTSERVICE_ACCESS | \
- 	 EFI_VARIABLE_RUNTIME_ACCESS)
- 
--static bool pstore_disable = IS_ENABLED(CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE);
-+static bool efivars_pstore_disable =
-+	IS_ENABLED(CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE);
- 
--static int efivars_pstore_init(void);
--static void efivars_pstore_exit(void);
--
--static int efi_pstore_disable_set(const char *val, const struct kernel_param *kp)
--{
--	int err;
--	bool old_pstore_disable = pstore_disable;
--
--	err = param_set_bool(val, kp);
--	if (err)
--		return err;
--
--	if (old_pstore_disable != pstore_disable) {
--		if (pstore_disable)
--			efivars_pstore_exit();
--		else
--			efivars_pstore_init();
--	}
--
--	return 0;
--}
--
--static const struct kernel_param_ops pstore_disable_ops = {
--	.set	= efi_pstore_disable_set,
--	.get	= param_get_bool,
--};
--
--module_param_cb(pstore_disable, &pstore_disable_ops, &pstore_disable, 0644);
--__MODULE_PARM_TYPE(pstore_disable, "bool");
-+module_param_named(pstore_disable, efivars_pstore_disable, bool, 0444);
- 
- static int efi_pstore_open(struct pstore_info *psi)
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 3700e9869767..f9c28fbdb26d 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -143,7 +143,7 @@ int efivar_lock(void)
  {
-@@ -255,12 +228,12 @@ static struct pstore_info efi_pstore_info = {
- 	.erase		= efi_pstore_erase,
- };
- 
--static int efivars_pstore_init(void)
-+static __init int efivars_pstore_init(void)
+ 	if (down_interruptible(&efivars_lock))
+ 		return -EINTR;
+-	if (!__efivars->ops) {
++	if (!__efivars || !__efivars->ops) {
+ 		up(&efivars_lock);
+ 		return -ENODEV;
+ 	}
+@@ -159,7 +159,7 @@ int efivar_trylock(void)
  {
- 	if (!efivar_supports_writes())
- 		return 0;
- 
--	if (pstore_disable)
-+	if (efivars_pstore_disable)
- 		return 0;
- 
- 	/*
-@@ -287,7 +260,7 @@ static int efivars_pstore_init(void)
- 	return 0;
- }
- 
--static void efivars_pstore_exit(void)
-+static __exit void efivars_pstore_exit(void)
- {
- 	if (!efi_pstore_info.bufsize)
- 		return;
+ 	if (down_trylock(&efivars_lock))
+ 		 return -EBUSY;
+-	if (!__efivars->ops) {
++	if (!__efivars || !__efivars->ops) {
+ 		up(&efivars_lock);
+ 		return -ENODEV;
+ 	}
 -- 
 2.56.1.831.g720f3f5937-goog
 
