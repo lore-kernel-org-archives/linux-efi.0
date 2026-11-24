@@ -1,18 +1,18 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.61.35
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=40.107.160.110
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795527195;
-	b=Yx6/kUtNWG04yklDP8yC4YnaA4osyABfB9uH/IE4CWzBe5NGZ7uvSrFk+cGkTbmK9mxW
-	 eJhYuvdT6e5Nk4wXhXN0os23JhpCIA29F6X4H5VKR634E2IedHF4AKElSnDB/gLRgG5v1
-	 vOGEik/s3FWKKg//Cb4FBZSxpBHf+jfqe9LXEe2hmVDmBqXD5pBMka+RYrpgN89xmqWy5
-	 JFKKlFtsV1dRzZMMmTEm+6H9jxxQQM4YOsxr92KpFrT6x14KBuJWVQnv8Y8r0iIZ6mRzH
-	 zq7jToMOmNQC/J//ejRMU0D14NhY9Z0gDu6cGgvo0SFzQh/o07szaNKo/jXxkzwsSQA==
+	t=1795529215;
+	b=JJ4CiFkuttA3agvscBqt4ZPgmkGJSDerQC6uAIUzagqL1kBWymvJRIFOvcVdPbcHsEre
+	 cr0mzmJZ9LVmhdBxoKua4OpIB0waU3HMJmuGSmjD0SrhmFox12xCd4MxMy4E7ixyPhxAD
+	 WZTnanSVhJhx6HviT+iUPxvvZv8UZDCVlegZqEN4u1bx7xYQHPUhSFjWdL7XWeaeB0Bxs
+	 QMwjnsGJ5i0gsKZNtX6CFIbf2lTauX8LNzaS0Rox2Kc7cF8xK/gnxg6Nq3MQxgqkSEoCf
+	 njVmY8xvIe6+39g121lILkcuGbP48yEvb4CC3zGITEMoEBHwtXVNjlipdBsADSyOVqQ==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795527195;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795529215;
 	h=DMARC-Filter:DKIM-Signature:Received:Received:
 	 X-MS-Exchange-Authentication-Results:Received-SPF:Received:Received:
-	 Received:Received:From:To:CC:Subject:Date:Message-ID:X-Mailer:
-	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:
-	 Content-Type:X-EOPAttributedMessage:X-MS-PublicTrafficType:
+	 Received:From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding:
+	 X-EOPAttributedMessage:X-MS-PublicTrafficType:
 	 X-MS-TrafficTypeDiagnostic:X-MS-Office365-Filtering-Correlation-Id:
 	 X-MS-Exchange-SenderADCheck:X-MS-Exchange-AntiSpam-Relay:
 	 X-Microsoft-Antispam:X-Microsoft-Antispam-Message-Info:
@@ -26,90 +26,81 @@ ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
 	 X-MS-Exchange-CrossTenant-FromEntityHeader:
 	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=1wdoQHbPv3tXS7S4MStolc76uOgtWQZBqgClzx/HElo=;
-	b=f6qcwYIUmop/Lp4bHCuKJBzocaQAKuM+v9kJX8UIqaGgV0GrgdlaaqBp2RBcxv63NSt5
-	 rb8oiQmBt5IrPwdSQtlc3oLdMsyZY6SmDod0tf/2g82IDxfpONn8XFisOVCbBjx/vSwMf
-	 PEJu9dlcgyVywIUNCy3zrKA7rjrM3maP2gMGR8JoIyUkxAa7PpCL9YLFf9vz3xXuafV6v
-	 vOU+6xjv9SWeOvbcF2IpcNLHNnAU3pE8FpsCwVNwyNPlBFn/DD1PCjddAejCGuIm/PD07
-	 xSLhZvhimMvl1+Jvi8aS+NASzPj9w7meAly56UlPRYHJzH/sTe520i1N1rxZyzqM4hA==
+	bh=uAZyIjIYSxUKllcewpoHABXS4mX8F9Jyc32ESP8v5Es=;
+	b=R//Ja6oms30vdEzxycHsbA0hezheIXiorONzetF13FV/7csNRXRqYDNKsoR5cZYQKER2
+	 R8F2PqDeOp4oMC42869Coqm75xJ1sJYLcmQm0Cvc4azSxO4k8RnsulRW9ICwNuhmxhqc6
+	 MbA3YCF+fbRlcqV2HQ0jRjm4X0nBY274RZ2hJ5JG1erkfBJSMsMdju6QUbiKknxHT3txQ
+	 yfDUWLOaXC/gNv+NE9j5oo9Bi0kSECI0Tz8kiyJMCje3CtRx0no1jEw/AYDUKXPdmBLZM
+	 vLN4gNyIh8Lg3gAUSYhg2RXA2VCsAgtDBA3gbXF7H82rYITxLQTcenEcQGaXb3Nq4gQ==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=amd.com;
-	spf=fail smtp.mailfrom=amd.com;
-	dkim=pass header.d=amd.com header.i=@amd.com header.a=rsa-sha256 header.s=selector1 header.b=gcMMxg3e;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.61.35
-Received: from DM1PR04CU001.outbound.protection.outlook.com (mail-centralusazon11010035.outbound.protection.outlook.com [52.101.61.35])
+	dmarc=pass header.from=wenske.fr;
+	spf=pass smtp.mailfrom=wenske.fr;
+	dkim=pass header.d=wenske.fr header.i=@wenske.fr header.a=rsa-sha256 header.s=selector1 header.b=dOmdpNGj;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=40.107.160.110
+Received: from PAUP264CU001.outbound.protection.outlook.com (mail-francecentralazon11021110.outbound.protection.outlook.com [40.107.160.110])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F396606A33B;
-	Tue, 24 Nov 2026 13:33:14 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3F396606A33B
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66CE360A380A;
+	Tue, 24 Nov 2026 14:06:54 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 66CE360A380A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wenske.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wenske.fr
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=amd.com header.i=@amd.com header.a=rsa-sha256 header.s=selector1 header.b=gcMMxg3e
+	dkim=pass (2048-bit key, unprotected) header.d=wenske.fr header.i=@wenske.fr header.a=rsa-sha256 header.s=selector1 header.b=dOmdpNGj
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=pF1JYmYHIJI+BSYrbbuTbLmOFm/ZXrTaMfx+Cu1Tnb7k8tdSYaVGxI8LMCNcFNTJ97emGsY+UVwG+Sed1L+LeEiMmx8EsEWrR7GNCZVXIPyjedu1mmEbSsfJl/YquIOUPQSFFTlKs1A5pBY/kJ/b5uTJPASCqlVyYTZZm1TD8Pnh3j5g6I2UL9k0ch5Vq/XPVlaMbVMLwlgiNjjVo642IsiZ5wpLuYMTtlpiEBvWSxe66AGP9y+pPStZ58f+tOvjC/BIVJr5p3gDJ95KU5rTHOtAr23Cl7YtmJt1fnvnX8N0Wj1Qi3ILQ2rB5DF9H1N3cPiKOGA50rIidfex69b+ww==
+ b=qj2zb3uHv+XYxVQk2XE1veKj/3E4aF7Gmd8Isrjcj3SacXU45F8VgrJ2wBp8yzFPuY6eGd/XB0dg/SZ9DgtIf147vb52sHu845aK3yZrYHCwpacYCC2vVAVdIosyKB1R7jKGSM+BZT4OFTklWQWeeIy0GDyUVo9FrrCloDVvoIkyKQtGqv5wj7wLDoeQXF+d4nAtJ93ZzqbvHnhdfYLRGVnb5eEEjDk3LEmb/8psFvFEIf1TPYYNPKWGnZBpwUaD2qo1faKRbGLegIZYBXlCnAbSKTBhZEIcZHssL3jyKQvQ/3ElgZNJmhGAt8JS30Sg3TQoz2Gfs2viKvwUq7HiIg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=1wdoQHbPv3tXS7S4MStolc76uOgtWQZBqgClzx/HElo=;
- b=tHLihW/e+afyCpontU84xI86CxDAzcn0d74in9RTPpBicHnXgmoRJGNdIETpcO7mil5l8Nz5pa/N1eSqhWALxD2/aksL3koLiiqA9tXQHUTorHP+y5Yk09GjbmwMYZY0AX9Shgim0Qtw3Eg6TaEaYLDW1wyoWeuGP+7HroKjgwBu9i6CGFKWa8qH/nrj8aLq/2wehR/4r2tuJAzvBW3IzkwfmfHgKQStcgn6FW4cxKEr22G7BMJ46CpN737++HgEsL4vvSamUH5ih/gPkYAE8Zh00dsDp7Uotiku2TC55QCjlpBF2Xpnnzhm/PW7jogpfBBDt3dJgGQT1d2C0BEQPQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
- (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
- dkim=none (message not signed); arc=none (0)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ bh=uAZyIjIYSxUKllcewpoHABXS4mX8F9Jyc32ESP8v5Es=;
+ b=VEnLBGE+tX3HsEpk+Ed9CeVLUzwIWJKjmXKQyarZcr7DERAZOfh0hjOlhhcFTXlSA7NJ3H8t33BIzQkr4ltpAxdpj38LM9HdYh8b0t+6DPRrUGI2SeRwOXOSWhO3ugx0vdPUxPWUDfbfm54GgrySCBD0t91rSkEApWcDRvXVoZdxHYk3W1U9PAWLbokJgUKvHm6Nlsl+h5zCc/aicmWurASXHvQi11pzrXlzaJ3Nz7e1Nos/hxOAhCNaNk8dRWxsSzpWrfLHIlzUWpum7CHe4m/BafRkGvFmcp+Lobwh3wDOS9ARLjfc+akp01AqJFeWgMYFsI7wJ9G+sD412W2R0A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=fail (sender ip is
+ 82.65.107.217) smtp.rcpttodomain=gentoo.org smtp.mailfrom=wenske.fr;
+ dmarc=fail (p=quarantine sp=quarantine pct=100) action=quarantine
+ header.from=wenske.fr; dkim=none (message not signed); arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wenske.fr;
+ s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=1wdoQHbPv3tXS7S4MStolc76uOgtWQZBqgClzx/HElo=;
- b=gcMMxg3ek/EA9w8jNoQ9wguHVXjoN+Uf6Tx9bXmO1PSimCMjs+YY2sovr50+tX/QkUoNFoPklYZusfktfBl4jRX1VI3VCBxajpQC6GDBhGEvdtn4tcgZ1XLa4I+X25LpPAkhOBFVgnVYt3cr04RxoShrMbwYwQzvWXBNLfAWLvk=
-Received: from BN0PR04CA0080.namprd04.prod.outlook.com (2603:10b6:408:ea::25)
- by DM4PR12MB6109.namprd12.prod.outlook.com (2603:10b6:8:ae::11) with
+ bh=uAZyIjIYSxUKllcewpoHABXS4mX8F9Jyc32ESP8v5Es=;
+ b=dOmdpNGjSx2fwcAPU0V9qnUfw1uPRQu5JdKYSGT7ivPsZo0uLfHLN8Yv1DaJ6WaM8IXEq3i7GL2IBhHl62Fo/gvjsP4w9oq84/ZJ0iBNII/6xJLZZlrX9gnoW6TKz19C2eiIDG8jct9TasvSTBvDgDfpDZE0ITqZnnNHP9qQSIzdkWtv5zAj5opbYbhCrgKrTHr6FlOG4mCMm9A48AR5vjD+Xyd888tB8dnC6/KXPQx7zWiplarwuU7OikWAXz1rtxC3bnGzTp14fz1/SHIl6kXsQUNHQE4XZq/b7WQM0aPUpiRkENyLxPqGTGx+rQTdF7A7WqpF4DK+0i1HBDnvug==
+Received: from PA7P264CA0262.FRAP264.PROD.OUTLOOK.COM (2603:10a6:102:375::13)
+ by PA3PPFADE62A42B.FRAP264.PROD.OUTLOOK.COM (2603:10a6:108:1::67b) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.662.4; Tue, 24 Nov
- 2026 13:32:47 +0000
-Received: from LV8PEPF00000068.namprd03.prod.outlook.com
- (2603:10b6:408:ea:cafe::aa) by BN0PR04CA0080.outlook.office365.com
- (2603:10b6:408:ea::25) with Microsoft SMTP Server (version=TLS1_3,
- cipher=TLS_AES_256_GCM_SHA384) id 15.21.662.6 via Frontend Transport; Tue, 24
- Nov 2026 13:32:46 +0000
-X-MS-Exchange-Authentication-Results: mx.microsoft.com 1; spf=pass (sender IP
- is 165.204.84.17) smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=satlexmb08.amd.com; pr=C
-Received: from satlexmb08.amd.com (165.204.84.17) by
- LV8PEPF00000068.mail.protection.outlook.com (10.167.248.41) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.21.662.3 via Frontend Transport; Tue, 24 Nov 2026 13:32:46 +0000
-Received: from Satlexmb09.amd.com (10.181.42.218) by satlexmb08.amd.com
- (10.181.42.217) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.57; Tue, 24 Nov
- 2026 07:32:45 -0600
-Received: from satlexmb08.amd.com (10.181.42.217) by satlexmb09.amd.com
- (10.181.42.218) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.57; Tue, 24 Nov
- 2026 07:32:44 -0600
-Received: from pankaj-M75q.amd.com (10.180.168.240) by satlexmb08.amd.com
- (10.181.42.217) with Microsoft SMTP Server id 15.2.2562.57 via Frontend
- Transport; Tue, 24 Nov 2026 07:32:44 -0600
-From: Pankaj Gupta <pankaj.gupta@amd.com>
-To: Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
-	<x86@kernel.org>
-CC: "H . Peter Anvin" <hpa@zytor.com>, Tom Lendacky <thomas.lendacky@amd.com>,
-	Ard Biesheuvel <ardb@kernel.org>, Kiryl Shutsemau <kas@kernel.org>, "Ilias
- Apalodimas" <ilias.apalodimas@linaro.org>, <linux-kernel@vger.kernel.org>,
-	Mike Rapoport <rppt@kernel.org>, <linux-mm@kvack.org>,
-	<linux-efi@vger.kernel.org>, <Pankaj.gupta.linux@gmail.com>, Pankaj Gupta
-	<pankaj.gupta@amd.com>
-Subject: [PATCH RFC 3/3] x86/e820: Ignore mem= in confidential guests
-Date: Tue, 24 Nov 2026 07:32:41 -0600
-Message-ID: <20261124133241.221719-4-pankaj.gupta@amd.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20261124133241.221719-1-pankaj.gupta@amd.com>
-References: <20261124133241.221719-1-pankaj.gupta@amd.com>
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.639.14; Tue, 24 Nov
+ 2026 14:06:49 +0000
+Received: from PA2PEPF00019230.FRAP264.PROD.OUTLOOK.COM
+ (2603:10a6:102:375:cafe::51) by PA7P264CA0262.outlook.office365.com
+ (2603:10a6:102:375::13) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.21.639.15 via Frontend Transport; Tue,
+ 24 Nov 2026 14:06:49 +0000
+X-MS-Exchange-Authentication-Results: mx.microsoft.com 1; spf=fail (sender IP
+ is 82.65.107.217) smtp.mailfrom=wenske.fr; dkim=none (message not signed)
+ header.d=none;dmarc=fail action=quarantine header.from=wenske.fr;
+Received-SPF: Fail (protection.outlook.com: domain of wenske.fr does not
+ designate 82.65.107.217 as permitted sender) receiver=protection.outlook.com;
+ client-ip=82.65.107.217; helo=lgs.sw-servers.net;
+Received: from lgs.sw-servers.net (82.65.107.217) by
+ PA2PEPF00019230.mail.protection.outlook.com (10.167.242.36) with Microsoft
+ SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.21.662.3
+ via Frontend Transport; Tue, 24 Nov 2026 14:06:49 +0000
+Received: from zephy.int.sw-servers.net (zephy.int.sw-servers.net [10.1.2.3])
+	by lgs.sw-servers.net (Postfix) with ESMTPS id 77BD232D;
+	Tue, 24 Nov 2026 15:06:49 +0100 (CET)
+Received: by zephy.int.sw-servers.net (Postfix, from userid 1000)
+	id 59B8010B2C3; Tue, 24 Nov 2026 15:06:49 +0100 (CET)
+From: Sebastien WENSKE <sebastien@wenske.fr>
+To: Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org
+Cc: swenske@veepee.com,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ James Le Cuirot <chewi@gentoo.org>, linux-kernel@vger.kernel.org,
+ stable@vger.kernel.org
+Subject: Re: [PATCH] efi/libstub: Allocate the INITRD table in ACPI reclaim memory
+Date: Tue, 24 Nov 2026 15:06:41 +0100
+Message-ID: <20261124140640.0f627d7e212c@wenske.fr>
+In-Reply-To: <37c38d1e-03cc-44ae-b617-d45fbf80acc5@app.fastmail.com>
+References: <20261012133712.618913-1-sebastien@wenske.fr>
+ <37c38d1e-03cc-44ae-b617-d45fbf80acc5@app.fastmail.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -119,66 +110,72 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: LV8PEPF00000068:EE_|DM4PR12MB6109:EE_
-X-MS-Office365-Filtering-Correlation-Id: a137cdd8-6f2b-4f86-8c0b-08df4a2f6d26
+X-MS-TrafficTypeDiagnostic: PA2PEPF00019230:EE_|PA3PPFADE62A42B:EE_
+X-MS-Office365-Filtering-Correlation-Id: 88015a63-dce8-4efa-5ffa-08df4a342efa
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|7416014|36860700016|23010399003|1800799024|82310400026|10067099003|11063799006|56012099006|261021121427099003|261102123227099003|18002099003|22082099003|6133799003;
+	BCL:0;ARA:13230040|36860700016|23010399003|82310400026|1800799024|376014|260925021911599003|260925022911599003|260925021311599003|10067099003|56012099006|5023799004|261026140227099003|4143699003|261021121427099003|261022105027099003|261022075727099003|261102123227099003|261028144727099003|261009223027099003|18002099003|22082099003;
 X-Microsoft-Antispam-Message-Info:
-	u+MHLehXfHQFP4KAI7hgNY4Ncw+1lRAgTb4UnFBKqz1oyJDrLyo/8tKOOndwbJ/V3e54sID08W7stvfkV5Fblx3lIUdS/YvRwau1yeud0PCzQmtSg1bUVsblLnG9RCTI6U6TdUH1nhpUm+qiMObY7yqhgHM7c2eHOWXlDKl0kelzC5z9wfjvqAw0fMNNNK5u8XqnGJ18mIx+zGtjtJrue7VZPsRhNaqoX6VuQWykvBEoHrGDK/lQNFTRZ4NIiaDUCYDX6vI6vcbYlTtR3RpphqQzA9ZW+e1nQSl8BVWG2/tBEpF54QM1wo1aDkFz32UeOQ7JkO327huBeC5TaCO/HbDu0w0b5EC/Ia2MC9NtQM2IeuW84RfH4lJnDrVgdFlViZ0h0CPfr2cfAFK9E/YK92h6+5gQKHgjgpkcvXFbQzbYEadMnjX6zWNBIvLktnnV23/2he/G/CXkOIRds7TYJBoAJrnSDTLtPD/lrnjp65Oe+3eLktsZvRn2wrpaOEN/eI0P3eUJIT0Na0Xkhy3uSzCOUxVuFLeiGMIFeWtigpw4/it/Q3nCtzsh/mLyemceRvsvjdsh8hQmGBPjkJnRoePh6G3cWQWxdUD7bqGSWOJ84bR674MioTpklLybAOcT6mgYGh8mRPSAIExBToO7LBLlArbENuDCuSgmGQmJGifDG6PazyvP47366XETbYqkZBMg1B4QdA5WJ6+RhgagzQ==
+	W9E3ObsSffmNdXlc+LiaiZw/V5/83lFtRDcsFxx1h75+hCNISMAKzmL6tjNTwqzndVs+f9W1VbYQQCG9yP1SXtInt8QzH7UwSny5/6dKgnYYIm1MkYI9YvpypczJ9x9DdhxevOEKPSuR+Yus5QuvNH377ehQsjtYYtvL7LOA9gLC3n7my6CdTD/nJxX8Dny1qsYRLpq00oPrc/x1lJVXlQRBeJkJxmS97j5uV7cyhQG2DbG3YyXDOUVjNmj9oIEiUXveA2hNvBsBJjZicSvYE3s0NieP/A4p7HlmWRjMqYwcpFMCq3xjb1vv5sz8dM8BOKjWI4vhAPpX3k4oJgvQEqn00pIHfcOPRF9ltlvLtFSQgiBvwseNorQ/W/Lnu8a0Og03WyNV0rOXQmKZh3IUItueQuSkmupnLVfPgwifhGbxi9XykWoetcEhTE6Nmhg9V7xAk8Cbm7Vz5EwvhNdciMK0xzsrRuojYVJP14x9SuNoNa5QV4kBVrghOOIwacq4EoE5kRINg88o7xdV3CIqMB4yQJYbCq/9XjnlRUMjrZWbFQDCwXQcorBNQiQmmq+YNiFI1PK3Whz7mj5ojpPvQ3LmQdbn/8B7vhlBr+DBSq8OT5SUpwiSdQlAD07t0u4n3yZAiWzK/CMByz7a97C6Dg==
 X-Forefront-Antispam-Report:
-	CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:satlexmb08.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(376014)(7416014)(36860700016)(23010399003)(1800799024)(82310400026)(10067099003)(11063799006)(56012099006)(261021121427099003)(261102123227099003)(18002099003)(22082099003)(6133799003);DIR:OUT;SFP:1101;
+	CIP:82.65.107.217;CTRY:FR;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:lgs.sw-servers.net;PTR:lgs.sw-servers.net;CAT:NONE;SFS:(13230040)(36860700016)(23010399003)(82310400026)(1800799024)(376014)(260925021911599003)(260925022911599003)(260925021311599003)(10067099003)(56012099006)(5023799004)(261026140227099003)(4143699003)(261021121427099003)(261022105027099003)(261022075727099003)(261102123227099003)(261028144727099003)(261009223027099003)(18002099003)(22082099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	mP0Kptxin80t7k+xLYrlgUvxTQdLtQouTV4MJsn+XF9jSK6afXJmVsimjjtTRAIZInFA5Ihc+YXKWmPuIhHkI8PwHn2TIwR3WSTppMtTiVwGkgq0AKryZW3E93n/UcunOraphXLHFJYZ5xVR59/ZnWtzBYRfOCoHnU+oAiyDa3W3RV/JruajYzv+aYG3rk3jj/03jOtCZt/Vo3x8pt2s25hJqOcJLYqV9T3QlVzTT9aXKwhkBbHQCuWzAmNPl3k2qyCMiJfFEy4jCE+PXqX4hoIZ5Txgu7fmB4SUgck2avijYiieOyp0coZCOp9xwrABhacipiF3aeR0YIKpwlx7S6WLDOHSYcKkTFPV/nh6F+uiixo2losInk7VtfLBp4wU4AZGnA3CwS1SkB4//lVdNdyol4dOBct1eZlajjnil77Otum4LxDO8xBt4DoRTD08
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Nov 2026 13:32:46.4507
+	tMOpfCS3V/QqIv53Y732yLMiNzNLAi32jHyMvTLNmfyUAPqgQn7EsKFN8TSJxLM5Ix0ajbsc3WmA5OA5ZOBKL/tnjcs90G3sVG4l6UWJOUNIdYeE144O1oXqbHPVh5u6vMF0035/Jk9a9uth6pGq2sd7kaG2BFJYeyZxy3YJaYemKVCSzFOitLttzhOsTav+C7mca7Hw1/vNEtqc2GjAAqySECguJOfJUPxF3kw5BnbEZ2XMLfwunEemCBsE3tPoDtOTEQG2iy3IgsfTVXwJT7kSnSfBEOXaU3pTcbQJBlwKH1ZfLHasTwWTvz6/1I9zNHRis4nN3cC2bEp5mVadKesBeixFvlNrvjbxEn0EJZCCm7REU/yDGmAigK203+eV7tFz8OKeJRIiI6wdaiVcHzIGnyZpzx7xHQnDohlbG9mACPp2eLTRZYX3lzqVYtuR
+X-OriginatorOrg: wenske.fr
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Nov 2026 14:06:49.6331
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: a137cdd8-6f2b-4f86-8c0b-08df4a2f6d26
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[satlexmb08.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource:
-	LV8PEPF00000068.namprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 88015a63-dce8-4efa-5ffa-08df4a342efa
+X-MS-Exchange-CrossTenant-Id: ff4ca3b8-6c54-4519-8b0b-9389fb15cdbb
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=ff4ca3b8-6c54-4519-8b0b-9389fb15cdbb;Ip=[82.65.107.217];Helo=[lgs.sw-servers.net]
+X-MS-Exchange-CrossTenant-AuthSource: PA2PEPF00019230.FRAP264.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR12MB6109
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA3PPFADE62A42B
 
-mem= also only edits the E820 table, after the firmware and the EFI stub
-have set up the unaccepted memory bitmap. It removes the RAM above the
-given limit, but the bitmap bits for it stay set.
+On Tue, 24 Nov 2026, at 12:38, Ard Biesheuvel wrote:
+> There was a report recently about EFI_ACPI_RECLAIM_MEMORY being
+> problematic in combination with hibernate, as those regions tends
+> to move around.
+>
+> Can you try this fix instead please?
+>
+> https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git/commit/?h=urgent&id=6863183e8b65e833f8140e20d526282a725e040e
 
-accept_memory() accepts whole units, and one more unit when the range ends
-on a unit boundary.  Memory below the limit can therefore pull in a unit
-that is no longer in the E820 table. On SEV-SNP that memory is not mapped
-and PVALIDATE faults.
+Hello Ard,
 
-Warn and ignore mem= in confidential guests, for the same reason as
-memmap=.
+It works, thanks - please consider my patch withdrawn.
 
-Signed-off-by: Pankaj Gupta <pankaj.gupta@amd.com>
----
- arch/x86/kernel/e820.c | 3 +++
- 1 file changed, 3 insertions(+)
+Tested on x86_64 under QEMU/KVM (q35, SMM) with Debian's OVMF
+2025.02, both the plain and the Secure Boot capable builds (no keys
+enrolled), the kernel booted as a systemd-stub UKI (initrd through the
+LINUX_EFI_INITRD_MEDIA_GUID device path), then kexec'd twice in a row
+with kexec_file_load() and an initrd:
 
-diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
-index 9c206ad4369c..c7b86267a480 100644
---- a/arch/x86/kernel/e820.c
-+++ b/arch/x86/kernel/e820.c
-@@ -940,6 +940,9 @@ __init static int parse_memopt(char *p)
- #endif
- 	}
- 
-+	if (cc_ignore_cmdline_mem("mem"))
-+		return 0;
-+
- 	userdef = 1;
- 	mem_size = memparse(p, &p);
- 
--- 
-2.34.1
+- v7.2.10, the setup of my report: without any patch the kexec'd
+  kernel oopses in tcp_parse_options+0xe7 again, 16 bytes of its text
+  zeroed at the stale table's address (0x1d4bcf98). With your patch
+  both kexec'd kernels log
 
+    efi: ... (MEMATTR=0x1d4b9018 unusable) (INITRD=0x1d4bcf98 unusable)
+
+  and run normally.
+
+- v7.3.6, with a debug print before the wipe: without a fix the
+  kexec'd kernels read what looks like their own text at the table's
+  address (e.g. base 0x74fb894800000002 size 0x7400000208b73b26) and
+  clear it, without any visible failure this time. With your patch the
+  table is disregarded and the wipe never runs - also with the flash
+  locked to SMM (-global driver=cfi.pflash01,property=secure,value=on).
+
+- v6.18.65: applies, both kexecs fine.
+
+Tested-by: Sebastien WENSKE <sebastien@wenske.fr>
+
+Thanks,
+Sebastien
