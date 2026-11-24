@@ -1,73 +1,69 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=198.175.65.15
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795537604;
-	b=hlIlTB31FH0bOoAJMbDy3MvHGpOd6nvEOi3tX6QGQYEspmNlMh8Vkx07uSruoQoBOoou
-	 SeJd98kduMEnUs3kbLa16sHdXtc7PdYqD+iur53xyyLVUBvQDxMhXGqPzMIA/8giJdr4y
-	 rwzXjqIZ6yqqvUMy1HBQOVDEGUvQGc2nYANt7+CubggOuAv1CaZIk5fZi6NTwMXtirDjk
-	 cjdUdTHVCwAZSAKhyvN297bfctIKQBFVBLANLgpJ+/0ZgLRjQF2kIJEL5Vw4T59lYfEES
-	 13niON4TUq3OE6sj4cnku0cQdqsJZFxCnvR079Ujo3AgFSQ/RpjHcfiHr5ew2CuScQQ==
+	t=1795539812;
+	b=biCpU+t80bOrcxKl9XsAolQddwpdgNfdEDsA4xjAiwJj9GT9tfTqNnDSFFkLZac3BOt8
+	 kvWn72nKMh7Kl8atwPLwMuihDlyMVahUTvAQet4nK/wL9WLrYTBOG9iqKfRdYKr6mW9/g
+	 xzljKpFoza+LIJoi6DszdEAXBio/eQXRpEZ4Ew3Xuri4VVld5CBrq2qDLCrAXpKb+igtz
+	 GQLKugSJqDR7D5eyJe3xw48tqWY17P4EuUMVFlPLJTQiIWPDSbK4hu4CGhAfyP8upEdbR
+	 37n7IbxLSUPvFgO56LrbOExLtM3PkeJt+fOeke43tQeuDHP9q1rbhL2oOXxWTK8in9g==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795537604;
-	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
-	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
-	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type:Content-Transfer-Encoding;
-	bh=3ieuTKgTmupFxrU1Sy9W+USlkxgIOvC38/mQnd0MGzc=;
-	b=4oMB1Tga8Yi9rpkhNLQg+1How1EjvAeUPgqyDfu0Wc8A7gltejOGxXWhk3J0bLceCbiN
-	 o0E519OE41E4n0ea24c57ojjqV1zxG1ZylmWCLiYTDVt/jF1j7jS7CVin78WIJPp0FA+m
-	 QVtVhkAkeDUsgTvP4e9XThRZNOSFS/evqH3KddQ+alNm9x+5xlsL/mk1TYe9VCNvGgpXO
-	 HvkjABVW4KlooCU2Zu2TgL4Bd9qIeh4BQ1yRxLdzjG/6Krtxkr8wUMuXGCqSKmF1VU84k
-	 K+W8Wir3E/jhgR5q3wDSfGkLVO9NNuI4RpkU7QXBFrN4eqcb95kKXl5/CBCtEdZ24nA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795539812;
+	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
+	 X-IronPort-AV:X-IronPort-AV:Received:X-CSE-ConnectionGUID:
+	 X-CSE-MsgGUID:X-ExtLoop1:X-IronPort-AV:Received:Message-ID:Date:
+	 MIME-Version:User-Agent:Subject:To:Cc:References:From:
+	 Content-Language:Autocrypt:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding;
+	bh=jHHJEpclenvhL4xmnZUmc9+yes2wNXZb3V1dO29rWao=;
+	b=mMwAF3TTZ2xGCHamxnpyzgGBqi/9z6xIXaBT31VH6iyk4jSGM5kERk6dPGSznKzjqGrw
+	 4mkztR+3NsmO9zfzC20Po+/YVe3XKxHjCV5LEaCmsUPJK84ccdlnpIRn1ZGMY7LWoY35L
+	 wN0zSij60+mRYb0KneWKAFg0AtOoCUbU0+z7E6LFW5Fsf3l/brkHMHaLWKai+uH54pU62
+	 WheD5CZ6v9MovqYNRmZVb+vHGoskRyRECKxdlmgNV+l+sf5qq1Sod6GhQnamKvy3N7Zjx
+	 Z1Mrr71zmNHcDF1y+sJmHLJVy4AtytTyvwx0+4c5SDA9j57B4U4W+KbWA8AuB7KH/zw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=j6L1RhGw;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	dmarc=pass header.from=intel.com;
+	spf=pass smtp.mailfrom=intel.com;
+	dkim=pass header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=UMMbX9EK;
+	arc=none smtp.remote-ip=198.175.65.15
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.15])
+	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAFEF606A31E;
-	Tue, 24 Nov 2026 16:26:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3CED4606A31E;
+	Tue, 24 Nov 2026 17:03:29 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3CED4606A31E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=j6L1RhGw
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 254691F000D2;
-	Tue, 24 Nov 2026 16:26:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795537604;
-	bh=3ieuTKgTmupFxrU1Sy9W+USlkxgIOvC38/mQnd0MGzc=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=j6L1RhGwQsaoRh1nVJn7PuNzvakza5gtaiZLoJq/m+IiguPyeMh3cS3fZfGdgtGlC
-	 15ya3i2ujfvmTT44rx95cBNQn3F/KudsUYbdNtueakfQ0ir8Oz2kko/9ervRrrbQys
-	 Y4OYIPv1aljxchEfsLZmANOX0wgsnTyR/p74kcdvopIp4Rt8o3kvYV1a4jW2lS6Tpg
-	 wCNly5fKgf/CVUZzfp/413J3/6ya4f5XjvqESi090BRzjcgxTqY1YPW/ybVFOfAhRG
-	 BZPhoBtQ6TzLTciE+qUV85eCVQfBfdQuyZ3X5lLqMJtESlFLjig3JcWsKVc1UWD9pl
-	 PWV3HJs3Ujjhg==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 64DFD198003A;
-	Tue, 24 Nov 2026 11:26:41 -0500 (EST)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Tue, 24 Nov 2026 11:26:41 -0500
-X-ME-Sender: <xms:vroFa1iKzJcRFma2WR9T_8ifmTKzYiLTfc_pGVsghlMf9rOWvhSqJA>
-    <xme:vroFa03LEBspPgahUh1xWn3UWQP1ogEsYVLwahDfURdKV-i6Q8XfyX6FtotFDQGpZ
-    _BlhJXdIhHZlDXwjiXDKNxeTSlMGumKl1_eMRRfwtk2NouMbKBYqAo>
-X-ME-Proxy-Cause: dmFkZTFK1SRhx2fcvvqjUveP2099rvc9Qqgqkm6zs8iZkfpV6opMlmIptApe4Y+xP/FpCz
-    ze1RuYawTba3QUB6nX7Y/xW7wxSLien47DLY7uc8GeZFx24VJhLiBZGZPb96x/pDRAU3iE
-    4tktzZrZoaIXvZMzKB62mZf9XuuMFTNKutvX8uOtieZ40/qrT7szA49zcuuuXJHYjtQh7y
-    ZOA6Sl+gjtYF3XxDxQ8chsK2eEk/eAAlU+yQmdUANx4B+IpWxavF4S/8tBoisLFGAbszDX
-    FPUX1luYY6i60WMQq6hQDK9NwAcU1umwoSULVAGjpj1g9U7BKWyorky4VSd4mPYl0pSUtP
-    ClTuwjEaarOCEy0WwSVwsrE9WtA7HibLwLn2lCgLyaHlaT1xqwFZZUZmv2CBk8oSyQg1hi
-    hZY1j+b9FROUGRItxhIHzKNo30zVZF/hqyMwnwNtallKr3uLdE638aepUS5bRyMCdDmNqs
-    8B58vNGUZ4Gtl4W6b/x59i2f4hqND6y7QKGWvdPSC+u5QqaihGPnnOuJS8xtucvntG76Qu
-    qaX5jx/on0/xvQH8Dnn9N4x2HTl8fp7Pt2yRplUf2DUDMtn2VPQp7TVXRsEHERJiL2jb+M
-    8Dq8Fa8xLSeOuc4lfGbo3i2TAIsyFEGdB0hEEiU/CBe1OQFfIhqHXBcTy7LQ
-X-ME-Proxy: <xmx:wboFa8dqwp3xU8riLhiiS2MPpLKE3ocsL-ZO8_WPAlYX4DX7uOQMDg>
-    <xmx:wboFa5FcJk-n5Yx9uoDR2iw8DJk_zpFiAehd4yf5gV-MHpnt-t1AtA>
-    <xmx:wboFa3v7kQ_dyVuuMXBQ7NPGnhA_rwJDM9nxd-PbwXzw714Jsds4dA>
-    <xmx:wboFazrTexgvGU-sWY3wiHdgl5zrUGFxJNStw_GWwNPv3i0rYXDMnA>
-    <xmx:wboFa-mJL-5AF4zgmplLqLwhcoa44kTPUMNvfInOskBrDJ0RXPFdRGoA>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id 7C79DF8009D; Tue, 24 Nov 2026 11:26:38 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key, unprotected) header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=UMMbX9EK
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1795539810; x=1827075810;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=jHHJEpclenvhL4xmnZUmc9+yes2wNXZb3V1dO29rWao=;
+  b=UMMbX9EK9jbQYYPb8r/35ohmo2fWt1FkpumJ/OowGNn7IHucoqrIChg4
+   7bws4W4aLiIsNrzE8/pBsA0VraPIExMsHddbFTuA9jbz6zKgU8zkSByIz
+   qYqvTWQeZCO2ei06AI3JRr644vApnpjQyIQRil5cUZTTYVbHkGDOrmCj7
+   yBYr9XQVRa5QVca2BU6zYSmtp9QF3JxZvVJqUpYg1sTgRA2rtP3vzjgQR
+   RUTyEuP40TjhlA7LrhMdXnGdw3CrYZcJg5cm+CaArXePcyHbTYM2GD9u9
+   M7S9+4qrmIFrh+eon4yMrEx39irMrzM7k3cmOiAXdr+S/P8EdC1o5cmU2
+   Q==;
+X-CSE-ConnectionGUID: jLG9789PSJa2QavSdOiq8Q==
+X-CSE-MsgGUID: dg28UWHARDiu0siuAPMEtw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11976"; a="4393394"
+X-IronPort-AV: E=Sophos;i="6.27,231,1787036400"; 
+   d="scan'208";a="4393394"
+Received: from fmviesa005.fm.intel.com ([10.60.135.145])
+  by orvoesa107.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Nov 2026 08:41:15 -0800
+X-CSE-ConnectionGUID: 4POPJdNPSY+//fLB9GhGBw==
+X-CSE-MsgGUID: q4Y3RdbdT9SCvGtwj9x0Qg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.27,231,1787036400"; 
+   d="scan'208";a="11727878"
+Received: from sghuge-mobl2.amr.corp.intel.com (HELO [10.125.110.20]) ([10.125.110.20])
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Nov 2026 08:32:04 -0800
+Message-ID: <96be8f5a-8f65-48ff-8263-1d5d5f706354@intel.com>
+Date: Tue, 24 Nov 2026 08:32:03 -0800
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -77,55 +73,81 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Date: Tue, 24 Nov 2026 17:26:17 +0100
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Mike Rapoport" <rppt@kernel.org>, "Dave Hansen" <dave.hansen@intel.com>
-Cc: "Pankaj Gupta" <pankaj.gupta@amd.com>,
- "Thomas Gleixner" <tglx@kernel.org>, "Ingo Molnar" <mingo@redhat.com>,
- "Borislav Petkov" <bp@alien8.de>,
- "Dave Hansen" <dave.hansen@linux.intel.com>, x86@kernel.org,
- "H . Peter Anvin" <hpa@zytor.com>, "Tom Lendacky" <thomas.lendacky@amd.com>,
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH RFC 0/3] x86/e820: Ignore memmap= and mem= in confidential
+ guests
+To: Ard Biesheuvel <ardb@kernel.org>, Mike Rapoport <rppt@kernel.org>
+Cc: Pankaj Gupta <pankaj.gupta@amd.com>, Thomas Gleixner <tglx@kernel.org>,
+ Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+ Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+ "H . Peter Anvin" <hpa@zytor.com>, Tom Lendacky <thomas.lendacky@amd.com>,
  "Kiryl Shutsemau (Meta)" <kas@kernel.org>,
- "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
  linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org,
  Pankaj.gupta.linux@gmail.com
-Message-Id: <c0e82936-9436-45e4-a8b6-07bdaa9680df@app.fastmail.com>
-In-Reply-To: <awW31hUpXuujSAXA@kernel.org>
 References: <20261124133241.221719-1-pankaj.gupta@amd.com>
  <e08f2321-749e-40f6-9ed4-3dba8e1625ba@intel.com>
  <awWzrkLxfQ2_ODKe@kernel.org>
  <2dd40d0d-2e1f-4a7f-ba65-2cceccd82028@intel.com>
  <awW31hUpXuujSAXA@kernel.org>
-Subject: Re: [PATCH RFC 0/3] x86/e820: Ignore memmap= and mem= in confidential guests
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+ <c0e82936-9436-45e4-a8b6-07bdaa9680df@app.fastmail.com>
+From: Dave Hansen <dave.hansen@intel.com>
+Content-Language: en-US
+Autocrypt: addr=dave.hansen@intel.com; keydata=
+ xsFNBE6HMP0BEADIMA3XYkQfF3dwHlj58Yjsc4E5y5G67cfbt8dvaUq2fx1lR0K9h1bOI6fC
+ oAiUXvGAOxPDsB/P6UEOISPpLl5IuYsSwAeZGkdQ5g6m1xq7AlDJQZddhr/1DC/nMVa/2BoY
+ 2UnKuZuSBu7lgOE193+7Uks3416N2hTkyKUSNkduyoZ9F5twiBhxPJwPtn/wnch6n5RsoXsb
+ ygOEDxLEsSk/7eyFycjE+btUtAWZtx+HseyaGfqkZK0Z9bT1lsaHecmB203xShwCPT49Blxz
+ VOab8668QpaEOdLGhtvrVYVK7x4skyT3nGWcgDCl5/Vp3TWA4K+IofwvXzX2ON/Mj7aQwf5W
+ iC+3nWC7q0uxKwwsddJ0Nu+dpA/UORQWa1NiAftEoSpk5+nUUi0WE+5DRm0H+TXKBWMGNCFn
+ c6+EKg5zQaa8KqymHcOrSXNPmzJuXvDQ8uj2J8XuzCZfK4uy1+YdIr0yyEMI7mdh4KX50LO1
+ pmowEqDh7dLShTOif/7UtQYrzYq9cPnjU2ZW4qd5Qz2joSGTG9eCXLz5PRe5SqHxv6ljk8mb
+ ApNuY7bOXO/A7T2j5RwXIlcmssqIjBcxsRRoIbpCwWWGjkYjzYCjgsNFL6rt4OL11OUF37wL
+ QcTl7fbCGv53KfKPdYD5hcbguLKi/aCccJK18ZwNjFhqr4MliQARAQABzUVEYXZpZCBDaHJp
+ c3RvcGhlciBIYW5zZW4gKEludGVsIFdvcmsgQWRkcmVzcykgPGRhdmUuaGFuc2VuQGludGVs
+ LmNvbT7CwXgEEwECACIFAlQ+9J0CGwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEGg1
+ lTBwyZKwLZUP/0dnbhDc229u2u6WtK1s1cSd9WsflGXGagkR6liJ4um3XCfYWDHvIdkHYC1t
+ MNcVHFBwmQkawxsYvgO8kXT3SaFZe4ISfB4K4CL2qp4JO+nJdlFUbZI7cz/Td9z8nHjMcWYF
+ IQuTsWOLs/LBMTs+ANumibtw6UkiGVD3dfHJAOPNApjVr+M0P/lVmTeP8w0uVcd2syiaU5jB
+ aht9CYATn+ytFGWZnBEEQFnqcibIaOrmoBLu2b3fKJEd8Jp7NHDSIdrvrMjYynmc6sZKUqH2
+ I1qOevaa8jUg7wlLJAWGfIqnu85kkqrVOkbNbk4TPub7VOqA6qG5GCNEIv6ZY7HLYd/vAkVY
+ E8Plzq/NwLAuOWxvGrOl7OPuwVeR4hBDfcrNb990MFPpjGgACzAZyjdmYoMu8j3/MAEW4P0z
+ F5+EYJAOZ+z212y1pchNNauehORXgjrNKsZwxwKpPY9qb84E3O9KYpwfATsqOoQ6tTgr+1BR
+ CCwP712H+E9U5HJ0iibN/CDZFVPL1bRerHziuwuQuvE0qWg0+0SChFe9oq0KAwEkVs6ZDMB2
+ P16MieEEQ6StQRlvy2YBv80L1TMl3T90Bo1UUn6ARXEpcbFE0/aORH/jEXcRteb+vuik5UGY
+ 5TsyLYdPur3TXm7XDBdmmyQVJjnJKYK9AQxj95KlXLVO38lczsFNBFRjzmoBEACyAxbvUEhd
+ GDGNg0JhDdezyTdN8C9BFsdxyTLnSH31NRiyp1QtuxvcqGZjb2trDVuCbIzRrgMZLVgo3upr
+ MIOx1CXEgmn23Zhh0EpdVHM8IKx9Z7V0r+rrpRWFE8/wQZngKYVi49PGoZj50ZEifEJ5qn/H
+ Nsp2+Y+bTUjDdgWMATg9DiFMyv8fvoqgNsNyrrZTnSgoLzdxr89FGHZCoSoAK8gfgFHuO54B
+ lI8QOfPDG9WDPJ66HCodjTlBEr/Cwq6GruxS5i2Y33YVqxvFvDa1tUtl+iJ2SWKS9kCai2DR
+ 3BwVONJEYSDQaven/EHMlY1q8Vln3lGPsS11vSUK3QcNJjmrgYxH5KsVsf6PNRj9mp8Z1kIG
+ qjRx08+nnyStWC0gZH6NrYyS9rpqH3j+hA2WcI7De51L4Rv9pFwzp161mvtc6eC/GxaiUGuH
+ BNAVP0PY0fqvIC68p3rLIAW3f97uv4ce2RSQ7LbsPsimOeCo/5vgS6YQsj83E+AipPr09Caj
+ 0hloj+hFoqiticNpmsxdWKoOsV0PftcQvBCCYuhKbZV9s5hjt9qn8CE86A5g5KqDf83Fxqm/
+ vXKgHNFHE5zgXGZnrmaf6resQzbvJHO0Fb0CcIohzrpPaL3YepcLDoCCgElGMGQjdCcSQ+Ci
+ FCRl0Bvyj1YZUql+ZkptgGjikQARAQABwsFfBBgBAgAJBQJUY85qAhsMAAoJEGg1lTBwyZKw
+ l4IQAIKHs/9po4spZDFyfDjunimEhVHqlUt7ggR1Hsl/tkvTSze8pI1P6dGp2XW6AnH1iayn
+ yRcoyT0ZJ+Zmm4xAH1zqKjWplzqdb/dO28qk0bPso8+1oPO8oDhLm1+tY+cOvufXkBTm+whm
+ +AyNTjaCRt6aSMnA/QHVGSJ8grrTJCoACVNhnXg/R0g90g8iV8Q+IBZyDkG0tBThaDdw1B2l
+ asInUTeb9EiVfL/Zjdg5VWiF9LL7iS+9hTeVdR09vThQ/DhVbCNxVk+DtyBHsjOKifrVsYep
+ WpRGBIAu3bK8eXtyvrw1igWTNs2wazJ71+0z2jMzbclKAyRHKU9JdN6Hkkgr2nPb561yjcB8
+ sIq1pFXKyO+nKy6SZYxOvHxCcjk2fkw6UmPU6/j/nQlj2lfOAgNVKuDLothIxzi8pndB8Jju
+ KktE5HJqUUMXePkAYIxEQ0mMc8Po7tuXdejgPMwgP7x65xtfEqI0RuzbUioFltsp1jUaRwQZ
+ MTsCeQDdjpgHsj+P2ZDeEKCbma4m6Ez/YWs4+zDm1X8uZDkZcfQlD9NldbKDJEXLIjYWo1PH
+ hYepSffIWPyvBMBTW2W5FRjJ4vLRrJSUoEfJuPQ3vW9Y73foyo/qFoURHO48AinGPZ7PC7TF
+ vUaNOTjKedrqHkaOcqB185ahG2had0xnFsDPlx5y
+In-Reply-To: <c0e82936-9436-45e4-a8b6-07bdaa9680df@app.fastmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
+On 11/24/26 08:26, Ard Biesheuvel wrote:
+>> They shouldn't but you can't guarantee that.
+>>
+>> But I don't mind letting them crash if they do 🙂
+>>
+> I'm fine with either approach (i.e. disallowing it or doing nothing
+> at all), as long as we don't pretend that this is something that is
+> expected to work.
 
-On Tue, 24 Nov 2026, at 17:14, Mike Rapoport wrote:
-> On Tue, Nov 24, 2026 at 07:58:31AM -0800, Dave Hansen wrote:
->> On 11/24/26 07:56, Mike Rapoport wrote:
->> > On Tue, Nov 24, 2026 at 07:09:42AM -0800, Dave Hansen wrote:
->> >> On 11/24/26 05:32, Pankaj Gupta wrote:
->> >>> In a confidential guest (SEV-SNP, TDX) the EFI stub builds the un=
-accepted
->> >>> memory bitmap before the command line is parsed. memmap=3D and me=
-m=3D edit
->> >>> e820_table only afterwards.
->> >> memmap=3D and mem=3D are debugging tools, right?=20
->> > I wish they were =F0=9F=99=82
->> > But AFAIU they are used to carve out "pmem" or PFN-mapped memory.
->>=20
->> I've used them that way for development, but production pmem systems
->> always had persistent memory in their BIOS-provided memory maps.
->>=20
->> How are folks depending on these in production in confidential guests?
->
-> They shouldn't but you can't guarantee that.
->
-> But I don't mind letting them crash if they do :)
->
-
-I'm fine with either approach (i.e. disallowing it or doing nothing
-at all), as long as we don't pretend that this is something that is
-expected to work.
-
+Yeah, it's not supposed to work. I'd rather document "don't poke the
+sharp stick in your eye" versus trying to make the stick less sharp.
