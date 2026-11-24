@@ -1,105 +1,74 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.46.43
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795541293;
-	b=iIWTdBsysM27LIwP1vIGNoBndQtttyVXZgddFuT99hKRKGLDtMhr7BIrFwqxgklWkXZS
-	 F2ikGmVVg2y9i94YDNOSkQitFZ3nw2mhLc6UAFFj51PDkVhq9giJqEVqp9vCdCUNfB77G
-	 acVXSf78BO4Z0o1l4qMgzELyRXrc/A2Ml5JsIvbSXTlMjoEdhqKSjpaoCvhg0B4TG4uOS
-	 KuvIGghX0wUONcwabJMgfX87nq7lGUMSVrFlqRoJzZztycN6YjMmLITgl2auUXJ6ry2zD
-	 zfgH9sDMnZLHpFm3hKXp4tPDiTCo5rQ9tMfGR6dhV3T3zg1sYwOvDQLaZuBnD3H6UPg==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795541293;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:Message-ID:Date:
-	 User-Agent:Subject:To:Cc:References:Content-Language:From:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding:X-ClientProxiedBy:MIME-Version:
-	 X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
-	 X-MS-Office365-Filtering-Correlation-Id:X-MS-Exchange-SenderADCheck:
-	 X-MS-Exchange-AntiSpam-Relay:X-Microsoft-Antispam:
-	 X-Microsoft-Antispam-Message-Info:X-Forefront-Antispam-Report:
-	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
-	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
-	 X-MS-Exchange-CrossTenant-FromEntityHeader:
-	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
-	 X-MS-Exchange-CrossTenant-UserPrincipalName:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=ZCwp05IcpcNS3RLWAuz6/8Sd0BXA3jsJ8MNUidlQd8g=;
-	b=uLprGpxJ6iecduO8sHZs7EOFizbQWv6rqBvHSmXWNdgPAAle5s5bjwnynXOGxQEHVqRz
-	 Iaw6wc+yVrx6+p+M6BV0jM4dselBtxp5XNupRO05XJUnALhr4rJzO+32Vvo3UMO7bDXg4
-	 12FytDySiY4cauX3+Whf4suXzmsCMHtPMSds62IQqvsBm0FZWXOItBKDGamyrr2fiie4B
-	 +9s8paRT0jUg93GJkip0CgO18qUA8gLTyKwqM3GLKXr9BBNFK5r0zregaWLr0B16GDE9e
-	 /0HdNHIupWYpWROm7QnoFX5oQJqcAzrlE4/fWrLjT+vT956uz9xM8wxP+iorWabZSfg==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=amd.com;
-	spf=fail smtp.mailfrom=amd.com;
-	dkim=pass header.d=amd.com header.i=@amd.com header.a=rsa-sha256 header.s=selector1 header.b=cvbCY3wk;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.46.43
-Received: from CO1PR03CU002.outbound.protection.outlook.com (mail-westus2azon11010043.outbound.protection.outlook.com [52.101.46.43])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.71
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1795541876;
+	b=wXjxkWwGW0QGpFVdjMOTRriJNlALFQxDxcQE4xMI7sMhaFEykJ/ecSR3jtccLpg6a42c
+	 rX7JKfjgz/3KRwyrsf2ewF/zhMYXD9/XA5KlOXiSeIiCau0F9ayFNyj7vNN6BHvjIzIq1
+	 XACnGgUVP7bQZPhhEGV7FFm+TLLZ/lUtsG2OfqmdS2j8xEkfMe3iOHrByp1BAAr92VtZm
+	 ZhizGIsbd33mYaPwhdMld9NpomupIr1mCYc2RujKYcSMVqqBHNdL/8fS7yN7kvDaZHo1R
+	 JGrh6omZuL4+A5EKS3SPrQ0KhLHy7dlltfj5b/qzQG/VIMyujveT4s+Man2bVdJY2Ew==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795541876;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Received:Date:Mime-Version:X-Developer-Key:
+	 X-Developer-Signature:X-Mailer:Message-ID:Subject:From:To:Cc:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=G69O/BlkH22ZYIj7xp+lE2XTSd46SKBHU59HdeJNpYY=;
+	b=KF24P//mzddDQHYxGcv33FVP0i+ikMknAbHPz1/SBEAP25FhQh1QZJe2uSci/dX0/7k9
+	 +8GA06fEv68LYj25hPbGs9vWYNJneuSdiLtCPd+E2lOPYDcPu/bKdLYbNEdj0s7n+p0QB
+	 3vwYsE54wUK03a+1LLnDdeHwNdSkW+zXUCB2atRixQ9i9xyCQbYxOLE9QECVWi+ghIIMk
+	 z0MJYOlRvpioXsgOlvDZBhDlaiX6DZLx8ablaM6hA5DnnZm3bnuhrQULg7M+RxVJb+bx/
+	 34lX7slJVbev+K1zlnkxTWnAZDUSqMrkZqCl98AqYA9hVwvGlVqbblqJ2qY9bwMBs1w==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=google.com;
+	spf=pass smtp.mailfrom=flex--ardb.bounces.google.com;
+	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=SH8rHZbU;
+	arc=none smtp.remote-ip=209.85.221.71
+Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com [209.85.221.71])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A588F606A323;
-	Tue, 24 Nov 2026 17:28:12 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A588F606A323
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80F94606A31E
+	for <linux-efi@vger.kernel.org>; Tue, 24 Nov 2026 17:37:56 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 80F94606A31E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=amd.com header.i=@amd.com header.a=rsa-sha256 header.s=selector1 header.b=cvbCY3wk
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=lQBqZWuegtoEJQQ/nzfe7AHYhviQVncqUhnyncdEv9nZncNNnwHv8Ud4/h8xWdUZ/0l0sOJotjSESL701CSmmczS9nmLzNkYjTupE/Lhy2kdDAqzIr7msNvjzJJLt1RMog4XJgwjIufX8wnzgVW8I/ROVnM4VG2kKVfL/aJzjLobqq3hf5MlkMLIvt8QasQKVsIpLvN33VVEzH+WJ+acYxOfsCZ1wnNQ2X7EIAq9CbJ+1q89MQB4wT369XmY6+fhF8zzj4aX4YDHsJa0+TQS32ycuVwfM/CPzump6H8D0C9FpULEpYgcOisXghHc1qidQK7FznPnJHLjyjwv1He5iw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ZCwp05IcpcNS3RLWAuz6/8Sd0BXA3jsJ8MNUidlQd8g=;
- b=pXdykWLFfte7EkgpEDQee2sJBUk1psB0UX7tGRHhpFX9HiDeaNWx4ZQfpqSlesaXZlGzakxt9lfx98//EaSzn0x0ZLx5Ycvb/5ePmSIJojyLSVf9yO0QZHAe/rx1kMZNnLpDizCJhMWHJze1PTYQ/N/u4SvA1vKe5K6ULqSEzJ7cT3CykT38uDnQeaseZsUj2WWjKXrjx0hW4Ngc6H0hnB+oXpNFqAacHe+tRTyIBdbR4/xqp7MH9vYYnmiFk0m5Y4XxDS5eVMhg0K6R9lk0oAp87/JAhVhkBL2Nfq/Kl+5zsZrJBuyiJ4GLzB8uyuWo9QSBs9pZpasZj+Q/6kLMEg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
- header.d=amd.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ZCwp05IcpcNS3RLWAuz6/8Sd0BXA3jsJ8MNUidlQd8g=;
- b=cvbCY3wkLE3hai4NK5Oir+8evhdhh3ekVxtQo2BuPXSKBEdAynkwPsw4J7zYNETeykZwCyuLWW4FBibd1CV4CONM/Q/GQJT4emYiX3g3s8C6e28bvE4VlWZb/X+3WGOCjxd06DXogGynHok85snWbcQ62to4hIvNhZUXXsZ6BBo=
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=amd.com;
-Received: from DS0PR12MB7771.namprd12.prod.outlook.com (2603:10b6:8:138::6) by
- PH0PR12MB8823.namprd12.prod.outlook.com (2603:10b6:510:28e::22) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.639.13; Tue, 24 Nov
- 2026 17:28:02 +0000
-Received: from DS0PR12MB7771.namprd12.prod.outlook.com
- ([fe80::9a3e:791f:33b6:3d8c]) by DS0PR12MB7771.namprd12.prod.outlook.com
- ([fe80::9a3e:791f:33b6:3d8c%4]) with mapi id 15.21.0639.011; Tue, 24 Nov 2026
- 17:28:01 +0000
-Message-ID: <f059498b-1e65-48cb-bc40-62323e161a14@amd.com>
-Date: Tue, 24 Nov 2026 18:27:55 +0100
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH RFC 0/3] x86/e820: Ignore memmap= and mem= in confidential
- guests
-To: Ard Biesheuvel <ardb@kernel.org>, Mike Rapoport <rppt@kernel.org>,
- Dave Hansen <dave.hansen@intel.com>
-Cc: Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>,
- Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
- x86@kernel.org, "H . Peter Anvin" <hpa@zytor.com>,
- Tom Lendacky <thomas.lendacky@amd.com>,
- "Kiryl Shutsemau (Meta)" <kas@kernel.org>,
- Ilias Apalodimas <ilias.apalodimas@linaro.org>,
- linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-efi@vger.kernel.org,
- Pankaj.gupta.linux@gmail.com
-References: <20261124133241.221719-1-pankaj.gupta@amd.com>
- <e08f2321-749e-40f6-9ed4-3dba8e1625ba@intel.com>
- <awWzrkLxfQ2_ODKe@kernel.org>
- <2dd40d0d-2e1f-4a7f-ba65-2cceccd82028@intel.com>
- <awW31hUpXuujSAXA@kernel.org>
- <c0e82936-9436-45e4-a8b6-07bdaa9680df@app.fastmail.com>
-Content-Language: en-US
-From: "Gupta, Pankaj" <pankaj.gupta@amd.com>
-In-Reply-To: <c0e82936-9436-45e4-a8b6-07bdaa9680df@app.fastmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: FR4P281CA0223.DEUP281.PROD.OUTLOOK.COM
- (2603:10a6:d10:e4::6) To DS0PR12MB7771.namprd12.prod.outlook.com
- (2603:10b6:8:138::6)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=SH8rHZbU
+Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-4915ba023d4so3040370f8f.0
+        for <linux-efi@vger.kernel.org>; Tue, 24 Nov 2026 09:37:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20260707; t=1795541875; x=1796146675; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:from:subject
+         :message-id:mime-version:date:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=G69O/BlkH22ZYIj7xp+lE2XTSd46SKBHU59HdeJNpYY=;
+        b=SH8rHZbUHwkp8JIw2HtG20CSPEB7+1vgThvSftACSVEvoAdv21Fw/bKTD7XdOAynQA
+         hqmNrYu0RaHuH93V837zFwp9070CN6Ka/Bvf5iMYLLSlb8CWq1ekBz7B59FujenH7CdZ
+         wFBtgfma7mmPMMQ5uwyAVNE0pVvdjnbZ3BKyEzlTq+5rwfIzi70nEZIH5HZ1cBupAzNh
+         eM6tvhGCRkjNV1+GuqS3rG8yUyDNczt5OSbhASTuf+Sf20PEfLCGLUOl0KWCkoMp8C/k
+         EJF26l7KWKPwHF5Ier8eOG7TOhJ1ZhQDw3bFV2N8E9ZVihaHeC8k4iIZl5BMj6ciec+1
+         9PUg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1795541875; x=1796146675;
+        h=content-transfer-encoding:content-type:cc:to:from:subject
+         :message-id:mime-version:date:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=G69O/BlkH22ZYIj7xp+lE2XTSd46SKBHU59HdeJNpYY=;
+        b=QXI2/VEvcpo7OmNSc+MuTwy0wF2ikNhBKgobwsZGkIrbljJIST4p/LT21p1tvoneXM
+         S4wms/WOPK4L6LKRmdJyZ2WlP0KL5+Bqt0ZsMNx32bcRBbjQIuKy8JQU77nRyOxMf+jV
+         j0Ub5VGcfv2KA1BlPLbHhcCCihweji11NeA8QeoJxeb8ITp7H5lbrSWrTr4e8tukKJp6
+         vv2Me2l7GVlgc5aIZCL03EyNY9MC9p4fa2/gINU49tzlDjKaFF8xKH9U7eBI2WZa94SQ
+         O2SC03kTHL2BQB4xV/WKYO3ENmgo1+SzxvN2t6fwpgUCepNa3i0Li18K2Czcc79ANW6q
+         Ko+g==
+X-Gm-Message-State: APuU4Z9bdh/9+alctA615xPFziEWTK1b9SqfFrplzq22HwIoK9oHQYiX
+	ZYXJ7dq8alA1Qx5FMw/z1LTQzxavNsjU4iilL2vptTqeEb99yResme8DZUjsoK4Cmm3rZ/I56rp
+	RZjYPFYojTBl2N0xwDzSWMFGd+exSEEgAEoY3D/LdN++iaiFqNQkO7ucIlZwA5DOQREBJvABX6A
+	y03tl2r6/fcwBsn2eekZJ5djh0i8MPLw==
+X-Received: from wrjb1.prod.google.com ([2002:adf:e301:0:b0:4a3:6d62:8107])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:4f10:b0:4a1:88de:9e8b
+ with SMTP id 5b1f17b1804b1-4bb88807909mr341731565e9.5.1795541874421; Tue, 24
+ Nov 2026 09:37:54 -0800 (PST)
+Date: Tue, 24 Nov 2026 18:28:10 +0100
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -108,112 +77,53 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DS0PR12MB7771:EE_|PH0PR12MB8823:EE_
-X-MS-Office365-Filtering-Correlation-Id: f6d74bef-9f31-47d3-f930-08df4a504a44
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|7416014|376014|23010399003|1800799024|5023799004|10067099003|261026140227099003|4143699003|11063799006|56012099006|261026121527099003|261021121427099003|261102123227099003|261022075727099003|261022105027099003|261028144727099003|22082099003|18002099003|6133799003;
-X-Microsoft-Antispam-Message-Info:
-	14pARPdHgRclmWCsXClL9wdGqB8IrYD4nZi/+DLf2X847fpR54jia0BU0pt5IB6TOOJRE1PwG9GfO2hiIYP9cSXw6jg7vPfnA1ttbfY0OmfrrQxc0Fq4lmQJgKzVcSg8IP0+b91d2SG1InQh+vZ6ObD3nGitUAV3UxttKAhNBm3y5DDw3LKU0qtR6xamWZ7Eo2gYWfBPLSlc6BWC9doQMd68etNEv0QFA7OcD/SLn9rpv77GnC9skZC25lhxYtRB7Zoyb6uVgySiY8Jz4jeIscQYeL0Ahb/bmozWMw2e46vneplw0u83DmFxdmx6rK62IgKUzezH24cVPXyRDC9aP0V9Cd4iecrbPy15E/ccUTpxa4217StbUBtyWlmWeidPncIbxxWuVgo4Vw4/JJXhcEZqqMPLbTC6gV79oQCyPSb81oZ/k6VsBpiifzAqbZIEIxKZvWs9NbAxk7xjXci/4t0FkNxrfoxPgs/dNrAmOf/y0rNEn8mU9QsO2yqsrXVVgXP8tQ2WeIXPYYg1XaqS7BrX8YAOyqUfMwNJs0s4DpGmST/PJEr5eshaYhAi0IVwhGUesAM1hhNKTQNrTJimea/lv0A0dJyZdStjZ/3/UsqrdTP8zTDSuOHEII/gs0pp
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DS0PR12MB7771.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(7416014)(376014)(23010399003)(1800799024)(5023799004)(10067099003)(261026140227099003)(4143699003)(11063799006)(56012099006)(261026121527099003)(261021121427099003)(261102123227099003)(261022075727099003)(261022105027099003)(261028144727099003)(22082099003)(18002099003)(6133799003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?R3FiU1NvZTd5S0M0MEtneTVrOWl3bW1VMlVGblI5Ylo0NWtQUE90UkoxVnY1?=
- =?utf-8?B?a0hKelowTVlmeVYvc3pqN3lzZWdTN3UxMnE1VkR3Y1lFN1o0TTZyT2FmcTJB?=
- =?utf-8?B?alhHaDFIRzFzV2VBcGdnc3BHcTJTK3RwNHBnMGNtTjYyQk10MjhGMzJ0WEFB?=
- =?utf-8?B?YXU3MXl3cTlMM1hKc0g4NDNJTUlzNWw2ZDJTQU1hTFY2RUdqejNrcWxkTUJK?=
- =?utf-8?B?MVRTL3hQQm9ickgxZ205TWVOUzU5ZXBWdXA4V1UyR1RBd1FHS2RkMnRTQjM1?=
- =?utf-8?B?aFRnZndyWWgzSkdVVmRHZGJ2Zjd4WTEvenlDTnNOSllVVzM5bTRsNUhaeDFv?=
- =?utf-8?B?dGx5SS93T3A3Rk1Mcmh2a2c1V3NINWNtdjNkSUVsaHJRQlNYM3NzSUM3Rk9O?=
- =?utf-8?B?dEllWk5jMXpvZ3owTHE3aVR6TkJxMVVUd1orU2RNcFFQMUVvVGZrei9BdTZr?=
- =?utf-8?B?RkFSM2xmV1ZkZjZCWlBFd2ZkSDJGNW53NllBYnQrWGQ0Z2VxdzJLcEpwT21s?=
- =?utf-8?B?RjJNM3JvVGgxaHVGaEk3SnZxZ1N0SEpGNno1cG5iTFJTYVVFbGMyV2NIY25m?=
- =?utf-8?B?aFMvdHpmZm40Z0tzdTAvSFpteDZ0NWcyeXJmV3huU2Y5akNCeEM3eCtuQlJ3?=
- =?utf-8?B?d01JUG5TTEZEbEZWTC9HWDJOcE9TWVRPOFowdlN2SDhVUUcyQXowYkNqTWRk?=
- =?utf-8?B?MU5qMGQ1QW9TSkV6MG5XR1FqQVBkRW5sR2xvdnZwVkVPZHo1RHpTOTFwdW1X?=
- =?utf-8?B?V0xjREdYRjFpTEtVUyszc2VqMUYwZGd5cWt2SHBseW1SN3JpS2dSVlhlb0RV?=
- =?utf-8?B?T3QrdTRmbU05SkN0SmxEY0lRSHA1NEwxMVh2QTRpbGZIWGVpYkthNG9leHRB?=
- =?utf-8?B?T3BvSmI5NWhCcW1DaDd6Wmo4WTFTVDdvOFBTM1o2dkpZMFhzTWNvMXU4OXVE?=
- =?utf-8?B?VURDL3Q4cXF1Qkt3SDFuK0xrVlMrdVBCWjFDQUFHTlJVaHVjZERWclpaVTZY?=
- =?utf-8?B?WHplK0lCVE81czFDYitabTc4UHRwNmVmVk1GVWVTM3RlQ0pQOWhvd1ozTlhZ?=
- =?utf-8?B?QU1uS2xOcmtVYktJK3MzRHlvb3BnVW9BL0FUOTRYZVJqbUtiS1RlL0pXQ2I3?=
- =?utf-8?B?cEVuWXYvUzV0U2hoS1BJNjdyTGc3NWRVYUdITitVenBHdTltcjRxdTd0TzM1?=
- =?utf-8?B?ZHlGcDFucUM4UGVkZytuVGFOZDZPbnNOcW55aVVIdUpKMVBSOGY2SzFFb2da?=
- =?utf-8?B?UWtXckVpVjZsZVpoR3BXaVVKcGEzOE9ZVkxBYWFUVkJ6RkVIMXNTWnZqM2Ir?=
- =?utf-8?B?Nm5rTzU1aEc5R3B5L0p1Tm1pNVBtYWY3cUZJZnAraW43Z01EcUxQTnllejF4?=
- =?utf-8?B?ZDBSb3g5MUU4SlcrbmNvRnlGcjJ2SUFjSFg1K2ZtSG5OU1NCcXdVSVNEWXdj?=
- =?utf-8?B?QzhZQ2EvQVhXdEZxQ0JxRjdqY3pjcVE5elpnVDZpbFpFTU01ZDc2NHF3ZkpP?=
- =?utf-8?B?a1lxbng4RVdGd1NTSlc3QTdzeDN0cVE5azZDU1dDRm5JR2ttYng2eFdYYXFv?=
- =?utf-8?B?Z1QvZEEvM0E4NE9jYk92NVhSMkxTWkhGdVZoWkMvRThhWjN6T1grRkg2N2JS?=
- =?utf-8?B?eW40aHUrc29RMy9naWZvbUJWV2pMdkV2dXk1eGlGWE5Sdi8rU2Y4YWhmL2Ur?=
- =?utf-8?B?aTlXYzR0M0drNFRDZERGeEVvNUhmdW85MDI3ZU1ickV4Zk9mQ1VwandUNkt6?=
- =?utf-8?B?YjVxNmxwbEd6Zi9wUVdVK3lOUVhVckJoOXdZNzRHcW1qcDRBdjZOUU5pOWxV?=
- =?utf-8?B?TW5wd0p5R0k2VkJGbFcxejFmY2orcDRxdjM3dXBXTEhOU053eVZQSkxCQnZ0?=
- =?utf-8?B?TkZQeFl1ODhYOHFTazJNRmZKR09sSEVYKzBud0p2akpJLzdRZzFtK3Y4QlIw?=
- =?utf-8?B?SWY3SnJaM1FuTW1OMDNFajRDRk91ZEZGQjFMVlkzejRsK2dTRTFWUVVuZXV6?=
- =?utf-8?B?VGlTVENyRlczTkZkbmdaQ2MzcWdzYS9kYjdoc09JNGd1QTRGdnpYeUFUUmV5?=
- =?utf-8?B?eUk3amhGNmZrZWxYdlRDY1YxZDhwSFI0M2d5ZG5ybFhUMERtZVFQZ0hxTE1o?=
- =?utf-8?B?cmo4TG5kdDNlbTFVNnNTUmVWQ05Ka1JaaE4rc25lNTFwODNwbjFra1hGYStG?=
- =?utf-8?B?ckRRQnB0Smg0Mlphd0pRR1ZjTFc4V1dQVlBSQ1VsS3FMWlFKZjFDNThpQXpF?=
- =?utf-8?B?cmk3dG4zMmkzNnFKaU5Qa3lEaDYrRUYrdDBkTnpSTGMvaWl4RzJubFREQTVE?=
- =?utf-8?B?My9hWGd3WHdJbUJDcEFsR0kvTzMyT3cralZqRXN1Z0NxMzRmYnFuQT09?=
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: f6d74bef-9f31-47d3-f930-08df4a504a44
-X-MS-Exchange-CrossTenant-AuthSource: DS0PR12MB7771.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Nov 2026 17:28:01.7079
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: P0CymmQFL1KDF/rylAkxan7VWsJSlyILdAPzWbpcUt0mBK0gb9b7mn2gYQDOf55C+XlE4z3tVhHGmLpWFuROJQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR12MB8823
+Mime-Version: 1.0
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1053; i=ardb@kernel.org;
+ h=from:subject; bh=Cu4l63ir4SJCNe0bGDU+eoKP2eTLvYAJWbKL+6g2QPs=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIZv1pA7zh4JAgykcRSGXNrBfrhTeseeqtsiveM2fCgvdn
+ k2YnjOjo5SFQYyLQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAEzkvBfDP4MZfSsjklx1GGwn
+ c34qns8kPaPlKtez6KLIN7y3vrEn5DEyXEzxiPp1SCvqjVWnz/NL/YzFdjl3dp1RUnp8fJrc7TQ rdgA=
+X-Mailer: git-send-email 2.56.1.831.g720f3f5937-goog
+Message-ID: <20261124172811.2580784-7-ardb+git@google.com>
+Subject: [PATCH v2 0/5] efi: Fix pstore runtime en/disable
+From: Ard Biesheuvel <ardb+git@google.com>
+To: linux-efi@vger.kernel.org
+Cc: Ard Biesheuvel <ardb@kernel.org>, Kees Cook <kees@kernel.org>, 
+	"Guilherme G. Piccoli" <gpiccoli@igalia.com>, 
+	"=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?=" <u.kleine-koenig@baylibre.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
->>>>>> In a confidential guest (SEV-SNP, TDX) the EFI stub builds the unaccepted
->>>>>> memory bitmap before the command line is parsed. memmap= and mem= edit
->>>>>> e820_table only afterwards.
->>>>> memmap= and mem= are debugging tools, right?
->>>> I wish they were 🙂
->>>> But AFAIU they are used to carve out "pmem" or PFN-mapped memory.
->>> I've used them that way for development, but production pmem systems
->>> always had persistent memory in their BIOS-provided memory maps.
->>>
->>> How are folks depending on these in production in confidential guests?
->> They shouldn't but you can't guarantee that.
->>
->> But I don't mind letting them crash if they do :)
->>
-> I'm fine with either approach (i.e. disallowing it or doing nothing
-> at all), as long as we don't pretend that this is something that is
-> expected to work.
+From: Ard Biesheuvel <ardb@kernel.org>
 
-Yes, it is confusing for a user who expects it to work.  I hit this
-myself and spent time finding the cause: a memmap= hole consistently
-crashes a confidential guest (SEV-SNP) early in boot.
+Fix buggy use of /sys/mode/efi-pstore/params to control the module at
+runtime
 
-I tried to fix it [1], but a bitmap unit cannot be half accepted when the
-hole is not 2 MiB aligned.  Also, a TDX guest does accept such holes.
+Changes since v1:
+- Address feedback from Uwe and Sashiko
+  * Two fixes for pre-existing issues
+- Split the conversion patch into two
 
-So we are left with the following options:
+Cc: Kees Cook <kees@kernel.org>
+Cc: "Guilherme G. Piccoli" <gpiccoli@igalia.com>
+Cc: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@baylibre.com>
+Link: https://lore.kernel.org/all/20260906235838.2928815-1-gpiccoli@igalia.=
+com/
 
-  - disallow the memmap= options with a clear warning, as this series
-    does,
-  - add similar handling for TDX, so that holes are not accepted there
-    either, as done for SEV-SNP in [1]; memmap= holes that are not
-    2 MiB aligned would still be unhandled, or
-  - only print a warning and leave the options applied, in which case
-    memmap= holes still crash SEV-SNP guests.
+Ard Biesheuvel (5):
+  efi: pstore: Make pstore_disable parameter read-only again
+  efi: efivars: Don't dereference NULL __efivars in efivar_lock()
+  efi: Statically initialize efivar_ops_nh
+  efi: Tie 'efivars' pdev lifecycle to generic efivars
+  efi: pstore: Convert into a platform driver for 'efivars'
 
-Which of these do you prefer, or is there a better way to handle it?
+ drivers/firmware/efi/efi-pstore.c | 120 +++++++++++++-------
+ drivers/firmware/efi/efi.c        |  71 +++++++++++-
+ drivers/firmware/efi/vars.c       |   4 +-
+ include/linux/efi.h               |  11 ++
+ 4 files changed, 158 insertions(+), 48 deletions(-)
 
-[1] 
-https://lore.kernel.org/all/20261113105554.199912-1-pankaj.gupta@amd.com/
-
-Thanks,
-
-Pankaj
+--=20
+2.56.1.831.g720f3f5937-goog
 
