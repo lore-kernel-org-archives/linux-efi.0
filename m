@@ -1,57 +1,73 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795518911;
-	b=qhVW7hkKCLL0dFEiSD/ORl5U06pkVDvN7f8+gRdKJH/rL1kq8C+LmmY5pORGU8okFTBV
-	 MDZwytL0Ktz4YgAJXgMBJvxF/qiCp+OsPKE/CxHxnfsiMXiCYZKlJAKrOm2Xq2+MU1B0f
-	 4B3zM+4VJB1so+bez8FoGRGA/Q4aPtbMOhwsXHrx/W31btgPRx2/fR/9m7m25iY3Nzy0I
-	 YUnfIgO/9uoEg91KsY6ICTFANCiC/re37m4PKYxKKsK+LrEIlF58eeFB7/cxEDvMUAzSX
-	 TNydawCMNnHYnQHtYxioquHRR0ku1bPPDyVDta2jXUvakY8aM46zb6fJz3gC8MC6Bbg==
+	t=1795520323;
+	b=Bj76im7prmzBtWbCzU6p//iGqF/VhioyDSmYQG3JbFSFeTIpBKFZniT6u2niirS/F8Zl
+	 DWwLU4GL3ogQDnYTf9sko/IgQ2twxvJtccanOGA50dh43WEbN4YsREbjYQ0sRVXMQMvhs
+	 x6nsPJqfQp2XzPRmeGhi5Ts14ZKMD5JMi8QQnF/xmq5s4eCvwft2G/cLx2VIi2JfiYscD
+	 ERGy32pQNLqx9eGGDNvTrF40LETJNeL+7Fti1So+pY9ySaY94PCi99Gy15MxeqE03zYNy
+	 4Za3wDqfbjhB/kXeCK7M835j5/+aI1HMaFBHucoRqbWchMXtV2XsklLBXhPnn1TWmyQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795518911;
-	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
-	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
-	bh=8i/f5Mw0BzF5sopOUkbpDZCAF4TkByS4VU50Gtq+ByQ=;
-	b=h9kmwXgbEMbsNUtCLM6YBTbedAfHzl3ciJZh09JO908Yzo4k2qCOnPY9pKALTYOsaqb+
-	 KgpQkJSkm1To9C1BpaIIzZnn7C44d24Q7WzxKw5+kTjrzRiTDYphtnhVQHi/+VoA/eN9D
-	 QgrGCcW1MhAq43J/uivOF/h0MEK9K17ZD7UvAN/2Z6BiFYgQx15p8blOtPVckwKTMgAqa
-	 IUHD7xx3OfrlMqa6j1+wKerz4YKyOWZ9Fu7/byPfN2hf1skhGgP+ghngtn2gFBRb3G7sU
-	 gcyB+RIuq7iWM0cFMSOPEv/koLsp9HjiX6Z6PB/nHebdIeGpZcGIJKWVAgMKh7SHQsQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795520323;
+	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
+	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type:Content-Transfer-Encoding;
+	bh=ABQKVhyl294KKPWOJB2LpLQRmzI66sryw48z0Ejt/g4=;
+	b=k9jHMEMXtLPH/Dk3e/pUYOrz1bUErTCnaQBzvXfDQ7TU8IB+tTW9++1QdFOIwCSCgNAE
+	 v8z8WEwKlM+WzRQf6nIbCqfs33ZsJ/KtvfJhp1zeR7OcphUkl8wZ3dvqrru8Kw8xdGO4O
+	 9jz06a47rbyeeA2NewxRwWHvI8ZOw62WhBqO1eu/BpC5YIv6m1A1071wCXFUpSFCWKKAG
+	 hLk/wMbuZbqSjIgffYelednRbTQdkKuvua+Ie3BvSERfi7FyxytaMPaPqogdgAId0aXh0
+	 7ffCWzG5eTpAaKnme6X1kXzqc4zsbwlU/W3QgB6yQMGTL3+AiCu26JDvsJa52UDnlNQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Dq3o6ci9;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ddfCxFmp;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B3E8606A32C
-	for <linux-efi@vger.kernel.org>; Tue, 24 Nov 2026 11:15:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D99F606A327
+	for <linux-efi@vger.kernel.org>; Tue, 24 Nov 2026 11:38:42 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Dq3o6ci9
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EC17B1F000C0;
-	Tue, 24 Nov 2026 11:15:10 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ddfCxFmp
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EC8D61F000F0;
+	Tue, 24 Nov 2026 11:38:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795518911;
-	bh=8i/f5Mw0BzF5sopOUkbpDZCAF4TkByS4VU50Gtq+ByQ=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=Dq3o6ci9svexUCE/Ij1ourK6jUqxZOeHWdUl2vpAyqQAAxv82hdw59TR5en5Y3nlU
-	 uMUzfa2IClGQO3Sui6PCf1cSWun+omcYF8dY0ggbvDcuwpwKZeIrujM2Tba8F6h1Kb
-	 PuA6P/e47zqCPPtRoB5jK6yRf7jgTB5czWb7DNLzO+ofQsVv2wSpVg6yz3yVbL4yuu
-	 cpbGRDULPVMORskasFFR1bCeTJeuWZrmeWJzviQtxGPHuDbOOO3yRFtEbx+88B2bAu
-	 Zd2GNUgtfSueQ59hb0+TlI+F3rNMW0s2pbZEHA9HlkIRw9i7IJA72UidXY9l3V30qP
-	 mAfAVeGWiv8mg==
-Message-ID: <sashiko-outbox-231026@kernel.org>
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v2] x86: Always permit the kernel to be placed at any
- physical address
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Ard Biesheuvel" <ardb+git@google.com>, x86@kernel.org
-Cc: linux-efi@vger.kernel.org, "Ard Biesheuvel" <ardb@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>
-In-Reply-To: <20261124110522.1371247-2-ardb+git@google.com>
-References: <20261124110522.1371247-2-ardb+git@google.com>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Tue, 24 Nov 2026 11:15:10 +0000
+	s=k20260515; t=1795520322;
+	bh=ABQKVhyl294KKPWOJB2LpLQRmzI66sryw48z0Ejt/g4=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=ddfCxFmp275OO+8l8zunn6/sK/8EY7z2z7Gc0dTRsc+vdcx4VarO7PtCK9mMeRXN5
+	 UF/U8X+OmCCEC/ALGlVsVqeFp0KEQyRndqW6MXjvx8CiMLfL4njf0PDD74nSP7O1Qd
+	 fw37y0TEBmdtwtg0MVyaUEJguFFiuFwcrFvZ5cHLm3yLjg54M6D2Icen/aNb25CyYC
+	 gilVooernoEDyQzTWbEZsh8P0caU1QkuKKFNoYR9E+ggMaLfqFrj7BWp7w+KVefLxw
+	 +N43FxrSoozCvHTGojkZHtCNh9AzsN+CkhDCKYJcRfC0s07j8I9ZH3XGh9dZsbHBz/
+	 ZAyJZQeyfpblg==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 4E17D198003A;
+	Tue, 24 Nov 2026 06:38:40 -0500 (EST)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Tue, 24 Nov 2026 06:38:40 -0500
+X-ME-Sender: <xms:PncFawP3pPb6bnyXZxUv12whf9yVOOGzh9MUlw7Q8vG1MXusX3rP_g>
+    <xme:PncFaxyyfGZ_jbYSKsyLeBOwgfPvc9-mRXmQiKA7rhgMJsjYXhlBZ6iM-RQojfNwa
+    xD3BjpVsjSwQ6PfoAZsYpWwiHf89h6LOy6mG3whQl9F1Elxw4rAEA>
+X-ME-Proxy-Cause: dmFkZTEG+JqeNQanrVPdZRYIGPClXPZdjYqmnC18pn2a0pJiffnGPLt3F2ZHBJaESEW0o9
+    g0H7LZ1xcqzY/LTc4mXt5AcX7SyqFeBKltNpWt71RxoDKcxb+UoPc+yrATx87d3BigrtnD
+    x+Ab3bcVr0mMnb1eytpyJfDfcxAiksW+fvB62xPxrLFK8szALdnHBvLdBGYyRtOC+rI2Lw
+    MiAS0ewoDA3RMjNN9LUd4R5FZ801GDEDin34Atelmpa3jhvNVa8LMGe5L/qmp5CchEZqMe
+    q1Gpjf5vLshyPEPKrmtnCyIdFybZIMZRzpIlAcmTkx9NJZAzXAFgEzStDZ4eWRGIRkrCeV
+    1wEHwL2LcnSGxVM3XUpyZhvz2a3dcvWT4X4kRrOo+tWDX23D7lUOMVUnQxoSG4JAcczMCk
+    FnHR1oBFdS1ONCdWRwwcYMG/v0D7FlDI8nwqPXZB5Dbjj+EZP9JqvkGRzWTl6+KbxchJTL
+    sKye7AEEZjhWh5iOz8uP+6N2DAgoP2uY87JldC5wT9OVx8MQfX8iEi3m1XcUMbtHXERqLb
+    P9uHAloxbyQXOAWjMU0xHhx3omPdItmoEqd78cYocMO5KwplJKGH9VbxRy06/J1nTO62Ku
+    MJnsryoh9sNFNG6hGmMJHVBN8A7wQMMTwUMWnMTFZovpoZwSusCPzt6iEY4w
+X-ME-Proxy: <xmx:QHcFa5yBgLXL-f3xC-CoKbnuCA5mbJTxq2IkG3J_mquV6Q-doTTeAA>
+    <xmx:QHcFa4VSYg75ZJ45AxhxU7sYrFBWzbQRz83Je9Jab_rMqPzgXZhOlA>
+    <xmx:QHcFa5heKXKNkSFEQnkq636Ffx8U0qj8FNA-OdD1Y0YSazfEfmEtLg>
+    <xmx:QHcFa4D0oj-qXX_Ggh-uvxmmHSJ-4D42_UkL8wsvmWcFEc9tIlQOdg>
+    <xmx:QHcFa_uoSw6afJO-ZWTprK_em1A-ReOWigUK2QAymHiBWiM9LJaHgbSN>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 782FDF80093; Tue, 24 Nov 2026 06:38:38 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -60,87 +76,49 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
+MIME-Version: 1.0
+Date: Tue, 24 Nov 2026 12:38:18 +0100
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "Sebastien WENSKE" <sebastien@wenske.fr>, linux-efi@vger.kernel.org
+Cc: swenske@veepee.com, "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "James Le Cuirot" <chewi@gentoo.org>, linux-kernel@vger.kernel.org,
+ stable@vger.kernel.org
+Message-Id: <37c38d1e-03cc-44ae-b617-d45fbf80acc5@app.fastmail.com>
+In-Reply-To: <20261012133712.618913-1-sebastien@wenske.fr>
+References: <20261012133712.618913-1-sebastien@wenske.fr>
+Subject: Re: [PATCH] efi/libstub: Allocate the INITRD table in ACPI reclaim memory
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-Thank you for your contribution! Sashiko AI review found 1 potential
-issue to consider:
-- [Medium] x86/Kconfig: config RELOCATABLE uses def_bool y instead of
-  bool
---
+Hello Sebastien,
 
-commit c734084ffe5143387f2c8e1cef5938ed63060e83
-Author: Ard Biesheuvel <ardb@kernel.org>
+On Mon, 12 Oct 2026, at 15:37, Sebastien WENSKE wrote:
+> Commit 6e62d1c6f2c7 ("efi: Wipe INITRD config table from memory after
+> consumption") makes the kernel clear the base and size of the
+> LINUX_EFI_INITRD_MEDIA_GUID configuration table once it has read them,
+> so that a kexec'd kernel no longer picks up a stale initrd.
+>
+> However, the stub allocates that table from EFI_LOADER_DATA, which the
+> kernel that consumes it treats as ordinary RAM, while the configuration
+> table entry pointing at it survives kexec. A kexec'd kernel therefore
+> finds the same address in the configuration table, and clears 16 bytes
+> there again, in memory that may by then hold anything - including the
+> kexec'd kernel's own image, which kexec_file_load() is free to place
+> there.
+>
+...
+>
+> Allocate the table from EFI_ACPI_RECLAIM_MEMORY instead, as the stub
+> already does for the RNG seed table so that it survives a kexec reboot.
+> The table then stays where it is across kexec, and the wipe always
+> lands on the table itself.
+>
 
-x86: Always permit the kernel to be placed at any physical address
+There was a report recently about EFI_ACPI_RECLAIM_MEMORY being
+problematic in combination with hibernate, as those regions tends
+to move around.
 
-This commit removes the CONFIG_RELOCATABLE gating around physical load
-address handling in the x86 decompressor and boot header, and restricts
-CONFIG_RELOCATABLE to 32-bit kernels and KASLR builds.
+Can you try this fix instead please?
 
-> diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-> index 15fd9ec5ecacb..5af340f77b5c6 100644
-> --- a/arch/x86/Kconfig
-> +++ b/arch/x86/Kconfig
+https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git/commit/?h=urgent&id=6863183e8b65e833f8140e20d526282a725e040e
 
-[ ... ]
-
-> @@ -1994,66 +1994,37 @@ config ARCH_HAS_GENERIC_CRASHKERNEL_RESERVATION
->  	  Don't change this unless you know what you are doing.
-> +	  Legacy i386 kdump use cases based on vmlinux rather than bzImage
-> +	  might need to override this, otherwise leave at its default.
-> =20
->  config RELOCATABLE
-> -	bool "Build a relocatable kernel"
-> -	default y
-> +	def_bool y
->  	help
-> -	  This builds a kernel image that retains relocation information
-> -	  so it can be loaded someplace besides the default 1MB.
-> -	  The relocations tend to make the kernel binary about 10% larger,
-> -	  but are discarded at runtime.
-> +	  This builds a kernel image that retains relocation information,
-> +	  allowing its placement in the virtual address space to deviate from
-> +	  the build time default. The relocations are applied at boot and then
-> +	  discarded, so their runtime memory footprint is zero.
-> =20
-> -	  One use is for the kexec on panic case where the recovery kernel
-> -	  must live at a different physical address than the primary
-> -	  kernel.
-> +	  On i386, the virtual displacement relative to PAGE_OFFSET must equal
-> +	  the physical displacement relative to LOAD_OFFSET, and so this option
-> +	  must always be set.
-> =20
-> -	  Note: If CONFIG_RELOCATABLE=3Dy, then the kernel runs from the address
-> -	  it has been loaded at and the compile time physical address
-> -	  (CONFIG_PHYSICAL_START) is used as the minimum location.
-> +	  On x86_64, the virtual displacement is independent from the physical
-> +	  placement, and the relocations are only used when randomizing the
-> +	  virtual address space (KASLR).
-> =20
->  config RANDOMIZE_BASE
->  	bool "Randomize the address of the kernel image (KASLR)"
-> -	depends on RELOCATABLE
-> +	select RELOCATABLE
->  	default y
->  	help
->  	  In support of Kernel Address Space Layout Randomization (KASLR),
-> @@ -2089,30 +2060,19 @@ config RANDOMIZE_BASE
->  # Relocation on x86 needs some additional build support
->  config X86_NEED_RELOCS
->  	def_bool y
-> -	depends on RANDOMIZE_BASE || (X86_32 && RELOCATABLE)
-> +	depends on RELOCATABLE
->  	select ARCH_VMLINUX_NEEDS_RELOCS
-
-[Severity: Medium]
-Should config RELOCATABLE be declared as bool rather than def_bool y?
-
-With def_bool y, CONFIG_RELOCATABLE is unconditionally enabled even when
-neither X86_32 nor RANDOMIZE_BASE selects it. Because X86_NEED_RELOCS now
-depends only on RELOCATABLE, an x86_64 build with CONFIG_RANDOMIZE_BASE=3Dn
-has CONFIG_RELOCATABLE=3Dy and CONFIG_X86_NEED_RELOCS=3Dy forced on, still
-emitting and compressing vmlinux.relocs into the image and running
-handle_relocations() at boot.
-
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261124110522.1371=
-247-2-ardb+git@google.com?part=3D1
