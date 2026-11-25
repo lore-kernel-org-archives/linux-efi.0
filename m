@@ -1,57 +1,57 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=178.154.239.207
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=93.77.172.4
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795626231;
-	b=f0wJ+ot+GoSMa5FrlsGn5uW5VBqHn+XFHcRk6fF4WAmcHF7WSjbbu+kfXaPnmmKx/nto
-	 WGvdUPpaqSCqdBjtwnqF9KVg4Wk8ZQWLcVHnf3XJWqOWWPplcc6DpsDPfOZSoiTVD1B0h
-	 x1Dzg55YuqHrTVxwjV/somRJ7fPwB6M7t4B01UZyD5NN1bmHFnGml2mb3qNK4iJhynZAU
-	 0mfkQhckYeN8Gz5gkLLHc9DmizS1ycLD0Bg+xT9KHGnhTu6+yBVYWFvCcuwTWyghVa5y6
-	 q8gVQnlSHI5AKJRMFS7qyZRNDumToKSt+NYE0K6P0qRS39zrWMJGX6V++rkQ5R2EHbQ==
+	t=1795626232;
+	b=12j3GWgeFEVAA6wiSFToUuO4XobTyEju+BgqcENzWfSO4zRJPGdigRA+Ry6Nc3vZKdom
+	 g3/NjYgc67mj1BZmorFGPdwIDpDayxJMtvOZyrorDfYWWheWSipRy9qt9sMcQGx1ljYoW
+	 E3Q9dNEuxdvHrv10WAaRgUM/HdWKyyQ7rkJf/Ftbyq/VeB+mSSsLitnQw8MJwGm94jhPw
+	 4b1qKBG3ZteZu+Ito+701RReuq3hvQblsaiNYWJpNxfUlblLE4atoy401eO4yRHdhiFYw
+	 gzAen42oDLZGhbD8UMq2hMgGZXTqR1xAuHxt8Maspt99AhrqRsg/F3Kk6R832OnF+tQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795626231;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795626232;
 	h=DMARC-Filter:Received:Received:X-Yandex-Fwd:DKIM-Signature:From:Date:
 	 Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:
 	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer;
-	bh=4GN2NjoUctxblUXPoG785/QR7v7He6l/la/VsAFii1g=;
-	b=3s0p9/Cmpd3WQaCbNYy8btgSKM6GFTMvIzJCvpwLr6a+2nJFhw5yPxAQkOe7VtVE9cf5
-	 Q4OHBh9igzpdqyB1sk4Tk7d0Cs2uJzx0/uf0Ooyq/0fFzD4XhZgK9lQZqdMRSl2wMb9Z4
-	 s5xQs0bCmiL/LBaz/A0nVsNxHy7/79SgaApqbg0VA0TF8NoVByaYcfGO50ZB8GOczbi/n
-	 N5ujI+HrMO31sVhllB9UFKakMubrOSySQDHTna/WjB9Xo059cAQ1Q15qmmJU2i77zYEPP
-	 Cv7jxVs3i0HB5oq8X2gqU9QxH8kt+mz/2Qc/K1vM/Bj/GA5ru8HbDTiJ/HNuvzJAEXw==
+	bh=D6e784RAfl1zWvIKf8VvIP9R0Xn4wVs0JRUhlpHhbJQ=;
+	b=Rh+n5F3Gmn4QhwPCOhQHGLoEMuVdIZ4Rc2X2mfLgVayPslGMk4YJ19sNiHlGqvREA652
+	 Td0kW1vys5F92pbXR+8kYATpwXC9bUw0SuOufNNl/T5uOugIQRKTP8GROISJrfTrL+icF
+	 lT4rcqKgkBdLQvHh+JWPijuZXQG8J8lF8RzYtSTPAvh7puaX4R6qi1v7mU8WaDK2TYeNz
+	 qODPIbyQXJ5+8DbhxsWdSdcjJCswyHnxh6lbI2JO+2ODwW5Ri2fV5bnwpsITL0iIGhy0E
+	 P/iGFK7EdpG/2l1Mh2JBxFVolB/BnHCY/gSKe91LkUobnox1hy51raatF1KwDFfGUUw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=yandex-team.ru;
 	spf=pass smtp.mailfrom=yandex-team.ru;
-	dkim=pass header.d=yandex-team.ru header.i=@yandex-team.ru header.a=rsa-sha256 header.s=default header.b="tr+/S78R";
-	arc=none smtp.remote-ip=178.154.239.207
-Received: from forwardcorp2d.mail.yandex.net (forwardcorp2d.mail.yandex.net [178.154.239.207])
+	dkim=pass header.d=yandex-team.ru header.i=@yandex-team.ru header.a=rsa-sha256 header.s=default header.b=ifVmvqKT;
+	arc=none smtp.remote-ip=93.77.172.4
+Received: from forwardcorp1e.mail.yandex.net (forwardcorp1e.mail.yandex.net [93.77.172.4])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0EBE606A323;
-	Wed, 25 Nov 2026 17:03:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C0EBE606A323
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7CD5606A33D;
+	Wed, 25 Nov 2026 17:03:51 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B7CD5606A33D
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yandex-team.ru
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=yandex-team.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=yandex-team.ru header.i=@yandex-team.ru header.a=rsa-sha256 header.s=default header.b=tr+/S78R
+	dkim=pass (1024-bit key) header.d=yandex-team.ru header.i=@yandex-team.ru header.a=rsa-sha256 header.s=default header.b=ifVmvqKT
 Received: from mail-nwsmtp-smtp-corp-main-80 (mail-nwsmtp-smtp-corp-main-80.yp-c.yandex.net)
-	by forwardcorp2d.mail.yandex.net (postfix) with ESMTPS id 7884F80CDF;
-	Wed, 25 Nov 2026 20:03:42 +0300 (MSK)
+	by forwardcorp1e.mail.yandex.net (postfix) with ESMTPS id A80E8100336;
+	Wed, 25 Nov 2026 20:03:43 +0300 (MSK)
 Received: from [127.0.1.1]
-	by mail-nwsmtp-smtp-corp-main-80 with ESMTPSA id a3lrP22Zo8c0-dbNcXmfJ;
-	Wed, 25 Nov 2026 20:03:41 +0300
+	by mail-nwsmtp-smtp-corp-main-80 with ESMTPSA id a3lrP22Zo8c0-sRAf1WTV;
+	Wed, 25 Nov 2026 20:03:42 +0300
 X-Yandex-Fwd: 1
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex-team.ru;
-	s=default; t=1795626221;
-	bh=4GN2NjoUctxblUXPoG785/QR7v7He6l/la/VsAFii1g=;
+	s=default; t=1795626222;
+	bh=D6e784RAfl1zWvIKf8VvIP9R0Xn4wVs0JRUhlpHhbJQ=;
 	h=Cc:In-Reply-To:Message-Id:To:Date:References:From:Subject;
-	b=tr+/S78R89GjelvqFKXJtvE39HfzS258I7qbcE+SIz9fkWHuD6ChISJm4o+nh/it1
-	 7fIP7xpIoaVM1U7VNt3l/UsvhSFH+VnjnMYnkKY0mo0FWLf3QXXPSZ/N9LcJYkwDp1
-	 Wz2bkhoF/3mRjabxVywEThlQ0M7/2jsaqyRX/5vM=
+	b=ifVmvqKT+7d8cLgAMMnVyYRRibQhivvzVTfOsbHcwGY6thKnU6SohPfAebPCA5IEc
+	 7PK52KMI7IMwADqJ25ILkCbacC70sVC0GIW8AVFA0sPa65dm8lYp9FjEZZjdDy2bTR
+	 PIQplQ8qdAO1AkGxZBGrZbFrYhZZ500fP9Tz8cl4=
 Authentication-Results: mail-nwsmtp-smtp-corp-main-80; dkim=pass header.i=@yandex-team.ru
 From: Mikhail Rudenko <xyzzy@yandex-team.ru>
-Date: Wed, 25 Nov 2026 20:03:26 +0300
-Subject: [PATCH 2/3] video: acquire firmware framebuffer apertures before
- mapping
+Date: Wed, 25 Nov 2026 20:03:27 +0300
+Subject: [PATCH 3/3] video: aperture: hand off EFI earlycon on aperture
+ ackquisition
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -63,7 +63,7 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20261125-efi-earlycon-v1-2-49ac2c0a430b@yandex-team.ru>
+Message-Id: <20261125-efi-earlycon-v1-3-49ac2c0a430b@yandex-team.ru>
 References: <20261125-efi-earlycon-v1-0-49ac2c0a430b@yandex-team.ru>
 In-Reply-To: <20261125-efi-earlycon-v1-0-49ac2c0a430b@yandex-team.ru>
 To: Ard Biesheuvel <ardb@kernel.org>, 
@@ -81,139 +81,167 @@ Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-doc@vger.kernel.org, Mikhail Rudenko <xyzzy@yandex-team.ru>
 X-Mailer: b4 0.15.2
 
-efifb and simplefb acquire their framebuffer apertures after mapping the
-framebuffer. Move acquisition ahead of mapping, so each driver claims
-the range before accessing it.
+With keep_bootcon, EFI earlycon can keep writing to the firmware
+framebuffer while a graphics driver takes over. Add a handoff option
+that unregisters it after framebuffer/drm device successfully acquires
+its aperture or when a conflicting-device removal helper is
+called. The option opt-in, default behavior is preserved.
 
-Also check the framebuffer size against the memory resource before
-simpledrm acquires the aperture.
+When handoff option is effective, unregister the EFI earlycon when a
+graphics device driver ackquires aperture (unless it was unregistered
+earlier).
 
 Signed-off-by: Mikhail Rudenko <xyzzy@yandex-team.ru>
 ---
- drivers/gpu/drm/sysfb/simpledrm.c | 28 ++++++++++++++--------------
- drivers/video/fbdev/efifb.c       | 12 +++++++-----
- drivers/video/fbdev/simplefb.c    | 11 ++++++-----
- 3 files changed, 27 insertions(+), 24 deletions(-)
+ Documentation/admin-guide/kernel-parameters.txt |  5 +++-
+ drivers/firmware/efi/earlycon.c                 | 37 ++++++++++++++++++++++++-
+ drivers/video/aperture.c                        | 13 ++++++++-
+ include/linux/efi.h                             |  7 +++++
+ 4 files changed, 59 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/gpu/drm/sysfb/simpledrm.c b/drivers/gpu/drm/sysfb/simpledrm.c
-index 21ddf4502ecc8..af4ce286fd6c8 100644
---- a/drivers/gpu/drm/sysfb/simpledrm.c
-+++ b/drivers/gpu/drm/sysfb/simpledrm.c
-@@ -747,6 +747,13 @@ static struct simpledrm_device *simpledrm_device_create(struct drm_driver *drv,
- 	if (mem) {
- 		void *screen_base;
+diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+index 0b3c140babd94..829bb01cc10d0 100644
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -1532,7 +1532,10 @@ Kernel parameters
+ 			memory mapped framebuffer (if available). On cache
+ 			coherent non-x86 systems that use system memory for
+ 			the framebuffer, pass the 'ram' option so that it is
+-			mapped with the correct attributes.
++			mapped with the correct attributes. Pass 'handoff' with
++			keep_bootcon to retain EFI earlycon until a graphics
++			driver acquires a firmware framebuffer aperture. Options
++			may be combined, e.g. earlycon=efifb,ram,handoff.
  
-+		if (size > resource_size(mem)) {
-+			drm_err(dev,
-+				"framebuffer size of %llu exceeds memory range %pr\n",
-+				size, mem);
-+			return ERR_PTR(-EINVAL);
-+		}
+ 		linflex,<addr>
+ 			Use early console provided by Freescale LINFlexD UART
+diff --git a/drivers/firmware/efi/earlycon.c b/drivers/firmware/efi/earlycon.c
+index 3a6eaf5481f40..9d65777d225e1 100644
+--- a/drivers/firmware/efi/earlycon.c
++++ b/drivers/firmware/efi/earlycon.c
+@@ -21,8 +21,20 @@ static u32 efi_x_array[1024];
+ static u32 efi_x, efi_y;
+ static u64 fb_base;
+ static bool fb_wb;
++static bool fb_handoff;
+ static void *efi_fb;
+ 
++void efi_earlycon_unregister(void)
++{
++	struct console *con = READ_ONCE(earlycon_console);
 +
- 		ret = devm_aperture_acquire_for_platform_device(pdev, mem->start,
- 								resource_size(mem));
- 		if (ret) {
-@@ -756,13 +763,6 @@ static struct simpledrm_device *simpledrm_device_create(struct drm_driver *drv,
- 
- 		drm_dbg(dev, "using system memory framebuffer at %pr\n", mem);
- 
--		if (size > resource_size(mem)) {
--			drm_err(dev,
--				"framebuffer size of %llu exceeds memory range %pr\n",
--				size, mem);
--			return ERR_PTR(-EINVAL);
--		}
--
- 		screen_base = devm_memremap(dev->dev, mem->start, resource_size(mem), MEMREMAP_WC);
- 		if (IS_ERR(screen_base))
- 			return screen_base;
-@@ -775,6 +775,13 @@ static struct simpledrm_device *simpledrm_device_create(struct drm_driver *drv,
- 		if (!res)
- 			return ERR_PTR(-EINVAL);
- 
-+		if (size > resource_size(res)) {
-+			drm_err(dev,
-+				"framebuffer size of %llu exceeds memory range %pr\n",
-+				size, res);
-+			return ERR_PTR(-EINVAL);
-+		}
++	if (!con || !fb_handoff)
++		return;
 +
- 		ret = devm_aperture_acquire_for_platform_device(pdev, res->start,
- 								resource_size(res));
- 		if (ret) {
-@@ -796,13 +803,6 @@ static struct simpledrm_device *simpledrm_device_create(struct drm_driver *drv,
- 			mem = res;
- 		}
- 
--		if (size > resource_size(mem)) {
--			drm_err(dev,
--				"framebuffer size of %llu exceeds memory range %pr\n",
--				size, mem);
--			return ERR_PTR(-EINVAL);
--		}
--
- 		screen_base = devm_ioremap_wc(&pdev->dev, mem->start, resource_size(mem));
- 		if (!screen_base)
- 			return ERR_PTR(-ENOMEM);
-diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-index 6361861b3ccf3..28295829932b1 100644
---- a/drivers/video/fbdev/efifb.c
-+++ b/drivers/video/fbdev/efifb.c
-@@ -478,6 +478,13 @@ static int efifb_probe(struct platform_device *dev)
- 			mem_flags &= md.attribute;
- 		}
- 	}
++	if (console_is_registered(con))
++		unregister_console(con);
++}
 +
-+	err = devm_aperture_acquire_for_platform_device(dev, par->base, par->size);
-+	if (err) {
-+		pr_err("efifb: cannot acquire aperture\n");
-+		goto err_release_fb;
+ /*
+  * EFI earlycon needs to use early_memremap() to map the framebuffer.
+  * But early_memremap() is not usable for 'earlycon=efifb keep_bootcon',
+@@ -219,6 +231,29 @@ efi_earlycon_write(struct console *con, const char *str, unsigned int num)
+ 
+ static bool __initdata fb_probed;
+ 
++static void __init efi_earlycon_parse_options(const char *opt)
++{
++	/* Reprobe has no options; retain those parsed on the first attempt. */
++	if (!opt)
++		return;
++
++	fb_wb = false;
++	fb_handoff = false;
++
++	while (*opt) {
++		size_t len = strcspn(opt, ",");
++
++		if (len == 3 && !strncmp(opt, "ram", len))
++			fb_wb = true;
++		else if (len == 7 && !strncmp(opt, "handoff", len))
++			fb_handoff = true;
++
++		opt += len;
++		if (*opt)
++			opt++;
 +	}
++}
 +
- 	if (mem_flags & EFI_MEMORY_WC)
- 		info->screen_base = ioremap_wc(efifb_fix.smem_start,
- 					       efifb_fix.smem_len);
-@@ -569,11 +576,6 @@ static int efifb_probe(struct platform_device *dev)
- 		goto err_unmap;
- 	}
+ void __init efi_earlycon_reprobe(void)
+ {
+ 	if (fb_probed)
+@@ -232,7 +267,7 @@ static int __init efi_earlycon_setup(struct earlycon_device *device,
+ 	u16 xres, yres;
+ 	u32 i;
  
--	err = devm_aperture_acquire_for_platform_device(dev, par->base, par->size);
--	if (err) {
--		pr_err("efifb: cannot acquire aperture\n");
--		goto err_fb_dealloc_cmap;
--	}
- 	err = devm_register_framebuffer(&dev->dev, info);
- 	if (err < 0) {
- 		pr_err("efifb: cannot register framebuffer\n");
-diff --git a/drivers/video/fbdev/simplefb.c b/drivers/video/fbdev/simplefb.c
-index 60e5dcec201ff..f682ead384bf6 100644
---- a/drivers/video/fbdev/simplefb.c
-+++ b/drivers/video/fbdev/simplefb.c
-@@ -599,6 +599,12 @@ static int simplefb_probe(struct platform_device *pdev)
- 	par->size = info->fix.smem_len;
+-	fb_wb = opt && !strcmp(opt, "ram");
++	efi_earlycon_parse_options(opt);
  
- 	info->fbops = &simplefb_ops;
-+	ret = devm_aperture_acquire_for_platform_device(pdev, par->base, par->size);
-+	if (ret) {
-+		dev_err(&pdev->dev, "Unable to acquire aperture: %d\n", ret);
-+		goto error_fb_release;
-+	}
+ 	if (si->orig_video_isVGA != VIDEO_TYPE_EFI) {
+ 		fb_probed = true;
+diff --git a/drivers/video/aperture.c b/drivers/video/aperture.c
+index 2b5a1e666e9b2..249b037562103 100644
+--- a/drivers/video/aperture.c
++++ b/drivers/video/aperture.c
+@@ -2,6 +2,7 @@
+ 
+ #include <linux/aperture.h>
+ #include <linux/device.h>
++#include <linux/efi.h>
+ #include <linux/list.h>
+ #include <linux/mutex.h>
+ #include <linux/pci.h>
+@@ -240,7 +241,13 @@ int devm_aperture_acquire_for_platform_device(struct platform_device *pdev,
+ 					      resource_size_t base,
+ 					      resource_size_t size)
+ {
+-	return devm_aperture_acquire(&pdev->dev, base, size, aperture_detach_platform_device);
++	int ret;
 +
- 	info->screen_base = ioremap_wc(info->fix.smem_start,
- 				       info->fix.smem_len);
- 	if (!info->screen_base) {
-@@ -632,11 +638,6 @@ static int simplefb_probe(struct platform_device *pdev)
- 	if (mem != res)
- 		par->mem = mem; /* release in clean-up handler */
++	ret = devm_aperture_acquire(&pdev->dev, base, size, aperture_detach_platform_device);
++	if (!ret)
++		efi_earlycon_unregister();
++
++	return ret;
+ }
+ EXPORT_SYMBOL(devm_aperture_acquire_for_platform_device);
  
--	ret = devm_aperture_acquire_for_platform_device(pdev, par->base, par->size);
--	if (ret) {
--		dev_err(&pdev->dev, "Unable to acquire aperture: %d\n", ret);
--		goto error_genpds;
--	}
- 	ret = register_framebuffer(info);
- 	if (ret < 0) {
- 		dev_err(&pdev->dev, "Unable to register simplefb: %d\n", ret);
+@@ -284,6 +291,8 @@ static void aperture_detach_devices(resource_size_t base, resource_size_t size)
+ int aperture_remove_conflicting_devices(resource_size_t base, resource_size_t size,
+ 					const char *name)
+ {
++	efi_earlycon_unregister();
++
+ 	/*
+ 	 * If a driver asked to unregister a platform device registered by
+ 	 * sysfb, then can be assumed that this is a driver for a display
+@@ -349,6 +358,8 @@ int aperture_remove_conflicting_pci_devices(struct pci_dev *pdev, const char *na
+ 	resource_size_t base, size;
+ 	int bar, ret = 0;
+ 
++	efi_earlycon_unregister();
++
+ 	sysfb_disable(&pdev->dev);
+ 
+ 	for (bar = 0; bar < PCI_STD_NUM_BARS; ++bar) {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index cc1df1577d5fb..44cff6fe53f90 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -720,6 +720,13 @@ efi_guid_to_str(const efi_guid_t *guid, char *out)
+ 
+ extern void efi_init (void);
+ extern void efi_earlycon_reprobe(void);
++#ifdef CONFIG_EFI_EARLYCON
++void efi_earlycon_unregister(void);
++#else
++static inline void efi_earlycon_unregister(void)
++{
++}
++#endif
+ #ifdef CONFIG_EFI
+ extern void efi_enter_virtual_mode (void);	/* switch EFI to virtual mode, if possible */
+ #else
 
 -- 
 2.56.1
