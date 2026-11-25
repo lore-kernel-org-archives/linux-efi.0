@@ -1,45 +1,45 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795590347;
-	b=RO14IudfjT7slz1n0p76qwRWsWHjrp9RhFhtpSgC69SPwJniCGHCNltekxwxFjYNbyAi
-	 43HKUj+c3QlV3HfzEr6qHSn21e0UCoUBB49FHqVFMSN9c9PG7gKO+MnimC7BiU89JelNU
-	 yDuiXerwS65MaRWiX0Y3EV8Usd06vs/5cA6yjvmDJ0uXCQZDcjlYoG9BCqW5O3EapowOo
-	 el1QWMB6yhhsHs7+UyFY+TzGIjIJRLffBZ2ZnNVGOPqB02W72TD99AXgEqOaCgevOf1sl
-	 sT/GVShq4YETBDUjN/B28s9cpBUpAcIoY2F0iSHr4tY/ZQiuWDGuTgXCQAZnj2FMxQg==
+	t=1795590353;
+	b=4rswo5CWnZU3wnwhaTogRlX03B48t46FLkXBvGFtLaQrXCiGj62Sx56Fw/T2bm3P38WV
+	 16rISQl8vIw7yC8IGtQ8j2vTnauCasJIWMTXwxC5eDSOa5biZtrAvi5jHS2qKrwMn/1O7
+	 FHs8i+/I9OFmyWch1xGZr59oaRbgackPDlvN5WcfJkEZZGl38vOFuBKOKX3LfA9Z8T0cu
+	 IS+Kw57PNqQ7nLYBjAhfsbghYG2JgRIqO66EU5HH8qczMIT722OYiSEuJEY9oUr+S4az+
+	 IQUGvkv+fTW+/+g5TrZDe9Zyo9dZjRmZJ2HNkuTFaA/NMNjlPX8PeexORmFQKnrNyHQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795590347;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795590353;
 	h=Received:DKIM-Signature:Content-Type:MIME-Version:Message-Id:
 	 In-Reply-To:References:Subject:From:To:Cc:Date;
-	bh=mk40sVkFOHQ4mbTFK0Wk1/9jOwYnq/31sZddGtTn2r8=;
-	b=a+l1185YH302LrxcUcsaksginpR6XTDfnvymSXe+JlGcNUs/5Gw2UQ9j2krBo74SaL6P
-	 m4aWiwD78+FXsD07/pgI2Rpr1dDn7fYYo1CfPCbiZCHf6zj4IHeWIjQtCKPnuSL6SWjhm
-	 U1UaM9QOE+hDU/5Dzm3q7ha9hbdVwQJXwz9zTISXX0Et8ng0/9SiLNFu8lPO6aqDVkSZ7
-	 ULXpHzyQY4DaCd39FdQiviyU+XLRa3jmZasrIgg3LWC3vAJL2UmP+on4WHfZoMLKYz7Wn
-	 bpZogElr/Yg8Eztxk2Qxf9f10aC8NO8cYXofqjF9JoVb/VGhzYfkQZznea8OQnbhbFw==
+	bh=eY8MxL4CQsiYqvHInHyteTrR1VjWiJ0DqyBDBb2ppMM=;
+	b=FuGHNS8WoDNucip8AXPuPBd4PvgbCPYO6JjVhLOsAwExRkh/zFKTnWNOnqFAlxMhGZzE
+	 IPyJ7ZmubZ34CMCO9y/vzkADeIlZCinm1ZPmOFrO+xPqoToi51rwS+nVOm9SYrjzzWwI5
+	 En9E2y/zBPCf3rnuzqPgjShDe7WIJtybbpQ2cAb93jS1sg6BdX1e0BZTEdcO+YBILyPXj
+	 EF6AEUkw2jxL66ZxjV5B5f5BrbCXHAZDou0c4vCSwQVNWuxvTQ30JmJTBqvX6RlUU1nM+
+	 FIRoRULC/V51TzSH9CRch+EBMSprhYMMBKCE/Lj1EFNKA+B8x7VuOsIaFZqZfB/kbNg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=GRtb5FE9;
+	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mae69HOv;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EFB9F606A32A;
-	Wed, 25 Nov 2026 07:05:46 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A99A3606A321;
+	Wed, 25 Nov 2026 07:05:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=GRtb5FE9
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3EBF51F000D1;
-	Wed, 25 Nov 2026 07:05:42 +0000 (UTC)
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mae69HOv
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C05151F00A36;
+	Wed, 25 Nov 2026 07:05:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795590346;
-	bh=mk40sVkFOHQ4mbTFK0Wk1/9jOwYnq/31sZddGtTn2r8=;
+	s=k20260515; t=1795590353;
+	bh=eY8MxL4CQsiYqvHInHyteTrR1VjWiJ0DqyBDBb2ppMM=;
 	h=In-Reply-To:References:Subject:From:To:Cc:Date;
-	b=GRtb5FE9lgsDE/bKoL3Rvn8xFaB0dRigQLL/uapE7WEJ9NrqYdC4bDZmSEiPNd2b8
-	 KwepLUjS19i7xjS1fa4NNbAvwbLCYbsXa3rFCUCkbOCGUZnAtWIEMGtNbVTXItAYpl
-	 tKGbhNHwVtywRWlLsPF6x38bvO1Kv74ZYblJybqw8/cQ1IrXlAsYu1WyzkMDnwT72t
-	 sgWbsLSCDMI/iW1jut/6aM+59Ro0o70Ow8n/cjrno0+UcQ2REbKZ6WFdrbTK2L6YEK
-	 Cf5989xM6AHFMlDEiHafzz+v+qU9yWhnIesHbszYK/VYmzrNtsfhvRdDYTfSiKxJ02
-	 h7NG/b4Bu98qw==
-Content-Type: multipart/mixed; boundary="===============8094284997810905034=="
+	b=mae69HOvNQF9iQmI9mch+Buz/1p55Vrhqg5GHI/FdhPJ1Spt80vXovSrv+jIYfmHC
+	 NFnqRJ8MRH6Khi2QuQ3siO1GiDVva/m9Gf138mpYqxIunhIoVx0NILfAhA4jCwQums
+	 42Dpu0zZVX7VxsAn+bK/23NrzJYqWYOXj/dTDvrw4e2ZsSeKFHSitMKlsiWfHmoRIC
+	 iki4HZdpMKVDUdfKadRjNbm2iUhlzqZ2iSQjYc+OV7zNvHUu7RpIZiPFiHZQaik0rO
+	 0PKeesZeBT8Z/tK5uLiWpN/lH7FqCp8mRZF+mvHaxDIfXwo8VnWYepsjJ/K60cyuHf
+	 9rG+fRZfX9+1A==
+Content-Type: multipart/mixed; boundary="===============1142665870477895472=="
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -49,129 +49,83 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Message-Id: <85612bab718b4dff389065a2f1e9b1a6339da01193ffaff6c5d8aedfbf46904a@mail.kernel.org>
-In-Reply-To: <20261125061523.1540234-22-irogers@google.com>
-References: <20261125061523.1540234-22-irogers@google.com>
-Subject: Re: [RFC PATCH v2 21/30] scripts: Add eh_frame_min.py .eh_frame coverage and size analyzer
+Message-Id: <1c6ad7441ca027dcd0f305477f5e65c82e85f5b049d06a8970bcfb67aa451162@mail.kernel.org>
+In-Reply-To: <20261125061523.1540234-21-irogers@google.com>
+References: <20261125061523.1540234-21-irogers@google.com>
+Subject: Re: [RFC PATCH v2 20/30] selftests/perf_events: Add Minimal DWARF CFI deferred user unwind test
 From: bot+bpf-ci@kernel.org
 To: irogers@google.com,linux-kernel@vger.kernel.org,linux-trace-kernel@vger.kernel.org,linux-arch@vger.kernel.org
 Cc: jpoimboe@kernel.org,rostedt@goodmis.org,peterz@infradead.org,mingo@redhat.com,tglx@kernel.org,bp@alien8.de,dave.hansen@linux.intel.com,x86@kernel.org,catalin.marinas@arm.com,will@kernel.org,mark.rutland@arm.com,linux-arm-kernel@lists.infradead.org,pjw@kernel.org,palmer@dabbelt.com,aou@eecs.berkeley.edu,alex@ghiti.fr,linux-riscv@lists.infradead.org,acme@kernel.org,namhyung@kernel.org,linux-perf-users@vger.kernel.org,mhiramat@kernel.org,ast@kernel.org,daniel@iogearbox.net,andrii@kernel.org,bpf@vger.kernel.org,nathan@kernel.org,llvm@lists.linux.dev,nsc@kernel.org,linux-kbuild@vger.kernel.org,ojeda@kernel.org,rust-for-linux@vger.kernel.org,ardb@kernel.org,linux-efi@vger.kernel.org,maz@kernel.org,oupton@kernel.org,kvmarm@lists.linux.dev,shuah@kernel.org,linux-kselftest@vger.kernel.org,indu.bhagat@oracle.com,jremus@linux.ibm.com,wnliu@google.com,dylanbhatch@google.com,irogers@google.com,ast@kernel.org,andrii@kernel.org,daniel@iogearbox.net,martin.lau@kernel.org,eddyz87@gmail.com,yongho
  ng.song@linux.dev,mason@kernel.org,ihor.solodrai@linux.dev
-Date: Wed, 25 Nov 2026 07:05:42 +0000 (UTC)
+Date: Wed, 25 Nov 2026 07:05:48 +0000 (UTC)
 
---===============8094284997810905034==
+--===============1142665870477895472==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
 
-> scripts: Add eh_frame_min.py .eh_frame coverage and size analyzer
+> selftests/perf_events: Add Minimal DWARF CFI deferred user unwind test
 
-TL;DR:
-- eh_frame_min.py may misreport sizes for RISC-V relocatable objects
-  (relocated advances unread), so savings and --minify output are wrong
-- FDE byte total counts unsupported FDEs, skewing the average
-- Two comment nits
+TL;DR: Test issues only, low severity: unwind_user_cfi.c includes a
+kernel-internal header and #undefs macros, and may report "not ok" instead of
+skip when perf_event_open returns ENOSYS.
 
-> diff --git a/scripts/eh_frame_min.py b/scripts/eh_frame_min.py
+> diff --git a/tools/testing/selftests/perf_events/unwind_user_cfi.c b/tools/testing/selftests/perf_events/unwind_user_cfi.c
+> new file mode 100644
+> index 000000000000..a36e9f4d39e2
 > --- /dev/null
-> +++ b/scripts/eh_frame_min.py
+> +++ b/tools/testing/selftests/perf_events/unwind_user_cfi.c
+> @@ -0,0 +1,482 @@
 
 [ ... ]
 
-> +        if name in sections:
-> +            # Accumulate sizes for multi-section objects (e.g. .text.*)
-> +            prev_addr, prev_sz, prev_b = sections[name]
+> +#include "../kselftest.h"
+> +#undef __always_inline
+> +#undef __attribute_const__
+> +#undef __must_check
+> +#undef __printf
+> +#include "../../../../include/linux/compiler_attributes.h"
 
-This isn't a bug, but this branch only runs when two section headers have
-the identical name.  Per-function sections such as .text.foo and .text.bar
-have distinct names and never reach it; they are summed later in
-analyze_elf() by the name.startswith(".text") prefix check.  Does the
-"(e.g. .text.*)" comment point at the right place?
+This isn't a bug, but would it be simpler to spell the few attributes this
+test needs directly, for example __attribute__((noinline, noclone)) and
+__attribute__((aligned(64))), instead of including
+include/linux/compiler_attributes.h and #undef'ing the clashing macros
+first?
 
-[ ... ]
-
-> +            elif ch == "B":
-> +                # BTI / PAC key on arm64
-> +                pass
-
-This isn't a bug, but 'B' in the AArch64 DWARF ABI only means that frames
-use the B key for return address signing.  BTI has no CIE augmentation, so
-should "BTI" be dropped from this comment?
-
-[ ... ]
-
-> +            if hi == 0x40:
-> +                op_counts["DW_CFA_advance_loc"] += 1
-> +                pending_adv += lo
-> +                continue
-
-On RISC-V relocatable objects, are the DW_CFA_advance_loc and
-advance_loc1/2/4 bytes stored in .eh_frame the real PC deltas?
-
-With linker relaxation, those deltas are filled in at link time from
-R_RISCV_SET6/SUB6 (and SET8/SUB8, SET16/SUB16, SET32/SUB32) relocation
-pairs, and the stored bytes are placeholders.  The script never reads
-.rela.eh_frame.
-
-arch/riscv/Makefile only adds -mno-relax through KBUILD_CFLAGS_MODULE and
-KBUILD_AFLAGS_MODULE, so objects such as the example mm/vmscan.o keep
-relaxation.  The build-time minifier in this series handles this case in
-scripts/min_eh_frame.c:
-
-    * Buffered output event emitted by minify_insns(). Adjacent non-relocated
-    * PC-advance events are coalesced before serialization, whereas relocated
-    * DW_CFA_advance_loc* instructions (e.g. RISC-V R_RISCV_ADD/SUB pairs) are
-    * preserved verbatim ...
-
-Here a relocated advance read as 0 leaves pending_adv at 0, so emit_op()
-flushes no "adv" event and the next kept rule is attached to the previous
-PC.  For riscv .o inputs that makes the 'FDE bytecode payload ... -> N B'
-figure and the 'Minified .eh_frame' size understated, which overstates the
-savings percentage, and the --minify blob, documented as being for
-differential tests, is not equivalent to the input CFI.
-
-Neither the commit message nor the docstring lists this as a limitation.
-Should the script read .rela.eh_frame and keep relocated advances verbatim,
-as min_eh_frame.c does, or refuse or flag ET_REL EM_RISCV inputs?
+From tools/testing/selftests/perf_events/ that path resolves to the
+kernel-internal include/linux/ header rather than a tools/include copy, and
+no other selftest includes a kernel-internal header this way.  Also,
+__must_check is not defined by either earlier include, so that #undef
+appears to do nothing.
 
 [ ... ]
 
-> +            res = decode_and_minify_insns(fde_insns, cie, arch, init_row=cie_init_rows[cie_off])
-> +            total_op_counts.update(res["op_counts"])
-> +            total_min_insn_bytes += len(res["min_insns"])
+> +	fd = (int)sys_perf_event_open(&attr, /*pid=*/0, /*cpu=*/-1,
+> +				      /*group_fd=*/-1, /*flags=*/0);
+> +	if (fd < 0) {
+> +		if (jit_page != MAP_FAILED)
+> +			munmap(jit_page, page_sz);
+> +		if (errno == EACCES || errno == EPERM || errno == EINVAL) {
+> +			ksft_test_result_skip("perf_event_open(defer_callchain) unavailable: %s\n",
+> +					      strerror(errno));
+> +			ksft_finished();
+> +		}
+> +		ksft_exit_fail_msg("perf_event_open failed: %s\n", strerror(errno));
+> +	}
 
-[ ... ]
+Should ENOSYS be treated as a skip here as well?
 
-> +            if not reasons:
-> +                supported_fdes += 1
+On a kernel built without CONFIG_PERF_EVENTS, perf_event_open is a
+COND_SYSCALL and returns -ENOSYS, so main() reaches ksft_exit_fail_msg()
+and the runner records "not ok" instead of a skip.  The selftests guide
+flags exiting nonzero other than KSFT_SKIP when a feature or config option
+is missing.
 
-[ ... ]
-
-> +    print(f"  FDE bytecode payload    : {total_orig_insn_bytes:10,d} B -> {total_min_insn_bytes:,d} B "
-> +          f"(avg {total_min_insn_bytes / max(supported_fdes, 1):.1f} B/FDE)")
-
-Is total_min_insn_bytes computed over the same set of FDEs as
-supported_fdes?
-
-total_min_insn_bytes is incremented for every FDE, before the
-"if not reasons:" check.  Unsupported FDEs are never written to
-min_eh_stream, but their minified bytecode is still counted, and the
-average then divides by supported_fdes only.
-
-For example, with 100 FDEs of which 50 are supported and 50 unsupported,
-each with 10 B of minified bytecode, total_min_insn_bytes is 1000 and
-supported_fdes is 50.  The script prints "avg 20.0 B/FDE", while the
-emitted FDEs average 10 B and only 500 B of FDE bytecode is in the
-minified stream.
-
-This is reachable with the listed inputs.  The x86_64 .plt FDE in /bin/bash
-uses a DW_CFA_def_cfa_expression that ends in DW_OP_plus, not DW_OP_deref,
-so it is added to reasons and treated as unsupported, yet its earlier
-def_cfa_offset ops still add to total_min_insn_bytes.
-
-Should total_min_insn_bytes be accumulated only inside the
-"if not reasons:" branch, or should the average divide by total_fdes and
-the line be labelled as covering all FDEs?
+The other missing prerequisites in main() (unsupported architecture, no
+PT_GNU_EH_FRAME, defer bits unknown to an older kernel) are already
+reported as skips, so adding ENOSYS to the errno check would make this case
+consistent with them.  The neighbouring perf_events tests also fail rather
+than skip when perf_event_open() fails, so this is low severity.
 
 
 ---
@@ -179,4 +133,4 @@ AI reviewed your patch. Please fix the bug or email reply why it's not a bug.
 See: https://github.com/kernel-patches/vmtest/blob/master/ci/claude/README.md
 
 CI run summary: https://github.com/kernel-patches/bpf/actions/runs/45561209846
---===============8094284997810905034==--
+--===============1142665870477895472==--
