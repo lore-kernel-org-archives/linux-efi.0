@@ -1,45 +1,45 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795590353;
-	b=4rswo5CWnZU3wnwhaTogRlX03B48t46FLkXBvGFtLaQrXCiGj62Sx56Fw/T2bm3P38WV
-	 16rISQl8vIw7yC8IGtQ8j2vTnauCasJIWMTXwxC5eDSOa5biZtrAvi5jHS2qKrwMn/1O7
-	 FHs8i+/I9OFmyWch1xGZr59oaRbgackPDlvN5WcfJkEZZGl38vOFuBKOKX3LfA9Z8T0cu
-	 IS+Kw57PNqQ7nLYBjAhfsbghYG2JgRIqO66EU5HH8qczMIT722OYiSEuJEY9oUr+S4az+
-	 IQUGvkv+fTW+/+g5TrZDe9Zyo9dZjRmZJ2HNkuTFaA/NMNjlPX8PeexORmFQKnrNyHQ==
+	t=1795590360;
+	b=3tryk9ifD5KaXESDtftyOAT1Uz3HMZJz+hT8q6We1HDB+25THd2pq76DU7BJ5i6PA2Ce
+	 DFRp0qS5mrjnF7ksmUQgLFuImFZ7OhwwWE9EQpx5jGRITIvZ0das6dHKnHrIIigW4QJ7G
+	 zPPxW3Ku90NjUsZjvPCFqviOkpOu/oxRY2Y1um6K8+xTpgaXiKA0YGMGZmwPUsqlpVQEu
+	 SyKUcRuPp/xi5yQ3uoxKKevcT0kuXYgQlrsEZmKLtnrQv4hha6HIr9yboagNTYG6RYu1B
+	 XMG9HORRoD4bT3Y/UokQ0rtp04+Psa1t9lrdge7eQCBGIi/t2D5XAzMuO3LzMRy2klQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795590353;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795590360;
 	h=Received:DKIM-Signature:Content-Type:MIME-Version:Message-Id:
 	 In-Reply-To:References:Subject:From:To:Cc:Date;
-	bh=eY8MxL4CQsiYqvHInHyteTrR1VjWiJ0DqyBDBb2ppMM=;
-	b=FuGHNS8WoDNucip8AXPuPBd4PvgbCPYO6JjVhLOsAwExRkh/zFKTnWNOnqFAlxMhGZzE
-	 IPyJ7ZmubZ34CMCO9y/vzkADeIlZCinm1ZPmOFrO+xPqoToi51rwS+nVOm9SYrjzzWwI5
-	 En9E2y/zBPCf3rnuzqPgjShDe7WIJtybbpQ2cAb93jS1sg6BdX1e0BZTEdcO+YBILyPXj
-	 EF6AEUkw2jxL66ZxjV5B5f5BrbCXHAZDou0c4vCSwQVNWuxvTQ30JmJTBqvX6RlUU1nM+
-	 FIRoRULC/V51TzSH9CRch+EBMSprhYMMBKCE/Lj1EFNKA+B8x7VuOsIaFZqZfB/kbNg==
+	bh=34IkE98ay9uD1UXazw384CiIG9xjTfNiMAYl39k2cwg=;
+	b=47melN6RQLcJt8vSBZNeZ/I4X/BN0QW0xSPgdqq/T2FVRl+NdDqYp06e4oaVcbMn0wR7
+	 cdSMc++3Vw4UBtgYIE1WkGEb6N16m5i8IuA55TLX2kuLKDhFmW5eivJ8uXwfRjX9uYG/w
+	 6FbS8hUv31fERXGs0V0qZx3MAsKVR9Oj9R8BygtXjTcbYEPr5IXarH+lbsrQA6h6H8jtL
+	 /MMYQ0I4P28og3fu7j8ZT/i1CQCtdZ/5ktI/YwWw9GWulxhFj1tNXkb4I4K08jd+sf7EM
+	 lVBh67RU3RiYBDqPzGNIvSlTsc7y4AL5vhD3LLmu2/FhL0zETtql7PoyDHQ8i/rMXOg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mae69HOv;
+	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QUrfkKKY;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A99A3606A321;
-	Wed, 25 Nov 2026 07:05:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FB35606A32C;
+	Wed, 25 Nov 2026 07:06:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mae69HOv
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C05151F00A36;
-	Wed, 25 Nov 2026 07:05:48 +0000 (UTC)
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QUrfkKKY
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A2E471F000D3;
+	Wed, 25 Nov 2026 07:05:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795590353;
-	bh=eY8MxL4CQsiYqvHInHyteTrR1VjWiJ0DqyBDBb2ppMM=;
+	s=k20260515; t=1795590360;
+	bh=34IkE98ay9uD1UXazw384CiIG9xjTfNiMAYl39k2cwg=;
 	h=In-Reply-To:References:Subject:From:To:Cc:Date;
-	b=mae69HOvNQF9iQmI9mch+Buz/1p55Vrhqg5GHI/FdhPJ1Spt80vXovSrv+jIYfmHC
-	 NFnqRJ8MRH6Khi2QuQ3siO1GiDVva/m9Gf138mpYqxIunhIoVx0NILfAhA4jCwQums
-	 42Dpu0zZVX7VxsAn+bK/23NrzJYqWYOXj/dTDvrw4e2ZsSeKFHSitMKlsiWfHmoRIC
-	 iki4HZdpMKVDUdfKadRjNbm2iUhlzqZ2iSQjYc+OV7zNvHUu7RpIZiPFiHZQaik0rO
-	 0PKeesZeBT8Z/tK5uLiWpN/lH7FqCp8mRZF+mvHaxDIfXwo8VnWYepsjJ/K60cyuHf
-	 9rG+fRZfX9+1A==
-Content-Type: multipart/mixed; boundary="===============1142665870477895472=="
+	b=QUrfkKKYin6SUsE7qd6BRGlRB/HIkWrriuppajmIOrJ5ONqdmuMIi147C0OIl/z6a
+	 f+bSohz+cw93b2FNOPy3NGqs2d2W744/EdQsn8CC948QxweQC0nyd9YHAtwPVwV8Fu
+	 k1zwxaR7wrRWl4jCMnblFe8s5L2Hqoxn7v4m+ILt4Ea2ugY45gzaEXR0yRtQNWfpTB
+	 5Gtms3+FPkLlZTX4uslLiJxexFZC67YyZf6QmWuYpYlZImCI9sNHvhcY8HOB5c07b8
+	 CqLgEHUdVT8UukRsTvQUN2iHGkoObnyv24GZLqTi0IVBXjuRG9BohgaJbbLuGMlZPi
+	 4F3hWV+ngD9Dg==
+Content-Type: multipart/mixed; boundary="===============8760472991523024919=="
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -49,83 +49,146 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Message-Id: <1c6ad7441ca027dcd0f305477f5e65c82e85f5b049d06a8970bcfb67aa451162@mail.kernel.org>
-In-Reply-To: <20261125061523.1540234-21-irogers@google.com>
-References: <20261125061523.1540234-21-irogers@google.com>
-Subject: Re: [RFC PATCH v2 20/30] selftests/perf_events: Add Minimal DWARF CFI deferred user unwind test
+Message-Id: <da45f3c72c6c359d7a2d029b5a0fd9c2cd0d28b849cfde0bc57669d12a7e34d1@mail.kernel.org>
+In-Reply-To: <20261125061523.1540234-12-irogers@google.com>
+References: <20261125061523.1540234-12-irogers@google.com>
+Subject: Re: [RFC PATCH v2 11/30] x86: Add DWARF CFI annotations to entry, ftrace, frame, and rethook
 From: bot+bpf-ci@kernel.org
 To: irogers@google.com,linux-kernel@vger.kernel.org,linux-trace-kernel@vger.kernel.org,linux-arch@vger.kernel.org
 Cc: jpoimboe@kernel.org,rostedt@goodmis.org,peterz@infradead.org,mingo@redhat.com,tglx@kernel.org,bp@alien8.de,dave.hansen@linux.intel.com,x86@kernel.org,catalin.marinas@arm.com,will@kernel.org,mark.rutland@arm.com,linux-arm-kernel@lists.infradead.org,pjw@kernel.org,palmer@dabbelt.com,aou@eecs.berkeley.edu,alex@ghiti.fr,linux-riscv@lists.infradead.org,acme@kernel.org,namhyung@kernel.org,linux-perf-users@vger.kernel.org,mhiramat@kernel.org,ast@kernel.org,daniel@iogearbox.net,andrii@kernel.org,bpf@vger.kernel.org,nathan@kernel.org,llvm@lists.linux.dev,nsc@kernel.org,linux-kbuild@vger.kernel.org,ojeda@kernel.org,rust-for-linux@vger.kernel.org,ardb@kernel.org,linux-efi@vger.kernel.org,maz@kernel.org,oupton@kernel.org,kvmarm@lists.linux.dev,shuah@kernel.org,linux-kselftest@vger.kernel.org,indu.bhagat@oracle.com,jremus@linux.ibm.com,wnliu@google.com,dylanbhatch@google.com,irogers@google.com,ast@kernel.org,andrii@kernel.org,daniel@iogearbox.net,martin.lau@kernel.org,eddyz87@gmail.com,yongho
  ng.song@linux.dev,mason@kernel.org,ihor.solodrai@linux.dev
-Date: Wed, 25 Nov 2026 07:05:48 +0000 (UTC)
+Date: Wed, 25 Nov 2026 07:05:55 +0000 (UTC)
 
---===============1142665870477895472==
+--===============8760472991523024919==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
 
-> selftests/perf_events: Add Minimal DWARF CFI deferred user unwind test
+> x86: Add DWARF CFI annotations to entry, ftrace, frame, and rethook
 
-TL;DR: Test issues only, low severity: unwind_user_cfi.c includes a
-kernel-internal header and #undefs macros, and may report "not ok" instead of
-skip when perf_event_open returns ENOSYS.
+TL;DR:
+- Commit message omits that ENCODE_FRAME_POINTER and FRAME_BEGIN/END are newly
+  enabled for DWARF CFI
+- Nits: duplicated frame.h condition block
+- Nits: rethook copies kprobes SAVE_REGS_STRING, duplicating the pt_regs
+  layout
 
-> diff --git a/tools/testing/selftests/perf_events/unwind_user_cfi.c b/tools/testing/selftests/perf_events/unwind_user_cfi.c
-> new file mode 100644
-> index 000000000000..a36e9f4d39e2
-> --- /dev/null
-> +++ b/tools/testing/selftests/perf_events/unwind_user_cfi.c
-> @@ -0,0 +1,482 @@
+>     x86: Add DWARF CFI annotations to entry, ftrace, frame, and rethook
+>
+>     Prepare x86-64 hand-written and inline assembly paths for runtime
+>     Minimal DWARF CFI kernel unwinding when CONFIG_UNWINDER_DWARF_CFI is
+>     enabled:
+>      - Emit .eh_frame alongside .debug_frame in asm/dwarf2.h and preserve
+>        FRAME_BEGIN/FRAME_END frame setup for non-leaf assembly helpers in
+>        asm/frame.h.
+>      - Annotate THUNK (arch/x86/entry/calling.h), ftrace_caller /
+>        ftrace_regs_caller / return_to_handler (arch/x86/kernel/ftrace_64.S),
+>        and arch_rethook_trampoline() (arch/x86/kernel/rethook.c) with .cfi_*
+>        directives.
+>
+>     Signed-off-by: Ian Rogers <irogers@google.com>
+
+This isn't a bug, but the commit message says FRAME_BEGIN/FRAME_END are
+"preserved".  Without CONFIG_FRAME_POINTER they used to expand to nothing,
+so with CONFIG_UNWINDER_DWARF_CFI they are newly enabled.
+
+The same hunk also enables ENCODE_FRAME_POINTER and encode_frame_pointer()
+for CONFIG_UNWINDER_DWARF_CFI, so entry_64.S, SAVE_REGS_STRING
+(kprobes/rethook), ftrace_regs_caller and copy_thread() now load an encoded
+pt_regs pointer into %rbp in builds without frame pointers.  The message
+doesn't mention this.
+
+Could the changelog say that ENCODE_FRAME_POINTER/encode_frame_pointer()
+are also enabled, and explain that the DWARF unwinder relies on %rbp frames
+and encoded pt_regs pointers for asm that has no .eh_frame?
+
+> diff --git a/arch/x86/include/asm/frame.h b/arch/x86/include/asm/frame.h
+> index 0ab65073c1cc..62939fbb6668 100644
+> --- a/arch/x86/include/asm/frame.h
+> +++ b/arch/x86/include/asm/frame.h
 
 [ ... ]
 
-> +#include "../kselftest.h"
-> +#undef __always_inline
-> +#undef __attribute_const__
-> +#undef __must_check
-> +#undef __printf
-> +#include "../../../../include/linux/compiler_attributes.h"
+> @@ -22,6 +22,30 @@
+>  	pop %_ASM_BP
+>  .endm
+>
+> +#else /* !__ASSEMBLER__ */
+> +
+> +#define FRAME_BEGIN				\
+> +	"push %" _ASM_BP "\n"			\
+> +	_ASM_MOV "%" _ASM_SP ", %" _ASM_BP "\n"
+> +
+> +#define FRAME_END "pop %" _ASM_BP "\n"
+> +
+> +#endif /* __ASSEMBLER__ */
+> +
+> +#define FRAME_OFFSET __ASM_SEL(4, 8)
+> +
+> +#else /* !CONFIG_FRAME_POINTER && !CONFIG_UNWINDER_DWARF_CFI */
+> +
+> +#define FRAME_BEGIN
+> +#define FRAME_END
+> +#define FRAME_OFFSET 0
+> +
+> +#endif /* CONFIG_FRAME_POINTER || CONFIG_UNWINDER_DWARF_CFI */
+> +
+> +#if defined(CONFIG_FRAME_POINTER) || defined(CONFIG_UNWINDER_DWARF_CFI)
+> +
+> +#ifdef __ASSEMBLER__
+> +
+>  #ifdef CONFIG_X86_64
 
-This isn't a bug, but would it be simpler to spell the few attributes this
-test needs directly, for example __attribute__((noinline, noclone)) and
-__attribute__((aligned(64))), instead of including
-include/linux/compiler_attributes.h and #undef'ing the clashing macros
-first?
+This isn't a bug, but both blocks here use the identical condition
+"defined(CONFIG_FRAME_POINTER) || defined(CONFIG_UNWINDER_DWARF_CFI)".
+Could the original single block be kept, with only its
+"#ifdef CONFIG_FRAME_POINTER" line changed, so the diff stays small?
 
-From tools/testing/selftests/perf_events/ that path resolves to the
-kernel-internal include/linux/ header rather than a tools/include copy, and
-no other selftest includes a kernel-internal header this way.  Also,
-__must_check is not defined by either earlier include, so that #undef
-appears to do nothing.
+> diff --git a/arch/x86/kernel/rethook.c b/arch/x86/kernel/rethook.c
+> index 85e2f2d16a90..2bff76758024 100644
+> --- a/arch/x86/kernel/rethook.c
+> +++ b/arch/x86/kernel/rethook.c
+> @@ -15,6 +15,87 @@ __visible void arch_rethook_trampoline_callback(struct pt_regs *regs);
+>  #define ANNOTATE_NOENDBR
+>  #endif
+>
+> +#if defined(CONFIG_X86_64) && defined(CONFIG_UNWINDER_DWARF_CFI)
+> +#define RETHOOK_CFI_STARTPROC		"	.cfi_startproc\n"
+> +#define RETHOOK_CFI_ENDPROC		"	.cfi_endproc\n"
+> +#define RETHOOK_CFI_ADJUST(off)		"	.cfi_adjust_cfa_offset " #off "\n"
+> +#define RETHOOK_SAVE_REGS_STRING	\
+> +	"	subq $24, %rsp\n"	\
+> +	RETHOOK_CFI_ADJUST(24)		\
+> +	"	pushq %rdi\n"		\
+> +	RETHOOK_CFI_ADJUST(8)		\
 
 [ ... ]
 
-> +	fd = (int)sys_perf_event_open(&attr, /*pid=*/0, /*cpu=*/-1,
-> +				      /*group_fd=*/-1, /*flags=*/0);
-> +	if (fd < 0) {
-> +		if (jit_page != MAP_FAILED)
-> +			munmap(jit_page, page_sz);
-> +		if (errno == EACCES || errno == EPERM || errno == EINVAL) {
-> +			ksft_test_result_skip("perf_event_open(defer_callchain) unavailable: %s\n",
-> +					      strerror(errno));
-> +			ksft_finished();
-> +		}
-> +		ksft_exit_fail_msg("perf_event_open failed: %s\n", strerror(errno));
-> +	}
+> +	"	pushq %rbp\n"		\
+> +	RETHOOK_CFI_ADJUST(8)		\
+> +	"	.cfi_offset rbp, -144\n"\
 
-Should ENOSYS be treated as a skip here as well?
+[ ... ]
 
-On a kernel built without CONFIG_PERF_EVENTS, perf_event_open is a
-COND_SYSCALL and returns -ENOSYS, so main() reaches ksft_exit_fail_msg()
-and the runner records "not ok" instead of a skip.  The selftests guide
-flags exiting nonzero other than KSFT_SKIP when a feature or config option
-is missing.
+> +#define RETHOOK_RESTORE_REGS_STRING	\
+> +	"	popq %r15\n"		\
+> +	RETHOOK_CFI_ADJUST(-8)		\
 
-The other missing prerequisites in main() (unsupported architecture, no
-PT_GNU_EH_FRAME, defer bits unknown to an older kernel) are already
-reported as skips, so adding ENOSYS to the errno check would make this case
-consistent with them.  The neighbouring perf_events tests also fail rather
-than skip when perf_event_open() fails, so this is low severity.
+[ ... ]
+
+This isn't a bug, but RETHOOK_SAVE_REGS_STRING and
+RETHOOK_RESTORE_REGS_STRING are an instruction-for-instruction copy of
+SAVE_REGS_STRING and RESTORE_REGS_STRING in arch/x86/kernel/kprobes/common.h
+with a CFI line added after each push and pop.  The pt_regs save order is now
+defined in two places, and the hard-coded ".cfi_offset rbp, -144" depends on
+that layout.
+
+optprobe_template_func() in kprobes/opt.c also uses the shared macros and
+has no .cfi_startproc, so they can't be annotated unconditionally.
+
+Could kprobes/common.h's SAVE_REGS_STRING/RESTORE_REGS_STRING instead take an
+optional per-push annotation hook that is empty by default, so the register
+list stays in one place?
 
 
 ---
@@ -133,4 +196,4 @@ AI reviewed your patch. Please fix the bug or email reply why it's not a bug.
 See: https://github.com/kernel-patches/vmtest/blob/master/ci/claude/README.md
 
 CI run summary: https://github.com/kernel-patches/bpf/actions/runs/45561209846
---===============1142665870477895472==--
+--===============8760472991523024919==--
