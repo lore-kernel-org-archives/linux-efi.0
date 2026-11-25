@@ -1,95 +1,72 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=216.40.44.11
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795628026;
-	b=suGSCPGp4AcnueWq5EsF7wwZIqba3G9KXgpCFlW7ofXYnu8RqJD5RZ7H++U4a8oo51UF
-	 N2F4LmTNIB7mLr57+dGcigvAKKQFVcrcK0KUqiHi5E+EtD8Um7XsipIS3I6hhF6IvOXt7
-	 R+f4x3n+EYL4vDDsa6U0AmwqNjR8vl/yE0lt4kI7UEpZV+MGpoDjQF55yMjYeq+FR0IOf
-	 8M3UgoCqDmidnnVPLFaPw+6PzThP6vRa/7x80L3rF+UdUIQmCBMTWg2JELDIwR3g0yR6O
-	 3sMauT9DJrU0QJWMMIndX1WEczk39/GUQXw1+7wu4F06k4Utuci33T1BEAnDT1etQmg==
+	t=1795630965;
+	b=ddAP9G2DTFT4ePILKeH+LEAoOqwxf9JjTOt7ccoygxO7mnXRHMs+8N4v2bhuV54wzR22
+	 u3G/3ooVWThboMEwxHjLwW5YMEBWw5q8fpE1nT2ISbhgpauQFEnIfcWE6LSTSyXBQJC4P
+	 RTuHhnTMybE8LPEJU6xVYWrHmEjAwA9X78gbPxgOLmLeJyYR/o729hVFeL1Ymt+dGWqfT
+	 a9bsuK+7GGeBW/Zdessn1byWi8Lv3pWA8ikR9rwnlMgsIIMtNIWXnJiz8yuxlB4tbf1pO
+	 Q0P5YR4WUrkvcIYhfNO91kmj0PeMUhqVDfntKosJRUcyTn58xD7emwmv7LukYYbjB+g==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795628026;
-	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:X-ME-Received:
-	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:From:To:Cc:Subject:
-	 Date:Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
-	bh=n/6bLDuC2MWLlkiw9AxsEw6O8WtH5WMIcohSXIYDu0M=;
-	b=iBc9ei6jtXu04zuXDEqjfcR5gPltZou72k6JljkHT39Hi+8K4fTmbYmwbJWCZlBsSDdg
-	 p6jE4XAK+Ck+v26dd41n4xWuY2H5fc6C8gkQe6I94nBF7jDCJGaxJVjK2PWBezau0Lgto
-	 JtRdcz0+GTIEGdDAkbkaUvw8g5HLAWMxPASeK8aQOCjmfmKtCzZo5cMIFzrBAfpmpTQ3+
-	 E2XIhlgBaxTe09a+LrMw9xGNyl3HTeRxpC1stDvVGOiGBHDCrgWJq1E+9uobssv2HjuIu
-	 LEu6TDRkNGQE2FIWprk1vV27H5UzkXs09uomnol/s9QYNW5k6ov97ZKtaj6UD0VSCgg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795630965;
+	h=DMARC-Filter:Received:Received:Date:From:To:Cc:Subject:Message-ID:
+	 In-Reply-To:References:X-Mailer:MIME-Version:Content-Type:
+	 Content-Transfer-Encoding:X-Rspamd-Server:X-Rspamd-Queue-Id:
+	 X-Stat-Signature:X-Spam-Status:X-Session-Marker:X-Session-ID:
+	 DKIM-Signature:X-HE-Tag:X-HE-Meta;
+	bh=6qR++cFUSbUPUEmO+yBbsbTsqe4WGzx7vfqPrLzKD+Y=;
+	b=3ZKVcBTpNC6/JCS6uJ032o5JNcQV8NVAJio/uXSh5uFmmtIo/5fXFpfWAGpBy/sQUZIB
+	 +X9ycRAob22E+JGQMyJq+My+kAj773MQmwh47aihpPB8izt7ZXwRCTPAjbGcf+qg5tbnL
+	 jOf5jn70aEaWpHiiwbB6K1k6TcW8cHNug8MrurE1+xIm+Zy53kkMhd+Rdwk7ookJ7mH6D
+	 86WaXlJ+8IctuWDdwV0v5OoxTYwdWEMaY4uqv8V+UMqCmkdDJDKM0XvVtMFJWkAeIuysu
+	 xaAYiljwddDJasrjNLxMPEYqcn6mfIt09CmbK0puRUAz7ogOJ0Vo0Jci9tLc52oLi7Q==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="a/qxYY7J";
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	dmarc=pass header.from=goodmis.org;
+	spf=pass smtp.mailfrom=goodmis.org;
+	dkim=pass header.d=goodmis.org header.i=@goodmis.org header.a=rsa-sha256 header.s=dkim1 header.b=dhj3qKPr;
+	arc=none smtp.remote-ip=216.40.44.11
+Received: from relay.hostedemail.com (smtprelay0011.hostedemail.com [216.40.44.11])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77518606A32C;
-	Wed, 25 Nov 2026 17:33:46 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3541D606A33C;
+	Wed, 25 Nov 2026 18:22:43 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3541D606A33C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=goodmis.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=goodmis.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=a/qxYY7J
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2DDE81F000D0;
-	Wed, 25 Nov 2026 17:33:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795628025;
-	bh=n/6bLDuC2MWLlkiw9AxsEw6O8WtH5WMIcohSXIYDu0M=;
-	h=From:To:Cc:Subject:Date;
-	b=a/qxYY7Jx4KrcgPN7wnFjijIWU7q3OzxEz/YnyGrjKK+wKdSKLXB0JiYZCmn1FEbx
-	 KuFrM1k5cvs7x3jXRL5AoInar9bPon5j//iN1LK0CHxMplHitTrTVFUgLBGMK/ZXXu
-	 2r+rA/FZqP6CuoT1QEQI1aTeJ3iwP1dLEEgh8xnyWngBWVufuVa43dIFIx8Sr27WF8
-	 ULNP2gobeKLxNGEBml9IVoljcPiLkkXe2zBo+X4ngU4qMW2QnZCuZJdqVfAahkfuD/
-	 fdsO17cywQi1ZT+UKbdjDVGBUrF/N+L3Gvf8J4VwHcT0KqvTzek2rw/GgQnjdVWPeV
-	 Czphq7SKI763g==
-Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfauth.ams.internal (Postfix) with ESMTP id 1463B198006A;
-	Wed, 25 Nov 2026 12:33:40 -0500 (EST)
-Received: from phl-frontend-03 ([10.202.2.162])
-  by phl-compute-01.internal (MEProxy); Wed, 25 Nov 2026 12:33:42 -0500
-X-ME-Sender: <xms:9BsHa8rRwZ-B6dJQd39mb36_IfObKj3ULBUz0osEA8SPOXbM5snwEA>
-    <xme:9BsHa0BmVBwiapEMhuUKQ7fl9cA7S8lwQll8ZeGsqSmQ6a01r4dg_ALumhlGRoFWH
-    HTqZGW-BqY4arqLQMhitQAu3ZbFIXc_80kcEezB3sXoMRmC81PlFoo0>
-X-ME-Received: <xmr:9BsHa6fIg0J2dn0Sfc3E8WBKM7hPXB_i7PX_qRaXMWPCeXRrLqzinpf9oVs>
-X-ME-Proxy-Cause: dmFkZTEjneGXuSsh9t8RLA5fj7OcIMpddJIPpUqkcCDk1koCABNj0DB7+xf1dKOxMj9juV
-    tF/xhAcgiETRmldAJL4fSnEhurJbuWquoguflFdf5cgOeCJcEe9MP0oUfMBzJ0/hMO7Ail
-    h22HXZLf6H0rTSIZ9mjjY3jC09UdkvYKAJS20FoyaRQda/TTQNzNLog6Np+64GF8l9mToz
-    q0cauJaKUUBMxe+bwgi1iKWVZ5OkzDj2yLkDwcN6+LwolQ/4feGVmf6XcJ1jZppe/5nEV4
-    lJV66d31/jxmkXNOvdRk1UdK2Rzx/cQhOxp+eVwBZfETf9hpDaFDrDiGYe8iHaydo0eaVm
-    J+QAX2klsry1H6D4sR5zJV1+nrOT4PUKbqM4OevwQYzQzb7m4PvTN+k63p9NVReNy7kgkL
-    QdpCSmburxqhy/hzlKchbRPw7FHgm6h4p9+GX6Vm8Df7P6sKBPOmABxD827xs4jREwniYo
-    eT25z3JA8qNMNakVrKso781cLFrnlBRXUCCAqw8gfDhgJE7laynH0C5jmMPacW98WjiLpy
-    B8VO6dq/RAj38Whgsiz2yIe0xXSJzHs9N00zF9mdOLURLsgOVAIUlYrmXe5UScBDhMKRwn
-    cOi1nnvBHPcVkqDkHS0dHHnu9e9zHg1WZNeZp3iCVFa/8dRzhh5Oc2qMSEJw
-X-ME-Proxy: <xmx:9BsHa8IvTYgfK2V5VArj27Edso_U465UskkroKOd_XMs_XdOG6aFbQ>
-    <xmx:9BsHayurQ7qvPx5WRFasGvucq6ucyUOxWsNwt_FtHXxK2Y4QVtgi3A>
-    <xmx:9BsHa-bgH0VPYcK40-exctqVMUixUrrg_xb2TcZNMiUVwpfFZHp3tQ>
-    <xmx:9BsHay24mIwRuAQ6r_oPPnN5Ye6e8gDSzrAFl6tWzB6XLoxyK9YiQw>
-    <xmx:9BsHa0URsQasB42Xh2rpLAL_lRXL-cIGxOk9Pna-5bqINz-sv8Bh5i8e>
-Feedback-ID: i10464835:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
- 25 Nov 2026 12:33:40 -0500 (EST)
-From: "Kiryl Shutsemau (Meta)" <kas@kernel.org>
-To: Ard Biesheuvel <ardb@kernel.org>
-Cc: "Kiryl Shutsemau (Meta)" <kas@kernel.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Thomas Gleixner <tglx@kernel.org>,
-	Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>,
-	x86@kernel.org,
-	"H. Peter Anvin" <hpa@zytor.com>,
-	Mike Rapoport <rppt@kernel.org>,
-	Tom Lendacky <thomas.lendacky@amd.com>,
-	Rick Edgecombe <rick.p.edgecombe@intel.com>,
-	Pankaj Gupta <pankaj.gupta@amd.com>,
-	linux-efi@vger.kernel.org,
-	linux-coco@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	kernel-team@meta.com,
-	stable@vger.kernel.org
-Subject: [PATCH] x86/efi: Handle EFI_UNACCEPTED_MEMORY in do_add_efi_memmap()
-Date: Wed, 25 Nov 2026 17:33:36 +0000
-Message-ID: <20261125173338.1250080-1-kas@kernel.org>
-X-Mailer: git-send-email 2.54.0
+	dkim=pass (1024-bit key) header.d=goodmis.org header.i=@goodmis.org header.a=rsa-sha256 header.s=dkim1 header.b=dhj3qKPr
+Received: from omf19.hostedemail.com (lb01a-stub [10.200.18.249])
+	by unirelay02.hostedemail.com (Postfix) with ESMTP id C90DE120F71;
+	Wed, 25 Nov 2026 18:22:38 +0000 (UTC)
+Received: from [HIDDEN] (Authenticated sender: rostedt@goodmis.org) by omf19.hostedemail.com (Postfix) with ESMTPA id 2158E20028;
+	Wed, 25 Nov 2026 18:22:27 +0000 (UTC)
+Date: Wed, 25 Nov 2026 13:22:25 -0500
+From: Steven Rostedt <rostedt@goodmis.org>
+To: "Gary Guo" <gary@garyguo.net>
+Cc: "Ian Rogers" <irogers@google.com>, <linux-kernel@vger.kernel.org>,
+ <linux-trace-kernel@vger.kernel.org>, <linux-arch@vger.kernel.org>,
+ <jpoimboe@kernel.org>, <peterz@infradead.org>, <mingo@redhat.com>,
+ <tglx@kernel.org>, <bp@alien8.de>, <dave.hansen@linux.intel.com>,
+ <x86@kernel.org>, <catalin.marinas@arm.com>, <will@kernel.org>,
+ <mark.rutland@arm.com>, <linux-arm-kernel@lists.infradead.org>,
+ <pjw@kernel.org>, <palmer@dabbelt.com>, <aou@eecs.berkeley.edu>,
+ <alex@ghiti.fr>, <linux-riscv@lists.infradead.org>, <acme@kernel.org>,
+ <namhyung@kernel.org>, <linux-perf-users@vger.kernel.org>,
+ <mhiramat@kernel.org>, <ast@kernel.org>, <daniel@iogearbox.net>,
+ <andrii@kernel.org>, <bpf@vger.kernel.org>, <nathan@kernel.org>,
+ <llvm@lists.linux.dev>, <nsc@kernel.org>, <linux-kbuild@vger.kernel.org>,
+ <ojeda@kernel.org>, <rust-for-linux@vger.kernel.org>, <ardb@kernel.org>,
+ <linux-efi@vger.kernel.org>, <maz@kernel.org>, <oupton@kernel.org>,
+ <kvmarm@lists.linux.dev>, <shuah@kernel.org>,
+ <linux-kselftest@vger.kernel.org>, <indu.bhagat@oracle.com>,
+ <jremus@linux.ibm.com>, <wnliu@google.com>, <dylanbhatch@google.com>
+Subject: Re: [RFC PATCH v2 00/30] unwind: Minimal DWARF CFI unwinding for
+ user and kernel space
+Message-ID: <20261125132225.00254c37@gandalf.local.home>
+In-Reply-To: <DN4FM3TBOJ9T.2QOOL77P5HETO@garyguo.net>
+References: <20261125061523.1540234-1-irogers@google.com>
+	<DN4FM3TBOJ9T.2QOOL77P5HETO@garyguo.net>
+X-Mailer: Claws Mail 3.20.0git84 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -99,53 +76,24 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-Rspamd-Server: rspamout06
+X-Rspamd-Queue-Id: 2158E20028
+X-Stat-Signature: bmxmyx7zbff3tj5wzgboeoe9y8ngdg7c
+X-Session-Marker: 726F737465647440676F6F646D69732E6F7267
+X-Session-ID: U2FsdGVkX1/Cm47ggEMe5tkUQwuPIv9j4yoOc3+2FwI=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=goodmis.org; h=date:from:to:cc:subject:message-id:in-reply-to:references:mime-version:content-type:content-transfer-encoding; s=dkim1; bh=6qR++cFUSbUPUEmO+yBbsbTsqe4WGzx7vfqPrLzKD+Y=; b=dhj3qKPrnd5Ol5oStgJ72xjormeA1wf1DO/RZc9kjGarZplof6LxOCEYEKKVU+6U05bo+jnrn30dh3AQ2S2utOXzBrNDvJP6ChCp0OiNHXA0Mz5Qca51KujLnC0+gny5rgFtqYDHuEEGrRoB4ayAc52wJ7NqKJRyFXoq+87Y6Bg=
+X-HE-Tag: 1795630947-362156
+X-HE-Meta: U2FsdGVkX18ShW9pI+/3LezhiP+sfLyAz5bbFmDR0Cg79ArNrSxS4kGp2fzzjf2A8iMOExZ79Wjpfg5dnD2BuvcnWnPjmIUJbGqbBkLfSiaYUFYSqR7ZAyP5O5UzEvRDCN589rXn1aP6/jRut7zfB+DDsEhPmN5DqCQvkQ7ZfZK1DiZPYS6+dvk+POli+n6GtTpGQ+j2vtl3LmQVHr+SzbA0nhYCBgifjijh6DwBsiIDVGFv0Nn3Ybo7aD+vHLlpczM4CVbNSwTPAeoiNfZ1pIRQfuRQQygtba8VmRY7xWxfdUk9RhDQhUICoUNpPyMEpj3E7lFTHILx587J1If+CzVdP12M+SkIwx9akUq8SAeuSlUzaZ2IKhNYhFH5nvIw0f5ED6Ry586F6FXLp5r+/Q==
 
-The EFI stub reports unaccepted memory to the kernel as E820 RAM.
-do_add_efi_memmap() has no case for EFI_UNACCEPTED_MEMORY and adds the
-same range again as E820_TYPE_RESERVED. e820__update_table() resolves
-the overlap in favour of the reserved type, so the kernel never uses
-the range.
+On Wed, 25 Nov 2026 16:28:02 +0000
+"Gary Guo" <gary@garyguo.net> wrote:
 
-do_add_efi_memmap() runs when soft reservation is enabled and the
-firmware marks any conventional memory EFI_MEMORY_SP; that takes no
-command-line option. It also runs with the add_efi_memmap boot
-parameter. A TDX or SEV-SNP guest booted either way loses the memory the
-firmware left unaccepted, and it does not show up in MemTotal.
+> A quick question: how do you plan to get this working on 32-bit ARM which has
+> its own EHABI?
 
-Add unaccepted memory as RAM, as the stub does. Without
-CONFIG_UNACCEPTED_MEMORY the kernel cannot accept it, so keep it
-reserved there.
+Do we care? Isn't ARM 32 mostly deprecated at this moment? Or at least not
+adding new features.
 
-Fixes: 745e3ed85f71 ("efi/libstub: Implement support for unaccepted memory")
-Reported-by: Mike Rapoport <rppt@kernel.org>
-Cc: stable@vger.kernel.org
-Signed-off-by: Kiryl Shutsemau (Meta) <kas@kernel.org>
----
-Build-tested only, with and without CONFIG_UNACCEPTED_MEMORY.
-
- arch/x86/platform/efi/efi.c | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 5eb96c17883e..f03d5e984f2f 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -150,6 +150,12 @@ static void __init do_add_efi_memmap(void)
- 		case EFI_PERSISTENT_MEMORY:
- 			e820_type = E820_TYPE_PMEM;
- 			break;
-+		case EFI_UNACCEPTED_MEMORY:
-+			if (IS_ENABLED(CONFIG_UNACCEPTED_MEMORY))
-+				e820_type = E820_TYPE_RAM;
-+			else
-+				e820_type = E820_TYPE_RESERVED;
-+			break;
- 		default:
- 			/*
- 			 * EFI_RESERVED_TYPE EFI_RUNTIME_SERVICES_CODE
-
-base-commit: aebb7274476403040d582c61478df8f4a7bf9cd3
--- 
-2.54.0
-
+-- Steve
