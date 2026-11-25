@@ -1,45 +1,45 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795590373;
-	b=j7k/5CRyYGumiPpg+QLYSGa9wLHpOF0n5OyoMG2IsmuQiuFH8znjcFI7Ot2NMKpbdxFy
-	 ZlwsozZgAABiGslvE7WLd3+GEBR/PSkRY/f6N3vHVMMKElsjymKGWdji4ICQ8H0n7rwEL
-	 GevcmVdaqVZ5zrg5C9PzCpBuXE1MkbcLET6CbFMLAfw+ckdrcfyvAJdVTWbtOY5Vuwl84
-	 GztqcHvV3O/+fKwd6JB1hJTJdiekR0HR+v3T5bYR0ySOkLrTuyNdIdU+7GECG1gw52+zI
-	 f1TdWAXYXD/RuA1fpD55Q1zuG7FpNwgEYqLMkFl7RUAVWAEz+/8bp3rKYFiuxvQzNfg==
+	t=1795590380;
+	b=XmFC99eLLGr9Jo3D/KExBFTngiSTw6BQReMFU9ssJ5Fg9l7N1tlq9FhMb/uO6AW69bfE
+	 cXbnCTiWkOOBrvpCu20CFlw2+wPFt6k4xxRqwYmaQGeQoQO15Bq+m5daaQesJkaGSPId0
+	 QtOQnjp4BZmaFEpgF+Vn2rIdLg+GAVKy9mYsAo79prkV8d2MP5QWYXokpkhgHRECvq7Zp
+	 Zi12g+COoz0mKDZfiUUtGIUclARrt8CWwlSsWIzUq8bbTl+vaTWCLCm9tycKG4HHxBpEG
+	 esVcCNdHn1c33uMKPO5CevGgAldH2sx7uuyZqO35V57IR0A2B1zRK7lr9j2Qc8a4L5Q==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795590373;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795590380;
 	h=Received:DKIM-Signature:Content-Type:MIME-Version:Message-Id:
 	 In-Reply-To:References:Subject:From:To:Cc:Date;
-	bh=K/q9nzsqStoipM5sT6ZTuum3AE/ZNSxJh2qnRm/7r7g=;
-	b=ONTdmj5EAJq+3dCCrSjYMdsot/T4FXJbl/XETLRkFvg/y5WKWKJ2GPCjqAyG6UsP3upo
-	 Cp7/TFKsACMglnoJAtyeLeAZ5pYYnOrTIs/Rd2LTLq8BrxiU3dpA+lRYLTJ9bC+2COS1S
-	 zxNlHo43MeAwHlWoA2/QvU2zd51VRjavK/OwGRhfJ05hpxxxAlatWVJr2l+KaZuqpK+zB
-	 VGYewbS9+JBX3aGRft7UeLnBPrF+82hA3sDvtsJ9lEBnuDemp7iAc8ChRYF7pRFKHEGKY
-	 Yem77oEfL5KO62eYhhtvj4Ec+Gv/FvmGJG3ouXEy+Jsjyyk2GZVG5Qruvmaz4ZVS0Pw==
+	bh=tf12otNrN4/M2wFpWK6UKOb8se/vjIpF1oB/7PJedo8=;
+	b=Cpg1j4yBdlxlKuYmZf4ES8nMGTgHeVgCyI0hL1gE161r3/EELju/YZm6srOipr95L36E
+	 zxYSB3HZjphn5UD8NpVNFDxYY4jicTfBNV9eQCgLiE1Y1LpOD0DMrH0v+KKQc1Yn+D1e+
+	 whVSg7DaD2FP94LLBlc1DT8uIuv0+m6EgAf33306T9mpQj+CYA8PUOQSfRE9XyoV82DXa
+	 6zysGeZ1Kzi/yXCfZ1WmwA/gVEYaIhRY6XfwZNKKgJEYh2D31WxHmKaeCHSRQdaTsrw/h
+	 ZqHhJiKhE1ArnLwjxRWhkwomW1sniGxtY4pjTu/sxApLTSlW9xkBK7cNWAU9vKX0lBA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="duLO0Th/";
+	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=LhYz8SYG;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF74360A260C;
-	Wed, 25 Nov 2026 07:06:13 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76798606A336;
+	Wed, 25 Nov 2026 07:06:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=duLO0Th/
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D3C2C1F0281F;
-	Wed, 25 Nov 2026 07:06:08 +0000 (UTC)
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=LhYz8SYG
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A41331F000CA;
+	Wed, 25 Nov 2026 07:06:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795590373;
-	bh=K/q9nzsqStoipM5sT6ZTuum3AE/ZNSxJh2qnRm/7r7g=;
+	s=k20260515; t=1795590380;
+	bh=tf12otNrN4/M2wFpWK6UKOb8se/vjIpF1oB/7PJedo8=;
 	h=In-Reply-To:References:Subject:From:To:Cc:Date;
-	b=duLO0Th/pmEW6BN6ZR8s5sDooJ28xxC8dPQ31BIo3oi+5i5YTuHpQPi8sYx+k5JGD
-	 T2FnDZibpqF3AdGleFRajL9gi1WyykPkja3VUvrQImQiM4drULWbiQ8djoGlqE0tEh
-	 UQawTQwvy68XlUmytoAM/8K87/Pk79CDHE72HJA3Evy37lq19UgmjH9uKhf92JJvOA
-	 9jkqzLKhi5AJB/2vDAHH9qNaos+lR71jmC4ryRxvo0qS7ni/BPIJu++u22lEz9AlGP
-	 fyduRg9pzZysRfaceVYF9QzTCWDhhJg5QLhHch8GV7DX+Kryskluvso19BS8pySXSa
-	 zC4A2lRBgTRsw==
-Content-Type: multipart/mixed; boundary="===============5830286129240094792=="
+	b=LhYz8SYGjI1xkHTUIwd0+xr71cge4PCaQOlERzeVkoaw+uHNBcWPZsPjDf0wf3Jx0
+	 CkiyTGwincDtCV/IOiCBLzc05m75quSTAQa3zDLD3a3VpPb6ncCugwb2b4UkAB6Ntc
+	 hVQKhKwrf2YNlRsmXQfKGz+19jcM1thKj5vixBjMRh0F8G5/utYJ4srAvt8umULiR1
+	 8cEQ7O6QJoqCgOiFWRrzypC4LQ+C7I9oQ/szMjM3unGdF70B3QAaUoRZEfpuwg9uG7
+	 y+K/UDM5HdBU04VDnMsKI1VA9QiMrbH6B5rsh0/jwGm+aJgsCPjNpg+6KM0zSFfti8
+	 KyF4tubmAb4Cw==
+Content-Type: multipart/mixed; boundary="===============3552485567889792111=="
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -49,142 +49,92 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Message-Id: <136ad6946f19e98a0c37189368cca4b26e036e29b242d21b61f9925d9925f896@mail.kernel.org>
-In-Reply-To: <20261125061523.1540234-29-irogers@google.com>
-References: <20261125061523.1540234-29-irogers@google.com>
-Subject: Re: [RFC PATCH v2 28/30] tools/unwind: Add CFG instruction abstract execution oracle to verify_cfi
+Message-Id: <6de91cfc63dfb312e51a201bcffd8890ab902cf9c9da92d9f57c2aae542c9095@mail.kernel.org>
+In-Reply-To: <20261125061523.1540234-16-irogers@google.com>
+References: <20261125061523.1540234-16-irogers@google.com>
+Subject: Re: [RFC PATCH v2 15/30] arm64: Add DWARF CFI annotations to entry, ftrace, EFI, BPF, and KASAN
 From: bot+bpf-ci@kernel.org
 To: irogers@google.com,linux-kernel@vger.kernel.org,linux-trace-kernel@vger.kernel.org,linux-arch@vger.kernel.org
 Cc: jpoimboe@kernel.org,rostedt@goodmis.org,peterz@infradead.org,mingo@redhat.com,tglx@kernel.org,bp@alien8.de,dave.hansen@linux.intel.com,x86@kernel.org,catalin.marinas@arm.com,will@kernel.org,mark.rutland@arm.com,linux-arm-kernel@lists.infradead.org,pjw@kernel.org,palmer@dabbelt.com,aou@eecs.berkeley.edu,alex@ghiti.fr,linux-riscv@lists.infradead.org,acme@kernel.org,namhyung@kernel.org,linux-perf-users@vger.kernel.org,mhiramat@kernel.org,ast@kernel.org,daniel@iogearbox.net,andrii@kernel.org,bpf@vger.kernel.org,nathan@kernel.org,llvm@lists.linux.dev,nsc@kernel.org,linux-kbuild@vger.kernel.org,ojeda@kernel.org,rust-for-linux@vger.kernel.org,ardb@kernel.org,linux-efi@vger.kernel.org,maz@kernel.org,oupton@kernel.org,kvmarm@lists.linux.dev,shuah@kernel.org,linux-kselftest@vger.kernel.org,indu.bhagat@oracle.com,jremus@linux.ibm.com,wnliu@google.com,dylanbhatch@google.com,irogers@google.com,ast@kernel.org,andrii@kernel.org,daniel@iogearbox.net,martin.lau@kernel.org,eddyz87@gmail.com,yongho
  ng.song@linux.dev,mason@kernel.org,ihor.solodrai@linux.dev
-Date: Wed, 25 Nov 2026 07:06:08 +0000 (UTC)
+Date: Wed, 25 Nov 2026 07:06:15 +0000 (UTC)
 
---===============5830286129240094792==
+--===============3552485567889792111==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
 
-> tools/unwind: Add CFG instruction abstract execution oracle to verify_cfi
+> arm64: Add DWARF CFI annotations to entry, ftrace, EFI, BPF, and KASAN
 
-TL;DR:
-- verify_cfi may skip code after returning calls or syscall/svc/ecall, and
-  silently skips past 4096 instructions, yet still counts functions clean, so
-  --strict may miss CFI mismatches
-- noreturn name list may be wrong
+TL;DR: Commit message only: it claims bpf_jit_supports_exceptions() is changed
+but only a comment is, possibly premature before the unwinder commit; it also
+omits an unconditional xzr store in return_to_handler.
 
-> diff --git a/tools/unwind/verify_insn.cpp b/tools/unwind/verify_insn.cpp
-> --- /dev/null
-> +++ b/tools/unwind/verify_insn.cpp
+>     arm64: Add DWARF CFI annotations to entry, ftrace, EFI, BPF, and KASAN
+>
+>     Annotate arm64 hand-written assembly helpers with .cfi_* directives
+>     under CONFIG_UNWINDER_DWARF_CFI so runtime .eh_frame unwinding traverses
+>     call_on_irq_stack(), __efi_rt_asm_wrapper(), return_to_handler() (and
+>     exports ftrace_caller_end), __hwasan_tag_mismatch(), and
+>     arch_bpf_timed_may_goto(), and allow bpf_jit_supports_exceptions() when
+>     CONFIG_UNWINDER_DWARF_CFI is enabled.
+>
+>     Signed-off-by: Ian Rogers <irogers@google.com>
 
-[ ... ]
+The commit message says the patch will "allow bpf_jit_supports_exceptions()
+when CONFIG_UNWINDER_DWARF_CFI is enabled", but the arm64 hunk only
+rewrites the comment:
 
-> +bool isKnownNoreturnName(StringRef Name)
-> +{
-> +	static const char *const Exact[] = {
-> +		"panic", "do_exit", "make_task_dead", "__stack_chk_fail",
-> +		"__stack_chk_fail_local", "fortify_panic", "usercopy_abort",
-> +		"__bug", "bug_at", "do_group_exit", "complete_and_exit",
+> diff --git a/arch/arm64/net/bpf_jit_comp.c b/arch/arm64/net/bpf_jit_comp.c
+> --- a/arch/arm64/net/bpf_jit_comp.c
+> +++ b/arch/arm64/net/bpf_jit_comp.c
+> @@ -3909,10 +3909,11 @@ u64 bpf_arch_uaddress_limit(void)
+>  
+>  bool bpf_jit_supports_exceptions(void)
+>  {
+> -	/* We unwind through both kernel frames starting from within bpf_throw
+> -	 * call and BPF frames. Therefore we require FP unwinder to be enabled
+> -	 * to walk kernel frames and reach BPF frames in the stack trace.
+> -	 * ARM64 kernel is always compiled with CONFIG_FRAME_POINTER=y
+> +	/*
+> +	 * We unwind through both kernel frames starting from within bpf_throw
+> +	 * call and BPF frames. Both UNWINDER_FRAME_POINTER and
+> +	 * UNWINDER_DWARF_CFI preserve x29 across kernel frames and walk
+> +	 * JITed BPF frame records.
+>  	 */
+>  	return true;
+>  }
 
-[ ... ]
+bpf_jit_supports_exceptions() returned true unconditionally before this
+patch and still does.  The wording looks like it came from the x86 patch in
+this series, which added "|| IS_ENABLED(CONFIG_UNWINDER_DWARF_CFI)".
 
-> +	if (Name.starts_with("__throw_") || Name.starts_with("_ZSt7__throw") ||
-> +	    Name.starts_with("_ZSt9__throw") || Name.contains("panicking") ||
-> +	    Name.starts_with("rust_begin_unwind") || Name.contains("noreturn") ||
-> +	    Name.starts_with("__bad_"))
-> +		return true;
-> +	return false;
-> +}
+There is also an ordering question.  At this commit arm64 has neither
+UNWINDER_FRAME_POINTER nor UNWINDER_DWARF_CFI; both arrive in the next
+commit, 14d0cf0eeab5 ("arm64/unwind: Add Minimal DWARF CFI kernel
+unwinder").  The removed sentence "ARM64 kernel is always compiled with
+CONFIG_FRAME_POINTER=y" is still true here and stops being true only in that
+commit.  Should this comment change move there?
 
-The kernel-doc says this returns true only when calls to @Name never return.
-Can Name.starts_with("__bad_") match functions that do return?
+The message also says the annotations are added "under
+CONFIG_UNWINDER_DWARF_CFI", but one change in return_to_handler is not under
+that option:
 
-__bad_area() and __bad_area_nosemaphore() in arch/x86/mm/fault.c are
-ordinary static void functions, and bad_area_nosemaphore() returns after
-calling __bad_area_nosemaphore().  Similarly, Name.contains("panicking")
-also matches returning Rust std helpers such as
-std::panicking::panic_count::is_zero_slow_path() -> bool.
+> @@ -338,12 +352,24 @@ SYM_CODE_START(return_to_handler)
+> -	/* Save the callsite's FP */
+> +	/* Save the callsite's FP and clear unused LR slot in ftrace_regs */
+>  	str	x29, [sp, #FREGS_FP]
+> +	str	xzr, [sp, #FREGS_LR]
+> +#ifdef CONFIG_UNWINDER_DWARF_CFI
 
-verifyFile() puts the address of every such symbol into noreturn_addrs, and
-verifyOracle2Instructions() then does:
+The str xzr store runs in every CONFIG_FUNCTION_GRAPH_TRACER build.  It
+looks harmless, since ftrace_partial_regs() used to copy stack garbage into
+regs->regs[30] for kprobe_multi return programs and now copies 0, but it is
+not mentioned in the changelog.
 
-	if (has_target &&
-	    noreturn_addrs.count(CallTarget))
-		continue;
-
-so the fallthrough PC is never enqueued.  Instructions only reachable past
-such a call (e.g. the epilogue after call __bad_area_nosemaphore) are never
-checked, yet the function is still counted in funcs_clean.  Could these two
-rules be narrowed to exact names (or core::panicking only)?
-
-The kernel names in Exact[] also differ from tools/objtool/noreturns.h:
-complete_and_exit and bug_at do not exist in this tree, and fortify_panic
-is a macro (the symbol is __fortify_panic).  __fortify_panic,
-kthread_complete_and_exit, vpanic and do_task_dead are not recognized.
-Could the kernel names come from tools/objtool/noreturns.h instead of a
-separate hand-kept list?
-
-The prefixes _ZSt7__throw and _ZSt9__throw can only match a 7- or
-9-character std:: identifier starting with __throw, so helpers like
-_ZSt16__throw_bad_castv or _ZSt28__throw_bad_array_new_lengthv are missed.
-
-[ ... ]
-
-> +		bool func_ok = true;
-> +		unsigned steps = 0;
-> +		while (!worklist.empty() && steps < 4096) {
-> +			uint64_t pc = worklist.front();
-> +			worklist.pop();
-> +			steps++;
-
-Each PC enters the worklist at most once, so steps counts distinct checked
-instructions.  When a function has more than 4096 reachable instructions,
-the loop exits with the worklist still non-empty.  Is it intended that the
-function is then still counted by:
-
-> +		if (func_ok)
-> +			st.funcs_clean++;
-
-func_ok is only cleared by an fde_eval_error or an evalRowAgainstAbs()
-failure on one of the first 4096 PCs.  Nothing records the truncation, so
-the function is listed as "Functions 100% instruction-clean", and a
-CFA/RA/FP mismatch after the cutoff is not counted in insns_*_mismatch, so
---strict still exits 0.  Large functions such as sqlite3VdbeExec exceed this
-easily.
-
-The decode-failure path behaves the same way:
-`if (DStat != MCDisassembler::Success || InsnSize == 0) continue;` drops all
-successors of an undecodable instruction and the function can still be
-counted clean.  This also seems to contradict the commit message's
-"verifying at every reachable instruction".  Could a truncated or abandoned
-walk clear func_ok, or be recorded with recordIssue() (for example as
-"step_limit")?
-
-[ ... ]
-
-> +			if (is_ret_or_ind_jump || Desc.isTrap() ||
-> +			    OpName == "UD2" || OpName == "BRK" ||
-> +			    OpName == "EBREAK" || OpName == "C_EBREAK" ||
-> +			    OpName == "SVC" || OpName == "ECALL" ||
-> +			    OpName == "SYSCALL" || OpName == "IRET64" ||
-> +			    OpName == "SYSRET64" || OpName == "ERET" ||
-> +			    OpName == "SRET" || OpName == "MRET")
-> +				continue;
-
-SVC, ECALL and SYSCALL return to the next instruction, but here they end the
-path and next_pc is never enqueued.  Everything after them on that path is
-unchecked, and the function can still be counted in funcs_clean.
-
-Examples are the arm64 vDSO fallbacks in
-arch/arm64/include/asm/vdso/gettimeofday.h (svc #0 followed by the return
-and the caller's epilogue), RISC-V sbi_ecall(), and user-space syscall
-wrappers (syscall; cmp $-4095,%rax; ...; ret).  The address after a syscall
-instruction is also the user PC that dwarf_cfi_unwind_user_eh_frame_hdr()
-starts from for a task that entered the kernel through a syscall.
-
-sigreturn trampolines are already excluded by the earlier
-`if (fr->signal) continue;`, and HVC/SMC are not in the list and fall
-through.  Should SVC/ECALL/SYSCALL be dropped from this terminator list so
-the fallthrough is verified, with stepInstruction() clobbering their defs?
+Could the changelog say that the bpf_jit_comp.c part only updates the
+justification ahead of the unwinder-choice commit (or move it there), and
+mention the unconditional FREGS_LR store?
 
 
 ---
@@ -192,4 +142,4 @@ AI reviewed your patch. Please fix the bug or email reply why it's not a bug.
 See: https://github.com/kernel-patches/vmtest/blob/master/ci/claude/README.md
 
 CI run summary: https://github.com/kernel-patches/bpf/actions/runs/45561209846
---===============5830286129240094792==--
+--===============3552485567889792111==--
