@@ -1,45 +1,45 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795590340;
-	b=Ry8lmEFsdiWTQ9gqNC/4oWbVYrZykwPP73iyKrExZqk1C69XO2P6V08yt4JsJMgsEOnN
-	 E7lZClA1bL5L8p28aG5IOYqjFneu+62KVgn/DQSaSqpeMLobKlYdL1wX5htWIKSD3nLvA
-	 RN/2P+/bhM8m8XX/pBzEay3DIvqtcuglAR49579Usas5TZkLFMVPvdU7Hkqlu0cIoPS0x
-	 mV3Brv758ltmW551Tk850q1r6WEThd0MTBtKoY3xsL12LAYLrJUELn3GDBFbuTfXZca7b
-	 cKK+cwtHzW8DoWAi++iM9tp+vzoDYzXqpmLLozY1QIENWlOllxPYoQCFGWw1VA6p7lw==
+	t=1795590347;
+	b=RO14IudfjT7slz1n0p76qwRWsWHjrp9RhFhtpSgC69SPwJniCGHCNltekxwxFjYNbyAi
+	 43HKUj+c3QlV3HfzEr6qHSn21e0UCoUBB49FHqVFMSN9c9PG7gKO+MnimC7BiU89JelNU
+	 yDuiXerwS65MaRWiX0Y3EV8Usd06vs/5cA6yjvmDJ0uXCQZDcjlYoG9BCqW5O3EapowOo
+	 el1QWMB6yhhsHs7+UyFY+TzGIjIJRLffBZ2ZnNVGOPqB02W72TD99AXgEqOaCgevOf1sl
+	 sT/GVShq4YETBDUjN/B28s9cpBUpAcIoY2F0iSHr4tY/ZQiuWDGuTgXCQAZnj2FMxQg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795590340;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795590347;
 	h=Received:DKIM-Signature:Content-Type:MIME-Version:Message-Id:
 	 In-Reply-To:References:Subject:From:To:Cc:Date;
-	bh=3Rjs+hf79BZIi0D+eaQi3V4duXTfNTgtE9+NKqARO4s=;
-	b=lPZHhNhmdHwpZsMiK1WRTJx5y2hlvKhCOu8q4Msh8JXvDWzVakzpJe1bL7Kz4QVPMMk4
-	 WawAGCHjchiuWO7mstDYyBEokzfqS1Oxr9LX0j4Q+3HKgPo4/L8t5/4aFH5jvAaZV7Yxn
-	 ChHsE7IXkSMQZPKp1sPLrK54alPs/0mbiQh81lmdW7gzxl40Tj1Zsp1vdkHT9fM6L0I3l
-	 bwPPhsWxoIqeZ4FSULYCljiUTUG0hbHgqLPD72WRwYSVwAArdQWDrWcylDCOq+d+Y+VaA
-	 IyoZ3MUPyJgxeCIOdlVrOq9VRjJukOKwdyD2/rJoaPFX8izJBCklShzjZqVnpKZEFtQ==
+	bh=mk40sVkFOHQ4mbTFK0Wk1/9jOwYnq/31sZddGtTn2r8=;
+	b=a+l1185YH302LrxcUcsaksginpR6XTDfnvymSXe+JlGcNUs/5Gw2UQ9j2krBo74SaL6P
+	 m4aWiwD78+FXsD07/pgI2Rpr1dDn7fYYo1CfPCbiZCHf6zj4IHeWIjQtCKPnuSL6SWjhm
+	 U1UaM9QOE+hDU/5Dzm3q7ha9hbdVwQJXwz9zTISXX0Et8ng0/9SiLNFu8lPO6aqDVkSZ7
+	 ULXpHzyQY4DaCd39FdQiviyU+XLRa3jmZasrIgg3LWC3vAJL2UmP+on4WHfZoMLKYz7Wn
+	 bpZogElr/Yg8Eztxk2Qxf9f10aC8NO8cYXofqjF9JoVb/VGhzYfkQZznea8OQnbhbFw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="Fvfa/TaF";
+	dkim=fail reason="signature verification failed" header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=GRtb5FE9;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 474C3606A337;
-	Wed, 25 Nov 2026 07:05:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EFB9F606A32A;
+	Wed, 25 Nov 2026 07:05:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Fvfa/TaF
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7FFC91F000D1;
-	Wed, 25 Nov 2026 07:05:35 +0000 (UTC)
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=GRtb5FE9
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3EBF51F000D1;
+	Wed, 25 Nov 2026 07:05:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795590339;
-	bh=3Rjs+hf79BZIi0D+eaQi3V4duXTfNTgtE9+NKqARO4s=;
+	s=k20260515; t=1795590346;
+	bh=mk40sVkFOHQ4mbTFK0Wk1/9jOwYnq/31sZddGtTn2r8=;
 	h=In-Reply-To:References:Subject:From:To:Cc:Date;
-	b=Fvfa/TaF/5uRajXxAtOrYOty3mxmlgYptKUjtuCqQDhMs+J9RxOV5Nel6HK+7FhBq
-	 LaJBXEzWytsu0Tv+aYlegSeyCBpi/OzE8h38mmyaecQIkf+SVjbX6+B3IWjQZYG72/
-	 BHv4UVcWlK/A8E6p2UOAIlKy3Ys+8EZP/36IIYJYjCKQrlfOzLYsx0g+NpvrmGMJWB
-	 X0mKO/Mq8dyuwxWpFPAt7j6yz9qg8D085iKX+l2pyrLYcXJ9T6pgwhqtSY4dgLGaDp
-	 xCgIXTyUP17AXbQejQQuMOpNXJy7h3sSN18861+XmIEkWMEZWkGWailSHzHLiQQnlw
-	 tOYY3S7k0YmrQ==
-Content-Type: multipart/mixed; boundary="===============8402610718020353362=="
+	b=GRtb5FE9lgsDE/bKoL3Rvn8xFaB0dRigQLL/uapE7WEJ9NrqYdC4bDZmSEiPNd2b8
+	 KwepLUjS19i7xjS1fa4NNbAvwbLCYbsXa3rFCUCkbOCGUZnAtWIEMGtNbVTXItAYpl
+	 tKGbhNHwVtywRWlLsPF6x38bvO1Kv74ZYblJybqw8/cQ1IrXlAsYu1WyzkMDnwT72t
+	 sgWbsLSCDMI/iW1jut/6aM+59Ro0o70Ow8n/cjrno0+UcQ2REbKZ6WFdrbTK2L6YEK
+	 Cf5989xM6AHFMlDEiHafzz+v+qU9yWhnIesHbszYK/VYmzrNtsfhvRdDYTfSiKxJ02
+	 h7NG/b4Bu98qw==
+Content-Type: multipart/mixed; boundary="===============8094284997810905034=="
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -49,253 +49,129 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Message-Id: <4d4c5055e3810e6955b671c7694f4c69f23e2893e276855fa5688dc8c2838b90@mail.kernel.org>
-In-Reply-To: <20261125061523.1540234-28-irogers@google.com>
-References: <20261125061523.1540234-28-irogers@google.com>
-Subject: Re: [RFC PATCH v2 27/30] tools/unwind: Add multi-arch symbolic instruction lifters for verify_cfi
+Message-Id: <85612bab718b4dff389065a2f1e9b1a6339da01193ffaff6c5d8aedfbf46904a@mail.kernel.org>
+In-Reply-To: <20261125061523.1540234-22-irogers@google.com>
+References: <20261125061523.1540234-22-irogers@google.com>
+Subject: Re: [RFC PATCH v2 21/30] scripts: Add eh_frame_min.py .eh_frame coverage and size analyzer
 From: bot+bpf-ci@kernel.org
 To: irogers@google.com,linux-kernel@vger.kernel.org,linux-trace-kernel@vger.kernel.org,linux-arch@vger.kernel.org
 Cc: jpoimboe@kernel.org,rostedt@goodmis.org,peterz@infradead.org,mingo@redhat.com,tglx@kernel.org,bp@alien8.de,dave.hansen@linux.intel.com,x86@kernel.org,catalin.marinas@arm.com,will@kernel.org,mark.rutland@arm.com,linux-arm-kernel@lists.infradead.org,pjw@kernel.org,palmer@dabbelt.com,aou@eecs.berkeley.edu,alex@ghiti.fr,linux-riscv@lists.infradead.org,acme@kernel.org,namhyung@kernel.org,linux-perf-users@vger.kernel.org,mhiramat@kernel.org,ast@kernel.org,daniel@iogearbox.net,andrii@kernel.org,bpf@vger.kernel.org,nathan@kernel.org,llvm@lists.linux.dev,nsc@kernel.org,linux-kbuild@vger.kernel.org,ojeda@kernel.org,rust-for-linux@vger.kernel.org,ardb@kernel.org,linux-efi@vger.kernel.org,maz@kernel.org,oupton@kernel.org,kvmarm@lists.linux.dev,shuah@kernel.org,linux-kselftest@vger.kernel.org,indu.bhagat@oracle.com,jremus@linux.ibm.com,wnliu@google.com,dylanbhatch@google.com,irogers@google.com,ast@kernel.org,andrii@kernel.org,daniel@iogearbox.net,martin.lau@kernel.org,eddyz87@gmail.com,yongho
  ng.song@linux.dev,mason@kernel.org,ihor.solodrai@linux.dev
-Date: Wed, 25 Nov 2026 07:05:35 +0000 (UTC)
+Date: Wed, 25 Nov 2026 07:05:42 +0000 (UTC)
 
---===============8402610718020353362==
+--===============8094284997810905034==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
 
-> tools/unwind: Add multi-arch symbolic instruction lifters for verify_cfi
+> scripts: Add eh_frame_min.py .eh_frame coverage and size analyzer
 
 TL;DR:
-- x86 PUSH64r/POP64r prefix tests likely catch memory forms, possibly
-  clobbering %rbp and causing false CFI mismatches
-- arm64 sub/add sp, sp, xN probably matches wrong opcodes, leaving SP unknown
-- RISC-V jal x0 may clobber ra; LDP W scale looks wrong
+- eh_frame_min.py may misreport sizes for RISC-V relocatable objects
+  (relocated advances unread), so savings and --minify output are wrong
+- FDE byte total counts unsupported FDEs, skewing the average
+- Two comment nits
 
-> diff --git a/tools/unwind/verify_insn_arch.cpp b/tools/unwind/verify_insn_arch.cpp
+> diff --git a/scripts/eh_frame_min.py b/scripts/eh_frame_min.py
 > --- /dev/null
-> +++ b/tools/unwind/verify_insn_arch.cpp
+> +++ b/scripts/eh_frame_min.py
 
 [ ... ]
 
-> +	if (Desc.isCall()) {
-> +		for (int d = 0; d < 32; d++) {
-> +			if (AS.llvm_arch == Triple::x86_64) {
+> +        if name in sections:
+> +            # Accumulate sizes for multi-section objects (e.g. .text.*)
+> +            prev_addr, prev_sz, prev_b = sections[name]
+
+This isn't a bug, but this branch only runs when two section headers have
+the identical name.  Per-function sections such as .text.foo and .text.bar
+have distinct names and never reach it; they are summed later in
+analyze_elf() by the name.startswith(".text") prefix check.  Does the
+"(e.g. .text.*)" comment point at the right place?
 
 [ ... ]
 
-> +			} else if (AS.llvm_arch == Triple::riscv64) {
-> +				if (d == 0 || d == 2 || d == 3 || d == 4 ||
-> +				    d == 8 || d == 9 || (d >= 18 && d <= 27))
-> +					continue;
-> +				st.regs[d] = {VK_UNKNOWN, 0};
+> +            elif ch == "B":
+> +                # BTI / PAC key on arm64
+> +                pass
 
-On riscv64, `jal ra, sym` and `jalr ra, off(rs)` do not set isCall in their
-MCInstrDesc, and stepInstructionRiscv() does not model JAL/JALR.  Is this
-riscv64 arm of the Desc.isCall() loop reachable for a real call?
-
-In the later patch "tools/unwind: Add CFG instruction abstract execution
-oracle to verify_cfi" (9528bbf0f915), verifyOracle2Instructions() sends
-every RISC-V call around stepInstruction() and repeats the same register
-list:
-
-    if (AS.llvm_arch == Triple::riscv64 && is_call) {
-            for (int d = 1; d < 32; d++) {
-                    if (d == 2 || d == 3 || d == 4 ||
-                        d == 8 || d == 9 ||
-                        (d >= 18 && d <= 27))
-                            continue;
-                    next_st.regs[d] = {VK_UNKNOWN, 0};
-            }
-    } else {
-            stepInstruction(next_st, MI, OpName, Desc, MCRI, ...);
-    }
-
-So the RISC-V caller-saved set is kept in two places that have to stay in
-sync, and any other caller of clobberGenericDefs()/stepInstruction() leaves
-a0-a7 and t0-t6 live across `jal ra`/`jalr ra`, contrary to the "ABI
-caller-saved registers across call instructions" comment.
-
-Could the normalized is_call be passed into stepInstruction() and
-clobberGenericDefs() so the oracle can drop its copy, or could this arm be
-removed with a note that the caller handles RISC-V calls?
+This isn't a bug, but 'B' in the AArch64 DWARF ABI only means that frames
+use the B key for return address signing.  BTI has no CIE augmentation, so
+should "BTI" be dropped from this comment?
 
 [ ... ]
 
-> +	if (OpName.starts_with("PUSH64r")) {
-> +		int src = ctx.regD(0);
-> +		st.regs[7] = addSymImm(st.regs[7], -8);
-> +		st.store(st.regs[7], ctx.getRegVal(st, src));
-> +		return true;
-> +	}
-> +	if (OpName == "PUSHF64" || OpName.starts_with("PUSH64i") ||
-> +	    OpName == "PUSH64rmm" || OpName == "PUSH64rmr") {
-> +		st.regs[7] = addSymImm(st.regs[7], -8);
-> +		st.store(st.regs[7], {VK_UNKNOWN, 0});
-> +		return true;
-> +	}
-> +	if (OpName.starts_with("POP64r")) {
-> +		int dst = ctx.regD(0);
-> +		SymVal loaded = st.load(st.regs[7]);
-> +		st.regs[7] = addSymImm(st.regs[7], 8);
-> +		if (dst != 7)
-> +			ctx.setRegVal(st, dst, loaded);
-> +		return true;
-> +	}
-> +	if (OpName == "POPF64" || OpName == "POP64rmm") {
-> +		st.regs[7] = addSymImm(st.regs[7], 8);
-> +		return true;
-> +	}
+> +            if hi == 0x40:
+> +                op_counts["DW_CFA_advance_loc"] += 1
+> +                pending_adv += lo
+> +                continue
 
-Don't starts_with("PUSH64r") and starts_with("POP64r") also match the memory
-forms PUSH64rmm and POP64rmm?  If so, the explicit "PUSH64rmm",
-"PUSH64rmr" and "POP64rmm" tests below them can never be reached.
+On RISC-V relocatable objects, are the DW_CFA_advance_loc and
+advance_loc1/2/4 bytes stored in .eh_frame the real PC deltas?
 
-For those memory forms, MCInst operand 0 is the base register of the memory
-reference, so ctx.regD(0) returns the address base rather than a data
-register.
+With linker relaxation, those deltas are filled in at link time from
+R_RISCV_SET6/SUB6 (and SET8/SUB8, SET16/SUB16, SET32/SUB32) relocation
+pairs, and the stored bytes are placeholders.  The script never reads
+.rela.eh_frame.
 
-For `pushq -8(%r10)` (PUSH64rmm) this stores the symbolic value of %r10 into
-the new stack slot, where the intended branch would store VK_UNKNOWN.  That
-is the DRAP sequence the function's kernel-doc says it models:
+arch/riscv/Makefile only adds -mno-relax through KBUILD_CFLAGS_MODULE and
+KBUILD_AFLAGS_MODULE, so objects such as the example mm/vmscan.o keep
+relaxation.  The build-time minifier in this series handles this case in
+scripts/min_eh_frame.c:
 
-    lea 8(%rsp), %r10
-    and $-64, %rsp
-    pushq -8(%r10)
+    * Buffered output event emitted by minify_insns(). Adjacent non-relocated
+    * PC-advance events are coalesced before serialization, whereas relocated
+    * DW_CFA_advance_loc* instructions (e.g. RISC-V R_RISCV_ADD/SUB pairs) are
+    * preserved verbatim ...
 
-The same happens for any `pushq disp(%rbp)` or `pushq disp(%rsp)`, such as
-GCC pushing stack-passed arguments for calls with more than six arguments.
+Here a relocated advance read as 0 leaves pending_adv at 0, so emit_op()
+flushes no "adv" event and the next kept rule is attached to the previous
+PC.  For riscv .o inputs that makes the 'FDE bytecode payload ... -> N B'
+figure and the 'Minified .eh_frame' size understated, which overstates the
+savings percentage, and the --minify blob, documented as being for
+differential tests, is not equivalent to the input CFI.
 
-For `popq disp(%base)` (POP64rmm), ctx.setRegVal(st, base, loaded) overwrites
-the base register's symbolic value with the popped value instead of storing
-to memory.  With base == %rbp, for example `pushf; popq -0x10(%rbp)` from
-native_save_fl() with the "=rm" output constraint, %rbp becomes VK_UNKNOWN.
-Every following row with an rbp-based CFA would then fail in
-evalRowAgainstAbs() with cfa_clobbered_or_opaque or fp_recovery_mismatch for
-a correct function.
-
-Would testing exact names (OpName == "PUSH64r" || OpName == "PUSH64rmr", and
-OpName == "POP64r" || OpName == "POP64rmr"), or moving the memory-form
-branches ahead of the prefix tests, give the intended behaviour?  No later
-patch in the series (up to 0278f019673d) touches verify_insn_arch.cpp.
+Neither the commit message nor the docstring lists this as a limitation.
+Should the script read .rela.eh_frame and keep relocated advances verbatim,
+as min_eh_frame.c does, or refuse or flag ET_REL EM_RISCV inputs?
 
 [ ... ]
 
-> +	if ((OpName == "ADDXrs" || OpName == "SUBXrs" ||
-> +	     OpName == "ADDXrx" || OpName == "SUBXrx") &&
-> +	    MI.getNumOperands() >= 4 && MI.getOperand(3).isImm()) {
+> +            res = decode_and_minify_insns(fde_insns, cie, arch, init_row=cie_init_rows[cie_off])
+> +            total_op_counts.update(res["op_counts"])
+> +            total_min_insn_bytes += len(res["min_insns"])
 
 [ ... ]
 
-> +		} else if (OpName.ends_with("rx") &&
-> +			   ((imm_arg >> 3) == 3 || (imm_arg >> 3) == 7) &&
-> +			   (imm_arg & 7) == 0) {
-> +			ok_shift = true;
-> +		}
-
-Are these the right LLVM opcode names for `add/sub sp, sp, xN`?  In LLVM's
-AArch64 AddSub multiclass, ADDXrx/SUBXrx take a GPR32 Rm with the
-UXTB..SXTW extends.  The 64-bit Rm forms that allow only UXTX/SXTX are the
-separate opcodes ADDXrx64/SUBXrx64, and the aliases used when Rd or Rn is SP
-(`sub sp, sp, x12` == `sub sp, sp, x12, uxtx #0`) bind to those.
-
-If so, the (imm_arg >> 3) == 3 || == 7 test can never be true for a decoded
-ADDXrx/SUBXrx, so this sub-branch is dead.  "SUBXrx64"/"ADDXrx64" match no
-case, stepInstructionArm64() returns false, and clobberGenericDefs() sets
-operand 0 (SP, DWARF 31) to VK_UNKNOWN.
-
-This prologue shape is common with GCC when the adjustment is not a valid
-add immediate but can be loaded with one mov:
-
-	mov	x12, 4160
-	sub	sp, sp, x12
-	.cfi_def_cfa_offset 4160
-
-After that instruction sp is VK_UNKNOWN, and evalRowAgainstAbs() would report
-cfa_clobbered_or_opaque for the SP-based CFA.  Even with the CFA moved to
-x29, the matching `add sp, sp, x12` / `ldp x29, x30, [sp], #N` epilogue
-would still report a mismatch.  The MOVZXi/MOVNXi/MOVKXi constant tracking
-added for this case then has no consumer for SP.
-
-Should this match "ADDXrx64"/"SUBXrx64" (and adjust the ends_with("rx")
-test), with the current ADDXrx/SUBXrx names dropped or handled separately
-with W-register extend semantics?  No later patch in the series fixes this.
+> +            if not reasons:
+> +                supported_fdes += 1
 
 [ ... ]
 
-> +	auto scaleOf = [](StringRef N) -> int64_t {
-> +		if (N.contains("Q"))
-> +			return 16;
-> +		if (N.contains("X") || N.contains("D"))
-> +			return 8;
-> +		if (N.contains("W") || N.contains("S"))
-> +			return 4;
+> +    print(f"  FDE bytecode payload    : {total_orig_insn_bytes:10,d} B -> {total_min_insn_bytes:,d} B "
+> +          f"(avg {total_min_insn_bytes / max(supported_fdes, 1):.1f} B/FDE)")
 
-Doesn't N.contains("D") also match the "D" in the "LDP" mnemonic prefix?
-scaleOf("LDPWpost") and scaleOf("LDPWpre") would then return 8 instead of 4.
+Is total_min_insn_bytes computed over the same set of FDEs as
+supported_fdes?
 
-The MC operand for LDP/STP is the raw signed imm7, so the scale is used
-directly here:
+total_min_insn_bytes is incremented for every FDE, before the
+"if not reasons:" check.  Unsupported FDEs are never written to
+min_eh_stream, but their minified bytecode is still counted, and the
+average then divides by supported_fdes only.
 
-	ctx.setRegVal(st, wb,
-		      addSymImm(addr,
-				MI.getOperand(4).getImm() * scaleOf(OpName)));
+For example, with 100 FDEs of which 50 are supported and 50 unsupported,
+each with 10 B of minified bytecode, total_min_insn_bytes is 1000 and
+supported_fdes is 50.  The script prints "avg 20.0 B/FDE", while the
+emitted FDEs average 10 B and only 500 B of FDE bytecode is in the
+minified stream.
 
-For example `ldp w19, w20, [sp], #8` would advance the abstract SP by 16 and
-desynchronise it from the CFI, giving a spurious CFA mismatch for the rest
-of the path.  The STP W forms come out right only because "STP" contains
-neither 'D' nor 'X'.  Compiler-generated prologues and epilogues do not use
-W-pair writeback on SP, so this mainly affects hand-written assembly.
+This is reachable with the listed inputs.  The x86_64 .plt FDE in /bin/bash
+uses a DW_CFA_def_cfa_expression that ends in DW_OP_plus, not DW_OP_deref,
+so it is added to reasons and treated as unsupported, yet its earlier
+def_cfa_offset ops still add to total_min_insn_bytes.
 
-Would selecting the scale from the register-class character after
-"LDP"/"STP" (OpName[3]) avoid the substring ambiguity?
-
-[ ... ]
-
-> +void normalizeRiscvControlFlow(const MCInst &MI, StringRef OpName,
-> +			       const MCRegisterInfo &MCRI,
-> +			       bool &is_ret_or_ind_jump, bool &is_uncond_branch,
-> +			       bool &is_call)
-> +{
-
-[ ... ]
-
-> +	if (OpName == "JAL") {
-> +		if (rd == 0) {
-> +			is_uncond_branch = true;
-> +			is_call = false;
-
-normalizeRiscvControlFlow() clears is_call for an uncompressed `j` (JAL
-x0), but doesn't stepInstruction() still see it as a call and clobber ra?
-
-The caller verifyOracle2Instructions() added in 9528bbf0f915 starts from
-is_call = Desc.isCall(), which is true for JAL since LLVM marks JAL/JALR
-isCall = 1.  After normalisation is_call is false, so the caller takes the
-else branch and calls stepInstruction().  stepInstructionRiscv() has no
-"JAL" case and returns false, so stepInstruction() falls back to:
-
-	if (!handled)
-		clobberGenericDefs(st, MI, Desc, MCRI, AS);
-
-clobberGenericDefs() re-reads Desc.isCall(), which is still true for JAL,
-and the riscv64 arm sets ra (x1), t0-t6 and a0-a7 to VK_UNKNOWN on every
-plain unconditional jump.  The state is then enqueued at the branch target.
-If the RA rule there is DWARF_CFI_RULE_SAME, evalRowAgainstAbs() reads
-st.regs[1] == VK_UNKNOWN and records a spurious ra_recovery_mismatch.  RA is
-SAME throughout leaf functions, and before the prologue or after the
-epilogue in shrink-wrapped paths.
-
-With RVC, `c.j` (C_J, not isCall) is unaffected, but an uncompressed `jal
-x0` is still emitted when the target is outside the +/-2KB c.j range, and
-for every jump in code built without the C extension.  The real call paths
-never reach this clobber because the caller handles riscv64 calls itself, so
-the riscv64 isCall branch in clobberGenericDefs() only fires for JAL x0, the
-one case that is not a call.
-
-Could "JAL" with rd == x0 (and C_J) be modelled in stepInstructionRiscv() as
-a no-op returning true, or could stepInstruction() take the normalised
-is_call instead of using Desc.isCall()?  No later patch in the series fixes
-this.
+Should total_min_insn_bytes be accumulated only inside the
+"if not reasons:" branch, or should the average divide by total_fdes and
+the line be labelled as covering all FDEs?
 
 
 ---
@@ -303,4 +179,4 @@ AI reviewed your patch. Please fix the bug or email reply why it's not a bug.
 See: https://github.com/kernel-patches/vmtest/blob/master/ci/claude/README.md
 
 CI run summary: https://github.com/kernel-patches/bpf/actions/runs/45561209846
---===============8402610718020353362==--
+--===============8094284997810905034==--
