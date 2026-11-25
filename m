@@ -1,75 +1,58 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.215.199
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795587419;
-	b=XXq/qiOcVe3hpStx/fZys+7r6bU6l79/qFyqszpyexQEQUAVQ9THSNKJDrqPPJGyMTFQ
-	 7IIfKxx9o35EYOffUab+TCPz4VmlIEcauEHu4jCa3v5Kq6X57elJOysl1MvuZYwJRw6VB
-	 beSsfPTcGlmK8kbGWf4p0V7SvQ/AiboyQDJHx7HFR77CJjQqa9uJ1qX9qfvBPWVX90ypM
-	 DqrNTndbHv+ikWMXNAM/zfAu5oY7UHOAFnbIyEGgTDpB3QgQJjYrdN4ayweBt8dMJhCbH
-	 Uz+Bn1aczN2ecEnLeR7WE9m6icLciI/lIRJ8bYe38TdIAAYA4zqlfobJap4qjpNW2rg==
+	t=1795588332;
+	b=a/JDXD7W7ftQYc8U4b739KEkODbDuegNjkMAIuPYyUgv7cE46q4+Eb8iWcpE9OHjvn49
+	 EfGYQyM52oWofD6pFIAxTOwlA2xlbiZ5g2lXiKbjBwtHofOzr5OIeqsGQNW24hVmHcHaj
+	 Dq7n+Dhu1h8TQdXsClIDvC+zm7RZsjsDNS/RdvFmzo78Yl5mkyh5HI+YOt2uqBpH7LdqE
+	 0DwPR9mH/zd6KYp3L/jfNtenQ2+GLkpZsFIYnO1WewgPxR038GP7H4ZnDUd4zfuj8JCIM
+	 +9HVkzg54oiA4Ho0YPfRMg/bRZUrC2qwQpyklDVvKImXSwrNBOjbI20maBhtCAZuQwA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795587419;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Received:Date:In-Reply-To:
-	 Mime-Version:References:X-Mailer:Message-ID:Subject:From:To:Cc:
-	 Content-Type;
-	bh=B0szZcyaY7NP1HowgKnJWSVhbM1uN8jco8rE2rfxzUA=;
-	b=v9uUCj6QYoOiKlkDb/Uu6kpTSLbMT46ni/lDQcTwhZm8oDPAzq7WaTIx8OUjvKfLApKZ
-	 59UE2XgYPE//dwX+AU3xDZnZW5mWt8JBXYXuRHojUO0K0o8ISd0Jx0PnU/Jo3YaVyH+S0
-	 dq/CwT2ecfPQC8bqjg/V7VvDxkAzXeavAUvucTOIuoi0xSNZJ2nrIhQB77JZl/j2kEGEu
-	 0Fupui4Xm/rz7tKGzVMzQW8jUxZKxlvTAIP6+oSbQKl3x7eDRUoht/uUiFLm6ftq5E7pT
-	 kyBdeR5P+uAYI3a3bXnbUPo09Df8xIXICU3uzBl6h+1IIeacVh1YskeCe8KFpxZZHFw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795588332;
+	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
+	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
+	bh=lN0/IceNSq/tJfj0XM571/oGNRiYEMA+7QT5WkAGDPo=;
+	b=y5mBJkOt+A23ZROr7X4AEMqX6PytkoQjfdGN9xJRbS5aDUy171SdfAdnWf8XfBRWHj3o
+	 jCVFFXgXvbMwFB0EL9gKVZs8WjPoBRdMhQehZ73+55STmaaqXMgmTXd1bJkaHi5naL/pV
+	 pGHdnS0f1hsZAEjNMQrsBS4N8TTEUIpTMIouqdqJv1S3z0NBZure+xwchN0K+I5L1EJsg
+	 vzRwn0ooxSs+cJBLFRDGWC+HJ4MCqF+Cp/XjYAgZ7f5TTkvl1hNwoV2xgXWYsuV1W91/O
+	 mnlSUxr98fhwNTJoYobKBr/B91qHkyHcIZeDwnbDi14AA2plSDpLpEC+rZLZqxMukjg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=google.com;
-	spf=pass smtp.mailfrom=flex--irogers.bounces.google.com;
-	dkim=pass header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=LJpTIGT8;
-	arc=none smtp.remote-ip=209.85.215.199
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com [209.85.215.199])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=UHyDqgjG;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32D5B606DE7C
-	for <linux-efi@vger.kernel.org>; Wed, 25 Nov 2026 06:16:58 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 32D5B606DE7C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--irogers.bounces.google.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E986606A32C;
+	Wed, 25 Nov 2026 06:32:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.a=rsa-sha256 header.s=20260707 header.b=LJpTIGT8
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-cddf142187aso2605943a12.2
-        for <linux-efi@vger.kernel.org>; Tue, 24 Nov 2026 22:16:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20260707; t=1795587418; x=1796192218; darn=vger.kernel.org;
-        h=content-type:cc:to:from:subject:message-id:references:mime-version
-         :in-reply-to:date:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=B0szZcyaY7NP1HowgKnJWSVhbM1uN8jco8rE2rfxzUA=;
-        b=LJpTIGT83cKcxQDhhMuek4OwdgkdQKkLxYONCLmTepeyOwwiDEqpA9PI3PrOY8XcnW
-         qBDwpKFXtz0XIpAR5Dq9NgplU/l2p/ADVoH7Mm5ymwO7xGNy/SpVvRtOaXSdsLLi5G25
-         i79iMt6EXqwRF1s3apdVBesej5O7itpdAfaK/CheRhK+FRwAZgRLX/ob6cSskRGhwqvV
-         ZWWo8Me1Ubrs4vQJqXgefYbt/X8NmL0zrd4kz2ZMiZlml0oGdd/AuWxGQnVIhh1z+uZh
-         pzdWsnNoz6uGgypKUUOT4Uf8kjKdew9+9OF4Nu8IUXmfkp/lVmFql3ye6f7qmIGe1LLq
-         chkw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795587418; x=1796192218;
-        h=content-type:cc:to:from:subject:message-id:references:mime-version
-         :in-reply-to:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=B0szZcyaY7NP1HowgKnJWSVhbM1uN8jco8rE2rfxzUA=;
-        b=0pvRaIen1VY4ldUBe2NKcqL3zwsO+dKW01qzZHqcALjWr2dBk/JuatmUdgqmI8K7zC
-         cbpV6a1Z1M/9LjHUZqwzXveAQWWKTCirD0VvqxkpGi2d2AVepLiKkscdTbKiO3RhbFIp
-         FF0jzTKX97V0KND7Ppx+7YsCsM9Hu5EJZSPkuUzSMtHXgRQPZnSXdVize6QM6IPFnGm+
-         JriIhmYH4fa6CrXdNuw4XtHhamgf5rDWAgs+JzUrYE44YcCbbJTSJFt2DaXjaVNCzzfe
-         n2YImjYyeuw0MBiP6rJUQVlE0xVimC+d086Npk7Z/1MTTjJ8nepaxK7nAOb9SX7vQQ4F
-         BGwA==
-X-Forwarded-Encrypted: i=1; AL+hErGrU33mgZqGBeU1RQHRzoh103dO/wrLPuMYgV0jNOUCGeZBLiEeTUie3E1TASDHL+ccRL05bgmqwo0=@vger.kernel.org
-X-Gm-Message-State: APuU4Z/gFpBdihRGdf8ZRIdHxt5NwRwIDDxbz/d5vGawWr8/VeNaCtFH
-	s9aPP8yqE5FuaRbsXtwbOvccRZaTbUvYSKxXL1vjO7AZJhVj3gTIJlaHYCKO0bHmzOzw9UxnTe+
-	qWEEbJ0e9Eg==
-X-Received: from pgin21-n1.prod.google.com ([2002:a05:6a02:8795:10b0:cdb:932c:948b])
- (user=irogers job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6300:8095:b0:3dd:85a8:cac8
- with SMTP id adf61e73a8af0-4014c949c92mr14160775637.31.1795587417428; Tue, 24
- Nov 2026 22:16:57 -0800 (PST)
-Date: Tue, 24 Nov 2026 22:15:23 -0800
-In-Reply-To: <20261125061523.1540234-1-irogers@google.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=UHyDqgjG
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6692E1F000D3;
+	Wed, 25 Nov 2026 06:32:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795588332;
+	bh=lN0/IceNSq/tJfj0XM571/oGNRiYEMA+7QT5WkAGDPo=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=UHyDqgjGATZQTJAtY/qhXxBpvhVzI3nUCjjnlA+J1+wzYfEh+daYTDwpZPRR8G/a/
+	 UXvic48AGJEdsn/7AD13JK/PhMNN8TbDTrR5sfaIuK6RdL34LZNXVbSqkh4tnL8P9/
+	 zalBtZflVtve2LXPyIrRdrr0ecP7opSXkGzkHkagC/nNZ/S71BRL96KUsINOQ/+PSu
+	 vRjvDrWqCkt4UIj2KZwTD96Ns7q0TT9RADkDWMcx+HeQh8R/FUh9QsUPBEKvnLk4rA
+	 dR0kl1zCR/qf6ebS90O1IJGCp85/X5rrx1TOAAv3Dc8nL8WYqT/00bBFR6dp3grynI
+	 qtCQTpLBTb30w==
+Message-ID: <sashiko-outbox-232708@kernel.org>
+From: sashiko-bot@kernel.org
+Subject: Re: [RFC PATCH v2 01/30] unwind: Add Minimal DWARF CFI bytecode
+ interpreter
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Ian Rogers" <irogers@google.com>, linux-trace-kernel@vger.kernel.org
+Cc: jpoimboe@kernel.org, rostedt@goodmis.org, peterz@infradead.org, mingo@redhat.com, tglx@kernel.org, bp@alien8.de, dave.hansen@linux.intel.com, x86@kernel.org, catalin.marinas@arm.com, will@kernel.org, mark.rutland@arm.com, pjw@kernel.org, palmer@dabbelt.com, aou@eecs.berkeley.edu, alex@ghiti.fr, acme@kernel.org, namhyung@kernel.org, linux-perf-users@vger.kernel.org, mhiramat@kernel.org, ast@kernel.org, daniel@iogearbox.net, andrii@kernel.org, bpf@vger.kernel.org, nathan@kernel.org, nsc@kernel.org, linux-kbuild@vger.kernel.org, ojeda@kernel.org, ardb@kernel.org, linux-efi@vger.kernel.org, "Marc
+ Zyngier" <maz@kernel.org>, "Oliver Upton" <oupton@kernel.org>, kvmarm@lists.linux.dev, shuah@kernel.org, indu.bhagat@oracle.com, jremus@linux.ibm.com, wnliu@google.com, dylanbhatch@google.com, gary@garyguo.net
+In-Reply-To: <20261125061523.1540234-2-irogers@google.com>
+References: <20261125061523.1540234-1-irogers@google.com>
+ <20261125061523.1540234-2-irogers@google.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Wed, 25 Nov 2026 06:32:09 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -78,80 +61,94 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-Mime-Version: 1.0
-References: <20261125061523.1540234-1-irogers@google.com>
-X-Mailer: git-send-email 2.56.1.831.g720f3f5937-goog
-Message-ID: <20261125061523.1540234-31-irogers@google.com>
-Subject: [RFC PATCH v2 30/30] MAINTAINERS: Add DWARF CFI stack unwinding entry
-From: Ian Rogers <irogers@google.com>
-To: linux-kernel@vger.kernel.org, linux-trace-kernel@vger.kernel.org, 
-	linux-arch@vger.kernel.org
-Cc: jpoimboe@kernel.org, rostedt@goodmis.org, peterz@infradead.org, 
-	mingo@redhat.com, tglx@kernel.org, bp@alien8.de, dave.hansen@linux.intel.com, 
-	x86@kernel.org, catalin.marinas@arm.com, will@kernel.org, 
-	mark.rutland@arm.com, linux-arm-kernel@lists.infradead.org, pjw@kernel.org, 
-	palmer@dabbelt.com, aou@eecs.berkeley.edu, alex@ghiti.fr, 
-	linux-riscv@lists.infradead.org, acme@kernel.org, namhyung@kernel.org, 
-	linux-perf-users@vger.kernel.org, mhiramat@kernel.org, ast@kernel.org, 
-	daniel@iogearbox.net, andrii@kernel.org, bpf@vger.kernel.org, 
-	nathan@kernel.org, llvm@lists.linux.dev, nsc@kernel.org, 
-	linux-kbuild@vger.kernel.org, ojeda@kernel.org, 
-	rust-for-linux@vger.kernel.org, ardb@kernel.org, linux-efi@vger.kernel.org, 
-	maz@kernel.org, oupton@kernel.org, kvmarm@lists.linux.dev, shuah@kernel.org, 
-	linux-kselftest@vger.kernel.org, indu.bhagat@oracle.com, jremus@linux.ibm.com, 
-	wnliu@google.com, dylanbhatch@google.com, Ian Rogers <irogers@google.com>
-Content-Type: text/plain; charset="UTF-8"
 
-Add a MAINTAINERS entry for Minimal DWARF CFI stack unwinding covering
-the core .eh_frame / .eh_frame_hdr bytecode interpreter and KUnit tests,
-the user-space PT_GNU_EH_FRAME VMA unwinder, the x86-64 DWARF CFI kernel
-unwinder, the build-time .eh_frame minifier and analyzer scripts, the
-standalone tools/unwind/ CFI verifier, and the deferred user-space CFI
-kselftest.
+Thank you for your contribution! Sashiko AI review found 1 potential
+issue to consider:
+- [Medium] unwind: dwarf_cfi: noinstr violations via
+  kmsan_unpoison_memory() and likely()
+--
 
-Also add arch/*/include/asm/unwind_user*.h to USERSPACE STACK UNWINDING
-so architectural unwind_user headers on x86, arm64, riscv, and future
-ports are routed to the user-space unwinding maintainers.
+commit a47eb90bddad018f7c1af29e002c5e94dbaf8bab
+Author: Ian Rogers <irogers@google.com>
 
-Signed-off-by: Ian Rogers <irogers@google.com>
----
- MAINTAINERS | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+unwind: Add Minimal DWARF CFI bytecode interpreter
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 44540a1eb2b8..0584279d745e 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -9496,6 +9496,21 @@ Q:	http://patchwork.linuxtv.org/project/linux-media/list/
- F:	drivers/media/usb/dvb-usb-v2/dvb_usb*
- F:	drivers/media/usb/dvb-usb-v2/usb_urb.c
- 
-+DWARF CFI STACK UNWINDING
-+M:	Ian Rogers <irogers@google.com>
-+L:	linux-trace-kernel@vger.kernel.org
-+L:	linux-kernel@vger.kernel.org
-+S:	Maintained
-+F:	arch/x86/kernel/unwind_dwarf.c
-+F:	include/linux/unwind_dwarf_cfi.h
-+F:	kernel/unwind/dwarf_cfi*.c
-+F:	kernel/unwind/user_cfi.c
-+F:	scripts/eh_frame_min.py
-+F:	scripts/min_eh_frame.c
-+F:	tools/include/linux/unwind_dwarf_cfi.h
-+F:	tools/testing/selftests/perf_events/unwind_user_cfi.c
-+F:	tools/unwind/
-+
- DYNAMIC DEBUG
- M:	Jason Baron <jbaron@akamai.com>
- M:	Jim Cromie <jim.cromie@gmail.com>
-@@ -29300,6 +29315,7 @@ USERSPACE STACK UNWINDING
- M:	Josh Poimboeuf <jpoimboe@kernel.org>
- M:	Steven Rostedt <rostedt@goodmis.org>
- S:	Maintained
-+F:	arch/*/include/asm/unwind_user*.h
- F:	include/linux/unwind*.h
- F:	kernel/unwind/
- 
--- 
-2.56.1.831.g720f3f5937-goog
+This commit adds a bounded DWARF Call Frame Information (.eh_frame and
+.eh_frame_hdr) bytecode interpreter for kernel, module, and user-space
+stack unwinding.
 
+> diff --git a/kernel/unwind/Makefile b/kernel/unwind/Makefile
+> index eae37bea54fdb..f772fc6079855 100644
+> --- a/kernel/unwind/Makefile
+> +++ b/kernel/unwind/Makefile
+> @@ -1 +1,11 @@
+> - obj-$(CONFIG_UNWIND_USER)	+=3D user.o deferred.o
+> +ifdef CONFIG_FUNCTION_TRACER
+> +CFLAGS_REMOVE_dwarf_cfi.o =3D $(CC_FLAGS_FTRACE)
+> +endif
+> +KASAN_SANITIZE_dwarf_cfi.o :=3D n
+> +KCSAN_SANITIZE_dwarf_cfi.o :=3D n
+> +UBSAN_SANITIZE_dwarf_cfi.o :=3D n
+> +KMSAN_SANITIZE_dwarf_cfi.o :=3D n
+> +KCOV_INSTRUMENT_dwarf_cfi.o :=3D n
+> +
+> +obj-$(CONFIG_UNWIND_DWARF_CFI)		+=3D dwarf_cfi.o
+> +obj-$(CONFIG_UNWIND_USER)		+=3D user.o deferred.o
+> diff --git a/kernel/unwind/dwarf_cfi.c b/kernel/unwind/dwarf_cfi.c
+> new file mode 100644
+> index 0000000000000..8b8004b1b8d15
+> --- /dev/null
+> +++ b/kernel/unwind/dwarf_cfi.c
+
+[ ... ]
+
+> +static __always_inline int
+> +dwarf_cfi_eval_fde_streams(struct dwarf_cfi_stream *cie_s,
+> +			   struct dwarf_cfi_stream *fde_s,
+> +			   unsigned long pc,
+> +			   const struct dwarf_cfi_arch *arch,
+> +			   struct dwarf_cfi_row *out_row,
+> +			   bool is_user)
+> +{
+
+[ ... ]
+
+> +	*out_row =3D row;
+> +	kmsan_unpoison_memory(out_row, sizeof(*out_row));
+> +	return 0;
+> +}
+
+[ ... ]
+
+> +noinstr int dwarf_cfi_eval_fde_kmem(const u8 *fde, const u8 *eh_start,
+> +				    const u8 *eh_end, unsigned long pc,
+> +				    const struct dwarf_cfi_arch *arch,
+> +				    struct dwarf_cfi_row *out_row)
+> +{
+
+[ ... ]
+
+> +	return dwarf_cfi_eval_fde_streams(&cie_s, &fde_s, pc, arch, out_row,
+> +					  /*is_user=3D*/false);
+> +}
+
+[Severity: Medium]
+Can the noinstr functions in dwarf_cfi.c call into instrumented .text when
+CONFIG_KMSAN or CONFIG_TRACE_BRANCH_PROFILING is enabled?
+
+dwarf_cfi_eval_fde_kmem() is marked noinstr and inlines
+dwarf_cfi_eval_fde_streams(), which calls kmsan_unpoison_memory().
+Because kmsan_unpoison_memory() in include/linux/kmsan-checks.h is gated
+on CONFIG_KMSAN rather than __SANITIZE_MEMORY__, KMSAN_SANITIZE_dwarf_cfi.o=
+ :=3D n
+does not stub it out, leaving a direct call from .noinstr.text to .text.
+
+In addition, neither kernel/unwind/Makefile nor dwarf_cfi.c defines
+DISABLE_BRANCH_PROFILING, so under CONFIG_TRACE_BRANCH_PROFILING=3Dy every
+likely() and unlikely() in the noinstr functions and their inlined helpers
+expands to a call to ftrace_likely_update() in .text, triggering objtool
+noinstr warnings and running instrumented code in noinstr contexts.
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261125061523.1540=
+234-1-irogers@google.com?part=3D1
