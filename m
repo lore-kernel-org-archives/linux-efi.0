@@ -1,47 +1,47 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=217.140.110.172
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795693819;
-	b=L3b66Ed1GS5vLUULOZNc3LmmbaTMvOUlPasQbdH6cge01UsTr4o8t5jNoWBM/oC67oi9
-	 CscJUj5NHB4Gk0KSH96L7KeVA9VuroeuwT+1FOoTdttrliyX7pQu+zoqfVm3Jo62O7cVP
-	 SLqlIDODc5SsWfHr0kn0yAPybCyGBreI3AI4pj01Vy3jUjt/eKQB6WGsTLSTLbA+eZooK
-	 Pu4ZLoJLumncDksAOIyWhlnZDmjETugeQ5sxjYBCj6Q2sYJjzPyVW3FR1doTp9dHKkvpe
-	 BF55MSajPzHYPZAYobca1ZVI4rSSO0eioVJtErgoc4jpvdtL/0EhN2HE6jdTQTJptpw==
+	t=1795693826;
+	b=1lSmCRJc0oatc49LoKiSlGrhuDf8QsiuBjG6QBYo30SWXKhN1qdOaRwhwuiijXNZnd+2
+	 y6NMMxcZxFMEASaQdYjYMbReFuS4o84nLpCBf2x00ODH/WviR4lhjiwoZ3yxjixAUKjBJ
+	 GhWetlTPjK+0AyBBYLTPoo5lkRX2xc0ce1BZ4OFRVjFnhSVOS6jphUQZBo6BRMyvwzqLz
+	 sEGvNG9xbG/RVW6MsKQbTb4Uo2btcOczAyv5SfjzuvgA0bvJ2Qnno0I8aPmKu7gVuq85p
+	 gC1AxIAYDV7w4aw3T4VXY3tZN8fOsvnbnOjO2dh7IxxQ3sXdcIJi+X+uy+RItbl9lQQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795693819;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795693826;
 	h=DMARC-Filter:Received:Received:DKIM-Signature:From:To:Cc:Subject:
 	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=p6pCAmfKttvQs1qE/yGyvXWawOOJ5bLlKuCjOlPLrCE=;
-	b=U2UZBaa6DcHrBVNRg0FNW1HCMytZAjC/Y90GRae3tf/FXcCevIwBzT8v6B6V1HLaCutj
-	 N6pUzNHrA5+wkuPqbpWTMwtB27YMY9XtwXdafmglEsARoeWoSOZwM8RchHPJs4mbVMp7J
-	 zR2Hi5gjLZAdnxJoG0auiPSUOxBvaxYikZFuJg+qznaRFrmJhvnGcmFl+7eihimR1T15G
-	 JS9AotjyY72NKJg0sLUsiLHF2MkQRYvo8Ivi2RHEGdu7tI7VHEK9S+UmX4UY/FwQ/f+wm
-	 HqDRuSYdkywj4i81vyybx1eNS0PY8nOu6t7dGE0suGHYIn5BikFfU1Jt1+XdBgSVgBg==
+	bh=IqOkoUGZgs1ZSY7BxI+ueUrm+jrJWpslzsFpDAohyjw=;
+	b=xnvcHLrLUAsR7UDqq64txd5O3ThNACt86R467POmAEdF6xF2EqmcCCqAtVqSTvbOGuod
+	 IZUqs3ss7t8ZQsy2h6D5O15y5ksH50cEiojJW+Hk8WKIszy2PyrmSMjFHBoAGkWrforLw
+	 9WoslYyl8zxv3fjnOlI7/6ndH6QVkcQEoZXvp0H/hbYAKglJAxEBN2MoWCOk5OO0TsmOY
+	 8I18GonBMauJ75NO0UqJOOScoX4QeWii55WsiwrakcFbzp9oOjJSI1umKdUYViihCEtty
+	 HOBW587B1dhbPu63U/MM1Ir0o5dz8j2JUqF3vgAzzPyslQQYRkn6ioUwoj2xPcVUiWA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=arm.com;
 	spf=pass smtp.mailfrom=arm.com;
-	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=ugYDt0iB;
+	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=fsW2ofqE;
 	arc=none smtp.remote-ip=217.140.110.172
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 5AA7C606A327;
-	Thu, 26 Nov 2026 11:50:19 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5AA7C606A327
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 73C13606A31C;
+	Thu, 26 Nov 2026 11:50:26 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 73C13606A31C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=ugYDt0iB
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=fsW2ofqE
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id C1F2D1C2B;
-	Thu, 26 Nov 2026 03:50:15 -0800 (PST)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id E89A71D14;
+	Thu, 26 Nov 2026 03:50:22 -0800 (PST)
 Received: from e142392.cambridge.arm.com (usa-sjc-imap-foss1.foss.arm.com [10.121.207.14])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 5DEF23F632;
-	Thu, 26 Nov 2026 03:50:15 -0800 (PST)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 831FB3F632;
+	Thu, 26 Nov 2026 03:50:22 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1795693818; bh=Rdgqx0rOK7ovOMli2Zxsy7q/hl7GZXAheTR1CD4NiOs=;
+	t=1795693825; bh=Rmb994cmdGLgndDqtNhWhnEDy905UlxaiI3SXTURFHI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=ugYDt0iBpMGL6SslLU1XaMAQqU1TNtSmLpd/Gm+m9CvPRgWvTiSxirQYEs1btE/SC
-	 W8SjYqMva5D8yZZ8IX7RmiCLVlL9CeJm1/D6fAHYvddIEAvPIv+LklcoI8TIeHjPIN
-	 tIhw4qShY2o68Y+fqVopvTPsdoU0T2IVDLNb2Qxg=
+	b=fsW2ofqEQzIK2nTtqKlUSeTyJqGjj7g94IQQlc2ISd/krEzgpw7bsONDUA/J5uWvl
+	 w4Uxn27X3U7Omb8oZAt+RKfmXDLN4EhhRZ6SqoqC8V2up3Srp/hRErl5KgVZfCdoMV
+	 Z/wRRmWXG/vTJWbRVu0Dv0SmbJdQU+UhW8j8fIQo=
 From: =?UTF-8?q?Kristina=20Mart=C5=A1enko?= <kristina.martsenko@arm.com>
 To: linux-arm-kernel@lists.infradead.org,
 	linux-acpi@vger.kernel.org,
@@ -69,9 +69,9 @@ Cc: Catalin Marinas <catalin.marinas@arm.com>,
 	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
 	Jinqian Yang <yangjinqian1@huawei.com>,
 	Zi Yan <ziy@nvidia.com>
-Subject: [RFC v2 03/13] arm64: Detect TLBID
-Date: Thu, 26 Nov 2026 11:49:26 +0000
-Message-ID: <20261126114936.864256-4-kristina.martsenko@arm.com>
+Subject: [RFC v2 05/13] KVM: arm64: Hide TLBID from guest instructions
+Date: Thu, 26 Nov 2026 11:49:28 +0000
+Message-ID: <20261126114936.864256-6-kristina.martsenko@arm.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20261126114936.864256-1-kristina.martsenko@arm.com>
 References: <20261126114936.864256-1-kristina.martsenko@arm.com>
@@ -87,146 +87,189 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Detect if FEAT_TLBID is supported by the system. Detect TLBID
-configuration from TLBIDIDR_EL1. This information will be used in later
-patches.
+Since we don't expose TLBID to guests, hide TLBI domains from guest
+TLBI{P} instructions:
+
+  * Map all guest virtual domains to the broadcast domain 0 in
+    VTLBID{OS}<n>_EL2. Enable the mapping with HCRX_EL2.VTLBID{OS}En.
+    If the guest issues a TLBI to a TLBI domain, it will instead go to
+    all agents in the Inner or Outer Shareable domain (as it does today).
+
+  * TLBID introduces some TLBIP instructions. A guest can execute TLBIP
+    instructions unless KVM or a nested hypervisor configures TLBI
+    instructions to trap. If trapped, then a TLBIP will trap with EC
+    0x14. In this case KVM currently injects an UNDEF (and prints an
+    error). This patch doesn't change that, as we don't support TLBIP
+    instructions in guests.
+
+  * KVM emulates some guest TLBI instructions. Ignore the TLBI domain in
+    ASID* TLBI instructions. In other types of TLBIs the domain is
+    implicitly ignored. (*ALL* instructions have the domain in an
+    optional register argument, which KVM does not pass. *VA*/*IPA*
+    instructions don't have a domain, only their TLBIP variants do.)
 
 Signed-off-by: Kristina Martšenko <kristina.martsenko@arm.com>
 ---
- arch/arm64/include/asm/cpu.h        |  1 +
- arch/arm64/include/asm/cpufeature.h |  7 +++++++
- arch/arm64/kernel/cpufeature.c      | 25 +++++++++++++++++++++++++
- arch/arm64/kernel/cpuinfo.c         |  3 +++
- arch/arm64/tools/cpucaps            |  1 +
- 5 files changed, 37 insertions(+)
+ arch/arm64/include/asm/el2_setup.h      | 67 +++++++++++++++++++++++++
+ arch/arm64/include/asm/kvm_emulate.h    |  5 ++
+ arch/arm64/include/asm/tlbflush.h       |  2 +
+ arch/arm64/kvm/hyp/include/hyp/switch.h |  7 ++-
+ arch/arm64/kvm/hyp/vhe/tlb.c            |  2 +
+ 5 files changed, 81 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm64/include/asm/cpu.h b/arch/arm64/include/asm/cpu.h
-index 3d1693aaf4e0..e839edded6ed 100644
---- a/arch/arm64/include/asm/cpu.h
-+++ b/arch/arm64/include/asm/cpu.h
-@@ -48,6 +48,7 @@ struct cpuinfo_arm64 {
- 	u64		reg_gmid;
- 	u64		reg_smidr;
- 	u64		reg_mpamidr;
-+	u64		reg_tlbididr;
+diff --git a/arch/arm64/include/asm/el2_setup.h b/arch/arm64/include/asm/el2_setup.h
+index 1521c9965ae3..c8a6a2f942e0 100644
+--- a/arch/arm64/include/asm/el2_setup.h
++++ b/arch/arm64/include/asm/el2_setup.h
+@@ -189,6 +189,72 @@
+ 	msr	vttbr_el2, xzr
+ .endm
  
- 	u64		reg_id_aa64dfr0;
- 	u64		reg_id_aa64dfr1;
-diff --git a/arch/arm64/include/asm/cpufeature.h b/arch/arm64/include/asm/cpufeature.h
-index e3c8a1493dc8..b236fe3077f5 100644
---- a/arch/arm64/include/asm/cpufeature.h
-+++ b/arch/arm64/include/asm/cpufeature.h
-@@ -658,6 +658,13 @@ static inline bool id_aa64pfr1_mte(u64 pfr1)
- 	return val >= ID_AA64PFR1_EL1_MTE_MTE2;
- }
- 
-+static inline bool id_aa64mmfr4_tlbid(u64 mmfr4)
-+{
-+	u32 val = cpuid_feature_extract_unsigned_field(mmfr4, ID_AA64MMFR4_EL1_TLBID_SHIFT);
++#define VTLBID_ISH	0
++#define VTLBID_OSH	1
 +
-+	return val > 0;
-+}
++.macro __init_vtlbid_regs sh
++	mrs_s	x0, SYS_TLBIDIDR_EL1
 +
- void __init setup_boot_cpu_features(void);
- void __init setup_system_features(void);
- void __init setup_user_features(void);
-diff --git a/arch/arm64/kernel/cpufeature.c b/arch/arm64/kernel/cpufeature.c
-index c9c9a6889455..a08d1ff632e6 100644
---- a/arch/arm64/kernel/cpufeature.c
-+++ b/arch/arm64/kernel/cpufeature.c
-@@ -523,6 +523,7 @@ static const struct arm64_ftr_bits ftr_id_aa64mmfr3[] = {
- };
- 
- static const struct arm64_ftr_bits ftr_id_aa64mmfr4[] = {
-+	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_LOWER_SAFE, ID_AA64MMFR4_EL1_TLBID_SHIFT, 4, 0),
- 	S_ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_LOWER_SAFE, ID_AA64MMFR4_EL1_E2H0_SHIFT, 4, 0),
- 	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_LOWER_SAFE, ID_AA64MMFR4_EL1_NV_frac_SHIFT, 4, 0),
- 	ARM64_FTR_END,
-@@ -742,6 +743,14 @@ static const struct arm64_ftr_bits ftr_mpamidr[] = {
- 	ARM64_FTR_END,
- };
- 
-+static const struct arm64_ftr_bits ftr_tlbididr[] = {
-+	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_EXACT, TLBIDIDR_EL1_NVOS_SHIFT, TLBIDIDR_EL1_NVOS_WIDTH, 0),
-+	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_EXACT, TLBIDIDR_EL1_NOS_SHIFT, TLBIDIDR_EL1_NOS_WIDTH, 0),
-+	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_EXACT, TLBIDIDR_EL1_NVIS_SHIFT, TLBIDIDR_EL1_NVIS_WIDTH, 0),
-+	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_EXACT, TLBIDIDR_EL1_NIS_SHIFT, TLBIDIDR_EL1_NIS_WIDTH, 0),
-+	ARM64_FTR_END,
-+};
++	.if \sh == VTLBID_ISH
++	ubfx	x1, x0, #TLBIDIDR_EL1_NIS_SHIFT, #TLBIDIDR_EL1_NIS_WIDTH
++	ubfx	x2, x0, #TLBIDIDR_EL1_NVIS_SHIFT, #TLBIDIDR_EL1_NVIS_WIDTH
++	.else
++	ubfx	x1, x0, #TLBIDIDR_EL1_NOS_SHIFT, #TLBIDIDR_EL1_NOS_WIDTH
++	ubfx	x2, x0, #TLBIDIDR_EL1_NVOS_SHIFT, #TLBIDIDR_EL1_NVOS_WIDTH
++	.endif
++	cbz	x1, .Lskip_vtlbid_regs_\@
 +
- /*
-  * Common ftr bits for a 32bit register with all hidden, strict
-  * attributes, with 4bit feature fields and a default safe value of
-@@ -866,6 +875,7 @@ static const struct __ftr_reg_entry {
- 
- 	/* Op1 = 0, CRn = 10, CRm = 4 */
- 	ARM64_FTR_REG(SYS_MPAMIDR_EL1, ftr_mpamidr),
-+	ARM64_FTR_REG(SYS_TLBIDIDR_EL1, ftr_tlbididr),
- 
- 	/* Op1 = 1, CRn = 0, CRm = 0 */
- 	ARM64_FTR_REG(SYS_GMID_EL1, ftr_gmid),
-@@ -1256,6 +1266,9 @@ static void __init init_cpu_features(void)
- 
- 	if (IS_ENABLED(CONFIG_ARM64_MTE) && id_aa64pfr1_mte(info->reg_id_aa64pfr1))
- 		init_cpu_ftr_reg(SYS_GMID_EL1, info->reg_gmid);
++	/* Map all virtual domains to the broadcast-all domain */
++	.if \sh == VTLBID_ISH
++	msr_s	SYS_VTLBID0_EL2, xzr
++	.else
++	msr_s	SYS_VTLBIDOS0_EL2, xzr
++	.endif
 +
-+	if (id_aa64mmfr4_tlbid(info->reg_id_aa64mmfr4))
-+		init_cpu_ftr_reg(SYS_TLBIDIDR_EL1, info->reg_tlbididr);
- }
- 
- static void update_cpu_ftr_reg(struct arm64_ftr_reg *reg, u64 new)
-@@ -3085,6 +3098,13 @@ static const struct arm64_cpu_capabilities arm64_features[] = {
- 		ARM64_CPUID_FIELDS(ID_AA64ISAR3_EL1, LSUI, IMP)
- 	},
- #endif
-+	{
-+		.desc = "TLBI domains (TLBID)",
-+		.capability = ARM64_HAS_TLBID,
-+		.type = ARM64_CPUCAP_SYSTEM_FEATURE,
-+		.matches = has_cpuid_feature,
-+		ARM64_CPUID_FIELDS(ID_AA64MMFR4_EL1, TLBID, IMP)
-+	},
- 	{},
- };
- 
-@@ -3884,6 +3904,11 @@ void update_cpu_features(int cpu)
- 		taint |= check_update_ftr_reg(SYS_GMID_EL1, cpu,
- 					      info->reg_gmid, boot->reg_gmid);
- 
-+	if (id_aa64mmfr4_tlbid(info->reg_id_aa64mmfr4)) {
-+		taint |= check_update_ftr_reg(SYS_TLBIDIDR_EL1, cpu,
-+					info->reg_tlbididr, boot->reg_tlbididr);
-+	}
++	/*
++	 * VTLBID1_EL2 is implemented if either NIS <= 8 && NVIS >= 4,
++	 * or NIS > 8 && NVIS >= 3. Similarly for VTLBIDOS1_EL2.
++	 */
++	cmp	x1, #8
++	cset	x0, ls
++	add	x0, x0, #3
++	cmp	x2, x0
++	b.lo	.Lskip_vtlbid_regs_\@
++	.if \sh == VTLBID_ISH
++	msr_s	SYS_VTLBID1_EL2, xzr
++	.else
++	msr_s	SYS_VTLBIDOS1_EL2, xzr
++	.endif
 +
- 	/*
- 	 * If we don't have AArch32 at all then skip the checks entirely
- 	 * as the register values may be UNKNOWN and we're not going to be
-diff --git a/arch/arm64/kernel/cpuinfo.c b/arch/arm64/kernel/cpuinfo.c
-index 94e6cd211d70..da163756fe5c 100644
---- a/arch/arm64/kernel/cpuinfo.c
-+++ b/arch/arm64/kernel/cpuinfo.c
-@@ -504,6 +504,9 @@ static void __cpuinfo_store_cpu(struct cpuinfo_arm64 *info)
- 		info->reg_smidr = read_cpuid(SMIDR_EL1) & ~SMIDR_EL1_SMPS;
++	/*
++	 * VTLBID{2,3}_EL2 are implemented if either NIS <= 8 && NVIS >= 5,
++	 * or NIS > 8 && NVIS >= 4. Similarly for VTLBIDOS{2,3}_EL2.
++	 */
++	add	x0, x0, #1
++	cmp	x2, x0
++	b.lo	.Lskip_vtlbid_regs_\@
++	.if \sh == VTLBID_ISH
++	msr_s	SYS_VTLBID2_EL2, xzr
++	msr_s	SYS_VTLBID3_EL2, xzr
++	.else
++	msr_s	SYS_VTLBIDOS2_EL2, xzr
++	msr_s	SYS_VTLBIDOS3_EL2, xzr
++	.endif
++.Lskip_vtlbid_regs_\@:
++.endm
++
++/* TLBID domain mapping */
++.macro __init_el2_vtlbid
++	mrs_s	x0, SYS_ID_AA64MMFR4_EL1
++	ubfx	x0, x0, #ID_AA64MMFR4_EL1_TLBID_SHIFT, #ID_AA64MMFR4_EL1_TLBID_WIDTH
++	cbz	x0, .Lskip_vtlbid_\@
++
++	__init_vtlbid_regs VTLBID_ISH
++	__init_vtlbid_regs VTLBID_OSH
++
++.Lskip_vtlbid_\@:
++.endm
++
+ /* GICv3 system register access */
+ .macro __init_el2_gicv3
+ 	mrs	x0, id_aa64pfr0_el1
+@@ -478,6 +544,7 @@
+ 	__init_el2_brbe
+ 	__init_el2_lor
+ 	__init_el2_stage2
++	__init_el2_vtlbid
+ 	__init_el2_gicv3
+ 	__init_el2_gicv5
+ 	__init_el2_hstr
+diff --git a/arch/arm64/include/asm/kvm_emulate.h b/arch/arm64/include/asm/kvm_emulate.h
+index 334211b8b2ee..fa6f389e99e6 100644
+--- a/arch/arm64/include/asm/kvm_emulate.h
++++ b/arch/arm64/include/asm/kvm_emulate.h
+@@ -762,6 +762,11 @@ static inline void vcpu_set_hcrx(struct kvm_vcpu *vcpu)
+ 					vcpu->arch.hcrx_el2 |= HCRX_EL2_NVnTTLBOS;
+ 			}
+ 		}
++
++		if (cpus_have_final_cap(ARM64_HAS_TLBID))
++			vcpu->arch.hcrx_el2 |= (HCRX_EL2_VTLBIDEn |
++						HCRX_EL2_VTLBIDOSEn);
++
  	}
- 
-+	if (id_aa64mmfr4_tlbid(info->reg_id_aa64mmfr4))
-+		info->reg_tlbididr = read_cpuid_with_overrides(TLBIDIDR_EL1);
-+
- 	cpuinfo_detect_icache_policy(info);
  }
  
-diff --git a/arch/arm64/tools/cpucaps b/arch/arm64/tools/cpucaps
-index 3125695122a0..a1500a655407 100644
---- a/arch/arm64/tools/cpucaps
-+++ b/arch/arm64/tools/cpucaps
-@@ -67,6 +67,7 @@ HAS_STAGE2_FWB
- HAS_TCR2
- HAS_TIDCP1
- HAS_TLB_RANGE
-+HAS_TLBID
- HAS_VA52
- HAS_VIRT_HOST_EXTN
- HAS_WFXT
+diff --git a/arch/arm64/include/asm/tlbflush.h b/arch/arm64/include/asm/tlbflush.h
+index a05520d3a013..8338d780ca59 100644
+--- a/arch/arm64/include/asm/tlbflush.h
++++ b/arch/arm64/include/asm/tlbflush.h
+@@ -46,6 +46,8 @@
+ 		__tlbi(op, (arg) | USER_ASID_FLAG);				\
+ } while (0)
+ 
++#define TLBI_TLBID_MASK		GENMASK_ULL(15, 0)
++
+ /* This macro creates a properly formatted VA operand for the TLBI */
+ #define __TLBI_VADDR(addr, asid)				\
+ 	({							\
+diff --git a/arch/arm64/kvm/hyp/include/hyp/switch.h b/arch/arm64/kvm/hyp/include/hyp/switch.h
+index e0c55644224c..53e9455953cb 100644
+--- a/arch/arm64/kvm/hyp/include/hyp/switch.h
++++ b/arch/arm64/kvm/hyp/include/hyp/switch.h
+@@ -340,9 +340,12 @@ static inline void __deactivate_traps_mpam(void)
+  *   the PTW is a thing. It really isn't.
+  *
+  * - EnIDCP128: We don't allow IMPDEF sysregs -- full stop.
++ *
++ * - VTLBID{OS}En: We decide which domain the guest's TLBIs are broadcast to.
+  */
+-#define NV_HCRX_GUEST_EXCLUDE	(HCRX_EL2_TMEA	    | HCRX_EL2_PTTWI | \
+-				 HCRX_EL2_EnIDCP128)
++#define NV_HCRX_GUEST_EXCLUDE	(HCRX_EL2_TMEA	    | HCRX_EL2_PTTWI	| \
++				 HCRX_EL2_EnIDCP128 | HCRX_EL2_VTLBIDEn	| \
++				 HCRX_EL2_VTLBIDOSEn)
+ 
+ static inline void __activate_traps_common(struct kvm_vcpu *vcpu)
+ {
+diff --git a/arch/arm64/kvm/hyp/vhe/tlb.c b/arch/arm64/kvm/hyp/vhe/tlb.c
+index 33ac9a8c954e..e848ba880694 100644
+--- a/arch/arm64/kvm/hyp/vhe/tlb.c
++++ b/arch/arm64/kvm/hyp/vhe/tlb.c
+@@ -226,6 +226,7 @@ void __kvm_flush_vm_context(void)
+  * - a non-shareable TLBI is upgraded to being inner-shareable
+  * - an outer-shareable TLBI is also mapped to inner-shareable
+  * - an nXS TLBI is upgraded to XS
++ * - any TLBID domain is upgraded to broadcast-all
+  */
+ int __kvm_tlbi_s1e2(struct kvm_s2_mmu *mmu, u64 va, u64 sys_encoding)
+ {
+@@ -291,6 +292,7 @@ int __kvm_tlbi_s1e2(struct kvm_s2_mmu *mmu, u64 va, u64 sys_encoding)
+ 	case OP_TLBI_ASIDE1NXS:
+ 	case OP_TLBI_ASIDE1ISNXS:
+ 	case OP_TLBI_ASIDE1OSNXS:
++		va &= ~TLBI_TLBID_MASK;
+ 		__tlbi(aside1is, va);
+ 		break;
+ 	case OP_TLBI_VAAE1:
 -- 
 2.43.0
 
