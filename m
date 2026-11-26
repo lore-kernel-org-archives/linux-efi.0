@@ -1,73 +1,58 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795697659;
-	b=FXAUVoerui0VjxxaA+zosSoyNZDDS082qMZEjfFFxbG6cHZ40NBy7tYpjC2CNENv2s2T
-	 PiNGxLwrBdtjMIyQrjJ0sW84QtgJHNsBz6/qtgBVo6eLDXsKc9q2ZKi3xqXfC1ngJIVTL
-	 A66VAaean+hpDPRXDSn9az5g+5y+l/mZ3MIttDqYs1Y16hs7K7E307x2V79Y4jtiheFpL
-	 5il9RXu+1LgOFlH91XHmssEaIRcvFwhhWZBNXIcF6qFFupoDtlLNhU3wPkNInT+PrH70l
-	 KUO02NAB4ssSiP4tfsxdyE2Tj68y9EC7xOadgCGfHoV/u8Qo8yX0X9s0jHFo6HZlBFw==
+	t=1795697986;
+	b=Azizer/xO7+eCbdB+ZgvSivhUPWy7te4oyWHz8LkGEJShktnYeccd+VL09DSFUlHQylO
+	 RATOMkgTZ2e25KQXJA4xiAV5PboX/59XrhitB5ewMQyeGfIafjsSf0TjiwLr1PsLgwCec
+	 af/unD1fgJa03CVduOcj0WcSpj34OQg+j8E38+vE01fgy9OMfCzmB09AsazEjWOwjNdvK
+	 app8qsNZUQgzfo2ZxKc6wZg7ckhuOd6C6F8KXcaDQ/u2MAe6bsTq+MINvrBFba5k2LwgG
+	 Krcvrbfpy1fdKRAZeeMrNOccmyD91t2FnQGN3ORT163AITnzSHAC5h+/8EOW9kO9FZg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795697659;
-	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
-	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
-	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type:Content-Transfer-Encoding;
-	bh=FxNnFypmQodB5jf3trdtEkzarufuoaXPyhp09jSaaYQ=;
-	b=C/KXc5NMb74TtWKcgHW0dguqzvCiE7G+PDbMEV17uRMna8Gp3BI/9jFlGJ9MUpfPffen
-	 NUShldq3FnQkjw+TBf9bTxXPHlI28gXMe0bteFzRvXdV+FNE6ABsXARYh6UVElyxgBOou
-	 ttzQvpnZ+KbzpqFncfe0yl2xeYnhLZlfa30h1ccBG+OwNqphiyiSq97FfyVVCeXQu4Eqv
-	 YAKU+oVgA5uDZ/uI7g3JAQxSkAiG+nbKR1Ah8bLQqbx6X1Nuzv9qOAz1BZpuLz3lowpIx
-	 Eg/MdI9rg74sOryQBH5sa645LEVXLhUHZqLU28mEOouUT0SCZwTPQgknU66eV4p8w2w==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795697986;
+	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
+	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
+	bh=49SH4z4rBYPkYl0KdB8+pVuPcYez0jj+4mJuAYx3GXw=;
+	b=WxhGkN5ntwWdjR4VN/UQ8DU5uAiWYCwJO4F/RUd14VF5GI6JXQe3Li9iz6OikIXZtXM3
+	 bAcRBH9kVeT5CF98gmoxO5BKzHXk9Wy66yUGbnqJv0n5kyf5FkLgmXFXEQr1NwbnbkDjF
+	 ZGDxuzo4qEvLDZeiBzl7/8WS7VW6xMD+fqsM6ahAyL/mX7jXSpphm/le5fUWVR5Xa0lMM
+	 rw1/pQgBSsxPf7Nr9q0+XpHPos8wnghphrB1dd1fQASUwn8OWaNPC72q4qTy/4bu7R/v+
+	 bOlxJ3CIduWCx5UQsxAXElgf73eNQoVVK7nrvB3evL2+Wmi41sPKpeIa80fYGR+jHPA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=RwdnTsti;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mePhcBso;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F28C606A31C
-	for <linux-efi@vger.kernel.org>; Thu, 26 Nov 2026 12:54:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66B1D606A339
+	for <linux-efi@vger.kernel.org>; Thu, 26 Nov 2026 12:59:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=RwdnTsti
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A0E4E1F000CA
-	for <linux-efi@vger.kernel.org>; Thu, 26 Nov 2026 12:54:18 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=mePhcBso
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 46FF91F0089E;
+	Thu, 26 Nov 2026 12:59:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795697658;
-	bh=FxNnFypmQodB5jf3trdtEkzarufuoaXPyhp09jSaaYQ=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=RwdnTstiPasa2YNHRNSXsw2FYKygiWYYZQjOpcex7xOnXZh4OUWgIdG+pzZdePii5
-	 L+3wN0ivajkcTXUHbnEIb+tA+oo8kbyt6g8gsi0JJEvOQsorZxMFNXw2NtG5VkFb8T
-	 zMv9rexqiK9A7sqj9hHewjaVjx7C2jgpmcTcZzSj6dJVfwv1q7YNvpeontqRoO/9Ve
-	 VphKdeBLaEEZS2XCvCsMG8VlgJ4nUnC4y5HXstR0XkBAad9YsoYlfdEvWdezRT8gqh
-	 yx2SFELTn6erlkxKeoUIaCb4pjQsjcnBXMRAXxXF/qbIWVJ2RGB6HmNVtu2qBNeZrY
-	 swnd8dwnZoOrg==
-Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
-	by mailfauth.ams.internal (Postfix) with ESMTP id E8C661980047;
-	Thu, 26 Nov 2026 07:54:16 -0500 (EST)
-Received: from ams-imap-11 ([10.64.2.31])
-  by ams-compute-02.internal (MEProxy); Thu, 26 Nov 2026 07:54:16 -0500
-X-ME-Sender: <xms:9isIa1mQkW_omfFu8Ogw7sDmj9dLq-m2Sh9r8JtgVwQ89MF4Rm95Kw>
-    <xme:9isIa7o_RWTG1yiwzCDpe9AyUKxvlCIjYCd9w-jJsXxuOXUQAaJHWhA0OZPVrtUKP
-    -4ePE-NrSWTJc08eN5KIZ4M4zrgXwgTNju0dHzaw2-f2u_UbsrJUKT_>
-X-ME-Proxy-Cause: dmFkZTE8fWJfctqFPvKY7gTircR3cEGnIrqCpM5qgH0RN8ZK+FWYvz+vJLcJO5ZXIZZZQw
-    f7i2vvmKhyNHo96GZbT/RFpZ1+ezgvHIvsl7yU0okcXUpJRbEPFm/V6A6frKXVPLGuQY8Z
-    OJQy27DYphr3hMwQFggyd6T1oczeNkY4/uUs8j2oSbIJMBKs5nY8D2j9IkGjRn4DOz82T2
-    U4o5K11dsVb4bSuNYay/Rz1peQb8X70A8jQOFlsoy4JLPTh65p2KzY/IT5fGxf20unqHkv
-    Cx8Py+cODmnZtbDQcx9T7vGaV7Xm39b2v9t4Z7z/xwkqsXw53a3GQwFLVfvC8W7WDNyQWa
-    nUNDVVsK4kDP/JcUCigH9pkUljfBNB0AL6ezr03QXF8HkYU0qsKw4EGzc5Hn6aNxh+/G1j
-    OiOuF2uOxJIz+PdNpX2+PbY9eS6AXQobh2sZQxgyPk/NPmmcnMunhi074NRrQltTQ01mFF
-    XYnfpllVgIeUl2pZuEYhnQZXPppF8hzDipntNwPuogSiI9Bgd/K6JHQD4tKhP8X7Orkwa4
-    ld5lhm+UpiCbc51K1TXrJ9vAmPu0XxLQHEggdnHKumcYhQ2oMmOT1jZWXis13qaOE4sL4M
-    fOqj6hpJ3aHTHO/XCUddpcMa3gH+6PqZCYE8rLBkH/NMcmf8GNF/XdG5l2DQ
-X-ME-Proxy: <xmx:-CsIa4ERdTkQBtyUAoTe60lZfrTCZ8rDSB7u5vQTdbhVeuL5ezop4A>
-    <xmx:-CsIa8R4rjQyhNBAopIbVW4uh8MMuu-PkXQTI3Hgt_hkdIr6-LlIkA>
-    <xmx:-CsIaxL6gYmhgTZFscZFqGbIFmK_QfaZLZ3lh9vYZck7eIQsnX142g>
-    <xmx:-CsIa_apaXbezpDCvM733K9L72WLfizvCrx0lZlNogNlikLrzAuUXQ>
-    <xmx:-CsIa789vEdHAz2RT3Qx4AvWv87DXKdJ7nvDNkuGOnebnGVLkL4kRGpT>
-Feedback-ID: ice86485a:Fastmail
-Received: by mailuser.ams.internal (Postfix, from userid 501)
-	id DF94CF8009A; Thu, 26 Nov 2026 07:54:14 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=k20260515; t=1795697985;
+	bh=49SH4z4rBYPkYl0KdB8+pVuPcYez0jj+4mJuAYx3GXw=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=mePhcBsoVAK0N8vmltlkIfgB3Eu/0HpmBzKHBt90hBv/3LplorT8A6tVy54ZQqDbA
+	 uhFLVqVKHpleUGoMsNkTCIFP9WqazTA9e34dFbHNt7aTB5F/7TGOYxjNbBrzVv/nMs
+	 XYNVy96i98bjhWmnDl3XhjS6hLWuX+3bZmBzufjOkxJ1LnBBWdzjbZ+RgAYMYWR0GV
+	 jN2FgXy+zIoar7pMSVHJMfMMYhYSGmMgDXDXFclpUmrGqdrbGjvmFVmQH0cqGiflbO
+	 Nvu5cfy144Go0UTeR5Zcsu4ZUzE23CrNBrcU7433iR9h2r2CohBFwU9ZfG+fz6iS3J
+	 E87cLQtzOmddA==
+Message-ID: <sashiko-outbox-235550@kernel.org>
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH v2] efi/libstub: fix building loongarch32 without zboot
+ enabled
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Dmitry Antipov" <dmantipov@yandex.ru>, "Ard Biesheuvel" <ardb@kernel.org>
+Cc: "Paul Walmsley" <pjw@kernel.org>, "Palmer Dabbelt" <palmer@dabbelt.com>, "Albert
+ Ou" <aou@eecs.berkeley.edu>, "Huacai Chen" <chenhuacai@kernel.org>, "WANG
+ Xuerui" <kernel@xen0n.name>, linux-efi@vger.kernel.org, "kernel test robot" <lkp@intel.com>
+In-Reply-To: <20261126124145.876953-1-dmantipov@yandex.ru>
+References: <20261126124145.876953-1-dmantipov@yandex.ru>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Thu, 26 Nov 2026 12:59:44 +0000
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -76,98 +61,117 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
-MIME-Version: 1.0
-Date: Thu, 26 Nov 2026 13:53:54 +0100
-From: "Ard Biesheuvel" <ardb@kernel.org>
-To: "Dmitry Antipov" <dmantipov@yandex.ru>,
- "Huacai Chen" <chenhuacai@kernel.org>
-Cc: "WANG Xuerui" <kernel@xen0n.name>, linux-efi@vger.kernel.org,
- loongarch@lists.linux.dev, "kernel test robot" <lkp@intel.com>
-Message-Id: <534a9786-8594-4f0b-8ce8-ea1844581c0b@app.fastmail.com>
-In-Reply-To: <20261126124145.876953-1-dmantipov@yandex.ru>
-References: <20261126124145.876953-1-dmantipov@yandex.ru>
-Subject: Re: [PATCH v2] efi/libstub: fix building loongarch32 without zboot enabled
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
 
+Thank you for your contribution! Sashiko AI review found 4 potential
+issues to consider:
+- [High] efi/libstub: dropping $(zboot-obj-y) breaks all
+  CONFIG_EFI_ZBOOT builds
+- [High] efi/libstub: removing shift helpers breaks 32-bit
+  CONFIG_EFI_ZBOOT link
+- [High] efi/libstub: removing lib-clz_ctz.o breaks ZSTD
+  CONFIG_EFI_ZBOOT link
+- [Medium] efi/libstub: loongarch32 aliases shift helpers to
+  instrumented kernel C code
+--
 
+commit 387fa3daffaccbaba76887c4a051e10a5a6deaf6
+Author: Dmitry Antipov <dmantipov@yandex.ru>
 
-On Thu, 26 Nov 2026, at 13:41, Dmitry Antipov wrote:
-> Kernel test robot has reported the following error observed on loongarch:
->
-> loongarch64-linux-ld: 
-> ./drivers/firmware/efi/libstub/lib-cmdline.stub.o: in function 
-> `__efistub_.L47':
-> __efistub_cmdline.c:(.init.text+0x258): undefined reference to 
-> `__efistub___ashldi3'
-> loongarch64-linux-ld: __efistub_cmdline.c:(.init.text+0x268): undefined 
-> reference to `__efistub___lshrdi3'
->
-> Following the approach introduced in commit a354b8de9ad6
-> ("riscv: add platform-specific double word shifts for riscv32"),
-> define EFI stub aliases for __ashldi3() and __lshrdi3() for
-> loongarch32 as well, thus making the related EFI stub's Makefile
-> quirks redundant.
->
-> Suggested-by: Ard Biesheuvel <ardb@kernel.org>
-> Reported-by: kernel test robot <lkp@intel.com>
-> Closes: 
-> https://lore.kernel.org/oe-kbuild-all/20261122125352.gAcg5yLx-lkp@intel.com/
-> Fixes: 442082297e3d ("riscv: fix building compressed EFI image")
-> Signed-off-by: Dmitry Antipov <dmantipov@yandex.ru>
-> ---
-> v2: define relevant EFI stubs in image-vars.h (Ard) 
-> ---
->  arch/loongarch/kernel/image-vars.h    | 2 ++
->  drivers/firmware/efi/libstub/Makefile | 7 +------
->  2 files changed, 3 insertions(+), 6 deletions(-)
->
-> diff --git a/arch/loongarch/kernel/image-vars.h 
-> b/arch/loongarch/kernel/image-vars.h
-> index e557ebd46c2b..19202f4f84c2 100644
+efi/libstub: fix building loongarch32 without zboot enabled
+
+This commit defines EFI stub symbol aliases for __lshrdi3 and __ashldi3 in
+arch/loongarch/kernel/image-vars.h and removes the zboot helper object rules
+from drivers/firmware/efi/libstub/Makefile.
+
+> diff --git a/arch/loongarch/kernel/image-vars.h b/arch/loongarch/kernel/i=
+mage-vars.h
+> index e557ebd46c2b3..19202f4f84c2b 100644
 > --- a/arch/loongarch/kernel/image-vars.h
 > +++ b/arch/loongarch/kernel/image-vars.h
 > @@ -8,6 +8,8 @@
 >  #ifdef CONFIG_EFI_STUB
-> 
->  __efistub_strcmp		= strcmp;
-> +__efistub___lshrdi3		= __lshrdi3;
-> +__efistub___ashldi3		= __ashldi3;
->  __efistub_kernel_entry		= kernel_entry;
->  __efistub_kernel_asize		= kernel_asize;
->  __efistub_kernel_fsize		= kernel_fsize;
+> =20
+>  __efistub_strcmp		=3D strcmp;
+> +__efistub___lshrdi3		=3D __lshrdi3;
+> +__efistub___ashldi3		=3D __ashldi3;
+>  __efistub_kernel_entry		=3D kernel_entry;
+>  __efistub_kernel_asize		=3D kernel_asize;
+>  __efistub_kernel_fsize		=3D kernel_fsize;
 
-For the part above ^^^:
+[Severity: Medium]
+Is it safe for the LoongArch EFI stub to call the core kernel's __lshrdi3()
+and __ashldi3() before kernel_entry?
 
-Acked-by: Ard Biesheuvel <ardb@kernel.org>
+Unlike RISC-V in commit a354b8de9ad6 ("riscv: add platform-specific double
+word shifts for riscv32"), which implements these helpers in assembly,
+LoongArch selects CONFIG_GENERIC_LIB_ASHLDI3 and CONFIG_GENERIC_LIB_LSHRDI3
+and builds the C implementations in lib/ashldi3.c and lib/lshrdi3.c as
+normal kernel objects.  They are marked notrace, which only suppresses
+ftrace, not KCOV, UBSAN, branch profiling or stack-protector
+instrumentation.
 
-NAK to the changes below, they break zboot and need to be dropped.
+With CONFIG_KCOV=3Dy, the branches in __ashldi3() and __lshrdi3() call
+__sanitizer_cov_trace_pc(), which dereferences current via the $tp register.
+When efi_pe_entry() -> efi_handle_cmdline() calls memparse() in the pre-boot
+EFI environment before kernel_entry initializes $tp to init_task, that
+access crashes before the kernel boots.  Building lib-ashldi3.o and
+lib-lshrdi3.o in drivers/firmware/efi/libstub/Makefile avoids kernel
+instrumentation.
 
-Huacai, I'd prefer to take this via the efi tree - otherwise,
-it will conflict with other changes that are queued up for
-the next cycle.
-
-
-
-
-> diff --git a/drivers/firmware/efi/libstub/Makefile 
-> b/drivers/firmware/efi/libstub/Makefile
-> index bbab12b8eb4b..bcf2a5981678 100644
+> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi=
+/libstub/Makefile
+> index bbab12b8eb4b2..bcf2a59816782 100644
 > --- a/drivers/firmware/efi/libstub/Makefile
 > +++ b/drivers/firmware/efi/libstub/Makefile
-> @@ -96,12 +96,7 @@ zboot-obj-y			:= zboot-decompress-gzip.o
->  CFLAGS_zboot-decompress-gzip.o	+= -I$(srctree)/lib/zlib_inflate
->  zboot-obj-$(CONFIG_KERNEL_ZSTD)	:= zboot-decompress-zstd.o lib-xxhash.o
->  CFLAGS_zboot-decompress-zstd.o	+= -I$(srctree)/lib/zstd
+> @@ -96,12 +96,7 @@ zboot-obj-y			:=3D zboot-decompress-gzip.o
+>  CFLAGS_zboot-decompress-gzip.o	+=3D -I$(srctree)/lib/zlib_inflate
+>  zboot-obj-$(CONFIG_KERNEL_ZSTD)	:=3D zboot-decompress-zstd.o lib-xxhash.o
+>  CFLAGS_zboot-decompress-zstd.o	+=3D -I$(srctree)/lib/zstd
 > -
-> -zboot-riscv-obj-$(CONFIG_32BIT)	:= lib-ashldi3.o lib-lshrdi3.o
-> -zboot-obj-$(CONFIG_RISCV)	+= lib-clz_ctz.o $(zboot-riscv-obj-y)
-> -zboot-loongarch-obj-$(CONFIG_32BIT) := lib-ashldi3.o lib-lshrdi3.o
-> -zboot-obj-$(CONFIG_LOONGARCH)	+= lib-clz_ctz.o $(zboot-loongarch-obj-y)
-> -lib-$(CONFIG_EFI_ZBOOT)		+= zboot.o $(zboot-obj-y)
-> +lib-$(CONFIG_EFI_ZBOOT)		+= zboot.o
-> 
->  lib-$(CONFIG_UNACCEPTED_MEMORY) += unaccepted_memory.o bitmap.o find.o
-> 
-> -- 
-> 2.56.1
+> -zboot-riscv-obj-$(CONFIG_32BIT)	:=3D lib-ashldi3.o lib-lshrdi3.o
+> -zboot-obj-$(CONFIG_RISCV)	+=3D lib-clz_ctz.o $(zboot-riscv-obj-y)
+> -zboot-loongarch-obj-$(CONFIG_32BIT) :=3D lib-ashldi3.o lib-lshrdi3.o
+> -zboot-obj-$(CONFIG_LOONGARCH)	+=3D lib-clz_ctz.o $(zboot-loongarch-obj-y)
+
+[Severity: High]
+Does removing lib-ashldi3.o and lib-lshrdi3.o break linking vmlinuz.efi.elf
+on 32-bit RISC-V and 32-bit LoongArch when CONFIG_EFI_ZBOOT=3Dy?
+
+The __efistub___ashldi3 and __efistub___lshrdi3 aliases in
+arch/{riscv,loongarch}/kernel/image-vars.h are only included by
+vmlinux.lds.S when linking vmlinux.  In
+drivers/firmware/efi/libstub/Makefile.zboot, vmlinuz.efi.elf is linked as a
+standalone binary with zboot.lds against only vmlinuz.o, zboot-header.o and
+drivers/firmware/efi/libstub/lib.a, where efi_zboot_entry() ->
+efi_handle_cmdline() still pulls in lib-cmdline.stub.o and leaves
+__efistub___ashldi3 and __efistub___lshrdi3 unresolved, reintroducing the
+build failure fixed by commit 442082297e3d ("riscv: fix building compressed
+EFI image").
+
+[Severity: High]
+Does removing lib-clz_ctz.o break linking vmlinuz.efi.elf on RISC-V and
+32-bit LoongArch when CONFIG_EFI_ZBOOT=3Dy and CONFIG_KERNEL_ZSTD=3Dy?
+
+zboot-decompress-zstd.c uses __builtin_ctz(), __builtin_clz(),
+__builtin_ctzll() and __builtin_clzll() in lib/zstd/common/bits.h, which
+emit calls to __efistub___ctz* and __efistub___clz* when target instructions
+are not enabled.  Because vmlinuz.efi.elf is linked standalone against
+drivers/firmware/efi/libstub/lib.a without the kernel's lib/lib.a, dropping
+lib-clz_ctz.o leaves those symbols undefined at link time.
+
+> -lib-$(CONFIG_EFI_ZBOOT)		+=3D zboot.o $(zboot-obj-y)
+> +lib-$(CONFIG_EFI_ZBOOT)		+=3D zboot.o
+
+[Severity: High]
+Does dropping $(zboot-obj-y) from lib-$(CONFIG_EFI_ZBOOT) break all
+CONFIG_EFI_ZBOOT=3Dy builds across every architecture?
+
+Without $(zboot-obj-y), neither zboot-decompress-gzip.stub.o nor
+zboot-decompress-zstd.stub.o and lib-xxhash.stub.o are added to
+drivers/firmware/efi/libstub/lib.a, so linking vmlinuz.efi.elf fails with
+undefined references to __efistub_efi_zboot_decompress_init and
+__efistub_efi_zboot_decompress from efi_zboot_entry().
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261126124145.8769=
+53-1-dmantipov@yandex.ru?part=3D1
