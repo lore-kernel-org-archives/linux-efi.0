@@ -1,47 +1,47 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=217.140.110.172
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795693844;
-	b=dbOkO30BkllTHO3ayzVRNhtGJc2WSyfxDP4bIZhIUW1EX2LgevQC6SMTeZp/7hhjWKI4
-	 BpWbBW+BqPOIUBiNajgOJUgTnIn5sj0vHE+CYlsuK+gvuxBsLMr/Hj7j/SlWHNRp5M+rD
-	 96KTYnw71O+S10i+3JaMiL79bJHrpThjPDIufaaWIHEJiQY08dAOGuQvr8/x5UzdMVLY2
-	 MBHwlbWM2qVNDe6MykGm/apdLyLzs989H9BCawWBxort+ztJ1fPYJ2kbGm/xjOkUAfCV9
-	 ZmYyWDq0TbmFfgqUuTHLKu5X3cumbEb4A7LkfGUMxoFjOUDs5RBphMOHQNeehAX6+PQ==
+	t=1795693848;
+	b=flItlUHDhdczBZ2rSrpgJ/Y5I0UXCrGwk6hPq9Cbn6mz5kjw/JHrSwvlS64cnM+ZofDq
+	 uQZAf1npvVCiIB7bhHnD1sE5GL7Jjmz3joZ2akBLo01u+C/FX6KXxs1DtOz6YRXiM1CSR
+	 Ktv0vO1YoK3jC+I+/x9P7UZ/N6aSkxTUYC21bKSiIuDmCL51Rcq2VmtFjN2RHmyx/FDek
+	 iK8v7HsZaFqNPMvHmWsMqnAeAs6lgZz37Ie3KzZ6vEgh+0tI/mBL1P9cYfvm7Cx0KF1GH
+	 xCsvB1py5vl0AYBr29biK53eozLWw3fK5fdA8tpLRXirjyHRIGEUE/5SgphqOB2cLnA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795693844;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795693848;
 	h=DMARC-Filter:Received:Received:DKIM-Signature:From:To:Cc:Subject:
 	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=b6RKS7d+8OXBa4lf8wQdl6bNH2OEwyyMIAjDGvUrIQg=;
-	b=zOC6yc/sDJJ5oTtHAc7i30cXL8mxXBAz1uH2o2PDW671nnU28vjysoBXrjuqzY8ZEm9q
-	 19Muy5jhLj2BoK80+cBH3hvfS1o62cCj92h54ubeTaLxBCAE0/pO4VxQnC8uXaorINL0C
-	 It6oZIgBfHne40nOnaa8aQFlb5vRkGlA5LmHP0k/M9QIyXkQDwkjGGQ2QEyHmtz//sck1
-	 svc/eC7EpbDlCrIK6P3+aJNV6smBOq27jTkd8pXmGuMAg/rcASOfqkKPqmZbtXzLmAynj
-	 5Ye2ZPatpU+cbbtU+xhAGpzXQpBxNgJULrgUrrL5+vomyHgZm1jty1C7x4tH77nU19g==
+	bh=vNhZoLWHEJooH7K0M5adBsTZX+4xiWJt3xs0oUlCycY=;
+	b=aSHwh6Ysvo6f6g+tgaSWHVga3/Yg+rx5sh8Dcc4i5vKN8tRwu7eT3iibVYCiLHOa49hU
+	 utPgOn8j51PB1lqW9U6NLGlGiVhN9h4vYBPnBNBFVZCKBcS+xkcBAvpsvXCI+rCPHtqzv
+	 4wYiH82D0koqBz7vua6GcClxRqnajYkv9FgxZeyG2HTwc1awjtSm1ne/6F9jX3mEFwUgD
+	 /Pll3BSDq7Yv91h/i5LuvV0T8/aPhk6I1T8fcrgSk1tW3ZLRm3rg7NaAvGUkEwMhGyY4A
+	 e4DGs9RKZqLjnYz258ZLYRmZcRUQBwhAQVIrUgP5GZEKCFZapW50987GDgq3Ek2956g==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=arm.com;
 	spf=pass smtp.mailfrom=arm.com;
-	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=mVSTwD83;
+	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=DMn0t2qc;
 	arc=none smtp.remote-ip=217.140.110.172
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 32088606A321;
-	Thu, 26 Nov 2026 11:50:44 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 32088606A321
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 018AB606A326;
+	Thu, 26 Nov 2026 11:50:47 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 018AB606A326
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=mVSTwD83
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=DMn0t2qc
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id E24011D14;
-	Thu, 26 Nov 2026 03:50:40 -0800 (PST)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 7AEB91D15;
+	Thu, 26 Nov 2026 03:50:44 -0800 (PST)
 Received: from e142392.cambridge.arm.com (usa-sjc-imap-foss1.foss.arm.com [10.121.207.14])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 7EB5D3F632;
-	Thu, 26 Nov 2026 03:50:40 -0800 (PST)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 178193F632;
+	Thu, 26 Nov 2026 03:50:43 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1795693843; bh=HFgFPYvLi5gGPuxJoYLpU9XoDsImLyCEfToLCdk4fOE=;
+	t=1795693847; bh=dbMROqEBiiOnXrLd/t4gIEe0yyAP6fWxR9vxfO6Bg84=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=mVSTwD83dW7z4DaJbTOOIc5t6kDvTGe8nHBMShtHhDM2cQuHkc0IgbbAJ50+zOIYN
-	 Ib3hB34kg047QUtGSzPZCn/KQYJvHGYPZT+v4LMMxBekG53Jvb6ZJ4vUZ8EYe/XVmB
-	 /kQA3xa/3FlzSZktPmitLlwBJTjpDNfkfM/D3PNs=
+	b=DMn0t2qc9tPPecrbOmCKWE4VYrkPe3eLnJfrBsszJQYDenu1wG3xwug/Z6hZCrsg2
+	 tpIUhvGQCFUmwWBm4DL32I+vp9cZwZR0ZKAc3LnZQhbqm9gwWhaQ4S37X8tbQjSP5Z
+	 UOB6bUs5patZd8tAyYS2V0QaSXdzYdWor5xy2u6Q=
 From: =?UTF-8?q?Kristina=20Mart=C5=A1enko?= <kristina.martsenko@arm.com>
 To: linux-arm-kernel@lists.infradead.org,
 	linux-acpi@vger.kernel.org,
@@ -69,9 +69,9 @@ Cc: Catalin Marinas <catalin.marinas@arm.com>,
 	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
 	Jinqian Yang <yangjinqian1@huawei.com>,
 	Zi Yan <ziy@nvidia.com>
-Subject: [RFC v2 10/13] arm64: tlbid: Track the TLBI domain of a task
-Date: Thu, 26 Nov 2026 11:49:33 +0000
-Message-ID: <20261126114936.864256-11-kristina.martsenko@arm.com>
+Subject: [RFC v2 11/13] arm64: Support TLBIP instructions
+Date: Thu, 26 Nov 2026 11:49:34 +0000
+Message-ID: <20261126114936.864256-12-kristina.martsenko@arm.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20261126114936.864256-1-kristina.martsenko@arm.com>
 References: <20261126114936.864256-1-kristina.martsenko@arm.com>
@@ -87,222 +87,264 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Maintain a bitmap of valid TLBI domains for each mm. A later patch will
-issue TLBIs for an mm to one of the domains in its bitmap.
+Modify the TLBI helper functions in tlbflush.h to issue TLBIP
+instructions instead of TLBI when requested. These will be used to pass
+a TLBI domain ID to TLBI operations.
 
-As a performance optimization, we want to avoid sending TLB
-invalidations to CPUs that have never installed a particular mm, since
-their TLBs can't contain the mm's PTEs. To achieve this, have each mm
-contain a bitmap of valid TLBI domains. A domain is valid if it contains
-all the CPUs that the mm has been installed on. Initially all domains
-are valid. Whenever an mm is installed on a new CPU, its set of domains
-is reduced (using a bitwise AND) to only include those domains that
-contain the new CPU.
+FEAT_TLBID introduces TLBIP instructions that behave like TLBI but take
+a 128-bit value as an argument (passed in two consecutive GPRs). TLBID
+uses these to pass a TLBI domain ID to *VA* and *IPA* type instructions.
+TLBID does not introduce non-shareable TLBIP instructions, so assert
+that those are not requested.
 
-Use atomic operations to reduce the bitmap. In case two threads update
-the bitmap concurrently, the result will be the same.
+Use local register variables to ensure that the two GPRs are
+consecutive. Alternatively we could use the %H operand modifier but LLVM
+doesn't support it.
 
-efi_mm is initialized very early, before TLBI domains are initialized,
-so e.g. system_supports_tlbid() will return false. Just configure efi_mm
-to use the largest domain in the system (containing all CPUs).
+Check for assembler support of TLBIP instructions. TLBIP won't be used
+(nor assembled) when CONFIG_ARM64_TLBID=n.
 
-Note: The initial bitmap is all ones. If a TLBI were issued before the
-mm is installed, then any domain could be selected, regardless of which
-CPUs are in it. (The bits above the last valid domain will be ignored.)
-This is fine, since at this point no TLBs actually need to be
-invalidated, since the mm hasn't been installed anywhere yet.
-
-Note: destroy_tlbid_context() doesn't need to check mm_is_efi() since
-efi_mm is never freed.
-
-Note: It would be possible to use mm_cpumask() instead of a domain
-bitmap, but arm64 doesn’t maintain it at the moment, and we would need a
-way to convert the cpumask to a domain, which would require more work
-than reading the domain bitmap.
+For now there should be no functional change, as no callers request
+TLBIP. A later patch will change this.
 
 Signed-off-by: Kristina Martšenko <kristina.martsenko@arm.com>
 ---
- arch/arm64/include/asm/mmu.h         | 11 ++++++
- arch/arm64/include/asm/mmu_context.h |  9 ++++-
- arch/arm64/mm/context.c              |  6 ++-
- arch/arm64/mm/tlbid.c                | 59 ++++++++++++++++++++++++++++
- 4 files changed, 82 insertions(+), 3 deletions(-)
+ arch/arm64/Kconfig                |   9 ++-
+ arch/arm64/include/asm/tlbflush.h | 130 ++++++++++++++++++++++--------
+ 2 files changed, 103 insertions(+), 36 deletions(-)
 
-diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
-index 5e1211c540ab..fc4e759f9f64 100644
---- a/arch/arm64/include/asm/mmu.h
-+++ b/arch/arm64/include/asm/mmu.h
-@@ -25,6 +25,7 @@ typedef struct {
- 	void		*vdso;
- 	unsigned long	flags;
- 	u8		pkey_allocation_map;
-+	atomic64_t	*tlbid_domains;
- } mm_context_t;
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index e288e8dc14aa..d0df8abb9b49 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -2409,9 +2409,16 @@ config ARM64_LSUI
  
- /*
-@@ -106,5 +107,15 @@ static inline void kpti_install_ng_mappings(void) {}
+ endmenu # "ARMv9.6 architectural feature"
  
- extern bool page_alloc_available;
- 
-+#ifdef CONFIG_ARM64_TLBID
-+int init_tlbid_context(struct mm_struct *mm);
-+void destroy_tlbid_context(struct mm_struct *mm);
-+void update_tlbid_domains(struct mm_struct *mm, unsigned int cpu);
-+#else
-+static inline int init_tlbid_context(struct mm_struct *mm) { return 0; }
-+static inline void destroy_tlbid_context(struct mm_struct *mm) {}
-+static inline void update_tlbid_domains(struct mm_struct *mm, unsigned int cpu) {}
-+#endif
++config AS_HAS_TLBID
++	def_bool $(as-instr,.arch_extension tlbid)
++	# https://github.com/llvm/llvm-project/pull/178913
++	depends on AS_IS_GNU || (AS_IS_LLVM && AS_VERSION >= 230000)
++	help
++	  Supported by LLVM 23+ and binutils 2.46+.
 +
- #endif	/* !__ASSEMBLER__ */
- #endif
-diff --git a/arch/arm64/include/asm/mmu_context.h b/arch/arm64/include/asm/mmu_context.h
-index 803b68758152..5bf2d3f73e1c 100644
---- a/arch/arm64/include/asm/mmu_context.h
-+++ b/arch/arm64/include/asm/mmu_context.h
-@@ -21,6 +21,7 @@
- #include <asm/cpufeature.h>
- #include <asm/daifflags.h>
- #include <asm/gcs.h>
-+#include <asm/mmu.h>
- #include <asm/proc-fns.h>
- #include <asm/cputype.h>
- #include <asm/sysreg.h>
-@@ -172,7 +173,13 @@ init_new_context(struct task_struct *tsk, struct mm_struct *mm)
- 	/* pkey 0 is the default, so always reserve it. */
- 	mm->context.pkey_allocation_map = BIT(0);
+ config ARM64_TLBID
+ 	def_bool y
+-	depends on ACPI
++	depends on ACPI && AS_HAS_TLBID
+ 	select ACPI_TLBI
  
--	return 0;
-+	return init_tlbid_context(mm);
-+}
+ config ARM64_SVE
+diff --git a/arch/arm64/include/asm/tlbflush.h b/arch/arm64/include/asm/tlbflush.h
+index 8338d780ca59..da7f99d722a5 100644
+--- a/arch/arm64/include/asm/tlbflush.h
++++ b/arch/arm64/include/asm/tlbflush.h
+@@ -41,11 +41,27 @@
+ 
+ #define __tlbi(op, ...)		__TLBI_N(op, ##__VA_ARGS__, 1, 0)
+ 
++#define __tlbip(op, arg) do {							\
++	u128 __arg = (arg);							\
++	register u64 low asm ("x0") = (u64)__arg;				\
++	register u64 high asm ("x1") = (u64)(__arg >> 64);			\
++										\
++	asm (ARM64_ASM_PREAMBLE ".arch_extension tlbid\n"			\
++	     "tlbip " #op ", %0, %1\n"						\
++	  : : "r" (low), "r" (high));						\
++} while (0)
 +
-+#define destroy_context(mm) destroy_context(mm)
-+static inline void destroy_context(struct mm_struct *mm)
-+{
-+	destroy_tlbid_context(mm);
+ #define __tlbi_user(op, arg) do {						\
+ 	if (arm64_kernel_unmapped_at_el0())					\
+ 		__tlbi(op, (arg) | USER_ASID_FLAG);				\
+ } while (0)
+ 
++#define __tlbip_user(op, arg) do {						\
++	if (arm64_kernel_unmapped_at_el0()) {					\
++		__tlbip(op, (arg) | (u128)USER_ASID_FLAG);			\
++	}									\
++} while (0)
++
+ #define TLBI_TLBID_MASK		GENMASK_ULL(15, 0)
+ 
+ /* This macro creates a properly formatted VA operand for the TLBI */
+@@ -132,49 +148,75 @@ static inline void sme_dvmsync_batch(void)
+ 
+ #define TLBI_TTL_UNKNOWN	INT_MAX
+ 
+-typedef void (*tlbi_op)(u64 arg);
++typedef void (*tlbi_op)(bool tlbip, u128 arg);
+ 
+-static __always_inline void vae1is(u64 arg)
++static __always_inline void vae1is(bool tlbip, u128 arg)
+ {
+-	__tlbi(vae1is, arg);
+-	__tlbi_user(vae1is, arg);
++	if (tlbip) {
++		__tlbip(vae1is, arg);
++		__tlbip_user(vae1is, arg);
++	} else {
++		__tlbi(vae1is, (u64)arg);
++		__tlbi_user(vae1is, (u64)arg);
++	}
  }
  
- static inline void arch_dup_pkeys(struct mm_struct *oldmm,
-diff --git a/arch/arm64/mm/context.c b/arch/arm64/mm/context.c
-index 0f4a28b87469..21146d57e8b7 100644
---- a/arch/arm64/mm/context.c
-+++ b/arch/arm64/mm/context.c
-@@ -13,6 +13,7 @@
- #include <linux/mm.h>
- 
- #include <asm/cpufeature.h>
-+#include <asm/mmu.h>
- #include <asm/mmu_context.h>
- #include <asm/smp.h>
- #include <asm/tlbflush.h>
-@@ -215,7 +216,7 @@ static u64 new_context(struct mm_struct *mm)
- void check_and_switch_context(struct mm_struct *mm)
+-static __always_inline void vae2is(u64 arg)
++static __always_inline void vae2is(bool tlbip, u128 arg)
  {
- 	unsigned long flags;
--	unsigned int cpu;
-+	unsigned int cpu = smp_processor_id();
- 	u64 asid, old_active_asid;
+-	__tlbi(vae2is, arg);
++	if (tlbip)
++		__tlbip(vae2is, arg);
++	else
++		__tlbi(vae2is, (u64)arg);
+ }
  
- 	if (system_supports_cnp())
-@@ -251,7 +252,6 @@ void check_and_switch_context(struct mm_struct *mm)
- 		atomic64_set(&mm->context.id, asid);
+-static __always_inline void vale1(u64 arg)
++static __always_inline void vale1(bool tlbip, u128 arg)
+ {
+-	__tlbi(vale1, arg);
+-	__tlbi_user(vale1, arg);
++	compiletime_assert(!tlbip, "Unsupported TLBIP operand");
++
++	__tlbi(vale1, (u64)arg);
++	__tlbi_user(vale1, (u64)arg);
+ }
+ 
+-static __always_inline void vale1is(u64 arg)
++static __always_inline void vale1is(bool tlbip, u128 arg)
+ {
+-	__tlbi(vale1is, arg);
+-	__tlbi_user(vale1is, arg);
++	if (tlbip) {
++		__tlbip(vale1is, arg);
++		__tlbip_user(vale1is, arg);
++	} else {
++		__tlbi(vale1is, (u64)arg);
++		__tlbi_user(vale1is, (u64)arg);
++	}
+ }
+ 
+-static __always_inline void vale2is(u64 arg)
++static __always_inline void vale2is(bool tlbip, u128 arg)
+ {
+-	__tlbi(vale2is, arg);
++	if (tlbip)
++		__tlbip(vale2is, arg);
++	else
++		__tlbi(vale2is, (u64)arg);
+ }
+ 
+-static __always_inline void vaale1is(u64 arg)
++static __always_inline void vaale1is(bool tlbip, u128 arg)
+ {
+-	__tlbi(vaale1is, arg);
++	if (tlbip)
++		__tlbip(vaale1is, arg);
++	else
++		__tlbi(vaale1is, (u64)arg);
+ }
+ 
+-static __always_inline void ipas2e1(u64 arg)
++static __always_inline void ipas2e1(bool tlbip, u128 arg)
+ {
+-	__tlbi(ipas2e1, arg);
++	compiletime_assert(!tlbip, "Unsupported TLBIP operand");
++
++	__tlbi(ipas2e1, (u64)arg);
+ }
+ 
+-static __always_inline void ipas2e1is(u64 arg)
++static __always_inline void ipas2e1is(bool tlbip, u128 arg)
+ {
+-	__tlbi(ipas2e1is, arg);
++	if (tlbip)
++		__tlbip(ipas2e1is, arg);
++	else
++		__tlbi(ipas2e1is, (u64)arg);
+ }
+ 
+ static __always_inline void __tlbi_level_asid(tlbi_op op, u64 addr, u32 level,
+@@ -188,7 +230,7 @@ static __always_inline void __tlbi_level_asid(tlbi_op op, u64 addr, u32 level,
+ 		FIELD_MODIFY(TLBI_TTL_MASK, &arg, ttl);
  	}
  
--	cpu = smp_processor_id();
- 	if (cpumask_test_and_clear_cpu(cpu, &tlb_flush_pending))
- 		local_flush_tlb_all();
+-	op(arg);
++	op(false, arg);
+ }
  
-@@ -262,6 +262,8 @@ void check_and_switch_context(struct mm_struct *mm)
- 
- 	arm64_apply_bp_hardening();
- 
-+	update_tlbid_domains(mm, cpu);
-+
- 	/*
- 	 * Defer TTBR0_EL1 setting for user threads to uaccess_enable() when
- 	 * emulating PAN.
-diff --git a/arch/arm64/mm/tlbid.c b/arch/arm64/mm/tlbid.c
-index 33d669e6bf1e..2c22ab71edbf 100644
---- a/arch/arm64/mm/tlbid.c
-+++ b/arch/arm64/mm/tlbid.c
-@@ -7,18 +7,77 @@
+ static inline void __tlbi_level(tlbi_op op, u64 addr, u32 level)
+@@ -449,32 +491,50 @@ static inline void arch_tlbbatch_flush(struct arch_tlbflush_unmap_batch *batch)
+  *    operations can only span an even number of pages. We save this for last to
+  *    ensure 64KB start alignment is maintained for the LPA2 case.
   */
- 
- #include <linux/acpi.h>
-+#include <linux/atomic.h>
- #include <linux/bitops.h>
- #include <linux/bitmap.h>
-+#include <linux/efi.h>
- #include <linux/jump_label.h>
-+#include <linux/mm_types.h>
- #include <linux/slab.h>
- #include <linux/sort.h>
- 
-+#include <asm/mmu.h>
-+
- DEFINE_STATIC_KEY_FALSE(tlbid_enabled);
- 
- static u16 *domain_ids;
- static unsigned long **cpu_domains;
- static int domain_count;
- 
-+void update_tlbid_domains(struct mm_struct *mm, unsigned int cpu)
-+{
-+	atomic64_t *mm_domains = mm->context.tlbid_domains;
-+
-+	if (!system_supports_tlbid())
-+		return;
-+
-+	for (int i = 0; i < BITS_TO_U64(domain_count); i++) {
-+		s64 mm_domain_bits = atomic64_read(&mm_domains[i]);
-+		s64 cpu_domain_bits = cpu_domains[cpu][i];
-+
-+		if ((mm_domain_bits & cpu_domain_bits) != mm_domain_bits)
-+			atomic64_and(cpu_domain_bits, &mm_domains[i]);
-+	}
-+}
-+
-+int init_tlbid_context(struct mm_struct *mm)
-+{
-+	bool is_efi = mm_is_efi(mm);
-+	atomic64_t *domains;
-+	int ndomains, nwords;
-+
-+	/* TLBI domain support not yet known at EFI init time */
-+	if (!system_supports_tlbid() && !is_efi)
-+		return 0;
-+
-+	ndomains = is_efi ? MAX_TLBI_DOMAINS : domain_count;
-+	nwords = BITS_TO_U64(ndomains);
-+	domains = kcalloc(nwords, sizeof(*domains), GFP_KERNEL);
-+	if (!domains)
-+		return -ENOMEM;
-+
-+	if (is_efi) {
-+		/*
-+		 * Use a safe domain since updates to domains would be lost if
-+		 * efi_mm were installed before TLBID is enabled.
-+		 */
-+		atomic64_set(domains, 1);
-+	} else {
-+		for (int i = 0; i < nwords; i++)
-+			atomic64_set(&domains[i], -1);
-+	}
-+
-+	mm->context.tlbid_domains = domains;
-+
-+	return 0;
-+}
-+
-+void destroy_tlbid_context(struct mm_struct *mm)
-+{
-+	if (system_supports_tlbid())
-+		kfree(mm->context.tlbid_domains);
-+}
-+
- static int __init init_cpu_domain_bitmaps(struct tlbi_domain *domains)
+-static __always_inline void rvae1is(u64 arg)
++static __always_inline void rvae1is(bool tlbip, u128 arg)
  {
- 	int cpu;
+-	__tlbi(rvae1is, arg);
+-	__tlbi_user(rvae1is, arg);
++	if (tlbip) {
++		__tlbip(rvae1is, arg);
++		__tlbip_user(rvae1is, arg);
++	} else {
++		__tlbi(rvae1is, (u64)arg);
++		__tlbi_user(rvae1is, (u64)arg);
++	}
+ }
+ 
+-static __always_inline void rvale1(u64 arg)
++static __always_inline void rvale1(bool tlbip, u128 arg)
+ {
+-	__tlbi(rvale1, arg);
+-	__tlbi_user(rvale1, arg);
++	compiletime_assert(!tlbip, "Unsupported TLBIP operand");
++
++	__tlbi(rvale1, (u64)arg);
++	__tlbi_user(rvale1, (u64)arg);
+ }
+ 
+-static __always_inline void rvale1is(u64 arg)
++static __always_inline void rvale1is(bool tlbip, u128 arg)
+ {
+-	__tlbi(rvale1is, arg);
+-	__tlbi_user(rvale1is, arg);
++	if (tlbip) {
++		__tlbip(rvale1is, arg);
++		__tlbip_user(rvale1is, arg);
++	} else {
++		__tlbi(rvale1is, (u64)arg);
++		__tlbi_user(rvale1is, (u64)arg);
++	}
+ }
+ 
+-static __always_inline void rvaale1is(u64 arg)
++static __always_inline void rvaale1is(bool tlbip, u128 arg)
+ {
+-	__tlbi(rvaale1is, arg);
++	if (tlbip)
++		__tlbip(rvaale1is, arg);
++	else
++		__tlbi(rvaale1is, (u64)arg);
+ }
+ 
+-static __always_inline void ripas2e1is(u64 arg)
++static __always_inline void ripas2e1is(bool tlbip, u128 arg)
+ {
+-	__tlbi(ripas2e1is, arg);
++	if (tlbip)
++		__tlbip(ripas2e1is, arg);
++	else
++		__tlbi(ripas2e1is, (u64)arg);
+ }
+ 
+ static __always_inline void __tlbi_range(tlbi_op op, u64 addr,
+@@ -490,7 +550,7 @@ static __always_inline void __tlbi_range(tlbi_op op, u64 addr,
+ 	arg |= FIELD_PREP(TLBIR_TG_MASK, get_trans_granule());
+ 	arg |= FIELD_PREP(TLBIR_ASID_MASK, asid);
+ 
+-	op(arg);
++	op(false, arg);
+ }
+ 
+ static __always_inline void __flush_tlb_range_op(tlbi_op lop, tlbi_op rop,
 -- 
 2.43.0
 
