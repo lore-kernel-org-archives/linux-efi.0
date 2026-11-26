@@ -1,47 +1,47 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=217.140.110.172
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795693834;
-	b=mG1lLLjhrZ1aD2narvvRyog5rtKPOqpYe04Gnr4zve4NnqO7GK/vyZKMLSH2TmlbIt6X
-	 btFkoKFrYtv3y6cwItilq9dil+PPAm3xB+MDuz1P8Qgrq9FCkO41FWUO0vLkG8mQ/F4+r
-	 3qDJ4jgPPei6g9YaRE4ZcZkgRvKPAfzsVys1jq0fMQsjXn6JFx8NyC7TS7nop0TTFroQf
-	 chLUJ8s2ea6IBHdtTWdgDVUHvhxT0ba8aAgqanMs8tO7EbuqWZw3PaubrxFC8pO2fAJvi
-	 O+iQYxgTyh9diT2zRLA/cwNGorCI3wiifXV+vFHSKbS2fJHO6wNEtl0IoU9AxhXm3qw==
+	t=1795693837;
+	b=pJIAoilVbcnBfy7jK6n+n3J976jwIqyMT+iW/Izjh8ddi0nvnf8eI1C2+MFbaAZaCeDq
+	 0/QgZetrOyuXITYNVOBXvS/Ym4NVPG2GY6yxbXvKgfhqmKWKA1hYyDT4Q87AW3ZUuUylF
+	 olyvOLyIRTNvkg1Ezta/Hxoq5LVKM07eCuApeq80AgzVHoL6ZPLLiHzk0jRHefgt1qkeK
+	 lwdMHVI2DQb7kqyqDbebJxJ+rVYG5saTvPWRuTl20Ymz48Xmy5NjO0B5yFGvaodzS+f6M
+	 htDZdgDD9Q8hrW2rHdodb1TQES51+JQ5+5qs3dWZUEhx8gjKr9CCGnjVrKnMZfiUogA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795693834;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795693837;
 	h=DMARC-Filter:Received:Received:DKIM-Signature:From:To:Cc:Subject:
 	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=+sMJKdm7RBjReJZBZpNRbMvCkNomWSzgnmwdCLNJxu0=;
-	b=Es6IY0BvROOkiGu+b/iBJS5NNNNMb2bDzbEzFAO13Iq3rgytQk0qoO6nnXNOoMP3noBL
-	 Fv3kSpNzqxx47p4AjAEcKO+/W9HZSQLeIZpMvld79+Y1lXUpadwFhvXEEZp0yF0IkvKVk
-	 Q5Z0es97Oe2JmSq5MOM6R2QAOReW3aIzlsEkBVjOZEUxGxNl2L3O4qOLHo0kcw5JzpMym
-	 IOWWLEtpuiZzNVlQJiz8QKKV5iLTPJwk4zcQuchf3ztxLhBGZHjpeDKl0y01AKf/tJ2Iq
-	 M6YArBZkLNmiTK+2gAJKgOELSQYncowvTicremXSMIDYo77jM5wrKSwlStZLtsNnIbg==
+	bh=azZ3KQu2QEF63DgvbCLhBPpTz7ayv4JWXUinkgaEY0U=;
+	b=IPGAbTd4/bsNPS4MTP0xhhNCwK+75VYgUr1TurZnw5w9ZzMOTHtHW+ZNgfSpWBHeWxkL
+	 6+Hcfprq46NGh/1nL3Z/G9SGeijQQQq4rhKhL8ShaevhAcE+bFpDIS6k6nSNd+J2vu+EX
+	 MBLw51wXZvk0M4z+UaAPxM3pYJ/cm65Jm71kDnGOqbgvqg7Ed37A6PV9tA/ZMZlxShIWX
+	 w7fc4rtT0P5OzA3+ySHQPwHaS6cNv+Y9wfyRU13fS5jjfMcTGX8gbZy6DHutbC3JAL4JN
+	 s1SKOHh39e4sPCdNQlq82ervYCqPARPOY2dfr8RJt56vM2dK/dLdEDsAb52j1Pd3IXw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=arm.com;
 	spf=pass smtp.mailfrom=arm.com;
-	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=pjLbAl1N;
+	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=G1Zv6WOA;
 	arc=none smtp.remote-ip=217.140.110.172
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id BB20E606A329;
-	Thu, 26 Nov 2026 11:50:33 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org BB20E606A329
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 32F95606A31C;
+	Thu, 26 Nov 2026 11:50:37 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 32F95606A31C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=pjLbAl1N
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=G1Zv6WOA
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 3005B1C2B;
-	Thu, 26 Nov 2026 03:50:30 -0800 (PST)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id BC68F1CE2;
+	Thu, 26 Nov 2026 03:50:33 -0800 (PST)
 Received: from e142392.cambridge.arm.com (usa-sjc-imap-foss1.foss.arm.com [10.121.207.14])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id A62913F632;
-	Thu, 26 Nov 2026 03:50:29 -0800 (PST)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 58F933F632;
+	Thu, 26 Nov 2026 03:50:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1795693833; bh=/3NPWBIuGcviSK+Zm4uH47Yg7s6hYkjvIlQ7KV0aitU=;
+	t=1795693836; bh=8QlSd2smlIXF53k84CUiTHAkghqqHY3TKxduzhWQPs0=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=pjLbAl1NAJE0z9HGf/71eN88bibgOpmM4y0xPEs546XwBjOLPs3QFyip+PZALT8sq
-	 1cM7MnGI9sU3YmK7Y1DqksdHX/Bb1gwOg/QEa/L9Q97UW/h+u93UdxnUHYhF92TreP
-	 +f/euCpEjPAX4teYU6O8zuA/0RBla4DoyNdH3DDQ=
+	b=G1Zv6WOAFD8/+FkhhNw32S6gMJlePJnG8ukoIiPetxSDatIDtRyd9u+5dFjhW8Z2b
+	 XbBsR36uioWjYtKZ6Vj57dU+Ce4XtFma7xFeBQom+oHteqvFlwmzE63o/u5MDSpzzP
+	 rVOgpgjskrN0SUkT91zvfzzO4HQbKjy7PBH9c8ec=
 From: =?UTF-8?q?Kristina=20Mart=C5=A1enko?= <kristina.martsenko@arm.com>
 To: linux-arm-kernel@lists.infradead.org,
 	linux-acpi@vger.kernel.org,
@@ -69,9 +69,9 @@ Cc: Catalin Marinas <catalin.marinas@arm.com>,
 	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
 	Jinqian Yang <yangjinqian1@huawei.com>,
 	Zi Yan <ziy@nvidia.com>
-Subject: [RFC v2 07/13] ACPI: TLBI: Parse domains from table
-Date: Thu, 26 Nov 2026 11:49:30 +0000
-Message-ID: <20261126114936.864256-8-kristina.martsenko@arm.com>
+Subject: [RFC v2 08/13] arm64: tlbid: Set up CPU domain bitmaps
+Date: Thu, 26 Nov 2026 11:49:31 +0000
+Message-ID: <20261126114936.864256-9-kristina.martsenko@arm.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20261126114936.864256-1-kristina.martsenko@arm.com>
 References: <20261126114936.864256-1-kristina.martsenko@arm.com>
@@ -87,351 +87,214 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Parse the Arm TLBI ACPI table.
+For each CPU, set up a bitmap of TLBI domains that contain the CPU.
+This will be used in later patches to select a domain that contains a
+given set of CPUs.
 
-The table contains a list of TLBI domains. Each domain is identified by
-a domain number (which can be passed to a TLBI instruction). Each domain
-contains a list of descendants, which are CPUs, SMMUs and subdomains.
-CPUs are identified by their ACPI Processor UID in GICC MADT, SMMUs by
-their Identifier in IORT, and subdomains by their offset in the TLBI
-table itself. This allows to describe a hierarchy of domains and the
-CPUs and SMMUs that are part of each domain.
+Sort the bitmap by size, with the largest domain at the smallest index.
+This will be used to select the smallest domain. Domains are sorted
+based on the number of CPUs that they contain. Domains may also contain
+SMMUs but we ignore that for now.
 
-Parse the domains from the table. For each domain, build a cpumask of
-the CPUs that are part of it. Only add CPUs that have not been disabled.
+Do the setup in arm64 code, near to where it will be used. The ACPI
+table parser calls the arm64 setup code directly after parsing the TLBI
+table, and passes a list of parsed domains. Afterwards, the parser's own
+temporary structures are freed. Alternatively the arm64 setup could be
+done from a subsys_initcall_sync().
 
-Parse the domains recursively. Use an arbitrary depth limit of 10 to
-prevent infinite recursion in case of firmware bugs. For simplicity each
-subdomain hierarchy may be parsed multiple times.
-
-Validate that domain 0 (the fallback broadcast-all domain) always
-exists and contains all CPUs. Also check that domain IDs fit into the
-architectural limit of 16 bits and what the CPUs support in TLBIDIDR.
-Sanity check the table itself (i.e. table sizes), as usually done in
-ACPI parsing.
-
-The list of domains and their CPUs will be used in the next patch to
-set up domain management in arm64 code. Place common structures in the
-arm64 ACPI header. The ARM64_TLBID kconfig symbol will be used later to
-detect compiler support and disable all TLBID code.
+Add a static key that will be used to check if TLBI domains are enabled.
+Disable domains for nVHE EL2 hypervisor code since it would otherwise
+need access to the static key (since it #includes tlbflush.h which will
+use system_supports_tlbid()) but it wouldn't use domains anyway.
 
 Signed-off-by: Kristina Martšenko <kristina.martsenko@arm.com>
 ---
- arch/arm64/Kconfig            |   5 +
- arch/arm64/include/asm/acpi.h |   9 ++
- drivers/acpi/arm64/Kconfig    |   3 +
- drivers/acpi/arm64/Makefile   |   1 +
- drivers/acpi/arm64/init.c     |   2 +
- drivers/acpi/arm64/init.h     |   1 +
- drivers/acpi/arm64/tlbi.c     | 211 ++++++++++++++++++++++++++++++++++
- 7 files changed, 232 insertions(+)
- create mode 100644 drivers/acpi/arm64/tlbi.c
+ arch/arm64/include/asm/acpi.h       |   1 +
+ arch/arm64/include/asm/cpufeature.h |   8 ++
+ arch/arm64/mm/Makefile              |   1 +
+ arch/arm64/mm/tlbid.c               | 114 ++++++++++++++++++++++++++++
+ drivers/acpi/arm64/tlbi.c           |   6 ++
+ 5 files changed, 130 insertions(+)
+ create mode 100644 arch/arm64/mm/tlbid.c
 
-diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 9b08b2457a55..e288e8dc14aa 100644
---- a/arch/arm64/Kconfig
-+++ b/arch/arm64/Kconfig
-@@ -2409,6 +2409,11 @@ config ARM64_LSUI
- 
- endmenu # "ARMv9.6 architectural feature"
- 
-+config ARM64_TLBID
-+	def_bool y
-+	depends on ACPI
-+	select ACPI_TLBI
-+
- config ARM64_SVE
- 	bool "ARM Scalable Vector Extension support"
- 	default y
 diff --git a/arch/arm64/include/asm/acpi.h b/arch/arm64/include/asm/acpi.h
-index 8a54ca6ba602..fb0bddd3b7ef 100644
+index fb0bddd3b7ef..5d173c26b56c 100644
 --- a/arch/arm64/include/asm/acpi.h
 +++ b/arch/arm64/include/asm/acpi.h
-@@ -10,6 +10,7 @@
- #define _ASM_ACPI_H
+@@ -178,6 +178,7 @@ struct tlbi_domain {
+ 	u16 id;
+ 	cpumask_var_t cpus;
+ };
++int arm64_tlbid_init(struct tlbi_domain *domains, int count);
+ #endif
  
- #include <linux/cpuidle.h>
-+#include <linux/cpumask.h>
- #include <linux/efi.h>
- #include <linux/memblock.h>
- #include <linux/psci.h>
-@@ -171,6 +172,14 @@ static inline int acpi_numa_get_nid(unsigned int cpu) { return NUMA_NO_NODE; }
- static inline void acpi_map_cpus_to_nodes(void) { }
- #endif /* CONFIG_ACPI_NUMA */
- 
-+#ifdef CONFIG_ARM64_TLBID
-+#define MAX_TLBI_DOMAINS	(1UL << 16)
-+struct tlbi_domain {
-+	u16 id;
-+	cpumask_var_t cpus;
-+};
-+#endif
-+
  #define ACPI_TABLE_UPGRADE_MAX_PHYS MEMBLOCK_ALLOC_ACCESSIBLE
- 
- #endif /*_ASM_ACPI_H*/
-diff --git a/drivers/acpi/arm64/Kconfig b/drivers/acpi/arm64/Kconfig
-index f2fd79f22e7d..d7ba9add438e 100644
---- a/drivers/acpi/arm64/Kconfig
-+++ b/drivers/acpi/arm64/Kconfig
-@@ -24,3 +24,6 @@ config ACPI_APMT
- 
- config ACPI_MPAM
- 	bool
-+
-+config ACPI_TLBI
-+	bool
-diff --git a/drivers/acpi/arm64/Makefile b/drivers/acpi/arm64/Makefile
-index 9390b57cb564..9cee81ce834b 100644
---- a/drivers/acpi/arm64/Makefile
-+++ b/drivers/acpi/arm64/Makefile
-@@ -5,6 +5,7 @@ obj-$(CONFIG_ACPI_FFH)		+= ffh.o
- obj-$(CONFIG_ACPI_GTDT) 	+= gtdt.o
- obj-$(CONFIG_ACPI_IORT) 	+= iort.o
- obj-$(CONFIG_ACPI_MPAM) 	+= mpam.o
-+obj-$(CONFIG_ACPI_TLBI) 	+= tlbi.o
- obj-$(CONFIG_ACPI_PROCESSOR_IDLE) += cpuidle.o
- obj-$(CONFIG_ARM_AMBA)		+= amba.o
- obj-y				+= dma.o init.o
-diff --git a/drivers/acpi/arm64/init.c b/drivers/acpi/arm64/init.c
-index 7a47d8095a7d..3affc7abf156 100644
---- a/drivers/acpi/arm64/init.c
-+++ b/drivers/acpi/arm64/init.c
-@@ -10,6 +10,8 @@ void __init acpi_arch_init(void)
- 		acpi_apmt_init();
- 	if (IS_ENABLED(CONFIG_ACPI_IORT))
- 		acpi_iort_init();
-+	if (IS_ENABLED(CONFIG_ACPI_TLBI))
-+		acpi_tlbi_init();
- 	if (IS_ENABLED(CONFIG_ARM_AMBA))
- 		acpi_amba_init();
+diff --git a/arch/arm64/include/asm/cpufeature.h b/arch/arm64/include/asm/cpufeature.h
+index b236fe3077f5..93da0ab03177 100644
+--- a/arch/arm64/include/asm/cpufeature.h
++++ b/arch/arm64/include/asm/cpufeature.h
+@@ -916,6 +916,14 @@ static inline bool system_supports_bbml3(void)
+ 	return alternative_has_cap_unlikely(ARM64_HAS_BBML3);
  }
-diff --git a/drivers/acpi/arm64/init.h b/drivers/acpi/arm64/init.h
-index dcc277977194..c036e2622a2f 100644
---- a/drivers/acpi/arm64/init.h
-+++ b/drivers/acpi/arm64/init.h
-@@ -5,3 +5,4 @@ void __init acpi_agdi_init(void);
- void __init acpi_apmt_init(void);
- void __init acpi_iort_init(void);
- void __init acpi_amba_init(void);
-+void __init acpi_tlbi_init(void);
-diff --git a/drivers/acpi/arm64/tlbi.c b/drivers/acpi/arm64/tlbi.c
+ 
++DECLARE_STATIC_KEY_FALSE(tlbid_enabled);
++static inline bool system_supports_tlbid(void)
++{
++	return IS_ENABLED(CONFIG_ARM64_TLBID) &&
++	       !is_nvhe_hyp_code() &&
++	       static_branch_unlikely(&tlbid_enabled);
++}
++
+ int do_emulate_mrs(struct pt_regs *regs, u32 sys_reg, u32 rt);
+ bool try_emulate_mrs(struct pt_regs *regs, u32 isn);
+ 
+diff --git a/arch/arm64/mm/Makefile b/arch/arm64/mm/Makefile
+index c26489cf96cd..cfd3255d8f0a 100644
+--- a/arch/arm64/mm/Makefile
++++ b/arch/arm64/mm/Makefile
+@@ -12,6 +12,7 @@ obj-$(CONFIG_TRANS_TABLE)	+= trans_pgd-asm.o
+ obj-$(CONFIG_DEBUG_VIRTUAL)	+= physaddr.o
+ obj-$(CONFIG_ARM64_MTE)		+= mteswap.o
+ obj-$(CONFIG_ARM64_GCS)		+= gcs.o
++obj-$(CONFIG_ARM64_TLBID) 	+= tlbid.o
+ KASAN_SANITIZE_physaddr.o	+= n
+ 
+ obj-$(CONFIG_KASAN)		+= kasan_init.o
+diff --git a/arch/arm64/mm/tlbid.c b/arch/arm64/mm/tlbid.c
 new file mode 100644
-index 000000000000..1a4b591f8f70
+index 000000000000..33d669e6bf1e
 --- /dev/null
-+++ b/drivers/acpi/arm64/tlbi.c
-@@ -0,0 +1,211 @@
++++ b/arch/arm64/mm/tlbid.c
+@@ -0,0 +1,114 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
-+ * Arm TLBI Domain Table (TLBI) support
++ * TLBI domains (FEAT_TLBID) support
 + *
 + * Copyright (C) 2026 Arm Ltd.
 + * Author: Kristina Martsenko <kristina.martsenko@arm.com>
 + */
 +
-+#define pr_fmt(fmt)	"ACPI: TLBI: " fmt
-+
 +#include <linux/acpi.h>
-+#include <linux/cpufeature.h>
-+#include <linux/limits.h>
++#include <linux/bitops.h>
++#include <linux/bitmap.h>
++#include <linux/jump_label.h>
 +#include <linux/slab.h>
++#include <linux/sort.h>
 +
-+#include "init.h"
++DEFINE_STATIC_KEY_FALSE(tlbid_enabled);
 +
-+#define MAX_HIERARCHY_DEPTH 10
-+
-+static struct acpi_table_tlbi *tlbi;
-+static struct tlbi_domain *domains;
++static u16 *domain_ids;
++static unsigned long **cpu_domains;
 +static int domain_count;
 +
-+static int __init validate_tlbi_domains(void)
++static int __init init_cpu_domain_bitmaps(struct tlbi_domain *domains)
 +{
-+	u64 tlbididr = read_sanitised_ftr_reg(SYS_TLBIDIDR_EL1);
-+	int domain_bits = FIELD_GET(TLBIDIDR_EL1_NIS, tlbididr);
-+	int domain0_idx = -1;
 +	int cpu;
 +
-+	if (domain_bits > 16)
-+		return -EINVAL;
-+
-+	for (int i = 0; i < domain_count; i++) {
-+		u16 max_domain_id = (1 << domain_bits) - 1;
-+
-+		if (domains[i].id > max_domain_id &&
-+		    !cpumask_empty(domains[i].cpus))
-+			return -EINVAL;
-+
-+		if (!domains[i].id)
-+			domain0_idx = i;
-+	}
-+
-+	if (domain0_idx == -1)
-+		return -EINVAL;
-+
-+	for_each_possible_cpu(cpu) {
-+		if (!cpumask_test_cpu(cpu, domains[domain0_idx].cpus))
-+			return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
-+static struct acpi_tlbi_descendant *__init tlbi_get_descendant(u32 offset)
-+{
-+	struct acpi_tlbi_descendant *descendant;
-+
-+	if (offset > tlbi->header.length)
-+		return NULL;
-+
-+	descendant = ACPI_ADD_PTR(struct acpi_tlbi_descendant, tlbi, offset);
-+
-+	if (offset + sizeof(*descendant) > tlbi->header.length ||
-+	    descendant->length < sizeof(*descendant) ||
-+	    descendant->length > tlbi->header.length ||
-+	    offset + descendant->length > tlbi->header.length)
-+		return NULL;
-+
-+	return descendant;
-+}
-+
-+static struct acpi_tlbi_domain *__init tlbi_get_domain(u32 offset)
-+{
-+	struct acpi_tlbi_domain *domain;
-+
-+	if (offset > tlbi->header.length)
-+		return NULL;
-+
-+	domain = ACPI_ADD_PTR(struct acpi_tlbi_domain, tlbi, offset);
-+
-+	if (offset + sizeof(*domain) > tlbi->header.length ||
-+	    domain->length < sizeof(*domain) ||
-+	    domain->length > tlbi->header.length ||
-+	    offset + domain->length > tlbi->header.length)
-+		return NULL;
-+
-+	return domain;
-+}
-+
-+static int __init parse_tlbi_domain(struct acpi_tlbi_domain *domain,
-+				    struct cpumask *cpus, int depth)
-+{
-+	u32 offset = domain->descendants_offset;
-+
-+	if (depth > MAX_HIERARCHY_DEPTH)
-+		return -EINVAL;
-+
-+	for (int i = 0; i < domain->descendant_count; i++) {
-+		struct acpi_tlbi_descendant *desc = tlbi_get_descendant(offset);
-+
-+		if (!desc)
-+			return -EINVAL;
-+
-+		switch (desc->type) {
-+		case ACPI_TLBI_DESCENDANT_DOMAIN: {
-+			struct acpi_tlbi_domain *child;
-+			int ret;
-+
-+			child = tlbi_get_domain(desc->identifier);
-+			if (!child)
-+				return -EINVAL;
-+
-+			ret = parse_tlbi_domain(child, cpus, depth + 1);
-+			if (ret)
-+				return ret;
-+			break;
-+		}
-+		case ACPI_TLBI_DESCENDANT_CPU: {
-+			int cpu = get_cpu_for_acpi_id(desc->identifier);
-+
-+			if (cpu >= 0 && cpu_possible(cpu))
-+				cpumask_set_cpu(cpu, cpus);
-+			break;
-+		}
-+		case ACPI_TLBI_DESCENDANT_SMMU:
-+			break;
-+		default:
-+			return -EINVAL;
-+		}
-+
-+		offset += desc->length;
-+	}
-+
-+	return 0;
-+}
-+
-+static void free_tlbi_domains(void)
-+{
-+	for (int i = 0; i < domain_count; i++)
-+		free_cpumask_var(domains[i].cpus);
-+	kfree(domains);
-+}
-+
-+static int __init parse_tlbi_table(void)
-+{
-+	u32 offset;
-+	int ret;
-+
-+	if (tlbi->header.length < sizeof(*tlbi) || !tlbi->domain_count ||
-+	    tlbi->domain_count > MAX_TLBI_DOMAINS)
-+		return -EINVAL;
-+
-+	domain_count = tlbi->domain_count;
-+	domains = kcalloc(domain_count, sizeof(*domains), GFP_KERNEL);
-+	if (!domains)
++	cpu_domains = kcalloc(nr_cpu_ids, sizeof(*cpu_domains), GFP_KERNEL);
++	if (!cpu_domains)
 +		return -ENOMEM;
 +
-+	offset = tlbi->domains_offset;
-+
-+	for (int i = 0; i < domain_count; i++) {
-+		struct acpi_tlbi_domain *domain = tlbi_get_domain(offset);
-+
-+		if (!domain || domain->id > U16_MAX) {
-+			ret = -EINVAL;
++	for_each_possible_cpu(cpu) {
++		cpu_domains[cpu] = bitmap_zalloc(domain_count, GFP_KERNEL);
++		if (!cpu_domains[cpu])
 +			goto err;
++
++		for (int i = 0; i < domain_count; i++) {
++			if (cpumask_test_cpu(cpu, domains[i].cpus))
++				set_bit(i, cpu_domains[cpu]);
 +		}
-+
-+		domains[i].id = domain->id;
-+		if (!zalloc_cpumask_var(&domains[i].cpus, GFP_KERNEL)) {
-+			ret = -ENOMEM;
-+			goto err;
-+		}
-+
-+		ret = parse_tlbi_domain(domain, domains[i].cpus, 0);
-+		if (ret)
-+			goto err;
-+
-+		offset += domain->length;
 +	}
-+
-+	ret = validate_tlbi_domains();
-+	if (ret)
-+		goto err;
 +
 +	return 0;
 +err:
-+	free_tlbi_domains();
-+	return ret;
++	for_each_possible_cpu(cpu)
++		bitmap_free(cpu_domains[cpu]);
++	kfree(cpu_domains);
++	return -ENOMEM;
 +}
 +
-+void __init acpi_tlbi_init(void)
++static int __init store_domain_ids(struct tlbi_domain *domains)
 +{
++	domain_ids = kmalloc_array(domain_count, sizeof(*domain_ids),
++				   GFP_KERNEL);
++	if (!domain_ids)
++		return -ENOMEM;
++
++	for (int i = 0; i < domain_count; i++)
++		domain_ids[i] = domains[i].id;
++
++	return 0;
++}
++
++static int __init tlbi_domain_cmp(const void *a, const void *b)
++{
++	const struct tlbi_domain *d1 = a;
++	const struct tlbi_domain *d2 = b;
++
++	/* Sort domains from largest to smallest */
++	return cmp_int(cpumask_weight(d2->cpus), cpumask_weight(d1->cpus));
++}
++
++static struct tlbi_domain *__init sort_domains_by_size(struct tlbi_domain *domains)
++{
++	struct tlbi_domain *domains_sorted;
++
++	domains_sorted = kmemdup(domains, domain_count * sizeof(*domains),
++				 GFP_KERNEL);
++	if (!domains_sorted)
++		return NULL;
++
++	sort(domains_sorted, domain_count, sizeof(*domains_sorted),
++	     tlbi_domain_cmp, NULL);
++
++	return domains_sorted;
++}
++
++int __init arm64_tlbid_init(struct tlbi_domain *domains_in, int count)
++{
++	struct tlbi_domain *domains;
 +	int ret;
 +
-+	if (!cpus_have_final_cap(ARM64_HAS_TLBID))
-+		return;
++	domain_count = count;
 +
-+	struct acpi_table_header *table __free(acpi_put_table) =
-+		acpi_get_table_pointer(ACPI_SIG_TLBI, 0);
-+	if (IS_ERR(table))
-+		return;
-+	tlbi = (struct acpi_table_tlbi *)table;
++	domains = sort_domains_by_size(domains_in);
++	if (!domains)
++		return -ENOMEM;
 +
-+	ret = parse_tlbi_table();
-+	if (ret) {
-+		pr_err("Failed to parse ACPI table\n");
-+		return;
-+	}
++	ret = store_domain_ids(domains);
++	if (ret)
++		goto err_ids;
++
++	ret = init_cpu_domain_bitmaps(domains);
++	if (ret)
++		goto err_cpu;
++
++	static_branch_enable(&tlbid_enabled);
++
++	kfree(domains);
++	return 0;
++err_cpu:
++	kfree(domain_ids);
++err_ids:
++	kfree(domains);
++	return ret;
 +}
+diff --git a/drivers/acpi/arm64/tlbi.c b/drivers/acpi/arm64/tlbi.c
+index 1a4b591f8f70..7fa7439a296f 100644
+--- a/drivers/acpi/arm64/tlbi.c
++++ b/drivers/acpi/arm64/tlbi.c
+@@ -208,4 +208,10 @@ void __init acpi_tlbi_init(void)
+ 		pr_err("Failed to parse ACPI table\n");
+ 		return;
+ 	}
++
++	ret = arm64_tlbid_init(domains, domain_count);
++	if (ret)
++		pr_err("Failed to initialize domains\n");
++
++	free_tlbi_domains();
+ }
 -- 
 2.43.0
 
