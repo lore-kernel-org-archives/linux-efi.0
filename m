@@ -1,47 +1,47 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=217.140.110.172
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795693824;
-	b=ZhZ0GKPOZYlSzGBFpwfmbNJrSIktQE9E4czNjpylKJIdkWMfr0Kl31yqbHCRwQsgUMIU
-	 PDx9OFznlKQlCp6A+zpZ7xwyZLJZFfTOVNMaKrbMUUvnESeTSt9WBGnFLaZeD+5V73lj8
-	 NCV2rY4ABv3mQ68tvEtIltyV6gaSzaU9dS2kNfmXVEfC86kTls29MAmiX2u+CA81Az6FT
-	 hCE+eQuJt+AoHKZchX6Thvqe6sdiBu5GI/JYo4uV1sccqxEWFGyvKO87VATTfcpLSHCGM
-	 naFolLAj0fXGzjg6g5aXxmBThlLOX51D1spVLwZqOHZiekT5cXTNqg3BMsNZiIbYNQw==
+	t=1795693819;
+	b=L3b66Ed1GS5vLUULOZNc3LmmbaTMvOUlPasQbdH6cge01UsTr4o8t5jNoWBM/oC67oi9
+	 CscJUj5NHB4Gk0KSH96L7KeVA9VuroeuwT+1FOoTdttrliyX7pQu+zoqfVm3Jo62O7cVP
+	 SLqlIDODc5SsWfHr0kn0yAPybCyGBreI3AI4pj01Vy3jUjt/eKQB6WGsTLSTLbA+eZooK
+	 Pu4ZLoJLumncDksAOIyWhlnZDmjETugeQ5sxjYBCj6Q2sYJjzPyVW3FR1doTp9dHKkvpe
+	 BF55MSajPzHYPZAYobca1ZVI4rSSO0eioVJtErgoc4jpvdtL/0EhN2HE6jdTQTJptpw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795693824;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795693819;
 	h=DMARC-Filter:Received:Received:DKIM-Signature:From:To:Cc:Subject:
 	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=J8WNoKEc0VuFKBNFw4+mR3YcdoFeytD04JpUsxYo3ks=;
-	b=VJkyaok7gkuaeUMRdWj+kwBBZfN7XaL50bC5WUBIcLj0c5PNWo+UFO7/8twJMgEB4NZa
-	 Sq33YbSdpdMbOKIoho6nsqdMk2Jq5m6DwFg03HvK3B8Q/Ase+W+BIialGsAd/sgBmJOBr
-	 uQPXCgmWb6uget+VaRU9GyLe9MObYZJC1vLUM/MZmwXLGZE+uH+sT+N/rpJzbadZrk2Hi
-	 fNP/dJAefm3FVyCU2wWj1j1aE2wP1mMzlu+xeKF1PmQktyF6n67hZcDAu9UYuFqO1MpYe
-	 Qq4F5tiaelNId941Wmw+5hIX/oYfWgeaGj2jXKP/UNIwGviKqZ1+/F+GaSyC3vgXtoA==
+	bh=p6pCAmfKttvQs1qE/yGyvXWawOOJ5bLlKuCjOlPLrCE=;
+	b=U2UZBaa6DcHrBVNRg0FNW1HCMytZAjC/Y90GRae3tf/FXcCevIwBzT8v6B6V1HLaCutj
+	 N6pUzNHrA5+wkuPqbpWTMwtB27YMY9XtwXdafmglEsARoeWoSOZwM8RchHPJs4mbVMp7J
+	 zR2Hi5gjLZAdnxJoG0auiPSUOxBvaxYikZFuJg+qznaRFrmJhvnGcmFl+7eihimR1T15G
+	 JS9AotjyY72NKJg0sLUsiLHF2MkQRYvo8Ivi2RHEGdu7tI7VHEK9S+UmX4UY/FwQ/f+wm
+	 HqDRuSYdkywj4i81vyybx1eNS0PY8nOu6t7dGE0suGHYIn5BikFfU1Jt1+XdBgSVgBg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=arm.com;
 	spf=pass smtp.mailfrom=arm.com;
-	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=hetP50fs;
+	dkim=pass header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=ugYDt0iB;
 	arc=none smtp.remote-ip=217.140.110.172
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id E1A6A606A31C;
-	Thu, 26 Nov 2026 11:50:22 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E1A6A606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 5AA7C606A327;
+	Thu, 26 Nov 2026 11:50:19 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5AA7C606A327
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=hetP50fs
+	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.a=rsa-sha256 header.s=foss header.b=ugYDt0iB
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 5EE161CE2;
-	Thu, 26 Nov 2026 03:50:19 -0800 (PST)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id C1F2D1C2B;
+	Thu, 26 Nov 2026 03:50:15 -0800 (PST)
 Received: from e142392.cambridge.arm.com (usa-sjc-imap-foss1.foss.arm.com [10.121.207.14])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id EA6D73F632;
-	Thu, 26 Nov 2026 03:50:18 -0800 (PST)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 5DEF23F632;
+	Thu, 26 Nov 2026 03:50:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1795693822; bh=yFkYatB5WJrK/LmKtOX2lr33tMmU0w63R59hWonTW+0=;
+	t=1795693818; bh=Rdgqx0rOK7ovOMli2Zxsy7q/hl7GZXAheTR1CD4NiOs=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=hetP50fsgqAmjdFPviqlduTjbgI+oEwKjOUz/S7jEV+l3va+oYYue9zXTrBRzs0Ng
-	 QUJ9QQz++TwVxZXyYShIAy2/H0HmPCvlmOn6CFhpf//np6XG9u+KIBs8VzEwOhID9Z
-	 wtAYetpQL3sSbZR/jKEEphDwfPmULweuBig3E9Mk=
+	b=ugYDt0iBpMGL6SslLU1XaMAQqU1TNtSmLpd/Gm+m9CvPRgWvTiSxirQYEs1btE/SC
+	 W8SjYqMva5D8yZZ8IX7RmiCLVlL9CeJm1/D6fAHYvddIEAvPIv+LklcoI8TIeHjPIN
+	 tIhw4qShY2o68Y+fqVopvTPsdoU0T2IVDLNb2Qxg=
 From: =?UTF-8?q?Kristina=20Mart=C5=A1enko?= <kristina.martsenko@arm.com>
 To: linux-arm-kernel@lists.infradead.org,
 	linux-acpi@vger.kernel.org,
@@ -69,9 +69,9 @@ Cc: Catalin Marinas <catalin.marinas@arm.com>,
 	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
 	Jinqian Yang <yangjinqian1@huawei.com>,
 	Zi Yan <ziy@nvidia.com>
-Subject: [RFC v2 04/13] KVM: arm64: Hide TLBID from guest sysregs
-Date: Thu, 26 Nov 2026 11:49:27 +0000
-Message-ID: <20261126114936.864256-5-kristina.martsenko@arm.com>
+Subject: [RFC v2 03/13] arm64: Detect TLBID
+Date: Thu, 26 Nov 2026 11:49:26 +0000
+Message-ID: <20261126114936.864256-4-kristina.martsenko@arm.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20261126114936.864256-1-kristina.martsenko@arm.com>
 References: <20261126114936.864256-1-kristina.martsenko@arm.com>
@@ -87,91 +87,146 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Don't expose FEAT_TLBID to guests. It wouldn't be useful in the general
-case since a guest doesn't know which domains exist and its vCPUs can be
-moved between any physical CPUs.
-
-Hide TLBID sysregs and sysreg fields from the guest:
-
-  * Report the feature as not supported in the ID register
-    ID_AA64MMFR4_EL1.TLBID.
-
-  * Configure the TLBIDIDR_EL1 sysreg to UNDEF via the FGU mechanism.
-    Sanitize a nested hypervisor's HFGRTR2.nTLBIDIDR.
-
-  * Sanitize a nested hypervisor's HCRX.{VTLBIDEn,VTLBIDOSEn,FNB}.
-
-  * VTLBID{OS}<n>_EL2 registers are VNCR-backed and not exposed to
-    guests (apart from being able to read/write into the VNCR page) so
-    no need to handle them in sys_reg_descs or elsewhere.
-
-  * The guest is free to set SCTLR2_EL{1,2}.TLBOSNIS, which shouldn't
-    matter to KVM.
+Detect if FEAT_TLBID is supported by the system. Detect TLBID
+configuration from TLBIDIDR_EL1. This information will be used in later
+patches.
 
 Signed-off-by: Kristina Martšenko <kristina.martsenko@arm.com>
 ---
- arch/arm64/kvm/config.c         | 6 ++++++
- arch/arm64/kvm/emulate-nested.c | 1 +
- arch/arm64/kvm/sys_regs.c       | 3 +++
- 3 files changed, 10 insertions(+)
+ arch/arm64/include/asm/cpu.h        |  1 +
+ arch/arm64/include/asm/cpufeature.h |  7 +++++++
+ arch/arm64/kernel/cpufeature.c      | 25 +++++++++++++++++++++++++
+ arch/arm64/kernel/cpuinfo.c         |  3 +++
+ arch/arm64/tools/cpucaps            |  1 +
+ 5 files changed, 37 insertions(+)
 
-diff --git a/arch/arm64/kvm/config.c b/arch/arm64/kvm/config.c
-index adaf26ab93b8..d93bc0715494 100644
---- a/arch/arm64/kvm/config.c
-+++ b/arch/arm64/kvm/config.c
-@@ -243,6 +243,7 @@ struct reg_feat_map_desc {
- #define FEAT_S2PIE		ID_AA64MMFR3_EL1, S2PIE, IMP
- #define FEAT_GCIE		ID_AA64PFR2_EL1, GCIE, IMP
- #define FEAT_NV3		ID_AA64MMFR4_EL1, NV_frac, NV3
-+#define FEAT_TLBID		ID_AA64MMFR4_EL1, TLBID, IMP
+diff --git a/arch/arm64/include/asm/cpu.h b/arch/arm64/include/asm/cpu.h
+index 3d1693aaf4e0..e839edded6ed 100644
+--- a/arch/arm64/include/asm/cpu.h
++++ b/arch/arm64/include/asm/cpu.h
+@@ -48,6 +48,7 @@ struct cpuinfo_arm64 {
+ 	u64		reg_gmid;
+ 	u64		reg_smidr;
+ 	u64		reg_mpamidr;
++	u64		reg_tlbididr;
  
- static bool not_feat_aa64el3(struct kvm *kvm)
- {
-@@ -849,6 +850,7 @@ static const struct reg_bits_to_feat_map hfgrtr2_feat_map[] = {
- 		   HFGRTR2_EL2_nTCRMASK_EL1,
- 		   FEAT_SRMASK),
- 	NEEDS_FEAT(HFGRTR2_EL2_nRCWSMASK_EL1, FEAT_THE),
-+	NEEDS_FEAT(HFGRTR2_EL2_nTLBIDIDR_EL1, FEAT_TLBID),
+ 	u64		reg_id_aa64dfr0;
+ 	u64		reg_id_aa64dfr1;
+diff --git a/arch/arm64/include/asm/cpufeature.h b/arch/arm64/include/asm/cpufeature.h
+index e3c8a1493dc8..b236fe3077f5 100644
+--- a/arch/arm64/include/asm/cpufeature.h
++++ b/arch/arm64/include/asm/cpufeature.h
+@@ -658,6 +658,13 @@ static inline bool id_aa64pfr1_mte(u64 pfr1)
+ 	return val >= ID_AA64PFR1_EL1_MTE_MTE2;
+ }
+ 
++static inline bool id_aa64mmfr4_tlbid(u64 mmfr4)
++{
++	u32 val = cpuid_feature_extract_unsigned_field(mmfr4, ID_AA64MMFR4_EL1_TLBID_SHIFT);
++
++	return val > 0;
++}
++
+ void __init setup_boot_cpu_features(void);
+ void __init setup_system_features(void);
+ void __init setup_user_features(void);
+diff --git a/arch/arm64/kernel/cpufeature.c b/arch/arm64/kernel/cpufeature.c
+index c9c9a6889455..a08d1ff632e6 100644
+--- a/arch/arm64/kernel/cpufeature.c
++++ b/arch/arm64/kernel/cpufeature.c
+@@ -523,6 +523,7 @@ static const struct arm64_ftr_bits ftr_id_aa64mmfr3[] = {
  };
  
- static const DECLARE_FEAT_MAP_FGT(hfgrtr2_desc, hfgrtr2_masks,
-@@ -947,6 +949,10 @@ static const struct reg_bits_to_feat_map hcrx_feat_map[] = {
- 		   HCRX_EL2_NVnTTLBOS,
- 		   FEAT_NV3),
- 	NEEDS_FEAT(HCRX_EL2_SRMASKEn, FEAT_SRMASK),
-+	NEEDS_FEAT(HCRX_EL2_FNB			|
-+		   HCRX_EL2_VTLBIDOSEn		|
-+		   HCRX_EL2_VTLBIDEn,
-+		   FEAT_TLBID),
- 	NEEDS_FEAT(HCRX_EL2_PACMEn, feat_pauth_lr),
- 	NEEDS_FEAT(HCRX_EL2_EnFPM, FEAT_FPMR),
- 	NEEDS_FEAT(HCRX_EL2_GCSEn, FEAT_GCS),
-diff --git a/arch/arm64/kvm/emulate-nested.c b/arch/arm64/kvm/emulate-nested.c
-index 2bec81668361..171c0c2b6bf2 100644
---- a/arch/arm64/kvm/emulate-nested.c
-+++ b/arch/arm64/kvm/emulate-nested.c
-@@ -1440,6 +1440,7 @@ static const struct encoding_to_trap_config encoding_to_fgt[] __initconst = {
- 	SR_FGT(SYS_TCRALIAS_EL1,	HFGRTR2, nTCRALIAS_EL1, 0),
- 	SR_FGT(SYS_TCRMASK_EL1,		HFGRTR2, nTCRMASK_EL1, 0),
- 	SR_FGT(SYS_ERXGSR_EL1,		HFGRTR2, nERXGSR_EL1, 0),
-+	SR_FGT(SYS_TLBIDIDR_EL1,	HFGRTR2, nTLBIDIDR_EL1, 0),
+ static const struct arm64_ftr_bits ftr_id_aa64mmfr4[] = {
++	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_LOWER_SAFE, ID_AA64MMFR4_EL1_TLBID_SHIFT, 4, 0),
+ 	S_ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_LOWER_SAFE, ID_AA64MMFR4_EL1_E2H0_SHIFT, 4, 0),
+ 	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_LOWER_SAFE, ID_AA64MMFR4_EL1_NV_frac_SHIFT, 4, 0),
+ 	ARM64_FTR_END,
+@@ -742,6 +743,14 @@ static const struct arm64_ftr_bits ftr_mpamidr[] = {
+ 	ARM64_FTR_END,
+ };
  
- 	/* HFGITR_EL2 */
- 	SR_FGT(OP_AT_S1E1A, 		HFGITR, ATS1E1A, 1),
-diff --git a/arch/arm64/kvm/sys_regs.c b/arch/arm64/kvm/sys_regs.c
-index c7d91138a6d4..54461a3da117 100644
---- a/arch/arm64/kvm/sys_regs.c
-+++ b/arch/arm64/kvm/sys_regs.c
-@@ -1981,6 +1981,9 @@ static u64 __kvm_read_sanitised_id_reg(const struct kvm_vcpu *vcpu,
- 		if (!system_supports_poe())
- 			val &= ~ID_AA64MMFR3_EL1_S1POE;
- 		break;
-+	case SYS_ID_AA64MMFR4_EL1:
-+		val &= ~ID_AA64MMFR4_EL1_TLBID;
-+		break;
- 	case SYS_ID_MMFR4_EL1:
- 		val &= ~ID_MMFR4_EL1_CCIDX;
- 		break;
++static const struct arm64_ftr_bits ftr_tlbididr[] = {
++	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_EXACT, TLBIDIDR_EL1_NVOS_SHIFT, TLBIDIDR_EL1_NVOS_WIDTH, 0),
++	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_EXACT, TLBIDIDR_EL1_NOS_SHIFT, TLBIDIDR_EL1_NOS_WIDTH, 0),
++	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_EXACT, TLBIDIDR_EL1_NVIS_SHIFT, TLBIDIDR_EL1_NVIS_WIDTH, 0),
++	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_EXACT, TLBIDIDR_EL1_NIS_SHIFT, TLBIDIDR_EL1_NIS_WIDTH, 0),
++	ARM64_FTR_END,
++};
++
+ /*
+  * Common ftr bits for a 32bit register with all hidden, strict
+  * attributes, with 4bit feature fields and a default safe value of
+@@ -866,6 +875,7 @@ static const struct __ftr_reg_entry {
+ 
+ 	/* Op1 = 0, CRn = 10, CRm = 4 */
+ 	ARM64_FTR_REG(SYS_MPAMIDR_EL1, ftr_mpamidr),
++	ARM64_FTR_REG(SYS_TLBIDIDR_EL1, ftr_tlbididr),
+ 
+ 	/* Op1 = 1, CRn = 0, CRm = 0 */
+ 	ARM64_FTR_REG(SYS_GMID_EL1, ftr_gmid),
+@@ -1256,6 +1266,9 @@ static void __init init_cpu_features(void)
+ 
+ 	if (IS_ENABLED(CONFIG_ARM64_MTE) && id_aa64pfr1_mte(info->reg_id_aa64pfr1))
+ 		init_cpu_ftr_reg(SYS_GMID_EL1, info->reg_gmid);
++
++	if (id_aa64mmfr4_tlbid(info->reg_id_aa64mmfr4))
++		init_cpu_ftr_reg(SYS_TLBIDIDR_EL1, info->reg_tlbididr);
+ }
+ 
+ static void update_cpu_ftr_reg(struct arm64_ftr_reg *reg, u64 new)
+@@ -3085,6 +3098,13 @@ static const struct arm64_cpu_capabilities arm64_features[] = {
+ 		ARM64_CPUID_FIELDS(ID_AA64ISAR3_EL1, LSUI, IMP)
+ 	},
+ #endif
++	{
++		.desc = "TLBI domains (TLBID)",
++		.capability = ARM64_HAS_TLBID,
++		.type = ARM64_CPUCAP_SYSTEM_FEATURE,
++		.matches = has_cpuid_feature,
++		ARM64_CPUID_FIELDS(ID_AA64MMFR4_EL1, TLBID, IMP)
++	},
+ 	{},
+ };
+ 
+@@ -3884,6 +3904,11 @@ void update_cpu_features(int cpu)
+ 		taint |= check_update_ftr_reg(SYS_GMID_EL1, cpu,
+ 					      info->reg_gmid, boot->reg_gmid);
+ 
++	if (id_aa64mmfr4_tlbid(info->reg_id_aa64mmfr4)) {
++		taint |= check_update_ftr_reg(SYS_TLBIDIDR_EL1, cpu,
++					info->reg_tlbididr, boot->reg_tlbididr);
++	}
++
+ 	/*
+ 	 * If we don't have AArch32 at all then skip the checks entirely
+ 	 * as the register values may be UNKNOWN and we're not going to be
+diff --git a/arch/arm64/kernel/cpuinfo.c b/arch/arm64/kernel/cpuinfo.c
+index 94e6cd211d70..da163756fe5c 100644
+--- a/arch/arm64/kernel/cpuinfo.c
++++ b/arch/arm64/kernel/cpuinfo.c
+@@ -504,6 +504,9 @@ static void __cpuinfo_store_cpu(struct cpuinfo_arm64 *info)
+ 		info->reg_smidr = read_cpuid(SMIDR_EL1) & ~SMIDR_EL1_SMPS;
+ 	}
+ 
++	if (id_aa64mmfr4_tlbid(info->reg_id_aa64mmfr4))
++		info->reg_tlbididr = read_cpuid_with_overrides(TLBIDIDR_EL1);
++
+ 	cpuinfo_detect_icache_policy(info);
+ }
+ 
+diff --git a/arch/arm64/tools/cpucaps b/arch/arm64/tools/cpucaps
+index 3125695122a0..a1500a655407 100644
+--- a/arch/arm64/tools/cpucaps
++++ b/arch/arm64/tools/cpucaps
+@@ -67,6 +67,7 @@ HAS_STAGE2_FWB
+ HAS_TCR2
+ HAS_TIDCP1
+ HAS_TLB_RANGE
++HAS_TLBID
+ HAS_VA52
+ HAS_VIRT_HOST_EXTN
+ HAS_WFXT
 -- 
 2.43.0
 
