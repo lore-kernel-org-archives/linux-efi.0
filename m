@@ -1,82 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795794282;
-	b=FPDAmdS5/WX0DUOJK0JL8QuaeQsPhY3SLb0AGEDY9dB+EZUxLpkWi1L50thihGFSx+E2
-	 e1mI8p93Lq+j7uDv7WMSqIuF5OO+AIosmEnNBO522/muWVoUvpKrGP/DzYak6XvbwyKTL
-	 m+nDWQxH9enRXO0ObYQFjltaCSPx6AeuU+lYmTe8PWtXWphgbW63uF81QcfrOKePA5Yr2
-	 SMfznHw7sezpyyA9ZjuEQ2oxClBdGo2ayCujRbBaxBJZp0GSrSgVBj+Hglw+xuduxu2JQ
-	 R0cujOFnV3SLvLDrA5QHLhwxPDsXAI4O5fwTGqvRIGH9QtFEdmD2FEgDQ1SYbzmlLCA==
+	t=1795794319;
+	b=x3o6BL9o0IMHv0LyQwK7hb+JU3H1I4e6MJ2du13ShqCwdoNfXXx2oRVAcoiNI914ain/
+	 QOaN/SV8Kvg21DNlZHh5xVFhORCBAgEehLM/J0mkXbi2TQXQ4Q1GVCjAVVUaiXK3Lq/mB
+	 rG1Y7g1O3p+7fNaIfcmVPc/9kg1ueo73N6Z2EarKbrBtf6+tyoIQBfbbovzM4aAt+iXDt
+	 un7/uxZaTIGz7OlJ123A8PB+gL1DqzrcLAQdzIReHjxN07lVFw2J/4LzBgweVRoHBx45d
+	 uFiLDq4gFd4X8pomGPpqSXooe/mdlzVdMy4BNnDOKJfXr6BUrqYchO65Zc5SFnf++ew==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795794282;
-	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:Received:
-	 Received:Received:Received:Received:Message-ID:Date:MIME-Version:
-	 User-Agent:Subject:To:Cc:References:Content-Language:From:
-	 Organization:In-Reply-To:Content-Type:Content-Transfer-Encoding:
-	 X-TM-AS-GCONF:X-Proofpoint-Reinject:X-Proofpoint-ORIG-GUID:
-	 X-Proofpoint-Spam-Info:X-Proofpoint-GUID:X-Authority-Analysis:
-	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-Virus-Version:
-	 X-Proofpoint-Spam-Details;
-	bh=ZUudbvDd7MPyN1ktju7yYOYQ2x2QokIUznwDazPg6Tw=;
-	b=qrVCXOAnWAy4vP705NthZRuKLuRQJU7ijsdmb/US7LNVLOYbtzo9ZQZv5qC45zNtkXT7
-	 JPm3eA1H8kcmWAHugGE0p4WXYuD3ZKMY7IFC7oy9WiffNVPlmMFlmDtO5DP9SqFtdH800
-	 0pVhXhIxbA1Gs87Il5XUMBgsFO4Hz/KQLjEpCGrXATVPDKom67hX+HC2Tn2v9XN/eA6Yv
-	 xbVJ45uebKX7TsPVlzeFEfiGQiGxhzq5J4sVd/hT1gA+eiY2WBEJczEiaEj2bkqaiB2o0
-	 sm5Xz0GRldl/x4bRVcXIqcMBZAabUsGrJA5wBr6IaPdHV3HdylKLMrrOLWzHgZw5gGQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795794319;
+	h=Received:DKIM-Signature:Received:Received:X-ME-Sender:
+	 X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:Received:X-Mailer:
+	 MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type:Content-Transfer-Encoding;
+	bh=gnDEMS0iHt15gL5KaJ+Nn57X9otTzk+I58v16QdRYcc=;
+	b=uMdH9S+a+ApWaJRI56VpfIS7iWRMkFIYkoYwSCPf1HcIIAVE4kH+XbXRWxEJdQ8ItraM
+	 Y1cxFuFzlw4WBi1Rbi6Al5YmJhZfRJMP5/cq6F1G/sK+1AtxFSRx9Pfyz08M6vhoimyr5
+	 Oln3Bc36oTxauTBuHiXPRIldBeKuyHzTt9ZelGWHaeFFb+qLtpYntYwHecVf84/Cci1kk
+	 WWE2xYG9oWWtxn+eaXufz1UEhaVgoc55Hh/TdbNJD+SPsAedP7q2VwuGfcvP2JnO6Z5mH
+	 aHWU9poIPhg48xp2IO2DGKBmYYItQwRdgh++VzUtWj8VVEpcZHV6v9vykEhtHzs03RQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=linux.ibm.com;
-	spf=pass smtp.mailfrom=linux.ibm.com;
-	dkim=pass header.d=ibm.com header.i=@ibm.com header.a=rsa-sha256 header.s=pp1 header.b=ouxCdVIP;
-	arc=none smtp.remote-ip=148.163.158.5
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=JB1zssfY;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DA67606A326;
-	Fri, 27 Nov 2026 15:44:41 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0DA67606A326
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B048E606A324
+	for <linux-efi@vger.kernel.org>; Fri, 27 Nov 2026 15:45:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.a=rsa-sha256 header.s=pp1 header.b=ouxCdVIP
-Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6ARE51UZ3266281;
-	Fri, 27 Nov 2026 15:43:48 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=ZUudbv
-	Dd7MPyN1ktju7yYOYQ2x2QokIUznwDazPg6Tw=; b=ouxCdVIPDTnoqzsJUQXtST
-	SW++jnDmlSChVN7g7jjSSr2GEdqI+8pYUzeH9o9p++NAQ3/sVjZkebO5YpmRU+XZ
-	Rs/pa96kU3ljTUuOjyojPDxFAbTVOqHFbFZwqZuXknf9srEXiKRTFwAh2eECKbJ5
-	Bx0/Mg6BeU9yHjZ9z1yULD+PVzlTl5qIRdX9PpPN3pAu57283gjeW7fQ0y5GaNGX
-	lKqVJQxugAEJj4Kh5bsGGI26I4wUQBDyMGpJL9kEPYLJXb10rK99tN7ND/qcvg2n
-	RDDq0tlSnZ7qaIVPtFsRydTEdeoGMk3/KAoPC6T+IEtzDhbHw5AOT7UZFoQyMt5g
-	==
-Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4j34g1npam-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Fri, 27 Nov 2026 15:43:47 +0000 (GMT)
-Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma11.dal12v.mail.ibm.com (8.18.1.11/8.18.1.11) with ESMTP id 6ARE4ETH3998991;
-	Fri, 27 Nov 2026 15:43:46 GMT
-Received: from smtprelay03.fra02v.mail.ibm.com ([9.218.2.224])
-	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 4j6x3h2p98-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 27 Nov 2026 15:43:44 +0000 (GMT)
-Received: from smtpav06.fra02v.mail.ibm.com (smtpav06.fra02v.mail.ibm.com [10.20.54.105])
-	by smtprelay03.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 6ARFhcV947186264
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 27 Nov 2026 15:43:38 GMT
-Received: from smtpav06.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 535392005A;
-	Fri, 27 Nov 2026 15:43:38 +0000 (GMT)
-Received: from smtpav06.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id A04F22004B;
-	Fri, 27 Nov 2026 15:43:34 +0000 (GMT)
-Received: from [9.111.162.114] (unknown [9.111.162.114])
-	by smtpav06.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Fri, 27 Nov 2026 15:43:34 +0000 (GMT)
-Message-ID: <a07554af-f6df-4a7f-a656-d01b8bc6ab6a@linux.ibm.com>
-Date: Fri, 27 Nov 2026 16:43:34 +0100
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=JB1zssfY
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EBA121F00897;
+	Fri, 27 Nov 2026 15:45:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795794319;
+	bh=gnDEMS0iHt15gL5KaJ+Nn57X9otTzk+I58v16QdRYcc=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject;
+	b=JB1zssfYw+imHpGzqwtC5bxeRAT3TilT/4N6aggkc/2aQrIFfSKYPjPnNGrDnNuCD
+	 i6Q3iaDTFqGIsVtaIEed0I+jvbQmNjOGY0hNBmtE6voI8JTkFcYDjmfcF92t2aRQN+
+	 ENcGwC6L1Hmee6FlpOuUsmYvSvvIMUcYf885vMlscaWmV719ZBNjtMUuQus6NE4q+1
+	 GuDMExlzxK9s0A0z0wzpLqi6uXoEDtouKh3pCKrlizfJO+Peo0U2usbiuYYHnWVCuf
+	 b3Wmdnn8kJMsf1oSSjL+Rjjv+3RkqB2T8knDrwlRloS6lt1DluS9/MFbEx3LpgZ2JN
+	 Xe/yFxDspXKbg==
+Received: from ams-compute-02.internal (ams-compute-02.internal [10.64.2.62])
+	by mailfauth.ams.internal (Postfix) with ESMTP id 3DDC4198003A;
+	Fri, 27 Nov 2026 10:45:16 -0500 (EST)
+Received: from ams-imap-11 ([10.64.2.31])
+  by ams-compute-02.internal (MEProxy); Fri, 27 Nov 2026 10:45:16 -0500
+X-ME-Sender: <xms:iKUJa5AkdJxnKccLXcMCurc131x9BzxkyDtyblVcz7UTk0qCfK6l8Q>
+    <xme:iKUJayXFm2YhzIgi9SPInDUX-UJiV53UZOU4RVdrD_eqdQDtpoqTcX_P3iLfD7CKv
+    TjTZCJ83aqifQrHscXBVAfYTsDfYsa4nS7m01fyEiM889CWl_Fv8CmX>
+X-ME-Proxy-Cause: dmFkZTFMcXaa74Ww3Kiq0njNmC6WTjACVv1LMbtEsqeSpRVSFbR/Ii5MZNWGX9Zt0PDC4H
+    QxR9lt1bmXDfrRIrCorv6+5mFL40Wh4Sb/IbRj/BEfQvKKf2rrQS9jZJs2KpQ++T3wSoLD
+    HNqyZ0pThIqEcsGyNXKeRbGfLfgvIjr5ltrRA4kRQMAh57Sv/vW40wLB5ugCQoAwYP+yDn
+    mqcN6PXz8tAquh0HX0rjDTsI5AoO0CDjNZ9dJZhAXhuICxzq9EfL7Fytc6bGOS0h+qgiFD
+    r4m02mBJrAEFL2pn0rfl2R8X7FfezgjnyIqIWsi8BdeUbjGCeYNUokspCipztY5uB13oL4
+    YuyWH8KtSnS4uQoxE7PMGHY1LlmlFxxm1KE3zJprK9tqrPEVmOck569OEc4Z34p1jVo+q2
+    3ivF3fonc3VfONZur+ttGBJiQPDOFX7bO7YbRRwS90s8oKkKqrAOSAp+bDHExf7PFpN9/2
+    MYSpyRRZaH5knqwf1zivHKPr3PkJ8A/L4rbGoWpOAQEudRzQJbmBkT/2j4k+aBm4BxMI8/
+    7ie4vqieF2IT3VtbrVvRPx/II5OdY1AE31VoMtNRQFbUR9Jq9KMDKqtqe5GqBnHYYI6KCZ
+    Osa26CLih0vjr119q8j7LlNbXu+EoLzZC+4Ve+yd15O4D/joKlh0TnVomAvg
+X-ME-Proxy: <xmx:jKUJa_qdFYIe-J18cgVIcEIWWYMT9YX8BlOTTPoAY2dY5zm3U0iWFg>
+    <xmx:jKUJawt29v05zGj1N-U8j50ppQcmBWYQ0-C0cQ6JoAXHx8VrtcezgA>
+    <xmx:jKUJaz5G7PV1fTi4fQ5s08qRx5AGl_yw_XHl41HZSDv4ismPsQ3SZw>
+    <xmx:jKUJa5RQ7EvBTiz9Kx9a6LpxkswJ6z8kJ7JlqwouQwm3fnLCCmpRLg>
+    <xmx:jKUJa7lULcOKouAxtdiZ0dgPwmK6qX1xlLeMs44QyW3EBqEInflytp2p>
+Feedback-ID: ice86485a:Fastmail
+Received: by mailuser.ams.internal (Postfix, from userid 501)
+	id 5658AF80093; Fri, 27 Nov 2026 10:45:12 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -86,204 +77,69 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC PATCH v2 12/30] x86/unwind: Add Minimal DWARF CFI kernel
- unwinder
-To: Ian Rogers <irogers@google.com>, linux-kernel@vger.kernel.org,
-        linux-trace-kernel@vger.kernel.org, linux-arch@vger.kernel.org
-Cc: jpoimboe@kernel.org, rostedt@goodmis.org, peterz@infradead.org,
-        mingo@redhat.com, tglx@kernel.org, bp@alien8.de,
-        dave.hansen@linux.intel.com, x86@kernel.org, catalin.marinas@arm.com,
-        will@kernel.org, mark.rutland@arm.com,
-        linux-arm-kernel@lists.infradead.org, pjw@kernel.org,
-        palmer@dabbelt.com, aou@eecs.berkeley.edu, alex@ghiti.fr,
-        linux-riscv@lists.infradead.org, acme@kernel.org, namhyung@kernel.org,
-        linux-perf-users@vger.kernel.org, mhiramat@kernel.org, ast@kernel.org,
-        daniel@iogearbox.net, andrii@kernel.org, bpf@vger.kernel.org,
-        nathan@kernel.org, llvm@lists.linux.dev, nsc@kernel.org,
-        linux-kbuild@vger.kernel.org, ojeda@kernel.org,
-        rust-for-linux@vger.kernel.org, ardb@kernel.org,
-        linux-efi@vger.kernel.org, maz@kernel.org, oupton@kernel.org,
-        kvmarm@lists.linux.dev, shuah@kernel.org,
-        linux-kselftest@vger.kernel.org, indu.bhagat@oracle.com,
-        wnliu@google.com, dylanbhatch@google.com
-References: <20261125061523.1540234-1-irogers@google.com>
- <20261125061523.1540234-13-irogers@google.com>
-Content-Language: en-US
-From: Jens Remus <jremus@linux.ibm.com>
-Organization: IBM Deutschland Research & Development GmbH
-In-Reply-To: <20261125061523.1540234-13-irogers@google.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-Reinject: loops=2 maxloops=12
-X-Proofpoint-ORIG-GUID: 5ZJeZ4dRYLWKasNlVNFN_HgzbYFJrPH2
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMTI3MDA2MiBTYWx0ZWRfX3ppIf7DvuI0B
- vCLEIduUtrcdh1ifjCJ30YvokvPQxXSoffMeR6OCQbDbZZlYU+s04lE4FKdQSzPHvl5DeT/nsPk
- HYln2faN13fSVAO423AD3Vi7w0XWYeI=
-X-Proofpoint-GUID: kfW7DRO-7vrKBDiqgdjT-kZh031cAVz2
-X-Authority-Analysis: v=2.4 cv=c8M+0h9l c=1 sm=1 tr=0 ts=6b09a534 cx=c_pps
- a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
- a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=RnoormkPH1_aCDwRdu11:22 a=RzCfie-kr_QcCd8fBx8p:22 a=VnNF1IyMAAAA:8
- a=1XWaLZrsAAAA:8 a=w5RBXh3AvzieJi7Cyr8A:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTI3MDA2MiBTYWx0ZWRfX3qAzkgNtC0R4
- HUyG6CTQOWPyYas2a2ejLw5Sj5SkgS+QrLoDYBCI/EAzMCTtw9O3tNX/G5nGF98UhevvaMdJVtJ
- pr1KvXtTIF+qBHW6b5LH97yXYLtnzMmuu8kPoL+zW1Cv8i3Aj4z8LcGwX3K4YypRtAv4zNndM9i
- wfHgY2arEijRcZkQ4ZIXMrNjIeyx6iM/1NcRaSBz18OqH8naX/KUse5ovf9oVT9hsZw36H3UW3L
- /e/Qn2JUTNuhsH6F4/oF7RHIEIekrRKJTTS7u5t9jpDXdFjCVQpR5zovcNKKfcWsIhIKKW8NslY
- HzQ7pcW2dMfkFomCCT7lH+LeybRe/MSuQ11Z4ZN0qinIYMAIENvpk1/7/eM+4RJYhijppy7nuAP
- cJDGtQcsa+zjcbRtV6WV18OsJEe0qjzbBkI1JX1Ozc8T29bBR34fOPSiPudo98JgaSuCi6Lzkt3
- g8rf7PJ+1CZxrm8hZqg==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
- definitions=2026-11-27_02,2026-11-27_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 clxscore=1011 malwarescore=0 suspectscore=0 bulkscore=0
- priorityscore=1501 phishscore=0 adultscore=0 spamscore=0 lowpriorityscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611270062
+Date: Fri, 27 Nov 2026 16:44:51 +0100
+From: "Ard Biesheuvel" <ardb@kernel.org>
+To: "George Guo" <dongtai.guo@linux.dev>,
+ "Huacai Chen" <chenhuacai@kernel.org>, "Pratyush Yadav" <pratyush@kernel.org>
+Cc: "Mike Rapoport" <rppt@kernel.org>,
+ "Pasha Tatashin" <pasha.tatashin@soleen.com>, shuah@kernel.org,
+ "Ilias Apalodimas" <ilias.apalodimas@linaro.org>,
+ "Andrew Morton" <akpm@linux-foundation.org>, baoquan.he@linux.dev,
+ ruirui.yang@linux.dev, guodongtai@kylinos.cn,
+ "WANG Xuerui" <kernel@xen0n.name>, "Alexander Graf" <graf@amazon.com>,
+ liukexin@kylinos.cn, loongarch@lists.linux.dev, linux-kernel@vger.kernel.org,
+ kexec@lists.infradead.org, linux-mm@kvack.org,
+ linux-kselftest@vger.kernel.org, linux-efi@vger.kernel.org
+Message-Id: <976f1220-a259-4bad-9eb4-ae1cc78a79a7@app.fastmail.com>
+In-Reply-To: <20261119082252.9120-1-dongtai.guo@linux.dev>
+References: 
+ <CAAhV-H5Vse=pKC3Beqhqxa7fqadiGVNqkSy_06HZ3Luw2Pmj5Q@mail.gmail.com>
+ <20261119082252.9120-1-dongtai.guo@linux.dev>
+Subject: Re: [PATCH v6 1/8] efi: Pass KHO state to the next kernel in a configuration
+ table
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-Hello Ian,
 
-some early feedback.
 
-On 11/25/2026 7:15 AM, Ian Rogers wrote:
-> Add CONFIG_UNWINDER_DWARF_CFI as a selectable x86-64 kernel stack
-> unwinder in arch/x86/kernel/unwind_dwarf.c, implementing the asm/unwind.h
-> and HAVE_RELIABLE_STACKTRACE interfaces over compiler-generated
-> .eh_frame and linker-generated --eh-frame-hdr tables:
->  - Build kernel C and Rust objects with asynchronous unwind tables and
->    -fomit-frame-pointer while suppressing unwind tables in boot/startup
->    and purgatory objects.
->  - Place .eh_frame_hdr and .eh_frame inside RO_DATA via
->    ARCH_RODATA_SECTIONS, index loadable module .eh_frame sections via
->    dwarf_cfi_mod_alloc()/dwarf_cfi_mod_free_rcu(), and enable BPF
->    exception stack walks in arch/x86/net/bpf_jit_comp.c.
->  - Unwind across task, IRQ, exception, ftrace, fgraph, rethook, BPF, and
->    call_on_stack() frames, while rejecting in-kernel pt_regs exception
->    boundaries in arch_stack_walk_reliable().
-> 
-> Signed-off-by: Ian Rogers <irogers@google.com>
+On Thu, 19 Nov 2026, at 09:22, George Guo wrote:
+> Hi Huacai, Ard, Pratyush,
+>
+> On Wed, Nov 04 2026, Huacai Chen wrote:
+>> I prefer to keep it in LoongArch until a second architecture, and I
+>> think Ard is the same. But this is not a strong objection to Pratyush.
+>
+> Kexin Liu and I have tried x86 as the second user, to see whether the
+> common table holds up. It needed only small changes:
+>
+> - The x86 EFI stub installs the table, as the LoongArch stub does.
+>   install_kho_table() moves from efi-stub.c to efi-stub-helper.c so
+>   that the x86 stub can call it.
+>
+> - kexec_file_load() skips the SETUP_KEXEC_KHO record when the table
+>   exists and the next kernel will get efi_info. Otherwise, for example
+>   on a legacy BIOS boot or with noefi, it falls back to setup_data.
+>
+> - When there is no SETUP_KEXEC_KHO record, the decompressor's KASLR
+>   code looks up the KHO bootmem areas in the table, so the kernel is
+>   not decompressed onto preserved memory.
+>
+> The table layout did not change. The only change to the common code is
+> that efi_kho_table_found() is no longer __init, since x86 calls it at
+> kexec load time.
+>
+> Tested in QEMU on x86_64. With OVMF, the KHO vmtest and
+> luo_kexec_simple pass, and the second kernel finds the KHO state
+> through the table. With SeaBIOS, the KHO vmtest passes through
+> setup_data.
+>
+> So I would like to keep the table common in v7.
 
-> diff --git a/arch/x86/kernel/unwind_dwarf.c b/arch/x86/kernel/unwind_dwarf.c
+Fair enough.
 
-> +/**
-> + * unwind_next_frame() - Advance @state to the next outer x86-64 kernel frame
-> + * @state: Current x86 unwind state.
-> + *
-> + * Evaluates Minimal DWARF CFI for @state->ip, handles top-of-stack task
-> + * pt_regs, arch_rethook_trampoline entry, %rsp-verified ENCODE_FRAME_POINTER
-> + * entry/exception pt_regs transitions, and call_on_stack() IRQ stack pivots.
-> + *
-> + * Return: true if a valid outer frame was unwound, or false when the bottom of
-> + * the stack is reached or an error terminates the walk.
-> + */
-> +bool unwind_next_frame(struct unwind_state *state)
-> +{
-...
+> Would you prefer the
+> x86 patches in the same series, so that the generic code comes with a
+> second user, or as a separate series on top?
+>
 
-> +		/*
-> +		 * Unencoded entry assembly (pre-ENCODE_FRAME_POINTER or
-> +		 * post-POP_REGS) or an unaligned/encoded %rbp cannot be
-> +		 * unwound via a frame-pointer guess.
-> +		 */
-> +		if (in_entry_text(state->ip) || (state->bp & (sizeof(long) - 1)))
-> +			goto err;
-> +
-> +		/* Fallback to frame-pointer guess and mark unreliable */
-> +		row = bpf_fp_row;
-> +		state->error = true;
-> +	}
-> +
-Maybe add a comment that the UNDEFINED rule indicates that the outermost
-frame has been reached?
-
-	/* RA undefined indicates outermost frame reached */
-
-> +	if (row.ra_rule == DWARF_CFI_RULE_UNDEFINED)
-> +		goto the_end;
-> +
-> +	if (row.ra_rule != DWARF_CFI_RULE_OFFSET)
-> +		goto err;
-
-Good: For RA rule only OFFSET is supported.  SP and FP rules may need
-checking (see below).
-
-> +
-> +	switch (row.cfa_base) {
-> +	case DWARF_CFI_BASE_SP: {
-> +		unsigned long sp_base = state->sp;
-> +
-> +		/*
-> +		 * call_on_stack() stores the pre-switch task-stack %rsp at the
-> +		 * top slot of the per-CPU IRQ stack (info.end - 1) and pivots
-> +		 * %rsp there before invoking the IRQ/softirq handler.
-> +		 */
-> +		if (state->stack_info.type == STACK_TYPE_IRQ &&
-> +		    state->sp == (unsigned long)(state->stack_info.end - 1)) {
-> +			if (!deref_stack_reg(state, state->sp, &sp_base))
-> +				goto err;
-> +		}
-> +		cfa = sp_base + row.cfa_off;
-> +		break;
-> +	}
-> +	case DWARF_CFI_BASE_FP:
-> +		cfa = state->bp + row.cfa_off;
-> +		break;
-> +	case DWARF_CFI_BASE_FP_INDIRECT:
-> +		if (!deref_stack_reg(state, state->bp + row.cfa_off, &cfa))
-> +			goto err;
-> +		break;
-> +	case DWARF_CFI_BASE_REG:
-> +		if (!get_scratch_reg(state, row.cfa_reg, &cfa))
-> +			goto err;
-> +		cfa += row.cfa_off;
-> +		break;
-> +	default:
-> +		goto err;
-> +	}
-> +
-> +	ip_p = cfa + row.ra_off;
-> +	if (!deref_stack_reg(state, ip_p, &state->ip))
-> +		goto err;
-> +
-> +	state->ip = dwarf_recover_ret_addr(state, state->ip,
-> +					   (unsigned long *)ip_p);
-> +	if (!state->ip || dwarf_is_rethook_trampoline(state->ip))
-> +		goto err;
-> +#ifdef CONFIG_FUNCTION_GRAPH_TRACER
-> +	if (state->ip == (unsigned long)return_to_handler)
-> +		goto err;
-> +#endif
-> +
-> +	if (row.fp_rule == DWARF_CFI_RULE_OFFSET) {
-> +		if (!deref_stack_reg(state, cfa + row.fp_off, &state->bp))
-> +			goto err;
-> +	} else if (row.fp_rule == DWARF_CFI_RULE_FP_OFFSET) {
-> +		if (!deref_stack_reg(state, state->bp + row.fp_off, &state->bp))
-> +			goto err;
-> +	}
-
-IIUC any other FP rule falls through and is implicitly handled as SAME.
-Furthermore row.sp_rule is not checked anywhere, so that any SP rule is
-explicitly handled as SP = CFA.  The implementations for the other archs
-are similar.  Maybe I am missing something.
-
-> +
-> +	state->sp = cfa;
-> +	state->regs = NULL;
-> +	state->prev_regs = NULL;
-> +	state->full_regs = false;
-> +	state->signal = row.signal;
-> +
-Regards,
-Jens
--- 
-Jens Remus
-Linux on Z Development (D3303)
-jremus@de.ibm.com / jremus@linux.ibm.com
-
-IBM Deutschland Research & Development GmbH; Vorsitzender des Aufsichtsrats: Wolfgang Wendt; Geschäftsführung: David Faller; Sitz der Gesellschaft: Ehningen; Registergericht: Amtsgericht Stuttgart, HRB 243294
-IBM Data Privacy Statement: https://www.ibm.com/privacy/
-
+I'd like to see both tbh, but only if it is not too much of a hassle.
