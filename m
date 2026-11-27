@@ -1,73 +1,80 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=216.40.44.12
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=91.218.175.233
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795793900;
-	b=dg71j/5llY4skX6l+GP6dcJWJxJ5hrDSqXdyZ+LRk5RLLanatfPd3NCu18Orpxl/LbW0
-	 L9ZULWNcOlJILJK12jLI8UwXr7LwQgt21Mr+FPbOBHNA0llXevCBjbn7Qd2a1uk40FZTC
-	 MvKwmSVeu+qbZg1aZaPmDfYJeDiQVfb9QYcyired7tH+e6q2BiT2KlSHXTw+BM+QYF5c6
-	 1KGr1J2QwNMcCO11qsuNT/3E3USBx2UNpb3Cjy5W435aH6kKgP69jJMCvgRZhuxonwxvX
-	 q+/ad9Ya4cZWxRQbq7cpBm6H2f2dG/KeAPOau7wPljS38soorWwcRY4mmt2GVFf0OQw==
+	t=1795794064;
+	b=tByZvM2KsXsZfR4xkqReokCysaI618y1EFazNrl8pHNblG1KNS06syh5AVFeMZ3+FP1z
+	 ikSr1ZuYxtqzfFxYoRWwZVdifltN7R1szfGLfmA3Y3rOiocVSCEX7b13r8q0R0JKHyNy9
+	 nI4WhMBxHj/rUe/7I9brtnBn0cjf7rLYIilPkaGeWnuKXuEF9eM8DqR2r4M9bEP14Js28
+	 fzp3tpjF9pNW/xXdm/4ENP2PGQp8tA1tduu6pooCSpcISJ3oYroUrlIWz7T41nqi0OEWe
+	 UkZmzWsZn6cMXNhuofp2saj2d4IxMlH7akSZfTwHhgfXcglCj3eu/Cp8008VGlVTjsg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795793900;
-	h=DMARC-Filter:Received:Received:Date:From:To:Cc:Subject:Message-ID:
-	 In-Reply-To:References:X-Mailer:MIME-Version:Content-Type:
-	 Content-Transfer-Encoding:X-Rspamd-Queue-Id:X-Stat-Signature:
-	 X-Spam-Status:X-Rspamd-Server:X-Session-Marker:X-Session-ID:
-	 DKIM-Signature:X-HE-Tag:X-HE-Meta;
-	bh=gxUrschx7iu+16DWxWUw1U2XUCMCjzUqsWH6d1cDnhw=;
-	b=VEl28XnJ+e8+i4gFfcKQphu+5cw0xpdMpVIs8J36xAD713PGuFC8Q1hd08Cx9CFmfT8I
-	 V2v+hEWZz+f+Vi2ZvCfq51FrUw/Ttx7/dp0gycFYPpz4rc1qi7Bw90DfzrNP6A1uMaFMR
-	 2SPpAjG8sBtWSSbP0Z0fZr7M+n7fkW427ze0Jh272We9IfgzsOCt02Lz+ph8fW8SDXcwP
-	 fw04MKfHNtdpc/J2GLeR6G+/jfb3uO5UiZ7XpwGvM/aA/wdztZ4qnNob+CnHDpE11tlOe
-	 pqoenMBjYdCymRpkSoJ0p+AJfgX4BOnn+JuNw7fPga8i/WKwkpVIErGhsLlkmrhn9Sg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795794064;
+	h=DMARC-Filter:X-Envelope-To:DKIM-Signature:X-Envelope-To:Received:
+	 X-Mizu-Trace-ID:X-Migadu-Flow:From:To:Cc:Subject:Date:Message-ID:
+	 X-Mailer:In-Reply-To:References:MIME-Version:
+	 Content-Transfer-Encoding;
+	bh=zTeGEeYubIuGfiie/NnBel4Xijl6Dj7t6gEULam6Lc8=;
+	b=vBx+5D7TetYeGozX9c7GyFFUEV1FS/+soGpsGkfXMo5v7kB4/Daz1wDFWZtu0SGNJk7j
+	 mRuTANwa8ztWufTRBsmZAliq3tmQXv9ZBAQG2kXuB5cR2F+d2GJV/3sO9M/Xz/YoFn5rl
+	 +9SR0bf8gDWwYpP5vhE8lrYRtJwBtKFBQ8XsuySkxqcZYcb+DZxOSTCPjQcodC3ccDfG9
+	 vfkzYmVGbEBXDchPy1PY/bNVuUEOWu0L3J+n3vxNW2Xf5ZtJfJlEYw+eCsvhFt5P+lPCm
+	 RqBtMZnS0HZ4IUOwD0DZvVkqoEKjSZwDmoyviNeKKdqsg8ZxEcqebVCnB1kTH2s51aA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=goodmis.org;
-	spf=pass smtp.mailfrom=goodmis.org;
-	dkim=pass header.d=goodmis.org header.i=@goodmis.org header.a=rsa-sha256 header.s=dkim1 header.b="Xg/3Scjl";
-	arc=none smtp.remote-ip=216.40.44.12
-Received: from relay.hostedemail.com (smtprelay0012.hostedemail.com [216.40.44.12])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	dmarc=pass header.from=linux.dev;
+	spf=pass smtp.mailfrom=linux.dev;
+	dkim=pass header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=cJOpl0D5;
+	arc=none smtp.remote-ip=91.218.175.233
+Received: from mta0.migadu.com (out-233.mta0.migadu.com [91.218.175.233])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB40B606A31F;
-	Fri, 27 Nov 2026 15:38:19 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org CB40B606A31F
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=goodmis.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=goodmis.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA845606A31C
+	for <linux-efi@vger.kernel.org>; Fri, 27 Nov 2026 15:41:03 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org EA845606A31C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=goodmis.org header.i=@goodmis.org header.a=rsa-sha256 header.s=dkim1 header.b=Xg/3Scjl
-Received: from omf07.hostedemail.com (lb01a-stub [10.200.18.249])
-	by unirelay03.hostedemail.com (Postfix) with ESMTP id 6FD05A041A;
-	Fri, 27 Nov 2026 15:38:09 +0000 (UTC)
-Received: from [HIDDEN] (Authenticated sender: rostedt@goodmis.org) by omf07.hostedemail.com (Postfix) with ESMTPA id BB51F20030;
-	Fri, 27 Nov 2026 15:37:57 +0000 (UTC)
-Date: Fri, 27 Nov 2026 10:37:56 -0500
-From: Steven Rostedt <rostedt@goodmis.org>
-To: Ian Rogers <irogers@google.com>
-Cc: Gary Guo <gary@garyguo.net>, linux-kernel@vger.kernel.org,
- linux-trace-kernel@vger.kernel.org, linux-arch@vger.kernel.org,
- jpoimboe@kernel.org, peterz@infradead.org, mingo@redhat.com,
- tglx@kernel.org, bp@alien8.de, dave.hansen@linux.intel.com, x86@kernel.org,
- catalin.marinas@arm.com, will@kernel.org, mark.rutland@arm.com,
- linux-arm-kernel@lists.infradead.org, pjw@kernel.org, palmer@dabbelt.com,
- aou@eecs.berkeley.edu, alex@ghiti.fr, linux-riscv@lists.infradead.org,
- acme@kernel.org, namhyung@kernel.org, linux-perf-users@vger.kernel.org,
- mhiramat@kernel.org, ast@kernel.org, daniel@iogearbox.net,
- andrii@kernel.org, bpf@vger.kernel.org, nathan@kernel.org,
- llvm@lists.linux.dev, nsc@kernel.org, linux-kbuild@vger.kernel.org,
- ojeda@kernel.org, rust-for-linux@vger.kernel.org, ardb@kernel.org,
- linux-efi@vger.kernel.org, maz@kernel.org, oupton@kernel.org,
- kvmarm@lists.linux.dev, shuah@kernel.org, linux-kselftest@vger.kernel.org,
- indu.bhagat@oracle.com, jremus@linux.ibm.com, wnliu@google.com,
- dylanbhatch@google.com
-Subject: Re: [RFC PATCH v2 00/30] unwind: Minimal DWARF CFI unwinding for
- user and kernel space
-Message-ID: <20261127103756.4ce1989b@gandalf.local.home>
-In-Reply-To: <CAP-5=fWkUW787c4dGx9rccucqD67dfRgwBB_SoCxFnfZXtXP-w@mail.gmail.com>
-References: <20261125061523.1540234-1-irogers@google.com>
-	<DN4FM3TBOJ9T.2QOOL77P5HETO@garyguo.net>
-	<20261125132225.00254c37@gandalf.local.home>
-	<CAP-5=fWkUW787c4dGx9rccucqD67dfRgwBB_SoCxFnfZXtXP-w@mail.gmail.com>
-X-Mailer: Claws Mail 3.20.0git84 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
+	dkim=pass (1024-bit key, unprotected) header.d=linux.dev header.i=@linux.dev header.a=rsa-sha256 header.s=key1 header.b=cJOpl0D5
+X-Envelope-To: linux-efi@vger.kernel.org
+DKIM-Signature: a=rsa-sha256; bh=D7LzFkhrlPQer8Lrs7O6LLemqF5OXFeGJoFOpPJ4gPo=;
+ c=simple/simple; d=linux.dev;
+ h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
+ t=1795794062; v=1; x=1796398862;
+ b=cJOpl0D5OSfcQqez6bcfCZyocvBCdviNPMu7xXzrW3rxCi7bGixjVd73vMe5JMKb3B+H+luq
+ W5mo8RtX8Cg6oQ5YDJre4nAUcjgffv4gqoHS+0UQAqQd3i1s594vnGrVvLROCT//DI3K3N6MCGM
+ 3zX7oZhRG9SWzVc7yRHgi3kQ=
+X-Envelope-To: linux-efi@vger.kernel.org
+Received: by smtp.migadu.com with ESMTPS id 944c59f8ed2ff705;
+	Fri, 27 Nov 2026 15:41:01 +0000
+X-Mizu-Trace-ID: 944c59f8ed2ff705
+X-Migadu-Flow: FLOW_OUT
+From: George Guo <dongtai.guo@linux.dev>
+To: mpilaniy@redhat.com
+Cc: rppt@kernel.org,
+	pasha.tatashin@soleen.com,
+	pratyush@kernel.org,
+	chenhuacai@kernel.org,
+	ardb@kernel.org,
+	shuah@kernel.org,
+	ilias.apalodimas@linaro.org,
+	akpm@linux-foundation.org,
+	baoquan.he@linux.dev,
+	ruirui.yang@linux.dev,
+	guodongtai@kylinos.cn,
+	kernel@xen0n.name,
+	graf@amazon.com,
+	liukexin@kylinos.cn,
+	loongarch@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	kexec@lists.infradead.org,
+	linux-mm@kvack.org,
+	linux-kselftest@vger.kernel.org,
+	linux-efi@vger.kernel.org
+Subject: Re: [PATCH v6 1/8] efi: Pass KHO state to the next kernel in a configuration table
+Date: Fri, 27 Nov 2026 07:40:54 -0800
+Message-ID: <20261127154054.43755-1-dongtai.guo@linux.dev>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <99670aa8-a33c-4a36-b8dd-66b02c6b6159@redhat.com>
+References: <99670aa8-a33c-4a36-b8dd-66b02c6b6159@redhat.com>
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Post: <mailto:linux-efi@vger.kernel.org>
@@ -77,28 +84,51 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-efi+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Rspamd-Queue-Id: BB51F20030
-X-Stat-Signature: wrsqnz8uj45at8ncwo3okdibrged3eg3
-X-Rspamd-Server: rspamout02
-X-Session-Marker: 726F737465647440676F6F646D69732E6F7267
-X-Session-ID: U2FsdGVkX1/dy2vpicCHk2iAQD+WW3qcRkxd14MkZ4s=
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=goodmis.org; h=date:from:to:cc:subject:message-id:in-reply-to:references:mime-version:content-type:content-transfer-encoding; s=dkim1; bh=gxUrschx7iu+16DWxWUw1U2XUCMCjzUqsWH6d1cDnhw=; b=Xg/3ScjlKHzBVPraoOdvRylx/Tn9nPAYZ/C1gW38+Nx2ATB28UjFuCVf5e98y+tLOcG6TFzHy67F9QBjmX8aC9pHdqg0pHBMtg5eILTMjducJZa4IENErBHjNLmW5OFDQEgQHLPC5xBqYrd/UrOdze/mJmaiqA2w5Z3MTGbMPS4=
-X-HE-Tag: 1795793877-61331
-X-HE-Meta: U2FsdGVkX1/j7/71rCLaiFjDADFZc74Yp0prnXfCQBF4enA4f8rdECVF0ISe3Ly50emRXOf2HdrZLBLkoiuEGR+oJRbQMf1/i+XDUMlfnGYQLe0qCt97O5CoaW4hoC/F91l99iY/PiDqO+8+vTXQ/AqPP2NBByNBDH6ZeqAMh2ENM4PHzXqgryIcX89x6oAGO21F8xOdO8sPkf0hilILgoDsi/WPMta7T9oIZop3OuyFMZuh3Xa03sko/cmK1iz7ICGKr8JAtH6AwvAW+3SZ/GaNkx1chFRpRs88093QP1TiqPh96gshIMWlNhgBxJ8YToqfmwL7/M92MqAiLAblOPtD1GS54wKUZbI+XxSG0KneN+QExrohcDopEQ3txjhSmzlE8y/PHhCMFRNW5B4exSNDaEa0lMV25DdZfKhiKZWSY0+oQ1O26svscCbJSE0O+34Xusfmkes=
+Content-Transfer-Encoding: 8bit
 
-On Wed, 25 Nov 2026 20:52:56 -0800
-Ian Rogers <irogers@google.com> wrote:
+Hi Mukesh,
 
-> There has been recent work on both MIPS and Alpha for perf events, so
-> supporting ARM32 EHABI doesn't seem unreasonable. Devices like the
-> Raspberry Pi Zero W/WH, which use a 32-bit CPU are end-of-life in 2030
-> (according to https://endoflife.date/raspberry-pi ). It is
-> out-of-scope here, but extending the kernel and verification
-> infrastructure shouldn't be hard.
+Thanks for the review, and sorry for the slow reply.
 
-If it's not too much of a burden then sure. I've stopped supporting new
-features in ftrace for x86 32bit a long time ago ;-)
+On 2026/11/4 20:24, Mukesh Pilaniya wrote:
+>> +			pr_warn("Could not map UEFI KHO table!\n");
+> This is a Linux EFI configuration table, not a __UEFI KHO table__, so
+> IMHO; UEFI wording is wrong here.
 
--- Steve
+Agreed. v7 changes it to:
+
+	pr_warn("Could not map KHO config table!\n");
+
+>> +	if (status != EFI_SUCCESS)
+>> +		efi_err("Failed to install KHO config table!\n");
+> When install_configuration_table fails, the pool allocation made
+> just above using efi_bs_callis never freed, so a page of
+> EFI_LOADER_DATA is leaked until ExitBootServices, This is a minor leak
+> so mentioned here for review completeness.
+
+Will fix in v7. The pool is freed when the install fails:
+
+	if (status != EFI_SUCCESS) {
+		efi_err("Failed to install KHO config table!\n");
+		efi_bs_call(free_pool, kho);
+	}
+
+>> + * The EFI stub installs this table zeroed on a cold boot. It stays
+>> + * in place across kexec; the running kernel rewrites it just before
+>> + * each kexec, and the next kernel reads it during early boot.
+> This statement is only true for the LoongArch and on arm64/riscv/x86 no
+> table exists, so the comment describes a kernel-wide invariant that does
+> not hold.
+
+Right. I don't want to name only LoongArch here, because x86 is
+expected to use the same table in a follow-up series. v7 rewords it
+as:
+
+ * Only installed by the EFI stub of architectures that pass KHO state
+ * this way (currently LoongArch); elsewhere the table does not exist.
+ * The stub installs it zeroed on a cold boot. It stays in place across
+ * kexec; the running kernel rewrites it just before each kexec, and the
+ * next kernel reads it during early boot.
+
+Thanks,
+George
